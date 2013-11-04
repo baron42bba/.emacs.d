@@ -1,0 +1,207 @@
+This is re-builder.info, produced by makeinfo version 4.6 from
+re-builder.texi.
+
+START-INFO-DIR-ENTRY
+* re-builder::                Write regular expressions with visual feedback.
+END-INFO-DIR-ENTRY
+
+   This file documents the re-builder XEmacs package, which provides
+visual feedback when developing regular expressions.
+
+   This documentation was taken from the source file, `re-builder.el',
+which is subject to the following conditions; because of the nature of
+the GNU GPL, this file is as a result also subject to those conditions.
+
+   Copyright (C) 1999, 2000, 2001, 2002, 2004 Free Software Foundation,
+Inc.
+
+   This file is part of GNU Emacs.
+
+   GNU Emacs is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any
+later version.
+
+   GNU Emacs is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+along with GNU Emacs; see the file COPYING.  If not, write to the Free
+Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+
+   End of permissions notice.
+
+
+File: re-builder.info,  Node: Top,  Next: Copying,  Prev: (dir),  Up: (dir)
+
+Re-builder on XEmacs
+********************
+
+When I have to come up with regular expressions that are more complex
+than simple string matchers, especially if they contain sub
+expressions, I find myself spending quite some time in the `development
+cycle'.  `re-builder' aims to shorten this time span so I can get on
+with the more interesting bits.
+
+   With it you can have immediate visual feedback about how well the
+regexp behaves to your expectations on the intended data.
+
+   This is version 1.2 of the re-builder manual, last updated on
+Sunday, July 24, 2005.
+
+* Menu:
+
+* Copying::                     re-builder copying conditions.
+* Overview::                    re-builder history and general information.
+
+For general users:
+* Usage::                       An overview of the operation of re-builder.
+* Regex Types::                 Types of regular expression handled.
+* Questions::                   A couple of selected queries.
+
+
+File: re-builder.info,  Node: Copying,  Next: Overview,  Prev: Top,  Up: Top
+
+re-builder Copying Conditions
+*****************************
+
+Copyright (C) 1999, 2000, 2001, 2002, 2004 Free Software Foundation,
+Inc.
+
+   re-builder is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option) any
+later version.
+
+   re-builder is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+along with XEmacs; see the file COPYING.  If not, write to the Free
+Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+
+
+File: re-builder.info,  Node: Overview,  Next: Usage,  Prev: Copying,  Up: Top
+
+An Overview of re-builder
+*************************
+
+When I have to come up with regular expressions that are more complex
+than simple string matchers, especially if they contain sub expressions,
+I find myself spending quite some time in the `development cycle'.
+re-builder aims to shorten this time span so I can get on with the more
+interesting bits.
+
+   With it you can have immediate visual feedback about how well the
+regexp behaves to your expectations on the intended data.
+
+
+File: re-builder.info,  Node: Usage,  Next: Regex Types,  Prev: Overview,  Up: Top
+
+Operation of re-builder
+***********************
+
+When called up, with `M-x re-builder RET', re-builder attaches itself
+to the current buffer which becomes its target buffer, where all the
+matching is done.  The active window is split so you have a view on the
+data while authoring the RE.  If the edited expression is valid the
+matches in the target buffer are marked automatically with colored
+overlays (for non-color displays see below) giving you feedback over the
+extents of the matched (sub) expressions.  The (non-)validity is shown
+only in the modeline without throwing the errors at you.  If you want to
+know the reason why RE Builder considers it as invalid call
+`reb-force-update' (`C-c C-u') which should reveal the error.
+
+   The target buffer can be changed with `reb-change-target-buffer'
+(`C-c C-b').  Changing the target buffer automatically removes the
+overlays from the old buffer and displays the new one in the target
+window.
+
+   re-builder keeps the focus while updating the matches in the target
+buffer so corrections are easily incorporated.  If you are satisfied
+with the result you can paste the RE to the kill-ring with `reb-copy'
+(`C-c C-w') (the copied RE and current syntax is displayed in the echo
+area), quit re-builder (`C-c C-q') and use it wherever you need it.
+
+   As the automatic updates can take some time on large buffers, they
+can be limited by `reb-auto-match-limit' so that they should not have a
+negative impact on the editing.  Setting it to nil makes even the auto
+updates go all the way.  Forcing an update overrides this limit allowing
+an easy way to see all matches.
+
+
+File: re-builder.info,  Node: Regex Types,  Next: Questions,  Prev: Usage,  Up: Top
+
+Regex Types
+***********
+
+Currently re-builder understands six different forms of input, namely
+`lisp-re', `perl', `read', `rx', `sregex', and `string' syntax.  Read
+syntax and string syntax are both delimited by `"'s and behave
+according to their name.  With the `perl' and `string' syntax there's
+no need to escape the backslashes and double quotes simplifying the
+editing somewhat.  The other four allow editing of symbolic regular
+expressions supported by the packages of the same name.  (`lisp-re' is
+a package by me and its support may go away as it is nearly the same as
+the `sregex' package in Emacs)
+
+   Note that the `sregex,' `rx' and `lisp-re' syntaxes will only be
+available in XEmacs if you've installed them yourself.
+
+   Editing symbolic expressions is done through a major mode derived
+from `emacs-lisp-mode' so you'll get all the good stuff like automatic
+indentation and font-locking etc.
+
+   When editing a symbolic regular expression, only the first expression
+in the RE Builder buffer is considered, which helps limiting the extent
+of the expression like the `"'s do for the text modes.  For the
+`sregex' syntax the function `sregex' is applied to the evaluated
+expression read.  So you can use quoted arguments with something like
+'("findme") or you can construct arguments to your heart's content with
+a valid ELisp expression.  The compiled string form will be copied by
+`reb-copy'.  If you want to take a glance at the corresponding string
+you can temporarily change the input syntax using `reb-change-syntax'
+(`C-c C-i').  The current RE syntax is also displayed in the modeline.
+
+   Changing the input syntax is transparent (for the obvious exception
+non-symbolic -> symbolic) so you can change your mind as often as you
+like.
+
+   There is also a shortcut function, `reb-toggle-case' (`C-c C-c'),
+for toggling the `case-fold-search' variable in the target buffer with
+an immediate update.
+
+
+File: re-builder.info,  Node: Questions,  Prev: Regex Types,  Up: Top
+
+Questions
+*********
+
+Q: But what if my display cannot show colored overlays?
+
+   A: Then the cursor will flash around the matched text making it stand
+out.
+
+   Q: But how can I then make out the sub-expressions?
+
+   A: That's where the `sub-expression mode' comes in.  In it only the
+digit keys are assigned to perform an update that will flash the
+corresponding subexp only.
+
+
+
+Tag Table:
+Node: Top1369
+Node: Copying2388
+Node: Overview3289
+Node: Usage3853
+Node: Regex Types5555
+Node: Questions7559
+
+End Tag Table

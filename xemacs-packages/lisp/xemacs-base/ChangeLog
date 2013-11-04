@@ -1,0 +1,1277 @@
+2006-05-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.03 released.
+
+2006-05-08  Tero Saarni  <tero.saarni@gmail.com>
+
+	* shell.el: Unbreak telnet, autoload shell-prompt-pattern.
+
+2006-03-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.02 released.
+
+2006-03-16  Nelson Ferreira  <njsf@tuxie.homelinux.net>
+
+	* debug.el (cancel-debug-on-entry): Fixed alist generation for
+	completing-read, thus allowing interactive use of
+	cancel-debug-on-entry to cancel debug of an individual function.
+
+2005-12-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.01 released.
+
+2005-12-27  Ville Skyttä  <scop@xemacs.org>
+
+	* compile.el (grep-find-use-xargs): Don't error out if xargs
+	is not available.
+
+2005-10-28  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.00 released.
+
+2005-10-23  Ville Skyttä  <scop@xemacs.org>
+
+	* compile.el (grep-find-use-xargs): Test "GNU" compatibility of
+	xargs in addition to find, and fall back to using generic
+	find+xargs if the latter is available.  Thanks to Karl Janmar for
+	the initial implementation.
+
+2005-10-12  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.99 released.
+
+2005-10-11  Steve Youngs  <steve@sxemacs.org>
+
+	* timer-funcs.el (with-timeout): Use `unwind-protect' to ensure
+	the timer is always deleted.
+	From: tbennett@nvidia.com
+
+2005-07-24  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.98 released.
+
+2005-07-02  Adrian Aichner  <adrian@xemacs.org>
+
+	* compile.el (grep): Report correct number of multi-line matches
+	(e.g. grep -P can do multi-line matches) by counting matches based
+	on grep-regexp-alist.
+
+2005-04-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.97 released.
+
+2005-04-04  Adrian Aichner  <adrian@xemacs.org>
+
+	* tq.el (tq-create): Sync tq.el with GNU Emacs tq.el<1.18>.
+
+2005-03-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.96 released.
+
+2005-03-04  Vin Shelton  <acs@xemacs.org>
+
+	* compile.el (find-grep): Aliases need to be quoted, apparently.
+
+2005-03-04  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.95 released.
+
+2005-02-26  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* compile.el (find-grep): Alias it to grep-find--if you're used to
+	the shell, find and _then_ grep is the word order that springs to
+	mind.
+
+2004-12-22  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.94 released.
+
+2004-12-18  Ilya N. Golubev  <gin@mo.msk.ru>
+
+	* add-log.el (add-change-log-entry): Use `point-at-eol',
+	`point-at-bol' instead of `line-end-position',
+	`line-beginning-position', which are not defined in current 21.4.
+	(add-log-current-defun): Ditto.
+	(match-string-no-properties): Copy from 21.5 `subr.el', for use in
+	current 21.4.
+
+2004-12-07  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.93 released.
+
+2004-12-06  Ben Wing  <ben@xemacs.org>
+
+	* Makefile (PACKAGE_SUPPRESS):
+	Conditionalize package-suppress forms on existence of
+	`package-suppress', not any particular version.
+
+	* add-log.el (font-lock):
+	Require font-lock, since we make use of font-lock faces in
+	calls to set-face-parent upon loading, and faces are not
+	automatically autoloaded if we do it this way.
+
+2004-11-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.92 released.
+
+2004-11-26  Steve Youngs  <steve@youngs.au.com>
+
+	* add-log.el (change-log-date-face): XEmacs doesn't have the
+	`:inherit' keyword for faces so use `make-face' and
+	`set-face-parent'. 
+	(change-log-name-face): Ditto.
+	(change-log-email-face): Ditto.
+	(change-log-file-face): Ditto.
+	(change-log-list-face): Ditto.
+	(change-log-conditionals-face): Ditto.
+	(change-log-function-face): Ditto.
+	(change-log-acknowledgement-face): Ditto.
+
+2004-11-23  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.91 released.
+
+2004-11-22  Ben Wing  <ben@xemacs.org>
+
+	* comint.el:
+	* comint.el (make-comint-1): New.
+	* comint.el (make-comint):
+	Break out make-comint functionality into make-comint-1 so we can
+	pass in a buffer directly. #### This should go away when FSF
+	comint.el is integrated.
+	
+	* shell.el (shell):
+	Fix up when shell-multiple-shells is true.  Generate the buffer
+	first and pass to comint; avoid weird tricks with the buffer name.
+
+2004-11-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.90 released.
+
+2004-11-07  Ben Wing  <ben@xemacs.org>
+
+	* add-log.el:
+	* add-log.el (require):
+	* add-log.el (change-log-mode-hook): New.
+	* add-log.el (add-log-full-name):
+	* add-log.el (add-log-mailing-address):
+	* add-log.el (add-log-keep-changes-together): New.
+	* add-log.el (add-log-always-start-new-record): New.
+	* add-log.el (add-log-buffer-file-name-function): New.
+	* add-log.el (add-log-file-name-function): New.
+	* add-log.el (change-log-version-info-enabled): New.
+	* add-log.el (change-log-version-number-regexp-list): New.
+	* add-log.el (change-log-date-face): New.
+	* add-log.el (change-log-name-face): New.
+	* add-log.el (change-log-email-face): New.
+	* add-log.el (change-log-file-face): New.
+	* add-log.el (change-log-list-face): New.
+	* add-log.el (change-log-conditionals-face): New.
+	* add-log.el (change-log-function-face): New.
+	* add-log.el (change-log-acknowledgement-face): New.
+	* add-log.el (change-log-font-lock-keywords):
+	* add-log.el (change-log-mode-map):
+	* add-log.el (iso8601-time-string):
+	* add-log.el (change-log-name):
+	* add-log.el (change-log-version-number-search): New.
+	* add-log.el (find-change-log):
+	* add-log.el (add-log-file-name): New.
+	* add-log.el (add-change-log-entry):
+	* add-log.el (add-change-log-entry-other-window):
+	* add-log.el (change-log-mode):
+	* add-log.el (add-log-current-defun-header-regexp):
+	* add-log.el (add-log-lisp-like-modes):
+	* add-log.el (add-log-current-defun):
+	* add-log.el (change-log-get-method-definition-md):
+	* add-log.el (get-method-definition-md)): Removed.
+	* add-log.el (change-log-get-method-definition-md)): New.
+	* add-log.el (get-method-definition-1): Removed.
+	* add-log.el (change-log-get-method-definition-1): New.
+	* add-log.el (get-method-definition): Removed.
+	* add-log.el (patch-to-change-log):
+	* add-log.el (change-log-get-method-definition): New.
+	* add-log.el (change-log-sortable-date-at): New.
+	* add-log.el (change-log-resolve-conflict): New.
+	* add-log.el (change-log-merge): New.
+	* add-log.el (change-log-redate): New.
+	* assoc.el:
+	* debug.el:
+	* debug.el (debugger): New.
+	* debug.el (debugger-mode-hook): New.
+	* debug.el (debugger-batch-max-lines): New.
+	* debug.el (debugger-previous-backtrace): New.
+	* debug.el (debugger-outer-overriding-terminal-local-map)): New.
+	* debug.el (debug):
+	* debug.el (debugger-setup-buffer): New.
+	* debug.el (debugger-make-xrefs): New.
+	* debug.el (debugger-continue):
+	* debug.el (debugger-jump):
+	* debug.el (debugger-frame-number):
+	* debug.el (debugger-frame):
+	* debug.el (debugger-frame-clear):
+	* debug.el (debugger-env-macro): New.
+	* debug.el (debugger-mode-map):
+	* debug.el (debugger-record-buffer): New.
+	* debug.el (debugger-record-expression): New.
+	* debug.el (debugger-mode):
+	* debug.el (debug-on-entry):
+	* debug.el (cancel-debug-on-entry):
+	* debug.el (debug-on-entry-1):
+	* easy-mmode.el:
+	* easy-mmode.el (define-minor-mode):
+	* easy-mmode.el (easy-mmode-define-global-mode):
+	* easy-mmode.el (easy-mmode-define-keymap):
+	* macros.el:
+	* macros.el (name-last-kbd-macro):
+	* macros.el (insert-kbd-macro):
+	* macros.el (apply-macro-to-region-lines):
+	* ring.el:
+	* ring.el (ring-insert-at-beginning):
+	* ring.el (ring-plus1):
+	* ring.el (ring-minus1):
+	* ring.el (ring-length):
+	* ring.el (ring-index):
+	* ring.el (ring-empty-p):
+	* ring.el (ring-size): New.
+	* ring.el (ring-copy): New.
+	* ring.el (ring-remove):
+	* ring.el (ring-ref):
+	* ring.el (ring-elements): New.
+	* shell.el:
+	* shell.el (shell-dumb-shell-regexp): New.
+	* shell.el (shell-prompt-pattern):
+	* shell.el (shell-file-name-chars):
+	* shell.el (shell-file-name-quote-list):
+	* shell.el (shell-chdrive-regexp):
+	* shell.el (shell-dirtrack-verbose): New.
+	* shell.el (explicit-bash-args):
+	* shell.el (shell-input-autoexpand):
+	* shell.el (shell-mode):
+	* shell.el (shell-write-history-on-exit): New.
+	* shell.el (shell):
+	* shell.el (shell-directory-tracker):
+	* shell.el (shell-cd-1):
+	* shell.el (shell-unquote-argument): New.
+	* shell.el (shell-process-pushd):
+	* shell.el (shell-resync-dirs):
+	* shell.el (shell-backward-command):
+	* shell.el (shell-dynamic-complete-command):
+	* shell.el (shell-replace-by-expanded-directory):
+	* sort.el:
+	* sort.el (sort-subr):
+	* sort.el (sort-reorder-buffer):
+	* sort.el (sort-lines):
+	* sort.el (sort-numeric-base): New.
+	* sort.el (sort-numeric-fields):
+	* sort.el (sort-regexp-fields):
+	* sort.el (sort-columns):
+	* timezone.el:
+	* timezone.el (timezone-world-timezones):
+	* timezone.el (timezone-parse-date):
+	* timezone.el (timezone-parse-time):
+	* timezone.el (timezone-time-from-absolute):
+	* timezone.el (timezone-fix-time):
+	* tq.el:
+	* tq.el (tq-create):
+	* tq.el (tq-filter):
+	* tq.el (tq-process-buffer):
+	Sync add-log, assoc, debug, macros, ring, shell, sort,
+	timezone, tq to 21.3.
+	Really sync easy-mmode with 21.3.
+
+2004-11-06  Ben Wing  <ben@xemacs.org>
+
+	* field.el (field-beginning):
+	* field.el (field-end):
+	skip-start and skip-end values were switched.
+
+2004-10-28  Ben Wing  <ben@xemacs.org>
+
+	* add-log.el (patch-to-change-log): Make hunk regexp a bit
+	more permissive to allow for --show-c-function and
+	--show-function-line options of `cvs-diff'.
+
+2004-10-22  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.89 released.
+
+2004-09-07  Jerry James  <james@xemacs.org>
+
+	* Makefile (ELCS): Add timer-funcs.el and realphabetize.
+
+2004-10-04  Adrian Aichner  <adrian@xemacs.org>
+
+	* ffap.el (ffap-alist): Single typo fix.
+
+2004-09-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.88 released.
+
+2004-08-30  Jerry James  <james@xemacs.org>
+
+	* field.el: New file.
+	* Makefile (ELCS): Add field.elc.
+
+2004-06-28  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.87 released.
+
+2004-06-28  Zoltan Filyo  <zoltan.filyo@multipolaris.hu>
+
+	* compile.el (compilation-error-regexp-alist-alist): Enhance
+	regexp to grasp Borland C++ Builder 6.0 syntax.
+
+2004-06-18  Jerry James  <james@xemacs.org>
+
+	* easy-mmode.el (easy-mmode-define-syntax): Replace call to
+	set-char-table-parent with derived-mode-merge-syntax-tables.
+
+2004-03-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.86 released.
+
+2004-03-26  Ville Skyttä  <scop@xemacs.org>
+
+	* easy-mmode.el (easy-mmode-define-navigation): Call only the
+	version of pos-visible-in-window-p with the correct number of args.
+
+2004-02-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.85 released.
+
+2004-02-14  Jerry James  <james@xemacs.org>
+
+	* easy-mmode.el: Don't conditionally define pos-visible-in-window-p.
+	* easy-mmode.el (easy-mmode-define-navigation): Check whether the
+	2 arg or 3 arg version of pos-visible-in-window-p is available and
+	call the right one.
+
+2004-01-27  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.84 released.
+
+2004-01-27  Jerry James  <james@xemacs.org>
+
+	* easy-mmode.el: Synch with Emacs 21.3.
+
+2003-12-04  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.83 released.
+
+2003-11-28  Robert Widhopf <mailspam3@robf.de>
+
+	* compile.el (compilation-ask-about-kill): Added new variable
+	allowing to kill a running compilation without being bothered by a
+	question if you really want to kill it.
+	
+	* compile.el (compile-internal): honor `compilation-ask-about-kill'
+
+2003-10-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.82 released.
+
+2003-10-20  Ville Skyttä  <scop@xemacs.org>
+
+	* regexp-opt.el: API + returned regexp compatibility sync with
+	GNU Emacs 21.3.  The major backwards-incompatible change is that
+	the shy/non-shy argument has been dropped from `regexp-opt',
+	`regexp-opt-depth' and `regexp-opt-group'.
+
+2003-09-20  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.81 released.
+
+2003-09-20  Steve Youngs  <youngs@xemacs.org>
+
+	* compile.el (grep-null-device): Add missing quote.
+
+2003-09-13  Adrian Aichner  <adrian@xemacs.org>
+
+	* compile.el: Partial sync with GNU Emacs compile.el revision
+	1.279.
+	* compile.el (compilation-parse-errors-function): Whitespace
+	cleanup.
+	* compile.el (compilation-error-regexp-alist-alist): Sync up,
+	adding new and simplifying some old expressions.
+	* compile.el (compilation-error-regexp-systems-list): Extend and
+	sort systems alphabetically.
+	* compile.el (compilation-error-screen-columns): Indentation sync.
+	* compile.el (compilation-read-command): Docstring sync.
+	* compile.el (compilation-ask-about-save): Ditto.
+	* compile.el (grep-regexp-alist): Support file names with blanks.
+	* compile.el (grep-find-use-xargs): Docstring fix.
+	* compile.el (compile): Whitespace cleanup.
+	* compile.el (grep-find): Docstring sync.
+	* compile.el (compile-internal): Whitespace cleanup.
+	* compile.el (compilation-setup): Docstring sync.
+	* compile.el (compilation-handle-exit): Docstring sync.
+	* compile.el (compile-error-at-point): Ditto.
+	* compile.el (compilation-next-error): Ditto.
+	* compile.el (compilation-previous-error): Ditto.
+	* compile.el (compilation-next-file): Error message sync (dropping
+	period).
+	* compile.el (kill-compilation): Ditto.
+	* compile.el (compile-goto-error): Ditto.
+	* compile.el (next-error): Docstring sync.
+	* compile.el (previous-error): Ditto.
+	* compile.el (first-error): Ditto.
+	* compile.el (compilation-next-error-locus): Whitespace cleanup.
+
+2003-09-19  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.80 released.
+
+	* Makefile (VERSION): XEmacs package 1.79 released.
+
+2003-09-19  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* compile.el (grep-null-device): Use null-device if bound.
+
+2003-06-11  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.78 released.
+
+2003-06-07  Ilya N. Golubev  <gin@mo.msk.ru>
+
+	* shell.el (shell-directory-tracker): Make regexp used for
+	skipping to next command correspond to one used for command
+	itself.
+	(shell-command-separator-regexp): New variable.
+
+2003-04-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.77 released.
+
+2003-04-15  Jerry James  <james@xemacs.org>
+
+	* comint.el: Remove references to comint-extract-current-pathname
+	and comint-match-partial-pathname, which do not exist.
+	* comint.el (comint-find-source-code): Use ffap-next-guess instead
+	of comint-extract-current-pathname.
+	* ffap.el: Autoload ffap-next-guess.
+
+2003-04-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.76 released.
+
+2003-03-24  Andy Piper  <andy@xemacs.org>
+
+	* compile.el (compilation-error-regexp-alist-alist): add regexp
+	suitable for ant errors.
+
+2003-03-22  Vasily Korytov  <deskpot@myrealbox.com>
+
+	* outline.el (outline-mode-hook): Add a (defvar ...), so this
+	variable is documented.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile (PACKAGE_SUPPRESS): New.
+	Add a PACKAGE_SUPPRESS value for use with new package-suppress
+	support, since _pkg.el is auto-generated.
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+	Delete blank HTML_FILES, HTML_DEP.
+
+2003-01-18  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.75 released.
+
+2003-01-12  Robert Bihlmeyer <robbe@orcus.priv.at>
+
+	* add-log.el (add-log-current-defun): add ( to ender for perl
+        functions.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.74 released.
+
+2003-01-06  Ville Skyttä  <scop@xemacs.org>
+
+	* add-log.el: Make auto-mode-alist modifications autoload-only.
+
+2003-01-03  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.73 released.
+
+2002-12-17  Jerry James  <james@xemacs.org>
+
+	* ffap.el: Require advice at compile time, not load time.
+
+2002-12-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.72 released.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+	* compile.el:
+	* compile.el (grep-all-files-history): New.
+	* compile.el (grep-all-files-omitted-expressions): New.
+	* compile.el (grep-all-files-omitted-directories): New.
+	* compile.el (construct-grep-all-files-command): New.
+	* compile.el (grep-all-files-in-current-directory): New.
+	* compile.el (grep-all-files-in-current-directory-and-below): New.
+	* compile.el (compile-internal):
+
+	New commands for conveniently grepping all useful files in the
+	current directory, or recursively.  Sort of like grep-find, but
+
+	(a) the find command is determined for you, to cover this
+	directory only, or all subdirs
+
+	(b) uninteresting files/dirs are automatically skipped by
+	`grep-all-files-omitted-expressions' and
+	`grep-all-files-omitted-directories' -- e.g. binary files (.o,
+	.obj, .exe), diff droppings (.orig, .rej), backup files (~),
+	autosave files (#....), CVS droppings (.#...), etc. plus
+	directories CVS/RCS/SCCS.
+
+	(c) unlike grep-find, the interface shows only the grep command,
+	minus files, so it's manageable.
+
+2002-11-25  Mike Sperber <mike@xemacs.org>
+
+	* compile.el (compile-internal): Re-set `outwin' because it may
+	have changed after `save-window-excursion'.
+
+2002-11-24  David A. Panariti  <davep.xemacs@meduseld.net>
+
+	* shell.el (shell-directory-tracker): Added check for a
+	`shell-dirtrack-other-regexp' which when matched calls
+	`shell-dirtrack-process-other-func'.  This allows for arbitrary
+	user processing of directory changing commands.
+
+        (shell-dirtrack-other-regexp): Added defcustom for the regexp.
+
+        (shell-dirtrack-process-other-func): Added defcustom for the
+        function to call.
+
+2002-10-29  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.71 released.
+
+2002-10-19  Ville Skyttä  <scop@xemacs.org>
+
+	* ffap.el (ffap): Remove dummy defun for ffap, autoload alias.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-07  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.70 released.
+
+2002-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* add-log.el: Add autoloaded auto-mode-alist associations.
+
+2002-09-25  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.69 released.
+
+2002-09-11  Evgeny Roubinchtein <zhenya@sdf.lonestar.org>
+
+	* easy-mmode.el (define-minor-mode): Use add-minor-mode to add
+	the keymap to minor-mode-alist and add the modeline indicator.
+
+2002-09-11  Simon Josefsson  <jas@extundo.com>
+
+	* time-stamp.el (time-stamp-hhmmss): New function.
+
+2002-09-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.68 released.
+
+2002-08-29  Norbert Koch  <nk@viteno.net>
+
+	* comint.el (comint-dynamic-complete-as-filename): Make the
+	directory suffix dependent on the system-type.
+	(comint-dynamic-complete-filename): Remove unnecessary
+	binding.
+
+2002-08-05  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.67 released.
+
+2002-08-04  Simon Josefsson  <jas@extundo.com>
+
+	* passwd.el (read-passwd): Redisplay.
+
+2002-07-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.66 released.
+
+2002-07-09  Hrvoje Niksic  <hniksic@xemacs.org>
+
+	* ffap.el (ffap-read-file-or-url): Return the current directory
+	if the user's input equals the current directory.
+
+2002-06-27  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.65 released.
+
+2002-06-26  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.64 released.
+
+2002-06-22  Ville Skyttä  <scop@xemacs.org>
+
+	* compile.el: Partial sync with GNU Emacs 21.2.
+	(compilation-error-screen-columns): New.
+	(compile-buffer-substring): New.
+	(compilation-setup):
+	Buffer-localize compilation-error-screen-columns.
+	(compilation-next-error-locus):
+	Use compilation-error-screen-columns.
+
+2002-05-07  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.63 released.
+
+2002-05-02  Ville Skyttä  <scop@xemacs.org>
+
+	* easy-mmode.el: Partial sync with GNU Emacs 21.2.
+	(define-minor-mode): New.
+	(easy-mmode-define-navigation): Ditto.
+	(easy-mmode-defmap): Ditto.
+	(easy-mmode-set-keymap-parents): Ditto.
+
+2002-05-02  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (ELCS): Add easy-mmode.elc.
+
+	* easy-mmode.el: Moved here from pcl-cvs.
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.62 released.
+
+2002-04-01  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* pp.el (pp-to-string): add autoload cookie.
+
+2002-03-27  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): 1.61 released.
+
+2002-03-25  Ville Skyttä  <scop@xemacs.org>
+
+	* regexp-opt.el: Partial synch with GNU Emacs 21.2.
+	(regexp-opt): Handle PAREN with value 'words.
+	(regexp-opt-group): Return empty string if STRINGS is empty.
+
+2002-03-26  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): 1.60 released.
+
+2002-03-14  David A. Panariti  <panariti@attbi.com>
+
+	* comint.el (comint-strip-ctrl-m):
+	Added a check to make sure whichever of comint-last-input-end or
+	comint-last-input-start that is used has a valid position.  This
+	allows comint-strip-ctrl-m to be used with gdb-mode.
+
+2002-01-28  David A. Panariti  <panariti@mediaone.net>
+
+	* ffap.el (ffap-url-regexp):
+	Changed http to https? to allow https urls to be recognized.
+
+2002-01-23  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* env.el: synched with FSF 21.1.50:
+	(substitute-env-vars): new function.
+	(setenv): add optional argument SUBSTITUTE-ENV-VARS.
+
+2002-01-17  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* shell.el (shell-input-autoexpand): fix custom type, add group.
+
+2002-01-14  Adrian Aichner  <adrian@xemacs.org>
+
+	* add-log.el (add-log-current-defun-header-regexp): Add . and [0-9].
+	* add-log.el (patch-to-change-log): Correct file-re1, file-re2,
+	and new-defun-re.  Apply heuristics for unsupported language, as
+	implemented in `add-log-current-defun', to New and Removed symbols
+	as well.
+
+2002-01-13  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in (provides): Update to include all provides.
+
+2002-01-07  Adrian Aichner  <adrian@xemacs.org>
+
+	* Makefile (HTML_FILES): New.
+	* Makefile (HTML_DEP): New.
+
+2002-01-02  Adrian Aichner  <adrian@xemacs.org>
+
+	* add-log.el (patch-to-change-log): Standardize on / in ChangeLog
+	entry paths.
+
+2002-01-02  Didier Verna  <didier@xemacs.org>
+
+	* add-log.el (patch-to-change-log): new keyword :dry-run.
+
+2001-12-10  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (ELCS): Add tq.elc, moved from vc-cc.
+
+2001-05-20  Adrian Aichner  <adrian@xemacs.org>
+
+	* compile.el (compilation-setup): Properly make
+	`mouse-track-click-hook' local in compile.el.
+
+2001-05-13  Adrian Aichner  <adrian@xemacs.org>
+
+	* compile.el (compilation-setup): Add
+	`compile-mouse-maybe-goto-error' to global value of
+	`mouse-track-click-hook' to fix mouse-track-insert between
+	buffers.
+
+2001-05-11  Ben Wing  <ben@xemacs.org>
+
+	* compile.el (compilation-find-file): warning fix.
+	
+	* sort.el:
+	* sort.el (sort-regexp-history): New.
+	* sort.el (sort-regexp-fields):
+	* sort.el (sort-regexp-fields-numerically):
+	* sort.el (sort-columns-subprocess): snarf the region before asking questions.
+
+2001-04-23  Ben Wing  <ben@xemacs.org>
+
+	* compile.el (compilation-shell-minor-mode):
+	Remember to localize the menubar before adding to it.
+
+2001-04-21  Ben Wing  <ben@xemacs.org>
+
+	* sort.el: need autoload for sort-regexp-fields-numerically.
+
+2001-04-21  Ben Wing  <ben@xemacs.org>
+
+	* add-log.el (change-log-mode):
+	Fix paragraph filling to correctly handle descriptor lines
+	(those beginning with e.g. * add-log.el (change-log-mode):).
+	* add-log.el (patch-to-change-log):
+	Don't error if patch blank.
+
+2001-04-20  Ben Wing  <ben@xemacs.org>
+
+	* sort.el:
+	* sort.el (sort): New.
+	* sort.el (sort-subr):
+	* sort.el (sort-fields):
+	* sort.el (sort-regexp-fields):
+	* sort.el (sort-regexp-fields-numerically): New.
+	* sort.el (sort-columns):
+	Synch with FSF 20.7.
+	Add new arg for compare fun to `sort-subr', `sort-regexp-fields'.
+	New command `sort-regexp-fields-numerically'.
+	
+2001-04-10  Ben Wing  <ben@xemacs.org>
+
+	* add-log.el (patch-to-change-log):
+	Fix warnings.  Make sure font-lock-auto-fontify is not
+	turned off when visiting ChangeLogs, so that they end up
+	font-locked when all is done.  Anchor file-re1 at begline
+	to avoid problems when the diff itself contains `Index:'.
+
+2001-03-31  Mike Sperber <mike@xemacs.org>
+
+	* compile.el (compilation-shell-minor-mode): Added.
+
+2001-03-14  Dr. Volker Zell  <Dr.Volker.Zell@oracle.com>
+
+	* ffap.el (ffap-menu-ask): Add test for ffap-xemacs to fix a
+	'Wrong type argument: eventp t' error.
+
+2001-03-12  Adrian Aichner  <adrian@xemacs.org>
+
+	* add-log.el (patch-to-change-log): Avoid second empty line after
+	ChangeLog addition, which is against current ChangeLog editing
+	practice.
+
+2001-02-05  Steve Youngs  <youngs@xemacs.org>
+
+	* passwd.el (passwd-erase-buffer): Back out Matt's patch.
+
+2001-01-24  Matt Tucker  <tuck@whistlingfish.net>
+
+	* passwd.el (passwd-erase-buffer): Temporarily disable font-lock
+	for performance reasons.
+
+2000-12-06  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* shell.el (shell): Return the buffer so callers may use it.
+
+2000-12-04  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* case-table.el: Use new API when available.
+
+2000-12-04  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* case-table.el: Use new API when available.
+
+2000-11-09  Volker Franz <volker.franz@tuebingen.mpg.de>
+
+	* comint.el (comint-send-input): Extracted function
+	comint-add-to-input-history from comint-send-input.
+	(comint-add-to-input-history): New function.
+
+2000-11-07  Martin Buchholz <martin@xemacs.org>
+
+	* env.el: Doc fix.
+
+2000-11-06  Martin Buchholz  <martin@xemacs.org>
+
+	* add-log.el (patch-to-change-log):
+	- Patch doesn't have to be in the same directory as source.
+	- Use make-hash-table, not make-hashtable
+	- Don't confusingly overload name `add-change-log-entry'.
+
+2000-10-15  Björn Torkelsson  <torkel@hpc2n.umu.se>
+
+	* debug.el (toggle-debug-on-error): New
+	(toggle-debug-on-signal): New
+	(toggle-debug-on-quit): New
+
+2000-10-24  Didier Verna  <didier@xemacs.org>
+
+	* add-log.el (patch-to-change-log): new cl keywords
+	:keep-source-files, :extent-property and :extent-property-value,
+	documented in the docstring.
+	Returns a list of modified ChangeLog buffers.
+
+2000-10-11  Fraser Young <fyoung@anytimenow.com>
+
+	* compile.el (compilation-find-file): Reset buffer
+	when its wrong.
+
+2000-10-03  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* macros.el (kbd-macro-query): Use next-command-event
+	instead of read-char-exclusive.
+
+2000-10-08  Adrian Aichner  <adrian@xemacs.org>
+
+	* add-log.el (patch-to-change-log): Honor variables
+	`add-log-full-name' and `add-log-mailing-address', like
+	`add-change-log-entry' does.
+
+2000-10-05  Martin Buchholz  <martin@xemacs.org>
+
+	* *: Mega typo fix.
+
+2000-10-03  Barry Wilkes  <bew@bcs.org.uk>
+
+	* compile.el: Added ;;;###autoload for grep-find
+
+2000-08-15  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* add-log.el (patch-to-change-log): Re-word docstring.  Fix hangup
+	on non-existent ChangeLog files, by using `find-change-log', as
+	suggested by Ben.
+
+2000-05-22  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* compile.el (compilation-find-file): push newly visited file
+	names on file-name-history
+
+2000-04-05  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* comint.el (comint-password-prompt-regexp): Make the space in
+	"pass phrase" optional so that it catches the `gpg' passphrase
+	prompt by default.
+
+2000-07-08  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* add-log.el (change-log-name): Remove outta-space port.
+	* add-log.el (patch-to-change-log): Use (user-full-name) instead
+	of (user-login-name) following the standard established by
+	`add-change-log-entry'.
+
+2000-06-12  Ben Wing  <ben@xemacs.org>
+
+	* add-log.el (patch-to-change-log): New function.
+
+2000-06-04  Mike Sperber <mike@xemacs.org>
+
+	* case-table.el (describe-buffer-case-table): Fix to use case
+	tables of actual buffer in question.
+
+2000-06-05  Ben Wing  <ben@xemacs.org>
+
+	* macros.el (assign-last-kbd-macro-to-key): new function;
+	used by menubar.
+
+2000-02-28  Martin Buchholz  <martin@xemacs.org>
+
+	* add-log.el (change-log-name): Remove VMS support.
+
+2000-02-28  Akim Demaille  <akim@epita.fr>
+
+	* add-log.el (add-log-current-defun): Add support for Autoconf
+	mode.
+
+2000-02-21  Andreas Jaeger  <aj@suse.de>
+
+	* compile.el (grep-find-use-xargs): Move defvar before usage.
+
+2000-02-14  Barry Wilkes  <bew@bcs.org.uk>
+
+	* compile.el : Added grep-find command (+ associated variables)
+	from FSF Emacs. Only one change to FSF code required, namely to
+	use read-shell-command rather than read-from-minibuffer in
+	grep-find.
+
+2000-02-16  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* compile.el: Delete garbage.
+
+2000-02-12  Andreas Jaeger  <aj@suse.de>
+
+	* compile.el (compilation-set-window-height): Did not take into
+	account left/right toolbars when checking that window was not
+	split horizontally.
+	Patch by Sean MacLennan <seanm@storm.ca>.
+	(compilation-find-file): Check if there's an existing buffer first.
+	(compare-file-to-buffer): New.
+	Patch by Jason Kim <jason@meta4.net>.
+
+2000-01-19  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* passwd.el (passwd-insecure-display): Remove face
+	property set by passwd-secure-display.
+
+2000-01-18  Martin Buchholz  <martin@xemacs.org>
+
+	* comint.el (comint-mode): Add autoload cookie.
+
+2000-01-13  Andreas Jaeger  <aj@suse.de>
+
+	* regexp-opt.el: Moved from package xemacs-devel to here since
+	other packages depend on it.
+
+	* Makefile (ELCS): Added regexp-opt.elc
+
+2000-01-12  Kirill 'Big K' Katsnelson  <kkm@dtmx.com>
+
+	* add-log.el (add-log-current-defun-function): Changed :type of
+	this defcustom to the correct one, 'function.
+
+2000-01-10  Didier Verna  <didier@xemacs.org>
+
+	* annotations.el (set-annotation-glyph): preserve layout and side
+	when not specified, remove old glyph from the extent when chaging
+	the side of the annotation.
+
+1999-12-11  Andreas Jaeger  <aj@suse.de>
+
+	* timezone.el (timezone-parse-date): Years < 69 are 20YY.
+
+1999-12-27  Yoshiki Hayashi  <t90553@mail.ecc.u-tokyo.ac.jp>
+
+	* passwd.el (read-passwd): Document how to disable recording
+	key strokes.
+
+1999-12-04  Jan Vroonhof  <vroonhof@math.ethz.ch>
+
+	* passwd.el (passwd-secure-display): Fix missing (lambda line. Don't
+	use single condition cond for clarity.
+	(passwd-insecure-display): ditto.
+
+1999-12-05  Andreas Jaeger  <aj@suse.de>
+
+	* debug.el (debug): Replace obsolete allocate-event with
+	make-event.
+	Patch by Martin Buchholz <martin@xemacs.org>.
+
+1999-10-11   Daiki Ueno  <ueno@ueda.info.waseda.ac.jp>
+
+	* passwd.el (passwd-secure-display): Preserve fallback values.
+
+1999-11-03    Robert Fenk <fenk@forwiss.tu-muenchen.de>
+
+	* shell.el (shell-dirstack-message): `getenv "HOME"' replaced by
+	`user-home-directory', because usually HOME is not defined on WinNT.
+
+1999-09-01  Gabriel Foster  <gabe@sgrail.com>
+
+	* compile.el: Added support for the SGI MipsPro 7.3 compilers to
+	compilation-error-regexp-alist-alist.
+
+1999-08-19  Christoph Wedler  <Christoph.Wedler@sap-ag.de>
+
+	* imenu.el: Synced up with FSF 20.4, except menu/menubar
+ 	differences, some autoload cookies and:
+	(imenu--generic-function): Use `match-string' instead
+ 	`match-string-no-properties'.
+	(imenu--completion-buffer): Don't set `minibuffer-setup-hook'.  In
+ 	XEmacs, `completing-read' has only 6 args, provide workaround.
+
+	* imenu.el: Bugfix in XEmacs specific part.
+ 	(imenu--last-menubar-filter-menu): New buffer-local variable.
+	(imenu-menu-filter): Use it.  Split/sort submenus.
+
+1999-07-22  SL Baur  <steve@beopen.com>
+
+	* comint.el (comint-password-prompt-regexp): add extra blank.
+	From Bob Weiner  <weiner@beopen.com>
+
+1999-07-22  SL Baur  <steve@xemacs.org>
+
+	* compile.el (compilation-set-window-height): Did not take into
+	account left/right toolbars when checking that window was
+	not split horizontally.
+	From Sean MacLennan <seanm@storm.ca>
+
+1999-03-26  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* compile.el (compile-internal): Use `shell-command-switch'
+	instead of a hard-coded "-c" switch.
+
+1998-11-30  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* imenu.el (imenu--create-menu-1): Handle empty menu.
+
+1998-12-05  SL Baur  <steve@altair.xemacs.org>
+
+	* timezone.el (timezone-zone-to-minute): Make function match
+	documentation.
+	From torin@perv.daft.com via James LewisMoss <dres@ioa.com>.
+
+1998-10-08  Didier Verna  <verna@inf.enst.fr>
+
+	* time-stamp.el (time-stamp-strftime): fixed usage of `concat'
+	(which now accepts only strings) when `field-result' is a number.
+
+1998-08-21  Greg Klanderman  <greg@alphatech.com>
+
+	* comint.el (comint-dynamic-complete-filename): do user name
+	completion too (~user).
+	(comint-dynamic-complete-as-username): new function.
+	(comint-dynamic-list-filename-completions): handle user name
+	completions too.
+
+1998-08-06  Michael Sperber [Mr. Preprocessor]  <sperber@informatik.uni-tuebingen.de>
+
+	* etc/enriched.doc: Put doc changes for XEmacs version back in.
+
+1998-07-31  Barry A. Warsaw  <bwarsaw@python.org>
+
+	* comint.el (comint-postoutput-scroll-to-bottom):
+	Added (sit-for 0) to work around
+	basic XEmacs recenter bug.
+
+1998-07-12  SL Baur  <steve@altair.xemacs.org>
+
+	* facemenu.el (facemenu-update-facemenu-menu): Kill
+	list-faces-display.
+
+	* annotations.el (set-annotation-glyph): Kill extent-layout.
+
+1998-07-02  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* compile.el (compile-command): Docstring fix: use `add-hook' to
+	modify hook value.
+
+1998-07-01  Carsten Leonhardt  <leo@arioch.oche.de>
+
+	* passwd.el (passwd-secure-display): Invert colors only in current
+	frame. This avoids messing up the colors in tty frames while
+	working in X frames.
+	(passwd-insecure-display): Ditto.
+
+1998-05-15  SL Baur  <steve@altair.xemacs.org>
+
+	* thing.el (thing-symbol): Fix for boundary condition.
+	From Michael Ernst <mernst@cs.washington.edu>
+
+1998-05-14  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* edmacro.el (kbd): Removed.
+
+1998-04-29  SL Baur  <steve@altair.xemacs.org>
+
+	* compile.el (compile-internal): Comment out (process-send-eof).
+	From Hrvoje Niksic <hniksic@srce.hr>
+
+1998-04-28  SL Baur  <steve@altair.xemacs.org>
+
+	* shell.el ((not shell-mode-map)): Don't use reader macro.
+
+1998-04-06  Martin Buchholz  <martin@xemacs.org>
+
+	* comint.el: Restore function comint-find-source-code and
+	friends removed earlier in 21.0 development cycle.
+
+1998-04-15  Martin Buchholz  <martin@xemacs.org>
+
+	* comint-delim-arg: Obsoleted by improvements to comint-arguments
+	* comint.el (comint-arguments): Use a single regexp for each arg.
+	Use only a third of the code to do the same thing.  Remove
+	dependency on (nthcdr -1 x) working.
+
+1998-04-11  Kirill M. Katsnelson  <kkm@kis.ru>
+
+	* shell.el (shell): When selecting shell file name, consult
+	`shell-file-name' before falling back to "/bin/sh".
+	Fix docstring accordingly.
+
+1998-04-11  Kirill M. Katsnelson  <kkm@kis.ru>
+
+	* compile.el (compile-internal): Close stdin of an inferior grep
+	or make process.
+
+1998-04-04  SL Baur  <steve@altair.xemacs.org>
+
+	* overlay.el: moved to fsf-compat.
+
+1998-03-23  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* facemenu.el: Don't define keys at top-level; use an autoload
+	cookie instead.
+
+1998-03-22  SL Baur  <steve@altair.xemacs.org>
+
+	* ffap.el: added.
+
+1998-03-04  SL Baur  <steve@altair.xemacs.org>
+
+	* compile.el (compile-internal): Back out previous change.
+
+1998-02-24  Greg Klanderman  <greg@alphatech.com>
+
+	* compile.el (compile-internal): save and restore the selected
+	window in addition to the current buffer as display-buffer may
+	create a new frame if the buffer is a special-display buffer.
+
+1998-02-21  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* shell.el (explicit-bash-args): Bash 1.14 doesn't support
+	`--login', so use the equivalent and more standard `-i' instead.
+
+1998-02-16  SL Baur  <steve@altair.xemacs.org>
+
+	* compile.el (compilation-mode): Autoload.
+
+1998-02-14  SL Baur  <steve@altair.xemacs.org>
+
+	* compile.el (grep): Print # of matches.
+	From Hrvoje Niksic <hniksic@srce.hr>
+
+1998-01-31  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* shell.el (shell-cd-1): Fixed remote directory tracking.
+
+1998-01-23  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* shell.el (explicit-*-args): Add args defcustoms for several
+	other popular shells.
+
+1997-12-18  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* add-log.el (add-log-convert): New function.
+
+1998-01-22  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* compile.el (compilation-minor-mode): Use `add-minor-mode' for
+	`compilation-minor-mode', and put an autoload cookie there.
+	(compilation-minor-mode-map): Also need to autoload the
+ 	minor-mode-map.
+	(compilation-minor-mode): ... and the variable.
+
+1998-01-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standards 1.0.
+	* package-info.in: Ditto.
+
+1998-01-16  Greg Klanderman  <greg@alphatech.com (Greg Klanderman)>
+
+	* add-log.el (prompt-for-change-log-name): use find-change-log to
+	find the default by searching upwards from the current directory
+	for a ChangeLog file.  Change the read-file-name prompt to present
+	user with the default, with point at the end of the directory
+	component.
+
+1998-01-17  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (ELCS): Add overlay.elc.
+
+	* package-info.in: Update provides tag.
+
+	* ebuff-menu.el: Provide 'ebuff-menu as a feature.
+
+	* echistory.el: Provide 'echistory as a feature.
+
+	* macros.el: Provide 'macros as a feature.
+
+	* novice.el: Provide 'novice as a feature.
+
+	* debug.el: Provide 'debug as a feature.
+
+1998-01-11  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Updated package build procedure.
+
+1998-01-09  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* annotations.el (annotations-in-region): Rewrote the
+	`map-extents' call to use the newer interface.
+
+1998-01-05  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* ring.el (ring-remove): Optimize by moveing duplicated function
+	call out of the loop into a let.  Varref is faster than a function
+	call, thus the codepath is reduced and the loop will execute more
+	quickly.
+
+1998-01-01  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Added skeleton.el.
+
+1997-12-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Add comint-xemacs.el and shell.el.
+
+1997-12-23  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Added ebuff-menu.el, echistory.el, ehelp.el,
+	electrict.el and helper.el.
+	Also added chistory.el, iso-syntax.el and time-stamp.el.
+
+	* xemacs-base 1.01 is released.
+
+	* add-log.el (change-log): Remove `(require 'fortran)'.
+
+	* imenu.el: New file.
+
+	* annotations.el: Commentary changes.
+	* assoc.el: Ditto.
+	* comint.el: Ditto.
+	* compile.el: Ditto.
+	* debug.el: Ditto.
+	* enriched.el: Ditto.
+	* env.el: Ditto.
+	* facemenu.el: Ditto.
+	* macros.el: Ditto.
+	* novice.el: Ditto.
+	* outline.el: Ditto.
+	* passwd.el: Ditto.
+	* pp.el: Ditto.
+	* regi.el: Ditto.
+	* ring.el: Ditto.
+	* sort.el: Ditto.
+	* thing.el: Ditto.
+	* timezone.el: Ditto.
+	* xbm-button.el: Ditto.
+
+	* Makefile: Add in:  add-log.el, compile.el, imenu.el, outline.el
+
+1997-12-20  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Created.

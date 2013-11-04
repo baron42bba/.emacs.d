@@ -1,0 +1,36 @@
+bundle agent
+classes:
+commands:
+files:
+methods:
+reports:
+services:
+vars:
+handle =>
+comment =>
+copy_from => local_cp("")
+copy_from => local_dcp("")
+edit_defaults =>
+edit_line =>
+perms => mog("644","root","root"),
+create => "true",
+create => "false",
+classes => 
+classes => if_repaired("")
+delete => tidy
+ifvarclass =>
+getindices();
+getvalues();
+link_from => ln_s("")
+move_obstructions => "true"
+edit_line => append_if_no_lines( "${lines}" )
+edit_line => expand_variables( "" )
+edit_line => comment_lines_containing("")
+usebundle =>
+string => "
+slist => {
+package_policy => "add"
+package_method => yum_rpm
+package_method => yum_rpm_ggs
+service_policy =>
+service_method => service_test

@@ -1,0 +1,1378 @@
+2006-03-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.76 released.
+
+2006-03-08  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el: Sync with GNU Emacs, adds support for GnuTLS and
+	some other fixes.
+
+	* tls.el: Sync with GNU Emacs, adds support for OpenSSL.
+
+	* starttls.el: Sync cosmetic fixes with GNU Emacs CVS HEAD.
+
+2005-10-28  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.75 released.
+
+2005-10-26  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-send-queued-mail): Code cleanup, tiny
+	patch from Hrvoje Niksic <hniksic@xemacs.org>.
+
+2005-09-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.74 released.
+
+2005-09-23  Simon Josefsson  <jas@extundo.com>
+
+	* reporter.el: Change maintainer to FSF, since nobody from the
+	XEmacs camp has touched this file for ages and it has effectively
+	been maintained by the FSF for quite some time through syncing
+	anyway.
+
+2005-08-08  Richard M. Stallman  <rms@gnu.org>
+
+	* mail/reporter.el (reporter-dump-state): Use insert-buffer-substring.
+
+2005-06-02  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* starttls.el (starttls-set-process-query-on-exit-flag):
+	Use eval-and-compile.
+
+2005-05-31  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* starttls.el (starttls-set-process-query-on-exit-flag): Alias to
+	set-process-query-on-exit-flag or process-kill-without-query.
+	(starttls-open-stream-gnutls): Use it instead of
+	process-kill-without-query.
+	(starttls-open-stream): Ditto.
+
+2001-11-22  Colin Walters  <walters@debian.org>
+
+	* mail/reporter.el (reporter-submit-bug-report): Doc fixes.
+
+2005-04-03  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.73 released.
+
+2005-04-02  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* sendmail.el (mail-do-fcc): Write the Unix mail file using the
+	binary coding system, as is appropriate for a file where non-ASCII
+	characters are encoded using separate MIME character sets for
+	every message, and thus no other single Mule coding system is
+	appropriate.
+
+2005-03-09  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.72 released.
+
+2005-03-09  Steve Youngs  <steve@sxemacs.org>
+
+	Support Firefox in browse-url.
+
+	* browse-url.el (browse-url-browser-function): Add firefox.
+	(browse-url-firefox-program): New.
+	(browse-url-firefox-arguments): New.
+	(browse-url-firefox-startup-arguments): New.
+	(browse-url-firefox-new-window-is-tab): New.
+	(browse-url-default-browser): Add firefox.
+	(browse-url-firefox): New.
+	(browse-url-firefox-sentinel): New.
+
+	* browse-url-xemacs.el: Add menu item for Firefox.
+
+2005-02-28  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.71 released.
+
+2005-02-26  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-netscape): Fix last commit.  Reported
+	by "Johann 'Myrkraverk' Oskarsson"
+	<myrkraverk@users.sourceforget.net>.
+
+2005-02-22  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-netscape-new-window-is-tab): New
+	variable.
+	(browse-url-netscape): Use it.  Doc fix.  Reported by "Johann
+	'Myrkraverk' Oskarsson" <myrkraverk@users.sourceforget.net>.
+
+2004-11-30  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.70 released.
+
+2004-11-29  Simon Josefsson  <jas@extundo.com>
+
+	* netrc.el: Use encrypt.el from ecrypto, instead of gnus-encrypt.
+	Sync with Gnus CVS.
+
+2004-11-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.69 released.
+
+2004-11-07  Ben Wing  <ben@xemacs.org>
+
+	* sendmail.el:
+	* sendmail.el (mail-signature):
+	* sendmail.el (mail-default-directory): New.
+	* sendmail.el (mail-use-dsn): New.
+	* sendmail.el (mail-mode-syntax-table):
+	* sendmail.el (mail-font-lock-keywords):
+	* sendmail.el (mail-mode-abbrev-table): New.
+	* sendmail.el (mail-mode):
+	* sendmail.el (mail-mode-fill-paragraph):
+	* sendmail.el (mail-mode-map):
+	* sendmail.el (sendmail-send-it):
+	* sendmail.el (mail-sent-via):
+	* sendmail.el (mail-reply-to):
+	* sendmail.el (mail-split-line): New.
+	* sendmail.el (mail):
+	* sendmail.el (mail-recover-1): New.
+	* sendmail.el (mail-recover):
+	Synch with FSF 21.3.
+
+2004-09-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.68 released.
+
+2004-05-28  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.texi (Authentication): Improve STARTTLS discussion.
+
+2004-02-29  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.texi (Authentication): Changed the list of supported
+	authentication mechanisms from CRAM-MD5, PLAIN and LOGIN-MD5 to
+	CRAM-MD5 and LOGIN, tiny patch from Andreas Voegele
+	<voegelas@gmx.net>.
+
+2003-04-23  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.texi: Fix license (the invariant sections mentioned has
+	never been part of the smtp manual).  Align info dir entry with
+	other emacs packages.
+
+2004-08-04  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* netrc.el: removed old encryption support, autoload gnus-encrypt.el
+	(netrc-parse): use gnus-encrypt.el functions
+
+2004-05-23  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* netrc.el (netrc-services-file): New variable.
+	(netrc-parse-services): New function.
+	(netrc-find-service-name): New function.
+	(netrc-find-service-number): New function.
+	(netrc-port-equal): New function.
+	(netrc-machine): Use it.
+
+2004-01-05  Teodor Zlatanov  <tzz@lifelogs.com>
+
+	* netrc.el: autoload password-read
+	(netrc): new configuration group
+	(netrc-encoding-method, netrc-openssl-path): configuration
+	variables for encoding and decoding of files with symmetric
+	ciphers
+	(netrc-encode): assistant function to encode a file with
+	netrc-encoding-method
+	(netrc-parse): added interactive parameter, added optional
+	decoding if netrc-encoding-method is non-nil but otherwise
+	behavior is standard
+	(netrc-encrypting-method, netrc-encrypt, netrc-parse):
+	s/encode/encrypt/ everywhere
+
+2004-01-05  Jesper Harder  <harder@ifa.au.dk>
+
+	* netrc.el (netrc-point-at-eol): Replace with point-at-eol.
+
+2004-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* rfc2104.el: Add arch cookie.
+
+2003-09-20  Simon Josefsson  <jas@extundo.com>
+
+	* tls.el (tls-process-connection-type): Doc fix.
+
+2004-06-11  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.67 released.
+
+2004-06-11  Simon Josefsson  <jas@extundo.com>
+
+	* mail-extr.el: Revert and remove coding cookie.  See
+	<87659y93co.fsf@tleepslib.sk.tsukuba.ac.jp> on xemacs-beta.
+	(mail-extr-skip-whitespace-forward)
+	(mail-extr-skip-whitespace-backward): Revert last patch.  See
+	<87isdy949c.fsf@tleepslib.sk.tsukuba.ac.jp> on xemacs-patches.
+
+2004-06-10  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.66 released.
+
+2004-05-26  Simon Josefsson  <jas@extundo.com>
+
+	* starttls.el: Merge with my GNUTLS based starttls.el.
+	(starttls-gnutls-program, starttls-use-gnutls)
+	(starttls-extra-arguments, starttls-process-connection-type)
+	(starttls-connect, starttls-failure, starttls-success): New variables.
+	(starttls-program, starttls-extra-args): Doc fix.
+	(starttls-negotiate-gnutls, starttls-open-stream-gnutls): New funs.
+	(starttls-negotiate, starttls-open-stream): Check `starttls-use-gnutls'
+	and pass on to corresponding *-gnutls function if it is set.
+
+2004-06-10  Simon Josefsson  <jas@extundo.com>
+
+	* mail-extr.el: Sync with Emacs CVS, with log entries until and
+	including 2003-05-18.
+	(mail-extr-address-syntax-table): Remove non-ASCII (from Emacs CVS
+	sync, not introduced by me).
+	(mail-extr-skip-whitespace-forward)
+	(mail-extr-skip-whitespace-backward): Ditto.  (See comment in
+	code.)
+
+2003-10-23  Dave Love  <fx@gnu.org>
+
+	* mail/mail-extr.el (mail-extr-address-syntax-table): Remove
+	non-ASCII unibyte chars.
+
+2003-05-18  Stefan Monnier  <monnier@cs.yale.edu>
+
+	* mail/mail-extr.el: Use explicit coding tag.
+
+2004-04-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.65 released.
+
+2004-04-09  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el: Add comment, based on report by kdc@rcn.com (Kevin
+	D. Clark).
+
+2003-12-07  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.64 released.
+
+2003-11-06  Mats Lidell  <matsl@xemacs.org>
+
+	* browse-url.el: Sync up with GNU Emacs CVS version 1.32 including
+	the following changes below before entry 2003-10-31
+
+2003-07-31  John Paul Wallington  <jpw@gnu.org>
+
+	* browse-url.el (browse-url-epiphany): Doc fix.
+
+2003-07-07  Richard M. Stallman  <rms@gnu.org>
+
+	* net/browse-url.el (browse-url-browser-function):
+	Add alternative for Epiphany.
+	(browse-url-epiphany-program, browse-url-epiphany-arguments)
+	(browse-url-epiphany-startup-arguments)
+	(browse-url-epiphany-new-window-is-tab): New variables.
+	(browse-url-epiphany, browse-url-epiphany-sentinel): New functions.
+
+2003-04-12  Stefan Monnier  <monnier@cs.yale.edu>
+
+	* net/browse-url.el: Don't autoload all these defcustoms.
+	(browse-url-default-macosx-browser): New fun.
+	(browse-url-browser-function): Use it for system-type = darwin.
+	(browse-url-usr1-signal): Remove.
+	(browse-url-mosaic): Use SIGUSR1 directly instead.
+	(browse-url-gnome-moz-program): New var.
+	(browse-url-gnome-moz, browse-url-default-browser): Use it.
+
+2003-10-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.63 released.
+
+2003-09-12  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.62 released.
+
+2003-09-12  Hrvoje Niksic  <hniksic@xemacs.org>
+
+	* pop3.el (pop3-movemail): Use binary coding system when writing
+	to crashbox.  Since binary was used to read the data from the
+	network, using it for writing guarantees that the same octets will
+	be stored that were retrieved from the server.
+
+2003-09-04  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.61 released.
+
+2003-09-04  Martin Gasbichler <gasbichl@informatik.uni-tuebingen.de>
+
+	* browse-url.el (browse-url-mozilla): Fix position of
+	parenthesis.
+
+2003-08-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.60 released.
+
+2003-08-21  Christian Schmitt  <Christian.Schmitt@dresdner-bank.com>
+
+	* browse-url.el (browse-url-mozilla): Make Mozilla browser work
+	under Windows.
+
+2003-05-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.59 released.
+
+2003-05-13  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-open-stream): Don't hard code
+	starttls-program.
+
+2003-05-02  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.58 released.
+
+2003-05-02  Steve Youngs  <youngs@xemacs.org>
+
+	* tls.el: New.
+
+	* Makefile (ELCS): Add tls.elc.
+
+	* package-info.in (provides): Add tls.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+	Use EXPLICIT_DOCS instead of explicitly giving the targets
+	and dependencies.
+
+2003-03-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.57 released.
+
+2003-03-11  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.texi: Doc fix.
+
+2003-02-23  Alex Schroeder <alex@emacswiki.org>
+
+	* smtpmail.texi (How Mail Works): New.
+
+2003-02-23  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.texi: New file.
+
+	* Makefile: Build smtpmail.info.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.56 released.
+
+2003-01-06  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-mozilla-program): Autoload.  Suggested
+	by Ville Skyttä.
+
+2003-01-05  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url-xemacs.el (browse-url-menu): Make Mozilla really be
+	mozilla.  Check if mozilla is installed before activating menu
+	entry.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+2002-12-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.55 released.
+
+2002-11-17  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-default-browser): Change priority.
+	(browse-url-default-browser): Prefer w3m over MMM and lynx.
+
+2002-11-16  Nix  <nix@esperi.demon.co.uk>
+
+	* browse-url.el: Update copyright date, function list.
+	(browse-url-gnudoit-program): Say that it's used by emacs-w3m
+        as well as w3.
+	(browse-url-default-browser): Look for w3m first.
+
+	(browse-url-w3m): New function.
+	(browse-url-w3m-gnudoit): Likewise.
+	(browse-url-browser-function): Add to here...
+	* browse-url-xemacs.el (browse-url-menu): ... and here.
+
+2002-11-13  Ville Skyttä  <scop@xemacs.org>
+
+	* smtpmail.el (smtp-via-smtp): Add missing paren.
+
+2002-11-13  Simon Josefsson  <jas@extundo.com>
+
+	* mail/smtpmail.el (smtpmail-via-smtp): Fall back to
+	user-mail-address as sender.
+
+2002-11-01  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.54 released.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-12  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.53 released.
+
+2002-10-11  Simon Josefsson  <jas@extundo.com>
+
+	* mail/sendmail.el (mail-envelope-from): New option `header' to
+	use RFC 2822 From: header as the envelope address.
+	(mail-envelope-from): New function, this should be used instead of
+	looking at the `mail-envelope-from' variable.
+	(sendmail-send-it): Use it.
+
+	* mail/smtpmail.el (smtpmail-via-smtp): Use it.
+
+2002-10-10  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-mozilla): Doc fix.
+
+2002-10-10  Steve Youngs  <youngs@xemacs.org>
+
+	* browse-url.el (browse-url-mozilla-new-window-is-tab): New.
+	(browse-url-mozilla): Use it.
+
+2002-09-30  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.52 released.
+
+2002-09-28  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-via-smtp): Only negotiate starttls on
+	streams that were opened using starttls.
+
+2002-09-26  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.51 released.
+
+2002-09-24  Simon Josefsson  <jas@extundo.com>
+
+	* mail/mail-extr.el (mail-extr-ignore-single-names): Change default.
+	(mail-extract-address-components): Doc fix.
+
+2002-09-25  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.50 released.
+
+2002-09-17  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el: Sync with Emacs CVS (following ChangeLog entries
+	from Emacs, until 2002-09-16 change).
+
+2002-09-12  Simon Josefsson  <jas@extundo.com>
+
+	* mail/smtpmail.el (smtpmail-send-it): Don't use : in filenames
+	(for cygwin). Suggested by Andrew Senior <aws at watson.ibm.com>.
+	Use expand-file-name.  Also don't require time-stamp.
+
+2002-09-11  Simon Josefsson  <jas@extundo.com>
+
+	* mail/smtpmail.el (smtpmail-default-smtp-server): Doc fix.
+
+2002-08-30  Simon Josefsson  <jas@extundo.com>
+
+	* mail/smtpmail.el (smtpmail-via-smtp): Delete process buffer
+	unless s-debug-info is enabled.
+
+2002-05-12  Richard M. Stallman  <rms@gnu.org>
+
+	* mail/smtpmail.el (smtpmail-mail-address): New variable.
+	(smtpmail-send-it): Bind and use that instead of `mail-address'.
+	(smtpmail-via-smtp): Likewise.
+
+2002-05-09  Simon Josefsson  <jas@extundo.com>
+
+	* mail/smtpmail.el (smtpmail-send-it): Use user-mail-address from
+	calling buffer.
+
+2002-05-08  Richard M. Stallman  <rms@gnu.org>
+
+	* mail/smtpmail.el (netrc-machine, netrc-get): Add autoloads.
+
+2002-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* Makefile (REQUIRES): Add ecrypto.
+
+2002-09-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.49 released.
+
+2002-09-02  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (REQUIRES): Self-require.
+
+	* highlight-headers.el: Use browse-url to open URLs,
+	provide obsolete aliases for backwards compatibility.
+
+2002-07-31  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.48 released.
+
+2002-07-26  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-netscape-send): Doc fix.
+	(comments): Added ";; XEmacs" markers were we differ from Emacs.
+
+2002-06-21  Richard M. Stallman  <rms@gnu.org>
+
+	* net/browse-url.el (browse-url-at-mouse): Don't pass an arg
+	to browse-url-at-point.
+
+2002-07-23  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* browse-url.el (browse-url-lynx-input-attempts): Use defcustom.
+	(browse-url-lynx-input-delay): Add custom type and group.
+
+2002-07-08  Simon Josefsson  <jas@extundo.com>
+
+	* mail-extr.el (mail-extr-all-top-level-domains): Update names.
+
+2002-07-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.47 released.
+
+2002-06-30  Ville Skyttä  <scop@xemacs.org>
+
+	* browse-url.el (browse-url-delete-temp-file):
+	Convert comments to docstring.
+	(browse-url-netscape-send)
+	(browse-url-lynx-emacs): Docstring fixes.
+
+2002-06-30  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-opera): Fix doc.
+
+	* mail-extr.el: Sync up with Emacs.
+	(mail-extr): Add :prefix.
+	(mail-extr-full-name-prefixes): purecopy. fix :type.
+	(mail-extr-mailbox-match-case-fold): Remove variable, this is now
+	the default.
+	(mail-extr-delete-char): Removed (obsolete v19 stuff).
+	(mail-extr-skip-whitespace-forward): 
+	(mail-extr-skip-whitespace-backward): 
+	(mail-extr-nuke-char-at): 
+	(mail-extr-safe-move-sexp): 
+	(mail-extr-undo-backslash-quoting): Defsubst.
+	(mail-extr-nuke-outside-range): Doc fix.
+	(mail-extr-last): Removed (obsoleted by `last').
+	(mail-extract-address-components): New optional argument ALL.
+	(mail-extract-address-components): MAJOR changes, unclear rationale.
+	(mail-extr-voodoo): MAJOR changes, unclear rationale.
+	(all-top-level-domains): Renamed to mail-extr-all-top-level-domains.
+	(mail-extr-all-top-level-domains): Updated.
+	(what-domain): Use m-e-a-t-l-d.
+
+2002-04-30  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.46 released.
+
+2002-04-27  Simon Josefsson  <jas@extundo.com>
+
+	* package-info.in (provides): Add netrc.
+
+	* Makefile (ELCS): Add netrc.el to package.
+
+2002-04-27  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el: Sync up with Emacs CVS. Autoload netrc and base64.
+	(smtpmail-auth-credentials): Support .authinfo.
+	(smtpmail-try-auth-methods): Support .authinfo.
+
+	* smtpmail.el (smtpmail-queue-counter): New internal variable.
+	(smtpmail-send-it): Use it, fix fast resending bug.
+
+2002-04-24  Simon Josefsson  <jas@extundo.com>
+
+	* netrc.el: New file, from gnus-util.el.
+
+2002-04-12  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-temp-file-list): Removed, unused.
+	(browse-url-maybe-new-window): Negate test (from Emacs).
+	(browse-url-delete-temp-file-list): Removed, unused.
+	(browse-url-delete-temp-file): Sync with Emacs.
+	(browse-url-mozilla): Fix doc.
+	(browse-url-galeon): Use --existing and --noraise correctly.
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.45 released.
+
+2002-04-07  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-browser-function): Revert :type fix
+	because buggy custom in XEmacs.
+
+2002-03-29  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (require): Require thingatpt and executable.
+
+2002-03-29  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (REQUIRES): Add fsf-compat and sh-script, needed by
+	browse-url.
+
+2002-03-25  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): 1.44 released.
+
+2002-03-15  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-filename-alist): Don't begin docstring
+	with *, you don't want to set this one with M-x set-variable.
+
+2002-03-15  Ville Skyttä  <scop@xemacs.org>
+
+	* browse-url.el (browse-url-browser-function): Add Opera.
+	(browse-url-opera-program, browse-url-opera-arguments)
+	(browse-url-opera-startup-arguments, browse-url-opera)
+	(browse-url-opera-sentinel): New.
+	(browse-url-default-browser): Add Opera, fix order in docstring.
+	(browse-url-netscape-program, browse-url-netscape-arguments)
+	(browse-url-netscape-startup-arguments, browse-url-mozilla-program)
+	(browse-url-mozilla-arguments, browse-url-mozilla-startup-arguments)
+	(browse-url-galeon-program, browse-url-galeon-arguments)
+	(browse-url-galeon-startup-arguments)
+	(browse-url-galeon-new-window-is-tab, browse-url-mosaic-program)
+	(browse-url-mosaic-arguments, browse-url-mosaic-pidfile)
+	(browse-url-filename-alist, browse-url-of-file-hook)
+	(browse-url-CCI-port, browse-url-xterm-program)
+	(browse-url-lynx-emacs-args, browse-url-gnudoit-program)
+	(browse-url-temp-dir, browse-url-netscape-version)
+	(browse-url-lynx-input-delay, browse-url-kde-program)
+	(browse-url-gnome-moz-arguments): Begin docs with *.
+
+	* browse-url-xemacs.el (browse-url-menu): Add Opera.
+
+2002-01-19  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-url-at-point): Work around bug in
+	XEmacs `set-text-properties'.
+
+2002-01-13  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in (provides): Update to include all provides.
+
+2002-01-09  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-send-queued-mail): Use binary instead of
+	no-conversion (no-conversion does conversion in XEmacs).
+
+2002-01-08  Simon Josefsson  <jas@extundo.com>
+
+	Emacs 21 sync.
+
+	* browse-url.el (browse-url): Add :link.
+	(browse-url-browser-function): Change UNIX default to
+	`browse-url-default-browser'.
+	(browse-url-browser-function): Add Mozilla.
+	(browse-url-browser-function): Add "Default browser".
+	(browse-url-browser-display, browse-url-mozilla-program)
+	(browse-url-mozilla-arguments)
+	(browse-url-mozilla-startup-arguments, browse-url-galeon-program)
+	(browse-url-galeon-arguments)
+	(browse-url-galeon-startup-arguments)
+	(browse-url-galeon-new-window-is-tab): New variables.
+	(browse-url-netscape-display): Removed.
+	(browse-url-filename-alist): Notice URLs.
+	(browse-url-process-environment): Don't use netscape browser.
+	(browse-url-default-browser, browse-url-mozilla,
+	(browse-url-mozilla-sentinel, browse-url-galeon) 
+	(browse-url-galeon-sentinel): New functions.
+	(browse-url-lynx-emacs): Fix errors.
+	(browse-url-galeon): Removed. (Rewritten above.)
+
+2001-12-26  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-send-it): Use
+	`mail-sendmail-undelimit-header'.
+	(mail-check-safe-charset): Autoload it.
+
+2001-12-21  Simon Josefsson  <jas@extundo.com>.
+
+	* smtpmail.el (smtpmail-send-queued-mail): Use
+	with-temp-buffer instead of find-file-noselect, and bind
+	coding-system-for-read to no-conversion when reading the queued
+	messages.
+
+2001-12-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* smtpmail.el (smtpmail-send-queued-mail): Insert the
+	enqueued messages literally.
+
+2001-11-30  Stefan Monnier  <monnier@cs.yale.edu>
+
+	* smtpmail.el: Use with-current-buffer.
+	(message-make-date, message-make-message-id): Autoload when needed.
+	(smtpmail-send-it): Use them to add `Date:' and `Message-Id:'
+	headers when missing.
+
+2001-11-25  Pavel Janík  <Pavel@Janik.cz>
+
+	* smtpmail.el (smtpmail-deduce-address-list): Don't use
+	insert-string.
+
+2001-11-13  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (top-level): Change maintainer to Simon
+	Josefsson, cleanup the smtpmail.el header.
+
+	* smtpmail.el (top-level): Don't require cl.
+	(smtpmail-cred-server, smtpmail-cred-port, smtpmail-cred-key)
+	(smtpmail-cred-user, smtpmail-cred-cert, smtpmail-cred-passwd)
+	(smtpmail-intersection): New utility funs.
+	(smtpmail-find-credentials): Use them.
+	(smtpmail-intersection): New function.
+	(smtpmail-open-stream): Use stringp instead of string-to-list.
+	(smtpmail-open-stream, smtpmail-try-auth-methods): New functions,
+	separated from smtpmail-via-smtp.
+
+	* smtpmail.el (top-level): Autoload starttls, mail-utils and
+	rfc2104.  Require base64 and cl.
+	(smtpmail-smtp-service): Doc fix.
+	(smtpmail-debug-info): Doc fix.
+	(smtpmail-auth-credentials): Fix default.  Fix doc.
+	(smtpmail-starttls-credentials): Fix doc.
+	(smtpmail-debug-verb): New variable.
+	(smtpmail-deduce-address-list, smtpmail-send-it): Don't require
+	mail-utils (it is autoloaded).
+	(smtpmail-via-smtp): Use `smtpmail-debug-verb' to control VERB.
+
+2001-12-27  Simon Josefsson  <jas@extundo.com>
+
+	* sendmail.el (mail-envelope-from): Fix :type.  Suggested by
+	"Golubev I. N." <gin@mo.msk.ru>.
+	(sendmail-send-it): Copy `mail-envelope-from' from calling buffer.
+	From "Golubev I. N." <gin@mo.msk.ru>.
+
+2001-11-27  Simon Josefsson  <jas@extundo.com>
+
+	* sendmail.el (top-level): Don't require mail-abbrev.
+
+	* mail-abbrevs.el (mail-abbrev-mailrc-file): Defun.  Autoload.
+
+2001-11-22  Simon Josefsson  <jas@extundo.com>
+
+	* sendmail.el (top-level): Require mail-abbrevs when compiling,
+	for the `mail-abbrev-mailrc-file' macro.
+
+2001-10-15  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-via-smtp): Use `mail-envelope-from'
+	in MAIL FROM.
+
+2001-10-15  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el: Doc fix.
+
+	* browse-url.el: Update maintainer.
+	(browse-url-browser-function): Upcase "Galeon".
+
+2001-10-13  Simon Josefsson  <jas@extundo.com>
+
+	* sendmail.el (sendmail-send-it): Fix local-variable-p arg.
+
+2001-10-14  Andy Piper  <andy@xemacs.org>
+
+	* browse-url.el (browse-url-browser-function): do the windows
+	thing for cygwin.
+
+2001-10-10  Simon Josefsson  <jas@extundo.com>
+
+	Emacs 21 sync.
+
+	* sendmail.el (mail-aliases-setup): Don't autoload (autoloaded in
+	mail-abbrev).
+	(mail-font-lock-keywords): Delay evaluation of
+	`mail-header-separator'.
+	(mail-font-lock-keywords): Various changes.
+	(mail-mode): Use `mail-mode-auto-fill' as
+	`normal-auto-fill-function'.
+	(mail-mode): Use `mail-mode-fill-function' as
+	`fill-paragraph-function'.
+	(mail-mode): Add `comment-start'.
+	(mail-mode): Add `adaptive-fill-regexp'.
+	(mail-mode): Add `adaptive-fill-first-line-regexp'.
+	(mail-mode): Fix `paragraph-start' regexp.
+	(sendmail-send-it): Copy `buffer-file-coding-system' over to temp
+	buffer.
+	(sendmail-send-it): Use `mail-header-end'.
+	(sendmail-send-it): Better handling of empty subjects.
+	(sendmail-send-it): Deliver in background (-odb) unless
+	`mail-interactive'.
+	(sendmail-send-it): Better detection of no recipients.
+	(mail-indent-citation): Various fixes.
+	(mail-recover): Default-directory is bound in `mail-mode', no need
+	to do it twice.
+
+2001-08-22  Stefan Monnier  <monnier@cs.yale.edu>
+
+	* sendmail.el (mail-mode): Use adaptive-fill-regexp.
+
+2001-03-21  Gerd Moellmann  <gerd@gnu.org>
+
+	* sendmail.el (sendmail-send-it): Don't parse Resent-*
+	headers.  Always invoke sendmail with option -t.
+
+2000-12-21  Miles Bader  <miles@gnu.org>
+
+	* sendmail.el (mail-mode): Set `comment-start' to the yank prefix.
+
+2001-10-06  Simon Josefsson  <jas@extundo.com>
+
+	Emacs 21 sync.
+
+	* reporter.el (top-level): Remove outdated version and last
+	modified fields.
+	(reporter-calculate-separator): Remove.
+	(reporter-submit-bug-report): Don't use it.  This may be bogus, if
+	it causes problems, revert.
+	(reporter-bug-hook): Ditto, use `rfc822-goto-eoh' instead.
+	(reporter-submit-bug-report): Doc fix for font-locking.
+
+2001-07-15  Stefan Monnier  <monnier@cs.yale.edu>
+
+	* reporter.el (reporter-submit-bug-report):
+	Don't abuse make-variable-buffer-local.  Fix call to add-hook.
+
+2000-05-26  Dave Love  <fx@gnu.org>
+
+	* reporter.el (reporter-version): Deleted.
+
+2001-10-10  Simon Josefsson  <jas@extundo.com>
+
+	* mail-utils.el (mail-check-safe-charset): Fix typo.
+
+	* rfc2104.el: Add ";;; Code:" to comply to coding style.
+
+2001-09-22  Simon Josefsson  <jas@extundo.com>
+
+	* sendmail.el (top-level): Require rfc822
+	(mail-dir): Removed variable. (Implementation using this variable
+	didn't seem finished, so I reverted the little that was done, see
+	`mail').
+	(mail-alias-modtime): New variable.  Used to keep track of
+	~/.mailrc modtime.
+	(mail-use-multiple-buffers-p): Customize variable.
+	(sendmail-sync-aliases): Re-instated (renamed from
+	`sendmail-synch-aliases'). Used to compare ~/.mailrc modtime.
+	(mail-setup): Require mail-abbrevs.
+	(mail-setup): Call `sendmail-sync-aliases' to see if ~/.mailrc
+	changed.
+	(mail-setup): Kill local variable `buffer-file-coding-system'.
+	(mail-setup): Inactivate input method.
+	(mail-mode): Doc fix.
+	(mail-mode-map): Derive from `text-mode-map'.
+	(mail-menubar-menu): Change "Go to field:" to "Navigation:"
+	(because not all commands where fields.).
+	(mail-menubar-menu): Add FCC and Expand Aliases.
+	(mail-bury): Use `window-dedicated-p'.
+	(mail-bury): Support `mail-dedicated-frame'.
+	(mail-send): Doc fix.
+	(mail-send): Complain about invalid headers.
+	(mail-do-fcc): Revert some of the XEmacs hackery, instead go
+	through some effort to make sure the file and any open buffers are
+	updated (earlier version could cause missing Fcc's).
+	(mail-do-fcc-cached-timezone, mail-do-fcc-insert-date-header):
+	Removed, functions from `mail-utils' are used instead.
+	(mail-do-fcc-rmail-internal): Removed, handled inline in
+	`mail-do-fcc' slightly different.
+	(mail-sent-via): Reinstate function.  Use `mail-header-end'.
+	(mail-reply-to): Let `mail-position-on-field' insert header.
+	(mail): Remove duplicated doc.
+	(mail): Don't use mail-dir.
+
+2001-09-16  Björn Torkelsson  <torkel@acc.umu.se>
+
+	* Makefile (ELCS): adding browse-url-xemacs
+
+2001-09-13  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url-xemacs.el: New file, moved the last work here.
+
+2001-09-10  Björn Torkelsson  <torkel@acc.umu.se>
+
+	* browse-url.el: added menus for choosing which browser to open
+	URL:s with (moved from menubar-items)
+
+2001-08-25  Simon Josefsson  <jas@extundo.com>
+
+	* sendmail.el (mail-reply-buffer): Rename to `mail-reply-action'.
+	(mail-reply-action, mail-send-actions): Make permanent-local.
+	(mail-default-headers, mail-bury-selects-summary, mail-send-hook):
+	Defcustom
+	(mail-send-nonascii): New variable.
+	(mail-setup): `mail-reply-buffer' -> `mail-reply-action'.
+	(mail-setup): Insert newlines.
+	(mail-setup): Put property on `mail-header-separator'.
+	(mail-setup): Support lisp expr `mail-signature'.
+	(mail-mode): `mail-reply-buffer' -> `mail-reply-action'.
+	(mail-header-end, mail-text-start, mail-sendmail-delimit-header)
+	(mail-sendmail-undelimit-header, mail-mode-auto-fill)
+	(mail-mode-fill-paragraph): New functions.
+	(mail-mode-map): Add `mail-yank-region'.
+	(mail-mode-map): Add `mail-attach-file'.
+	(mail-menubar-menu): `mail-reply-buffer' -> `mail-reply-action'.
+	(rmail-summary-buffer): Remove.
+	(sendmail-send-it): Doc fix.
+	(sendmail-send-it): Look for `sendmail-program' in caller's
+	buffer.
+	(mail-position-on-field): Use `mail-header-end'.  Fix.
+	(mail-text, mail-fill-yanked-message): Use `mail-text-start'.
+	(mail-fill-yanked-message): Call `fill-individual-paragraphs' with
+	`mail-citation-prefix-regexp' (Note: `f-i-p' don't support regexp
+	there, but a regexp is non-nil so it works anyway.  `f-i-p' should
+	be synced as well.)
+	(mail-indent-citation): Yank clear headers.
+	(mail-yank-original): Doc fix.
+	(mail-yank-original): `mail-reply-buffer' -> `mail-reply-action'.
+	(mail-yank-original): Use `mail-reply-action' instead of old
+	logic.
+	(mail-yank-original): Remove text properties.
+	(mail-yank-original): Bind `mark-even-if-inactive' (for
+	transient-mark-mode, if XEmacs adds it in the future).
+	(mail-yank-original): Bind `mail-citation-header' before running
+	`mail-citation-hook'.
+	(mail-yank-original): Don't active mark.
+	(mail-yank-clear-headers): Exchange start and end if necessary.
+	(mail-yank-region, mail-attach-file): New functions.
+	(mail): Doc fix.
+	(mail): Auto save fixes.
+
+2001-08-25  Simon Josefsson  <jas@extundo.com>
+
+	* browse-url.el (browse-url-browser-function): Add Regexp/function
+	alist custom option. (Emacs sync.)
+
+2001-08-01  Simon Josefsson  <jas@extundo.com>
+
+	* rfc822.el (rfc822-goto-eoh): Add compatibility
+	`rfc822-goto-eoh'. (Emacs has it in simple.el.)
+
+2001-07-30  Simon Josefsson  <jas@extundo.com>
+
+	* smtpmail.el (smtpmail-via-smtp): Send EHLO/HELO again after
+	STARTTLS, as per RFC 2487.
+
+2001-07-28  Simon Josefsson  <jas@extundo.com>
+
+	First part of Emacs 21 sync.
+
+	* sendmail.el (sendmail): New defgroup.
+	(mail-from-style): Defcustom.
+	(mail-specify-envelope-from, mail-envelope-from): New variables.
+	(mail-self-blind):
+	(mail-interactive):
+	(mail-yank-ignored-headers):
+	(send-mail-function): Defcustom.
+	(mail-header-separator): Defcustom. Category text property (?).
+	(mail-archive-file-name):
+	(mail-default-reply-to):
+	(mail-alias-file):
+	(mail-setup-hook):
+	(mail-yank-prefix):
+	(mail-indentation-spaces):
+	(mail-citation-hook): Defcustom.
+	(mail-citation-header):
+	(mail-citation-prefix-regexp): New variables.
+	(mail-signature): Defcustom.  Risky-local-variable property (?).
+	(mail-signature-file): Defcustom.
+	(sendmail-send-it): Support system-default mail-from-style.
+	Support mail-{specify-,}envelope-from.
+
+	Emacs 21 sync.
+	
+	* smtpmail.el (smtpmail-maybe-append-domain): Renamed from
+	`maybe-append-domain'.
+	(smtpmail-warn-about-unknown-extensions): New variable.
+	(smtpmail-via-smtp): Use new function and variable.
+
+2001-06-16  Simon Josefsson  <jas@extundo.com>
+
+	Emacs 21 sync.
+
+	* browse-url.el (toplevel): Add 2000, 2001 to copyright. Sync
+	comments.
+	(browse-url-browser-function): Fix doc.
+	(browse-url-browser-function): Rename "kfm" to "KDE". Add GNOME.
+	(browse-url-new-window-flag): Renamed from
+	`browse-url-new-window-p'.
+	(browse-url-new-window-p): Defalias.
+	(browse-url-filename-alist): Add DOS *:\* magic.
+	(browse-url-kde-program, browse-url-kde-args): Add variable.
+	(browse-url-url-at-point): Remove conditioning.
+	(browse-url-maybe-new-window): New macro.
+	(browse-url-file-url, browse-url): Use `dolist'.
+	(browse-url-at-mouse): Use `mouse-set-point' instead of previous
+	more complicated logic.
+	(browse-url-event-buffer, browse-url-event-point): Removed.
+	(browse-url-netscape): Use ` instead of (list ...).
+	(browse-url-gnome-moz-arguments): New variable.
+	(browse-url-gnome-moz): New function.
+	(browse-url-kde): Renamed from `browse-url-kfm'.
+	(browse-url-kfm): Defalias.
+	(browse-url-{netscape,mosaic,cci,w3,lynx-emacs,mail}): Use
+	`browse-url-maybe-new-window' macro.
+
+2001-06-08  Matt Curtin  <cmcurtin@interhack.net>
+
+	Integrated new function graciously supplied by 
+	Mikael Hedin <mikael.hedin@irf.se>.
+	
+	* browse-url.el: Added Galeon support.
+
+2001-05-27  Don Pellegrino <donpellegrino@computer.org>
+
+	* smtpmail.el (smtpmail-auth-supported): Add `login'.
+	(smtpmail-via-smtp): Check for `login' mech properly.
+
+2001-05-15  Simon Josefsson  <simon@josefsson.org>
+
+	Emacs 21 sync.
+
+	* rfc822.el (rfc822-bad-address): Remove \n\t from message.
+	(rfc822-looking-at): Use `set-match-data' instead of
+	`store-match-data'.
+	(rfc822-snarf-word):
+	(rfc822-snarf-subdomain):
+	(rfc822-addresses):
+	(rfc822-addresses-1): Remove \0177-\377 from regexp. (It didn't
+	work as intended, matching ascii > 127 (think mule), and it also
+	generated unnecessary complaints on mail addresses.)
+	(rfc822-addresses-1): Allow multiple "." inside RFC822 strings.
+	(rfc822-addresses-1): More error handling.
+	(rfc822-addresses): Remove old hack to ignore bad addresses. The
+	old hack behaves badly on e.g.
+	"lcm36651@uxa.cso.uiuc.edu (Hi!  ;)), jas@pdc.kth.se"
+	while without the hack it works better, you get an RFC822 comment
+	containing an error message.
+	(top level): Remove 1993 copyright (was probably the earlier
+	XEmacs modification).
+
+2001-03-30  David M. Karr <dmkarr@earthlink.net>
+
+	* smtpmail.el (smtpmail-send-it): Use (user-mail-address).
+
+2001-03-24  Simon Josefsson  <simon@josefsson.org>
+
+	Sync with Emacs -- Mike Taylor, 11th October 1999 to add support
+	for automatically appending a domain to RCPT TO: addresses.
+	
+	* smtpmail.el (smtpmail-sendto-domain): New variable.
+	(maybe-append-domain): New function.
+	(smtpmail-via-smtp): Use it.
+
+2001-03-22  Simon Josefsson  <simon@josefsson.org>
+
+	* smtpmail.el (smtpmail-via-smtp): Support EHLO SIZE arguments.
+
+2001-03-14  Edward M. Lee  <tailbert@yahoo.com>
+
+	* sendmail.el (send-mail-function): Use smtp by default on cygwin.
+
+2001-02-16  Simon Josefsson  <simon@josefsson.org>
+
+	* base64.el: Synch with Gnus: Require cl.  Use defalias instead of
+	fset. Add variable base64-binary-coding-system. Use it.  Change
+	base64-*insert-char.  Add optional argument no-line-break for
+	compatibility to base64-encode*.
+
+2000-12-31  Simon Josefsson  <simon@josefsson.org>
+
+	* reporter.el: Incorporate doc fixes from Emacs 21, update
+	maintainer field.
+
+2000-12-31  Simon Josefsson  <sj@extundo.com>
+
+	* mailheader.el: Sync with Emacs 21 (Doc fixes, support string
+	`headers' in mail-header-format).
+
+	* starttls.el: Sync with Emacs 21 (Change copyright status to
+	reflect FSF assignment, remove starttls-open-ssl-stream, improve
+	customize of variables).
+
+	* rfc2104.el: Sync with Emacs 21 (Add SHA-1 example, test case
+	reference, rfc2104-hexstring-to-bitstring, refresh copyright
+	date).
+
+2000-11-26  Simon Josefsson  <sj@extundo.com>
+
+	* mail-utils.el (mail-y-or-n-p, mail-flatten-list)
+	(mail-check-safe-charset): New functions, from LMI's message.el.
+
+	* smtpmail.el (smtpmail-send-it): Use it; check for bad
+	characters.
+
+	* sendmail.el (sendmail-send-it): Use it; check for bad
+	characters.
+
+2000-11-18  Simon Josefsson  <sj@extundo.com>
+
+	* smtpmail.el (smtpmail-via-smtp): Use `set-process-coding-system'
+	instead of `set-buffer-process-coding-system'.  Only use it if
+	`mule' or `file-coding' is provided.
+	(smtpmail-send-data-1): Call `encode-coding-string' only if `mule'
+	or `file-coding' is provided.
+
+2000-06-26  Charles G Waldman  <cgw@alum.mit.edu>
+ 
+        * mail-abbrevs.el: Remove v18 compatibility code.
+        (mail-rename-buffer-regexp) New variable.
+        (mail-maybe-rename-buffer) New function.
+        (sendmail-pre-abbrev-expand-hook) Call `mail-maybe-rename-buffer'.
+
+2000-11-08  Simon Josefsson  <sj@extundo.com>
+
+	* smtpmail.el: Added auth and starttls support.
+
+	* starttls.el: New file.
+
+2000-11-08  Steve Youngs  <youngs@xemacs.org>
+
+	* base64.el: Moved from w3 package.
+
+	* rfc2104.el: Moved from gnus package.
+
+	* Makefile (ELCS): Add rfc2104.elc, base64.elc.
+
+2000-10-26  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* smtpmail.el (smtpmail-send-data-1): Replace MULE 2.3 functions
+	to current ones.
+
+2000-10-24  Simon Josefsson  <sj@extundo.com>
+
+	* smtpmail.el: Sync with Emacs 20.7
+
+2000-10-12  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* mail-utils.el (rmail-dont-reply-to): Remove comma
+	following spaces.  Patch from Gerd.
+
+2000-10-05  Martin Buchholz  <martin@xemacs.org>
+
+	* *: Mega typo fix.
+
+2000-08-07  Sean MacLennan  <seanm@storm.ca>
+
+	* browse-url.el (browse-url-mosaic): Add support for mMosiac
+
+2000-06-05  Ben Wing  <ben@xemacs.org>
+
+	* sendmail.el (send-mail-function): use smtpmail-send-it
+	under MS Windows -- there is no sendmail.
+
+2000-03-13  Matt Curtin  <cmcurtin@interhack.net>
+
+	* browse-url.el: Included change suggested by Baoqiu Cui
+	<cbaoqiu@Cs.SunySB.EDU> to prevent a call that will fail to
+	`set-text-properties'.  Fixed the check for the Windoze
+	display in `browse-url-netscape'. Fixed the XEmacs interface to
+	the default browser for Windoze.
+
+2000-03-05  Kyle Jones  <kyle_jones@wonderworks.com>
+
+	* sendmail.el (mail-send): call expand-abbrev only if parent
+	function is called interactively.  Previously expand-abbrev was
+	called in all cases.
+
+	  (mail-to): ditto.
+	  (mail-subject): ditto.
+	  (mail-cc): ditto.
+	  (mail-bcc): ditto.
+	  (mail-fcc): ditto.
+	  (mail-reply-to): ditto.
+	  (mail-text): ditto.
+
+2000-02-16  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* mail-utils.el (rmail-dont-reply-to): Fix the case for
+	multiple comma separated addresses.  Patch from Gerd.
+
+2000-01-05  Yoshiki Hayashi  <t90553@mail.ecc.u-tokyo.ac.jp>
+
+	* mail-utils.el: Synch with FSF 20.5.
+
+2000-01-08  Andreas Jaeger  <aj@suse.de>
+
+	* browse-url.el: Added support for kfm.  
+	Patch by Neal Becker <nbecker@fred.net>.
+
+2000-01-07  Andreas Jaeger  <aj@suse.de>
+
+	* Makefile (ELCS): Added mailheader.
+
+	* mailheader: Moved from package gnus to here Gnus 5.8.x usage.
+
+1999-12-09  Gunnar Evermann  <ge204@eng.cam.ac.uk>
+
+	* browse-url.el (browse-url-event-buffer): Replace posn-buffer &
+	event-start with event-buffer.
+	(browse-url-event-point): Replace posn-point & event-start with
+	event-point.
+
+1999-12-05  Andreas Jaeger  <aj@suse.de>
+
+	* Makefile (REQUIRES): Add eterm.
+	Patch by Jan Vroonhof <vroonhof@math.ethz.ch>. 
+
+1999-11-14  Matt Curtin  <cmcurtin@interhack.net>
+
+	* browse-url.el synched with Emacs 20.4
+
+1999-04-09  Andy Piper  <andy@xemacs.org>
+
+	* pop3.el: sync with 1.3s.
+
+1999-04-13  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* pop3.el (pop3-get-message-numbers): Reverse msg-list when used
+	to push (which reverses again) elements found in UIDL.
+
+1999-04-09  Andy Piper  <andy@xemacs.org>
+
+	* pop3.el (pop3-clean-region): don't misinterpret From: lines.
+	(pop3-nnmail-movemail): new gnus replacement function.
+	
+1999-03-05  SL Baur  <steve@xemacs.org>
+
+	* highlight-headers.el (highlight-headers-follow-url-function):
+	Document KFM support.
+	(highlight-headers-follow-url-kfm): New function.
+	From Neal Becker <nbecker@fred.net>
+
+	* browse-url.el (browse-url-browser-function): Add KFM support.
+	(browse-url-kfm): New function.
+	From Neal Becker <nbecker@fred.net>
+
+1999-01-20  Charles G Waldman  <cgw@pgt.com>
+
+	* sendmail.el (sendmail-send-it): Execute sendmail in
+	  background if mail-interactive is nil, and don't 
+	  try to check error exit.
+
+1998-10-31  Gregory Neil Shapiro  <gshapiro@sendmail.org>
+
+	* sendmail.el (sendmail-send-it): Catch error exits from
+	  sendmail-program and report the failure to the user.
+
+1998-06-08  Martin Buchholz  <martin@xemacs.org>
+
+	* browse-url.el: browse-url-grail requires &optional new-window
+	arg, like all other browse-url-* functions.
+	- remove unused variabled `pidbuf'
+	- remove global setq of variable `enc'
+
+1998-06-01  SL Baur  <steve@altair.xemacs.org>
+
+	* mail-abbrevs.el: Unconditionally initialize keymaps.
+
+1998-05-10  SL Baur  <steve@altair.xemacs.org>
+
+	* mail-abbrevs.el (mail-abbrev-init-keys): New function.
+	Initialize keys only when called and do it on a keymap the caller 
+	provides.
+
+1998-05-09  SL Baur  <steve@altair.xemacs.org>
+
+	* Customize `message-url'.
+	From Michael Ernst <mernst@cs.washington.edu>
+
+1998-05-01  SL Baur  <steve@altair.xemacs.org>
+
+	* sendmail.el (mail-mode): Use easymenu to add the menu.
+
+1998-04-28  SL Baur  <steve@altair.xemacs.org>
+
+	* mail-utils.el (mail-rewrite-address-function): New variable.
+	(mail-strip-quoted-names): Use it.
+	
+1998-04-22  Didier Verna  <verna@inf.enst.fr>
+
+	* browse-url.el (browse-url-cci): ;;;###autoload was missing.
+
+1998-04-21  SL Baur  <steve@altair.xemacs.org>
+
+	* highlight-headers.el (highlight-headers-follow-url-netscape):
+	Print URL in minibuffer status messages.
+	From Bob Weiner <weiner@altrasoft.com>
+
+1998-03-22  Barry A. Warsaw  <bwarsaw@cnri.reston.va.us>
+
+	* reporter.el-3.35.
+
+Thu Mar 19 12:24:19 1998  Barry A. Warsaw  <bwarsaw@cnri.reston.va.us>
+
+	* reporter.el:  Released 3.34 to RMS and SLB.
+
+Thu Mar 19 17:22:21 1998  Barry A. Warsaw  <bwarsaw@cnri.reston.va.us>
+
+	* reporter.el (mail-user-agent): Removed all mail-user-agent
+	related definitions since these are now part of X/Emacs.
+
+	* reporter.el (reporter-beautify-list): Break infloop when
+	reaching the end of the buffer without crossing an unbalanced
+	paren.  Use scan-sexps instead of forward-sexp for the loop break
+	test.
+
+Mon Jan 13 17:10:24 1997  Barry A. Warsaw  <bwarsaw@cnri.reston.va.us>
+
+	* reporter.el (reporter-submit-bug-report): Only call
+	display-buffer if pop-up-windows is non-nil.
+
+Thu Jan  9 23:04:46 1997  Barry A. Warsaw  <bwarsaw@cnri.reston.va.us>
+
+	* reporter.el: Merged in RMS changes from 29-Aug-1996.
+
+1998-02-24  SL Baur  <steve@altair.xemacs.org>
+
+	* rmail-mini.el: Define rmail-mode-map.
+	From John W. Jones <jj@asu.edu>
+
+1998-01-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standard 1.0.
+
+1998-01-18  SL Baur  <steve@altair.xemacs.org>
+
+	* rmailout.el: Add provide 'feature.
+
+	* highlight-headers.el (highlight-headers-follow-url-netscape):
+	Fix processing of sending URL to remote Netscape.
+	From Raymond Toy <toy@rtp.ericsson.se>
+
+1998-01-11  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+
+1998-01-09  SL Baur  <steve@altair.xemacs.org>
+
+	* mail-abbrevs.el: Synched with the version in InfoDock 3.6.2.
+
+1998-01-02  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+
+1997-12-21  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (ELCS): Add reporter.el.
+
+1997-12-20  SL Baur  <steve@altair.xemacs.org>
+
+	* browse-url.el: Remove explicit (require 'dired).
+	toplevel: Fix guard on (require 'term).
+	
+	* Makefile: Created.
+

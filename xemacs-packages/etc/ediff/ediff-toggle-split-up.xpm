@@ -1,0 +1,25 @@
+/* XPM */
+static char *ediff-toggle-split-up[] = {
+/* width height num_colors chars_per_pixel */
+"    15    15        3            1",
+/* colors */
+"# c #000000",
+"a c firebrick",
+"f c Gray75 s backgroundToolBarColor",
+/* pixels */
+"fffffffffffffff",
+"faaaaaaaaaaffff",
+"faaaaaaaaaaffff",
+"fffffffffffffff",
+"ffffffffffffaaf",
+"f######fffffaaf",
+"f####fffffffaaf",
+"f####fffffffaaf",
+"f#####fff#ffaaf",
+"f#ff###ff#ffaaf",
+"f#fff#####ffaaf",
+"ffffff####ffaaf",
+"ffffff####ffaaf",
+"ffff######ffaaf",
+"fffffffffffffff",
+};

@@ -1,0 +1,127 @@
+2005-10-18  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.21 released.
+
+2005-10-16  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (AUTHOR_VERSION): Bring up to date (2.0f).
+
+2005-10-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.20 released.
+
+2005-10-15  Malcolm Purvis  <malcolmp@xemacs.org>
+
+	* executable.el: Sync with GNU Emacs 22.0.50.1 (CVS).  Update
+	FSF's address in GPL notices.
+
+2005-10-15  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.19 released.
+
+2005-10-12  Jérôme Marant  <jmarant@free.fr>
+
+	* sh-script.el: Sync with GNU Emacs 21.4
+        Update FSF's address in GPL notices.
+	(sh-mode-map): Move menu-related code to sh-mode-menu.
+	(sh-mode-menu): New menu definition.
+	(sh-mode): Install menu.
+
+2003-10-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.18 released.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.17 released.
+
+2003-01-05  Ville Skyttä  <scop@xemacs.org>
+
+	* sh-script.el: Append .m?spec to auto-mode-alist instead of
+	adding to the front to restore order with this and rpm-spec-mode.
+	Make auto-mode and interpreter-mode-alist modifications
+	autoload-only.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-07  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.16 released.
+
+2002-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* sh-script.el: Add autoloaded auto-mode-alist and
+	interpreter-mode-alist associations.
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.15 released.
+
+2002-04-03  Ville Skyttä  <scop@xemacs.org>
+
+	* executable.el: Sync with GNU Emacs 21.2.
+	(executable-binary-suffixes): New.
+	(executable-make-buffer-file-executable-if-script-p): New.
+	(executable-find): Use executable-binary-suffixes.
+
+2002-03-02  Jeff Miller <jmiller@cablespeed.com>
+
+	* executable.el:  missing autoload cookie.
+    
+2000-07-11  Jose Romildo Malaquias <romildo@urano.iceb.ufop.br>
+
+	* sh-script.el: Synch with FSF 20.7.
+
+1999-12-10  Gunnar Evermann  <ge204@eng.cam.ac.uk>
+
+	* sh-script.el (sh-ancestor-alist): Add bash2.
+	From Paul Cassella <fortytwo@cmu.edu>.
+
+1999-05-31  Andy Piper  <andyp@parallax.co.uk>
+
+	* sh-script.el (sh-set-shell): don't include the extension in
+ 	sh-shell name.  This is almost never the right thing and breaks
+ 	font-lock.
+
+1998-05-12  Andy Piper  <andyp@parallax.co.uk>
+
+	* sh-script.el (sh-shell): don't include the extension in the shell
+	name.  This is almost never the right thing and breaks font-lock.
+
+1998-01-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standard 1.0.
+	* package-info.in: Ditto.
+
+1998-01-12  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+
+1998-01-03  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+
+1998-01-01  SL Baur  <steve@altair.xemacs.org>
+
+	* skeleton.el: removed.
+
+1997-12-24  SL Baur  <steve@altair.xemacs.org>
+
+	* sh-script.el: explicitly require 'skeleton to avoid bootstrap
+	problems.
+
+	* Makefile: Created.
+

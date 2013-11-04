@@ -1,0 +1,25 @@
+/* XPM */
+static char *update[] = {
+/* width height num_colors chars_per_pixel */
+"    15    15        3            1",
+/* colors */
+". c #000000",
+"a c #000080",
+"c c Gray75 s backgroundToolBarColor",
+/* pixels */
+"ccccccccccccccc",
+"ccc.aaacccccccc",
+"cc.acccaacccacc",
+"ccaccccccacaacc",
+"ccacccccccaaacc",
+"ccaccccccaaaacc",
+"cc.accccaaaaacc",
+"ccccccccccccccc",
+"ccaaaaacccca.cc",
+"ccaaaaccccccacc",
+"ccaaacccccccacc",
+"ccaacaccccccacc",
+"ccacccaaccca.cc",
+"ccccccccaaa.ccc",
+"ccccccccccccccc",
+};

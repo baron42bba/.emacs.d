@@ -1,0 +1,44 @@
+# SUMMARY:      README for pydoc.el emacs interface to Python pydoc.
+#
+# AUTHOR:       Bob Weiner
+# ORG:          Deepware
+#
+# ORIG-DATE:    23-Apr-01 at 00:03:37
+# LAST-MOD:     23-Apr-01 at 00:16:15 by Bob Weiner
+#
+# Copyright (C) 2001  Bob Weiner
+# Licensed under the Python license version 2.0 or higher.
+#
+# DESCRIPTION:  
+
+pydoc.el is an Emacs/XEmacs/InfoDock interface to the Python pydoc system.
+It provides convenient integration with powerful programming editors,
+speeding both Python learning and day-to-day access of reference
+documentation while programming.
+
+For installation information, see the DESCRIPTION section in "pydoc.el".
+
+----
+
+pydoc.el adds one new global key binding, {C-c M-h} (pydoc-commands) which
+displays a menu of commands for interacting with pydoc.  It is global so
+you may examine Python documentation whenever needed, regardless of whether
+you have a Python code buffer on screen.
+
+The following commands are available, each invoked by typing the first
+character of the command name when prompted with the menu.
+
+A)propos <term>    - list modules/packages with <term> in their first line doc strings
+H)elp <term>       - display doc for name <term> or string literal '<term>'
+K)eyword <keyword> - with completion, display doc for a Python <keyword>
+M)odule <name>     - with completion, display doc for a Python module <name>
+P)ackage <name>    - with completion, display doc for a Python package <name>
+T)opic <topic>     - with completion, display Python reference doc for <topic>
+X)ref <term>       - with completion, display doc for a pydoc cross-reference
+                     within a Python reference manual section
+
+?   - show the above help
+C-g - abort from menu
+
+# DESCRIP-END.
+

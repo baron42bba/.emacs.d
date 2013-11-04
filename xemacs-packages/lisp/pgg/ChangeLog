@@ -1,0 +1,507 @@
+2005-09-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.06 released.
+
+2005-08-15  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (url-insert-file-contents): Don't autoload it, Emacs has
+	it in url-handlers.el and XEmacs in url.el.  Reported by Luca
+	Capello and Romain Francoise.
+	(pgg-fetch-key-function): Removed, not used?
+	(pgg-insert-url-with-w3): Require url, to get
+	url-insert-file-contents regardless of where it is defined.
+
+2005-08-08  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el: Autoload url-insert-file-contents instead of loading
+	w3/url.
+	(pgg-insert-url-with-w3): Don't load url here.
+
+2005-08-05  Daiki Ueno  <ueno@unixuser.org>
+
+	* pgg-parse.el (pgg-parse-hash-algorithm-alist): Add SHA-2.
+
+2005-07-25  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-insert-url-with-w3): Don't load w3, it is possible
+	to have the url package without w3.  Reported by Daiki Ueno
+	<ueno@unixuser.org> and Luigi Panzeri <matley@muppetslab.org>.
+
+2005-07-04  Juanma Barranquero  <lekktu@gmail.com>
+
+	* pgg-gpg.el (pgg-gpg):
+	* pgg-parse.el (pgg-parse):
+	* pgg-pgp.el (pgg-pgp):
+	* pgg-pgp5.el (pgg-pgp5): Finish `defgroup' description with period.
+
+2005-06-29  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* pgg.el (pgg-verify): Return the verification result.
+
+2005-05-30  Reiner Steib  <Reiner.Steib@gmx.de>
+
+	* pgg-gpg.el (pgg-gpg-snarf-keys-region): Replace `string-to-int'
+	by `string-to-number'.
+	* pgg-parse.el (pgg-read-body, pgg-read-bytes)
+	(pgg-format-key-identifier): Ditto.
+
+2005-05-09  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-possibly-cache-passphrase): Fix PIN caching,
+	tiny patch from "Georg C. F. Greve" <greve@gnu.org>.
+
+2005-01-21  Derek Atkins <warlord@MIT.EDU>  (tiny change)
+
+	* pgg-pgp.el (pgg-pgp-decrypt-region): Use passphrase cache.
+
+2004-09-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.05 released.
+
+2004-08-31  Reiner Steib  <Reiner.Steib@gmx.de>
+
+	* pgg.texi: Use @copying and @insertcopying.
+
+2004-01-17  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg.texi (User Commands, Backend methods): do.
+
+2004-01-05  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.texi (Caching passphrase): Fix PGG passphrase caching
+	section.
+
+2003-09-14  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg.texi (Selecting an implementation, Caching passphrase)
+	(Initializing): Markup fix.
+
+2003-05-17  Adrian Aichner  <adrian@xemacs.org>
+
+	* pgg.texi (Prerequisites): Ruthless typo fixing.
+	* pgg.texi (Architecture): Ditto.
+	* pgg.texi (Backend methods): Ditto.
+
+2004-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* Makefile (REQUIRES): Add ecrypto, for password.el.
+
+	* pgg.el: Sync with Gnus CVS until and including 2003-07-24 entry
+	below.
+
+2004-01-05  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-passphrase-cache, pgg-run-at-time): Remove.
+	(pgg-add-passphrase-cache, pgg-remove-passphrase-cache): Use
+	the password package.
+
+2003-12-12  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* pgg.el (pgg-run-at-time): Ditto.
+
+2003-12-10  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* pgg.el (pgg-run-at-time): New function.
+	(pgg-add-passphrase-cache): Use it.
+
+2003-10-27  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-decrypt-region): Don't set pgg-default-user-id.
+
+2003-07-24  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg.el: Reapply changes from 2003-04-03 to fix security problem.
+	See http://www.debian.org/security/2003/dsa-339
+
+2004-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-pgp.el, pgg-pgp5.el: Sync with Gnus CVS until and including
+	2003-07-24 entry below.
+
+2004-07-28  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-pgp5.el (pgg-pgp5-encrypt-region): Accept sign
+	parameter (but don't use it, for now).
+
+2004-05-19  Lars Magne Ingebrigtsen  <larsi@gnus.org>
+
+	* pgg-pgp.el (pgg-pgp-verify-region): Clean up.
+
+2004-05-19  Michael Schierl  <schierlm-usenet@gmx.de>
+
+	* pgg-pgp.el (pgg-pgp-verify-region): Default when signature
+	isn't a string.
+
+2003-07-28  Dave Love  <fx@gnu.org>
+
+	* pgg-pgp.el, pgg-pgp5.el: Require cl when compiling.
+
+2003-07-24  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-pgp.el, pgg-pgp5.el: Reapply changes from 2003-04-03 to fix
+	security problem.  See http://www.debian.org/security/2003/dsa-339
+
+2004-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-parse.el: Sync with Gnus CVS until and including 2003-12-10
+	entry below.
+
+2004-01-15  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-parse.el: Remove unnecessary (require 'custom).
+
+2003-12-10  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-parse.el (pgg-decode-packets): Rewrite to handle corrupt
+	input.
+	(pgg-decode-armor-region): Don't parse packet if decoding fail.
+
+2004-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el: Sync with Gnus CVS until and including 2003-07-24
+	entry below.
+
+2003-12-07  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-recipient-arg): Add.
+	(pgg-gpg-encrypt-region): Use it.  Tiny patch from Lloyd Zusman
+	<ljz@asfast.com>.
+	(pgg-gpg-recipient-argument): Doc fix.  Renamed fro p-g-r-a.
+	(pgg-gpg-encrypt-region): Update.
+
+2003-11-15  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-lookup-all-secret-keys)
+	(pgg-gpg-lookup-key): Use regexp match instead of
+	split-string (split-string is different between emacs 21.2 and
+	21.4).  Reported by ultrasoul@ultrasoul.com (David D. Smith).
+
+2003-11-09  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-encrypt-region): Cache passphrase under hex
+	key id too (for decryption).
+	(pgg-gpg-sign-region): Likewise.
+
+2003-11-09  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-all-secret-keys): New variable.
+	(pgg-gpg-lookup-all-secret-keys): New function.
+	(pgg-gpg-select-matching-key): Likewise.
+	(pgg-gpg-decrypt-region): Use new functions.  From Satyaki Das
+	<satyakid@stanford.edu>.
+
+2003-10-27  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-possibly-cache-passphrase): New optional
+	parameter key, overrides the key id used to store passphrase
+	under (uses true key id from gpg output if nil).
+	(pgg-gpg-encrypt-region): Search for passphrase using user suplied
+	string STR, instead of (pgg-lookup-key STR t).
+	(pgg-gpg-encrypt-region): Store passphrase under user suplied
+	string, instead of real key id taken from gpg output.
+	(pgg-gpg-decrypt-region): Likewise.
+	(pgg-gpg-sign-region): Likewise.
+
+2003-08-09  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-gpg.el (pgg-gpg-extra-args): Fix customization type.
+
+2003-08-07  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-gpg.el (pgg-gpg-process-region): Bind
+	default-enable-multibyte-characters to nil.
+
+2003-07-28  Dave Love  <fx@gnu.org>
+
+	* pgg-gpg.el: Require cl when compiling.
+
+2003-07-24  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-gpg.el (pgg-gpg-process-region): Add "--yes" to options.
+
+	* pgg-gpg.el: Reapply changes from 2003-04-03 to fix security
+	problem.  See http://www.debian.org/security/2003/dsa-339
+
+2004-09-16  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-def.el: Sync with Gnus CVS until and including 2003-10-02
+	entry below
+
+2004-01-15  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-def.el: Remove unnecessary (require 'custom).
+
+2003-11-10  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-def.el (pgg-encrypt-for-me): Change default from nil to t.
+
+2003-10-02  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-def.el (pgg-default-keyserver-address): Change to
+	subkeys.pgp.net.  From Michael Shields <shields@msrl.com>
+
+2003-10-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.04 released.
+
+2003-05-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.03 released.
+
+2003-05-12  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.texi: Add .info extension to output filename, revert
+	2003-03-17 change below after xemacs-beta discussion.
+
+2003-05-10  Ville Skyttä  <scop@xemacs.org>
+
+	* pgg.el (pgg-temp-buffer-show-function): Reuse existing
+	visible output window if one is available.
+
+2003-05-09  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.texi (Default user identity): Add.
+
+2003-03-17  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.texi: Fix setfilename.  Tiny patch by Frank Haun
+	<pille3003@fhaun.de>.
+
+2003-04-29  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (run-at-time): Autoload it (fix xemacs compile
+	warnings).
+
+2003-04-24  Dave Love  <fx@gnu.org>
+
+	* pgg.el: Split eval-when-compile forms.
+
+2003-04-20  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-def.el, pgg.el, pgg-gpg.el, pgg-parse.el, pgg-pgp5.el,
+	pgg-pgp.el: Fix license template.
+
+2003-04-16  Dave Love  <fx@gnu.org>
+
+	* pgg.el: Require cl when compiling.
+
+2003-04-07  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg.el (pgg-decrypt-region): Don't use
+	`insert-buffer', the docstring says "This function is meant for
+	the user to run interactively.  Don't call it from programs!"
+
+2003-04-06  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-gpg.el (pgg-gpg-process-region): Revert previous change.
+
+	* pgg-pgp.el (pgg-pgp-process-region, pgg-pgp-verify-region)
+	(pgg-pgp-snarf-keys-region): do.
+
+	* pgg-pgp5.el (pgg-pgp5-verify-region)
+	(pgg-pgp5-snarf-keys-region, pgg-pgp5-process-region): do.
+
+	* pgg.el (pgg-make-temp-file, pgg-temporary-file-directory): do.
+
+2003-04-03  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg-gpg.el (pgg-gpg-process-region): do.
+
+	* pgg-pgp.el (pgg-pgp-process-region, pgg-pgp-verify-region)
+	(pgg-pgp-snarf-keys-region): do.
+
+	* pgg-pgp5.el (pgg-pgp5-verify-region)
+	(pgg-pgp5-snarf-keys-region, pgg-pgp5-process-region): Use it.
+
+	* pgg.el (pgg-make-temp-file): New function. `make-temp-name' is
+	unsafe.
+	(pgg-temporary-file-directory): Remove.
+
+2003-03-04  Jesper Harder  <harder@ifa.au.dk>
+
+	* pgg.el (pgg-read-passphrase): Simplify.
+
+2003-03-01  Satyaki Das  <satyaki@theforce.stanford.edu>
+	(Trivial patch.)
+
+	* pgg-gpg.el (pgg-gpg-process-region): Insert process status into
+	errors-buffer. This produces a nicer error message in case of
+	problems.
+
+2003-02-08  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-process-region): Don't blink.  From Satyaki
+	Das <satyaki@chicory.stanford.edu>.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+	Use STANDARD_DOCS instead of explicitly giving the targets
+	and dependencies.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+2002-12-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.02 released.
+
+2002-11-11  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-encrypt, pgg-decrypt, pgg-sign, pgg-verify): Display
+	output when called interactively.
+
+2002-11-02  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-encrypt-region): Makes PGG respect the
+	setting of the default user ID.  From Raymond Scholz
+	<ray-2002@zonix.de>.
+
+2002-10-30  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-def.el (pgg-passphrase-cache-expiry): New, defcustom.
+
+	* pgg.el (pgg-passphrase-cache-expiry): Removed.
+
+2002-10-22  TSUCHIYA Masatoshi  <tsuchiya@namazu.org>
+
+	* pgg.el (pgg-snarf-keys): Do not refer unbinded local variables.
+
+2002-10-22  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-encrypt, pgg-decrypt, pgg-sign, pgg-verify)
+	(pgg-snarf-keys): Add.
+
+2002-10-10  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-verify-region): Filter out stuff into output
+	buffer and error buffer depending on type of information.
+
+	* pgg.el (pgg-verify-region): Use it.
+
+	* pgg-def.el (pgg-query-keyserver): New variable.
+
+	* pgg.el (pgg-decrypt-region): Bind pgg-default-user-id to
+	key-identifier in packet.  Is this a good idea?
+
+2002-10-09  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-insert-url-with-w3): Ignore errors.
+	(pgg-fetch-key-function): Nil if w3 is not installed.
+
+2002-10-29  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.01 released.
+
+2002-10-20  Steve Youngs  <youngs@xemacs.org>
+
+	* pgg-parse.el (pgg-parse-public-key-algorithm-alist): XEmacs
+	doesn't have the 'alist custom type, use cons cells instead.
+	(pgg-parse-symmetric-key-algorithm-alist): Ditto.
+	(pgg-parse-hash-algorithm-alist): Ditto.
+	(pgg-parse-compression-algorithm-alist): Ditto.
+	(pgg-parse-signature-type-alist): Ditto.
+
+	* pgg-gpg.el (pgg-gpg-extra-args): Fix custom mismatch.
+
+	* pgg-pgp5.el (pgg-pgp5-extra-args): Ditto.
+
+	* pgg-pgp.el (pgg-pgp-extra-args): Ditto.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-07  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.00 released.
+
+2002-10-05  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-encrypt-region): Make signencrypt really
+	work.
+
+2002-10-04  Ville Skyttä  <scop@xemacs.org>
+
+	* Package moved to official location.
+	* Makefile (VERSION): Use two digits, change to 0.99.
+	* .cvsignore: New.
+
+2002-10-04  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-gpg.el (pgg-gpg-encrypt-region): Make signencrypt work.
+
+	* pgg-pgp.el (pgg-pgp-verify-region): Inline
+	binary-write-decoded-region from MEL.
+
+	* pgg.texi: Document sign parameter.  Remove luna stuff.
+
+2002-10-04  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-encrypt-region): Support sign.
+
+	* pgg-gpg.el (pgg-gpg-encrypt-region): Ditto.
+
+2002-10-01  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-pgp.el: Don't require mel.  Don't use luna.
+	(pgg-scheme-pgp-instance, pgg-make-scheme-pgp): Remove.
+	(pgg-pgp-process-region): Use expand-file-name instead of concat.
+	(pgg-pgp-process-region): Don't use binary-funcall.
+
+	* pgg-pgp5.el (pgg-pgp5-process-region): Don't use binary-funcall.
+
+	* pgg-gpg.el (pgg-gpg-process-region): Use expand-file-name
+	instead of concat.
+
+	* pgg-pgp5.el (pgg-pgp5-process-region): Ditto.
+
+2002-09-29  Simon Josefsson  <jas@extundo.com>
+
+	* pgg-parse.el (pgg-char-int, pgg-string-as-unibyte): Prevent byte
+	compile warnings.
+
+	* pgg.el (pgg-decrypt-region): Don't parse packet.
+
+	* pgg.el, pgg-gpg.el, pgg-pgp5.el: Don't depend on luna.el.
+
+2002-09-29  Daiki Ueno <ueno@unixuser.org>
+
+	* pgg.el: Remove dependency on calist.el.
+
+2002-09-28  Simon Josefsson  <jas@extundo.com>
+
+	* pgg.el (pgg-temporary-file-directory): New variable.
+	(pgg-verify-region): Don't assume set-buffer-multibyte exists.
+
+	* pgg-pgp5.el (pgg-pgp5-process-region, pgg-scheme-verify-region)
+	(pgg-scheme-snarf-keys-region): Use pgg-temporary-file-directory.
+
+	* pgg-parse.el (pgg-char-int): Defalias.
+	(pgg-format-key-identifier, pgg-byte-after, pgg-read-byte) 
+	(pgg-read-bytes, pgg-read-body): Use it.
+	(pgg-decode-packets): Don't use MEL, use base64-*.
+	(pgg-parse-armor): Don't assume set-buffer-multibyte exists.
+	(pgg-string-as-unibyte): Defalias.
+	(pgg-parse-armor-region): Use it.
+
+	* pgg-gpg.el (pgg-gpg-process-region): Use
+	pgg-temporary-file-directory.
+
+	* pgg-pgp5.el (pgg-scheme-verify-region): Inline
+	binary-write-decoded-region from MEL.
+
+	* pgg-pgp5.el, pgg-gpg.el: Don't require mel.
+
+	* pgg-parse.el (top-level): Remove dependency on static.el,
+	pccl.el, mel.el.
+	(pgg-parse-crc24, pgg-parse-crc24-string): Only define if
+	`define-ccl-program' is boundp, instead of using broken.
+
+2002-09-28  Simon Josefsson  <jas@extundo.com>
+
+	* New package, taken from APEL, FLIM and SEMI (EMIKO).

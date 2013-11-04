@@ -1,0 +1,1560 @@
+2006-05-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.07 released.
+
+2006-05-06  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: Improve regexps for finding prototype and
+	property style function declarations (thanks to Tsirkin Evgeny),
+	miscellaneous other cleanups.
+
+2005-12-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.06 released.
+
+2005-12-01  Ville Skyttä  <scop@xemacs.org>
+
+	* diff-mode.el: Sync hunk and file recognition improvements and
+	some trivial bits from GNU Emacs CVS.
+	(diff-removed-face): Don't use :inherit (not in 21.4).
+	(diff-added-face): Ditto.
+	(diff-function-face): Ditto.
+	(diff-nonexistent-face): Ditto.
+
+2005-07-10  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.05 released.
+
+2005-07-08  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-spec-build-command): Sync with upstream.
+	(rpm-section-regexp): Sync with rpm 4.4.1.
+	(rpm-tags-list): Ditto.
+	(rpm-spec-field-value): Improve macro expansion.
+
+	* rpm-spec-mode.el.upstream: Sync with upstream.
+
+2005-05-20  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.04 released.
+
+2005-05-20  Malcolm Purvis  <malcolmp@xemacs.org>
+
+	* sql.el (sql-mode-abbrev-table): Fix error generating the abbrev
+	table.
+
+2005-04-19  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.03 released.
+
+2005-04-18  Malcolm Purvis  <malcolmp@xemacs.org>
+
+	* sql.el: Sync with upstream 2.0.1.
+
+2005-02-03  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.02 released.
+
+	* verilog-mode.el: Sync with upstream 4.2.
+
+2004-08-17  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.01 released.
+
+2004-08-16  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* lua-mode.el (lua): Fix typo in defgroup docstring.
+
+2004-08-16  Ville Skyttä  <scop@xemacs.org>
+
+	* diff-mode.el (diff-minor-mode): Autoload a dummy autoload
+	instead of define-minor-mode.
+
+	* lua-mode.el: Make auto-mode-alist modifications autoload-only.
+
+2004-08-15  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.00 released.
+
+2004-08-15  Ville Skyttä  <scop@xemacs.org>
+
+	* lua-mode.el: New.
+	* lua-mode.el.upstream: New.
+
+	* package-info.in (provides): Add lua-mode.
+
+	* Makefile (ELCS): Add lua-mode.elc.
+
+	* prog-modes.texi: Add title (for HTML).
+	(lua-mode): New.
+
+	* diff-mode.el: Sync with GNU Emacs 21.3 (mostly).
+
+	* cvs.el (cvs-no-log-option): Default to nil.  `-l' is
+	available only in CVS versions from 1.11 to 1.11.6.  Thanks
+	to Jens Petersen <petersen@redhat.com>.
+
+2004-08-13  Ville Skyttä  <scop@xemacs.org>
+
+	* prog-modes.texi: Spelling fixes.
+
+2004-07-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.99 released.
+
+2004-07-26  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: GNU Emacs compatibility improvements.
+	(javascript-mode-map):	Default to c-make-inherited-keymap.
+	(javascript-menu): New.
+	Thanks to Igor Rayak.
+
+2004-06-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.98 released.
+
+	* diff-mode.el: Revert last change, it's bogus.  Thanks to Ville
+	Skyttä and Robert Widhopf.
+
+2004-06-06  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.97 released.
+
+2004-05-26  Robert Widhopf  http://www.robf.de
+
+	* diff-mode.el (diff-font-lock-keywords-1): There is only one
+	level of decoration, so make it level 1.
+	(diff-font-lock-keywords): This shoud be a list referring to the
+	actual variables for the levels.   
+
+2004-03-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.96 released.
+
+2004-03-02  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.95 released.
+
+2004-02-17  Jerry James  <james@xemacs.org>
+
+	* diff-mode.el: Test for combine-after-change-calls function, not
+	value, and use the ,@ notation.
+
+2004-01-27  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.94 released.
+
+2004-01-26  Jerry James  <james@xemacs.org>
+
+	* teco.el (teco-read-command): Fix parenthesizing error.
+
+2004-01-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.93 released.
+
+2004-01-25  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el: Sync with upstream 1.1.0.
+
+	* prog-modes.texi: Typo/spelling fixes.
+
+2003-12-09  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.92 released.
+
+2003-12-08  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el (php-mode): Make autoload hack autoload-only,
+	add interactive flag.
+
+2003-10-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.91 released.
+
+2003-10-19  Ville Skyttä  <scop@xemacs.org>
+
+	* verilog-mode.el: Remove regexp-opt workarounds, defalias
+	verilog-regexp-opt to regexp-opt instead.
+
+	* php-mode.el (php-font-lock-keywords-3): Remove obsolete
+	regexp-opt comment.
+
+2003-10-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.90 released.
+
+2003-10-15  Peter Osterlund  <petero2@telia.com>
+
+	* p4.el: Sync with upstream version.
+
+2003-09-30  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.89 released.
+
+2003-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el (php-font-lock-keywords-3): Use explicit grouping
+	with php-superglobals due to differences between our and GNU
+	regexp-opt implementations.
+
+2003-09-29  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el: Sync with upstream 1.0.5, unbreak imenu
+	regexps while at it.
+
+2003-09-25  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.88 released.
+
+2003-09-24  Jake Colman  <jake.colman@xemacs.org>
+
+	* prog-modes.texi:  Major bulking up of the info content.
+
+2003-09-22  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (EXPLICIT_DOCS): Removed.
+	(STANDARD_DOCS): Use this instead.
+
+2003-09-21  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.87 released.
+
+2003-09-19  Jake Colman  <jake.colman@xemacs.org>
+
+	* Makefile (EXPLICIT_DOCS): New.
+
+2003-09-03  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.86 released.
+
+2003-09-02  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-spec-intitialize): Integer concatenation
+	fix for default-epoch != nil, avoid extra newline at the end.
+	Thanks to Enrico Scholz.
+
+2003-08-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.85 released.
+
+	* package-info.in: provide uil-mode.
+
+2003-08-31  Ville Skyttä  <scop@xemacs.org>
+
+	* uil-mode.el: Add auto-mode-alist autoload cookie for *.uil.
+
+2003-08-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.84 released.
+
+2003-08-29  Jake Colman  <jake.colman@xemacs.org>
+
+	* Makefile (ELCS): added uil-mode
+
+2003-08-19  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.83 released.
+
+2003-08-18  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: Add %check section (rpm >= 4.1.1).
+	Fix/sync XEmacs/GNU -style face docstrings.
+	Add support for highlighting specfile section markers.
+
+2003-08-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.82 released.
+
+2003-08-03  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-build): Set EMACS=t in environment
+	to emulate `compilation-mode'.
+	(rpm-spec-faces): Add "rpm-spec-" prefix.
+
+2003-06-27  Damien Nadé  <anvil@livna.org>
+
+	* rpm-spec-mode.el (rpm-spec-field-value): Fix macro expansion.
+
+2003-07-21  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.81 released.
+
+2003-07-21  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* package-info.in (provides): Add 'make-mode.
+
+2003-07-21  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* make-mode.el (make-mode): Library should `provide' own name.
+
+2003-07-02  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.80 released.
+
+2003-06-27  Damien Nadé  <anvil@livna.org>
+
+	* rpm-spec-mode.el: New customization options.
+	(rpm-spec-default-release): New.
+	(rpm-spec-default-epoch): New.
+	(rpm-spec-default-build-section): New.
+	(rpm-spec-default-install-section): New.
+	(rpm-spec-default-clean-section): New.
+	(rpm-spec-default-buildroot): New.
+	(rpm-spec-mode-new-file-hook): New.
+
+2003-06-27  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-spec-font-lock-keywords):
+	Allow underscores in tags (eg. for Summary(en_US)).
+	(auto-mode-alist): Use rpm-spec-mode for *.spec.in too.
+
+2003-06-20  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.79 released.
+
+2003-05-30  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el: Sync with upstream 1.0.4.
+
+2003-06-11  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.78 released.
+
+2003-06-10  Vasily Korytov  <deskpot@myrealbox.com>
+
+	* javascript-mode.el: Add an auto-mode-alist entry and a
+	(speedbar-add-supported-extension) call for the *.pac files.
+	
+2003-06-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.77 released.
+
+2003-06-07  Adrian Aichner  <adrian@xemacs.org>
+
+	* asm-mode.el: Add auto-mode-alist autoload cookie for .asm files.
+
+2003-06-06  Adrian Aichner  <adrian@xemacs.org>
+
+	* m4-mode.el: auto-mode-alist cookie update.
+	* verilog-mode.el: Ditto.
+
+2003-06-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.76 released.
+
+2003-06-01  Adrian Aichner  <adrian@xemacs.org>
+
+	* mode-compile.el: Many typo fixes, some inspired by Norbert Koch.
+	* mode-compile.el (mode-compile-choosen-compiler): Removed.
+	Retaining compatibility via `define-obsolete-variable-alias'.
+	* mode-compile.el (mode-compile-chosen-compiler): New.  Suggested
+	by Robert Delius Royar.
+
+2003-06-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.75 released.
+
+	* Makefile (VERSION): XEmacs package 1.74 released.
+
+2003-06-01  Adrian Aichner  <adrian@xemacs.org>
+
+	* mode-compile.el: Typo fixes and sync with author version 2.28.
+	* mode-compile.el (cl): New require.
+	* mode-compile.el (compilation): Update of "Author's Emacs Page"
+	URL, currently not reachable either.
+	* mode-compile.el (mode-compile-modes-alist): Add cperl-mode.
+	* mode-compile.el (mode-compile-prefered-default-makerule):
+	Removed.  Retaining compatibility via
+	`define-obsolete-variable-alias'.
+	* mode-compile.el (mode-compile-preferred-default-makerule): New.
+	* mode-compile.el (mode-compile-version): Sync.
+	* mode-compile.el (mode-compile-help-address): Ditto.
+	* mode-compile.el (mc--makerule-completion): Typo fix.
+	* mode-compile.el (mode-compile-submit-bug-report): Update for
+	mode-compile-prefered-default-makerule.
+	* mode-compile.el (mode-compile): Add cperl-mode to doc string.
+	* mode-compile.el (mode-compile-kill): Ditto.
+
+2003-04-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.73 released.
+
+2003-03-22  Vasily Korytov  <deskpot@myrealbox.com>
+
+	* ksh-mode.el (ksh-mode-hook): Add a (defvar ...), so this
+	variable is documented.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile (diff-mode.elc):
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+
+2003-01-24  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.72 released.
+
+2002-01-19  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-spec-use-compilation-mode): New.
+	(rpm-build): Prompt for saving if buffer modified, build
+	in compilation-mode if it's available and
+	rpm-spec-use-compilation-mode is non-nil.
+
+2003-01-20  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.71 released.
+
+2003-01-19  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: Add imenu support.
+	* make-mode.el: Make auto-mode-alist regexp less sloppy,
+	associate *.am with makefile-mode.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.70 released.
+
+2003-01-06  Ville Skyttä  <scop@xemacs.org>
+
+	* tcl.el: Make auto-mode and interpreter-mode-alist modifications
+	autoload-only.
+	* vrml-mode.el: Ditto.
+	* sql.el: Ditto.
+	* rpm-spec-mode.el: Ditto.
+	* rexx-mode.el: Ditto.
+	* prolog.el: Ditto.
+	* postscript.el: Ditto.
+	* pascal.el: Ditto.
+	* make-mode.el: Ditto.
+	* javascript-mode.el: Ditto.
+	* icon.el: Ditto.
+	* eiffel.el: Ditto.
+	* diff-mode.el: Ditto.
+	* awk-mode.el: Ditto.
+	* autoconf-mode.el: Ditto.
+	* asm-mode.el: Ditto.
+
+2003-01-03  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.69 released.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+	(diff-mode.elc): Dependency on easy-mmode due to macros.
+
+2002-12-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.68 released.
+
+2002-11-20  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-spec-font-lock-keywords): Handle
+	%config(noreplace) and friends.
+	(rpm-spec-initialize): Indent headings to column 16.
+
+2002-10-23  Stig Bjorlykke  <stigb@tihlde.org>
+
+	* rpm-spec-mode.el (rpm-spec-rpm-build-command): Removed.
+	(rpm-spec-nobuild): Replaced rpm-spec-test.
+	(rpm-spec-quiet): New.
+	(rpm-spec-indent-heading-values): New.
+	(rpm-spec-mode-map): Redefined key bindings.
+	(rpm-spec-mode-menu): Added "Quiet".  Changed "Testing only" to
+	"No build".  Renamed rpm-build-* functions.
+	(rpm-spec-mode): Find correct build command.
+	(rpm-build): Added check for quiet.
+	(rpm-update-mode-name): Added quiet.  Renamed test to nobuild.
+	(rpm-spec-initialize): Indent according to "indent-heading-values".
+	(rpm-add-change-log-entry): Add " - " if adding version.
+
+2002-10-20  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: Update my mail address.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-07  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.67 released.
+
+2002-10-06  Peter Osterlund  <petero2@telia.com>
+
+	* p4.el (p4-diff2): When invoking p4-diff2 interactively, default
+	  to showing the differences between the current rev and rev#
+	  minus one.
+	* p4.el (p4-minor-map): Don't modify the global keymap, use
+	  p4-minor-map instead.
+	* p4.el (p4-require-vc-p, p4-prev-toggle-fkn): Removed.
+	* p4.el (p4-print-with-rev-history-int): Renamed to p4-blame-int.
+	* p4.el (p4-activate-print-buffer, p4-blame-int): Colorize buffer
+	  using font lock mode.
+	* p4.el (p4-font-lock-buffer): New function.
+	* p4.el (p4-blame-int): Display date and author information for
+	  each source line.
+	* p4.el (p4-blame-int): Follow branches when assigning blame.
+	* p4.el (p4-resolve): If you switched directory to a different
+	  depot, p4-resolve didn't work until you manually killed the
+	  *p4 resolve* buffer.
+
+2002-10-04  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el (rpm-spec-rpm-build-command):
+	New custom variable for configuring the rpm build command.
+	(rpm-build): Use `rpm-spec-rpm-build-command'.
+	(rpm-spec-initialize): Minor tweaks to initial spec file.
+
+2002-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* awk-mode.el: Add autoloaded auto-mode-alist and
+	interpreter-mode-alist associations.
+	* asm-mode.el: Ditto.
+	* autoconf-mode.el: Ditto.
+	* eiffel.el: Ditto.
+	* icon.el: Ditto.
+	* make-mode.el: Ditto.
+	* pascal.el: Ditto.
+	* postscript.el: Ditto.
+	* prolog.el: Ditto.
+	* rexx-mode.el: Ditto.
+	* tcl.el: Ditto.
+	* vrml-mode.el: Ditto.
+
+2002-09-25  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.66 released.
+
+2002-09-20  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (ELCS): Remove cperl-mode.elc and perl-mode.elc.
+	(REQUIRES): Remove ps-print, was needed by cperl-mode.
+
+	* package-info.in (provides): Remove cperl-mode and perl-mode.
+
+	* cperl-mode.el: Remove, move to perl-modes package.
+	* perl-mode.el: Ditto.
+	
+2002-09-18  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (ELCS): Remove ruby-mode.elc and inf-ruby.elc.
+
+	* package-info.in (provides): Remove inf-ruby and ruby-mode.
+
+	* inf-ruby.el: Remove, move to ruby-modes package.
+	* inf-ruby.el.upstream: Ditto.
+	* ruby-mode.el: Ditto.
+	* ruby-mode.el.upstream: Ditto.
+	
+2002-09-18  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (ELCS): Remove f90.elc, fortran.elc and
+	fortran-misc.elc.
+
+	* package-info.in (provides): Remove f90 and fortran.
+
+	* f90.el: Remove, move to fortran-modes package.
+	* fortran.el: Ditto.
+	* fortran-misc.el: Ditto.
+	
+2002-09-18  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (ELCS): Remove python-mode.elc and pydoc.elc.
+	(EXTRA_SOURCES): Removed.
+	(MAINTAINER): Change to xemacs-beta.
+
+	* package-info.in (provides): Remove python-mode and pydoc.
+
+	* pydoc.el: Removed, moved to python-modes package.
+	* pydoc.el.upstream: Ditto.
+	* pydoc-el-README: Ditto.
+	* pydoc_lisp.py: Ditto.
+	* python-mode.el: Ditto.
+	* python-mode.el.upstream: Ditto.
+
+2002-09-11  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el (javascript-mode): Set menu name to
+	JavaScript (it's not C++), thanks to Geert Ribbers.
+	(javascript): Case tweak for custom group in menus.
+
+2002-08-29  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.65 released.
+
+2002-08-28  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: Make it work with GNU Emacs too,
+	fontify keywords immediately after '('.  Contributed by
+	Stefan Schlee <stefan_schlee@yahoo.com>.
+
+2002-08-26  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.64 released.
+
+2002-08-21  Ville Skyttä  <scop@xemacs.org>
+
+	* inf-ruby.el: Sync with upstream version 1.3.2.2.
+	See inlined change log for detailed changes.
+	* inf-ruby.el.upstream: Ditto.
+
+2002-08-15  Peter Osterlund  <petero2@telia.com>
+
+	* p4.el (p4-prev-toggle-fkn, p4-exec-p4,
+	substitute-key-definition): Do not autoload. Autoloading causes
+	unnecessary overhead for those not using p4.el without really
+	helping those who do use it.
+
+2002-08-02  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.63 released.
+
+2002-08-02  Steve Youngs  <youngs@xemacs.org>
+
+	* p4.el (p4-prev-toggle-fkn): Autoload it.
+
+2002-08-02  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.62 released.
+
+2002-08-01  Peter Osterlund  <petero2@telia.com>
+
+	* p4.el: Include all stable features from the sourceforge cvs tree
+	(version 10.1 + some more).
+	* p4.el (p4-help-text): Disable automatic function help text
+	generation because a p4 server may not be accessible during byte
+	compilation.
+
+2002-08-01  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el (php-mode): Workaround for problem with autoload
+	cookies and define-derived-mode.
+
+2002-07-31  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.61 released.
+
+2002-07-23  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: Syntax highlighting tweaks.
+	(rpm-spec-mode): Call (rpm-update-mode-name)
+	on startup so modeline starts with correct status.
+
+2002-07-15  Adrian Aichner  <adrian@xemacs.org>
+
+	* ksh-mode.el: It's XEmacs, not Xemacs.
+	* php-mode.el: Ditto.
+	* php-mode.el (php-mode): Ditto.
+	* php-mode.el (php-font-lock-syntactic-keywords): Ditto.
+
+2002-07-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.60 released.
+
+2002-07-11  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: Add --nodeps stuff.
+	(rpm-spec-nodeps): New.
+	(rpm-toggle-nodeps): New.
+	(rpm-spec-mode-map): Add entry for -nodeps.
+	(rpm-spec-mode-menu): Ditto.
+	(rpm-build): Handle -nodeps.
+
+2002-07-06  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: Docstring fixes, cleanups.
+	(rpm-spec-user-full-name): New.
+	(rpm-spec-user-mail-address): New.
+	(rpm-add-change-log-entry): Use the new customizables.
+	(rpm-insert-packager): Ditto.
+
+2002-06-27  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.59 released.
+
+2002-06-26  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.58 released.
+
+2002-06-23  Ville Skyttä  <scop@xemacs.org>
+
+	* cperl-mode.el (cperl-fix-line-spacing): Add missing \ in [ t].
+	* cperl-mode.el: Typo and docstring fixes.
+
+	* icon.el (icon-mode):
+	Check for existence of hs-special-modes-alist before using it.
+	* icon.el: checkdoc-fixed.
+
+2002-06-22  Ville Skyttä  <scop@xemacs.org>
+
+	* make-mode.el: Partial sync with GNU Emacs 21.2.
+	(makefile-mode): Change customization group name to "makefile".
+	(makefile): New name for customization group.
+	(makefile-fill-paragraph): New.
+	(makefile-mode-abbrev-table): New.
+
+2002-06-17  Ville Skyttä  <scop@xemacs.org>
+
+	* cperl-mode.el (cperl-syntaxify-unwind): Docstring typo fix,
+	thanks to Reuben Thomas.
+
+2002-06-07  Martin Schwenke  <martin@meltin.net>
+
+	* eiffel.el:
+	(eif-end-matching-keywords): now insists that "once" is followed by
+	whitespace and that the next character is not a double-quote.  This
+	fixes indentation and eif-end-of-feature bugs.  It also works for
+	SmallEiffel's once manifest strings.
+
+	* eiffel.el:
+	Changed name of file to eiffel.el - fixed various comments and the
+	provide.
+
+	Removed D. Colnet from copyright.  A recent exchange confirmed
+	that I haven't merged any of his changes.
+
+	Clarified eif-short bug is under *GNU* Emacs 19.34.
+
+2002-06-08  Ville Skyttä  <scop@xemacs.org>
+
+	* ruby-mode.el: Sync with upstream version 1.25.2.10.
+	* ruby-mode.el.upstream: Ditto.
+
+2002-06-08  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.57 released.
+
+2002-06-05  Ville Skyttä  <scop@xemacs.org>
+
+	* eiffel.el: New version from Martin Schwenke.
+	* eiffel3.el: Remove, obsoleted by Martin's version.
+	* Makefile (ELCS): Add eiffel.elc, remove eiffel3.elc.
+	* package-info.in (provides): Add eiffel-mode, remove eiffel3.
+
+2002-06-03  Steve Youngs  <youngs@xemacs.org>
+
+	* verilog-mode.el (verilog-mode): Add missing ';' in autoload
+	cookie. 
+	(verilog-version): Add autoload cookie.
+	(verilog-customize): Ditto.
+
+2002-05-21  Ville Skyttä  <scop@xemacs.org>
+
+	* sql-mode.el: Add .sql files to auto-mode-alist.
+
+	* javascript-mode.el (javascript-mode): Fix prototype function
+	indentation, from Sebastian Delmont <sdelmont@zonageek.com>.
+
+	Sebastian's comments:
+
+	It looks like cc-mode doesn't like JavaScript's prototype
+	function declarations.	This triggers indentation errors in a few
+	cases, since the indentation engine considers the function block
+	as a brace-list	entry, and it won't detect language constructs
+	(i.e. "if", "switch", etc) inside it.  Here's a gnu.emacs.bug
+	thread that discusses the problem, and proposes a solution:
+	http://groups.google.com/groups?hl=en&lr=&th=bae37c6e427b29db&rnum=3
+
+2002-05-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.56 released.
+
+2002-05-12  Matt Tucker <tuck@whistlingfish.net>
+
+	* cperl-mode.el (cperl-mode): buffer-localize fill-paragraph-function.
+
+2002-05-07  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.55 released.
+
+2002-05-03  Ville Skyttä  <scop@xemacs.org>
+
+	* diff-mode.el: More syncing with GNU Emacs 21.2.
+	(diff-hunk-next): Created with easy-mmode-define-navigation.
+	(diff-hunk-prev): Ditto.
+	(diff-file-next): Ditto.
+	(diff-file-prev): Ditto.
+
+2002-05-02  Andrew Begel <abegel@cs.berkeley.edu>
+
+	* autoconf-mode.el (autoconf-mode):
+	Use "dnl " instead of "dnl" as comment-start.
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.54 released.
+
+2002-04-21  Ville Skyttä  <scop@xemacs.org>
+
+	* pydoc.el.upstream: New file.
+	* python-mode.el.upstream: Ditto.
+
+2002-04-20  David A. Panariti  <panariti@attbi.com>
+
+	* python-mode.el (py-execute-region): 
+	Add fix to handle condition where py-which-shell is nil.
+
+	* pydoc.el: Handle new versions of python-mode.el in which
+	py-execute-region return t rather than a buffer[name].  The
+	following changes are executed only when py-execute-region 
+	returns	t.
+	(pydoc-call): Guesses the output buffer name to be the current
+	python process buffer or "*Python Output*".
+	(pydoc-initialize): Sets the output buffer to be the name of the
+	current python process buffer.
+
+2002-04-20  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: Whitespace cleanup.
+	(rpm-spec-initialize): Tweaks to initial spec file.
+
+2002-04-12  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: Docstring updates.
+	(rpm-tags-list): Bring up to date with RPM 4.1.
+	(rpm-add-change-log-entry): Eliminate no-version argument.
+	(rpm-spec-field-value): Ignore errors when finding the value,
+	avoid returning whitespace.
+	(rpm-find-spec-version): Handle Epoch/Serial, return nil
+	unless Version was found.
+
+2002-04-11  Ville Skyttä  <scop@xemacs.org>
+
+	* ruby-mode.el: Sync with upstream revision 1.25.2.9.
+	* ruby-mode.el.upstream: Ditto.
+
+2002-04-09  Ville Skyttä  <scop@xemacs.org>
+
+	* inf-ruby.el.upstream: New file.
+	* ruby-mode.el.upstream: Ditto.
+	* rpm-spec-mode.el.upstream: Ditto.
+
+2002-04-07  James LewisMoss  <dres@lewismoss.org>
+
+	* diff-mode.el (diff-reverse-direction): Check for --- and +++
+	before reversing the ^- or ^+.  Also extract out the regexp into a
+	var for clarity.
+	(diff-reverse-direction): if there is a region use that.  If not
+	do whole buffer.  Change doc string to go along with this and fix
+	typo in doc string.
+
+2002-04-07  Ville Skyttä  <scop@xemacs.org>
+
+	* rpm-spec-mode.el: New.
+	* Makefile (REQUIRES): Add sh-script, needed by rpm-spec-mode.el.
+	* Makefile (ELCS): Add rpm-spec-mode.elc.
+	* package-info.in (provides): Add rpm-spec-mode.
+	
+	* diff-mode.el.upstream: Removed.
+
+2002-03-30  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* tcl.el (tcl-mode): recheck for filladapt mode
+	(tcl-mode): refix imenu support
+
+2002-03-28  Ville Skyttä  <scop@xemacs.org>
+
+	* icon.el: Sync with GNU Emacs 21.2.
+	* tcl.el: Ditto.
+	* diff-mode.el: Ditto, mostly.
+	* package-info.in (provides): Add icon.
+
+2002-03-25  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): 1.53 released.
+
+2002-03-24  Ville Skyttä  <scop@xemacs.org>
+
+	* f90.el: Sync with GNU Emacs 21.2.
+	* awk-mode.el: Update sync status.
+	* modula2.el: Ditto.
+
+2002-03-20  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: Update to version 1.4.
+	Add inferior mode for a JavaScript shell, speedbar integration,
+	customization groups and variables.  Update copyright notice.
+	(javascript-font-lock-keywords): Treat "const" like "var".
+	(javascript-mode-hook): New.
+	(javascript-shell): New.
+	(javascript-shell-command): New.
+	(javascript-shell-command-args): New.
+	(javascript-shell-mode): New.
+	(javascript-shell-mode-hook): New.
+	(javascript-shell-prompt-pattern): New.
+
+2002-03-17  Ville Skyttä  <scop@xemacs.org>
+
+	* tcl.el: Mostly sync with GNU Emacs 21.1.
+
+2002-03-15  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: Update to version 1.3.
+	Added javascript-mode-abbrev-table, use regexp-opt, doc updates.
+
+2002-03-14  Ville Skyttä  <scop@xemacs.org>
+
+	* awk-mode.el: Mostly sync with GNU Emacs 21.1.
+
+2002-03-04  Ville Skyttä  <scop@xemacs.org>
+
+	* f90.el: Sync with GNU Emacs 21.1.
+
+2002-02-28  Ville Skyttä  <scop@xemacs.org>
+
+	* ruby-mode.el: New file.
+
+	* inf-ruby.el: Ditto.
+
+	* Makefile (REQUIRES): Added ilisp for inf-ruby.
+	* Makefile (ELCS): Added ruby-mode.elc and inf-ruby.elc.
+
+	* package-info.in (provides): Added ruby-mode and inf-ruby.
+
+2002-02-23  Ville Skyttä  <scop@xemacs.org>
+
+	* modula2.el: Sync with FSF 21.1.
+
+	* package-info.in (provides): Added modula2.
+
+2002-02-21  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el (php-file-patterns): Re-added autoload cookie.
+
+2002-02-21  Ville Skyttä  <scop@xemacs.org>
+
+	* php-mode.el: Sync with upstream 1.0.2.
+
+2002-02-21  Ville Skyttä  <scop@xemacs.org>
+
+	* sql.el: Sync with upstream 1.6.5, with trailing ^Ms removed.
+
+2002-02-21  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (MAINTAINER): Change to Ville Skyttä
+	<scop@xemacs.org>.
+
+2002-02-19  Ville Skyttä  <scop@xemacs.org>
+
+	* javascript-mode.el: New file.
+	* package-info.in (provides): Added javascript-mode.
+	* Makefile (ELCS): Added javascript-mode.elc.
+
+2002-01-12  Jan Vroonhof  <jan@xemacs.org>
+
+	* Makefile (REQUIRES): Require ps-print
+
+2002-01-03  Adrian Aichner  <adrian@xemacs.org>
+
+	* tcl.el (tcl-mode): Check for (boundp 'filladapt-mode).
+
+2001-12-27  Steve Youngs  <youngs@xemacs.org>
+
+	* php-mode.el (php-mode-abbrev-table): Revert my patch of
+	2001-12-20. 
+
+2001-12-23  Vin Shelton  <acs@xemacs.org>
+
+	* php-mode.el: Remove trailing ^Ms.
+
+2001-12-18  Adrian Aichner  <adrian@xemacs.org>
+
+	* cvs.el (cvs-shell-command): Thou shalt obey shell-file-name and
+	shell-command-switch.
+	* cvs.el (cvs-shell-command-option): Ditto.
+	* cvs.el (cvs:merge-convert-symbolic-to-numeric): Ditto.
+
+2001-12-20  Steve Youngs  <youngs@xemacs.org>
+
+	* php-mode.el (php-mode-abbrev-table): Escape a parenthesis in a
+	string. 
+
+2001-12-19  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (REQUIRES): Add dired for p4.
+
+	* p4.el (p4-running-xemacs): Autoload 'timerp', 'cancel-timer' and
+	'dired-get-filename'.
+
+	* php-mode.el (php-file-patterns): Add autoload cookie.
+
+2001-12-18  Steve Youngs  <youngs@xemacs.org>
+
+	* old-c-mode.el: New file.
+
+	* p4.el: Ditto.
+
+	* php-mode.el: Ditto.
+
+	* pydoc.el: Ditto.
+
+	* verilog-mode.el: Sync to author version 3.57
+
+	* Makefile (REQUIRES): Add vc, speedbar for p4 and php-mode.
+	(ELCS): Add old-c-mode.elc, p4.elc, php-mode.elc, pydoc.elc
+	(EXTRA_SOURCES): Add pydoc-el-README, pydoc_lisp.py
+
+	* package-info.in (provides): Update for new files.
+	
+2001-12-05  Vaclav Barta  <vbar@comp.cz>
+
+	* cperl-mode.pl: Got fill-paragraph-or-region to use
+	cperl-fill-paragraph.
+
+2001-12-02  Steve Youngs  <youngs@xemacs.org>
+
+	* mode-compile.el (python-dbg-flags): Typo fix.
+
+2001-06-19  Barry Warsaw  <barry@xemacs.org>
+
+	* python-mode.el (python-font-lock-keywords):
+	Add "yield" as a keyword to support the new "simple
+	generators" feature of 2.2.  See PEP 255.
+
+2001-06-18  Barry Warsaw  <barry@xemacs.org>
+
+	* python-mode.el (py-continuation-offset):
+	New variable which controls how much to indent continuation
+	lines, defined as lines following those that end in backslash
+	continuing a block opening statement.
+
+2001-09-10  Raymond Toy  <toy@rtp.ericsson.se>
+
+	* fortran.el (fortran-mode-map): Keep M-BS as backward-kill-word
+	and make C-M-h 'mark-fortran-subprogram.
+
+2001-08-15  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* tcl.el (tcl-mode): check for filladapt mode
+	(tcl-mode): fix imenu support
+
+2001-07-31  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-db2): Doc change.
+
+2001-07-23  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-postgres): Add the database at the end of the
+	parameters instead of at beginning.
+	(sql-postgres-options): Doc change.
+
+2001-06-21  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* diff-mode.el (vc-backend-diff): Fix when default-major-mode is text-mode, 
+	also enabled font-lock
+
+2001-06-18  Ben Wing  <ben@xemacs.org>
+
+	* diff-mode.el:
+	* diff-mode.el (diff-jump-to-old-file-flag): Removed.
+	* diff-mode.el (diff-jump-to-old-file): New.
+	* diff-mode.el ('diff-jump-to-old-file-flag): New.
+	* diff-mode.el (diff-update-on-the-fly-flag): Removed.
+	* diff-mode.el (diff-update-on-the-fly): New.
+	* diff-mode.el ('diff-update-on-the-fly-flag): New.
+	* diff-mode.el (diff-begin-in-read-only-mode): New.
+	* diff-mode.el (diff-metify-map): New.
+	* diff-mode.el (diff-mode-map): New.
+	* diff-mode.el (diff-goto-source):
+	* diff-mode.el (diff-mode):
+	Reapply patch.
+
+2001-05-20  Ben Wing  <ben@xemacs.org>
+
+	* diff-mode.el:
+	* diff-mode.el (diff-jump-to-old-file-flag): Removed.
+	* diff-mode.el (diff-jump-to-old-file): New.
+	* diff-mode.el (diff-update-on-the-fly-flag): Removed.
+	* diff-mode.el (diff-update-on-the-fly): New.
+	* diff-mode.el (diff-begin-in-read-only-mode): New.
+	* diff-mode.el (diff-metify-map): New.
+	* diff-mode.el (diff-mode-map): New.
+	* diff-mode.el (diff-goto-source):
+	* diff-mode.el (diff-mode):
+	Eliminate nonstandard -flag ending on variables.
+	
+	Add var to control whether we begin in read-only mode; FALSE
+	by default (principle of least surprise; and do not assume that
+	people opening any file named .diff have no interest in editing
+	it).
+
+	Comment out bogus behavior of setting the selection in
+	diff-goto-source.
+
+	Fix keymap-hacking tricks.
+
+2001-04-11  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el: Bumping to version 4.0 since we now support only
+	XEmacs 21.1 and Emacs 20.7, although not all of the compatibility
+	code for older Emacsen has been removed.  Specifically, the old
+	"make sure we have a current custom.el library" stuff is removed,
+	as is the hack-around for an NTEmacs 19.34.6 make-temp-name bug.
+
+	Updated much of the Commentary section in the initial comments.
+
+	Much more importantly, I've integrated Ken Manheimer's pdbtrack
+	stuff, which is way cool.  When enabled (as by default), this
+	turns on the overlay arrow when pdb is entered, either in the
+	shell buffer or in the *Python* buffer.  Specifically:
+
+	(py-mode-map): Added C-c C-d to toggle pdb tracking.
+
+	(py-pdbtrack-do-tracking-p): New user customizable variable to
+	control whether overlay arrow tracking is enabled or not.  This
+	variable is buffer local and is turned on by default.
+
+	(py-pdbtrack-minor-mode-string): The string that's added to the
+	minor mode alist when actually doing pdb overlay arrow tracking.
+	User customizable.
+
+	(py-pdbtrack-toggle-stack-tracking, turn-on-pdbtrack,
+	turn-off-pdbtrack): New commands to control pdb tracking.
+
+	(py-pdbtrack-is-tracking-p): Helper variable used to control the
+	display of py-pdbtrack-minor-mode-string.  Set to true when the
+	overlay arrow is enabled, and false when it's disabled.
+
+	(py-pdbtrack-stack-entry-regexp, py-pdbtrack-input-prompt,
+	py-pdbtrack-track-range): Inherited from pdbtrack.el and renamed.
+
+	(py-pdbtrack-overlay-arrow, py-pdbtrack-track-stack-file): New
+	functions which actually do the tracking.
+
+	(py-shell): Add py-pdbtrack-track-stack-file to
+	comint-output-filter-functions.
+
+	Finally, add py-pdbtrack-track-stack-file to
+	comint-output-filter-functions at the file level.  This and the
+	py-shell addition should ensure that pdb tracking is installed
+	regardless of the order of operation.
+
+	Also, add py-pdbtrack-minor-mode-string to minor-mode-alist.
+
+2001-02-24  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el (py-parse-state): Teach python-mode how to scan
+	code which follows multi-line list comprehensions.
+
+2001-02-20  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el (py-execute-region): This one's easy... kill the
+	temporary file's buffer after executing its contents.
+
+2000-12-27  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el (python-font-lock-keywords): Add highlighting of
+	`as' as a keyword, but only in "import foo as bar" statements
+	(including optional preceding `from' clause).
+
+2000-10-27  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el (py-goto-beginning-of-tqs): When searching
+	backwards for the matching delimiter, watch out for backslash
+	escaped delimiters.  Also use = instead of eq for character
+	comparison (because a character is = to it's integer value, but
+	not eq to it).
+
+2000-06-23  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el (py-execute-region): Make sure the new temporary
+	buffer is current for the insertion of the text.
+
+2000-05-23  Barry Warsaw  <bwarsaw@anthem>
+
+	* python-mode.el (py-execute-region): Based on suggestions by
+	Francois Pinard and Skip Montanaro, handle execution of indented
+	regions by inserting an "if 1:" in front of the block.  This
+	better preserves things like triple quoted strings and commented
+	regions.  This patch resolves PR#264.
+
+2001-04-23  Karl M. Hegbloom  <karlheg@microsharp.com>
+
+	* cperl-mode.el (cperl-pod2man-build-command): Man-filter-list is
+	not always bound, depending on which man viewer you are using.
+	Only set flist when boundp Man-filter-list.
+
+2001-04-20  Trey Belew  <trey@veggie.stu.wesleyan.edu>
+
+	* cperl-mode.el (pod-spell): New.
+	(make-pod-list): New.
+
+2001-04-14  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-escape-newlines-and-send): New function.
+	(sql-db2): Set comint-input-sender to
+	sql-escape-newlines-and-send.
+
+2001-04-13  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-db2-program): New option.
+	(sql-db2-options): New option.
+	(sql-db2): New function.
+
+2001-04-06  Glynn Clements  <glynn.clements@virgin.net>
+
+	* awk-mode.el (awk-mode): Add necessary call to c-common-init
+
+2001-04-04  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-mode-menu): Added highlighting entries.
+	(sql-highlight-oracle-keywords): New function.
+	(sql-highlight-postgres-keywords): New function.
+	(sql-highlight-ansi-keywords): New function.
+
+2001-03-24  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-help): Doc change.
+
+2001-04-08  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (REQUIRES): Add cc-mode, ps-print-nomule, fsf-compat, 
+	edit-utils, ediff, emerge & efs.
+
+2001-04-07  Mike Sperber <mike@xemacs.org>
+
+	* diff-mode.el (vc-backend-diff): Don't autoload.
+
+2001-04-05  Mike Sperber <mike@xemacs.org>
+
+	* diff-mode.el: 
+	* diff-mode.el.upstream: Added.
+
+	* Makefile (ELCS): Add diff-mode.elc.
+
+2001-03-05  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-interbase): New function.
+	(sql-interbase-program): New option.
+	(sql-interbase-options): New option.
+	And some typos fixed: "customise" to "customize".
+
+2001-02-10  Matt Tucker  <tuck@whistlingfish.net>
+
+	* cperl-mode.el (cperl-mode): Initialize paren-backwards-message
+
+2001-02-10  Matt Tucker  <tuck@whistlingfish.net>
+
+	* cperl-mode.el (cperl-mode): Disable override of
+	font-lock-unfontify-region-function under XEmacs
+
+2001-01-27  Steve Youngs  <youngs@xemacs.org>
+
+	* sql.el: Sync with author version 1.4.25.
+
+2001-01-24  Andrew W. Nosenko  <awn@bcs.zp.ua>
+
+	* sql.el (sql-sybase): typo fix (was: query user about server two
+	times instead of server and database).
+
+2001-01-03  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-sybase): Doc change.
+	(sql-mysql): Doc change.
+	(sql-postgres): Doc change.
+
+2000-11-02  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-sybase-options): New option.
+	(sql-sybase): Use it.  Add sql-database to the list of parameters
+	provided for login.  The options -w 2048 -n are not used any more.
+	(sql-postgres-options): Changed default from "--pset" to "-P".
+	(sql-mysql-options): Doc change.
+	(sql-stop): Doc change.
+
+2000-10-31  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* make-mode.el (makefile-backslash-region): Make it put the
+	backslashes all the way out past the longest line in the region.
+	- Font lock and Imenu improvements.
+	    - eliminate use of `purecopy'.
+	With some enhancements by Yoshiki Hayashi  <yoshiki@xemacs.org>.
+
+2000-10-05  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-sybase-options): New option.
+	(sql-sybase): Use it.  Add sql-database to the list of parameters
+	provided for login.  The options -w 2048 -n are not used any more.
+
+2000-10-08  Gunnar Evermann  <ge204@eng.cam.ac.uk>
+
+	* teco.el: Change keyword to 'emulations'.
+
+2000-10-05  Martin Buchholz  <martin@xemacs.org>
+
+	* *: Mega typo fix.
+
+2000-10-04  Nick V. Pakoulin  <npak@ispras.ru>
+
+	* awk-mode.el: Small typo/error fixed in font-lock regexpr.
+
+2000-09-25  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-mysql-options): New variable.
+	(sql-mysql): Use it.
+
+2000-10-03  Nick V. Pakoulin  <npak@ispras.ru>
+
+	* awk-mode.el: Synched with FSF Emacs 20.7
+	Added some extra fontification.
+
+2000-08-07  Sean MacLennan  <seanm@storm.ca>
+
+	* cperl-mode.el (cperl-init-faces): Allow XEmacs support of array
+	and hash faces.
+
+2000-08-29  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-postgres): Use sql-postgres-options.
+	(sql-postgres-options): New variable.
+
+2000-08-28  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-mode-menu): Work around missing variable mark-active
+	in XEmacs.
+	(sql-mode): Added call to easy-menu-add for XEmacs compatibility.
+	(sql-interactive-mode): Added call to easy-menu-add for XEmacs
+	compatibility.
+
+2000-08-15  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-magic-go): Use comint-bol.
+	(sql-copy-column): Use comint-line-beginning-position.
+	(comint-line-beginning-position): Define a replacement for
+	comint-line-beginning-position if it is not fboundp.
+
+2000-08-07  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-mode-map): TAB is no longer defined in sql-mode-map;
+	it didn't have any effect anyway.
+
+2000-07-28  Alex Schroeder  <alex@gnu.org>
+
+	* sql.el (sql-postgres): Jason Beegan's patch uses the parameters
+	--pset and pager=off instead of sending \\o|cat at the beginning
+	of the session.
+
+2000-07-17  Andreas Jaeger  <aj@suse.de>
+
+	* sql.el: Version 1.4.15 from Alex Schroeder <alex@gnu.org>.
+
+2000-07-13  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* mode-compile.el (mc--build-output-args): Protect filename
+	arguments by double-quotes to handle paths with embedded SPACE on
+	Windows NT.
+	* mode-compile.el (mc--set-command): Ditto.
+	* mode-compile.el (mc--shell-compile): Ditto.
+	* mode-compile.el (makefile-compile): Ditto.
+
+2000-07-13  Adrian Aichner  <aichner@ecf.teradyne.com>
+	* mode-compile.el: Import of mode-compile.el 2.27 from
+	http://www.tls.cena.fr/~boubaker/distrib/.
+
+2000-07-04  Andreas Jaeger  <aj@suse.de>
+
+	* sql.el: Version 1.4.13 from Alex Schroeder.
+
+2000-06-29  AichnerAd  <aichner@ecf.teradyne.com>
+
+	* cperl-mode.el: Comment updates.
+	* cperl-mode.el (cperl-mode-map): Use `cperl-electric-delete'.
+	* cperl-mode.el (cperl-electric-delete): Bring back from previous
+	XEmacs version to support setting of `delete-key-deletes-forward'.
+
+2000-06-26  AichnerAd  <aichner@ecf.teradyne.com>
+
+	* cperl-mode.el: Add XEmacs license information, expand RCS keywords.
+	* cperl-mode.el (cperl-version): Expand Revision keyword.
+
+2000-06-25  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* cperl-mode.el (cperl-perldoc): Make function work under XEmacs.
+	(cperl-version): sync with version 4.32 of Ilya Zakharevich
+	<ilya@math.ohio-state.edu>
+
+2000-05-12  Martin Buchholz  <martin@xemacs.org>
+
+	* f90.el: Change Author address.
+
+2000-03-06  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* eiffel3.el (eif-init-color): Don't change font-lock-comment-face
+	and font-lock-string-face.
+	(Top level): Ditto.
+
+2000-01-19  Akim Demaille  <akim@epita.fr>
+
+	* autoconf-mode.el (autoconf-font-lock-keywords): Support `A._DEFUN'
+	definitions: Autoconf now uses AC_DEFUN, AU_DEFUN, AH_DEFUN, and
+	others are to come.
+
+2000-01-19  Andreas Jaeger  <aj@suse.de>
+
+	* python-mode.el: Version 3.105 from Barry Warsaw.
+
+1999-12-04  Andreas Jaeger  <aj@suse.de>
+
+	* sql.el (sql-mode-syntax-table): Recognize end of comments
+	inititated by "--".
+	Patch by Enrico Scholz <Enrico.Scholz@informatik.tu-chemnitz.de>.
+
+1999-10-05  Tim Bradshaw  <tfb@tfeb.org>
+
+	* make-mode.el (makefile-font-lock-keywords):
+	font-lock-preprocessor-face was used unquoted, quoted it.
+
+1999-11-11  Andreas Jaeger  <aj@suse.de>
+
+	* ksh-mode.el: New version from Gary Ellison <gfe@interhack.net>.
+
+1999-09-22  Martin Buchholz  <martin@xemacs.org>
+
+	* autoconf-mode.el (autoconf-font-lock-keywords): Add font-lock
+	keywords for function definitions
+
+1999-07-15  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* make-mode.el: Better highlighting and imenu support.
+
+1999-06-05  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* sql.el (sql-mode): autoload
+	(sql-interactive-mode): ditto
+	(sql-oracle): ditto
+	(sql-sybase): ditto
+	(sql-informix): ditto
+	(sql-ingres): ditto
+	(sql-ms): ditto
+	(sql-postgres): ditto
+
+1999-07-06  SL Baur  <steve@miho.m17n.org>
+
+	* make-mode.el (makefile-mode): Fix for InfoDock menus.
+	From Bob Weiner <weiner@altrasoft.com>
+
+1999-05-12  SL Baur  <steve@gneiss.etl.go.jp>
+
+	* ksh-mode.el: Synch to ksh-mode.el-2.12
+	(ksh-mode-map): Bind DEL to
+	backward-or-forward-delete-char.
+	Restore 'ksh-mode feature.
+
+1999-02-05  Torbjorn Einarsson  <T.Einarsson@clab.ericsson.se>
+
+	* f90.el Synched up with: FSF 20.3, except that
+	font-lock-reference-face is used in place of font-lock-constant-face.
+	(f90-break-before-delimiters): Changed type to boolean.
+	(f90-font-lock-keywords-1): Same regexps for Emacs and XEmacs and
+	changed font-lock-reference-face to font-lock-function-name-face.
+	(f90-font-lock-keywords-2):  Same regexps for Emacs and XEmacs and
+	changed font-lock-reference-face to font-lock-function-name-face.
+	(f90-font-lock-keywords-3): Same regexps for Emacs and XEmacs.
+	(f90-mode-syntax-table): Allow underscore in names, byt not $ etc
+	(f90-mode-map): Electric insert , + - * /
+	(f90-type-def-re): Correct indentation for TYPE block
+	(f90-imenu): Imenu support (FSF only).
+	(f90-mode): Using normal-auto-fill-function.
+	(f90-looking-at-if-then): Fixed bug in matching expressions.
+	(f90-looking-at-where-or-forall): Simplified code.
+	(f90-looking-at-type-like): Better reg-exp for TYPE block.
+	(f90-looking-at-program-block-start): Support for more types of
+	subroutines.
+	(f90-comment-indent): Better indentation of trailing comments.
+	(f90-no-block-limit): Fixed bug in block matching.
+	(f90-electric-insert): New function for auto-fill at operators.
+	(f90-indent-line): Simplified code.
+	(f90-break-line): Better behavior for breaking lines.
+	(f90-auto-fill-mode): Function removed.
+	(f90-do-auto-fill): Also update line.
+	(f90-fill-region): Changed due to new updating policy.
+	(f90-match-end): Fixed bug due to new syntax.
+
+1998-12-30  Martin Buchholz  <martin@xemacs.org>
+
+	* python-mode.el: Upgrade to version 3.90 by simply copying
+	Barry Warsaw's copy.  Have we lost Oliver's and Bob's changes?
+	Snarfed from http://www.python.org/emacs/python-mode/python-mode.el
+
+1998-11-24  SL Baur  <steve@altair.xemacs.org>
+
+	* sql.el: New file.
+
+1998-10-15  SL Baur  <steve@altair.xemacs.org>
+
+	* cvs.el: New file.
+
+1998-09-30  Jan Vroonhof  <vroonhof@math.ethz.ch>
+
+	* cperl-mode.el: Do not mess with auto-mode-alist.
+
+1998-09-30  SL Baur  <steve@altair.xemacs.org>
+
+	* cperl.el: Update maintainer field.
+
+1998-09-29  Bob Weiner  <weiner@altrasoft.com>
+
+	* python.el: (py-guess-indent-offset): Suppress message if
+	noninteractive.
+
+1998-09-28  SL Baur  <steve@altair.xemacs.org>
+
+	* verilog-mode.el (verilog-emacs-features): Correct major version
+	computation.
+
+1998-09-04  Gunnar Evermann  <Gunnar.Evermann@nats.informatik.uni-hamburg.de>
+
+	* postscript.el: (postscript-font-lock-keywords) eliminate
+	redundancy from regexp for strings.
+
+1998-07-20  Tomasz Cholewo  <tjchol01@aivo.spd.louisville.edu>
+
+	* postscript.el: Fixed syntax table entry for '}'.
+
+1998-07-14  SL Baur  <steve@altair.xemacs.org>
+
+	* prolog.el (prolog-consult-region): send-string ->
+	process-send-string.
+	(prolog-consult-region): send-region -> process-send-region.
+
+1998-05-04  Oliver Graf <ograf@fga.de>
+
+	* python-mode.el(imenu-example--create-python-index):
+	added imenu Top-entry to fix 'empty' modules
+
+1998-04-29  SL Baur  <steve@altair.xemacs.org>
+
+	* simula.el (simula-mode): Autoload.
+
+	* m4-mode.el (m4-mode): Autoload.
+
+1998-02-08  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* autoconf-mode.el: Recognize parens as such.
+
+1998-01-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standard 1.0.
+	* package-info.in: Ditto.
+
+1998-01-12  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (CATEGORY): Update to newer package interface.
+
+1998-01-05  SL Baur  <steve@altair.xemacs.org>
+
+	* python-mode.el updated to 3.28.
+
+1998-01-03  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+
+1997-12-23  SL Baur  <steve@altair.xemacs.org>
+
+	* tcl.el (tcl-submit-bug-report): Remove compile time dependency
+	on reporter.
+
+	* Makefile: Created.

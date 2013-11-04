@@ -1,0 +1,70 @@
+**** EDIFF -- a comprehensive interface to diff for Emacs and XEmacs
+
+This directory:
+
+README	    	-- This file
+Makefile	-- Automated installation file
+ediff.texi	-- Manual in Texinfo format
+ediff, ediff-?	-- The Info files
+ediff.dvi	-- Manual in DVI format
+
+ediff.el    	-- Ediff Emacs Lisp code
+ediff-init.el	-- Ediff Emacs Lisp code
+ediff-help.el	-- Ediff Emacs Lisp code
+ediff-wind.el	-- Ediff Emacs Lisp code
+ediff-util.el	-- Ediff Emacs Lisp code
+ediff-diff.el	-- Ediff Emacs Lisp code
+ediff-merg.el	-- Ediff Emacs Lisp code
+ediff-mult.el   -- Ediff Emacs Lisp code
+ediff-vers.el	-- Ediff Emacs Lisp code
+ediff-ptch.el	-- Ediff Emacs Lisp code
+ediff-tbar.el	-- Ediff Emacs Lisp code -- for XEmacs only
+ediff-hook.el	-- Ediff Emacs Lisp code
+toolbar/	-- Ediff toolbar icons   -- for XEmacs only
+
+
+To install Ediff do:
+
+		uncompress ediff.tar.Z
+		tar xf ediff.tar
+
+
+Then do the following:
+
+1. To compile Lisp:
+		
+      	    	make  (or 'make all')
+   
+2. You can also type
+
+	       make install
+	       
+   to do what "make all" does plus it will copy the files ediff*.elc
+   into a suitable Lisp directory.
+   
+   To make this happen, you will most likely have to change the PREFIX
+   variable in Makefile and, possibly, one or more of these variables:
+   
+   	DATADIR, LISPDIR, INFODIR, ETCDIR, and VERSION
+	
+   if they don't point to the right directories in your installation.
+   You also need to have a write permission for all directories
+   mentioned in LISPDIR, INFODIR, and ETCDIR.
+   
+3. XEmacs users must invoke `make' with the parameter EMACS=xemacs.
+   Even better: edit Makefile directly.
+
+4. Under XEmacs, copy the icons in the `toolbar' directory into
+   the-directory-where-xemacs-installed/etc/toolbar/
+
+Normally, all Ediff menus and autoloads are already defined in Emacs, so you
+don't need to define anything in your .emacs to run Ediff.
+However, if it was announced that this distribution of Ediff contains
+new features, you may need to put 
+
+(require 'ediff-hook)
+
+in your .emacs to take advantage of these new features. This doesn't load
+Ediff, but readies Emacs for the things to come. When this version of
+Ediff gets installed in the standard Emacs distribution, you can remove
+the above require-statement (but leaving it in does no harm).

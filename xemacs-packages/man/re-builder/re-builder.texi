@@ -1,0 +1,287 @@
+\input texinfo   @c -*-texinfo-*-
+
+@c Manual for the XEmacs re-builder package.
+
+@c ** #### something uses these headers, find out how and explain here
+@c %**start of header
+@setfilename re-builder.info
+@settitle Visual development of regular expressions
+@setchapternewpage odd
+@c %**end of header
+
+@c Version values, for easy modification
+@set VERSION 1.2
+@set UPDATED Sunday, July 24, 2005
+
+@c ** Many people seem to prefer this footenote style
+@footnotestyle end
+
+@direntry
+* re-builder::                Write regular expressions with visual feedback.
+@end direntry
+
+@c ** It is often convenient to use a macro for names which have unusual
+@c ** spelling or formatting conventions.
+@c Macro to make formatting of the package name consistent.
+@macro pkgname
+@i{re-builder}
+@end macro
+
+@c Copying permissions, et al
+@c Note that this whole section is repeated thrice, once for the Info
+@c version, once for TeX, and once for HTML.
+@c Note that if you combine this document with others' work, you may
+@c need to change the permissions statement.  Make sure you do so in all
+@c three places.
+@c #### Probably not the right place for HTML.
+@html
+This file documents the @pkgname{} XEmacs package, which provides visual
+feedback when developing regular expressions.
+
+This documentation was taken from the source file, @file{re-builder.el},
+which is subject to the following conditions; because of the nature of
+the GNU GPL, this file is as a result also subject to those conditions. 
+     
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2004 Free Software
+Foundation, Inc.
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any
+later version.
+
+GNU Emacs is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with GNU Emacs; see the file COPYING.  If not, write to the Free
+Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+
+End of permissions notice.
+@end html
+
+@ifinfo
+This file documents the @pkgname{} XEmacs package, which provides visual
+feedback when developing regular expressions.
+
+This documentation was taken from the source file, @file{re-builder.el},
+which is subject to the following conditions; because of the nature of
+the GNU GPL, this file is as a result also subject to those conditions. 
+     
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2004 Free Software
+Foundation, Inc.
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any
+later version.
+
+GNU Emacs is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with GNU Emacs; see the file COPYING.  If not, write to the Free
+Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+
+End of permissions notice.
+@end ifinfo
+
+@tex
+
+@titlepage
+@title R
+@subtitle Last updated @value{UPDATED}
+
+@author Detlev Zundel. Texinfo conversion by Aidan Kehoe. 
+@page
+This file documents the @pkgname{} XEmacs package, which provides visual
+feedback when developing regular expressions.
+
+This documentation was taken from the source file, @file{re-builder.el},
+which is subject to the following conditions; because of the nature of
+the GNU GPL, this file is as a result also subject to those conditions. 
+
+@vskip 0pt plus 1filll     
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2004 Free Software
+Foundation, Inc.
+
+This file is part of GNU Emacs.
+
+GNU Emacs is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any
+later version.
+
+GNU Emacs is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with GNU Emacs; see the file COPYING.  If not, write to the Free
+Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+     
+@end titlepage
+@page
+
+@end tex
+
+@ifnottex
+@node Top, Copying, (dir), (dir)
+@top Re-builder on XEmacs
+
+When I have to come up with regular expressions that are more
+complex than simple string matchers, especially if they contain sub
+expressions, I find myself spending quite some time in the
+`development cycle'.  `re-builder' aims to shorten this time span
+so I can get on with the more interesting bits.
+
+With it you can have immediate visual feedback about how well the
+regexp behaves to your expectations on the intended data.
+
+This is version @value{VERSION} of the @pkgname{} manual, last updated on
+@value{UPDATED}.
+
+@end ifnottex
+
+@menu
+* Copying::                     @pkgname{} copying conditions.
+* Overview::                    @pkgname{} history and general information.
+
+For general users:
+* Usage::                       An overview of the operation of @pkgname{}.
+* Regex Types::                 Types of regular expression handled.
+* Questions::                   A couple of selected queries. 
+@end menu
+
+@node Copying, Overview, Top, Top
+@chapter @pkgname{} Copying Conditions
+
+@c ** CHECK THE COPYRIGHT DATE(S) AND HOLDER(S)!
+
+Copyright (C) 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+
+@pkgname{} is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+@pkgname{} is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with XEmacs; see the file COPYING.  If not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.
+
+@node Overview, Usage, Copying, Top
+@chapter An Overview of @pkgname{}
+
+When I have to come up with regular expressions that are more complex
+than simple string matchers, especially if they contain sub expressions,
+I find myself spending quite some time in the `development cycle'.
+@pkgname{} aims to shorten this time span so I can get on with the more
+interesting bits.
+
+With it you can have immediate visual feedback about how well the regexp
+behaves to your expectations on the intended data.
+
+@node Usage, Regex Types, Overview, Top
+@chapter Operation of @pkgname{}
+
+When called up, with @kbd{M-x re-builder RET}, @pkgname{} attaches
+itself to the current buffer which becomes its target buffer, where all
+the matching is done.  The active window is split so you have a view on
+the data while authoring the RE.  If the edited expression is valid the
+matches in the target buffer are marked automatically with colored
+overlays (for non-color displays see below) giving you feedback over the
+extents of the matched (sub) expressions.  The (non-)validity is shown
+only in the modeline without throwing the errors at you.  If you want to
+know the reason why RE Builder considers it as invalid call
+@kbd{reb-force-update} (@kbd{C-c C-u}) which should reveal the error.
+
+The target buffer can be changed with @code{reb-change-target-buffer}
+(@kbd{C-c C-b}).  Changing the target buffer automatically removes
+the overlays from the old buffer and displays the new one in the
+target window.
+
+@pkgname{} keeps the focus while updating the matches in the target
+buffer so corrections are easily incorporated.  If you are satisfied
+with the result you can paste the RE to the kill-ring with
+@code{reb-copy} (@kbd{C-c C-w}) (the copied RE and current syntax is
+displayed in the echo area), quit @pkgname{} (@kbd{C-c C-q}) and use
+it wherever you need it.
+
+As the automatic updates can take some time on large buffers, they can
+be limited by @code{reb-auto-match-limit} so that they should not have a
+negative impact on the editing.  Setting it to nil makes even the auto
+updates go all the way.  Forcing an update overrides this limit allowing
+an easy way to see all matches.
+
+@node Regex Types, Questions, Usage, Top
+@chapter Regex Types
+
+Currently @pkgname{} understands six different forms of input, namely
+@code{lisp-re}, @code{perl}, @code{read}, @code{rx}, @code{sregex},
+and @code{string} syntax.  Read syntax and string syntax are both
+delimited by @code{"}s and behave according to their name.  With the
+@code{perl} and @code{string} syntax there's no need to escape the
+backslashes and double quotes simplifying the editing somewhat.  The
+other four allow editing of symbolic regular expressions supported by
+the packages of the same name.  (@code{lisp-re} is a package by me and
+its support may go away as it is nearly the same as the @code{sregex}
+package in Emacs)
+
+Note that the @code{sregex,} @code{rx} and @code{lisp-re} syntaxes will
+only be available in XEmacs if you've installed them yourself.
+
+Editing symbolic expressions is done through a major mode derived
+from @code{emacs-lisp-mode} so you'll get all the good stuff like
+automatic indentation and font-locking etc.
+
+When editing a symbolic regular expression, only the first expression
+in the RE Builder buffer is considered, which helps limiting the
+extent of the expression like the @code{"}s do for the text modes.
+For the @code{sregex} syntax the function @code{sregex} is applied to
+the evaluated expression read.  So you can use quoted arguments with
+something like '("findme") or you can construct arguments to your
+heart's content with a valid ELisp expression.  The compiled string
+form will be copied by @code{reb-copy}.  If you want to take a glance
+at the corresponding string you can temporarily change the input
+syntax using @code{reb-change-syntax} (@kbd{C-c C-i}).  The current RE
+syntax is also displayed in the modeline.
+
+Changing the input syntax is transparent (for the obvious exception
+non-symbolic -> symbolic) so you can change your mind as often as you
+like.
+
+There is also a shortcut function, @code{reb-toggle-case} (@kbd{C-c
+C-c}), for toggling the @code{case-fold-search} variable in the target
+buffer with an immediate update.
+
+@node Questions, , Regex Types, Top
+@chapter Questions
+
+Q: But what if my display cannot show colored overlays?
+
+A: Then the cursor will flash around the matched text making it stand
+out.
+
+Q: But how can I then make out the sub-expressions?
+
+A: That's where the `sub-expression mode' comes in.  In it only the
+digit keys are assigned to perform an update that will flash the
+corresponding subexp only.

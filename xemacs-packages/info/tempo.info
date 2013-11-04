@@ -1,0 +1,588 @@
+This is tempo.info, produced by makeinfo version 4.7 from tempo.texi.
+
+   This is Edition 0.0(prerelease), last updated 8 June 1995, of `the
+Tempo manual', for `tempo.el' version 1.2.3.
+
+   Copyright (C) 1995 David Kågedal
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the section entitled "Copying"is included exactly as in the
+original, and provided that the entire resulting derived work is
+distributed under the terms of a permission notice identical to this
+one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that this permission notice may be stated in a
+translation approved by the Free Software Foundation.
+
+
+File: tempo.info,  Node: Top,  Next: Overview,  Prev: (dir),  Up: (dir)
+
+Tempo
+*****
+
+This is Edition 0.0(prerelease), last updated 8 June 1995, of the
+manual for `tempo.el' version 1.2.3.
+
+   Tempo is a template writing package for GNU Emacs.
+
+* Menu:
+
+* Overview::                    An overview of tempo
+* Templates::                   Templates
+* Options::                     Controlling tempo behaviour
+* The mark list::               The mark list
+* The save list::               The save list
+* Adding tempo::                Adding tempo support
+* Concept index::               Concept index
+* Function index::              Function index
+* Variable index::              Variable index
+* Copying::                     The terms of this distribution
+
+ --- The Detailed Node Listing ---
+
+Overview
+
+* A short example::             Example
+* Basics::                      Tempo basics
+* Tags overview::               Tag lists and automatic completion
+
+Templates
+
+* Syntax::                      Template syntax
+* Elements::                    Template elements
+* Defining your own elements::  Defining your own elements
+
+
+File: tempo.info,  Node: Overview,  Next: Templates,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+Tempo is a package that provides writers and users of Emacs editing
+modes with functions for creating and inserting templates into an Emacs
+buffer in a convenient way. The template insertion commands can be bound
+to keys or can be automatically expanded from words written in the
+buffer.
+
+* Menu:
+
+* A short example::             Example
+* Basics::                      Tempo basics
+* Tags overview::               Tag lists and automatic completion
+
+
+File: tempo.info,  Node: A short example,  Next: Basics,  Prev: Overview,  Up: Overview
+
+1.1 A short example
+===================
+
+A good way to get a general idea of what `tempo' is about is through an
+introductory example. The follwoing short example of a `tempo' template
+builds a template for inserting a for loop in a C program.
+
+     (tempo-define-template "c-for"
+                            '("for ("
+                              (p "Initialization: ") ","
+                              (p "Increment: ") ","
+                              (p "End condition: ") " {" n>
+                              r n>
+                              "}" > %))
+
+   This creates a command `tempo-template-c-for' which, when executed,
+inserts the following at the point:
+
+     for (-!-,,) {
+
+     }
+
+   The point is placed at the -!-, which is not included in the text.
+The command `M-x tempo-forward-mark' will, at this point, move the
+point to after the first comma. Successive executions will move the
+point to after the second comma, to the second line and to after the
+closing brace. In a mode customized for tempo, `tempo-forward-mark'
+will of course be bound to some convenient keystroke combination.
+
+   If the variable `tempo-interactive' was set to non-nil, the result
+would have been a little different. Instead of inserting nothing inside
+the parenthesis, the user would be prompted for the text to be written
+in the three positions, with the prompt strings `Initialization:',
+`Increment:' and `End condition:', respectively, and the point would be
+placed on the second line, properly indented.
+
+   Also, if there was a currently active region (*note Regions:
+(emacs)Mark.), and the template command was used with a prefix argument
+(such as `C-u M-x tempo-template-c-for') the for loop would be inserted
+around the region, so that the contents of the region would be placed
+between the the opening and closing braces.
+
+
+File: tempo.info,  Node: Basics,  Next: Tags overview,  Prev: A short example,  Up: Overview
+
+1.2 Tempo basics
+================
+
+The most inportant function in tempo is `tempo-define-template', which
+defines a template, together with a function to insert it. *Note
+Syntax::, for a complete description of this function.
+
+   A simple definition has the form
+
+     (tempo-define-template NAME ELEMENTS)
+
+   When this is evaluated, the variable `tempo-template-NAME' is bound
+to ELEMENTS, and the function `tempo-template-NAME' is a command that
+will insert the template when invoked.
+
+   The ELEMENTS is supplied as a list whose elements have different
+meanings. Strings are simply inserted and lisp expressions are evaluated
+to strings. There are also some symbols with special meanings, such as:
+
+`p'
+`(p PROMPT [NAME])'
+     The symbol `p' marks a "hot spot" in a template. When this is
+     encountered, the current position of the point is saved as a
+     marker and saved on the `tempo-marks' list. These marks can later
+     easily be jumped to with the functions `tempo-forward-mark' and
+     `tempo-backward-mark'.
+
+     If the form `(p PROMPT)' is used, and the variable
+     `tempo-interactive' is non-`nil', PROMPT is used to prompt the
+     user for a string in the minibuffer. If `tempo-interactive' is
+     `nil', it works just like a single `p'.
+
+`r'
+`(r PROMPT)'
+     This works very much like `p', but when the template was invoked
+     with a prefix (as with `C-u TEMPLATE-CMD') and a region is active,
+     the template will be wrapped around the region, so that the text
+     of the region is placed where the `r' element is.
+
+`>'
+     A greater-than sign in a template means that the current line
+     should be indented according to the current mode. The function
+     `indent-line' is called, which usually gives the desired result.
+     not that often it is advisable to insert the `>' after the text to
+     be put on the line, to help the indention function.
+
+
+   There are many more thing you can put in a template, but the above
+are some of the more essential. *Note Elements::, for a full
+description of the possible template elements.
+
+
+File: tempo.info,  Node: Tags overview,  Prev: Basics,  Up: Overview
+
+1.3 Tag lists and automatic completion
+======================================
+
+If you supply a third argument TAG to `tempo-define-template', it can
+be used as an abbrevation for the template. If you gave the C for-loop
+in the example above a third argument `"for"', you could use the
+completion capabilities in tempo. If you write in a buffer (with the
+point at -!-):
+
+     for-!-
+
+   and type `M-x tempo-complete-tag', the string `foo' would be
+replaced by the for-loop template. For this to be really useful,
+`tempo-complete-tag' should be bound to a convenient keystroke. But
+there is more power in this command. If you have defined a template with
+the tag `procedure' you can hit `M-x tempo-complete-tag' as soon as you
+have written a unique prefix of the word. For example
+
+     proc-!-
+
+   could expand to
+
+     procedure -!-();
+     begin
+
+     end;
+
+   when you type `M-x tempo-complete-tag' had you defined a Pascal
+`procedure' template with the tag `procedure'. If there is no unique
+match, `tempo-complete-tag' will complete the tag as much as possible,
+and show a buffer with the possible completions. You can then type
+another character, which will hopefully make it unique and press `M-x
+tempo-complete-tag' again.
+
+   Unfortunaly, there is no good way to use the mouse in the completion
+buffer, although it claims to be so.
+
+
+File: tempo.info,  Node: Templates,  Next: Options,  Prev: Overview,  Up: Top
+
+2 Templates
+***********
+
+This node describes the syntax and semantics of templates defined by
+`tempo-define-template'. The first part deals with the syntax of the
+function itself, while the second part describes the different template
+elements.
+
+* Menu:
+
+* Syntax::                      Template syntax
+* Elements::                    Template elements
+* Defining your own elements::  Defining your own elements
+
+
+File: tempo.info,  Node: Syntax,  Next: Elements,  Prev: Templates,  Up: Templates
+
+2.1 Template syntax
+===================
+
+Templates are defined with the function `tempo-define-tempalate'.
+
+ -- Function: tempo-define-template name elements [tag documentation
+          [taglist]]]
+     Define a template named `tempo-template-NAME'.
+
+     This function creates a template and binds it to a new variable
+     named `tempo-template-NAME'. It also creates a new command under
+     the same name. This command expands the template at the current
+     point, when invoked.
+
+     The parameter ELEMENTS is a list of template elements. The
+     possible elements are described in *Note Elements::.
+
+     If a TAG is supplied, it must be a string which is placed in
+     TAGLIST or `tempo-tags'. This string is used for automatic
+     completion. When `tempo-complete-tag' is called and TAG is
+     matched, the template template defined with TAG is inserted.
+     (*note Tags overview:: for more information on tags and tag lists)
+
+
+File: tempo.info,  Node: Elements,  Next: Defining your own elements,  Prev: Syntax,  Up: Templates
+
+2.2 Template elements
+=====================
+
+These are the predefined elements you can use in a template definition:
+
+`STRING'
+     A string in a template is first run through the string
+     preprocessors in `tempo-insert-string-functions' and the result is
+     inserted.
+
+`p'
+     This denotes an "interesting" position in the template. When the
+     template is expanded, this position is remembered with a mark on
+     the tempo-marks list. *Note The mark list::.
+
+`r'
+     This works in a similar way to the above `p' element, but if the
+     template command is given a prefix command, the current region is
+     placed here. This means that the preceding part of the template is
+     expanded before the region, and the rest is expanded after. There
+     can be only one `r' in a template. If `transient-mark-mode' is
+     active (*note Regions: (emacs)Mark.) the current region is used
+     and the prefix argument is ignored.
+
+     If the variable `tempo-insert-region' is non-nil, the behaviour of
+     the `r' element is reversed.
+
+`(p PROMPT [NAME [NOINSERT]])'
+`(P PROMPT [NAME [NOINSERT]])'
+`(r PROMPT [NAME [NOINSERT]])'
+     If the variable `tempo-interactive' is nil, the elements `(p
+     ...))' and `(P ...)' work exactly like a single `p', and `(r ...)'
+     works like a single `r'.
+
+     But, if you set `tempo-interactive' to `t' the user is prompted
+     for a string to insert when the template is expanded. The prompt
+     is taken from the `prompt' parameter. The element `(P ...)' works
+     like `(p ...)' with the exception that `tempo-interactive' is
+     forced to `t', which means that the user will always (almost
+     always, see below) be prompted.
+
+     If you provide a NAME to any of these, and interactive prompting
+     is taking place, the resulting string is saved in a local list so
+     it can be inserted again later with the `(s ...)' element. *Note
+     The save list::, for more detailed information.
+
+     As a special case, if the save list already contains something
+     under NAME, it is used directly, and no prompting is done, even
+     with a `(P ...)' element.
+
+     The third argument, NOINSERT, disables insertion of text. If
+     `tempo-interactive' it non-`nil', and a NAME has been provided,
+     normally a string is read through the minibuffer and then inserted
+     and saved. When NOINSERT is non-`nil', nothing is inserted, and
+     the text is only saved for later.
+
+     Stylistic conventions (invented by me) dictates that these elements
+     should be placed as early as possible in template definitions.
+
+`r>'
+     This element works like `r', but it also indents the region it is
+     expanded around.
+
+`(s NAME)'
+     This looks up NAME in the save list and inserts what it finds.
+     Note that if it finds a string, it is not run through the string
+     preprocessors.
+
+`&'
+     An ampersand inserts a newline if there are characters other than
+     whitespace before the current point on the line. Otherwise it does
+     nothing. This means that it makes sure that the following text
+     always starts a new line, possibly with some leading whitespace.
+
+`%'
+     A percent sign inserts a newline it there are characters other than
+     whitespace after the current point on the line. Otherwise it does
+     nothing.
+
+`n'
+     Simply inserts a newline character.
+
+`>'
+     This does not insert any text. Instead it indents the line
+     according to the major mode, by calling
+     `indent-according-to-mode'. Note that in order to get best
+     results, you often should place this after the text you want to
+     place on the line, as this could affect the indentation.
+
+`n>'
+     Inserts a newline and indents line. It is the same as a `n'
+     followed by a `>'.
+
+`o'
+     Works like `%', but leaves the point on the first line. Note that
+     this can cause great confusion if you are not careful. If the `o'
+     is the first element in a template which is inserted at the
+     beginning of a line, strange things happen. This is due to odd
+     behaviour in `open-line'.
+
+`nil'
+     A `nil' element is simply igonred. That means that a lisp
+     expression (see below) that returns nil does not insert anything.
+
+`(l ELEMENT1 ELEMENT2...)'
+     This element is most useful as a return value from a lisp
+     expression (see below). It inserts the elements using the same
+     rules as all template elements.
+
+`Anything else'
+     All unrecognized elements are checked to see if it is a
+     user-defined elemet. *Note Defining your own elements::. If isn't,
+     it is assumed to be a lisp expression and is evaluated in a normal
+     fashion. The result from such an expression is taken as a template
+     element an is inserted according to the usual rules. If you don't
+     want to insert anything, make your expression return `nil'. If you
+     want to insert more than one element, use the `(l ELEMENT1
+     ELEMENT2...)' element.
+
+
+
+File: tempo.info,  Node: Defining your own elements,  Prev: Elements,  Up: Templates
+
+2.3 Defining your own elements
+==============================
+
+The variable `tempo-user-elements' contains a list of functions to call
+when an unrecognized element is found.
+
+ -- Variable: tempo-user-elements
+     A list of functions. When `tempo-insert' is called with an element
+     it doesn't recognize, it checks this list by calling each function
+     with the element as the single argument. A function in this list
+     should take a single element as argument and return `nil' for
+     elements it doesn't recognize. If it does recognize an element, it
+     should return another element to be inserted, e.g. a string. If
+     the function wants to return an authorative `nil', it could return
+     either `""' or `(l)'.
+
+   Do not use any one-charachter tags for your own elements. These are
+reserved for future tempo enhancements.
+
+
+File: tempo.info,  Node: Options,  Next: The mark list,  Prev: Templates,  Up: Top
+
+3 Controlling tempo behaviour
+*****************************
+
+There are some options available for the end user of tempo templates.
+
+ -- User Option: tempo-interactive
+     Controls whether templates should prompt the user for strings to
+     insert via the minibuffer or let the user edit them in place. This
+     affects the behaviour of the template elements `(p ...)' and `(r
+     ...)'.
+
+ -- User Option: tempo-insert-region
+     Controls the behaviour of the `r', `r>' and `(r ...)' tags. If
+     this variable is `nil', `r' elements will be treated just like `p'
+     elements, unless the template command is given a prefix (or a
+     non-nil argument), in which case the template will be inserted
+     around the region. *Note Elements::, for further information. If
+     this variable is non-`nil', the behaviour is reversed.
+
+     In Transient Mark mode, this option is unused.
+
+
+File: tempo.info,  Node: The mark list,  Next: The save list,  Prev: Options,  Up: Top
+
+4 The mark list
+***************
+
+When a `p' or `r' element is inserted, or when `tempo-interactive' is
+nil and a `(p ...)', `(P ...)' or `(r ...)' element is inserted, the
+current position in the buffer is remembered for later. A mark is
+created and stored in the variable `tepo-marks'.
+
+   There are two functions for moving between these marks.
+
+ -- Function: tempo-forward-mark
+     Move the point to the first mark on the mark list that is after the
+     point. If there is no such mark, nothing happens.
+
+ -- Function: tempo-backward-mark
+     Move the point to the last mark on the mark lit that is before the
+     point. If there is no such mark, nothing happens.
+
+   This function adds marks to the mark list.
+
+ -- Function: tempo-insert-mark mark
+     Inserts MARK in the mark list, while keeping the list sorted. If
+     there already is a mark at the same position, only one mark is
+     kept.
+
+
+File: tempo.info,  Node: The save list,  Next: Adding tempo,  Prev: The mark list,  Up: Top
+
+5 The save list
+***************
+
+In a template, different elements can be saved for later with the
+function `tempo-save-named' on a data structure called the "save list".
+The most obvious way to do this, is to supply a NAME argument to the
+`(p ...)' element or one of its likes, but it can also be done
+programmatically with an explicit call to `tempo-save-named'.
+
+   Every saved element is saved in the list `tempo-named-insertions'.
+After inserting a template, this list is cleared, so things saved in it
+does not live between insertions. You should use ordinary variables for
+that.
+
+   The following two functions could be used from inside a template.
+
+ -- Function: tempo-save-named name data
+     Save DATA on the save list under the name NAME. The function
+     returns nil.
+
+ -- Function: tempo-lookup-named name
+     Lookup some saved data under the name NAME.  Returns the data if
+     NAME was found, and `nil' otherwise.
+
+   The following functions deal with the save list, but should be
+considered internal to tempo.
+
+ -- Function: tempo-insert-named name
+     Insert the previous insertion saved under a named specified in
+     NAME.  If there is no such name saved, a tempo mark is inserted.
+
+     Note that if the data is a string, it will not be run through the
+     string processor.
+
+ -- Function: tempo-forget-insertions
+     Clears the save list.
+
+
+File: tempo.info,  Node: Adding tempo,  Next: Concept index,  Prev: The save list,  Up: Top
+
+6 Adding tempo support
+**********************
+
+
+File: tempo.info,  Node: Concept index,  Next: Function index,  Prev: Adding tempo,  Up: Top
+
+7 Concept index
+***************
+
+ [index ]
+* Menu:
+
+* Adding elements:                       Defining your own elements.
+                                                                (line 6)
+* Customization:                         Options.               (line 6)
+* Defining elements:                     Defining your own elements.
+                                                                (line 6)
+* Defining new templates:                Syntax.                (line 6)
+* Elements:                              Elements.              (line 6)
+* Template elements:                     Elements.              (line 6)
+* Templates:                             Syntax.                (line 6)
+* User options:                          Options.               (line 6)
+* User-defined elements:                 Defining your own elements.
+                                                                (line 6)
+* Writing templates:                     Syntax.                (line 6)
+
+
+File: tempo.info,  Node: Function index,  Next: Variable index,  Prev: Concept index,  Up: Top
+
+8 Function index
+****************
+
+ [index ]
+* Menu:
+
+* tempo-backward-mark:                   The mark list.        (line 18)
+* tempo-define-template:                 Syntax.               (line 10)
+* tempo-forget-insertions:               The save list.        (line 38)
+* tempo-forward-mark:                    The mark list.        (line 14)
+* tempo-insert-mark:                     The mark list.        (line 24)
+* tempo-insert-named:                    The save list.        (line 31)
+* tempo-lookup-named:                    The save list.        (line 24)
+* tempo-save-named:                      The save list.        (line 20)
+
+
+File: tempo.info,  Node: Variable index,  Next: Copying,  Prev: Function index,  Up: Top
+
+9 Variable index
+****************
+
+ [index ]
+* Menu:
+
+* tempo-insert-region:                   Options.              (line 15)
+* tempo-interactive:                     Options.              (line  9)
+* tempo-named-insertions:                The save list.        (line 12)
+* tempo-user-elements:                   Defining your own elements.
+                                                               (line 10)
+
+
+File: tempo.info,  Node: Copying,  Prev: Variable index,  Up: Top
+
+10 Copying
+**********
+
+
+
+Tag Table:
+Node: Top991
+Node: Overview2119
+Node: A short example2670
+Node: Basics4592
+Node: Tags overview6759
+Node: Templates8172
+Node: Syntax8666
+Node: Elements9695
+Node: Defining your own elements14723
+Node: Options15654
+Node: The mark list16628
+Node: The save list17624
+Node: Adding tempo19088
+Node: Concept index19230
+Node: Function index20318
+Node: Variable index21057
+Node: Copying21567
+
+End Tag Table

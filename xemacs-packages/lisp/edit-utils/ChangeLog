@@ -1,0 +1,1756 @@
+2006-03-07  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.34 released.
+
+2006-03-07  Nelson Ferreira  <nelson.ferreira@ieee.org>
+
+	* fast-lock.el (fast-lock-after-fontify-buffer): Check existence
+	of fast-lock cache file before trying to access it.
+
+2006-02-22  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.33 released.
+
+2006-02-21  Adrian Aichner  <adrian@xemacs.org>
+
+	* dabbrev.el (dabbrev--extent-clicked-on): Supply required fourth
+	argument to `dabbrev--substitute-expansion'.
+
+2005-12-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.32 released.
+
+2005-11-28  Zajcev Evgeny  <zevlg@yandex.ru>
+
+	* power-macros.el: Use (featurep 'xemacs) instead of (boundp
+	'xemacs-logo).
+
+2005-11-25  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.31 released.
+
+2005-11-21  Adrian Aichner  <adrian@xemacs.org>
+
+	* Makefile (ELCS): Add crm.elc.
+
+2005-11-21  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.30 released.
+
+2005-11-20  Adrian Aichner  <adrian@xemacs.org>
+
+	* crm.el: New file.  This corresponds to revision 1.5 of GNU Emacs
+	CVS, plus update of FSF address, as provided in Message-ID:
+	<v9y84g75j2.fsf_-_@marauder.physik.uni-ulm.de> by Reiner Steib.
+
+2005-11-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.29 released.
+
+	* savehist.el: Sync with upstream version 23.
+
+	* Makefile (VERSION): XEmacs package 2.28 released.
+
+2005-11-02  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.27 released.
+
+	* savehist.el: Sync with upstream version 22.
+
+2005-10-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.26 released.
+
+2005-05-02  David A. Panariti  <davep.xemacs@meduseld.net>
+
+	* saveconf.el (recover-context): 
+	Fixed bug when attempting to restore a file that no longer
+	exists.  In this case, the restore loop deletes the buffer but
+	does not read the following file offset.  This puts the restore
+	loop out of alignment with the data in the restore file, which
+	causes the loop to terminate possibly leaving some context
+	unprocessed.
+
+2005-08-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.25 released.
+
+2005-08-25  Zajcev Evgeny  <zevlg@yandex.ru>
+
+	* paren.el (paren-mode): [add] New mode 'sexp-around added.
+	* paren.el (paren-highlight): [add] Support for 'sexp-around mode
+	* paren.el (paren-set-mode): Ditto.
+
+2005-05-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.24 released.
+
+2005-04-27  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* balloon-help.el (balloon-help-gutter-possible):
+	(balloon-help-make-help-frame):
+	Whack gutters, too.
+	(balloon-help-make-junk-frame):
+	(balloon-help-make-help-frame):
+	Use override-redirect to suppress WM decorations.
+	(balloon-help-make-help-frame): Convert alist to plist.
+
+2005-05-07  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.23 released.
+
+2005-05-05  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* lazy-lock.el (lazy-lock-mode): lazy-lock-mode should _not_ have
+	a non-nil global default; it should only be t in those buffers for
+	which fontification is active. 
+
+2005-02-10  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.22 released.
+
+2005-02-09  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* man.el: Bind manual-entry to C-h C-m by default.
+
+2005-02-03  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.21 released.
+
+2005-01-31  Ben Wing  <ben@xemacs.org>
+
+	* lazy-shot.el (lazy-shot-install-extent):
+	Use plain set-extent-property as
+	set-extent-initial-redisplay-function is going away.
+
+2005-01-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.20 released.
+
+2005-01-29  Ville Skyttä  <scop@xemacs.org>
+
+	* edit-utils.texi: Spelling fixes, add document title.
+
+2004-12-22  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.19 released.
+
+2004-12-22  Peter Thiemann  <thiemann@informatik.uni-freiburg.de>
+
+	* func-menu.el (fume-function-name-regexp-javascript): Enhance the
+	regexp, don't register functions in comment sections. 
+
+2004-11-09  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.18 released.
+
+2004-11-08  Ben Wing  <ben@xemacs.org>
+
+	* dabbrev.el (dabbrev-case-replace):
+	We don't really need to set this to nil by default; the setting
+	of dabbrev-case-fold-search is enough.
+
+2004-11-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.17 released.
+
+2004-11-07  Ben Wing  <ben@xemacs.org>
+
+	* dabbrev.el:
+	* dabbrev.el (dabbrev--eliminate-newlines): New.
+	* dabbrev.el (dabbrev-upcase-means-case-search):
+	* dabbrev.el (dabbrev-case-distinction): New.
+	* dabbrev.el (dabbrev-case-replace):
+	* dabbrev.el (dabbrev-check-all-buffers):
+	* dabbrev.el (dabbrev-ignored-buffer-names):
+	* dabbrev.el (dabbrev-ignored-buffer-regexps): New.
+	* dabbrev.el (dabbrev-select-buffers-function):
+	* dabbrev.el (dabbrev-filter-elements):
+	* dabbrev.el (dabbrev-completion):
+	* dabbrev.el (dabbrev-expand):
+	* dabbrev.el (dabbrev--goto-start-of-abbrev):
+	* dabbrev.el (dabbrev--select-buffers):
+	* dabbrev.el (dabbrev--try-find):
+	* dabbrev.el (dabbrev--find-all-expansions):
+	* dabbrev.el (dabbrev--scanning-message):
+	* dabbrev.el (dabbrev--ignore-buffer-p): New.
+	* dabbrev.el (dabbrev--find-expansion):
+	* dabbrev.el (dabbrev--substitute-expansion):
+	* dabbrev.el (dabbrev--make-friend-buffer-list): New.
+	* dabbrev.el (dabbrev--search):
+	Synch to 21.3.
+	
+	* lazy-lock.el (lazy-lock-install-timers):
+	Use delete-itimer not cancel-timer.
+	
+	* recent-files.el:
+	* recent-files.el (recent-files-non-permanent-submenu):
+	Default recent-files-non-permanent-submenu to nil, as it should
+	be.
+
+2004-10-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.16 released.
+
+2004-09-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.15 released.
+
+2004-09-23  Zajcev Evgeny  <zevlg@yandex.ru>
+
+	* func-menu.el (fume-mode): [fix] typo.
+
+2004-06-18  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.14 released.
+
+2004-03-31  Stephen J. Turnbull  <turnbull@sk.tsukuba.ac.jp>
+
+	* completion.el (symbol-under-point):
+	(symbol-before-point):
+	(symbol-under-or-before-point):
+	(symbol-before-point-for-complete):
+	(next-cdabbrev):
+	(add-completions-from-c-buffer):
+	Don't let syntax-table properties override completion's table.
+
+2004-06-17  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.13 released.
+
+2004-06-16  Tom Howland  <tom@tomzilla.org>
+
+	* desktop.el (desktop-create-buffer): Don't try to
+	use expand-file-name on nil.
+
+2003-09-25  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* desktop.el (desktop-partially-loaded-p): New variable.
+	(desktop-save): Check it before overwriting.
+	(desktop-read): Set, then clear it, in case error is thrown.
+
+2004-04-25  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.12 released.
+
+2004-04-25  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* man.el (manual-entry): Document '-k' option.  Accept fewer
+	characters of output in apropos-mode.
+	(Manual-nuke-nroff-bs): Handle rman correctly.
+
+2004-04-24  Adrian Aichner  <adrian@xemacs.org>
+
+	* align.el: Sync align.el with current GNU Emacs CVS to fix bug in
+	align-region.
+	* align.el (align-rules-list): Typo fix.
+	* align.el (align-exclude-rules-list): Ditto.
+	* align.el (align-region): Bug fix.
+
+2004-01-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.11 released.
+
+	* winring.el: Sync with upstream version 3.11.
+
+2003-10-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.10 released.
+
+2003-10-20  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.09 released.
+
+2003-10-20  Jake Colman  <jake.colman@xemacs.org>
+
+	* Makefile (ELCS):  new library highline.el
+	* edit-utils.texi:
+	* edit-utils.texi (Top):
+	* edit-utils.texi (paren):
+	* edit-utils.texi (shell-font):
+	* edit-utils.texi (highline):
+	* edit-utils.texi (highline-keys):
+	* edit-utils.texi (highline-hooks):
+	* edit-utils.texi (highline-options):
+	* package-info.in:
+
+2003-10-17  Andrew W. Nosenko  <awn@bcs.zp.ua>
+
+	* func-menu.el: Add autoconf mode support.
+	(fume-function-name-regexp-autoconf): New variable.
+	(fume-function-name-regexp-alist): Use it.
+
+2003-10-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.08 released.
+
+2003-10-15  Jake Colman  <jake.colman@xemacs.org>
+
+	* Makefile (ELCS): new library narrow-stack.el
+	* edit-utils.texi (Top):
+	* edit-utils.texi (Align Usage):
+	* edit-utils.texi (allout):
+	* edit-utils.texi (narrow-stack): documentation for new library
+
+2003-08-28  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.07 released.
+
+2003-08-28  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi: Replaced references to '.emacs file' with the
+	more generic 'initialization file'.
+	
+2003-08-27  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi: Reorganized and rearranged the menu
+
+2003-08-27  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi: New section "Undocumented" containing only the
+	undocumented libraries. Used the .el filename as the node name
+	since that will make it easier to determine which file provides
+	which functionality.  Provided documentation for a few more
+	undocumented nodes.
+
+2003-08-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.06 released.
+
+2003-08-20  René Kyllingstad  <listmailxemacs@kyllingstad.com>
+
+	* func-menu.el (fume-python-fully-qualified-names): New.
+	* func-menu.el (fume-find-next-python-function-name):
+          use fume-python-fully-qualified-names
+
+2003-08-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.05 released.
+
+2003-08-14  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi (Top):  Completed the documentation of most of
+	the menu items.
+	* edit-utils.texi (Navigating the Window Ring):
+	* edit-utils.texi (Where Was I):
+	* edit-utils.texi (Abbreviation List):
+	* edit-utils.texi (id-select):
+	* edit-utils.texi (makesum):
+	* edit-utils.texi (man):
+	* edit-utils.texi (outl-mouse):
+	* edit-utils.texi (page-ext):
+	* edit-utils.texi (page-ext-keys):
+	* edit-utils.texi (page-ext-using):
+	* edit-utils.texi (page-ext-addr):
+	* edit-utils.texi (Specifically): New.
+	* edit-utils.texi (Redo):
+	* edit-utils.texi (Scrolling In Place):
+	* edit-utils.texi (sip-features):
+	* edit-utils.texi (sip-commands):
+	* edit-utils.texi (sip-install):
+	* edit-utils.texi (sip-customize):
+	* edit-utils.texi (Line Numbering):
+	* edit-utils.texi (Vertical Mode):
+	* edit-utils.texi (Getting the Mouse Out of the Way):
+	* edit-utils.texi (Blinking Cursor):
+	* edit-utils.texi (Speeding Up Fontlock):
+	* edit-utils.texi (Lazy Fontlocking):
+	* edit-utils.texi (Another Lazy Fontlocker):
+	* edit-utils.texi (mic-paren):
+	* edit-utils.texi (paren):
+	* edit-utils.texi (shell-font):
+	* edit-utils.texi (Hooks Invoked After Saving):
+	* edit-utils.texi (Indivisible Blocks of Text):
+	* edit-utils.texi (Table and Array Editor):
+	* edit-utils.texi (Big Menubar):
+	* edit-utils.texi (Floating Toolbar):
+
+2003-08-13  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* edit-utils.texi: Add Jake's copyright notice, change license.
+	(Copying): New node, explains the doclicense problem.
+	(XEmacs License): Change name from `Copying'.
+	(Top):
+	(Comparing Windows):
+	(The Toolbar Utilities):
+	Fixup references to `Copying' and `XEmacs License'.
+
+	(Completion): Shut up makeinfo.
+
+2003-08-11  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi (Top): Documentation for the following sections:
+	'File Management', 'Session Management' and 'Abbreviations'.
+	* edit-utils.texi (Detached Minibuffers):
+	* edit-utils.texi (Convenient Buffer Switching):
+	* edit-utils.texi (iswitchb-cust):
+	* edit-utils.texi (iswitchb-my-keys): Removed.
+	* edit-utils.texi (Changing the Display):
+	* edit-utils.texi (Permanent Buffers):
+	* edit-utils.texi (Self-Resizing Minibuffer):
+	* edit-utils.texi (Searching Many Buffers):
+	* edit-utils.texi (Meaningful Unique Names):
+	* edit-utils.texi (Navigating the Window Ring):
+	* edit-utils.texi (Auto-Revert Usage):
+	* edit-utils.texi (Backup Directory):
+	* edit-utils.texi (Bookmark):
+	* edit-utils.texi (Desktop):
+	* edit-utils.texi (Recent File Navigation):
+	* edit-utils.texi (recentf-cust):
+	* edit-utils.texi (Example): New.
+	* edit-utils.texi (Save Configuration):
+	* edit-utils.texi (Save History):
+	* edit-utils.texi (Save Places):
+	* edit-utils.texi (Where Was I):
+	* edit-utils.texi (Completion):
+	* edit-utils.texi (Dynamic Abbreviations):
+	* edit-utils.texi (Hippie Expand):
+	* edit-utils.texi (Interactive Completion):
+	* edit-utils.texi (Template Insertion):
+	* edit-utils.texi (Power Macros):
+	* edit-utils.texi (Align):
+	* edit-utils.texi (Align Usage):
+	* edit-utils.texi (Allout):
+	* edit-utils.texi (The Toolbar Editor):
+	* edit-utils.texi (Toolbar Portability):
+
+2003-08-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.04 released.
+
+2003-08-07  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi (Top): Documentation for the 'Buffer and Window
+	Management' packages.
+	* edit-utils.texi (Comparing Windows):
+	* edit-utils.texi (Detached Minibuffers):
+	* edit-utils.texi (Convenient Buffer Switching):
+	* edit-utils.texi (Customization):
+	* edit-utils.texi (iswitchb-my-keys): New.
+	* edit-utils.texi (Changing the Display):
+	* edit-utils.texi (Regexp Matching):
+	* edit-utils.texi (Replacement for read-buffer):
+	* edit-utils.texi (Permanent Buffers):
+	* edit-utils.texi (Self-Resizing Minibuffer):
+	* edit-utils.texi (Searching Many Buffers):
+	* edit-utils.texi (Meaningful Unique Names):
+	* edit-utils.texi (Navigating the Window Ring):
+	* edit-utils.texi (History):
+	* edit-utils.texi (Related Packages):
+	* edit-utils.texi (Reverting Buffers):
+	* edit-utils.texi (Auto-Revert Usage):
+	* edit-utils.texi (Power Macros):
+	* edit-utils.texi (Align Usage):
+	* edit-utils.texi (Allout):
+
+2003-08-06  Jake Colman  <jake.colman@xemacs.org>
+
+	* Makefile (ELCS): New package allout
+	* edit-utils.texi (Top): documentation for allout
+	* edit-utils.texi (Vertical Mode):
+	* edit-utils.texi (Align):
+	* edit-utils.texi (Align Usage):
+	* edit-utils.texi (Allout):
+	* package-info.in: New package allout
+
+2003-08-06  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.03 released.
+
+2003-08-06  Jake Colman  <jake.colman@xemacs.org>
+
+	* edit-utils.texi (Top): Added documentation for align,
+	autorevert, and power-macros.
+	* edit-utils.texi (Meaningful Unique Names):
+	* edit-utils.texi (Navigating the Window Ring):
+	* edit-utils.texi (Reverting Buffers):
+	* edit-utils.texi (Auto-Revert Usage):
+	* edit-utils.texi (Power Macros):
+	* edit-utils.texi (Line Numbering):
+	* edit-utils.texi (Vertical Mode):
+	* edit-utils.texi (Align):
+	* edit-utils.texi (Align Usage):
+
+2003-08-01  Jake Colman  <jake.colman@xemacs.org>
+
+	* Makefile (ELCS): Added two libraries: autorevert and align
+	* package-info.in: update provides
+	* autorevert.el: new
+	* align.el: new
+	
+
+2003-06-20  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.02 released.
+
+2003-06-16  Nickolay Pakoulin  <npak@ispras.ru>
+
+	* recent-files.el (recent-files-visit-file): New function.
+	A command to find a file from `recent-files-list'
+
+2003-06-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 2.01 released.
+
+2003-05-31  Adrian Aichner  <adrian@xemacs.org>
+
+	* func-menu.el (fume-function-name-regexp-lisp): Make regexp more
+	correct.
+
+2003-03-21  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Add entries for tempo*.html, edit-utils*.html.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+	Use EXPLICIT_DOCS instead of explicitly giving the targets
+	and dependencies.
+
+2003-03-02  Norbert Koch  <nk@viteno.net>
+
+	* Makefile (VERSION): XEmacs package 2.00 released.
+
+	* Makefile (VERSION): XEmacs package 1.99 released.
+
+2003-02-17  Ben Wing  <ben@xemacs.org>
+
+	* lazy-lock.el:
+	* lazy-lock.el (lazy-lock-cache-start): Removed.
+	* lazy-lock.el (lazy-lock-cache-end): Removed.
+	* lazy-lock.el (lazy-lock-window-start-cache): New.
+	* lazy-lock.el (lazy-lock-window-end-cache): New.
+	* lazy-lock.el (lazy-lock-window-buffer-cache): New.
+	* lazy-lock.el (lazy-lock-window-buffer-modiff-cache): New.
+	* lazy-lock.el (lazy-lock-frame-modiff-cache): New.
+	* lazy-lock.el (lazy-lock-text-props-changed-cache): New.
+	* lazy-lock.el (lazy-lock-mode): New.
+	* lazy-lock.el (lazy-lock-buffers): New.
+	* lazy-lock.el (lazy-lock-timers): New.
+	* lazy-lock.el (lazy-lock-first-unfontify-pos): New.
+	* lazy-lock.el (lazy-lock-minimum-size):
+	* lazy-lock.el (lazy-lock-walk-windows): Removed.
+	* lazy-lock.el (lazy-lock-defer-on-the-fly): New.
+	* lazy-lock.el (NOTE): New.
+	* lazy-lock.el (lazy-lock-defer-contextually): New.
+	* lazy-lock.el (lazy-lock-defer-time): New.
+	* lazy-lock.el (lazy-lock-stealth-time):
+	* lazy-lock.el (lazy-lock-stealth-nice):
+	* lazy-lock.el (lazy-lock-stealth-verbose):
+	* lazy-lock.el (lazy-lock-ignore-commands): Removed.
+	* lazy-lock.el (lazy-lock-mode-line-string):
+	* lazy-lock.el (lazy-lock-hide-invisible): Removed.
+	* lazy-lock.el (lazy-lock-invisible-foreground): Removed.
+	* lazy-lock.el (turn-on-lazy-lock):
+	* lazy-lock.el (lazy-lock-value-in-major-mode): New.
+	* lazy-lock.el (lazy-lock-install): New.
+	* lazy-lock.el (lazy-lock-fixup-hooks): Removed.
+	* lazy-lock.el (lazy-lock-install-hooks): New.
+	* lazy-lock.el (lazy-lock-install-timers): New.
+	* lazy-lock.el (lazy-lock-unstall): New.
+	* lazy-lock.el (lazy-lock-pre-idle-fontify-windows):
+	* lazy-lock.el (lazy-lock-maybe-fontify-frame):
+	* lazy-lock.el (lazy-lock-fontify-region): Removed.
+	* lazy-lock.el (lazy-lock-after-fontify-buffer): Removed.
+	* lazy-lock.el (lazy-lock-after-change-function): Removed.
+	* lazy-lock.el (lazy-lock-after-change): New.
+	* lazy-lock.el (lazy-lock-timeout-id): Removed.
+	* lazy-lock.el (lazy-lock-post-command-fontify-stealthily): Removed.
+	* lazy-lock.el (lazy-lock-post-setup-emacs-fontify-windows): Removed.
+	* lazy-lock.el (lazy-lock-post-setup-ediff-control-frame): Removed.
+	* lazy-lock.el (lazy-lock-fontify-after-defer): New.
+	* lazy-lock.el (lazy-lock-fontify-after-idle): New.
+	* lazy-lock.el (lazy-lock-after-unfontify-buffer): New.
+	* lazy-lock.el (lazy-lock-maybe-fontify-window): Removed.
+	* lazy-lock.el (lazy-lock-fontify-stealthily): Removed.
+	* lazy-lock.el (lazy-lock-fontify-walk-stealthily): Removed.
+	* lazy-lock.el (lazy-lock-unfontified-p):
+	* lazy-lock.el (lazy-lock-percent-fontified):
+	* lazy-lock.el (font-lock-after-fontify-buffer-hook):
+	* lazy-lock.el (font-lock-after-unfontify-buffer-hook):
+	* lazy-lock.el (lazy-lock-fontify-chunk): New.
+	* lazy-lock.el (lazy-lock-vertical-motion-value): New.
+	* lazy-lock.el (lazy-lock-colour-invisible): Removed.
+
+	Major overhaul.  This version should be faster than the old one,
+	and in addition has the major new feature of "deferred correct
+	fontification", as described below.  Sync up most stuff to the
+	latest lazy-lock in FSF 21.2.  Integrate some stuff from jit-lock,
+	because our model is closer to jit-lock's than to FSF/lazy-lock's.
+	Speed it up in various ways, e.g. by removing the hack that binds
+	font-lock-beginning-of-syntax-function to nil, thereby insuring
+	horrible behavior at the end of a file.  Use GUARANTEE argument to
+	window-end to ensure we get an accurate idea of what's on the
+	screen, and therefore we know with confidence whether the screen
+	is going to be scrolled by redisplay, and can much better optimize
+	our checks to see whether we need to do anything.  The biggest
+	user-level difference has to do with lazy-lock-defer-contextually,
+	which, if non-nil, implements a system whereby after a change
+	lazy-lock will update everything from the change point to the
+	bottom of the screen (and further, once you display the areas
+	farther down), after an idle-delay of (currently) 0.25 seconds.
+	Insert a comment-begin (/*) in C, for example, and you'll see
+	*all* the text afterwards, down to the bottom of the screen,
+	become colored like a comment unless a comment-end intervenes.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.98 released.
+
+2003-01-06  Ville Skyttä  <scop@xemacs.org>
+
+	* tempo.el: Doc updates, sync with GNU Emacs.
+	(tempo-insert-template): Check for `mark-active' and
+	`deactivate-mark' before using them.
+	* tempo.texi: New.
+	* Makefile: Handle tempo.texi.
+
+2003-01-03  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.97 released.
+
+2002-12-17  Jerry James  <james@xemacs.org>
+
+	* Makefile (REQUIRES): Add xemacs-devel so that profile autoloads.
+
+2002-12-06  Ville Skyttä  <scop@xemacs.org>
+
+	* func-menu.el (fume-perl-fully-qualified-names): New.
+	(fume-find-next-perl-function-name): Fix names for fully
+	qualified functions, optionally return the fully qualified name.
+	Original patch by Remco Wouts <remco@xray.bmc.uu.se>.
+
+2002-12-04  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el (toolbar-update-toolbar): New function.
+
+2002-12-03  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el (toolbar-find-button):
+	(toolbar-find-item):
+	(toolbar-find-button-by-icon):
+	(toolbar-find-button-by-command):
+	(toolbar-find-button-by-help-string):
+	(toolbar-find-button-by-element):
+	(toolbar-add-kbd-macro):
+	(toolbar-execute-last-kbd-macro):
+	New functions.
+	(button-palette): New variable.
+	(toolbar-add-button): Rename to toolbar-add-item.
+	(toolbar-add-item): Renamed from toolbar-add-button.
+	(toolbar-kill-item-pos): Improve specifier handling.  Use
+	button-palette.
+
+2002-11-23  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el: Cosmetic changes for jwz.
+
+2002-11-22  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el: More accurate keywords.
+	(edit-toolbar): New Customize group.
+	(toolbar-button-default-position): New user variable.
+	(toolbar-new-button): New function.
+	(toolbar-new-spacer): New function.
+	(make-toolbar-instantiator): New function.
+	(toolbar-add-button): New function.
+	(toolbar-add-button-on-the-fly): New function.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+2002-12-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.96 released.
+
+2002-12-04  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el (toolbar-update-toolbar): New function.
+
+2002-12-03  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el (toolbar-find-button):
+	(toolbar-find-item):
+	(toolbar-find-button-by-icon):
+	(toolbar-find-button-by-command):
+	(toolbar-find-button-by-help-string):
+	(toolbar-find-button-by-element):
+	(toolbar-add-kbd-macro):
+	(toolbar-execute-last-kbd-macro):
+	New functions.
+	(button-palette): New variable.
+	(toolbar-add-button): Rename to toolbar-add-item.
+	(toolbar-add-item): Renamed from toolbar-add-button.
+	(toolbar-kill-item-pos): Improve specifier handling.  Use
+	button-palette.
+
+2002-11-23  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el: Cosmetic changes for jwz.
+
+2002-11-22  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* toolbar-utils.el: More accurate keywords.
+	(edit-toolbar): New Customize group.
+	(toolbar-button-default-position): New user variable.
+	(toolbar-new-button): New function.
+	(toolbar-new-spacer): New function.
+	(make-toolbar-instantiator): New function.
+	(toolbar-add-button): New function.
+	(toolbar-add-button-on-the-fly): New function.
+
+2002-12-04  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* Makefile (TEXI_FILES, INFO_FILES): Define them.
+	(all): Depend on INFO_FILES.
+
+	* edit-utils.texi: New file.
+
+2002-11-26  Katsumi Yamaoka  <yamaoka@jpl.org>
+
+	* lazy-shot.el (lazy-shot-install-timer): Use kill-buffer-hook to
+	delete an itimer when a buffer is killed.
+
+2002-11-05  Robert Fenk  <Robert.Fenk@gmx.de>
+
+	* desktop.el (desktop-relative-file-names): If non-nil we store
+	relative file names in the desktop-file.
+	(desktop-save):  Modified to honor `desktop-relative-file-names'.
+	(desktop-create-buffer): Use the current `desktop-dirname' as the
+	directory for the expansion of relative file names.
+
+2002-11-01  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.95 released.
+
+2002-10-28  Vladimir Alexiev  <vladimir@worklogic.com>
+
+	* after-save-commands.el (After-save--set-help-flyover):
+	Allow the predicate to be a lisp form instead of a regexp string.
+	(After-save--entry-lookup): ditto.
+	(After-save--after-save-hook): 
+	Allow the command to be a lisp form instead of a shell command.
+	Process environment only if it's a shell command.
+	(After-save-alist): 
+	Fix the defcustom to allow choices for predicate and command.
+	Document the variable better and give examples of elisp predicate
+	and command.
+	(my-after-save-action): (after "ends here")
+	Some commented-out code, has nicer output capabilities but is not
+	merged yet.
+
+2002-10-29  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.94 released.
+
+2002-10-20  Ville Skyttä  <scop@xemacs.org>
+
+	* func-menu.el: Update my mail address.
+
+2002-10-15  Simon Josefsson  <jas@extundo.com>
+
+	* saveplace.el: Sync.el with Emacs 21.2.
+
+2001-10-22  Gerd Moellmann  <gerd@gnu.org>
+
+	* saveplace.el (save-place): Require `saveplace'.
+
+2001-07-15  Pavel Janík  <Pavel@Janik.cz>
+
+	* saveplace.el: Some fixes to follow coding conventions in
+	files maintained by FSF.
+
+2001-06-28  Karl Fogel  <kfogel@red-bean.com>
+
+	* saveplace.el: Update maintainer email address.
+
+2001-04-19  Karl Fogel  <kfogel@collab.net>
+
+	* saveplace.el (save-place-alist-to-file): Removed no-effect code
+	that inserted file content only to delete it immediately.
+	Probably a cut-and-paste bug.  Thanks to Juanma Barranquero
+	<lektu@terra.es> for the patch.
+
+1997-09-24  Francis Litterio  <franl@world.std.com>
+
+	* saveplace.el (save-place-to-alist): Optimize out the degenerate
+	case when point is 1.
+
+1997-09-19  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* saveplace.el (save-place-version-control): Make nil the default.
+
+1997-01-28  Richard Stallman  <rms@psilocin.gnu.ai.mit.edu>
+
+	* saveplace.el (load-save-place-alist-from-file):
+	Delete spurious t's.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-09-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.93 released.
+
+2002-09-03  René Kyllingstad  <listmailxemacs@kyllingstad.com>
+
+	* desktop.el (desktop-enable-save-on-exit): New variable.
+	Partial sync with GNU Emacs 21.2.  Small tweaks to the
+	submitted patch by <scop@xemacs.org>.
+
+2002-08-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.92 released.
+
+2002-08-08  Adrian Aichner  <adrian@xemacs.org>
+
+	* mic-paren.el: Sync with
+	http://www.emacswiki.org/elisp/mic-paren.el version 3.7 plus typo
+	fixes of my own.
+
+2002-08-12  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.91 released.
+
+2002-08-02  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.90 released.
+
+2002-07-31  Ville Skyttä  <scop@xemacs.org>
+
+	* func-menu.el: Add JavaScript support, checkdoc'ify.
+	(fume-function-name-regexp-javascript): New.
+	(fume-function-name-regexp-alist): Use -regexp-javascript.
+	(fume-find-next-javascript-function-name): New.
+	(fume-find-function-name-method-alist): Use -javascript-function-name.
+
+2002-07-24  Ville Skyttä  <scop@xemacs.org>
+
+	* setnu.el: Sync with author version 1.06.
+
+2002-06-27  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.89 released.
+
+2002-06-04  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.88 released.
+
+2002-06-02  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.87 released.
+
+2002-05-31  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.86 released.
+
+2002-05-23  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* completion.el (save-completions-to-file): Kill the
+	" *completion-save-buffer*" buffer.
+	(load-completions-from-file): Ditto.
+
+2002-05-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.85 released.
+
+2002-05-10  Ben Wing  <ben@xemacs.org>
+
+	* recent-files.el:
+	* recent-files.el (recent-files-menu-omit-chars-list): New.
+	* recent-files.el (recent-files-version):
+	* recent-files.el (recent-files-maybe-generate-accelerator-spec): New.
+	* recent-files.el (recent-files-update-menu):
+	Add accelerator specs to recent-files menus, if possible.
+	
+	* scroll-in-place.el (scroll-command-groups):
+	* scroll-in-place.el (scroll-down):
+	* scroll-in-place.el (scroll-up):
+	Changes to track changes in a new workspace of mine (not yet
+	committed), where all scrollbar stuff is moved to Lisp.
+	
+2002-04-30  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.84 released.
+
+2002-04-28  Steve Youngs  <youngs@xemacs.org>
+
+	* big-menubar.el: Rewrite so it's useful for XEmacs versions
+	21.1.x to 21.5.x.
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.83 released.
+
+2002-04-08  John Paul Wallington  <jpw@bundalo.shootybangbang.com>
+
+	* avoid.el (mouse-avoidance-mode-line-string): add autoload cookie.
+
+2002-03-25  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): 1.82 released.
+
+2002-03-24  Nix  <nix@esperi.demon.co.uk>
+
+	* setnu.el (setnu-mode): Added autoload cookie.
+
+	* vertical-mode.el: Added autoload cookie.
+
+2002-03-08  Mike Sperber <mike@xemacs.org>
+
+	* func-menu.el (fume-function-name-regexp-scheme): Recognize other
+	define-like forms (such as define-syntax).
+
+2002-03-04  Vin Shelton  <acs@xemacs.org>
+
+	* Makefile (REQUIRES): Added dired and mail-lib
+
+2002-03-03  Nix  <nix@esperi.demon.co.uk>
+
+	* desktop.el: Synch with FSF Emacs 21.1.
+
+2002-02-24  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in (provides): Remove ibuffer.
+
+2002-02-15  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (ELCS): Removed ibuffer.elc, moved it to it's own
+	package. 
+
+2002-01-29  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* ibuffer.el (ibuffer-name-map): use [buttonx], not [(mouse-x)].
+	(ibuffer-mode-name-map): ditto.
+	(ibuffer-occur-mode-map): ditto.
+	(ibuffer-fontification-level): return font-lock-auto-fontify when
+	font-lock-mode is bound.
+
+2002-01-18  Casper Kvan Clausen  <xemacs@kvans.dk>
+
+	* lazy-lock.el (lazy-lock-percent-fontified): Fix bug when
+	traversing empty buffers.
+
+2002-01-16  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* man.el (Manual-switches): fix custom type, add group.
+	* avoid.el (mouse-avoidance-mode-line-string): new customizable
+	variable.
+	* balloon-help.el (balloon-help-mode-line-string): ditto.
+	* lazy-lock.el (lazy-lock-mode-line-string): ditto.
+
+2002-01-08  Didier Verna  <didier@xemacs.org>
+
+	* func-menu.el (fume-function-marks): New.
+	* func-menu.el (fume-rescan-buffer): Use it.
+	* func-menu.el (fume-update-menubar-entry): Call `function-menu'
+	instead of `fume-add-menubar-entry'.
+	* func-menu.el (function-menu): Add menu entries for
+	`fume-goto-next-function' and `fume-goto-previous-function'.
+	* func-menu.el (fume-mouse-function-goto): fix bug when clicking
+	outside text.
+	* func-menu.el (fume-goto-next-function): New.
+	* func-menu.el (fume-goto-previous-function): New.
+	* func-menu.el (fume-mode-line-string): New.
+	* func-menu.el (fume-mode-hook): New.
+	* func-menu.el (fume-mode-map): New.
+	* func-menu.el (fume-mode): New.
+	* func-menu.el (turn-on-fume-mode): New.
+	* func-menu.el (turn-off-fume-mode): New.
+	* func-menu.el (fume-setup-buffer): New.
+	* func-menu.el (fume-do-setup-buffer): New.
+
+2001-12-29  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in: (provides) Update to include all provides.
+
+2001-12-26  Nix  <nix@esperi.demon.co.uk>
+
+	* uniquify.el (uniquify-ignore-buffers-query-functions): New hook,
+	called to determine buffers not to uniquify.
+	(uniquify-rationalize-file-buffer-names): Use it...
+	(uniquify-ignore-buffers-re): ... reimplement in terms of it.
+	New function.
+	(uniquify-ignore-buffers-mode-re): New variable and function.
+	Co-authored with Volker Franz  <volker.franz@tuebingen.mpg.de>.
+
+2001-12-13  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (REQUIRES): Add fsf-compat for info-look's require
+	'overlay.
+
+2001-12-05  Christoph Wedler  <Christoph.Wedler@sap.com>
+
+	* info-look.el: Sync with Emacs-21.1.  The only differences are...
+	(overlay): Require.
+	(info-lookup): Use code from old XEmacs version instead Emacs
+	specific multi-frame coding...
+	(...emacs-lisp-mode): XEmacs' info files are named
+	xemacs/lispref instead emacs/elisp.
+
+2001-12-03  Ted Phelps <phelps@dstc.edu.au>
+
+	* blink-cursor.el: Don't use last-input-time if it's not
+	available.
+
+2001-11-27  Robert Fenk  <Robert.Fenk@gmx.de>
+
+	* man.el (Manual-use-rosetta-man): New.
+
+2001-09-29  Jeff Mincy <jeff@delphioutpost.com>
+
+	* recent-files.el (recent-files-entry-to-menu-entry): Don't
+	prepend "*" if in a submenu.
+
+2001-08-23  Adrian Aichner  <adrian@xemacs.org>
+
+	* uniquify.el: Fix the documented bug that prevented uniquify from
+	working in native Windows XEmacs.  Patch is courtesy of Paul
+	Krause.
+	* uniquify.el (uniquify-directory-matching-regexp): New.
+	* uniquify.el (uniquify-get-proposed-name): Use
+	uniquify-directory-matching-regexp.
+	* uniquify.el (uniquify-reverse-components): Use
+	directory-sep-char.
+
+2001-08-16  Steve Youngs  <youngs@xemacs.org>
+
+	* setnu.el: Moved here from JDE package.
+
+	* Makefile (ELCS): Add setnu.elc
+
+2001-08-14  Stefan Kamphausen  <mail@skamphausen.de>
+
+	* func-menu.el (fume-find-next-ruby-function-name): Improved.
+
+2001-08-06  Stefan Kamphausen  <mail@skamphausen.de>
+
+	* func-menu.el: added ruby support
+
+2001-07-19   Daiki Ueno  <ueno@unixuser.org>
+
+	* iswitchb.el (iswitchb-complete): Set this-command to
+	'iswitchb-completion-help when putting the following excusion into
+	iswitchb-completion-help.
+
+2001-07-14  Steve Youngs  <youngs@xemacs.org>
+
+	* ibuffer.el: Replaced with newer version that was in
+	xemacs-devel.
+
+2001-07-10  Vin Shelton  <acs@xemacs.org>
+
+	* search-buffers.el: Remove trailing ^Ms.
+
+2001-07-01  Steve Youngs  <youngs@xemacs.org>
+
+	* search-buffers.el: New file.
+
+	* ibuffer.el: New file.
+
+	* Makefile (ELCS): Add ibuffer.elc, search-buffers.elc.
+
+2001-05-20  Ben Wing  <ben@xemacs.org>
+
+	* scroll-in-place.el (scroll-command-groups):
+	Put scroll-up-one and scroll-down-one in their own group so they
+	don't interact badly with pageup/down.
+
+2001-05-11  Ben Wing  <ben@xemacs.org>
+
+	* func-menu.el: typo fix.
+	* recent-files.el: autoload the init function.
+
+2001-04-20  Karl M. Hegbloom  <karlheg@microsharp.com>
+
+	* id-select.el (id-select-thing-with-mouse): Use `own-selection' in
+	newest XEmacs.
+
+2001-04-21  Ben Wing  <ben@xemacs.org>
+
+	* func-menu.el:
+	* func-menu.el (fume-add-menubar-entry):
+	* func-menu.el (fume-do-add-menubar-entry): New.
+	* func-menu.el (fume-update-menubar-entry): When invoked from
+	find-file-hooks, delay creation of menubar entry until XEmacs
+	becomes idle.  This way, func-menu will not intrude when files are
+	loaded temporarily (e.g. as part of patch-to-change-log).
+
+2001-04-06  Glynn Clements  <glynn.clements@virgin.net>
+
+	* man.el (manual-entry): limit search to current line when trying
+	to find a default.
+
+2001-04-05  Andrew W. Nosenko  <awn@bcs.zp.ua>
+
+	* func-menu.el (fume-function-name-regexp-make): Use `\s_' symbol
+	class instead of hardcoded `_' and `/' characters.
+
+2001-02-24  Ben Wing  <ben@xemacs.org>
+
+	* dabbrev.el:
+	* dabbrev.el (dabbrev):
+	* dabbrev.el (dabbrev-abbrev-skip-leading-regexp):
+	* dabbrev.el (dabbrev-case-fold-search):
+	* dabbrev.el (dabbrev-upcase-means-case-search):
+	* dabbrev.el (dabbrev-case-replace):
+	* dabbrev.el (dabbrev-check-all-buffers):
+	* dabbrev.el (dabbrev-ignored-buffer-names): New.
+	* dabbrev.el (dabbrev-check-other-buffers):
+	* dabbrev.el (dabbrev-completion):
+	* dabbrev.el (dabbrev-expand):
+	* dabbrev.el (dabbrev--abbrev-at-point):
+	* dabbrev.el (dabbrev--find-expansion):
+	* dabbrev.el (dabbrev--substitute-expansion):
+	* dabbrev.el (dabbrev--search):
+	Synch with FSF 20.7.
+
+2001-02-16  Martin Buchholz  <martin@xemacs.org>
+
+	* lazy-lock.el (lazy-lock-pre-idle-fontify-windows):
+	Avoid infinite loop if selected frame is not visible.
+	* lazy-lock.el (lazy-lock-maybe-fontify-window):
+	Can't use with-selected-window - not in 21.1.
+
+2001-02-15  Martin Buchholz  <martin@xemacs.org>
+
+	Fix bug:
+	xemacs -q -no-site-file ~/.emacs -f font-lock-mode \
+	  -f turn-on-lazy-lock -f split-window-vertically -f make-frame
+	Then select upper window, move mouse to single-window frame, move
+	mouse back to split-window frame. Selected window will be lower one.
+	* lazy-lock.el:
+	(lazy-lock-pre-idle-fontify-windows):
+	The idiom (with-selected-window x ...) only works if x is in the
+	same frame as the selected window - else the frame-selected window
+	of x's frame is not restored.
+	(lazy-lock-maybe-fontify-frame): New.
+
+2001-02-15  Martin Buchholz  <martin@xemacs.org>
+
+	* lazy-lock.el: Byte-compiler warning cleanup.
+
+2001-01-13  Vin Shelton  <acs@xemacs.org>
+
+	* detached-minibuf.el: Create a separator correctly for 21.2.
+
+2000-11-16  Martin Buchholz  <martin@xemacs.org>
+
+	* func-menu.el (fume-bomb-proof):
+	Revert previous change, now that the byte compiler in 21.2 is fixed.
+
+2000-11-16  Steve Youngs  <youngs@xemacs.org>
+
+	* redo.el: Sync with author version 1.02.
+
+2000-11-15  Steve Youngs  <youngs@xemacs.org>
+
+	* func-menu.el (fume-bomb-proof): Wrap it in a eval-and-compile.
+
+2000-11-13  Martin Buchholz  <martin@xemacs.org>
+
+	* man.el: Fix man page presentation portability bugs.
+	(Manual-nuke-nroff-bs-footers):
+	- Some systems (AIX, Tru64) don't have 66-line paginated man output.
+	- Avoid deleting actual information every 66th line of the man page
+	  by doing conservative detection of paginated output.
+	- Better heuristic for inserting newlines at former page breaks.
+	- Support both Solaris-style and groff-style pagination.
+	(Manual-nuke-nroff-bs):
+	- Make sure section headings are in man-heading face even if the
+	  source boldifies them to avoid random choice of man-bold or man-heading.
+	- Section headings may be followed by one optional newline.
+	- Don't do special handling for one-page man pages.
+	- Special-case the sequence _\b_ so that \fBfoo_bar\fP is
+	  displayed using one extent, not three.
+	- speed up by almost a factor of two.
+	- Guess that the sequence c\b\bc is always overstriking.
+	(Manual-bold-twocolumn-compatibility-regexp): Delete.
+	(Manual-mouseify-xrefs):
+	Pass apropos-mode as an arg instead of using it dynamically.
+
+2000-11-02  Nick V. Pakoulin  <npak@ispras.ru>
+
+	* icomplete.el: Fixed header.
+
+2000-10-18  Andrew W. Nosenko  <awn@bcs.zp.ua>
+
+	* man.el (Manual-mode-syntax-table): syntax table for Manual mode
+	is added.
+	(manual-entry): uses syntax table of current buffer when search
+	defaults but allow wresize(3x) and similar as special case.
+	(manual-entry): if current position is first character of
+	identifier then use this identifier as default.
+
+2000-10-19  Steve Youngs  <youngs@xemacs.org>
+
+	* power-macros.el: New file.
+
+	* Makefile (ELCS): Add power-macros.elc.
+
+2000-10-08  Gunnar Evermann  <ge204@eng.cam.ac.uk>
+
+	* func-menu.el (fume-about): Add missing fume-version.
+
+2000-10-08  Carsten Dominik  <dominik@astro.uva.nl>
+
+	* func-menu.el: Upgrade support for IDL to IDLwave
+
+2000-10-05  Martin Buchholz  <martin@xemacs.org>
+
+	* *: Mega typo fix.
+
+2000-10-04  Andrew W. Nosenko <awn@bcs.zp.ua>
+
+	* man.el (manual-entry): using of syntax-table instead of hard-coded
+	characters for detecting topic when called interactivelly.
+
+2000-09-23  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (ELCS): Added vertical-mode.el.
+
+2000-08-04  Didier Verna  <didier@xemacs.org>
+
+	* func-menu.el: some reformatting of comments and copyright notice.
+	(fume-version): increase.
+	(fume-about): just give the version number.
+	(fume-function-name-regexp-manual): new variable (man pages support).
+	(fume-function-name-regexp-alist): Manual-mode addition.
+	(fume-find-next-manual-section): new function (man pages support).
+	(fume-find-function-name-method-alist): use it.
+
+
+2000-03-10  Felix Gatzemeier  <fxg@cs.RWTH-Aachen.De>
+
+	* man.el: Smoothed sectioning and retrieval.  In determining the
+	default in the prompt, pick up sections in parentheses, too.  When
+	interpreting a manpage request, accept the '5 passwd' shorthand
+	for 'passwd(5)'.
+
+1999-08-30  Mike Sperber <mike@xemacs.org>
+
+	* edit-toolbar.el (edit-toolbar-file-name): Use
+	`user-init-directory' correctly.
+
+	* where-was-i-db.el: Zap the `in-user-init-directory' crapola.
+	(wwi-with-open-database): Expand the database filename.
+
+2000-07-07  Ben Wing  <ben@xemacs.org>
+
+	* lazy-lock.el (lazy-lock-pre-idle-fontify-windows):
+	window-minibuffer-p requires an arg in 21.1.
+	(lazy-lock-post-command-fontify-stealthily): same.
+
+2000-05-21  Ben Wing  <ben@xemacs.org>
+
+	* lazy-lock.el:
+	* lazy-lock.el (lazy-lock-submit-bug-report): Removed.
+	* lazy-lock.el (lazy-lock-mode):
+	* lazy-lock.el (lazy-lock-walk-windows):
+	* lazy-lock.el (lazy-lock-cache-continue): Removed.
+	* lazy-lock.el (lazy-lock): New.
+	* lazy-lock.el (lazy-lock-stealth-verbose):
+	* lazy-lock.el (lazy-lock-ignore-commands):
+	* lazy-lock.el (lazy-lock-hide-invisible):
+	* lazy-lock.el (lazy-lock-continuity-time): Removed.
+	* lazy-lock.el (lazy-lock-invisible-foreground):
+	* lazy-lock.el (lazy-lock-stealth-load): New.
+	* lazy-lock.el (lazy-lock-put-text-property):
+	* lazy-lock.el ('lazy-lock-put-text-property): New.
+	* lazy-lock.el (lazy-lock-fontify-region):
+	* lazy-lock.el (lazy-lock-after-fontify-buffer):
+	* lazy-lock.el (lazy-lock-sit-for): Removed.
+	* lazy-lock.el (lazy-lock-pre-idle-fontify-windows):
+	* lazy-lock.el (lazy-lock-pre-idle-frame-modified-tick): Removed.
+	* lazy-lock.el (lazy-lock-pre-idle-selected-frame): Removed.
+	* lazy-lock.el (lazy-lock-maybe-fontify-window): New.
+	* lazy-lock.el (lazy-lock-timeout-id): New.
+	* lazy-lock.el (lazy-lock-fontify-window):
+	* lazy-lock.el (lazy-lock-post-resize-fontify-windows): Removed.
+	* lazy-lock.el (lazy-lock-fontify-stealthily):
+	* lazy-lock.el (lazy-lock-fontify-walk-windows): Removed.
+	* lazy-lock.el (lazy-lock-fontify-walk-stealthily):
+	* lazy-lock.el (lazy-lock-colour-invisible):
+
+	Removed all support for FSF Emacs and for old (19.x) versions
+	of XEmacs, added customize support, extended the
+	frame-modified-tick code to work over all frames, and cleaned
+	up the pre-idle-hook code to be even more careful about
+	avoiding consing and not changing any global state
+	(e.g. select-window) unless necessary.  Also, general code
+	cleanups, e.g. removing outdated comments.
+
+2000-05-16  Andreas Jaeger  <aj@suse.de>
+
+	* func-menu.el (fume-function-name-regexp-fortran90): Improved.
+	Patch by Michael L. Hall <hall@galt.lanl.gov>.
+
+2000-04-13  Mike Woolley <mike@ariel.co.uk>
+
+	* desktop.el (desktop-internal-v2s): Handle character correctly.
+
+2000-04-03  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* edit-utils/foldout.el: (foldout-hide-flag): New constant.
+	(foldout-show-flag): Ditto.
+	(foldout-mouse-track-click-hook): New function.
+	(foldout-mouse-goto-heading): Use event-point.
+	(foldout-mouse-zoom): New argument click-count.
+	(foldout-mouse-show): Ditto.
+	(Top level): Use XEmacs style key bindings.
+
+2000-04-06  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* man.el (Manual-bold-twocolumn-compatibility-regexp): New
+	variable.
+	(Manual-nuke-nroff-bs): Search
+	Manual-bold-twocolumn-compatibility-regexp followed by two ^H.
+
+2000-04-02  IKEYAMA Tomonori  <tomonori@suiyokai.org>
+
+	* fast-lock.el (fast-lock-cache-name): Treat Windows path
+	separator.
+
+2000-02-23  Andreas Jaeger  <aj@suse.de>
+
+	* mic-paren.el: Version 2.3 from Klaus Berndl.
+
+2000-01-19  Adrian Aichner  <aichner@ecf.teradyne.com>
+
+	* bookmark.el (bookmark-completing-read): Use new argument default
+	of `completing-read'.  Drop last argument if we get signaled
+	`wrong-number-of-arguments'.  Document the change.  Re-indent
+	function.
+
+2000-01-18  Andreas Jaeger  <aj@suse.de>
+
+	* bookmark.el (bookmark-completing-read): Fix patch from
+	1999-12-21 for XEmacs 21.1.x.  Patch by Adrian Aichner
+	<aichner@ecf.teradyne.com>.
+
+2000-01-17  Yoshiki Hayashi  <t90553@mail.ecc.u-tokyo.ac.jp>
+
+	* bookmark.el (bookmark-menu-popup-paned-menu): Use
+	get-popup-menu-response.
+
+2000-01-14  Yoshiki Hayashi  <t90553@mail.ecc.u-tokyo.ac.jp>
+
+	* makesum.el (make-command-summary): Use with-displaying-help-buffer.
+	provide makesum.
+
+1999-12-21  Yoshiki Hayashi  <t90553@mail.ecc.u-tokyo.ac.jp>
+
+	* bookmark.el (bookmark-completing-read): Use DEFAULT
+	argument of completing-read.
+
+1999-11-19  Karl M. Hegbloom  <karlheg@bittersweet.sysc.pdx.edu>
+
+	* where-was-i-db.el: Use expand-file-name in user-init-directory
+
+1999-11-03    Robert Fenk <fenk@forwiss.tu-muenchen.de>
+
+	* reportmail.el (display-time-init):  `getenv "HOME"' replaced by
+	`user-home-directory', because usually HOME is not defined on WinNT.
+
+1999-07-23  Jerry James  <jerry@cs.ucsb.edu>
+
+	* avoid.el (mouse-avoidance-exile-hook): Check
+	emacs-major-version too.
+	* avoid.el (mouse-avoidance-fancy-hook): Ditto.
+
+1999-01-29  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* uniquify.el: Sync with Emacs-20.3.
+	(uniquify-ignore-buffers-re): New user option.  Useful to avoid
+ 	having uniquify rename gnus/message draft buffers.
+	(uniquify-rationalize-file-buffer-names): Use it.
+
+1999-07-07  Greg Klanderman  <greg@klanderman.net>
+
+	* backup-dir.el: update to version 2.9
+
+1999-06-18  Bob Weiner  <weiner@beopen.com>
+
+	* completion.el (complete): Added autoload cookie.
+
+1999-07-02  Didier Verna  <verna@inf.enst.fr>
+
+	* balloon-help.el (balloon-help-minor-mode): new function.
+	(balloon-help-minor-mode): new variable.
+	(balloon-help-motion-hook): handle it.
+	(balloon-help-mode): update doc string + autoload cookie.
+	(balloon-help-mode): (variable) defcustom' it + autoload cookie.
+	(balloon-help-version): increment version number.
+
+1999-05-11  SL Baur  <steve@gneiss.etl.go.jp>
+
+	* recent-files.el (recent-files-add-file): `recent-files-get-file-name'
+	can return nil
+	From Tudor Hulubei <tudor@cs.unh.edu>
+
+1999-03-17  Didier Verna  <didier@xemacs.org>
+
+	* permanent-buffers.el: version 1.2. ChangeLog in the file.
+
+1999-03-08  Charles G. Waldman  <cgw@fnal.gov>
+
+        * where-was-i-db.el:  spelling fixes in documentation
+
+1999-02-18  Karl M. Hegbloom  <karl@cathcart.sysc.pdx.edu>
+
+	* after-save-commands.el: Many changes.  - install a global after
+	save hook, maybe re-install after `write-file', allow setting of
+	an after save command for a file currently being visited, upgrade
+	the example value of After-save-alist, improved docstring, etc...
+
+1998-12-30  Martin Buchholz  <martin@xemacs.org>
+
+	* winring.el: New file.  Version 3.5.
+	Imported from http://www.python.org/emacs/winring/winring.el
+
+1998-12-02  SL Baur  <steve@altair.xemacs.org>
+
+	* floating-toolbar.el: Remove explicit (require 'x) so the file
+	can be bytecompiled prior to release.
+
+1998-10-16  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* man.el (Manual-switches): New option.
+	(manual-entry): Use it.
+
+1998-09-29  Jonathan Marten <jonathan.marten@uk.sun.com>
+
+	* paren.el: General tidy up.  Removed paren-message-suppress, look
+	at whether there is a current message instead.  Implemented
+	backwards context message for programming languages for which it
+	is appropriate (so giving better messages for C and similar),
+	added custom variable `paren-backwards-message'.  Cleaned up some
+	doc strings.
+
+1998-09-30  SL Baur  <steve@altair.xemacs.org>
+
+	* man.el (nuke-nroff-bs): autoload and change to defalias.
+	(Manual-nuke-nroff-bs): autoload.
+
+1998-09-29  SL Baur  <steve@altair.xemacs.org>
+
+	* makesum.el (make-command-summary): program test was reversed.
+
+1998-09-25  Greg Klanderman  <greg@alphatech.com>
+
+	* popper.el: update to version XEmacs 1.5.
+
+1998-09-18  SL Baur  <steve@altair.xemacs.org>
+
+	* lazy-lock.el (lazy-lock-running-xemacs-p): Test for "XEmacs" in
+	version string.
+
+1998-08-25  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* after-save-commands.el: Major cleanups and docstring edits.
+
+1998-07-20  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* after-save-commands.el (After-save--entry-lookup): use
+	`regexp-quote' so that files with `c++' in them don't trigger an
+	"invalid preceding regexp" error.
+
+1998-07-20  SL Baur  <steve@altair.xemacs.org>
+
+	* func-menu.el: v2.57 from David Hughes <djh@videonetworks.com>
+
+1998-07-14  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: add missing dependency for outl-mouse.elc.
+
+	* outl-mouse.el: Global search and replace
+	set-pixmap-contributes-to-line-height to set-glyph-contrib-p.
+
+1998-07-13  SL Baur  <steve@altair.xemacs.org>
+
+	* mode-motion+.el (mode-motion-clear-last-extent): Use modern name
+	for obsolete popup-menu-up-p.
+
+1998-07-12  SL Baur  <steve@altair.xemacs.org>
+
+	* scroll-in-place.el (scroll-determine-goal-column): screen-width
+	-> frame-width.
+
+	* bookmark.el (bookmark-write-file): Kill usage of `baud-rate'.
+	(bookmark-load): Ditto.
+
+1998-06-13  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* after-save-commands.el: Shorten the custom group to improve look
+	of menus.
+
+1998-06-10  Greg Klanderman  <greg@alphatech.com>
+
+	* backup-dir.el: update to v2.7.
+
+1998-05-30  Kirill M. Katsnelson  <kkm@kis.ru>
+
+	* recent-files.el (recent-files-filename-replacements): Use
+	regexp-quote to get regexp from a filename.
+
+1998-05-29  Greg Klanderman  <greg@alphatech.com>
+
+	* popper.el: upgrage from XEmacs v1.3 to v1.4.
+
+1998-06-01  SL Baur  <steve@altair.xemacs.org>
+
+	* popper.el: Synch with v1.3.
+
+1998-05-12  Jan Vroonhof  <vroonhof@math.ethz.ch>
+
+	* lazy-shot.el (lazy-shot-after-change-function): Removed debug
+	message.
+
+1998-05-11  SL Baur  <steve@altair.xemacs.org>
+
+	* edit-faces.el (edit-faces-mode): Use easymenu.
+
+1998-03-15  Greg Klanderman  <greg@alphatech.com>
+
+	* mic-paren.el (paren-dont-activate-on-load): default to t.
+
+1998-04-27  SL Baur  <steve@altair.xemacs.org>
+
+	* id-select.el: (id-select-string-p): Fix beginning of string bug.
+	From Bob Weiner <weiner@altrasoft.com>
+
+1998-04-22  SL Baur  <steve@altair.xemacs.org>
+
+	* shell-font.el: synch David Hughes updates.
+
+1998-04-22  Didier Verna  <verna@inf.enst.fr>
+
+	* blink-cursor.el (blink-cursor-mode): defcustom and autoload it
+	for options menu handling.
+
+	* lazy-shot.el (lazy-shot-mode): ditto.
+
+	* fast-lock.el (fast-lock-mode): ditto.
+
+1998-04-21  SL Baur  <steve@altair.xemacs.org>
+
+	* id-select.el: Synch with latest version.
+
+1998-03-31  Stephen Eglen  <stephen@cns.ed.ac.uk>
+
+	* iswitchb.el (iswitchb-read-buffer): New function to act as
+	drop-in replacement for read-buffer.
+	(iswitchb-existing-buffer-p): New function.
+	(iswitchb-exit-minibuffer): New function.
+	(iswitchb-complete): Use iswitchb-common-match-string rather than
+	recomputing the value.
+	(iswitchb-make-buflist): Takes the default buffer as an argument.
+	(iswitchb-completion-help): Multiple TAB presses scroll the
+	completion window.
+	(iswitchb-minibuffer-setup-hook): Customized.
+	(iswitchb-entryfn-p): Simplified.
+	(iswitchb-default): New variable.
+	(iswitchb-method): No longer a user variable.
+	(iswitchb-entry): Function deleted.
+	(iswitchb-ignore-buffername-p): store-match-data renamed to
+	set-match-data.
+	Many doc fixes.
+
+1998-04-06  Jan Vroonhof  <vroonhof@math.ethz.ch>
+
+	* lazy-shot.el (lazy-shot-lock-extent): Be liberal in what you
+	expect. Check for detached extents.
+
+1998-03-23  Greg Klanderman  <greg@alphatech.com>
+
+	* backup-dir.el: Update to v2.6: quote the eval-after-load form
+
+1998-03-30  SL Baur  <steve@altair.xemacs.org>
+
+	* makesum.el (make-command-summary): Fix to work with new help
+	  buffer naming.
+
+1998-03-25  SL Baur  <steve@altair.xemacs.org>
+
+	* timer.el removed.
+
+1998-03-21  SL Baur  <steve@altair.xemacs.org>
+
+	* ballon-help.el-1.07 from Kyle Jones
+
+1998-03-19  SL Baur  <steve@altair.xemacs.org>
+
+	* timer.el (timer-activate-when-idle): avoid call to
+	set-itimer-uses-arguments.
+	From someone. #### FIXME.
+
+1998-03-11  SL Baur  <steve@altair.xemacs.org>
+
+	* paren.el (paren-max-blinks): Allow setting to nil for indefinite
+	blinking.
+	From Jeremiah W. James <jerry@cs.ucsb.edu>
+
+1998-03-02  Greg Klanderman  <greg@alphatech.com>
+
+	* man.el (manual-entry): Return the buffer into which the man page
+	was formatted if successful.
+
+1998-03-05  SL Baur  <steve@altair.xemacs.org>
+
+	* func-menu.el: synched with v2.54.
+
+1998-03-04  SL Baur  <steve@altair.xemacs.org>
+
+	* desktop.el (desktop-save): Back out avoidance of write-region patch.
+	Suggested by Greg Klanderman <greg@alphatech.com>
+
+1998-02-21  Greg Klanderman  <greg@alphatech.com>
+
+	* desktop.el (desktop-remove): Use expand-file-name to expand a
+	filename wrt a directory, not concat.
+	(desktop-save): ditto.
+
+1998-02-24  SL Baur  <steve@altair.xemacs.org>
+
+	* backup-dir.el: Updated to 2.5.
+
+	* popper.el added.
+	From Greg Klanderman  <greg@alphatech.com>
+	(popper-install): New function with all initialization stuffs.
+
+1998-02-02  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* icomplete.el: Is now usable with rsz-minibuf.el.
+	(icomplete-prospects-length): New user option.
+	(icomplete-completions): Use it.  Make much faster.  Sort
+	remaining prospects.
+
+1998-02-16  Jens-Ulrik Holger Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* uniquify.el: Emacs syncing.  Updates header comments a little.
+	(uniquify-buffer-name-style): Sync tag.
+	(uniquify-min-dir-content): Sync docstring.
+	(uniquify-file-name-nondirectory): Sync new function.
+	(uniquify-fix-item-base): was `uniquify-fix-list-base'.
+	(uniquify-fix-item-filename): was `uniquify-fix-list-filename'.
+	(uniquify-fix-item-buffer): was `uniquify-fix-list-buffer'.
+	(uniquify-fix-item-unrationalized-buffer): was macro
+	`uniquify-cadddr' and `uniquify-unrationalized-buffer'.
+	(uniquify-fix-item-filename-lessp): was
+	`uniquify-fix-list-filename-lessp'.
+	(uniquify-rationalize-file-buffer-names): Sync.
+	(uniquify-buffer-file-name): Sync.
+	(uniquify-filename-lessp): use `uniquify-file-name-nondirectory'.
+	(uniquify-get-proposed-name): Sync.
+	(uniquify-rename-buffer): Sync.
+
+1998-02-16  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* man.el (manual-entry): Do not use option "-s" with
+	option "-k".
+
+1998-02-11  SL Baur  <steve@altair.xemacs.org>
+
+	* reportmail.el: Synch to InfoDock 3.6.2.
+
+1998-02-04  SL Baur  <steve@altair.xemacs.org>
+
+	* mic-paren.el (mic-paren-highlight): Deebolify -- replace /= with
+	(not (eq ...)).
+
+1998-01-23  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* man.el (manual-entry): Would bug out on foo(x).
+
+1998-01-31  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* icomplete.el (icomplete-completions): Make faster.
+  	Would bug out with name="XY" and canditates=(("XY") ("XY")).
+  	Previous bug fix from 1998-01-12 has a serious performance bug.
+
+1998-01-31  SL Baur  <steve@altair.xemacs.org>
+
+	* icomplete.el: Reverse Wedler patch of 1998-01-12.
+
+	* balloon-help.el: Document X resource name for decoration.
+	From Georg Nikodym <georgn@Canada.Sun.COM>
+
+1998-01-25  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standard 1.0.
+	* package-info.in: Ditto.
+
+1998-01-12  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* icomplete.el (icomplete):
+	(icomplete-completions): Would bug out with name="XY" and
+	canditates=(("XY") ("XY")).
+
+1998-01-12  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package specs.
+	resume.el, timer.el, after-save-commands.el, shell-font.el,
+	lispm-fonts.el added.
+
+1997-12-09  Colin Rafferty  <craffert@xemacs.com>
+
+	* lazy-shot.el: Made it handle large insertions in the file more
+	gracefully, by using `after-change-functions'.
+	(lazy-shot-after-change-function): Created.
+	(lazy-shot-install-extents): Made it take `start' and `end'
+	instead of using entire buffer.
+	(lazy-shot-install): Made it install our after-change-function and
+	remove font-lock's.
+	(lazy-shot-unstall): Made it remove our after-change-function and
+	install font-lock's back.
+
+1997-12-10  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* func-menu.el (fume-goto-function): `regexp-quote'
+	function name MATCH-FN.
+
+1998-01-09  SL Baur  <steve@altair.xemacs.org>
+
+	* id-select.el: Synched up with InfoDock 3.6.2.
+
+1998-01-05  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: add permanent-buffers.el.
+
+1998-01-03  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (ELCS): Add where-was-i-db.el.
+	Update to new package interface.
+
+1998-01-01  SL Baur  <steve@altair.xemacs.org>
+
+	* desktop.el (desktop-remove): Correction in overwrite logic to not
+	lose on MS Windows.
+	Jeff Sparkes <jsparkes@internetivity.com>
+
+	* Makefile: Added info-look.el.
+
+1997-12-30  SL Baur  <steve@altair.xemacs.org>
+
+	* mic-paren.el (mic-paren-command-hook): Spelling fix.
+	(mic-paren-command-idle-hook): Spelling fix.
+	(mic-paren-highlight): Deebolify -- replace /= with (not (eq ...))
+
+	* backup-dir.el ("diff"): Defer symbol munging in diff.el until if
+	and when "diff" is loaded.
+	Suggested by: Karl M. Hegbloom <karlheg@bittersweet.inetarena.com>
+
+	* Makefile (ELCS): backup-dir.el, saveconf.el, saveplace.el added.
+
+1997-12-28  SL Baur  <steve@altair.xemacs.org>
+
+	* loadhist.el: Removed from package (and put back in core).
+
+1997-12-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Created.

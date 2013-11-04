@@ -1,0 +1,26 @@
+/* XPM */
+static char *delete[] = {
+/* width height num_colors chars_per_pixel */
+"    15    15        4            1",
+/* colors */
+". c #808080",
+"# c #800000",
+"a c #ffffff",
+"b c #c0c0c0",
+/* pixels */
+"bbbbbbbbbbbbbbb",
+"b##abbbbbbbb##a",
+"b####abbbbb##ab",
+"bb####abbb##abb",
+"bbbb###ab#abbbb",
+"bbbbb#####abbbb",
+"bbbbbb###abbbbb",
+"bbbbb#####abbbb",
+"bbbb###ab##abbb",
+"bbb###abbb##abb",
+"bb###abbbbb#abb",
+"bb###abbbbbb#ab",
+"bbb#abbbbbbbbbb",
+"bbb#abbbbbbbbbb",
+"bbbbbbbbbbbbbbb",
+};

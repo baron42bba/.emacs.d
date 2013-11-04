@@ -1,0 +1,103 @@
+2006-05-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.09 released.
+
+2006-04-29  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* cperl-mode.el (cperl-short-docs):
+	'\u' => '\\u' as it should have been in the first place. 
+	
+2005-04-27  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.08 released.
+
+2005-04-21  Malcolm Purvis  <malcolmp@xemacs.org>
+
+	* cperl-mode.el: Sync with upstream version 5.0.
+
+2005-02-10  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.07 released.
+
+2005-02-10  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* cperl-mode.el: Mark the previous changes as XEmacs-specific changes.
+
+2005-02-09  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* cperl-mode.el: Autoload cperl-perldoc, cperl-perldoc-at-point.
+	* cperl-mode.el (cperl-mode-map): 
+	  Bind them to C-cC-hp, C-cC-hP, respectively. 
+
+2004-08-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.06 released.
+
+2004-08-12  Ville Skyttä  <scop@xemacs.org>
+
+	* cperl-mode.el: Sync with upstream version 4.35.
+
+2003-10-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.05 released.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+
+2003-01-18  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.04 released.
+
+2003-01-13  Vasily Korytov  <deskpot@myrealbox.com>
+
+	* cperl-mode.el: Define `cperl-dark-background',
+	`cperl-dark-foreground', `cperl-nonoverridable-face',
+	`cperl-array-face' and `cperl-hash-face' on tty as well.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.03 released.
+
+2003-01-06  Ville Skyttä  <scop@xemacs.org>
+
+	* cperl-mode.el: Make auto-mode and interpreter-mode-alist
+	entries autoload-only.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-08  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.02 released.
+
+2002-10-07  Björn Torkelsson  <torkel@acc.umu.se>
+
+	* cperl-mode.el (cperl-invalid-face): fix typo
+
+2002-10-07  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.01 released.
+
+2002-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* cperl-mode.el: Add autoloaded auto-mode-alist and
+	interpreter-mode-alist associations.
+
+2002-09-25  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.00 released.
+
+2002-09-20  Ville Skyttä  <scop@xemacs.org>
+
+	* Package created, moved perl-mode and cperl-mode from the
+	prog-modes package here.
+

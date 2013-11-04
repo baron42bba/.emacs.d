@@ -1,0 +1,821 @@
+2005-10-12  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.72 released.
+
+2005-07-27  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.71 released.
+
+2005-07-26  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.8 is released.
+
+2005-07-26  Didier Verna  <didier@xemacs.org>
+
+	* patcher.el (patcher-warning): New.
+	* patcher.el (patcher-goto-signature): Use it.
+	* patcher.el (patcher-after-send): Ditto.
+	* patcher.el (patcher-install-send-hooks): New.
+	* patcher.el (patcher-mail-compose-mail): Use it.
+	* patcher.el (patcher-mail-adapt-1): Ditto.
+	* patcher.el (patcher-mail-sendmail): Don't use the ACTIONS
+	argument of the `mail' function, to stay coherent with the others
+	methods.
+
+2005-07-26  Didier Verna  <didier@xemacs.org>
+
+	* patcher.el (patcher-mail-or-reply-setup): Rename to
+	`patcher-mail-setup'.
+	* patcher.el (patcher-mail-1): Use it.
+	* patcher.el (patcher-reply-1): Rename to `patcher-mail-adapt-1'.
+	Use `patcher-mail-setup'.
+	* patcher.el (patcher-reply-subproject): Rename to
+	`patcher-mail-adapt-subproject'.
+	Use `patcher-mail-adapt-1'.
+	* patcher.el (patcher-reply): Rename to `patcher-mail-adapt'.
+	Use `patcher-mail-adapt-1'.
+	* patcher.el (patcher-gnus-summary-followup): New.
+	* patcher.el (patcher-gnus-summary-followup-with-original): New.
+	* patcher.el (patcher-gnus-summary-reply): New.
+	* patcher.el (patcher-gnus-summary-reply-with-original): New.
+	* patcher.el (patcher-gnus-summary-minor-mode-string): New.
+	* patcher.el (patcher-gnus-summary-minor-mode-hook): New.
+	* patcher.el (patcher-gnus-summary-minor-mode-map): New.
+	* patcher.el (patcher-gnus-summary-minor-mode): New.
+	* patcher.el (patcher-gnus-article-minor-mode-string): New.
+	* patcher.el (patcher-gnus-article-minor-mode-hook): New.
+	* patcher.el (patcher-gnus-article-minor-mode-map): New.
+	* patcher.el (patcher-gnus-article-minor-mode): New.
+	* patcher.el (patcher-insinuate-gnus): New.
+
+2005-07-25  Didier Verna  <didier@xemacs.org>
+
+	* patcher.el (patcher-goto-subject): New.
+	* patcher.el (patcher-goto-signature): New.
+	* patcher.el (patcher-logmsg-insert-subject): Use
+	`patcher-goto-subject'.
+	* patcher.el (patcher-logmsg-commit): Ditto.
+	* patcher.el (patcher-mail-or-reply-setup): New.
+	* patcher.el (patcher-mail-1): Use it. Remove &optional modifier.
+	* patcher.el (patcher-reply-1): New.
+	* patcher.el (patcher-reply-subproject): New.
+	* patcher.el (patcher-reply): New.
+
+2004-12-07  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.70 released.
+
+2004-12-06  Ben Wing  <ben@xemacs.org>
+
+	* profile.el:
+	Update header docs.
+
+2004-11-28  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.69 released.
+
+2004-11-27  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.7 is released.
+
+2004-11-15  Didier Verna  <didier@xemacs.org>
+
+	* patcher.el (patcher-change-logs-loaded-by-us): Remove.
+	* patcher.el (patcher-change-logs): Turn into an alist.
+	* patcher.el (patcher-file-relative-name): Handle list as well as
+	string argument.
+	* patcher.el (patcher-files-string): Ditto.
+	* patcher.el (patcher-files-buffers): Ditto.
+	* patcher.el (patcher-diff-base): Handle `patcher-change-logs' as
+	an alist.
+	* patcher.el (patcher-generate-diff-1): Ditto.
+	* patcher.el (patcher-after-send): Ditto. Use it instead of
+	`patcher-change-logs-loaded-by-us'.
+
+2004-11-15  Didier Verna  <didier@xemacs.org>
+
+	From Ben Wing <ben@xemacs.org>
+	* patcher.el (patcher-generate-change-logs): Move point to the
+	beginning of the inserted entry so that it's sure to be visible.
+	Clean up code and use save-restriction.
+
+	* patcher.el (patcher-diff-base):
+	* patcher.el (patcher-after-send): Keep track of whether we loaded
+	a ChangeLog and hence can kill it.
+
+2004-11-15  Didier Verna  <didier@xemacs.org>
+
+	* patcher.el (patcher-mail-message): Remove (bogus) send-action
+	argument to message-mail call. It is handled by
+	message-exit-actions below.
+
+2004-11-23  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.68 released.
+
+2004-11-22  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.67 released.
+
+2004-11-13  Ben Wing  <ben@xemacs.org>
+
+	* profile.el:
+	* profile.el (profile):
+	* profile.el (toggle-profiling): New.
+	Add toggle-profiling.
+
+2004-11-09  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.66 released.
+
+2004-11-08  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.6.2 is released.
+
+2004-09-29  Steve Youngs  <steve@youngs.au.com>
+
+	* Makefile (REQUIRES): Add ecrypto.
+
+2004-09-06  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.65 released.
+
+2004-08-31  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.6 is released.
+
+2004-06-30  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.64 released.
+
+2004-06-28  Jerry James  <james@xemacs.org>
+
+	* find-func.el: Synch with Emacs 21.3.
+	* find-func.el (find-function-space-re): New regular expression.
+	* find-func.el (find-function-regexp): Add several define-* forms.
+	* find-func.el (find-variable-regexp): Do not match defgroup.
+	* find-func.el (find-function-recenter-line): Add :type.
+	* find-func.el (find-function-search-for-symbol): Synch.
+	* find-func.el (find-function-noselect): Add autoload.
+	* find-func.el (find-function-read): Protect against 0 return
+	value of function-at-point.
+	* find-func.el (find-function-do-it): Remove unused orig-buf.
+	Quote run-hooks argument.
+	* find-func.el (find-variable-noselect): Autoload.  Add optional
+	FILE parameter.
+	* find-func.el (find-variable-at-point): Protect against 0 return
+	value of variable-at-point.
+
+2004-05-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.63 released.
+
+2004-05-03  Jerry James  <james@xemacs.org>
+
+	* profile.el (profile-results): Avoid division by zero.
+
+2004-03-30  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.62 released.
+
+2004-03-30  Steve Youngs  <sryoungs@bigpond.net.au>
+
+	* profile.el (profile-displaying-temp-buffer): New.
+	(profile-results): Use it.
+
+2004-01-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.61 released.
+
+2003-10-31  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.60 released.
+
+2003-10-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.59 released.
+
+2003-03-07  David A. Panariti  <davep@meduseld.net>
+
+	* eldoc.el (eldoc-get-doc): Factored document string extraction
+	code out of `eldoc-print-current-symbol-info'.
+
+	(eldoc-print-current-symbol-info): Calls `eldoc-get-doc' to get
+	doc to print.
+
+	(eldoc-doc): New function.  Gets doc for current symbol and
+	displays it in the echo area.
+
+	(eldoc-insert-elisp-func-template): New function.  Converts doc
+	from `eldoc-get-doc' into a function template and inserts it at
+	point.
+
+2003-08-19  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.58 released.
+
+2003-08-15  Adrian Aichner  <adrian@xemacs.org>
+
+	* patch-keywords.el: Autoload patch-review defgroup for easier
+	integration of patch-keywords.
+
+2003-08-06  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.57 released.
+
+2003-08-06  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.5.2 is released.
+
+2003-07-30  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.56 released.
+
+2003-07-29  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.5 is released.
+
+2003-05-18  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.55 released.
+
+2003-05-14  Vin Shelton  <acs@xemacs.org>
+
+	* Makefile (REQUIRES): Added eterm in order to find term.el.
+
+
+2003-05-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.54 released.
+
+2003-05-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (REQUIRES): Add sh-script, net-utils.
+
+2003-04-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.53 released.
+
+2003-04-23  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.4.1 is released.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+	Use EXPLICIT_DOCS instead of explicitly giving the targets
+	and dependencies.
+	Delete recursive doc targets and do docs at top-level.
+
+2003-03-02  Norbert Koch  <nk@viteno.net>
+
+	* Makefile (VERSION): XEmacs package 1.52 released.
+
+	* Makefile (VERSION): XEmacs package 1.51 released.
+
+2003-02-13  Ben Wing  <ben@xemacs.org>
+
+	* profile.el:
+	* profile.el (profile-results):
+	* profile.el (combine-profiling-info):
+	* profile.el (Calls): New.
+
+	Deal with new info added -- total-timing, gc-usage,
+	total-gc-usage.  Improve `profile-results' so you can specifying
+	sorting by call-count \(one C-u) or GC usage (two C-u's). (####
+	Perhaps they should be reversed?) Compress and prettify the output
+	somewhat so everything fits and make sure we don't go past 79
+	columns.  Add a bit of explanatory info at the bottom to explain
+	the compressed headers. #### Perhaps I should set truncate-lines to
+	t.
+
+2003-01-07  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.4 is released.
+
+2003-01-03  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.50 released.
+
+2002-12-17  Jerry James  <james@xemacs.org>
+
+	* Makefile (REQUIRES): Add rmail, tm, and apel due to transitive
+	dependencies on gnus.
+
+2002-12-07  Ben Wing  <ben@xemacs.org>
+
+	* profile.el (profile-results): s/if-boundp/if (boundp)/
+	(combine-profiling-info): Ditto.
+
+2002-12-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.49 released.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+	* profile.el:
+	* profile.el (profile-results):
+	* profile.el (profile):
+	* profile.el ('pretty-print-profiling-info): Removed.
+	* profile.el (profile-call-count-results): Removed.
+	* profile.el (profile-expression): New.
+	* profile.el (profile-command): New.
+	* profile.el (profile-key-sequence):
+	* profile.el (combine-profiling-info): New.
+	* profile.el (compile-and-profile):
+	* profile.el (compile-and-continue-profile): New.
+	* profile.el (save-profiling-info): New.
+	* profile.el (continue-profile): New.
+
+	Redo interface to eliminate major principle-of-least-surprise
+	violations and make it overall much more convenient.  Goes hand-in-
+	hand with changes on the C level, but still supports the old
+	C level interface.
+
+	Add new low-level functions save-profiling-info,
+	combine-profiling-info and (C level) set-profiling-info, which
+	together allow you full control over the profiling process and
+	allow you to properly implement things like nested profile runs,
+	combining many different profile results into a whole, etc.
+
+	Remove obsolete (4 years old) pretty-print-profiling-info.
+	Remove profile-call-count-results.  Call counts and now an
+	integral part of the profiling info, and the only real benefit
+	of this function (sort by call-count) is an argument or C-u to
+	profile-results.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-08-02  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.48 released.
+
+2002-07-18  Adrian Aichner  <adrian@xemacs.org>
+
+	* checkdoc.el (checkdoc-generate-compile-warnings-flag): Typo
+	fixing sync with GNU Emacs.
+	* checkdoc.el (checkdoc): Ditto (plus some re-wording).
+	* checkdoc.el (checkdoc-display-status-buffer): Ditto.
+	* checkdoc.el (checkdoc-interactive-loop): Ditto.
+	* checkdoc.el (checkdoc-next-message-error): Ditto.
+	* checkdoc.el (checkdoc-message-text-engine): Ditto.
+
+2002-07-14  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.47 released.
+
+2002-07-02  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.3.1 is released (oups, bugfix release).
+
+2002-07-02  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.3 is released.
+
+2002-06-27  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.46 released.
+
+2002-06-26  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.45 released.
+
+2002-06-24  Didier Verna  <didier@xemacs.org>
+
+	* patcher.el: patcher 3.2 is released.
+
+2002-06-09  Adrian Aichner  <adrian@xemacs.org>
+
+	* Makefile (clean): New.  Hook in texi/Makefile.
+	* Makefile (distclean): New.  Ditto.
+
+2002-05-20  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.44 released.
+
+2002-05-17  Adrian Aichner  <adrian@xemacs.org>
+
+	* Makefile (TEXI_FILES): New.
+	* Makefile (INFO_FILES): New.
+	* Makefile (html): New.
+	* patcher.el (patcher-default-gnus-group): Typo fix.
+
+2002-05-16  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.1 is released, with documentation !
+
+2002-03-04  Steve Youngs  <youngs@xemacs.org>
+
+	* patch-keywords.el: Conditionalise key binding on choice of MUA.
+	Update 'Commentary'.
+	(patch-keywords-insert-vm): New.
+	(patch-keywords-insert-gnus): New, renamed from
+	`patch-keywords-insert'.
+	(patch-review-mua): Enable VM.
+	(patch-keywords): Update doc string.
+	(patch-keywords-insert-vm): Update doc string.
+
+2002-02-25  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 3.0 is released.
+
+2002-02-22  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in: Add patch-keywords.
+
+	* Makefile (REQUIRES): Add gnus for 'patch-keywords.el'.
+	(ELCS): Add patch-keywords.elc
+
+2002-01-18  Adrian Aichner  <adrian@xemacs.org>
+
+	* patch-keywords.el (patch-keywords-insert): Don't abbreviate
+	numeric keywords.
+
+2002-01-17  Steve Youngs  <youngs@xemacs.org>
+
+	* patch-keywords.el (patch-keywords): Update doc string.
+
+2002-01-16  Adrian Aichner  <adrian@xemacs.org>
+
+	* patch-keywords.el (patch-keywords): Use full release numbers.
+	(patch-keywords-insert): Use last digit of numeric keyword.
+
+2002-01-15  Adrian Aichner  <adrian@xemacs.org>
+
+	* patch-keywords.el: Typo fix.
+	(patch-keywords-message-beginning-of-line): Use
+	`patch-keywords-in-header-p' in older gnus-versions < 5.090004.
+	(patch-keywords-insert): Supply version	argument to
+	`gnus-continuum-version'.  It wasn't optional in gnus-versions
+	< 5.090004.
+
+2002-01-14  Steve Youngs  <youngs@xemacs.org>
+
+	* patch-keywords.el: New.
+
+2002-02-08  Simon Josefsson  <jas@extundo.com>
+
+	* elp.el: Change maintainer to XEmacs dev team exclusively.
+	Replace GNU Emacs with XEmacs in the license text.  Add note about
+	sync status.
+
+2002-01-13  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in (provides): Update to include all provides.
+
+2002-01-10  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* eldoc.el: use eldoc-minor-mode-string in add-minor-mode form.
+	(eldoc-minor-mode-string): fix custom type.
+
+2001-12-25  Simon Josefsson  <jas@extundo.com>
+
+	* elp.el: Sync with Emacs 21.1.
+	(top-level): Add years to copyright.  Change maintainer.  Remove
+	old version/last-modified.  Fix comments.  Remove comment about
+	max 18h as it has been fixed.
+	(elp-report-limit): Fix doc.
+	(elp-recycle-buffers-p): Fix doc.
+	(elp-version, elp-help-address): Removed.
+	(elp-not-profilable, elp-not-profilable-p): New function.
+	(elp-instrument-function): Don't profile profile functions.
+	(elp-instrument-function): Redo (list (list ...
+	(elp-instrument-function): Work with advice.
+	(elp-restore-function): Don't autoload.
+	(elp-restore-function): Change logic.
+	(elp-instrument-package): Error if all functions are instrumented.
+	(elp-instrument-package): Fix indentation.
+	(elp-reset-function): Fix doc.
+	(elp-get-time): Removed.
+	(elp-elapsed-time): New function.
+	(elp-wrapper): Use it.
+	(elp-wrapper): Fix doc.
+	(elp-wrapper): Change logic.
+	(elp-submit-bug-report): Removed.
+	(elp-unload-hook): New hook.
+
+2001-09-08  Adrian Aichner  <adrian@xemacs.org>
+
+	* bench.el (bench-large-lisp-file): Use expand-file-name instead
+	of concat to build path.
+	* bench.el (bench-small-lisp-file): Ditto.
+
+2001-09-04  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* hide-copyleft.el (hide-copyleft-region): Make it interactive.
+
+2001-07-14  Steve Youngs  <youngs@xemacs.org>
+
+	* ibuffer.el: Move to edit-utils package.
+
+	* Makefile (ELCS): Remove ibuffer.elc
+
+2001-05-21  Martin Buchholz  <martin@xemacs.org>
+
+	* hide-copyleft.el (hide-copyleft-region):
+	Remove (presumably) ancient debugging statement assigning to `x'.
+
+2001-05-22  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 2.5 is released.
+
+2001-05-16  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 2.4 is released.
+
+2001-05-11  Steve Youngs  <youngs@xemacs.org>
+
+	* ibuffer.el: New.
+
+2001-05-07  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 2.2 is released.
+
+2001-04-26  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (REQUIRES): Add mail-lib.
+
+2001-04-25  Didier Verna  <didier@xemacs.org>
+
+	* Patcher 2.1 is released.
+
+2001-04-12  Steve Youngs  <youngs@xemacs.org>
+
+	* patcher.el: New
+
+2001-04-10  Ben Wing  <ben@xemacs.org>
+
+	* docref.el: Use correct name for hook.
+
+2000-12-12  Martin Buchholz  <martin@xemacs.org>
+
+	* profile.el (profile-results): Prettier pretty-printing.
+	(For prettiest results, needs fixes to `format')
+
+2000-10-25  Yoshiki Hayashi  <yoshiki@xemacs.org>
+
+	* checkdoc.el: New file.
+
+2000-10-05  Martin Buchholz  <martin@xemacs.org>
+
+	* *: Mega typo fix.
+
+2000-03-05  Martin Buchholz  <martin@xemacs.org>
+
+	* profile.el (compile-and-profile): New.
+
+2000-05-28  Jim Radford  <radford@robotics.caltech.edu>
+
+	* find-func.el (find-function-noselect): Aliased builtins can now
+	be found with find-function.
+
+2000-07-10  Ben Wing  <ben@xemacs.org>
+
+	* find-func.el (find-function-regexp): augment to include various
+	define-* constructs for functions.
+	(find-variable-regexp): likewise.
+
+2000-03-04  Martin Buchholz  <martin@xemacs.org>
+
+	* profile.el: Doc fixes.
+
+2000-01-13  Andreas Jaeger  <aj@suse.de>
+
+	* regexp-opt.el: Moved to package xemacs-base since other packages
+	depend on it.
+
+	* Makefile (ELCS): Removed regexp-opt.elc.
+
+1998-09-28  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* trace.el (trace-function-read): New function.
+	(trace-function): Use it.
+	(trace-function-background): Use it.
+
+1999-05-28  Karl M. Hegbloom  <karlheg@debian.org>
+
+	* hide-copyleft.el: Get rid of `more-copylefts-to-hide', and just
+	customize `copylefts-to-hide'.
+
+1999-07-05  SL Baur  <steve@xemacs.org>
+
+	* eldoc.el: Use add-minor-mode to add as a minor mode.
+	From Bob Weiner <weiner@altrasoft.com>
+
+1998-10-20  Andy Piper  <andyp@parallax.co.uk>
+
+	* bench.el (bench-large-lisp-file): use temp-directory rather than
+	home-grown temp-dir.
+	(bench-small-lisp-file): ditto.
+	(temp-dir): removed.
+
+1998-09-18  Noah Friedman  <friedman@splode.com>
+
+	* eldoc.el (eldoc-message): Check for 1-arg case, and store string
+	in eldoc-last-message without consing a new string.
+	Rearrange logic from nested if's into cond's.
+	(eldoc-print-fnsym-args): Renamed to eldoc-get-fnsym-args-string.
+	Do not print message; just return string.
+	(eldoc-get-var-docstring): Renamed from eldoc-print-var-docstring.
+	Do not print message; just return string.
+	Cache that string in eldoc-last-data.
+	(eldoc-last-data): Make into a vector.
+	(eldoc-get-fnsym-args-string): Use new data form of structure.
+	(eldoc-get-var-docstring): Here also.
+	(eldoc-last-data-store): New function.
+	(eldoc-get-fnsym-args-string): Use it.
+	(eldoc-get-var-docstring): Here also.
+	(eldoc-docstring-first-line): Minimize interim string consing.
+	Call substitute-command-keys on the result.
+	(eldoc-print-var-docstrings, eldoc-print-docstring,
+	eldoc-docstring-message): Functions removed.
+	(eldoc-docstring-format-sym-doc): New function, functionality
+	ripped out of eldoc-docstring-message.
+	(eldoc-get-fnsym-args-string, eldoc-get-var-docstring): Use it.
+
+1998-08-19  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* ielm.el (ielm-eval-input): Change `:', `::', `:::' to `!'...,
+	since the `:' is special syntax now for keyword variables.
+ 	(several other occurances also changed.) I chose !, because shells
+	use that character for history expansion.
+	(ielm-eval-input): Check that `ielm-string' is not null.
+ 	Integrated reversed patch from Gregory Neil Shapiro
+	<gshapiro@sendmail.org>.
+
+1998-08-15  SL Baur  <steve@altair.xemacs.org>
+
+	* eval-expr.el (eval-expr-display-message): screen-width ->
+	frame-width.
+
+1998-07-14  Jens-Ulrik Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* find-func.el: Version 0.22 released.
+	(find-function-search-for-symbol): Put error sexp into simplier
+	`format' format.
+	(find-function-do-it): Fixed problem when a symbol in current
+	buffer found in other-window.
+	Added `help-mode-map' key bindings to `find-function-at-point' and
+	`find-variable-at-point' that used to be in "help".
+
+1998-06-15  Jens-Ulrik Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* find-func.el: Version 0.21 released.
+	Improvements to the preamble.  Require "loadhist".
+	(find-function-source-path): Simplified the custom type.
+	(find-function-recenter-line): New variable to control center of
+	definition.
+	(find-function-after-hook): New variable.
+	(find-function-search-for-symbol): `regexp-quote' the symbol name:
+	needed to find-function `mapcar*' for example.  [Patch from Hrvoje
+	Niksic <hniksic@srce.hr>]
+	(find-function-search-for-symbol): Include library name in error
+	message when symbol can't be found.
+	(find-function-noselect): Improved docstring.  Don't include
+	`library' in let [Thanks to Bob Weiner <weiner@altrasoft.com>].
+	Use `symbol-file' instead of `describe-symbol-find-file'.  Protect
+	`compiled-function-annotation' call and keep it for older
+	XEmacsen.  Use `file-name-sans-extension' for compiled functions.
+	(find-function-read): Separate `completing-read' calls for
+	variables and functions, and use `variable-history'.
+	(find-function-do-it): Mention new `find-function-recenter-line'
+	and `find-function-after-hook' in docstring.  Use them.
+	(find-function): Mention `find-function-recenter-line' and
+	`find-function-after-hook' in docstring.
+	(find-function-other-window): Remove most of docstring and add
+	reference to `find-function' instead.
+	(find-function-other-frame): Ditto.
+	(find-variable-noselect): Use `symbol-file' instead of
+	`describe-symbol-find-file'.
+	(find-variable): Mention `find-function-recenter-line' and
+	`find-function-after-hook' in docstring.
+	(find-variable-other-window): Remove most of docstring and add
+	reference to `find-variable' instead.
+	(find-variable-other-frame): Ditto.
+	(find-function-on-key): Simplified.
+
+1998-04-20  Karl M. Hegbloom  <karlheg@bittersweet.inetarena.com>
+
+	* hide-copyleft.el (more-copylefts-to-hide): Added defcustom.
+
+1998-04-18  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* profile.el (profile-results): When `internal-error-checking' is
+	non-nil, warn that the results are likely bogus.
+
+1998-03-26  Jens-Ulrik Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* find-func.el (find-function-read): Call `variable-at-point' for
+	variable and `function-at-point' for function, not the other way
+	round!
+	() Comment out keybindings with their autoload cookies to be
+	custom-friendlier.
+	() Version 0.20 released.
+
+1998-03-09  SL Baur  <steve@altair.xemacs.org>
+
+	* hide-copyleft.el: restored.
+
+1998-03-03  Markus Linnala  <maage@cs.tut.fi>
+
+	* find-gc.el (trace-call-tree): Use make to make RTL's.
+	(find-gc-unsafe): Print output to buffer. Change
+	garbage_collecting function from Fgarbage_collect_1 to
+	garbage_collect_1.
+	(emacs-source-directory): Change default.
+	(source-files): Try to get default from src directory.
+
+1998-03-04  Jens-Ulrik Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* find-func.el (find-function-regexp): New variable, taken from
+	former constant in `find-function-noselect'.  Can now find
+	function definitions with parameters on a new line (suggested by
+	Christoph Wedler <wedler@fmi.uni-passau.de>).
+	(find-variable-regexp): New variable.
+	(find-function-search-for-symbol): New function of stuff taken out
+	of `find-function-noselect'
+	(find-function-noselect): Use it and `find-function-regexp'.
+	(find-function-read): Renamed from `find-function-read-function'.
+	With optional arg now read a variable.
+	(find-function-do-it): Added parameter to indicate if a variable
+	is being searched for.
+	(find-function): Use `find-function-read'.
+	(find-function-other-window): Ditto.
+	(find-function-other-frame): Ditto.
+	(find-variable-noselect): New function for finding the point of
+	definition of variables, modeled on `find-function-noselect'.
+	(find-variable): New function.
+	(find-variable-other-window): Ditto.
+	(find-variable-other-frame): Ditto.
+	(find-variable-at-point): New function for "help".
+	(ctl-x-map): Bind find-variable functions.
+
+1998-02-08  Kyle Jones  <kyle_jones@wonderworks.com>
+
+	* xemacs-devel/pretty-print.el: Don't bind keys when
+	  loaded.
+
+1998-02-01  SL Baur  <steve@altair.xemacs.org>
+
+	* eldoc.el (eldoc-mode): Append to post-command-hook.
+	From David Byers <davby@ida.liu.se>
+
+1998-01-24  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standard 1.0.
+
+1998-01-13  Hrvoje Niksic  <hniksic@srce.hr>
+
+	* old-prim/profile.el (profile-results): Use call-count-profile-table.
+	(profile-call-count-results): New function.
+
+1998-01-12  SL Baur  <steve@altair.xemacs.org>
+
+	* pretty-print.el: Reformat comments.
+
+1997-12-27  Jens-Ulrik Holger Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* pretty-print.el (pp-internal): Make it autoloaded.  Docstring typo.
+
+1997-12-17  Jens-Ulrik Holger Petersen  <petersen@kurims.kyoto-u.ac.jp>
+
+	* pretty-print.el (pp-internal-sexp): Protect fboundp call with
+	symbolp test.  Necessary to be able to print a value of `(-3 smthg)'
+	for example.
+
+1998-01-11  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (ELCS): Add pretty-print.el.
+	Update to latest package spec.
+
+1997-12-10  Christoph Wedler  <wedler@fmi.uni-passau.de>
+
+	* find-func.el (find-function-noselect): `regexp-quote'
+	function name FUNCTION.
+
+1998-01-02  SL Baur  <steve@altair.xemacs.org>
+
+	* _pkg.el (xemacs-devel): Updated package-provide spec.
+
+1998-01-01  SL Baur  <steve@altair.xemacs.org>
+
+	* ielm.el: New file.
+
+1997-12-24  SL Baur  <steve@altair.xemacs.org>
+
+	* elp.el: Remove bytecompile time dependency on reporter
+
+	* Makefile: Added find-func.el, regexp-opt.el, and reposition.el.
+
+1997-12-23  SL Baur  <steve@altair.xemacs.org>
+
+	* docref.el: Updated commentary.
+
+	* Makefile: Created.

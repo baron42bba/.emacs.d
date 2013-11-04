@@ -1,0 +1,11 @@
+pkginfo/MANIFEST.re-builder
+lisp/re-builder/ChangeLog
+lisp/re-builder/_pkg.el
+lisp/re-builder/auto-autoloads.el
+lisp/re-builder/auto-autoloads.elc
+lisp/re-builder/custom-load.el
+lisp/re-builder/custom-load.elc
+lisp/re-builder/re-builder.el
+lisp/re-builder/re-builder.elc
+info/re-builder.info
+man/re-builder/re-builder.texi

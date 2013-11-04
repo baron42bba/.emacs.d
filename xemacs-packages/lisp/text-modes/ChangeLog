@@ -1,0 +1,947 @@
+2005-11-02  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.90 released.
+
+	* htmlize.el: Sync with upstream version 1.28.
+
+2005-09-21  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.89 released.
+
+2005-09-14  Jari Aalto  <jari aalto A T cante net>
+
+	* folding.el 
+	(top level): Updated Copyright years and its information.
+	(folding-package-url-location): Updated URL
+	to point to XEmacs CVS server.
+
+2005-05-10  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.88 released.
+
+2005-04-04  Robert Widhopf  <hack@robf.de>
+
+	* hexl.el: Adds as-you-type hex-input, i.e. when in the ASCII
+	columns you will enter in ASCII and when in the HEX columns you
+	will enter hex.  You may easily switch between the two columns
+	by TAB.
+
+2005-04-17  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.87 released.
+
+2005-04-16  Adrian Aichner  <adrian@xemacs.org>
+
+	* Makefile (ELCS): Add whitespace-visual-mode.elc.
+
+2005-04-16  Zajcev Evgeny <zevlg@yandex.ru>
+
+	* tpum.el: Initial import of tpum.
+
+2005-04-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.86 released.
+
+2005-04-13  Steve Youngs  <steve@sxemacs.org>
+
+	* flyspell.el (flyspell-check-word-p): Test for XEmacs with
+	(featurep 'xemacs) instead of (fboundp 'about-xemacs).
+
+2005-03-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.85 released.
+
+2005-03-25  Aidan Kehoe  <kehoea@parhasard.net>
+
+	* whitespace.el (whitespace-cleanup): Integrate this change from
+	the FSF:
+
+	2003-06-10  Rajesh Vaidheeswarran  <rv@gnu.org>
+
+		* whitespace.el (whitespace-cleanup): Respect user
+		preference for silence.
+
+2005-02-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.84 released.
+
+	* whitespace-visual-mode.el: New mode, successor to
+	old-whitespace-mode.  Includes some bug fixes.
+
+2005-02-10  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.83 released.
+
+2005-02-10  Mike FABIAN <mfabian@suse.de>
+
+	* whitespace.el (whitespace-global-mode): Autoload a dummy autoload
+	instead of `define-minor-mode'.
+
+2005-01-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.82 released.
+
+2005-01-09  Steve Youngs  <steve@sxemacs.org>
+
+	* crontab.el (crontab-delete-blank-lines): New.  To make deleting
+	blank lines in crontab files optional.
+	(crontab-save): Use it.
+
+2004-11-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.81 released.
+
+2004-11-25  Jari Aalto <jari aalto A T cante dot net>
+
+	* folding.el: non-ascii character removed from bibtex-mode.
+	Changed bib-mode '@comment' => '%'. Closes Debian
+	Bug#282388
+
+2004-11-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.80 released.
+
+2004-11-07  Ben Wing  <ben@xemacs.org>
+
+	* Makefile (ELCS):
+	* whitespace.el: New.
+	Import whitespace.el from FSF 21.3.  Same idea as existing
+	whitespace-mode but does more: Corrects problems as well as just
+	highlighting them.
+
+	* whitespace-mode.el:
+	* whitespace-mode.el (whitespace): Removed.
+	* whitespace-mode.el (old-whitespace): New.
+	* whitespace-mode.el (whitespace-mode): Removed.
+	* whitespace-mode.el (old-whitespace-mode): New.
+	* whitespace-mode.el (whitespace-mode-line-string): Removed.
+	* whitespace-mode.el (old-whitespace-mode-line-string): New.
+	* whitespace-mode.el (whitespace-incremental-mode-line-string): Removed.
+	* whitespace-mode.el (old-whitespace-incremental-mode-line-string): New.
+	* whitespace-mode.el (whitespace-chars): Removed.
+	* whitespace-mode.el (old-whitespace-chars): New.
+	* whitespace-mode.el (whitespace-mode-hook): Removed.
+	* whitespace-mode.el (old-whitespace-mode-hook): New.
+	* whitespace-mode.el (whitespace-incremental-mode-hook): Removed.
+	* whitespace-mode.el (old-whitespace-incremental-mode-hook): New.
+	* whitespace-mode.el (whitespace-install-toolbar-icon): Removed.
+	* whitespace-mode.el (old-whitespace-install-toolbar-icon): New.
+	* whitespace-mode.el (whitespace-install-submenu): Removed.
+	* whitespace-mode.el (old-whitespace-install-submenu): New.
+	* whitespace-mode.el (whitespace-toolbar-function): Removed.
+	* whitespace-mode.el (old-whitespace-toolbar-function): New.
+	* whitespace-mode.el (whitespace-blank-and-tab-search-string): Removed.
+	* whitespace-mode.el (old-whitespace-blank-and-tab-search-string): New.
+	* whitespace-mode.el (whitespace-tab-search-string): Removed.
+	* whitespace-mode.el (old-whitespace-tab-search-string): New.
+	* whitespace-mode.el (whitespace-blank-search-string): Removed.
+	* whitespace-mode.el (old-whitespace-blank-search-string): New.
+	* whitespace-mode.el (whitespace-blank-face): Removed.
+	* whitespace-mode.el (old-whitespace-blank-face): New.
+	* whitespace-mode.el (whitespace-tab-face): Removed.
+	* whitespace-mode.el (old-whitespace-tab-face): New.
+	* whitespace-mode.el (whitespace-highlight-chars-in-region): Removed.
+	* whitespace-mode.el (old-whitespace-highlight-chars-in-region): New.
+	* whitespace-mode.el (whitespace-show-faces): Removed.
+	* whitespace-mode.el (old-whitespace-show-faces): New.
+	* whitespace-mode.el (whitespace-highlight-region): Removed.
+	* whitespace-mode.el (old-whitespace-highlight-region): New.
+	* whitespace-mode.el (whitespace-highlight-buffer): Removed.
+	* whitespace-mode.el (old-whitespace-highlight-buffer): New.
+	* whitespace-mode.el (whitespace-find-next-highlighted-region): Removed.
+	* whitespace-mode.el (old-whitespace-find-next-highlighted-region): New.
+	* whitespace-mode.el (whitespace-incremental-highlight): Removed.
+	* whitespace-mode.el (old-whitespace-incremental-highlight): New.
+	* whitespace-mode.el (whitespace-highlight-window): Removed.
+	* whitespace-mode.el (old-whitespace-highlight-window): New.
+	* whitespace-mode.el (whitespace-dehighlight-region): Removed.
+	* whitespace-mode.el (old-whitespace-dehighlight-region): New.
+	* whitespace-mode.el (whitespace-dehighlight-buffer): Removed.
+	* whitespace-mode.el (old-whitespace-dehighlight-buffer): New.
+	* whitespace-mode.el (whitespace-highlight-after-change-function): Removed.
+	* whitespace-mode.el (old-whitespace-highlight-after-change-function): New.
+	* whitespace-mode.el (whitespace-incremental-mode): Removed.
+	* whitespace-mode.el (old-whitespace-incremental-mode): New.
+	* whitespace-mode.el (fboundp):
+	* whitespace-mode.el (and):
+	* whitespace-mode.el (whitespace-set-whitespace-chars): Removed.
+	* whitespace-mode.el (old-whitespace-set-whitespace-chars): New.
+	* whitespace-mode.el (whitespace-menu): Removed.
+	* whitespace-mode.el (old-whitespace-menu): New.
+	whitespace->old-whitespace to avoid massive name clashes.
+
+2004-09-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.79 released.
+
+2004-09-10  Jari Aalto <jari aalto A T poboxes dot com>
+
+	* folding.el
+	(whole file): Extra empty newlines removed.
+	Protected all email addresses by removing AT-signs.
+	(Version): Changed version scheme to date based YYYY.MMDD, because
+	it is independent of upstream's version control software.
+	The old upstream version number was 2.117.
+	(Copyright): Removed unnecessary 'all rights reserved'.
+	The code is GPL.
+	(folding-fold-region): auctex:latex-mode's
+	`indent-according-to-mode' causes bottom fold to indent 50
+	characters forward. Added check to prevent that. Bug reported
+	by Uwe Brauer; oub A T mat dot ucm dot es.
+	(folding-check-folded): Added check for \r character, which
+	signifies collapsed folds. This fixes bug (C-x s) where buffer's folds
+	were forced to closed state if folding mode was active in some other
+ 	buffer. Function `folding-mode-write-file' did that, but the
+	impulse came from `folding-check-folded'.
+
+2004-05-19  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.78 released.
+
+2004-04-18  Ville Skyttä  <scop@xemacs.org>
+
+	* desktop-entry-mode.el: GNU Emacs font-lock compatiblity tuning.
+
+2004-04-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.77 released.
+
+	* Makefile (VERSION): XEmacs package 1.76 released.
+
+2004-04-01  Jari Aalto <jari aalto A T poboxes dot com>
+
+	-- Use spam protective addresses
+	-- Merged in changes made by 2003-11-12  Adrian Aichner
+   	from XEmacs tree 1.15; Typo fixes for docstrings and comments.
+	-- Returned to old bug and solved it in a better way (preserve
+	region) by using different expansion macros for XEmacs and Emacs.
+	See See
+	http://list-archive.xemacs.org/xemacs-beta/199810/msg00039.html
+	(folding-forward-char-1): 2.112 Renamed. Was
+	`folding-forward-char'.
+	(folding-backward-char-1): 2.112 Renamed. Was
+	`folding-backward-char'.
+	(folding-forward-char-macro): 2.112 New. Fix XEmacs region
+	preservation with '_p' interactive spec.
+	(folding-backward-char-macro): 2.112 New. Fix XEmacs region
+	preservation with '_p' interactive spec.
+	(folding-interactive-spec-p): 2.112 New.
+
+2004-04-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.75 released.
+
+2004-04-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.74 released.
+
+2004-01-05  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.73 released.
+
+2004-01-04  Ville Skyttä  <scop@xemacs.org>
+
+	* desktop-entry-mode.el: Version 0.93, adding imenu support,
+	better support for X-* keys and group headers, keywords reserved
+	for use with KDE and miscellaneous cosmetic changes.
+
+2003-12-31  Ville Skyttä  <scop@xemacs.org>
+
+	* po-compat.el: Sync with gettext 0.13.1, po-mode.el already in sync.
+
+	* po-mode.el: Don't autoload auto-mode-alist association until
+	`po-mode' is autoloaded as well.
+
+2003-11-18  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.72 released.
+
+	* htmlize.el: Sync with upstream version 1.16.
+
+2003-11-13  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.71 released.
+
+2003-11-12  Adrian Aichner  <adrian@xemacs.org>
+
+	* folding.el: Typo fixes for docstrings and comments.
+
+2003-10-29  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.70 released.
+
+2003-10-19  Ville Skyttä  <scop@xemacs.org>
+
+	* desktop-entry-mode.el (desktop-entry-keywords):
+	Change according to new, synced regexp-opt interface.
+	(desktop-entry-mode-version): 0.92.
+
+2003-10-19  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.69 released.
+
+	* htmlize.el: Sync with upstream version 1.12.
+
+2003-10-16  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.68 released.
+
+	* htmlize.el: Sync with upstream version 1.4.
+
+2003-10-15  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.67 released.
+
+	* htmlize.el: Sync with upstream.
+
+2003-10-09  Ville Skyttä  <scop@xemacs.org>
+
+	* apache-mode.el (apache-font-lock-keywords):
+	Reorganize mod_perl keywords, add mod_perl 2 keywords.
+
+2003-10-13  Ville Skyttä  <scop@xemacs.org>
+
+	* desktop-entry-mode.el (desktop-entry-font-lock-keywords):
+	Highlight comments, fix keyword highlight.
+
+2003-10-01  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.66 released.
+
+2003-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* desktop-entry-mode.el: New.
+
+2003-09-30  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.65 released.
+
+2003-08-31  Ville Skyttä  <scop@xemacs.org>
+
+	* apache-mode.el (apache-font-lock-keywords):
+	Add handlers of various core modules.
+
+2003-09-15  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.64 released.
+
+2003-09-14  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* other/folding.el
+	(DOCUMENTATION): Added 'Uninstall' and 'To read the manual'
+	sections.
+	(folding-install): 2.109 Removed 'folding installed' message.
+	(folding-install): 2.109 Removed 'folding uninstalled' message.
+	(folding-add-to-marks-list): 2.109 Added support to `php-mode'.
+	(folding-add-to-marks-list): 2.109 Added support to
+	`change-log-mode'.
+	(folding-add-to-marks-list): 2.109 Added support to
+	`finder-mode'
+	(folding-add-to-marks-list): 2.109 Added support to
+	`javascript-mode'.
+	(folding-uninstall-keymaps): 2.109 New.
+	(folding-install-keymaps): 2.109 New.
+	(folding-install): 2.109 Cmpletely rewritten.
+	(folding-mode): 2.109 Added (assq 'folding-mode minor-mode-alist)
+	check if not there, call `folding-install'.
+	(folding-skip-folds): Removed variable `search' and
+	`funcall'. It's faster to call `search-backward' and
+	`search-forward' directly.
+
+2003-08-26  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.63 released.
+
+2003-08-25  Ville Skyttä  <scop@xemacs.org>
+
+	* apache-mode.el (apache-font-lock-keywords):
+	Add mod_python keywords.
+
+2003-07-14  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.62 released.
+
+2003-07-11  Rodney Sparapani <rsparapa@mcw.edu>
+
+	* rtf-support.el (rtf-map-chars): Added support for form-feeds.
+
+2003-06-08  Norbert Koch  <viteno@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.61 released.
+
+2003-06-06  Adrian Aichner  <adrian@xemacs.org>
+
+	* po-mode.el: auto-mode-alist cookie update.
+
+2003-03-09  Ben Wing  <ben@xemacs.org>
+
+	* Makefile:
+	Delete explicit compile:: and binkit: rules.
+	Don't add custom-load.elc to the list of generated elc's.
+
+2003-03-02  Norbert Koch  <nk@viteno.net>
+
+	* Makefile (VERSION): XEmacs package 1.60 released.
+
+	* Makefile (VERSION): XEmacs package 1.59 released.
+
+2003-02-17  Vasily Korytov  <deskpot@myrealbox.com>
+
+	* apache-mode.el (apache-file-patterns): Updated to include
+	(httpd|srm|access).conf.default files.
+
+2003-02-11  Ville Skyttä  <scop@xemacs.org>
+
+	* hexl.el (hexl-find-file): Use 2nd arg for find-file
+	only if we have file-coding.
+
+2003-02-05  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el (folding-uninstall): Folding was removed
+	from all hooks, but the buffers stayed in folding mode. Now
+	calling uninstall will terminate folding-mode in every Emacs
+	buffer; calls `turn-off-folding-mode'.
+
+2003-01-26  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.58 released.
+
+2003-01-23  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el: Applied patch from plasma
+	<plasmaball@pchome.com.tw>. The folding markers
+	do no longer require starting name: '{{{ MARKER', but can be
+	started with plain '{{{'. Files generated this way are compatible
+	with `vim' editor setting `set fdm=marker'.
+
+2003-01-18  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.57 released.
+
+2003-01-13  Vasily Korytov  <deskpot@myrealbox.com>
+
+	* css-mode.el (cssm-indent-line): Use `indent-to' for indenting.
+
+2003-01-13  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.56 released.
+
+2003-01-06  Ville Skyttä  <scop@xemacs.org>
+
+	* xrdb-mode.el: Make auto-mode-alist modifications autoload-only.
+	* xpm-mode.el: Ditto.
+	* scribe.el: Ditto.
+	* nroff-mode.el: Ditto.
+	* winmgr-mode.el: Ditto.
+	* css-mode.el: Ditto.
+
+2003-01-02  Michael Shields  <shields@msrl.com>
+
+	* flyspell.el (mail-mode-flyspell-verify):  More robust handling
+	of `mail-header-separator'.  More efficient signature detection.
+	Allow for regexp metacharacters in message-header-separator.
+
+2002-11-29  Ben Wing  <ben@xemacs.org>
+
+	* .cvsignore: Remove files now handled automatically by CVS.
+	* Makefile: Use `compile' instead of hard-coded `all'.
+
+2002-11-01  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.55 released.
+
+2002-09-13  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* filladapt.el (fill-region): Ensure beg <= end.
+	RFE from David Panariti <davep.xemacs@meduseld.net>.
+
+2002-10-29  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.54 released.
+
+2002-10-18  Glynn Clements  <glynn.clements@virgin.net>
+
+	* image-mode.el: Substantially re-written to avoid use of
+	format-alist.
+
+2002-10-15  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (srckit): Remove.
+
+2002-10-07  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.53 released.
+
+2002-09-30  Ville Skyttä  <scop@xemacs.org>
+
+	* image-mode.el: Add autoloaded auto-mode-alist associations.
+	* nroff-mode.el: Ditto.
+	* scribe.el: Ditto.
+	* winmgr-mode.el: Ditto.
+	* xrdb-mode.el: Ditto, plus add .ad to extensions.
+
+2002-09-06  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.52 released.
+
+2002-08-29  Ville Skyttä  <scop@xemacs.org>
+
+	* flyspell.el: Sync with upstream.
+	(flyspell-auto-correct-binding): New.
+	(flyspell-mouse-map): Use flyspell-auto-correct-binding.
+
+2002-08-23  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el: 1.10 (folding-uninstall-hooks): 2.105
+	Removed `interactive' status.
+	(folding-install-hooks): 2.105
+	Removed `interactive' status.
+	(folding-uninstall): New user function.
+
+2002-08-05  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.51 released.
+
+2002-08-03  Ville Skyttä  <scop@xemacs.org>
+
+	* po-mode.el: Sync with gettext 0.11.4.  No autoloads
+	because of previously reported problems with keybindings.
+
+	* po-compat.el: New, from gettext 0.11.4.
+
+	* Makefile (ELCS): Add po-compat.elc.
+
+	* package-info.in (provides): Add po-compat.
+
+2002-08-03 Sat  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el:
+	New feature - added font-lock support.
+	Removed LCD entry, because OHIO archive hasn't
+	been functional in years. Documentation typos cleaned a bit.
+	(folding-mode): Added call to`folding-font-lock-support'
+	(folding-font-lock-keywords): New function.
+	(folding-font-lock-support-instantiate): New function.
+	(folding-font-lock-support): New function.
+	(folding-package-url-location): Added note that folding is
+	included in XEmacs.
+	(folding-font-lock-begin-mark): New user variable.
+	(folding-font-lock-end-mark): New user variable..
+
+2002-08-02  Ville Skyttä  <scop@xemacs.org>
+
+	* xrdb-mode.el: Sync with author version 2.27.
+
+2002-08-02  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.50 released.
+
+2002-08-01  Ville Skyttä  <scop@xemacs.org>
+
+	* flyspell.el: Sync with author version 1.6h, with a change:
+	(flyspell-mouse-map): Use C-; instead of C-/ for
+	flyspell-auto-correct-previous-word (C-/ is bound to undo).
+
+2002-07-31  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.49 released.
+
+2002-07-26  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el (folding-install): The unistall choice was
+	missing. Added.
+	(folding-uninstall-hooks): added
+	`turn-off-folding-mode'
+	(folding-mode): Moved `folding-keep-hooked' to the
+	point where folding is turned on. It should not be called
+	if folding is turned off.
+
+2002-07-15  Adrian Aichner  <adrian@xemacs.org>
+
+	* folding.el: It's XEmacs, not Xemacs.
+
+2002-06-27  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.48 released.
+
+2002-06-26  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.47 released.
+
+2002-06-13  Ville Skyttä  <scop@xemacs.org>
+
+	* Makefile (ELCS): Add css-mode.elc.
+	* package-info.in (provides): Add css-mode.
+	* css-mode.el, css-mode.el.upstream: New files.
+
+2002-06-13  Ville Skyttä  <scop@xemacs.org>
+
+	* package-info.in (provides): Add po-mode.
+
+2002-06-11  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (ELCS): Add po-mode.elc.
+
+	* po-mode.el: New file.
+
+2002-06-09  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* xpm-mode.el (xpm-init): Toolbar specs go with buffer, not frame.
+
+2002-06-04  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.46 released.
+
+2002-06-02  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.45 released.
+
+2002-05-31  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.44 released.
+
+2002-05-25  Ville Skyttä  <scop@xemacs.org>
+
+	* apache-mode.el (apache-font-lock-keywords):
+	Add some missing keywords and values for apache-ssl, mod_ssl
+	and mod_perl.
+
+2002-05-15  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* apache-mode.el (apache-font-lock-keywords): added new keywords
+	from apache-2.0.36
+
+2002-05-10  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.43 released.
+
+2002-05-09  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* apache-mode.el: separated apache directives into sections
+	for easier updating
+	* apache-mode.el (apache-font-lock-keywords):
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.42 released.
+
+2002-04-24  Ville Skyttä  <scop@xemacs.org>
+
+	* apache-mode.el (apache-font-lock-keywords):
+	Use string equality test in delete-duplicates.
+
+2002-04-24  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): XEmacs package 1.41 released.
+
+2002-04-24  Hrvoje Niksic  <hniksic@xemacs.org>
+
+	* htmlize.el: Sync to upstream version 0.67
+
+2002-04-23  Ville Skyttä  <scop@xemacs.org>
+
+	* apache-mode.el: Docstring updates.
+	(apache-font-lock-keywords):
+	Add keywords for mod_ssl, Apache-SSL and mod_perl.
+	Use delete-duplicates in regexp-opt lists.
+	Fix typo (ProxyReceiveBufferSize).
+
+2002-04-20  Rendhalver [Peter Brown]  <rendhalver@xemacs.org>
+
+	* apache-mode.el: New file.
+
+	* Makefile (ELCS): Added apache-mode.elc.
+
+	* package-info.in (provides): Add apache-mode.
+
+2002-04-07  Alastair J. Houghton  <ajhoughton@lineone.net>
+
+	* rtf-support.el (rtf-spool-region): Fixed extraction of font
+	  information [name, size etc...] on X11.
+
+2002-04-06  Hrvoje Niksic  <hniksic@xemacs.org>
+
+	* htmlize.el: Sync to upstream version 0.65
+
+2002-03-25  Steve Youngs  <youngs@xemacs.org>
+
+	* Makefile (VERSION): 1.40 released.
+
+2002-03-24  Hrvoje Niksic  <hniksic@xemacs.org>
+
+	* htmlize.el: Sync to upstream version 0.64
+
+2002-03-13  Adrian Aichner  <adrian@xemacs.org>
+
+	* package-info.in: Fix typo for rtf-support.
+
+2002-03-08  Volker Franz  <volker.franz@tuebingen.mpg.de>
+
+	* whitespace-mode.el (whitespace-incremental-mode): Autoload it.
+
+2002-03-02  Jeff Mincy  <mincy@rcn.com>
+
+	* xpm-mode.el: (xpm-init) fix infinite loop,
+	(xpm-toolbar-select-colour) null button
+
+2002-02-28  Volker Franz  <volker.franz@tuebingen.mpg.de>
+
+	* whitespace-mode.el: If add-minor-mode is bound, then uses
+	add-minor-mode instead of directly changing minor-mode-alist.
+	Added autoload-cookies for this.
+	(whitespace-mode-line-string): newly defined with
+	autoload-cookies.
+	(whitespace-incremental-mode-line-string): likewise.
+
+2002-02-13  Steve Youngs  <youngs@xemacs.org>
+
+	* flyspell.el: Sync to upstream version 1.6g
+
+2002-02-01  Jeff Mincy  <jeff@delphioutpost.com>
+
+	* xpm-mode.el:  Add xpm-mode to auto-mode-alist.
+
+2002-01-24 Thu  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el:
+	(folding-bind-default-keys): Added
+	C-x . to run `folding-context-next-action'. Code by
+	Scott Evans <gse@antisleep.com> during mail exchange.
+	(folding-easy-menu-define): Added
+	`folding-context-next-action'
+	(folding-mouse-call-original): Added `car-safe' to read
+	EVENT, which may be nil.
+	(folding-next-visible-heading): Better variable
+	name `bm' => `begin-mark'
+	(folding-bind-backward-compatible-keys):
+	Used `let' to locally set `folding-mode-prefix-key', but that
+	did not accept a thing, because `folding-install' instantiated
+	the keymap using `folding-mode-prefix-key', which retained the
+	original value. Now sets permanently `folding-mode-prefix-key'
+	to C-c.
+
+2002-01-10  John Paul Wallington  <jpw@shootybangbang.com>
+
+	* flyspell.el (flyspell-mode-line-string): fix custom type.
+
+2001-12-30  Gleb Arshinov  <gleb@barsook.com>
+
+	* folding.el: remove comment about (now fixed) XEmacs isearch
+	support bug
+	(folding-isearch-hook-function): for XEmacs use
+	overriding-local-map or to fiddle with minor-mode-map-alist as
+	appropriate.  This supports both 21.2+ and older XEmacs isearch
+	code.
+	(folding-isearch-general): execute isearch-abort and isearch-quit
+	like any other function for clarity and to make sure any
+	side-effects of underlying implementation take effect.  cond
+	clause is no longer necessary, but is left in place to make patch
+	more clear.
+	(folding-isearch-general): always goto position returned by
+	underlying isearch function.  This makes C-g work as expected
+	(go back to original position where isearch was started)
+	(folding-isearch-general): fully mimic exit signal of isearch
+
+2001-12-30 Sun  Jari Aalto  <jari aalto A T poboxes dot com>
+
+	* folding.el: Synched with the latest folding: 2.97.
+	All function now have uniforma naming `folding-' where the
+	previous version used both `fold-' and `folding-'.
+	Isearch support is still broken in XEmacs, works in Emacs.
+	See complete list of changes in folding itself (history
+	section)
+
+2001-12-29  Steve Youngs  <youngs@xemacs.org>
+
+	* package-info.in: (provides): Update to include all provides.
+
+2001-12-28  Steve Youngs  <youngs@xemacs.org>
+
+	* rtf-support.el: New file.
+
+	* Makefile (ELCS): Add rtf-support.elc
+
+2001-07-18  Charles G Waldman  <cgw@xemacs.org>
+
+	* hexl.el (hexlify-buffer):
+	* hexl.el (dehexlify-buffer): Check whether buffer-file-system
+	is bound.
+
+2001-06-18  Ben Wing  <ben@xemacs.org>
+
+	* hexl.el:
+	* hexl.el (hexl): New.
+	* hexl.el (hexl-iso):
+	* hexl.el (hexl-follow-ascii): New.
+	* hexl.el (hexl-ascii-extent): New.
+	* hexl.el (hexl-mode):
+	* hexl.el (hexl-after-revert-hook):
+	* hexl.el (hexl-save-buffer):
+	* hexl.el (hexl-mode-exit):
+	* hexl.el (hexl-current-address):
+	* hexl.el (hexl-address-to-marker):
+	* hexl.el (hexl-goto-address):
+	* hexl.el (hexl-scroll-up):
+	* hexl.el (hexlify-buffer):
+	* hexl.el (dehexlify-buffer):
+	* hexl.el (hexl-hex-char-to-integer):
+	* hexl.el (hexl-oct-char-to-integer):
+	* hexl.el (hexl-insert-hex-char):
+	* hexl.el (hexl-insert-hex-string): New.
+	* hexl.el (hexl-insert-octal-char):
+	* hexl.el (hexl-follow-ascii-find): New.
+	* hexl.el (hexl-mode-map):
+	Sync with FSF 21.0.103.  Now works on MS Windows.
+
+2001-04-02  Glynn Clements  <glynn.clements@virgin.net>
+
+	* hexl.el (hexl-find-file): force use of 'binary coding-system
+
+2001-01-25  Steve Youngs  <youngs@xemacs.org>
+
+	* ansi-color.el: Sync with author version 3.4.3.
+
+2001-01-19  Steve Youngs  <youngs@xemacs.org>
+
+	* ansi-color.el: New file.
+
+2000-11-16  Steve Youngs  <youngs@xemacs.org>
+
+	* filladapt.el: Sync with author version 2.12.
+
+2000-11-01  Hrvoje Niksic <hniksic@arsdigita.com>
+
+	* htmlize.el: Update to author version 0.55.
+
+2000-10-05  Martin Buchholz  <martin@xemacs.org>
+
+	* *: Mega typo fix.
+
+2000-07-27  Ben Wing  <ben@xemacs.org>
+
+	* flyspell.el (setq ispell-library-path nil): hack so that this
+	will still compile when ispell executable non-existent.
+	(later that same day): revert.  fixed ispell itself.
+
+2000-05-16  Andreas Jaeger  <aj@suse.de>
+
+	* htmlize.el: Version 0.50 from Hrvoje Niksic.
+
+2000-02-14  Stephen J. Turnbull  <stephen@xemacs.org>
+
+	* image-mode.el (image-external-viewer): Remove variable.
+	(image-external-viewer-list): New variable.
+	(image-start-external-viewer): Search `image-external-viewer-list'
+	at run-time, rather than set `image-external-viewer' at load-time.
+
+2000-01-15  Andreas Jaeger <aj@xemacs.org>
+
+	* flyspell.el (global-flyspell-mode): Reverted last patch for now
+	since it lead to some new unresolved problems.
+
+2000-01-11  Didier Verna  <didier@xemacs.org>
+
+	* flyspell.el (global-flyspell-mode): add missing autoload.
+
+1999-11-11  Andreas Jaeger  <aj@suse.de>
+
+	* htmlize.el: Version 0.49 from Hrvoje Niksic <hniksic@srce.hr>.
+
+1999-07-06  SL Baur  <steve@miho.m17n.org>
+
+	* filladapt.el (fill-paragraph): Quote leading parenthesis.
+	(lisp-fill-paragraph): Ditto.
+	(fill-region-as-paragraph): Ditto.
+	(fill-region): Ditto.
+	From Bob Weiner <weiner@altrasoft.com>
+
+1999-04-22  John H Palmieri  <palmieri@member.ams.org>
+
+	* xpm-mode.el (xpm-parse-color):
+	Handle s and m fields correctly if before the c field.
+	Read color correctly from c field if before s and/or m fields.
+
+1999-04-08  Sam Mikes  <smikes@alumni.hmc.edu>
+
+	* folding.el: (fold-mouse-call-original) use `int-to-string' in `concat'
+
+1999-02-15  SL Baur  <steve@xemacs.org>
+
+	* Makefile (ELCS): Add htmlize.elc.
+
+1998-12-30  Martin Buchholz  <martin@xemacs.org>
+
+	* xrdb-mode.el: Upgrade from version 2.11 -> 2.24
+	Snarfed from http://www.python.org/emacs/xrdb-mode.el
+
+1998-10-27  SL Baur  <steve@altair.xemacs.org>
+
+	* flyspell.el (flyspell-mode): Autoload.
+	Remove # in add-minor-mode call (it isn't needed).
+	Move add-minor-mode setup to end of file.
+
+1998-10-21  Greg Klanderman  <greg@alphatech.com>
+
+	* flyspell.el (flyspell-mode-map): add autoload cookie.
+	(top level): pass the function flyspell-mode as the fifth
+	argument to add-minor-mode, not the value of the variable.
+
+1998-10-21  Greg Klanderman  <greg@alphatech.com>
+
+	* flyspell.el: synch to author version 1.4d.
+
+1998-09-24  SL Baur  <steve@altair.xemacs.org>
+
+	* flyspell.el (flyspell-mode-line-string): New variable.
+	Use `add-minor-mode' to add the minor mode to XEmacs.
+	(flyspell-mode): Autoload.
+	(flyspell-mode-map): Autoload.
+	(flyspell-mode-line-string): Autoload.
+
+1998-08-29  Jeff Miller  <jmiller@smart.net>
+
+	* whitespace-mode.el:  added autoload cookie for whitespace-mode
+	updated toolbar icon to use foregroundToolBarColor.
+
+1998-07-03  Charles G Waldman  <cgw@pgt.com>
+
+	* image-mode.el: Fixed image-decode to handle start and end args.
+
+1998-03-25  SL Baur  <steve@altair.xemacs.org>
+
+	* folding.el: New file.
+
+1998-03-16  SL Baur  <steve@altair.xemacs.org>
+
+	* iso-acc.el: Update maintainer: field.
+
+1998-02-26  SL Baur  <steve@altair.xemacs.org>
+
+	* filladapt.el: Version 2.12 courtesy of Kyle Jones.
+
+1998-02-25  SL Baur  <steve@altair.xemacs.org>
+
+	* xrdb-mode.el (xrdb-submit-bug-report): Require reporter here
+	since we don't need it for bytecompiling.
+
+1998-01-25  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile (VERSION): Update to package standard 1.0.
+	* package-info.in: Ditto.
+
+1998-01-12  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+	(ELCS): Add nroff-mode, scribe and ws-mode.
+
+1998-01-03  SL Baur  <steve@altair.xemacs.org>
+
+	* Makefile: Update to newer package interface.
+
+1997-12-24  SL Baur  <steve@altair.xemacs.org>
+
+	* whitespace-mode.el: Strip usage of adapt.el.
+
+	* xrdb-mode.el: Don't require 'reporter at bytecompile time.
+
+	* Makefile: Created.

@@ -1,0 +1,40 @@
+;;; custom-load.el --- automatically extracted custom dependencies
+
+;;; Code:
+
+(autoload 'custom-add-loads "cus-load")
+
+(custom-add-loads 'extensions '("time-stamp"))
+(custom-add-loads 'change-log '("add-log"))
+(custom-add-loads 'shell '("shell"))
+(custom-add-loads 'comint-completion '("comint"))
+(custom-add-loads 'comint '("comint-xemacs" "comint"))
+(custom-add-loads 'tools '("add-log" "compile"))
+(custom-add-loads 'shell-faces '("shell"))
+(custom-add-loads 'time-stamp '("time-stamp"))
+(custom-add-loads 'keyboard '("edmacro"))
+(custom-add-loads 'data '("sort" "time-stamp"))
+(custom-add-loads 'sort '("sort"))
+(custom-add-loads 'frames '("imenu"))
+(custom-add-loads 'shell-directories '("shell"))
+(custom-add-loads 'programming '("compile"))
+(custom-add-loads 'compilation '("compile"))
+(custom-add-loads 'comint-source '("comint"))
+(custom-add-loads 'debugger '("debug"))
+(custom-add-loads 'maint '("add-log"))
+(custom-add-loads 'field '("field"))
+(custom-add-loads 'edmacro '("edmacro"))
+(custom-add-loads 'imenu '("imenu"))
+(custom-add-loads 'debug '("debug"))
+(custom-add-loads 'faces '("facemenu"))
+(custom-add-loads 'passwd '("passwd"))
+(custom-add-loads 'enriched '("enriched"))
+(custom-add-loads 'processes '("comint-xemacs" "compile" "passwd" "shell"))
+(custom-add-loads 'ffap '("ffap"))
+(custom-add-loads 'wp '("enriched"))
+(custom-add-loads 'editing '("field"))
+(custom-add-loads 'matching '("ffap" "imenu"))
+(custom-add-loads 'unix '("shell"))
+(custom-add-loads 'facemenu '("facemenu"))
+
+;;; custom-load.el ends here

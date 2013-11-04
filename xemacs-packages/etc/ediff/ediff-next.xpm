@@ -1,0 +1,25 @@
+/* XPM */
+static char * file[] = {
+/* width height num_colors chars_per_pixel */
+"15 15 5 1",
+" 	c Gray75 s backgroundToolBarColor",
+".	c black",
+"X	c white",
+"o	c black",
+"O	c black",
+"               ",
+"       .       ",
+"       ..      ",
+"       .X.     ",
+" .......XX.    ",
+" .XXXXXXXoX.   ",
+" .XooooooooX.  ",
+" .Xoooooooooo. ",
+" .XooooooooO.  ",
+" .oOOOOOOoO.   ",
+" .......OO.    ",
+"       .O.     ",
+"       ..      ",
+"       .       ",
+"               ",
+};

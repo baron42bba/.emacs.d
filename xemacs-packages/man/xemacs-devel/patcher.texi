@@ -1,0 +1,2000 @@
+\input texinfo
+
+@c patcher.texi --- Patcher documentation
+
+@c Copyright (C) 2002, 2003, 2004 Didier Verna.
+
+@c PRCS: $Id: patcher.texi,v 1.13 2005/07/26 14:20:11 didierv Exp $
+
+@c Author:        Didier Verna <didier@lrde.epita.fr>
+@c Maintainer:    Didier Verna <didier@lrde.epita.fr>
+@c Created:       Sun Apr 21 21:34:06 2002 under XEmacs 21.5 (beta 1)
+@c Last Revision: Tue Aug 31 14:14:48 2004
+
+@c This file is part of Patcher.
+
+@c Patcher is free software; you can redistribute it and/or modify
+@c it under the terms of the GNU General Public License version 2,
+@c as published by the Free Software Foundation.
+
+@c Patcher is distributed in the hope that it will be useful,
+@c but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c GNU General Public License for more details.
+
+@c You should have received a copy of the GNU General Public License
+@c along with this program; if not, write to the Free Software
+@c Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+@c Commentary:
+
+@c Contents management by FCM version 0.1-b2.
+
+@c #### TODO:
+@c - Add a section on how to setup Patcher for PRCS.
+@c   Or better yet: provide default themes from which people would get
+@c   inspiration.
+
+
+@c %** start of header
+@setfilename patcher.info
+@settitle Patcher
+@setchapternewpage odd
+@setcontentsaftertitlepage
+@dircategory Emacs
+@direntry
+* Patcher: (patcher). Automatic archive-based projects maintenance.
+@end direntry
+@c %** end of header
+
+
+@c ====================================================================
+@c Definitions
+@c ====================================================================
+@set VERSION 3.8
+@set COPYRIGHT_DATE 1999, 2000, 2001, 2002, 2003, 2004, 2005
+
+
+@c ====================================================================
+@c Copyright
+@c ====================================================================
+@ifinfo
+This file contains the documentation for Patcher version
+@value{VERSION}, an XEmacs package for automating the maintenance of
+archive-based projects.
+
+Copyright @copyright{} @value{COPYRIGHT_DATE} Didier Verna.
+
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that the
+sections entitled ``Copying'' and ``GNU General Public License'' are
+included exactly as in the original, and provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation
+approved by the Free Software Foundation.
+@end ifinfo
+
+
+
+@c ====================================================================
+@c Title Page
+@c ====================================================================
+@titlepage
+@title Patcher
+@subtitle Automatic archive-based projects maintenance from within XEmacs
+@subtitle Version @value{VERSION}
+@author Didier Verna <@email{didier@@xemacs.org}>
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} @value{COPYRIGHT_DATE} Didier Verna.
+
+
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that the
+sections entitled ``Copying'' and ``GNU General Public License'' are
+included exactly as in the original, and provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation
+approved by the Free Software Foundation.
+@end titlepage
+
+
+
+@c ====================================================================
+@c Master menu
+@c ====================================================================
+@ifnottex
+@node Top, Copying, , (dir)
+@comment  node-name,  next,  previous,  up
+@top Patcher
+
+Patcher is an XEmacs package designed to automate and ease the
+maintenance of archive-based projects. It provides assistance in
+building, reporting and committing patches, as well as in handling the
+corresponding ChangeLog entries, for example by creating skeletons.
+
+This info file documents Patcher version @value{VERSION}.
+
+@menu
+* Copying::          The GNU General Public License
+* Introduction::     What Patcher is all about
+* Installation::     How to get and install Patcher
+* Quick Start::      For the brave and the impatient
+* User Manual::      A step-by-step guide to using Patcher
+* Variables Index::
+* Functions Index::
+* Keystrokes Index::
+@end menu
+
+Patcher is developed by Didier Verna @email{didier@@xemacs.org}.
+
+@end ifnottex
+
+
+
+@c ====================================================================
+@c Copying
+@c ====================================================================
+@node Copying, Introduction, Top, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Copying
+
+Patcher is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 2,
+as published by the Software Foundation.
+
+Patcher is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+
+@c ====================================================================
+@c Introduction
+@c ====================================================================
+@node Introduction, Installation, Copying, Top
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+When a project becomes important in size, or when the development is
+performed cooperatively by several people across the Internet, it is a
+common practice to help maintaining it by using a development control
+system. Such tools (CVS, PRCS, to name a few) usually work by
+maintaining a centralized project archive (also called a repository)
+that keeps track of the history of the changes, lets you develop
+different ``branches'' at the same time and perform operations like
+merges between these different project branches.
+
+In such ``archive-based'' maintenance models, making the project evolve
+usually involves repeatedly the same few steps, some of which can be
+tedious: you work on your local copy of the project; once you're
+satisfied with your changes, you create a patch by diffing your local
+copy against the project's archive; then (or progressively), you
+construct the ChangeLog entries. Finally, you propose your changes by
+sending a mail to the developers list with your patch and the ChangeLog
+entries included, hoping that your proposition will be accepted. If
+you're one of the maintainers, you will still probably send the message
+to the list, simply announcing the modification, and immediately commit
+the patch with an informative log message.
+
+Patcher is an XEmacs package designed to automate this process. Patcher
+can't work on the project for you. However, as soon as you give it some
+basic knowledge on the project structure and repository, it can
+automatically build a patch by comparing your local copy with the
+repository, create ChangeLog entries, prepare a mail announcing the
+changes, and even commit the patch for you with a informative log
+message. All of this is done in just a few keystrokes. Additionally,
+Patcher can perform some sanity checks, like verifying that your local
+copy is up-to-date, that you did not forget some ChangeLog entries, that
+the commit operation went well and so on.
+
+If you're brave and impatient, and want to start using the basics of
+Patcher as soon as possible, see @ref{Quick Start}. It is recommended to
+read it anyway, since it gives an overview of how Patcher works. If you
+know the basics and want a more detailed guide, see @ref{User Manual}.
+
+Enjoy using Patcher !
+
+
+
+@c ====================================================================
+@c Installation
+@c ====================================================================
+@node Installation, Quick Start, Introduction, Top
+@comment  node-name,  next,  previous,  up
+@chapter Installation
+
+@menu
+* Distribution::                How to get Patcher
+* Requirements::                What you need to get Patcher running
+* Insinuation::                 How to plug Patcher into other libraries
+@end menu
+
+
+@c Distribution =======================================================
+@node Distribution, Requirements, , Installation
+@comment  node-name,  next,  previous,  up
+@section Distribution
+
+Patcher is available either as a standalone package, or as part of the
+standard @file{xemacs-devel} XEmacs package.
+
+You can get @file{xemacs-devel} in three different ways:
+@itemize @bullet
+@item
+You can install @file{xemacs-devel} from within XEmacs via the package
+user interface (accessible from the @samp{Tools} menu or via @kbd{M-x
+list-packages}).
+
+@item
+You can also download the @file{xemacs-devel-<version>-pkg.tar.gz}
+tarball from @uref{ftp://ftp.xemacs.org/pub/xemacs/packages/}, and
+unpack it where you put the other packages.
+
+@item
+@file{xemacs-devel} sources are available from the XEmacs CVS
+repository. The module name is @samp{xemacs-devel}. See
+@uref{http://www.xemacs.org/Develop/cvsaccess.html} for more information
+about the XEmacs CVS repository.
+@end itemize
+
+
+I also provide Patcher as a standalone package. This is mainly for my
+personal usage (when developing and debugging new versions) but you
+might want to use it if you're not interested in the rest of
+@file{xemacs-devel}. The standalone version of Patcher can be found at
+@uref{http://www.lrde.epita.fr/~didier/comp/development/software.php}.
+You will also find different inlined versions of this documentation at
+that place. For installation instructions, please read the
+@file{INSTALL} file.
+
+
+@c Requirements =======================================================
+@node Requirements, Insinuation, Distribution, Installation
+@comment  node-name,  next,  previous,  up
+@section Requirements
+
+Patcher currently works only with XEmacs 21.4 or later. I'm not sure it
+works with earlier versions of XEmacs, but I'm sure it does @strong{not}
+work with GNU Emacs (see below).
+
+Patcher might also have some other requirements, depending on how you use
+it:
+
+@itemize @bullet
+@item
+If you let Patcher create ChangeLogs for you (@pxref{ChangeLogs
+Handling}), you will need the @file{add-log} library from the
+@file{xemacs-base} package, version 1.48 or later, installed on your
+system. That's actually the may reason for Patcher not being able to run
+in GNU Emacs, though I have not tried to port it yet.
+
+@item
+If you want to send mails from Patcher (@pxref{Mail Methods}), you will
+need a mail user agent. Patcher currently supports @file{sendmail},
+@file{message} and @file{Gnus} natively and through the
+@file{compose-mail} interface. Other MUA might be partly supported when
+used with @code{compose-mail}. Patcher will probably suffer from non
+critical deficiencies in that case however (it will issue warnings).
+@end itemize
+
+
+@c Insinuation ========================================================
+@node Insinuation, , Requirements, Installation
+@comment  node-name,  next,  previous,  up
+@section Insinuation
+
+With a proper installation of Patcher (either way), you don't need any
+special trickery in your @file{.emacs} file because all entry points to
+the library should be autoloaded.
+
+However, Patcher has the ability to hook into external libraries, but
+won't do so unless requested. Currently, Patcher has hooks for Gnus
+only. If you're using Gnus as your MUA, you might want to add the
+following line to your @file{gnusrc} file:
+
+@example
+(patcher-insinuate-gnus)
+@end example
+
+This will add some facilities described along the text.
+
+
+
+@c ====================================================================
+@c Quick Start
+@c ====================================================================
+@node Quick Start, User Manual, Installation, Top
+@comment  node-name,  next,  previous,  up
+@chapter Quick Start
+
+In this chapter, we quickly setup the basic Patcher configuration for
+hacking on XEmacs. Adapt the example as you wish. Let's make some
+assumptions first:
+
+@itemize @bullet
+@item
+You own a computer.
+
+@item
+You have the @file{add-log} library from the @file{xemacs-base} package,
+version 1.48 or later, installed on your system.
+
+@item
+You're using XEmacs from the CVS repository.
+
+@item
+Your local copy of the repository is located in
+@file{/usr/local/src/XEmacs-21.5}.
+
+@item
+Your local copy of the repository is up-to-date, but you've done some
+hacking in the sources that you'd like to submit.
+
+@item
+Since you're lazy, you didn't write the ChangeLog entries yet.
+@end itemize
+
+
+@menu
+* Setting up Patcher::     Making Patcher aware of your project
+* Calling Patcher::        Preparing a patch and a message
+* Filling the ChangeLogs:: Patcher only creates skeletons
+* Filling the Message::    You should insert the ChangeLog entries
+* Committing the Patch::   Applying your modifications to the archive
+* Sending the Message::    Telling people about your modifications
+@end menu
+
+
+@c The Project Descriptor =============================================
+@node Setting up Patcher, Calling Patcher, Quick Start, Quick Start
+@comment  node-name,  next,  previous,  up
+@section Setting up Patcher
+
+The first thing to do is to make patcher aware of your ``XEmacs''
+project. Put this in your @file{.emacs} file:
+
+@lisp
+(setq patcher-projects
+      '(("XEmacs" "/usr/local/src/XEmacs-21.5"
+         :to-address "xemacs-patches@@xemacs.org")
+        ))
+@end lisp
+
+@vindex patcher-projects
+As you can imagine, @code{patcher-projects} is a user option in which
+you store information about the projects you want to manage with
+Patcher. It is actually a list of what's called @dfn{project
+descriptors}. Here's the meaning of the only project descriptor we have
+in the example above: we have a project named ``XEmacs'', located in
+@file{/usr/local/src/XEmacs-21.5} and for which emails should be sent to
+@email{xemacs-patches@@xemacs.org}.
+
+Note the particular syntax for specifying the mailing address. This is
+what's called a @dfn{project option}. Contrary to the project's name and
+directory, which are mandatory and always appear as the first and second
+elements of a project descriptor, project options are optional and can
+appear in any order.
+
+
+@c Calling Patcher ====================================================
+@node Calling Patcher, Filling the ChangeLogs, Setting up Patcher, Quick Start
+@comment  node-name,  next,  previous,  up
+@section Calling Patcher
+
+Now you want to build a patch with your changes, and prepare a message
+to submit them. The way Patcher works is currently to setup the message
+first, and then to control all subsequent operations from there. In
+other words, to create a patch, you actually ask Patcher to prepare a
+mail. Type this:
+
+@lisp
+M-x patcher-mail
+@end lisp
+
+@findex patcher-mail
+First, you're prompted (with completion) for a project name (the first
+element of each project descriptor, remember ?). We currently only have
+an ``XEmacs'' project, so hitting @kbd{TAB} will directly fill the
+minibuffer in with this only choice. Then, you're prompted for a subject
+line that will be used in the mail. Say something sensible.
+
+Three operations are now executed in turn:
+
+@enumerate
+@item
+@vindex patcher-default-to-address
+@vindex :to-address
+Patcher prepares a mail buffer. The message will be sent to the address
+you specified with the @code{:to-address} project option, and the
+subject line now reads ``[PATCH] something sensible''.
+
+@item
+Patcher now builds the patch. The command used to do this is @samp{cvs
+-q diff -u} (this is also a project option). Upon successful completion
+of this command (we assume that's indeed the case), the patch is
+inserted into the mail buffer. Some information about the patch is
+provided just above it (the command used, the files affected and so on).
+
+@item
+Finally, Patcher generates ChangeLog skeletons from what it understands
+of the patch. This involves visiting the appropriate ChangeLog files,
+and creating initial entries.
+@end enumerate
+
+
+@c Filling the ChangeLogs =============================================
+@node Filling the ChangeLogs, Filling the Message, Calling Patcher, Quick Start
+@comment  node-name,  next,  previous,  up
+@section Filling the ChangeLogs
+
+Patcher has just created initial ChangeLog entries for you. You must now
+browse through the ChangeLog file(s) and fill the entries as you see
+fit. Once you're done, you can very well save the ChangeLog buffers.
+However, don't kill them ! Don't even think about it. Patcher still
+needs them. Now, please return to the mail buffer.
+
+
+@c Inserting the ChangeLog entries ====================================
+@node Filling the Message, Committing the Patch, Filling the ChangeLogs, Quick Start
+@comment  node-name,  next,  previous,  up
+@section Filling the message
+
+Now that you're satisfied with your ChangeLog entries and you've
+returned to the mail buffer, you want to write some explanation text in
+the message. I'll let you do that. You also want to insert the ChangeLog
+entries corresponding to your patch, since they are usually much more
+readable than the patch itself.
+
+@findex patcher-insert-change-logs
+@kindex C-c C-p i
+Inserting your ChangeLog entries in the mail buffer is as simple as
+typing @samp{C-c C-p i}. This actually calls the function
+@code{patcher-insert-change-logs}, which places them just above the
+patch, with a short information line (per ChangeLog file) on top.
+
+
+@c Committing the Patch ===============================================
+@node Committing the Patch, Sending the Message, Filling the Message, Quick Start
+@comment  node-name,  next,  previous,  up
+@section Committing the Patch
+
+If you have commit access to your project, you should read this.
+Otherwise, you may directly see @ref{Sending the Message}.
+
+Committing your changes involves three steps: preparing the commit
+command, preparing the commit log message, and actually committing the
+changes. Although Patcher can do all of this in one shot, it lets you
+control each step by default.
+
+@findex patcher-commit-change
+@kindex C-c C-p c
+In order to start the commit process, simply type @samp{C-c C-p c}. This
+calls the function @code{patcher-commit-change}. Congratulations. You've
+just been transported to a new buffer, the @code{*Patcher Log Message*}
+buffer. This buffer lets you edit the log message that will accompany
+your commit. Note that the message is initialized with the subject line
+of your mail. This is also a project option.
+
+@findex patcher-logmsg-commit
+@kindex C-c C-c
+Once you're satisfied with the log message, type @samp{C-c C-c}. This
+calls the function @code{patcher-logmsg-commit}, which computes the
+commit command to use. The command is displayed in a special buffer, the
+@code{*Patcher Commit Command*} buffer. The default commit command is
+@samp{cvs commit}, which of course is also a project option. Note that
+Patcher stores the log message in a temporary file and uses the
+@option{-F} @kbd{cvs commit} option. Finally, note that Patcher has
+automatically appended the affected ChangeLog files to the commit
+command.
+
+At this point, you have the opportunity to abort the commit operation.
+Otherwise, answer positively and the commit will be executed. If you had
+not previously saved the ChangeLog files, Patcher will do it for you
+just before committing.
+
+
+@c Sending the Message ================================================
+@node Sending the Message, , Committing the Patch, Quick Start
+@comment  node-name,  next,  previous,  up
+@section Sending the Message
+
+Sending the message has actually nothing to do with Patcher. It depends
+on the method you use for sending mails, but will usually be done via a
+@samp{C-c C-c} command of some sort. On thing to note however: if you've
+committed your changes via Patcher, the message has been slightly
+modified: the subject line now reads ``[COMMIT] something sensible''
+instead of ``[PATCH] @dots{}'', and a short commit notice has been
+inserted just at the beginning of the message's body.
+
+That's it. That was easy. Congratulations on your first shot at Patcher,
+anyway ! Of course, Patcher is much more powerful and customizable than
+what has been described in this chapter. For a complete documentation on
+how to use and customize Patcher, please refer to @ref{User Manual}.
+
+
+
+@c ====================================================================
+@c User Manual
+@c ====================================================================
+@node User Manual, Variables Index, Quick Start, Top
+@comment  node-name,  next,  previous,  up
+@chapter User Manual
+
+This chapter provides a step-by-step guide to using Patcher. Everything
+there is to know about Patcher is here, though the features are
+introduced progressively.
+
+All user options that are going to be presented in this manual can be
+found in the @code{patcher} customization group, or a subgroup of it.
+
+@menu
+* Project Descriptors::  The project specification mechanism
+* Mail Preparation::     Customizing Patcher messages
+* Patch Generation::     Specifying how a patch is to be constructed
+* ChangeLogs Handling::  How Patcher behaves with respect to ChangeLogs
+* Project Check In::     Committing your changes from Patcher
+* Mail Sending::         Sending the message and cleaning up the place
+* More On Commands::     Error handling and other generalities
+* More On Subprojects::  Defining permanent subprojects
+@end menu
+
+@ignore
+The manual is currently organized in a rather sequential way: one
+chapter for source patches, one for ChangeLogs. This might not be the
+best way to do it. Another way is to split the information in terms of
+patch/ChangeLog creation, and Patch/ChangeLog appearance in messages.
+@end ignore
+
+@c Project Descriptors ================================================
+@node Project Descriptors, Mail Preparation, User Manual, User Manual
+@comment  node-name,  next,  previous,  up
+@section Project Descriptors
+
+@vindex patcher-projects
+Projects specifications are stored in @code{patcher-projects}. This user
+option is actually a list of @dfn{project descriptors}. Each project
+descriptor has the following form: @samp{(@var{NAME} @var{DIR}
+@var{:OPTION} @var{VALUE} @dots{})}
+
+@vindex patcher-default-to-address
+@vindex :to-address
+@var{NAME} is a string naming your project, @var{DIR} is a string
+specifying the directory in which it resides. The remainder of a project
+descriptor is a sequence of zero or more option/value pairs, that we
+call @dfn{project options}. All option names start with a colon. The
+type of a value depends on the corresponding option. For example, there
+is a project option named @code{:to-address}, whose value should be a
+string giving the email address to which you want to send Patcher
+messages.
+
+When Patcher needs the value for a particular project option, it looks
+for it directly in the project descriptor, but also in other places.
+This process is described below.
+
+@menu
+* Themes::                 Collections of options
+* Project inheritance::    Getting options from other projects
+* Fallbacks::              Default values for project options
+* Retrieval::              The process of getting an option's value
+* Inheritance or theme ?:: The proper way to factor out option values
+@end menu
+
+@node Themes, Project inheritance, , Project Descriptors
+@comment  node-name,  next,  previous,  up
+@subsection Themes
+
+If you have several projects sharing the same option set, you might want
+to setup a theme. Themes are named collections of project options.
+
+@vindex patcher-themes
+Themes are stored in the @code{patcher-themes} user option. This option
+is a list of themes. Each theme has the following form:
+@samp{(@var{NAME} @var{:OPTION} @var{VALUE} @dots{})}.
+
+@var{NAME} is the theme's name (a symbol). The remainder of the list is
+a sequence of zero or more option/value pairs, just like in project
+descriptors.
+
+@vindex patcher-default-themes
+@vindex :themes
+In order to use a theme in a given project, a @code{:themes} project
+option is provided. It is a list of theme names (symbols). Use this
+option in your project descriptor, and the project will implicitly
+inherit all options from the corresponding theme.
+
+One important note: as @code{:themes} is a project option, it can appear
+in a theme. In other words, themes can inherit from other themes. When
+Patcher tries to retrieve an option, the themes tree is traversed in
+depth first.
+
+@vindex patcher-max-theme-depth
+Because themes can contain themes, a bogus setting might lead to an
+infinite loop (a cycle in a theme graph). To prevent this, the
+@code{patcher-max-theme-depth} user option is provided. It represents
+the expected maximum theme nesting level, and defaults to 8.
+
+
+@node Project inheritance, Fallbacks, Themes, Project Descriptors
+@comment  node-name,  next,  previous,  up
+@subsection Project inheritance
+
+When two projects are very similar, you might want to use the project
+inheritance mechanism described below.
+
+@vindex :inheritance
+There is a special project option called @code{:inheritance}. This
+option must be a list of project names (strings). The inheritance of a
+project defines a list of projects from which to inherit options.
+
+One important note: inherited projects might have their own
+@code{:inheritance} option set to other projects in turn. In other
+words, the project inheritance can be more than one level deep. When
+Patcher tries to retrieve an option, the inheritance tree is traversed
+in depth first.
+
+@vindex patcher-max-inheritance-depth
+Because inherited projects can inherit from projects, a bogus setting
+might lead to an infinite loop (a cycle in a project graph). To prevent
+this, the @code{patcher-max-inheritance-depth} user option is provided.
+It represents the expected maximum project inheritance level, and
+defaults to 8.
+
+The @code{:inheritance} project option is somewhat special in the sense
+that it can't appear in a theme. We will encounter other exceptions
+later in this manual.
+
+
+@node Fallbacks, Retrieval, Project inheritance, Project Descriptors
+@comment  node-name,  next,  previous,  up
+@subsection Fallbacks
+
+@vindex patcher-default-to-address
+@vindex :to-address
+For each existing project option, Patcher also has a @dfn{fallback} user
+option with a default value that would be shared among all (or some of)
+your projects. The name of the fallback is obtained by replacing the
+colon in the project option's name with the prefix
+@code{patcher-default-}. For example, the fallback corresponding to the
+@code{:to-address} project option is named
+@code{patcher-default-to-address}.
+
+The @code{:inheritance} project option is also special in the sense that
+it doesn't have a corresponding fallback. We will encounter other
+exceptions later in this manual.
+
+In the remainder of this manual, we will rarely mention the fallbacks
+again. When we introduce a new project option, just remember that it
+always has a corresponding fallback (well, not always, as you just
+discovered).
+
+
+@node Retrieval, Inheritance or theme ?, Fallbacks, Project Descriptors
+@comment  node-name,  next,  previous,  up
+@subsection Retrieval
+
+When Patcher needs the value of a particular project option, it looks
+for it in the following manner:
+
+@itemize @bullet
+@item
+First, it looks directly in the project descriptor to see if the option
+is given.
+
+@item
+@vindex patcher-default-themes
+@vindex :themes
+@vindex patcher-themes
+If that fails, it next tries the given themes, if any. This involves
+recursively traversing the project's themes tree. Options successfully
+retrieved in themes are said to be @dfn{themed}.
+
+@item
+@vindex :inheritance
+If that still fails, it then tries the inherited projects, if any. This
+involves recursively traversing the project's inheritance tree. Options
+successfully retrieved in inherited projects are said to be
+@dfn{inherited}. Note that in turn, such options could have been
+actually themed in the inherited project.
+
+@item
+If that fails again, it finally falls back to the value given in the
+corresponding fallback (if it exists). In such a case, the option is
+said to be @dfn{fallbacked}.
+@end itemize
+
+Note that a value of @code{nil} for a project option @strong{is an
+actual value}. It is not equivalent to an option being unset. As a
+consequence, if Patcher finds a project option with a value of
+@code{nil} somewhere, it will use it and stop the search, even if a non
+nil value could be retrieved later from a theme, an inherited project or
+a fallback. This provides you with a way to annihilate themed,
+inherited or fallbacked options.
+
+
+@node Inheritance or theme ?, , Retrieval, Project Descriptors
+@comment  node-name,  next,  previous,  up
+@subsection Inheritance or theme ?
+
+At that point, you might be wondering why the themes and inheritance
+concepts were both designed, since they actually perform very similar
+tasks. Good question. Here is a good answer.
+
+Projects might share options for different reasons. For example, my
+``XEmacs'' (source) and ``XEmacs Packages'' projects share many options
+(@code{To:} address, @code{From:} address, diff and commit commands and
+so on) because they both relate to XEmacs. On the other hand I have
+personal but totally unrelated projects that share the same commands
+because they are all handled through a local PRCS archive.
+
+In other words, you should rather use the inheritance mechanism when
+projects relate to each other, and the theme mechanism for settings that
+are orthogonal the projects they apply to.
+
+
+
+@c Mail Preparation ===================================================
+@node Mail Preparation, Patch Generation, Project Descriptors, User Manual
+@comment  node-name,  next,  previous,  up
+@section Mail Preparation
+
+Patcher currently uses the mail buffers as ``master'' buffers for
+controlling all operations: building a patch, creating the ChangeLog
+entries, committing@dots{} all is done from the mail buffer. Note
+however that you don't need to actually send mails to use Patcher
+(@pxref{Fake Mail Method}).
+
+To use Patcher on a certain project, you start by preparing a (possibly
+fake) mail. There are several ways to do so: you could start a brand new
+message, ``adapt'' a message already in preparation to Patcher, or even
+compose some sort of a Patcher reply to another message.
+
+@defun patcher-mail
+Start composing a brand new Patcher message. This function interactively
+prompts you for the name of the project and for a (mail) subject line.
+@end defun
+
+@defun patcher-mail-adapt
+Assuming that you are already editing a message (with your usual MUA),
+this function ``adapts'' it to Patcher by prompting you for the name of
+a project. Note that this function does @emph{not} prompt you for a
+subject.
+@end defun
+
+If you're using Gnus to read mail and have properly insinuated it
+(@pxref{Insinuation}), Patcher offers different Gnus-like ways to answer
+mails and adapt them to Patcher. All the functions below are available
+from both the Gnus Summary and the Article buffer.
+
+@defun patcher-gnus-summary-followup
+@kindex C-c C-p f
+Compose a followup to the article, and adapt it to Patcher. This
+function is bound to @kbd{C-c C-p f}.
+@end defun
+
+@defun patcher-gnus-summary-followup-with-original
+@kindex C-c C-p F
+Idem, but also cite the original article. This function is bound to
+@kbd{C-c C-p F}.
+@end defun
+
+@defun patcher-gnus-summary-reply
+@kindex C-c C-p r
+Like @code{patcher-gnus-summary-followup}, but compose a reply. This
+function is bound to @kbd{C-c C-p r}.
+@end defun
+
+@defun patcher-gnus-summary-reply-with-original
+@kindex C-c C-p R
+Idem, but also cite the original article. This function is bound to
+@kbd{C-c C-p R}.
+@end defun
+
+
+In any case, Patcher starts working on the project (by first creating
+the patch) after the message is prepared. Because of this, we'll start
+by reviewing the mail-related customizations you might want to setup.
+
+@menu
+* Mail Methods::          Using a particular mailer
+* Message Customization:: Specifying initial contents for messages
+@end menu
+
+@node Mail Methods, Message Customization, Mail Preparation, Mail Preparation
+@comment  node-name,  next,  previous,  up
+@subsection Mail Methods
+
+@vindex patcher-default-mail-method
+@vindex :mail-method
+Since there are different mail packages working in XEmacs, Patcher
+supports different methods for preparing messages. You can specify the
+method you prefer in the @code{:mail-method} project option. The value
+must be a symbol.
+
+@menu
+* Standard Mail Methods:: Patcher supports standard mail packages
+* Fake Mail Method::      Patcher supports not sending mails
+* Other Mail Methods::    Patcher supports everything
+@end menu
+
+@node Standard Mail Methods, Fake Mail Method, Mail Methods, Mail Methods
+@comment  node-name,  next,  previous,  up
+@subsubsection Standard Mail Methods
+
+Patcher currently supports @file{sendmail}, @file{message} and
+@file{Gnus} natively and through the @file{compose-mail} interface.
+Other MUA might be partly supported when used with @code{compose-mail}.
+Patcher will probably suffer from non critical deficiencies in that case
+however (it will issue warnings).
+
+@table @code
+@item compose-mail
+@findex compose-mail
+@findex patcher-mail-compose-mail
+@vindex mail-user-agent
+This is the default. It is implemented via the function
+@code{patcher-mail-compose-mail} which calls @code{compose-mail} to
+prepare the message. If you are not familiar with @samp{compose-mail},
+you might also want to throw an eye to the user option
+@code{mail-user-agent}. If your project does not specify an address to
+send the message to (@pxref{Message Customization}), it is prompted for.
+
+@item sendmail
+@findex mail
+@findex patcher-mail-sendmail
+A direct interface to the @code{mail} function from the @code{sendmail}
+package. It is implemented via the function
+@code{patcher-mail-sendmail}. If your project does not specify an
+address to send the message to (@pxref{Message Customization}), it is
+prompted for.
+
+@item message
+@findex message-mail
+@findex patcher-mail-message
+A direct interface to the @code{message-mail} function from the
+@code{message} library (it is part of @code{Gnus}). It is implemented
+via the function @code{patcher-mail-message}. If your project does not
+specify an address to send the message to (@pxref{Message
+Customization}), it is prompted for.
+
+@item gnus
+@findex gnus-post-news
+@findex patcher-mail-gnus
+A direct interface to the @code{gnus-post-news} function from the
+@code{Gnus} package (it can also send mails@dots{}). It is implemented
+via the function @code{patcher-mail-gnus}. This mail method is
+interesting when you maintain a special mail group for messages that you
+send with Patcher, most probably because they are sent to some
+mailing-list, such as @email{xemacs-patches@@xemacs.org}.
+
+@vindex patcher-default-gnus-group
+@vindex :gnus-group
+This method uses a Gnus group name and acts as if you had type @samp{C-u
+a} on that group in the @code{*Group*} buffer, hence honoring the group
+parameters and posting-styles. If your project does not specify a Gnus
+group name (@pxref{Message Customization}), it is prompted for.
+@end table
+
+This last mail method is special in the sense that it requires a running
+Gnus session to work. If that's needed, Patcher can start Gnus for you
+in several ways, according to the following user options:
+
+@table @code
+@item patcher-mail-run-gnus
+@vindex patcher-mail-run-gnus
+If @code{nil}, Patcher will never start Gnus and abort the operation
+instead. If @code{t}, Patcher will always start Gnus when needed. If
+@code{'prompt}, Patcher will ask you what (you want) to do. This is the
+default behavior.
+
+@item patcher-mail-run-gnus-other-frame
+@vindex patcher-mail-run-gnus-other-frame
+Used when Patcher has to start Gnus by itself. If @code{nil}, continue
+using the current frame. If @code{t}, start Gnus in another frame (this
+is the default). If @code{'follow}, start Gnus in another frame, and use
+this new frame to prepare the Patcher mail.
+@end table
+
+@node Fake Mail Method, Other Mail Methods, Standard Mail Methods, Mail Methods
+@comment  node-name,  next,  previous,  up
+@subsubsection Fake Mail Method
+
+@findex patcher-mail-fake
+At that point, you might be wondering why the mail method is a project
+option and not simply a user option, since you probably only use one
+mail agent at all. Right. But you might one day work on projects for
+which you don't need to send messages at all. This could happen if you
+start using Patcher on a project of your own for instance. For that
+reason, there is a @code{fake} mail method available. It is implemented
+via the @code{patcher-mail-fake} function and calls no particular mail
+user agent. Once you type @samp{C-c C-c} to virtually send the fake
+message, it only performs some cleanup.
+
+All right. But did we really need this fake method ? I mean, one could
+use the usual mail method, and simply not send the message in the end.
+Huh, yeah, ok@dots{} Actually, it is very probable that in a future
+release of Patcher, the mail buffer won't be the master buffer anymore,
+and mail sending will be just another optional step in the process. In
+that case, the mail method is likely to move away from project option
+to standard user option.
+
+@node Other Mail Methods, , Fake Mail Method, Mail Methods
+@comment  node-name,  next,  previous,  up
+@subsubsection Other Mail Methods
+
+@vindex patcher-default-mail-method
+@vindex :mail-method
+If you're not satisfied with the provided mail methods (want a @code{vm}
+one ?), you can provide your own, more or less. Here's what to do: set
+your @code{:mail-method} project option to, say, @code{foo}, and write
+your own function which must be named @code{patcher-mail-foo}.
+
+This function must take two arguments (a project descriptor and a string
+containing the subject of the message), and prepare a mail buffer. If
+you want to do this, you should see how it's done for the built-in
+methods.
+
+Note that the mail adaptation facility won't be available for your
+custom method. For that, I would have to hack the internals of Patcher.
+
+
+@node Message Customization, , Mail Methods, Mail Preparation
+@comment  node-name,  next,  previous,  up
+@subsection Message Customization
+
+When preparing a message, Patcher can fill some parts of it for you.
+Here's a list of mail-related project options.
+
+@table @code
+@item :user-name
+@vindex patcher-default-user-name
+@vindex :user-name
+The name (your name) to use when composing the message. It will affect
+the @code{From:} header. This option is used by all mail methods but
+@code{fake}. If not given, @code{user-full-name} is used.
+
+@item :user-mail
+@vindex patcher-default-user-mail
+@vindex :user-mail
+The mail (your mail) address to use when composing the message. It will
+affect the @code{From:} header. This option is used by all mail methods but
+@code{fake}. If not given, @code{user-mail-address} is used.
+
+@item :to-address
+@vindex patcher-default-to-address
+@vindex :to-address
+The address to send messages to (a string). This option is used by all
+mail methods but @code{gnus} and @code{fake}. If not given, it is
+prompted for when calling @code{patcher-mail}.
+
+@item :gnus-group
+@vindex patcher-default-gnus-group
+@vindex :gnus-group
+The Gnus group name to use for posting messages (a string). This option
+is used only by the @code{gnus} mail method. If not given, it is
+prompted for when calling @code{patcher-mail}.
+
+Note that if you configured your name and mail in Gnus, for instance
+through posting styles, these configurations take precedence over the
+corresponding Patcher options.
+
+@item :subject-prefix
+@vindex patcher-default-subject-prefix
+@vindex :subject-prefix
+A prefix for the subject line of messages. It can be @code{nil} or a
+string. By default, ``[PATCH]'' is used. This part of subjects is never
+prompted for. A @samp{%n} occurring in this string will be replaced with
+the project name. Also, a space is inserted between the prefix and the
+remainder of the subject, when appropriate.
+
+@item :subject
+@vindex patcher-default-subject
+@vindex :subject
+A default value for prompted subjects (a string). A @samp{%n} occurring
+in this string will be replaced with the project's name
+(@pxref{Subproject Naming}). Please note that this is used @strong{only}
+to provide a default value for prompted subjects. Subjects are
+@strong{always} prompted for.
+
+@item :mail-prologue
+A prologue to insert just at the top of a message body (a string).
+@end table
+
+@c Patch Generation ===================================================
+@node Patch Generation, ChangeLogs Handling, Mail Preparation, User Manual
+@comment  node-name,  next,  previous,  up
+@section Patch Generation
+
+Patcher creates patches by diffing your local copy of the project
+against the repository. This is done automatically after preparing a
+message, so you shouldn't normally bother to do it manually. That
+situation might still happen from time to time, like, if you further
+modify the sources, or if the initial operation failed for some reason
+(@pxref{More On Commands}).
+
+@findex patcher-generate-diff
+@kindex C-c C-p d
+The way to (re)generate the patch manually is to call
+@code{patcher-generate-diff} from the mail buffer. This function is
+bound to @samp{C-c C-p d} in this buffer. You can both customize the
+diff command used to (re)generate the patch, and restrict the diff to a
+subset of the project's files.
+
+When possible, Patcher also tries to check that your project is
+up-to-date with respect to the archive, and will inform you otherwise.
+
+@menu
+* Diff Command::        Specifying the command to generate the patch
+* After Diff Hook::     Tweaking the diff output
+* Diff Line Filter::    Omitting lines from the diff output
+* Patch Restriction::   Specifying the files affected by the patch
+* Patcher Instances::   You can have several instances of Patcher
+* Diff Prologue::       A header is inserted above the patch
+@end menu
+
+By the way, (re)generating the patch does not necessarily mean that it
+is directly inserted into the mail buffer. This also depends on the
+ChangeLogs behavior (@pxref{ChangeLogs Handling}).
+
+@node Diff Command, After Diff Hook, Patch Generation, Patch Generation
+@comment  node-name,  next,  previous,  up
+@subsection Diff Command
+
+@vindex patcher-default-diff-command
+@vindex :diff-command
+@findex patcher-mail
+The diff command used to generate the patch is specified by the
+@code{:diff-command} project option. By default, the command used is
+@samp{cvs -q diff -u}. You can also punctually change this command by
+calling @code{patcher-mail} or @code{patcher-generate-diff} with a
+prefix argument. Patcher will then prompt you for a new command and use
+it exclusively for this particular patch.
+
+For detail about the format of this option, see @ref{Patch Restriction}.
+See also @ref{More On Commands}.
+
+
+@node After Diff Hook, Diff Line Filter, Diff Command, Patch Generation
+@comment  node-name,  next,  previous,  up
+@subsection After Diff Hook
+
+Sometimes, you might want to tweak a little the diff output before doing
+anything with it, for instance, before generating ChangeLog skeletons
+(@pxref{ChangeLogs Handling}), or simply inserting it into the mail
+buffer.
+
+@vindex patcher-default-after-diff-hook
+@vindex :after-diff-hook
+In order to do that, you might want to use the @code{:after-diff-hook}
+project option. It should be a list of function names (symbols) that
+will be called after each diff output. Each function should take two
+optional arguments delimiting a region to process (no arguments means
+process the whole buffer) and work in the current buffer. The point is
+originally placed at the beginning of the region, and the buffer
+excursion is saved for you.
+
+@findex patcher-prcs-diff-convert
+Note: Patcher provides a special function named
+@code{patcher-prcs-diff-convert} that can be used in this hook in order
+to convert PRCS diff output to a traditional one.
+
+
+@node Diff Line Filter, Patch Restriction, After Diff Hook, Patch Generation
+@comment  node-name,  next,  previous,  up
+@subsection Diff Line Filter
+When generating a global diff, that is, without specifying the files
+affected by the patch explicitly (@pxref{Patch Restriction}), some
+uninformative lines might be present in the output. A typical example is
+files present in your local copy but unknown to the CVS server. Such
+files are indicated by a question mark in diff outputs.
+
+@vindex patcher-default-diff-line-filter
+@vindex :diff-line-filter
+Patcher has a project option named @code{:diff-line-filter} that lets
+filter out such unwanted lines when inserting the diff in the mail
+buffer. This must be a regular expression matching a whole line. Caution
+however: do not put beginning or end of lines markers in your regexp.
+Patcher will do it for you.
+
+By default, the value is @code{"\\? .*"}, which excludes files unknown
+to the CVS server.
+
+@node Patch Restriction, Patcher Instances, Diff Line Filter, Patch Generation
+@comment  node-name,  next,  previous,  up
+@subsection Patch Restriction
+
+Sometimes, you don't want to generate a global patch, but instead work
+on a subset of the project's files. Patcher understands this concept as
+working on a @dfn{subproject}.
+
+As for working on whole projects, there are several alternatives to
+start working on a subproject:
+
+@defun patcher-mail-subproject
+@findex patcher-mail
+This function behaves exactly like @code{patcher-mail}, except that it
+also prompts you for the files affected by the patch. You can specify
+files as well as directories, use wildcards, just as you would construct
+a command line diff.
+@end defun
+
+@defun patcher-mail-adapt-subproject
+@findex patcher-mail-adapt
+Idem, with respect to @code{patcher-mail-adapt}.
+@end defun
+
+@findex patcher-gnus-summary-followup
+@findex patcher-gnus-summary-followup-with-original
+@findex patcher-gnus-summary-reply
+@findex patcher-gnus-summary-reply-with-original
+Finally, all the Gnus-specific reply functions (@pxref{Mail
+Preparation}) take an optional prefix argument that make them work on
+subprojects.
+
+
+Two important things are to be kept in mind when working on subprojects:
+@itemize @bullet
+@item
+It is not necessary (it is even forbidden) to specify the ChangeLog
+files. Patcher will automatically find them for you. In other words,
+only specify source files, not ChangeLog files.
+
+@item
+@findex patcher-mail
+@findex patcher-mail-subproject
+@findex patcher-generate-diff
+Don't mistake the prefix argument of @code{patcher-mail},
+@code{patcher-mail-subproject} and @code{patcher-generate-diff} as a way
+to specify files. It is not meant for that. It is meant only to
+temporarily modify the diff command itself, not the files to which it
+applies.
+@end itemize
+
+@vindex patcher-default-diff-command
+@vindex :diff-command
+When working on a subproject, Patcher uses the same diff command as the
+one used for the whole project, that is, the value of the
+@code{:diff-command} project option. In the case of a subproject
+however, Patcher has to know where to put the files on the command line
+(even if it's usually the last part of it). This is done with the special
+construct @samp{%f}: a @samp{%f} appearing in the diff command will be
+replaced with the specified files (and the computed ChangeLog files) for
+a subproject, and will simply be removed when working on the whole
+project.
+
+As an example, given that the default diff command used by Patcher is
+@code{cvs -q diff -u}, you should know understand that the default value
+for @code{patcher-default-diff-command} is @samp{cvs -q diff -u %f}. Do
+you ?
+
+There is another special construct available in this command: a
+@samp{%n} will be replaced with the project's name (@pxref{Subproject
+Naming}). This is useful in commands with weird options syntax, like
+PRCS.
+
+For a more advanced way of handling subprojects, see @ref{More On
+Subprojects}.
+
+@node Patcher Instances, Diff Prologue, Patch Restriction, Patch Generation
+@comment  node-name,  next,  previous,  up
+@subsection Patcher Instances
+
+The concept of subprojects brings up the question of having Patcher
+working on different patches at the same time. It is possible under some
+conditions:
+
+@itemize @bullet
+@item
+You can have as many simultaneous Patcher instances as you want on
+different projects (you would not define two projects sharing the same
+directory, would you ?).
+
+@item
+You can have as many simultaneous Patcher instances as you want on the
+same project, as long as there is no overlapping between each
+subproject. This means that you can't have source files, or even
+ChangeLog files in common.
+@end itemize
+
+This last point will be subject to improvements in the future.
+
+
+@node Diff Prologue, , Patcher Instances, Patch Generation
+@comment  node-name,  next,  previous,  up
+@subsection Diff Prologue
+
+Patcher can (and does) insert a special prologue just above a patch in
+the message in preparation. This prologue gives information such as the
+diff command used, the files affected and so on.
+
+@vindex patcher-default-diff-prologue-function
+@vindex :diff-prologue-function
+@findex patcher-default-diff-prologue
+The function used to generate this prologue can be specified with the
+@code{:diff-prologue-function} project option. A value of @code{nil}
+means don't insert any prologue. By default, the internal function
+@code{patcher-default-diff-prologue} is used. If you want to provide
+your own, here how to do it.
+
+Your function should take one argument indicating the kind of diff (a
+symbol), and perform insertion at current point in the current buffer.
+The possible values for the argument are:
+
+@table @code
+@item sources
+indicates a source diff only,
+
+@item change-logs
+indicates a ChangeLog diff only,
+
+@item mixed
+indicates a diff on both source and ChangeLog files.
+@end table
+
+The following variables are bound (when appropriate) when this function
+is executed:
+
+@table @code
+@item name
+the name of the current Patcher project,
+@item source-diff
+the command used to create a source diff,
+@item change-log-diff
+the command used to create a ChangeLog diff,
+@item source-files
+sources files affected by the current patch,
+@item change-log-files
+ChangeLog files affected by the current patch.
+@end table
+
+ In the case of a mixed diff, a @code{nil} value for
+@code{change-log-diff} indicates that the same command was used for both
+the source and ChangeLog files.
+
+
+
+@c ChangeLog Handling =================================================
+@node ChangeLogs Handling, Project Check In, Patch Generation, User Manual
+@comment  node-name,  next,  previous,  up
+@section ChangeLogs Handling
+
+ChangeLogs management in Patcher involves two aspects: how ChangeLog
+entries are created, and how they appear in the messages. Both aspects
+can be customized beyond your craziest dreams.
+
+@menu
+* ChangeLogs Updating::   How Patcher deals with ChangeLogs
+* ChangeLogs Appearance:: How ChangeLogs appear in messages
+* ChangeLogs Prologue::   A header is inserted above the ChangeLogs
+@end menu
+
+@node ChangeLogs Updating, ChangeLogs Appearance, ChangeLogs Handling, ChangeLogs Handling
+@comment  node-name,  next,  previous,  up
+@subsection ChangeLogs Action
+
+@vindex patcher-default-change-logs-updating
+@vindex :change-logs-updating
+The way Patcher deals with ChangeLogs is controlled via the
+@code{:change-logs-updating} project option. Its value must be a symbol
+from the following:
+
+@table @code
+@item automatic
+This is the default. Each time you (re)generate a diff, Patcher
+(re)creates ChangeLog skeletons in the appropriate ChangeLog files, by
+analyzing the generated diff. You then have to fill the entries
+manually.
+@findex patch-to-change-log
+@strong{Caution}: the diff analysis is not done by Patcher directly, but
+by the function @code{patch-to-change-log} from the @code{add-log}
+library from the @code{xemacs-base} package. Only standard diff and cvs
+diff output are currently supported, both in unified format only.
+
+@item manual
+Patcher assumes that you create ChangeLog entries manually, as you write
+code, so it won't create ChangeLogs skeletons. It is important to
+understand that in this situation, ChangeLog entries @strong{must} have
+been written @strong{before} you call Patcher. Patcher won't let you
+write them in the process.
+
+@item none
+The project doesn't have ChangeLog files. Patcher won't try to create
+ChangeLog entries, and won't expect that you have written some either.
+@end table
+
+@vindex patcher-default-change-logs-user-name
+@vindex :change-logs-user-name
+@vindex patcher-default-change-logs-user-mail
+@vindex :change-logs-user-mail
+@findex patch-to-change-log
+@vindex user-full-name
+@vindex user-mail-address
+If you're working in @code{automatic} updating mode, Patcher has two
+other project options that give you some control on the created entries:
+@code{:change-logs-user-name} and @code{:change-logs-user-mail}. As you
+might expect, these are strings defining your name and mail address for
+ChangeLog entries'headers. When @code{nil}, Patcher lets the function
+@code{patch-to-change-log} decide what to use (most probably what the
+user options @code{user-full-name} and @code{user-mail-address} say).
+
+@vindex patcher-default-kill-source-files-after-diffing
+@vindex :kill-source-files-after-diffing
+Here's a last point to mention about the @code{automatic} updating mode.
+In order to build the ChangeLog skeletons, the source files must be
+visited. Patcher has a @code{:kill-source-files-after-diffing} project
+option that lets you decide whether you want to kill the source buffers
+just after diffing or not. The value can be either @code{nil} or
+@code{t}. By default, the behavior is to preserve the source files,
+since you might need them for reference when filling the ChangeLog
+entries.
+
+If you're working in @code{manual} updating mode, Patcher might still
+need to know the affected ChangeLog files (for the commit process) and
+your exact ChangeLog entries in each of these files (for insertion in
+the message). The ChangeLog files are automatically deduced from the
+patch. When that's required, however, you will be presented with each
+ChangeLog file in turn, and invited to precise the number of ChangeLog
+entries concerning this patch. These entries must of course appear at
+the top of the file.
+
+Finally, note that an updating mode of @code{none} is the only case
+where ChangeLog files are regarded as normal ones if present. As a
+consequence, that is a case where it is not forbidden to list them
+explicitly as part of a subproject (@pxref{Patch Restriction}),
+although I don't see why you would want to do that.
+
+@node ChangeLogs Appearance,  ChangeLogs Prologue, ChangeLogs Updating, ChangeLogs Handling
+@comment  node-name,  next,  previous,  up
+@subsection ChangeLogs Appearance
+
+@findex patcher-insert-change-logs
+@kindex C-c C-p i
+When Patcher has to deal with ChangeLog files, you insert ChangeLog
+entries in the message buffer by calling the function
+@code{patcher-insert-change-logs}. It is bound to @samp{C-c C-p i} in
+the mail buffer. Note that if ChangeLogs are written in advance, you
+don't have to do that, as Patcher will do it automatically. You have to
+call this function by hand only in @code{automatic} updating mode
+(@pxref{ChangeLogs Updating}).
+
+In all circumstances however, you can use this function to
+@strong{reinsert} the ChangeLog entries into the mail buffer. That might
+come in handy if you further modified them after the initial insertion
+(it's never too late to fix a typo).
+
+@vindex patcher-default-change-logs-appearance
+@vindex :change-logs-appearance
+The appearance of ChangeLog entries in the message is controlled by the
+@code{:change-logs-appearance} project option. Its value must be a
+symbol from the following:
+
+@table @code
+@item verbatim
+This is the default. ChangeLog entries appear just as text in the
+message, above the patch. Most people prefer this kind of appearance
+since it is the most readable.
+
+@item packed
+ChangeLog entries appear as a patch (they are diff'ed against the
+archive). This patch is however distinct from the source patch, and
+appears above it.
+
+@item patch
+ChangeLog entries appear as a patch (they are diff'ed against the
+archive), and this patch is integrated into the source patch. In other
+words, the message looks like a global patch integrating both the
+sources and the ChangeLogs.
+@end table
+
+@vindex patcher-default-change-logs-diff-command
+@vindex :change-logs-diff-command
+When the ChangeLogs appearance is either @code{packed} or @code{patch},
+the diff command used to generate the patch is controlled by the
+@code{:change-logs-diff-command} project option. The value can be the
+symbol @code{diff}, meaning that the same diff command is to be used as
+for the sources (@pxref{Diff Command}), or it can be a string specifying
+an alternate command.
+
+When diffing ChangeLog files, it is strongly recommended that you remove
+contexts from the diff, because otherwise, ChangeLog patches often fail
+to apply correctly.
+
+@vindex patcher-default-diff-command
+@vindex :diff-command
+As in the case of the @code{:diff-command} project option (@pxref{Patch
+Restriction}), a @code{%f} serves to indicate where to put the ChangeLog
+files on the diff command line, and a @samp{%n} is replaced with the
+project's name (@pxref{Subproject Naming}). See also @ref{More On
+Commands}.
+
+@vindex patcher-default-change-logs-diff-command
+@vindex :change-logs-diff-command
+Given these two remarks, you should now understand why the default value
+for @code{patcher-default-change-logs-diff-command} is @samp{cvs -q diff
+-U 0 %f}.
+
+@node ChangeLogs Prologue, , ChangeLogs Appearance, ChangeLogs Handling
+@comment  node-name,  next,  previous,  up
+@subsection ChangeLogs Prologue
+
+ChangeLog prologues are small pieces of informative text that Patcher
+adds above each ChangeLog insertion in the mail buffer.
+
+@vindex patcher-default-change-logs-prologue
+@vindex :change-logs-prologue
+When the ChangeLogs appearance is @code{verbatim}, Patcher inserts one
+prologue per ChangeLog file. The prologue's contents is controlled by
+the @code{:change-logs-prologue} project option (a string). A @samp{%f}
+appearing in this string will be replaced with the ChangeLog filename.
+The default value for @code{patcher-default-change-logs-prologue} is
+@code{"%f addition:"}.
+
+@vindex patcher-default-diff-prologue-function
+@vindex :diff-prologue-function
+@findex patcher-default-diff-prologue
+When the ChangeLogs appearance is @code{packed}, Patcher inserts only
+one prologue for the whole ChangeLogs patch. When @code{patch}, there is
+a single prologue for both the ChangeLogs and the sources. For
+customizing the prologue in both of these cases, see @ref{Diff
+Prologue}.
+
+
+@c Project Check In ===================================================
+@node Project Check In, Mail Sending, ChangeLogs Handling, User Manual
+@comment  node-name,  next,  previous,  up
+@section Project Check In
+
+@findex patcher-commit-change
+@kindex C-c C-p c
+If you have the privilege to commit your changes yourself, you might do
+so directly from the mail buffer, as the last operation before actually
+sending the message. This is done by calling the function
+@code{patcher-commit-change} which is bound to @samp{C-c C-p c} in the
+mail buffer.
+
+Committing directly from Patcher has the advantage that both the commit
+command line and the commit log message (@pxref{Log Message Handling})
+are constructed automatically. Of course, you still have an in-depth
+control on the commit process.
+
+@menu
+* Commit Command::       Specifying the command to commit the patch
+* Log Message Handling:: Building a commit log message
+* Commit Operation::     Actually committing your changes
+@end menu
+
+@node Commit Command, Log Message Handling, Project Check In, Project Check In
+@comment  node-name,  next,  previous,  up
+@subsection Commit Command
+
+@findex patcher-commit-change
+@vindex patcher-default-commit-command
+@vindex :commit-command
+The command used to to commit a patch is specified by the
+@code{:commit-command} project option (a string). You can also
+temporarily change the command in question by calling
+@code{patcher-commit-change} with a prefix argument. As usual, note that
+this prefix argument is not meant to modify the affected files on the
+command line. It's meant only to punctually modify the commit command
+itself. The affected files are computed automatically by Patcher.
+
+The commit command accepts (and maybe requires) special constructs:
+
+@itemize
+@item
+A @code{%n} occurring in the string will be replaced with the project's
+name (@pxref{Subproject Naming}).
+
+@item
+A @code{%f} occurring in the string will be replaced with the files
+affected by the patch (ChangeLogs included, this time), or discarded if
+the patch is global.
+
+@item
+A @code{%s} occurring in the string will be replaced with the name of
+a file containing the commit log message (@pxref{Log Message Handling}).
+This file is a temporary file handled by Patcher.
+
+@item
+A @code{%S} occurring in the string will be replaced with the commit log
+message itself (@pxref{Log Message Handling}). Since the intent here is
+to use the message as a command-line argument, it is quoted against
+shell expansion.
+@end itemize
+
+Please note that a @code{%f} is required in your commit commands, unless
+you know for sure that you will never ever work on a subproject
+(@pxref{Patch Restriction}). But you never know that. Besides, you
+should always also provide either a @code{%s} or a @code{%S}, unless
+your archival software does not support log messages.
+
+@vindex patcher-default-commit-command
+@vindex :commit-command
+Given that, you should now understand why the default value for
+@code{patcher-default-commit-command} is @samp{cvs commit -F %s %f}.
+
+@node Log Message Handling, Commit Operation, Commit Command, Project Check In
+@comment  node-name,  next,  previous,  up
+@subsection Log Message Handling
+
+Most project management tools understand the concept of a @dfn{log
+message}: a short yet informative message that accompany the commit
+operation, which is also stored in the repository.
+
+Before a commit operation, Patcher always builds an initial log message,
+based on certain elements under your control (@pxref{Log Message
+Elements}). Afterwards, you can decide on whether you want some further
+(manual) edition of log message, or whether you want to commit
+immediately.
+
+@vindex patcher-default-edit-log-message
+@vindex :edit-log-message
+The @code{:edit-log-message} project option lets you specify this
+behavior. If @code{t} (the default), you will be able to manually edit
+the log message. If @code{nil}, Patcher will proceed directly to the
+commit operation.
+
+Please note that Patcher stores log messages in temporary files that
+will be used later by the commit command.
+
+@menu
+* Log Message Elements:: Elements Patcher can add automatically
+* Log Message Editing::  Manually modifying the log message
+@end menu
+
+@node Log Message Elements, Log Message Editing, Log Message Handling, Log Message Handling
+@comment  node-name,  next,  previous,  up
+@subsubsection Log Message Elements
+
+@vindex patcher-default-log-message-items
+@vindex :log-message-items
+Patcher has the ability to initialize the log message with different
+elements. These elements are specified with the
+@code{:log-message-items} project option. Its value is either
+@code{nil}, meaning that you don't want any initialization, or a list of
+symbols specifying the elements you desire. The available items are:
+
+@table @code
+@item subject
+The subject of the message. The subject's prefix is automatically
+removed.
+
+@item compressed-change-logs
+The ``compressed'' ChangeLog entries. Only the most important part of
+the ChangeLogs is preserved, so the entries appear in a more compact
+fashion.
+
+@item change-logs
+The raw ChangeLog entries.
+@end table
+
+@vindex patcher-default-change-logs-separator
+@vindex :change-logs-separator
+By default, only the message's subject is used. When using more than one
+item, they appear in the order specified above. If anything appears
+before the raw ChangeLog entries, a separator string is used. This
+string is specified by the @code{:change-logs-separator} project option.
+By default the string looks like ``--- ChangeLog entries follow: ---''.
+
+
+@node Log Message Editing, , Log Message Elements, Log Message Handling
+@comment  node-name,  next,  previous,  up
+@subsubsection Log Message Editing
+
+If so required, Patcher lets you manually edit the log message after
+having initialized it. Log message edition happens in a special buffer,
+the @code{*Patcher Log Message*} buffer.
+
+While editing this buffer, commands to insert the items described in
+@ref{Log Message Elements} are at your disposal. These commands perform
+insertion at point:
+
+@table @code
+@item patcher-logmsg-insert-subject
+@findex patcher-logmsg-insert-subject
+@kindex C-c C-p s
+Bound to @samp{C-c C-p s}. Insert the message's subject (sans the
+prefix).
+
+@item patcher-logmsg-insert-compressed-change-logs
+@findex patcher-logmsg-insert-compressed-change-logs
+@kindex C-c C-p c
+Bound to @samp{C-c C-p c}. Insert the compressed ChangeLog entries.
+
+@item patcher-logmsg-insert-change-logs
+@findex patcher-logmsg-insert-change-logs
+@kindex C-c C-p l
+Bound to @samp{C-c C-p l}. Insert the raw ChangeLog entries. Use a
+prefix argument if you also want the ChangeLogs separator string to be
+inserted.
+@end table
+
+@findex patcher-logmsg-init-message
+@kindex C-c C-p i
+In addition to these commands, you can also completely reinitialize the
+log message according to the specified items, by calling the function
+@code{patcher-logmsg-init-message}, bound to @samp{C-c C-p i}. Caution:
+this command first erases the buffer.
+
+@findex patcher-logmsg-commit
+@kindex C-c C-c
+Finally, once you're happy with your log message, you proceed to the
+commit operation by calling the function @code{patcher-logmsg-commit},
+bound to @samp{C-c C-c}.
+
+@node Commit Operation, , Log Message Handling, Project Check In
+@comment  node-name,  next,  previous,  up
+@subsection Commit Operation
+
+@kindex C-c C-p c
+@kindex C-c C-c
+The commit operation occurs after typing @samp{C-c C-p c} from the mail
+buffer, if you have not required log message edition, or after typing
+@samp{C-c C-c} from the @code{*Patcher Log Message*} buffer otherwise.
+
+@vindex patcher-default-confirm-commits
+@vindex :confirm-commits
+At that point, Patcher has constructed a proper commit command. You
+still have an option to abort the process, though: the
+@code{:confirm-commits} project option lets you specify whether to
+require confirmation before committing. If @code{t} (the default),
+Patcher will display the constructed commit command and ask for a
+confirmation before proceeding. If @code{nil}, Patcher will commit
+immediately.
+
+After the commit operation, Patcher changes some parts of the mail
+buffer in the following manner:
+
+@itemize @bullet
+@item
+@vindex patcher-default-subject-committed-prefix
+@vindex :subject-committed-prefix
+The subject prefix is changed to that specified by the
+@code{:subject-committed-prefix} project option (a string), unless it is
+@code{nil}. By default, ``[COMMIT]'' is used.
+
+@item
+@vindex patcher-default-committed-notice
+@vindex :committed-notice
+A commit notice is added right at the beginning of the message's body.
+This notice is specified by the @code{:committed-notice} project option.
+It can be @code{nil} or a string. By default, it reads ``NOTE: this
+patch has been committed.''.
+@end itemize
+
+
+@c Mail Sending =======================================================
+@node Mail Sending, More On Commands, Project Check In, User Manual
+@comment  node-name,  next,  previous,  up
+@section Mail Sending
+
+Sending the message will most probably be done by typing @samp{C-c C-c}
+in the mail buffer. This is also the case when you're using the fake
+mail method, by the way.
+
+@menu
+* Before Sending:: Patcher does some checkings
+* After Sending::  patcher does some cleanup
+@end menu
+
+@node Before Sending, After Sending, Mail Sending, Mail Sending
+@comment  node-name,  next,  previous,  up
+@subsection Before Sending
+
+There are circumstances in which Patcher will perform some checkings on
+your message when you send it, just before it is actually sent:
+
+@itemize @bullet
+@item ChangeLogs insertion
+
+@vindex patcher-mail-check-change-logs-insertion
+In case of manual ChangeLog insertion (@pxref{ChangeLogs Appearance}),
+Patcher can check that you have indeed inserted the ChangeLog entries
+before sending the message. This behavior is controlled by the
+@code{patcher-mail-check-change-logs-insertion} user option. A value of
+@code{nil} means never check (the message will be sent as-is). A value
+of t means check, and abort the sending if the ChangeLog entries are
+missing. A value of @code{ask} (the default) means ask for your opinion
+on this terrible matter.
+
+@item Commit Operation
+
+@vindex patcher-default-commit-privilege
+@vindex :commit-privilege
+Patcher has a @code{:commit-privilege} project option; a boolean
+specifying whether you're likely to commit your changes by yourself.
+
+@vindex patcher-mail-check-commit-action
+In case of commit privilege, Patcher can check that you have indeed
+committed your changes before sending the message. This behavior is
+controlled by the @code{patcher-mail-check-commit-action} user option. A
+value of @code{nil} means never check (the message will be sent as-is).
+A value of t means check, and abort the sending if the commit operation
+has not been performed. A value of @code{ask} (the default) means ask
+for your opinion on this rather unfortunate situation.
+@end itemize
+
+
+Two notes on these checkings:
+
+@itemize @bullet
+@item
+For uninteresting technical reasons, Patcher does not currently (and
+will probably never) offer you an automatic ChangeLogs insertion or
+commit operation, at mail sending time, but just abort the sending
+process in some circumstances. That's not a big deal though.
+
+@item
+For other uninteresting technical reasons, these checkings require a
+native knowledge of your mail user agent. Patcher does not currently
+support all mail user agents on earth (I'll add them on demand however).
+If that's the case, you will be warned and invited to send me a message.
+Also, you can send me one on April 21st: it's my birthday.
+@end itemize
+
+@node After Sending, , Before Sending, Mail Sending
+@comment  node-name,  next,  previous,  up
+@subsection After Sending
+
+After sending the message, Patcher also performs some cleanup
+operations, that you can customize. The cleanup is controlled by the
+following project options. Each one is a boolean option which defaults
+to @code{t}.
+
+@table @code
+@item :kill-source-files-after-sending
+@vindex patcher-default-kill-source-files-after-sending
+@vindex :kill-source-files-after-sending
+Whether to kill source files after sending the message. If @code{nil},
+the source files will remain visited.
+
+@item :kill-change-logs-after-sending
+@vindex patcher-default-kill-change-logs-after-sending
+@vindex :kill-change-logs-after-sending
+Whether to kill ChangeLog files after sending the message. If
+@code{nil}, the ChangeLog files will remain visited.
+@end table
+
+
+@c More On Commands ===================================================
+@node More On Commands, More On Subprojects, Mail Sending, User Manual
+@comment  node-name,  next,  previous,  up
+@section More On Commands
+
+This section deals with information that apply to all commands used by
+Patcher (diff and commit operations).
+
+@menu
+* Prefixing Commands::  Bypassing a firewall
+* Error Handling::      Dealing with errors
+@end menu
+
+@node Prefixing Commands, Error Handling, , More On Commands
+@comment  node-name,  next,  previous,  up
+@subsection Prefixing Commands
+
+If you're working on a distant archive and you're behind a firewall, you
+might need to prefix all your commands with something like
+@code{runsocks}. Of course, this can be done manually in all your
+command settings, but Patcher offers you a simpler way to do it.
+
+@vindex patcher-default-pre-command
+@vindex :pre-command
+There is a project option named @code{:pre-command} which can be used
+for this kind of thing. It must be a string that will be prepended to
+all operations performed by Patcher.
+
+
+@node Error Handling, , Prefixing Commands, More On Commands
+@comment  node-name,  next,  previous,  up
+@subsection Error Handling
+
+@vindex patcher-default-failed-command-regexp
+@vindex :failed-command-regexp
+From time to time, commands may fail for different reasons. Patcher
+tracks the failures in these commands and lets you know when that
+happens. The @code{:failed-command-regexp} project option lets you
+specify a regular expression to match with the output of an aborted
+command. By default, the value is @code{"^cvs \\[[^]]* aborted\\]"}.
+
+
+@c More On Subprojects ===============================================
+@node More On Subprojects, , More On Commands, User Manual
+@comment  node-name,  next,  previous,  up
+@section More On Subprojects
+
+We've already seen how to work punctually on a subproject, that is, on a
+subset of a project's files (@pxref{Patch Restriction}). If you happen
+to work more than once on the same project subset, it will quickly
+become annoying to have to specify explicitly the same files over and
+over again. Patcher offers you a way to permanently define subprojects.
+
+@menu
+* Defining Subprojects::  Storing subprojects definitions
+* Subproject Naming::     When different projects have the same name
+* Command Directory::     For non local revision control systems
+@end menu
+
+
+@node Defining Subprojects, Subproject Naming, , More On Subprojects
+@comment  node-name,  next,  previous,  up
+@subsection Defining Subprojects
+
+@vindex patcher-subprojects
+The user option @code{patcher-subprojects} stores a list of
+@dfn{subproject descriptors}. A subproject descriptor is almost the same
+as a project descriptor, with a few exceptions:
+
+@itemize @bullet
+@item
+Instead of the project directory field (the second field in a project
+descriptor), you rather specify the name of the project this subproject
+is based on.
+
+@item
+In addition to the standard project options we've already seen, two
+subproject options are available:
+@table @code
+@item :subdirectory
+@vindex :subdirectory
+This lets you specify a subdirectory of the original project's directory
+in which the whole subproject resides.
+
+@item :files
+@vindex :files
+This lets you specify a list of files or directories composing the
+subproject. Each file specification can contain wildcards. If a
+@code{:subdirectory} subproject option is given, these files or
+directories should be relative to this subdirectory. Otherwise, they
+should be relative to the parent project's directory.
+@end table
+
+Please note that these subproject options have no corresponding fallback
+(that would be meaningless). They can't appear in a theme either.
+
+@item
+@vindex :inheritance
+Subprojects don't have an @code{:inheritance} mechanism. Instead, they
+implicitly inherit from their base project (which in turn can inherit
+from other projects).
+@end itemize
+
+Here are some important remarks about subprojects:
+
+@itemize @bullet
+@item
+@vindex :subdirectory
+@vindex :files
+A subproject with neither a @code{:subdirectory} nor a @code{:files}
+option is exactly the same as the base project, apart from project
+options that you would override.
+
+@item
+@findex patcher-mail
+@findex patcher-mail-subproject
+@findex patcher-mail-adapt
+@findex patcher-mail-adapt-subproject
+Since permanent subprojects are defined statically, they should be used
+with the normal Patcher functions like @code{patcher-mail}. You don't
+need to use the @code{*-subproject} versions any more.
+
+@item
+Because of that, projects and subprojects can't have names in common. If
+that happens to be the case, Patcher will blindly use a subproject
+rather than a project of that name
+
+@item
+So what happens if you persist in using a @code{*-subproject} function
+on a permanent subproject ? Well, you punctually work on a
+subsubproject@dots{}
+@end itemize
+
+
+@node Subproject Naming, Command Directory, Defining Subprojects, More On Subprojects
+@comment  node-name,  next,  previous,  up
+@subsection Subproject Naming
+
+@vindex patcher-projects
+@vindex patcher-subprojects
+As you already know, Patcher distinguishes projects by their @var{NAME}
+field in the @code{patcher-projects} and @code{patcher-subprojects} user
+options. This is problematic, however, if you define different patcher
+projects for a single physical project, and the commands require the
+project's name. That might for instance be the case with PRCS
+(decidedly) weird options syntax.
+
+@vindex patcher-default-name
+@vindex :name
+To remedy this problem, patcher provides a @code{:name} project option.
+If set, it will actually be used for all @code{%n} substitutions where
+the project's name (in the Patcher sense) would normally be used.
+
+If you want to use the project's name in the Patcher sense, regardless
+of the value of the @code{:name} option, use @code{%N} instead of
+@code{%n}.
+
+
+@node Command Directory, , Subproject Naming, More On Subprojects
+@comment  node-name,  next,  previous,  up
+@subsection Command Directory
+
+Some revision control systems, like CVS, work on a per-file basis. Some
+others, like PRCS, work only globally. This has an important implication
+for subprojects being sudirectories of other projects. Indeed, while
+CVS, for instance, can be executed anywhere, PRCS can only be run in the
+base project's root directory.
+
+@vindex :command-directory
+@vindex patcher-default-command-directory
+If you want to define projects for which the revision control system can
+be executed in only one directory, Patcher provides you with the
+@code{:command-directory} project option (a string). This directory can
+be specified relative to the project's directory (but note that it must
+go upwards).
+
+All commands (diff and commit ones) will be executed from there. Also,
+note that the command directory does not change the way you might
+specify files. Patcher modifies all needed paths automatically to handle
+the command directory properly.
+
+
+@c ====================================================================
+@c Variables Index
+@c ====================================================================
+@node Variables Index, Functions Index, User Manual, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Variables Index
+@printindex vr
+
+
+@c ====================================================================
+@c Functions Index
+@c ====================================================================
+@node Functions Index,  Keystrokes Index, Variables Index, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Functions Index
+@printindex fn
+
+
+@c ====================================================================
+@c Keystrokes Index
+@c ====================================================================
+@node Keystrokes Index,  , Functions Index, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Keystrokes Index
+@printindex ky
+
+
+@bye
+
+@c Don't add stuff under this line !!
+@c patcher.texi ends here
