@@ -148,6 +148,11 @@ load-path))
 "Insert the current date"
 (interactive)
 (insert-string (format-time-string "%B %e, %Y")))
+(defun insert-timestamp ()
+"Insert the current timestamp"
+(interactive)
+(insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+
 (defun load-git-cfengine ()
   "Load config and tags file of git cfengine repo"
 (interactive) (visit-tags-table "~/.cfengine_tags")
@@ -298,6 +303,7 @@ nil)
 (define-key global-map "\C-ct" 'visit-tags-table)
 (define-key global-map "\C-cf" 'tags-search)
 
+(define-key global-map "\C-c\C-t" 'insert-timestamp)
 (define-key global-map "\C-c\C-c" 'centered-cursor-mode)
 
 (define-key global-map "\C-cc" 'load-git-cfengine)
