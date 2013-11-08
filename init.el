@@ -159,6 +159,23 @@ load-path))
 (interactive) (find-file "~/.cfagent/inputs/config.cf")
 )
 
+;; cfe-config-adduser runs ldapsearch with cn=user to fill some values.
+
+(defun cfe-config-adduser ( user )
+"Insert usertemplate for config.cf"
+  (interactive "sUser: ")
+  (insert "      \"users[" user "][login]\" string => \"" user "\";
+      \"users[" user "][fullname]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " givenName ")) 0 -1) " " (substring ( shell-command-to-string (concat "ldapse " user " sn ")) 0 -1) "\";
+      \"users[" user "][uid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1) "\";
+      \"users[" user "][gid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1)"\";
+      \"users[" user "][group]\" string => \"" user "\";
+      \"users[" user "][groups]\" slist => { \"adm\",\"apache\",\"games\" };
+      \"users[" user "][home]\" string => \"/home/" user "\";
+      \"users[" user "][shell]\" string => \"/bin/bash\";
+      \"users[" user "][flags]\" string => \"-m\";
+      \"users[" user "][authorized_keys][0]\" string => \"\";" )
+
+)
 ;;(defun scpload (&rest args)
 ;;"scp copy from pottwal"
 ;;   (shell-command ( scp andreas@pottwal: emacstmp/))
