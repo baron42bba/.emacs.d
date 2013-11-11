@@ -162,7 +162,7 @@ load-path))
 ;; cfe-config-adduser runs ldapsearch with cn=user to fill some values.
 
 (defun cfe-config-adduser ( user )
-"Insert usertemplate for config.cf"
+  "Insert usertemplate for config.cf"
   (interactive "sUser: ")
   (insert "      \"users[" user "][login]\" string => \"" user "\";
       \"users[" user "][fullname]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " givenName ")) 0 -1) " " (substring ( shell-command-to-string (concat "ldapse " user " sn ")) 0 -1) "\";
@@ -176,6 +176,30 @@ load-path))
       \"users[" user "][authorized_keys][0]\" string => \"\";" )
 
 )
+
+(defun cfe-insert-bundle ( name )
+  "Insert bundletemplate"
+  (interactive "sBundle: ")
+  (insert "#=head2 bundle " name "
+#
+#
+#
+#=cut
+#
+
+bundle " name "
+{
+  vars:
+
+  files:
+
+  methods:
+
+  classes:
+
+}")
+)
+
 ;;(defun scpload (&rest args)
 ;;"scp copy from pottwal"
 ;;   (shell-command ( scp andreas@pottwal: emacstmp/))
@@ -324,6 +348,7 @@ nil)
 (define-key global-map "\C-c\C-c" 'centered-cursor-mode)
 
 (define-key global-map "\C-cc" 'load-git-cfengine)
+(define-key global-map "\C-cb" 'cfe-insert-bundle)
 
 ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
 
