@@ -56,6 +56,9 @@ load-path))
 ;; (require 'bbdb)
 ;; (bbdb-initialize)
 
+;; For TemplateToolkit
+
+(add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
 
 ;; For AucTex:
 
