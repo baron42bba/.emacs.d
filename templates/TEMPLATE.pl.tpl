@@ -12,8 +12,10 @@ use warnings;
 
 =head2 main
 
+=cut
+
 sub main {
-    my ( $help, $man );
+    my ( $help, $man, verbose );
 
     my $result = GetOptions (
 	"help|h"    => \$help,
