@@ -19,6 +19,10 @@ load-path))
 (require 'template)
 (template-initialize)
 
+;; load yaml-mode
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+
 ;; load org mode
 ;; See http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html for details
 
