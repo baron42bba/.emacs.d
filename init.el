@@ -41,6 +41,7 @@ load-path))
 
 ;; load git support
 ; (require 'egg)
+(add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
 (load-library "egg")
 
 (load-library "cfengine")
@@ -99,6 +100,11 @@ load-path))
 
 ;; No menubar
 (menu-bar-mode -1)
+
+;; No toolbar
+(if window-system
+    (tool-bar-mode -1)
+)
 
 ;; Specify printing format
 (setq ps-paper-type 'a4)
@@ -234,8 +240,9 @@ nil)
 ;;	      (line-beginning-position) (1+ (line-end-position))
 ;;	      (current-buffer)))))
 
-(set-face-background-pixmap 'default "/home/baron/.xemacs/xemacs-bg.xpm")
-
+;; (set-face-background-pixmap 'default "/home/baron/.xemacs/xemacs-bg.xpm")
+(set-foreground-color "green")
+(set-background-color "black")
 
 ;; pos1: goto start of line, start of screen, start of buffer
 ;; end: goto end of line, end of screen, end of buffer
