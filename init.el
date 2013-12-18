@@ -23,10 +23,15 @@ load-path))
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
+(require 'htmlize )
+
 ;; load org mode
 ;; See http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html for details
 
-(require 'org-install)
+(add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/org-8.2.3c")
+(require 'org)
+
+;; (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
@@ -36,6 +41,20 @@ load-path))
 			     "~/org/private.org"
 			     "~/org/it.org"
 			     ))
+;;(setq org-html-preamble nil
+;;     org-html-postamble nil
+;;      org-html-head "")
+
+;; (setq org-html-preamble nil
+;;       org-html-postamble nil
+;;       org-html-include-default-style nil
+;;       org-html-head ""
+;;       org-export-html-with-timestamp nil
+;;       org-export-html-style "body-only"
+;; )
+;; body-only option ?
+
+;; (setq html (org-export-as-html 3 nil nil 1))
 
 (define-key global-map "\C-ce" '(lambda () (interactive) (find-file "~/org/emacs.org")))
 
