@@ -58,6 +58,39 @@ load-path))
 
 (define-key global-map "\C-ce" '(lambda () (interactive) (find-file "~/org/emacs.org")))
 
+;; (setq org-clock-persist 'history)
+(org-clock-persistence-insinuate)
+(setq org-clock-persist t)
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+(define-key global-map "\C-cc" 'org-capture)
+
+(setq org-capture-templates
+
+'(("i" "it Tasks" entry (file+headline "~/org/it.org" "Tasks")
+"* TODO %?\n
+
+%i\n
+%a")
+
+("w" "work Tasks" entry (file+headline "~/org/work.org" "Tasks")
+"* TODO %?\n
+
+%i\n
+%a")
+
+))
+
+(setq org-link-abbrev-alist '(
+("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
+("cpan" . "http://search.cpan.org/search?query=%s&mode=all")
+("google" . "http://www.google.com/search?q=")
+("gmap" . "http://maps.google.com/maps?q=%s")
+("omap" . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+("bmap" . "http://www.bing.com/maps/default.aspx?q=%s&mkt=en&FORM=HDRSC4")
+("wiki" . "http://en.wikipedia.org/wiki/")
+("ads" . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")
+))
+;; example: [[bmap:space needle]]
 ;; load git support
 ; (require 'egg)
 (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
@@ -380,7 +413,7 @@ nil)
 (define-key global-map "\C-c\C-t" 'insert-timestamp)
 (define-key global-map "\C-c\C-c" 'centered-cursor-mode)
 
-(define-key global-map "\C-cc" 'load-git-cfengine)
+(define-key global-map "\C-c\C-f" 'load-git-cfengine)
 (define-key global-map "\C-cb" 'cfe-insert-bundle)
 
 ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
