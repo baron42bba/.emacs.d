@@ -13,6 +13,8 @@ load-path))
 ;; http://www.emacswiki.org/emacs/EmacsNiftyTricks
 
 
+(setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
+
 (require 'centered-cursor-mode)
 
 ;; load template support
@@ -30,6 +32,16 @@ load-path))
 
 (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/org-8.2.3c")
 (require 'org)
+
+;; run these commands to make org-protocol work in gnome:
+;; gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/command '/usr/bin/emacsclient %s' --type String
+;; gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/enabled --type Boolean true
+;;
+;; this is how your firefox bookmark must look like:
+;; javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
+
+(server-start)
+(require 'org-protocol)
 
 ;; (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
@@ -77,6 +89,10 @@ load-path))
 
 %i\n
 %a")
+
+("l" "Links (it)" entry (file+headline "~/org/it.org" "Links")
+"** %c\n\n  %u\n  %i"
+         :empty-lines 1)
 
 ))
 
