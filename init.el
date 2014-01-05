@@ -90,7 +90,7 @@ load-path))
 %i\n
 %a")
 
-("l" "Links (it)" entry (file+headline "~/org/it.org" "Links")
+("l" "Links (it)" entry (file+headline "~/org/notes.org" "Links")
 "** %c\n\n  %u\n  %i"
          :empty-lines 1)
 
