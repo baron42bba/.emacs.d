@@ -144,6 +144,8 @@ load-path))
 ;; load cperl-mode for perl files
 (fset 'perl-mode 'cperl-mode)
 
+(cperl-set-style 'GNU)
+
 ;; for auto-completion
 
 (require 'auto-complete-config)

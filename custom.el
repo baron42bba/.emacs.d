@@ -4,7 +4,10 @@
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(gnuserv-program (concat exec-directory "/gnuserv"))
+ '(history-length 1000)
  '(org-agenda-files (quote ("~/org/emacs.org" "~/org/work.org" "~/org/private.org" "~/org/it.org")))
+ '(recentf-max-saved-items 42)
+ '(savehist-mode t nil (savehist))
  '(toolbar-visible-p nil)
  '(vc-handled-backends (quote (RCS CVS SVN SCCS Bzr Hg Mtn Arch))))
 (custom-set-faces
