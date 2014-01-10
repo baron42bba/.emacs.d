@@ -68,7 +68,11 @@ load-path))
 
 ;; (setq html (org-export-as-html 3 nil nil 1))
 
-(define-key global-map "\C-ce" '(lambda () (interactive) (find-file "~/org/emacs.org")))
+(global-set-key [f5] '(lambda () (interactive) (find-file "~/org/notes.org")))
+
+(define-key global-map [f6] '(lambda () (interactive) (find-file "~/org/work.org")))
+(define-key global-map [f8] '(lambda () (interactive) (find-file "~/org/workhours.org")))
+(define-key global-map [f9] '(lambda () (interactive) (find-file "~/org/emacs.org")))
 
 ;; (setq org-clock-persist 'history)
 (org-clock-persistence-insinuate)
@@ -142,9 +146,11 @@ load-path))
 ;; For Perl:
 
 ;; load cperl-mode for perl files
+(require 'cperl-mode)
 (fset 'perl-mode 'cperl-mode)
 
-(cperl-set-style 'GNU)
+(eval-after-load "cperl-mode"
+    '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
 
 ;; for auto-completion
 
