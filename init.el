@@ -27,6 +27,28 @@ load-path))
 
 (require 'htmlize )
 
+(ido-mode t)
+(setq ido-enable-prefix nil
+      ido-enable-flex-matching t
+      ido-case-fold nil
+      ido-auto-merge-work-directories-length -1
+      ido-create-new-buffer 'always
+      ido-use-filename-at-point nil
+      ido-max- 10)
+;; (require 'ido-vertical-mode)
+;; (ido-vertical-mode)
+
+;; (defun sd/ido-define-keys() ;; C-n/p is more intuitive in vertical layout
+;;   (define-key ido-completion-map (kbd "C-n") 'ido-next-match)
+;;   (define-key ido-completion-map (kbd "<down>") 'ido-next-match)
+;;   (define-key ido-completion-map (kbd "C-p") 'ido-prev-match)
+;;   (define-key ido-completion-map (kbd "<up>") 'ido-prev-match)
+;; )
+
+(require 'visual-regexp)
+(define-key global-map (kbd "M-&") 'vr/query-replace)
+(define-key global-map (kbd "M-/") 'vr/replace)
+
 ;; load org mode
 ;; See http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html for details
 
@@ -289,6 +311,18 @@ bundle " name "
 }")
 )
 
+;; (defun cfe-lookup-docs ()
+;;  "Search current word from buffer in online docs."
+;;  (interactive)
+;;  (save-excursion
+;;    (skip-syntax-backward "w_")
+;;    (w3m-browse-url (lambda ()
+;; 		     (skip-syntax-forward "w_")
+;; 		     (point)
+;; 		     )
+;; 		   )))
+
+
 ;;(defun scpload (&rest args)
 ;;"scp copy from pottwal"
 ;;   (shell-command ( scp andreas@pottwal: emacstmp/))
@@ -448,6 +482,8 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\C-c\C-f" 'load-git-cfengine)
 (define-key global-map "\C-cb" 'cfe-insert-bundle)
+
+(define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
 ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
 
