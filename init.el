@@ -27,6 +27,9 @@ load-path))
 
 (require 'htmlize )
 
+(require 'ace-jump-mode)
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
 (ido-mode t)
 (setq ido-enable-prefix nil
       ido-enable-flex-matching t
