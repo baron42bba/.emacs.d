@@ -13,6 +13,12 @@ load-path))
 ;; http://www.emacswiki.org/emacs/EmacsNiftyTricks
 
 
+
+;; http://www.emacswiki.org/emacs/ELPA
+(require 'package)
+
+(package-initialize)
+
 (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
 
 (require 'centered-cursor-mode)
@@ -22,8 +28,8 @@ load-path))
 (template-initialize)
 
 ;; load yaml-mode
-(require 'yaml-mode)
-(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+;; (require 'yaml-mode)
+;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
 (require 'htmlize )
 
@@ -138,8 +144,8 @@ load-path))
 ;; example: [[bmap:space needle]]
 ;; load git support
 ; (require 'egg)
-(add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
-(load-library "egg")
+;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
+;; (load-library "egg")
 
 (load-library "cfengine")
 ;; to enable mouse-wheel
