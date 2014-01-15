@@ -12,9 +12,13 @@ load-path))
 ;; http://www.emacswiki.org/emacs/EmacsCrashTips
 ;; http://www.emacswiki.org/emacs/EmacsNiftyTricks
 
+;;; * Emacs server
+(require 'server)
+(unless (server-running-p)
+  (server-start))
 
 
-;; http://www.emacswiki.org/emacs/ELPA
+;;; * http://www.emacswiki.org/emacs/ELPA
 (require 'package)
 
 (package-initialize)
@@ -23,7 +27,7 @@ load-path))
 
 (require 'centered-cursor-mode)
 
-;; load template support
+;;; * load template support
 (require 'template)
 (template-initialize)
 
@@ -33,8 +37,11 @@ load-path))
 
 (require 'htmlize )
 
+;;; * ace-jump-mode
 (require 'ace-jump-mode)
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+;;; * ido-mode
 
 (ido-mode t)
 (setq ido-enable-prefix nil
@@ -54,11 +61,13 @@ load-path))
 ;;   (define-key ido-completion-map (kbd "<up>") 'ido-prev-match)
 ;; )
 
+;;; * visual-regexp
+
 (require 'visual-regexp)
 (define-key global-map (kbd "M-&") 'vr/query-replace)
 (define-key global-map (kbd "M-/") 'vr/replace)
 
-;; load org mode
+;;; *  load org mode
 ;; See http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html for details
 
 (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/org-8.2.3c")
@@ -71,7 +80,6 @@ load-path))
 ;; this is how your firefox bookmark must look like:
 ;; javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
 
-(server-start)
 (require 'org-protocol)
 
 ;; (require 'org-install)
@@ -147,34 +155,37 @@ load-path))
 ;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
 ;; (load-library "egg")
 
+;;; * cfengine
 (load-library "cfengine")
-;; to enable mouse-wheel
+;;; * enable mouse-wheel
 (load-library "mwheel")
+(mwheel-install)
 ;;   (load-library "todo-mode")
+
+;;; * tramp
 (load-library "tramp")
 (setq default-tramp-method "sftp")
-(mwheel-install)
 
-;; twitter http://www.twmode.sourceforge.net/
+;;; * twitter http://www.twmode.sourceforge.net/
 (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
 (require 'twittering-mode)
 
-;; For Big Brother Database
+;;; * Big Brother Database
 
 ;; (require 'bbdb)
 ;; (bbdb-initialize)
 
-;; For TemplateToolkit
+;;; * TemplateToolkit
 
 (add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
 
-;; For AucTex:
+;;; * AucTex:
 
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
 (setq-default TeX-master nil)
 
-;; For Perl:
+;;; * Perl
 
 ;; load cperl-mode for perl files
 (require 'cperl-mode)
@@ -183,7 +194,7 @@ load-path))
 (eval-after-load "cperl-mode"
     '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
 
-;; for auto-completion
+;;; * auto-completion
 
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
@@ -193,75 +204,75 @@ load-path))
 (add-to-list 'ac-modes 'dns-mode)
 
 
-;; syntax-highlighting
+;;; * syntax-highlighting
 (font-lock-mode)
 (global-font-lock-mode 1)
 
-;; Display Line Number and Col Number in mode-line
+;;; * Display Line Number and Col Number in mode-line
 (column-number-mode t)
 (line-number-mode t)
 
-;; Display time / email in mode-line
+;;; * Display time / email in mode-line
 (setq display-time-24hr-format t)
 (display-time)
 
-;; No menubar
+;;; * No menubar
 (menu-bar-mode -1)
 
-;; No toolbar
+;;; * No toolbar
 (if window-system
     (tool-bar-mode -1)
 )
 
-;; Specify printing format
+;;; * Specify printing format
 (setq ps-paper-type 'a4)
 
-;; Set ispell dictionary
+;;; * Set ispell dictionary
 (setq ispell-dictionary "english")
 
-;; Set Shell for M-| command
+;;; * Set Shell for M-| command
 (setq shell-file-name "/bin/bash")
 
-;; Set Shell used by TeX
+;;; * Set Shell used by TeX
 (setq tex-shell-file-name "/bin/bash")
 
-;; Set grep command options
+;;; * Set grep command options
 (setq grep-command "grep -i -nH -e ")
 
-;; Confirm quit
+;;; * Confirm quit
 (setq confirm-kill-emacs 'yes-or-no-p)
 
-;; Quick file access with bar
+;;; * Quick file access with bar
 ;; (speedbar t)
 
-;; Ignore case when completing file names
+;;; * Ignore case when completing file names
 (setq read-file-name-completion-ignore-case t)
 
-;; Highlight parenthesis pairs
+;;; * Highlight parenthesis pairs
 (show-paren-mode 1)
 
-;; Blinking parenthesis
+;;; * Blinking parenthesis
 (setq blink-matching-paren-distance nil)
 
-;; Highlight text between parens
+;;; * Highlight text between parens
 (setq show-paren-style 'expression)
 
-;; Use buffer nanme as frame title
+;;; * Use buffer nane as frame title
 (setq frame-title-format "%b - emacs")
 
-;; Completion in mini-buffer
+;;; * Completion in mini-buffer
 (icomplete-mode t)
 
-;; Stack minibuffers
+;;; * Stack minibuffers
 (setq enable-recursive-minibuffers t)
 
-;; RecentFiles http://www.emacswiki.org/emacs/RecentFiles
+;;; * RecentFiles http://www.emacswiki.org/emacs/RecentFiles
 (require 'recentf)
 (recentf-mode 1)
 (setq recentf-max-menu-items 42)
 (global-set-key "\C-c\ \C-r" 'recentf-open-files)
 
-;; Some nice functions
+;;; * Some nice functions
 ;;(blink-matching-paren 1)
 ;;(paren-activate)
 (defun insert-date ()
@@ -494,6 +505,11 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
+;;; ** Use C-+ and C-- to adjust font size
+
+(define-key global-map (kbd "C-+") 'text-scale-increase)
+(define-key global-map (kbd "C--") 'text-scale-decrease)
+
 ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
 
 ;; (global-set-key (kbd "<kp-subtract>") 'ergoemacs-close-current-buffer)
@@ -510,3 +526,9 @@ vi style of % jumping to matching brace."
 ;; (global-set-key (kbd "<kp-3>") 'xah-open-file-at-cursor)
 
 ;; (global-set-key (kbd "<kp-9>") 'isearch-forward)
+
+;; Local variables: ***
+;; eval: (orgstruct-mode 1) ***
+;; eval: (setq orgstruct-heading-prefix-regexp ";;; ") ***
+;; End: ***
+
