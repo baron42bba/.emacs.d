@@ -46,6 +46,10 @@ load-path))
 
 (require 'htmlize )
 
+;;; * vc-git
+(require 'vc-git)
+  (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
+
 ;;; * ace-jump-mode
 (require 'ace-jump-mode)
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
