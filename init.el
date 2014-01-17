@@ -17,6 +17,15 @@ load-path))
 (unless (server-running-p)
   (server-start))
 
+;; define function to shutdown emacs server instance
+(defun server-shutdown ()
+  "Save buffers, Quit, and Shutdown (kill) server"
+  (interactive)
+  (save-some-buffers)
+  (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
+  (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
+  (kill-emacs)
+  )
 
 ;;; * http://www.emacswiki.org/emacs/ELPA
 (require 'package)
