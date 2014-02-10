@@ -123,6 +123,7 @@ load-path))
 (global-set-key [f5] '(lambda () (interactive) (find-file "~/org/notes.org")))
 
 (define-key global-map [f6] '(lambda () (interactive) (find-file "~/org/work.org")))
+(define-key global-map [f7] '(lambda () (interactive) (find-file "~/org/private.org")))
 (define-key global-map [f8] '(lambda () (interactive) (find-file "~/org/workhours.org")))
 (define-key global-map [f9] '(lambda () (interactive) (find-file "~/org/emacs.org")))
 
