@@ -5,6 +5,7 @@
   ;; If there is more than one, they won't work right.
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(history-length 1000)
+ '(magit-commit-signoff t)
  '(org-agenda-files (quote ("~/org/emacs.org" "~/org/work.org" "~/org/private.org" "~/org/it.org")))
  '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("marmalade" . "http://marmalade-repo.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages"))))
  '(package-user-dir "/home/baron/.xemacs/elpa")
