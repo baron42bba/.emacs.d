@@ -105,6 +105,22 @@ load-path))
 			     "~/org/private.org"
 			     "~/org/it.org"
 			     ))
+
+; Some initial languages we want org-babel to support
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (sh . t)
+   (python . t)
+   (R . t)
+   (ruby . t)
+   (ditaa . t)
+   (dot . t)
+   (octave . t)
+   (sqlite . t)
+   (perl . t)
+   ))
+
 ;;(setq org-html-preamble nil
 ;;     org-html-postamble nil
 ;;      org-html-head "")
@@ -512,12 +528,14 @@ vi style of % jumping to matching brace."
 (define-key global-map "\C-cf" 'tags-search)
 
 (define-key global-map "\C-c\C-t" 'insert-timestamp)
-(define-key global-map "\C-c\C-c" 'centered-cursor-mode)
+(define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
 (define-key global-map "\C-c\C-f" 'load-git-cfengine)
 (define-key global-map "\C-cb" 'cfe-insert-bundle)
 
 (define-key global-map "\C-c\C-w" 'fixup-whitespace)
+
+(define-key global-map "\C-cm" 'magit-status)
 
 ;;; ** Use C-+ and C-- to adjust font size
 
