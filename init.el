@@ -537,6 +537,8 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\C-cm" 'magit-status)
 
+(define-key global-map "\C-c\C-c" 'compile)
+
 ;;; ** Use C-+ and C-- to adjust font size
 
 (define-key global-map (kbd "C-+") 'text-scale-increase)
