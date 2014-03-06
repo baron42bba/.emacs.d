@@ -9,7 +9,7 @@
  '(magit-repo-dirs (quote ("~/git")))
  '(org-agenda-files (quote ("~/org/emacs.org" "~/org/work.org" "~/org/private.org" "~/org/it.org")))
  '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("marmalade" . "http://marmalade-repo.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages"))))
- '(package-user-dir "/home/baron/.xemacs/elpa")
+ '(package-user-dir "~/.xemacs/elpa")
  '(recentf-max-saved-items 42)
  '(savehist-mode t nil (savehist))
  '(toolbar-visible-p nil)

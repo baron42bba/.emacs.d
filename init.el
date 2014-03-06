@@ -2,7 +2,7 @@
 (setq load-path
 (append
 (list (expand-file-name "/usr/local/lib/xemacs/xemacs-packages/lisp/"))
-(list (expand-file-name "/home/baron/.xemacs/"))
+(list (expand-file-name "~/.xemacs/"))
 ;;	     (expand-file-name "/usr/share/emacs/lisp/")
 load-path))
 
@@ -39,6 +39,13 @@ load-path))
 ;;; * load template support
 (require 'template)
 (template-initialize)
+
+;; The file names are absolute, not relative, locations
+;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
+(setq synonyms-file        "~/.xemacs/mthesaur.txt")
+(setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
+(require 'synonyms)
+
 
 ;; load yaml-mode
 ;; (require 'yaml-mode)
@@ -409,7 +416,7 @@ vi style of % jumping to matching brace."
 ;;	      (line-beginning-position) (1+ (line-end-position))
 ;;	      (current-buffer)))))
 
-;; (set-face-background-pixmap 'default "/home/baron/.xemacs/xemacs-bg.xpm")
+;; (set-face-background-pixmap 'default "~/.xemacs/xemacs-bg.xpm")
 (set-foreground-color "green")
 (set-background-color "black")
 
