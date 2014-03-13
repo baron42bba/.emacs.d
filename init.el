@@ -368,6 +368,30 @@ bundle " name "
 }")
 )
 
+(add-hook 'cfengine3-mode-hook
+  (lambda ()
+    (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
+    (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser)
+    ))
+
+
+(defun dns-rndc ()
+"Do rndc reload of current buffers filename."
+(interactive)
+(string-match "/\\([^/]*\\)$" buffer-file-name)
+(let* ((zonefile (match-string 1 buffer-file-name))
+       )
+  (if (y-or-n-p (format "rndc reload %s?" zonefile))
+      (shell-command (concat "rndc reload " zonefile ) ) )
+  )
+
+)
+
+(add-hook 'dns-mode-hook
+  (lambda ()
+    (define-key dns-mode-map "\C-cr" 'dns-rndc)
+    ))
+
 ;; (defun cfe-lookup-docs ()
 ;;  "Search current word from buffer in online docs."
 ;;  (interactive)
@@ -380,10 +404,6 @@ bundle " name "
 ;; 		   )))
 
 
-;;(defun scpload (&rest args)
-;;"scp copy from pottwal"
-;;   (shell-command ( scp andreas@pottwal: emacstmp/))
-;;)
 
 (defun eshell/ssh (&rest args)
 "Secure shell"
@@ -538,7 +558,6 @@ vi style of % jumping to matching brace."
 (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
 (define-key global-map "\C-c\C-f" 'load-git-cfengine)
-(define-key global-map "\C-cb" 'cfe-insert-bundle)
 
 (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
