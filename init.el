@@ -24,6 +24,8 @@ load-path))
   (save-some-buffers)
   (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
   (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
+  (setq twittering-cert-file nil )
+
   (kill-emacs)
   )
 
