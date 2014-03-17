@@ -206,6 +206,14 @@ load-path))
 ;;; * twitter http://www.twmode.sourceforge.net/
 (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
 (require 'twittering-mode)
+(cond
+ ((string-equal system-type "gnu/linux")
+  (progn
+    (setq twittering-cert-file "/etc/ssl/certs/ca-bundle.crt") )
+  )
+)
+
+(setq twittering-use-master-password t)
 
 ;;; * Big Brother Database
 
