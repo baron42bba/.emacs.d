@@ -567,7 +567,7 @@ vi style of % jumping to matching brace."
 (define-key global-map "\C-c\C-t" 'insert-timestamp)
 (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
-(define-key global-map "\C-c\C-f" 'load-git-cfengine)
+(define-key global-map "\C-cf" 'load-git-cfengine)
 
 (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
