@@ -3,6 +3,7 @@
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
+ '(blink-cursor-mode t)
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(history-length 1000)
  '(magit-commit-signoff t)
@@ -20,7 +21,8 @@
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(default ((t (:size "14pt" :family "Lucidatypewriter"))))
- '(toolbar ((t (:background "Gray80" :size "8"))) t))
+ '(cursor ((t (:foreground "red"))))
+ '(tool-bar ((t (:background "Gray80" :size "8")))))
 (defcustom sql-mysql-program "/usr/local/mysql/bin/mysql"
 "*Command to start mysql by mysqlDB."
 :type 'file

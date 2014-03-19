@@ -382,6 +382,7 @@ bundle " name "
   (lambda ()
     (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
     (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser)
+    (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
     ))
 
 
@@ -573,7 +574,11 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\C-cm" 'magit-status)
 
-(define-key global-map "\C-c\C-c" 'compile)
+(define-key global-map "\C-cw" (lambda ()
+				 (interactive)
+				 (let ((woman-use-topic-at-point t))
+				   (woman))))
+(define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
 
 ;;; ** Use C-+ and C-- to adjust font size
 
