@@ -317,7 +317,7 @@ load-path))
 (require 'recentf)
 (recentf-mode 1)
 (setq recentf-max-menu-items 42)
-(global-set-key "\C-c\ \C-r" 'recentf-open-files)
+(global-set-key "\C-cr" 'recentf-open-files)
 
 ;;; * Some nice functions
 ;;(blink-matching-paren 1)
