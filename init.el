@@ -385,6 +385,16 @@ bundle " name "
     (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
     ))
 
+(add-hook 'org-mode-hook
+  (lambda ()
+    (auto-fill-mode)
+    ))
+
+(add-hook 'latex-mode-hook
+  (lambda ()
+    (auto-fill-mode)
+    ))
+
 
 (defun dns-rndc ()
 "Do rndc reload of current buffers filename."
