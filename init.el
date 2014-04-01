@@ -616,6 +616,10 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\C-cm" 'magit-status)
 
+(define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
+(define-key global-map "\M-g\M-s" 'magit-status)
+(define-key global-map "\M-g\M-b" 'magit-branch-manager)
+
 (define-key global-map "\C-cw" (lambda ()
 				 (interactive)
 				 (let ((woman-use-topic-at-point t))
