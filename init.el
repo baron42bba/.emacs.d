@@ -32,7 +32,7 @@ load-path))
 ;;; * http://www.emacswiki.org/emacs/ELPA
 (require 'package)
 
-(package-initialize)
+;;; (package-initialize)
 
 (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
 
@@ -232,6 +232,28 @@ load-path))
 (setq TeX-parse-self t)
 (setq-default TeX-master nil)
 
+;;; * EPG/GPG:
+
+;; Do not use gpg agent when runing in terminal
+(defadvice epg--start (around advice-epg-disable-agent activate)
+  (let ((agent (getenv "GPG_AGENT_INFO")))
+    (when (not (display-graphic-p))
+      (setenv "GPG_AGENT_INFO" nil))
+    ad-do-it
+    (when (not (display-graphic-p))
+      (setenv "GPG_AGENT_INFO" agent))))
+
+;; (defadvice epg--start (around advice-epg-disable-agent disable)
+;;   "Don't allow epg--start to use gpg-agent in plain text terminals."
+;;   (if (display-graphic-p)
+;;       ad-do-it
+;;     (let ((agent (getenv "GPG_AGENT_INFO")))
+;;       (setenv "GPG_AGENT_INFO" nil) ; give us a usable text password prompt
+;;       ad-do-it
+;;       (setenv "GPG_AGENT_INFO" agent))))
+;; (ad-enable-advice 'epg--start 'around 'advice-epg-disable-agent)
+;; (ad-activate 'epg--start)
+
 ;;; * Perl
 
 ;; load cperl-mode for perl files
@@ -331,7 +353,6 @@ load-path))
 (interactive)
 (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
 
-
 ;; eshell-here: Thanks to Howard Abrahams:
 ;; http://www.howardism.org/Technical/Emacs/eshell-fun.html
 ;;
@@ -362,6 +383,13 @@ directory to make multiple eshell windows easier."
   (insert "exit")
   (eshell-send-input)
   (delete-window))
+
+;; post-commit and post-merge hook for git:
+;; #!/bin/bash
+;; rm .git/etags
+;; find ${PWD} -type f -regex ".*\(\.cf\|_pl\.dat\|_conf.dat\)" | xargs etags --append --output=.git/etags
+;; set link for emacs:
+;; ln -s ~/.cfagent/inputs/../.git/etags ~/.cfengine_tags
 
 (defun load-git-cfengine ()
   "Load config and tags file of git cfengine repo"
@@ -614,11 +642,10 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
-(define-key global-map "\C-cm" 'magit-status)
 
 (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
-(define-key global-map "\M-g\M-s" 'magit-status)
 (define-key global-map "\M-g\M-b" 'magit-branch-manager)
+(define-key global-map "\C-cm" 'magit-status)
 
 (define-key global-map "\C-cw" (lambda ()
 				 (interactive)
