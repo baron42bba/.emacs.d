@@ -331,6 +331,38 @@ load-path))
 (interactive)
 (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
 
+
+;; eshell-here: Thanks to Howard Abrahams:
+;; http://www.howardism.org/Technical/Emacs/eshell-fun.html
+;;
+;; modified because current version lacks function have window-total-height.
+
+(defun eshell-here ()
+  "Opens up a new shell in the directory associated with the
+current buffer's file. The eshell is renamed to match that
+directory to make multiple eshell windows easier."
+  (interactive)
+  (let* ((parent (if (buffer-file-name)
+                     (file-name-directory (buffer-file-name))
+                   default-directory))
+     ;;    (height (/ (window-total-height) 3))
+         (name   (car (last (split-string parent "/" t)))))
+;;    (split-window-vertically (- height))
+    (split-window-vertically '-10)
+    (other-window 1)
+    (eshell "new")
+    (rename-buffer (concat "*eshell: " name "*"))
+
+    (insert (concat "ls"))
+    (eshell-send-input)))
+
+(define-key global-map "\C-c!" 'eshell-here)
+
+(defun eshell/x ()
+  (insert "exit")
+  (eshell-send-input)
+  (delete-window))
+
 (defun load-git-cfengine ()
   "Load config and tags file of git cfengine repo"
 (interactive) (visit-tags-table "~/.cfengine_tags")
