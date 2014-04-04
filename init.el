@@ -186,6 +186,7 @@ load-path))
 ("omap" . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
 ("bmap" . "http://www.bing.com/maps/default.aspx?q=%s&mkt=en&FORM=HDRSC4")
 ("wiki" . "http://en.wikipedia.org/wiki/")
+("rfc" . "http://tools.ietf.org/rfc/rfc%s.txt")
 ("ads" . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")
 ))
 ;; example: [[bmap:space needle]]
