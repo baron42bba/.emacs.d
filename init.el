@@ -206,6 +206,9 @@ load-path))
 (load-library "tramp")
 (setq default-tramp-method "sftp")
 
+;; with this you can do /sudo:ssh-host:file-on-ssh-host
+(add-to-list 'tramp-default-proxies-alist '(".*" "\`root\'" "/ssh:%h:"))
+
 ;;; * twitter http://www.twmode.sourceforge.net/
 (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
 (require 'twittering-mode)
