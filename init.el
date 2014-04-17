@@ -47,7 +47,7 @@ load-path))
 (setq synonyms-file        "~/.xemacs/mthesaur.txt")
 (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
 (require 'synonyms)
-
+(define-key global-map (kbd "C-c ?") 'synonyms)
 
 ;; load yaml-mode
 ;; (require 'yaml-mode)
