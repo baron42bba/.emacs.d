@@ -223,6 +223,11 @@ load-path))
 ;; (require 'bbdb)
 ;; (bbdb-initialize)
 
+;;; * Malyon
+;; http://www.emacswiki.org/emacs/MalyonMode
+
+(require 'malyon)
+
 ;;; * TemplateToolkit
 
 (add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
