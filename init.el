@@ -406,10 +406,10 @@ directory to make multiple eshell windows easier."
 (interactive) (find-file "~/.cfagent/inputs/config.cf")
 )
 
-;; cfe-config-adduser runs ldapsearch with cn=user to fill some values.
+;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
 
-(defun cfe-config-adduser ( user )
-  "Insert usertemplate for config.cf"
+(defun cfe-config-adduser-ldap ( user )
+  "Insert usertemplate based on ldap information for config.cf"
   (interactive "sUser: ")
   (insert "      \"users[" user "][login]\" string => \"" user "\";
       \"users[" user "][fullname]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " givenName ")) 0 -1) " " (substring ( shell-command-to-string (concat "ldapse " user " sn ")) 0 -1) "\";
@@ -417,6 +417,22 @@ directory to make multiple eshell windows easier."
       \"users[" user "][gid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1)"\";
       \"users[" user "][group]\" string => \"" user "\";
       \"users[" user "][groups]\" slist => { \"adm\",\"apache\",\"games\" };
+      \"users[" user "][home]\" string => \"/home/" user "\";
+      \"users[" user "][shell]\" string => \"/bin/bash\";
+      \"users[" user "][flags]\" string => \"-m\";
+      \"users[" user "][authorized_keys][0]\" string => \"\";" )
+
+)
+
+(defun cfe-config-adduser ( user )
+  "Insert usertemplate for config.cf"
+  (interactive "sUser: ")
+  (insert "      \"users[" user "][login]\" string => \"" user "\";
+      \"users[" user "][fullname]\" string => \"\";
+      \"users[" user "][uid]\" string => \"\";
+      \"users[" user "][gid]\" string => \"\";
+      \"users[" user "][group]\" string => \"" user "\";
+      \"users[" user "][groups]\" slist => { \"" user "\" };
       \"users[" user "][home]\" string => \"/home/" user "\";
       \"users[" user "][shell]\" string => \"/bin/bash\";
       \"users[" user "][flags]\" string => \"-m\";
@@ -450,7 +466,7 @@ bundle " name "
 (add-hook 'cfengine3-mode-hook
   (lambda ()
     (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
-    (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser)
+    (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
     (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
     ))
 
