@@ -35,6 +35,8 @@ load-path))
 ;;; (package-initialize)
 
 (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
+(require 'rainbow-delimiters)
+(global-rainbow-delimiters-mode)
 
 (require 'centered-cursor-mode)
 
