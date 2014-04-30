@@ -434,7 +434,7 @@ directory to make multiple eshell windows easier."
       \"users[" user "][uid]\" string => \"\";
       \"users[" user "][gid]\" string => \"\";
       \"users[" user "][group]\" string => \"" user "\";
-      \"users[" user "][groups]\" slist => { \"" user "\" };
+      \"users[" user "][groups]\" string => \"" user "\";
       \"users[" user "][home]\" string => \"/home/" user "\";
       \"users[" user "][shell]\" string => \"/bin/bash\";
       \"users[" user "][flags]\" string => \"-m\";
