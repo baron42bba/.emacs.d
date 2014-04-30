@@ -35,8 +35,8 @@ load-path))
 ;;; (package-initialize)
 
 (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
-(require 'rainbow-delimiters)
-(global-rainbow-delimiters-mode)
+;;(require 'rainbow-delimiters)
+;;(global-rainbow-delimiters-mode)
 
 (require 'centered-cursor-mode)
 
@@ -418,7 +418,7 @@ directory to make multiple eshell windows easier."
       \"users[" user "][uid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1) "\";
       \"users[" user "][gid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1)"\";
       \"users[" user "][group]\" string => \"" user "\";
-      \"users[" user "][groups]\" slist => { \"adm\",\"apache\",\"games\" };
+      \"users[" user "][groups]\" string => \"adm,apache,games\";
       \"users[" user "][home]\" string => \"/home/" user "\";
       \"users[" user "][shell]\" string => \"/bin/bash\";
       \"users[" user "][flags]\" string => \"-m\";

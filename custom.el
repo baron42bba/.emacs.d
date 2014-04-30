@@ -13,6 +13,7 @@
  '(package-user-dir "~/.xemacs/elpa")
  '(recentf-max-saved-items 42)
  '(savehist-mode t nil (savehist))
+ '(template-default-directories (quote ("~/.xemacs/templates/")))
  '(toolbar-visible-p nil)
  '(vc-handled-backends (quote (RCS CVS SVN SCCS Bzr Hg Mtn Arch))))
 (custom-set-faces
