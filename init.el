@@ -157,22 +157,31 @@ load-path))
 ;; (setq org-clock-persist 'history)
 (org-clock-persistence-insinuate)
 (setq org-clock-persist t)
-(setq org-default-notes-file (concat org-directory "/notes.org"))
+(setq org-default-notes-file (concat org-directory "/refile.org"))
 (define-key global-map "\C-cc" 'org-capture)
 
 (setq org-capture-templates
 
-'(("i" "it Tasks" entry (file+headline "~/org/it.org" "Tasks")
-"* TODO %?\n
+'(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
+"* TODO %?\n%U\n
 
 %i\n
 %a")
 
-("w" "work Tasks" entry (file+headline "~/org/work.org" "Tasks")
-"* TODO %?\n
+("n" "note" entry (file+headline "~/org/refile.org" "Note")
+"* NOTE %?\n%U\n
 
 %i\n
 %a")
+
+("m" "Meeting" entry (file+headline "~/org/refile.org" "Meeting")
+"* MEETING %? :MEETING:\n%U\n
+
+%i\n
+%a" :clock-in t :clock-resume t)
+
+("j" "Journal" entry (file+datetree "~/git/org/diary.org")
+ "* %?\n%U\n" :clock-in t :clock-resume t)
 
 ("l" "Links (it)" entry (file+headline "~/org/notes.org" "Links")
 "** %c\n\n  %u\n  %i"
