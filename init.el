@@ -111,10 +111,13 @@ load-path))
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
 (setq org-log-done t)
+(setq org-id-method (quote uuidgen))
 (setq org-agenda-files (list "~/org/emacs.org"
 			     "~/org/work.org"
 			     "~/org/private.org"
 			     "~/org/it.org"
+			     "~/org/refile.org"
+			     "~/org/workhours.org"
 			     ))
 
 ; Some initial languages we want org-babel to support
@@ -147,12 +150,12 @@ load-path))
 
 ;; (setq html (org-export-as-html 3 nil nil 1))
 
-(global-set-key [f5] '(lambda () (interactive) (find-file "~/org/notes.org")))
+(global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
 
-(define-key global-map [f6] '(lambda () (interactive) (find-file "~/org/work.org")))
-(define-key global-map [f7] '(lambda () (interactive) (find-file "~/org/private.org")))
-(define-key global-map [f8] '(lambda () (interactive) (find-file "~/org/workhours.org")))
-(define-key global-map [f9] '(lambda () (interactive) (find-file "~/org/emacs.org")))
+(global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
+(global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
+(global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))
+(global-set-key (kbd "C-c <f9>") '(lambda () (interactive) (find-file "~/org/emacs.org")))
 
 ;; (setq org-clock-persist 'history)
 (org-clock-persistence-insinuate)
@@ -205,6 +208,151 @@ load-path))
 ; (require 'egg)
 ;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
 ;; (load-library "egg")
+
+
+
+
+;; taken from org-mode.org:
+
+;;
+;; Resume clocking task when emacs is restarted
+(org-clock-persistence-insinuate)
+;;
+;; Show lot of clocking history so it's easy to pick items off the C-F11 list
+(setq org-clock-history-length 23)
+;; Resume clocking task on clock-in if the clock is open
+(setq org-clock-in-resume t)
+;; Change tasks to NEXT when clocking in
+(setq org-clock-in-switch-to-state 'bh/clock-in-to-next)
+;; Separate drawers for clocking and logs
+(setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
+;; Save clock data and state changes and notes in the LOGBOOK drawer
+(setq org-clock-into-drawer t)
+;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
+(setq org-clock-out-remove-zero-time-clocks t)
+;; Clock out when moving task to a done state
+(setq org-clock-out-when-done t)
+;; Save the running clock and all clock history when exiting Emacs, load it on startup
+(setq org-clock-persist t)
+;; Do not prompt to resume an active clock
+(setq org-clock-persist-query-resume nil)
+;; Enable auto clock resolution for finding open clocks
+(setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+;; Include current clocking task in clock reports
+(setq org-clock-report-include-clocking-task t)
+
+(setq bh/keep-clock-running nil)
+
+(defun bh/clock-in-to-next (kw)
+  "Switch a task from TODO to NEXT when clocking in.
+Skips capture tasks, projects, and subprojects.
+Switch projects and subprojects from NEXT back to TODO"
+  (when (not (and (boundp 'org-capture-mode) org-capture-mode))
+    (cond
+     ((and (member (org-get-todo-state) (list "TODO"))
+           (bh/is-task-p))
+      "NEXT")
+     ((and (member (org-get-todo-state) (list "NEXT"))
+           (bh/is-project-p))
+      "TODO"))))
+
+(defun bh/find-project-task ()
+  "Move point to the parent (project) task if any"
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+      (while (org-up-heading-safe)
+        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+          (setq parent-task (point))))
+      (goto-char parent-task)
+      parent-task)))
+
+(defun bh/punch-in (arg)
+  "Start continuous clocking and set the default task to the
+selected task.  If no task is selected set the Organization task
+as the default task."
+  (interactive "p")
+  (setq bh/keep-clock-running t)
+  (if (equal major-mode 'org-agenda-mode)
+      ;;
+      ;; We're in the agenda
+      ;;
+      (let* ((marker (org-get-at-bol 'org-hd-marker))
+             (tags (org-with-point-at marker (org-get-tags-at))))
+        (if (and (eq arg 4) tags)
+            (org-agenda-clock-in '(16))
+          (bh/clock-in-organization-task-as-default)))
+    ;;
+    ;; We are not in the agenda
+    ;;
+    (save-restriction
+      (widen)
+      ; Find the tags on the current task
+      (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
+          (org-clock-in '(16))
+        (bh/clock-in-organization-task-as-default)))))
+
+(defun bh/punch-out ()
+  (interactive)
+  (setq bh/keep-clock-running nil)
+  (when (org-clock-is-active)
+    (org-clock-out))
+  (org-agenda-remove-restriction-lock))
+
+(defun bh/clock-in-default-task ()
+  (save-excursion
+    (org-with-point-at org-clock-default-task
+      (org-clock-in))))
+
+(defun bh/clock-in-parent-task ()
+  "Move point to the parent (project) task if any and clock in"
+  (let ((parent-task))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (while (and (not parent-task) (org-up-heading-safe))
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (if parent-task
+            (org-with-point-at parent-task
+              (org-clock-in))
+          (when bh/keep-clock-running
+            (bh/clock-in-default-task)))))))
+
+;; (defvar bh/organization-task-id "eb155a82-92b2-4f25-a3c6-0304591af2f9")
+(defvar bh/organization-task-id "20140625-424242-424242")
+
+(defun bh/clock-in-organization-task-as-default ()
+  (interactive)
+  (org-with-point-at (org-id-find bh/organization-task-id 'marker)
+    (org-clock-in '(16))))
+
+(defun bh/clock-out-maybe ()
+  (when (and bh/keep-clock-running
+             (not org-clock-clocking-in)
+             (marker-buffer org-clock-default-task)
+             (not org-clock-resolving-clocks-due-to-idleness))
+    (bh/clock-in-parent-task)))
+
+(add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
+
+
+(global-set-key (kbd "<f12>") 'org-agenda)
+(global-set-key (kbd "<f9> c") 'calendar)
+(global-set-key (kbd "<f9> I") 'bh/punch-in)
+(global-set-key (kbd "<f9> O") 'bh/punch-out)
+(global-set-key (kbd "<f9> t") 'bh/insert-inactive-timestamp)
+(global-set-key (kbd "<f9> T") 'bh/toggle-insert-inactive-timestamp)
+(global-set-key (kbd "C-<f9>") 'previous-buffer)
+(global-set-key (kbd "C-<f10>") 'next-buffer)
+(global-set-key (kbd "<f11>") 'org-clock-goto)
+(global-set-key (kbd "C-<f11>") 'org-clock-in)
+
+
+
+;;
+
+
 
 ;;; * cfengine
 (load-library "cfengine")
@@ -623,12 +771,12 @@ vi style of % jumping to matching brace."
 ;; (setq recent-files-number-of-entries 30)
 ;; (recent-files-initialize)
 
-;;  Make the F12 key toggle Whitespace mode on and off.  Whitespace mode causes 
+;;  Make the <ctrl> c F12 key toggle Whitespace mode on and off.  Whitespace mode causes 
 ;; all hard tabs to be highlighted.  You can also configure it to highlight space characters 
 ;; in a different color.  There is also an untabify function to convert hard tabs to the 
 ;; appropriate number of spaces, and a tabify function to convert groups of spaces to 
 ;; hard tabs. 
-(global-set-key (kbd "<f12>") 'whitespace-mode)
+(global-set-key (kbd "C-c <f12>") 'whitespace-mode)
 
 
 ;; (add-hook 'find-file-hooks 'fume-setup-buffer)
