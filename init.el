@@ -112,8 +112,9 @@ load-path))
 (define-key global-map "\C-ca" 'org-agenda)
 (setq org-log-done t)
 (setq org-id-method (quote uuidgen))
-(setq org-agenda-files (list "~/org/emacs.org"
-			     "~/org/work.org"
+(setq org-agenda-files (list "~/org/work.org"
+			     "~/org/notes.org"
+			     "~/org/emacs.org"
 			     "~/org/private.org"
 			     "~/org/it.org"
 			     "~/org/refile.org"
@@ -878,6 +879,7 @@ vi style of % jumping to matching brace."
 
 (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
 (define-key global-map "\M-g\M-b" 'magit-branch-manager)
+(define-key global-map "\M-gb" 'magit-blame-mode)
 (define-key global-map "\C-cm" 'magit-status)
 
 (define-key global-map "\C-cw" (lambda ()
