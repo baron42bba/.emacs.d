@@ -183,7 +183,7 @@ load-path))
 ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
  "* %?\n%U\n" :clock-in t :clock-resume t)
 
-("l" "Links (it)" entry (file+headline "~/org/notes.org" "Links")
+("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
 "** %c\n\n  %u\n  %i"
          :empty-lines 1)
 
@@ -506,7 +506,7 @@ bundle " name "
 
 (add-hook 'dns-mode-hook
   (lambda ()
-    (define-key dns-mode-map "\C-cr" 'dns-rndc)
+    (define-key dns-mode-map "\C-c\C-r" 'dns-rndc)
     ))
 
 ;; (defun cfe-lookup-docs ()
