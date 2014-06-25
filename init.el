@@ -171,17 +171,14 @@ load-path))
 %i\n
 %a")
 
-("n" "note" entry (file+headline "~/org/refile.org" "Note")
-"* NOTE %?\n%U\n
+  ("m" "Meeting" entry (file "~/git/org/refile.org")
+   "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+
+  ("n" "note" entry (file+headline "~/org/refile.org" "Note")
+   "* NOTE %?\n%U\n
 
 %i\n
 %a")
-
-("m" "Meeting" entry (file+headline "~/org/refile.org" "Meeting")
-"* MEETING %? :MEETING:\n%U\n
-
-%i\n
-%a" :clock-in t :clock-resume t)
 
 ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
  "* %?\n%U\n" :clock-in t :clock-resume t)
@@ -212,7 +209,7 @@ load-path))
 
 
 
-;; taken from org-mode.org:
+;; taken from http://doc.norang.ca/org-mode.org :
 
 ;;
 ;; Resume clocking task when emacs is restarted
@@ -335,6 +332,58 @@ as the default task."
     (bh/clock-in-parent-task)))
 
 (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
+
+(defvar bh/insert-inactive-timestamp t)
+
+(defun bh/toggle-insert-inactive-timestamp ()
+  (interactive)
+  (setq bh/insert-inactive-timestamp (not bh/insert-inactive-timestamp))
+  (message "Heading timestamps are %s" (if bh/insert-inactive-timestamp "ON" "OFF")))
+
+(defun bh/insert-inactive-timestamp ()
+  (interactive)
+  (org-insert-time-stamp nil t t nil nil nil))
+
+(defun bh/insert-heading-inactive-timestamp ()
+  (save-excursion
+    (when bh/insert-inactive-timestamp
+      (org-return)
+      (org-cycle)
+      (bh/insert-inactive-timestamp))))
+
+(add-hook 'org-insert-heading-hook 'bh/insert-heading-inactive-timestamp 'append)
+
+; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+(setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                 (org-agenda-files :maxlevel . 9))))
+
+; Use full outline paths for refile targets - we file directly with IDO
+(setq org-refile-use-outline-path t)
+
+; Targets complete directly with IDO
+(setq org-outline-path-complete-in-steps nil)
+
+; Allow refile to create parent tasks with confirmation
+(setq org-refile-allow-creating-parent-nodes (quote confirm))
+
+; Use IDO for both buffer and file completion and ido-everywhere to t
+(setq org-completion-use-ido t)
+(setq ido-everywhere t)
+(setq ido-max-directory-size 100000)
+(ido-mode (quote both))
+; Use the current window when visiting files and buffers with ido
+(setq ido-default-file-method 'selected-window)
+(setq ido-default-buffer-method 'selected-window)
+; Use the current window for indirect buffer display
+(setq org-indirect-buffer-display 'current-window)
+
+;;;; Refile settings
+; Exclude DONE state tasks from refile targets
+(defun bh/verify-refile-target ()
+  "Exclude todo keywords with a done state from refile targets"
+  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+(setq org-refile-target-verify-function 'bh/verify-refile-target)
 
 
 (global-set-key (kbd "<f12>") 'org-agenda)
