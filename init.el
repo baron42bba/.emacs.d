@@ -12,6 +12,9 @@ load-path))
 ;; http://www.emacswiki.org/emacs/EmacsCrashTips
 ;; http://www.emacswiki.org/emacs/EmacsNiftyTricks
 
+;; enable debugging if you run into problems regarding your config:
+;;(setq debug-on-error t)
+
 ;;; * Emacs server
 (require 'server)
 (unless (server-running-p)
@@ -32,7 +35,7 @@ load-path))
 ;;; * http://www.emacswiki.org/emacs/ELPA
 (require 'package)
 
-;;; (package-initialize)
+(package-initialize)
 
 (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
 ;;(require 'rainbow-delimiters)
@@ -238,7 +241,8 @@ load-path))
 (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
 ;; Include current clocking task in clock reports
 (setq org-clock-report-include-clocking-task t)
-
+(setq org-time-clocksum-format
+      '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
 (setq bh/keep-clock-running nil)
 
 (defun bh/clock-in-to-next (kw)
