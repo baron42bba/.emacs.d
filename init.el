@@ -563,6 +563,9 @@ as the default task."
 (setq recentf-max-menu-items 42)
 (global-set-key "\C-cr" 'recentf-open-files)
 
+;;; * ipcalc https://github.com/dotemacs/ipcalc.el
+(require 'ipcalc)
+
 ;;; * Some nice functions
 ;;(blink-matching-paren 1)
 ;;(paren-activate)
