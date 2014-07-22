@@ -41,7 +41,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 
 *** run in servermode
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (require 'server)
   (unless (server-running-p)
     (server-start))
@@ -69,10 +69,11 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.xemacs/elpa")
+  (add-to-list 'load-path "~/.xemacs/elpa/popup-20140207.1702")
   (require 'package)
-  
   (package-initialize)
-
+  
 #+END_SRC
 
 *** latex
@@ -194,12 +195,22 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 #+BEGIN_SRC emacs-lisp
   (require 'org-protocol)
-
+  
   (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
   (define-key global-map "\C-cl" 'org-store-link)
   (define-key global-map "\C-ca" 'org-agenda)
   (setq org-log-done t)
   (setq org-id-method (quote uuidgen))
+  
+  (if (equal "agerler" user-login-name)
+  (setq org-agenda-files (list "~/workorg/work.org"
+                               "~/org/notes.org"
+                               "~/org/emacs.org"
+                               "~/org/private.org"
+                               "~/org/it.org"
+                               "~/org/refile.org"
+                               "~/org/workhours.org"
+                               ))
   (setq org-agenda-files (list "~/org/work.org"
                                "~/org/notes.org"
                                "~/org/emacs.org"
@@ -208,6 +219,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
                                "~/org/refile.org"
                                "~/org/workhours.org"
                                ))
+  )
   
   ; Some initial languages we want org-babel to support
   (org-babel-do-load-languages
@@ -241,9 +253,20 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   
   (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
   
-  (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
   (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
-  (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))
+      
+  (if (equal "agerler" user-login-name)
+      (progn
+        (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
+        (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/workorg/workhours.org")))
+        )
+    (progn
+      (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
+      (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))))
+         
+         
+  
+      
   (global-set-key (kbd "C-c <f9>") '(lambda () (interactive) (find-file "~/org/emacs.org")))
   
   ;; (setq org-clock-persist 'history)
@@ -487,14 +510,14 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (global-set-key (kbd "<f11>") 'org-clock-goto)
   (global-set-key (kbd "C-<f11>") 'org-clock-in)
   
-
-
+  
+  
   (add-hook 'org-mode-hook
     (lambda ()
       (auto-fill-mode)
       ))
   
-
+  
 #+END_SRC
 
 *** cfengine
@@ -669,9 +692,10 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 *** auto-completion
 
 #+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.xemacs/elpa/auto-complete-20140618.2217")
   (require 'auto-complete-config)
+  (add-to-list 'ac-dictionary-directories "~/.xemacs/elpa/auto-complete-20140618.2217")
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-  (add-to-list 'ac-dictionary "~/.dict")
   (ac-config-default)
   (add-to-list 'ac-modes 'cfengine3-mode)
   (add-to-list 'ac-modes 'dns-mode)
