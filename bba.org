@@ -51,19 +51,24 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 *** define emacs shutdown function
 
 #+BEGIN_SRC emacs-lisp
-
-  ;; define function to shutdown emacs server instance
-  (defun server-shutdown ()
-    "Save buffers, Quit, and Shutdown (kill) server"
-    (interactive)
-    (save-some-buffers)
-    (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
-    (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
-    (setq twittering-cert-file nil )
   
-    (kill-emacs)
-    )
-
+    ;; define function to shutdown emacs server instance
+    (defun server-shutdown ()
+      "Save buffers, Quit, and Shutdown (kill) server"
+      (interactive)
+      (save-some-buffers)
+      (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
+      (if (equal "agerler" user-login-name)
+          (progn
+            (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git commit -a -m 'autocommit'")
+            )
+        (progn
+          (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
+          ))
+      (setq twittering-cert-file nil )
+      (kill-emacs)
+      )
+  
 #+END_SRC
 
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
@@ -192,6 +197,7 @@ this is how your firefox bookmark must look like:
 #+BEGIN_SRC :eval no :tangle no
 javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
 #+END_SRC
+
 
 #+BEGIN_SRC emacs-lisp
   (require 'org-protocol)
@@ -625,6 +631,9 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 #+END_SRC
 
 *** [[http://www.twmode.sourceforge.net/][twitter]]
+
+BUGBUG: set `twittering-proxy-server' and `twittering-proxy-port' with strings
+from environment variable http_proxy
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
@@ -1154,6 +1163,10 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   ;; javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
   
   (require 'org-protocol)
+  
+  (if (eq system-type 'darwin)
+      (require 'org-mac-protocol)
+  )
   
   ;; (require 'org-install)
   (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
