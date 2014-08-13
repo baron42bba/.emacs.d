@@ -530,7 +530,8 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 #+BEGIN_SRC emacs-lisp
   (load-library "cfengine")
-
+  (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
+  
   ;; post-commit and post-merge hook for git:
   ;; #!/bin/bash
   ;; rm .git/etags
@@ -607,8 +608,8 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
       (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
       (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
       ))
-
-
+  
+  
 #+END_SRC
 
 *** mwheel
