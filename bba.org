@@ -605,11 +605,45 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (add-hook 'cfengine3-mode-hook
     (lambda ()
       (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
+      (define-key cfengine3-mode-map "\C-ct" (lambda() (interactive) (shell-command "~/bin/cfengine_update_testing.sh" )))
       (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
       (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
       ))
   
   
+#+END_SRC
+
+for C-c t you can use a file like this one:
+
+#+NAME: ~/bin/cfengine_update_testing.sh
+#+BEGIN_SRC sh
+  #!/bin/bash
+  :<<cut
+  =cut
+  
+  =pod
+  
+  =head1 NAME
+  
+  cfengine_update_testing
+  
+  =head1 DESCRIPTION
+  
+  sync cfengine inputs to agtest03 and run failsafe.
+  
+  =cut
+  
+  cf-promises -D customlib_active || exit 3
+  rsync -av --progress --delete -e ssh ~/.cfagent/inputs/ agtest03:/var/cfengine/masterfiles/
+  ssh agtest03 "/usr/local/sbin/cf-agent -f /var/cfengine/inputs/failsafe.cf"
+  
+  :<<=cut
+  
+  =head1 AUTHOR
+  
+  Andreas Gerler <baron@bundesbrandschatzamt.de>
+  
+  =cut
 #+END_SRC
 
 *** mwheel
