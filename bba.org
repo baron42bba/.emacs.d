@@ -605,7 +605,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (add-hook 'cfengine3-mode-hook
     (lambda ()
       (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
-      (define-key cfengine3-mode-map "\C-ct" (lambda() (interactive) (shell-command "~/bin/cfengine_update_testing.sh" )))
+      (define-key cfengine3-mode-map "\C-c\S-t" (lambda() (interactive) (shell-command "~/bin/cfengine_update_testing.sh" )))
       (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
       (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
       ))
@@ -613,7 +613,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   
 #+END_SRC
 
-for C-c t you can use a file like this one:
+for C-c T you can use a file like this one:
 
 #+NAME: ~/bin/cfengine_update_testing.sh
 #+BEGIN_SRC sh
