@@ -521,6 +521,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (add-hook 'org-mode-hook
     (lambda ()
       (auto-fill-mode)
+      (flyspell-mode)
       ))
   
   
