@@ -81,6 +81,13 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
   
 #+END_SRC
 
+*** smartparens-mode
+Enable smart parens in all modes.
+See [[https://github.com/toctan/smartparens][Smartparens on github]].
+
+#+BEGIN_SRC emacs-lisp
+  (smartparens-global-mode 1)
+#+END_SRC
 *** latex
 
 #+BEGIN_SRC emacs-lisp
