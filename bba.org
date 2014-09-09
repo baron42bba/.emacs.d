@@ -86,6 +86,9 @@ Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
 
 #+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.xemacs/elpa/smartparens-20140819.203")
+  (add-to-list 'load-path "~/.xemacs/elpa/dash-20140811.523")
+  (require 'smartparens)
   (smartparens-global-mode 1)
 #+END_SRC
 *** latex
