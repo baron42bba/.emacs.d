@@ -91,6 +91,14 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (require 'smartparens)
   (smartparens-global-mode 1)
 #+END_SRC
+*** guide-key
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.xemacs/elpa/popwin-20140902.1727")
+  (add-to-list 'load-path "~/.xemacs/elpa/guide-key-20140828.807")
+  (require 'guide-key)
+  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c"))
+  (guide-key-mode 1)
+#+END_SRC
 *** latex
 
 #+BEGIN_SRC emacs-lisp
