@@ -51,24 +51,25 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 *** define emacs shutdown function
 
 #+BEGIN_SRC emacs-lisp
-  
-    ;; define function to shutdown emacs server instance
-    (defun server-shutdown ()
-      "Save buffers, Quit, and Shutdown (kill) server"
-      (interactive)
-      (save-some-buffers)
-      (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
-      (if (equal "agerler" user-login-name)
-          (progn
-            (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git commit -a -m 'autocommit'")
-            )
+    
+  ;; define function to shutdown emacs server instance
+  (defun server-shutdown ()
+    "Save buffers, Quit, and Shutdown (kill) server"
+    (interactive)
+    (save-some-buffers)
+    (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
+    (if (equal "work" (getenv "SYSENV"))
         (progn
-          (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
-          ))
-      (setq twittering-cert-file nil )
-      (kill-emacs)
-      )
-  
+          (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git commit -a -m 'autocommit'")
+          (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git push origin")
+          )
+      (progn
+        (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
+        ))
+    (setq twittering-cert-file nil )
+    (kill-emacs)
+    )
+    
 #+END_SRC
 
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
@@ -226,7 +227,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (setq org-log-done t)
   (setq org-id-method (quote uuidgen))
   
-  (if (equal "agerler" user-login-name)
+  (if (equal "work" (getenv "SYSENV"))
   (setq org-agenda-files (list "~/workorg/work.org"
                                "~/org/notes.org"
                                "~/org/emacs.org"
@@ -278,8 +279,8 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
   
   (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
-      
-  (if (equal "agerler" user-login-name)
+  
+  (if (equal "work" (getenv "SYSENV"))
       (progn
         (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
         (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/workorg/workhours.org")))
