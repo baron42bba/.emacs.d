@@ -98,6 +98,8 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (add-to-list 'load-path "~/.xemacs/elpa/guide-key-20140828.807")
   (require 'guide-key)
   (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c"))
+  (setq guide-key/recursive-key-sequence-flag t)
+  (setq guide-key/idle-delay 3)
   (guide-key-mode 1)
 #+END_SRC
 *** latex
