@@ -97,7 +97,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (add-to-list 'load-path "~/.xemacs/elpa/popwin-20140902.1727")
   (add-to-list 'load-path "~/.xemacs/elpa/guide-key-20140828.807")
   (require 'guide-key)
-  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c"))
+  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c" "C-x l"))
   (setq guide-key/recursive-key-sequence-flag t)
   (setq guide-key/idle-delay 3)
   (guide-key-mode 1)
@@ -1040,13 +1040,14 @@ from environment variable http_proxy
   (define-key global-map "\C-ct" 'bba/toggle)
   
   (define-key bba/toggle "f" 'auto-fill-mode)
-  (defin-key bba/toggle "p" 'smartparens-mode)
+  (define-key bba/toggle "p" 'smartparens-mode)
+  (define-key bba/toggle "s" 'flyspell-mode)
   (define-prefix-command 'bba/launcher)
   (define-key global-map "\C-xl" 'bba/launcher)
   
   (define-key bba/launcher "c" 'calculator)
   (define-key bba/launcher "d" 'ediff-buffers)
-  (defin-key bba/launcher "s" 'shell)
+  (define-key bba/launcher "s" 'shell)
       
       (define-key global-map "\C-c\C-t" 'insert-timestamp)
       (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
