@@ -8,7 +8,7 @@
 Inspired by the [[http://eschulte.github.io/emacs-starter-kit/][Emacs Starter Kit]] and [[http://sachachua.com/blog/][Sacha Chua]] I set up my configuration file
 using Org-babel. You could load it with =(org-babel-load-file "/path/to/file")=,
 changing the path appropriately, but you'll probably want to tweak it
-extensively first. 
+extensively first.
 
 To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what used to be the =~/.emacs= file):
 
@@ -51,7 +51,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 *** define emacs shutdown function
 
 #+BEGIN_SRC emacs-lisp
-    
+
   ;; define function to shutdown emacs server instance
   (defun server-shutdown ()
     "Save buffers, Quit, and Shutdown (kill) server"
@@ -69,7 +69,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
     (setq twittering-cert-file nil )
     (kill-emacs)
     )
-    
+
 #+END_SRC
 
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
@@ -79,7 +79,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
   (add-to-list 'load-path "~/.xemacs/elpa/popup-20140207.1702")
   (require 'package)
   (package-initialize)
-  
+
 #+END_SRC
 
 *** smartparens-mode
@@ -114,7 +114,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
     (lambda ()
       (auto-fill-mode)
       ))
-  
+
 
 #+END_SRC
 
@@ -222,13 +222,13 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 #+BEGIN_SRC emacs-lisp
   (require 'org-protocol)
-  
+
   (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
   (define-key global-map "\C-cl" 'org-store-link)
   (define-key global-map "\C-ca" 'org-agenda)
   (setq org-log-done t)
   (setq org-id-method (quote uuidgen))
-  
+
   (if (equal "work" (getenv "SYSENV"))
   (setq org-agenda-files (list "~/workorg/work.org"
                                "~/org/notes.org"
@@ -247,7 +247,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
                                "~/org/workhours.org"
                                ))
   )
-  
+
   ; Some initial languages we want org-babel to support
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -262,11 +262,11 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
      (sqlite . t)
      (perl . t)
      ))
-  
+
   ;;(setq org-html-preamble nil
   ;;     org-html-postamble nil
   ;;      org-html-head "")
-  
+
   ;; (setq org-html-preamble nil
   ;;       org-html-postamble nil
   ;;       org-html-include-default-style nil
@@ -275,13 +275,13 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   ;;       org-export-html-style "body-only"
   ;; )
   ;; body-only option ?
-  
+
   ;; (setq html (org-export-as-html 3 nil nil 1))
-  
+
   (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
-  
+
   (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
-  
+
   (if (equal "work" (getenv "SYSENV"))
       (progn
         (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
@@ -290,44 +290,44 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
     (progn
       (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
       (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))))
-         
-         
-  
-      
+
+
+
+
   (global-set-key (kbd "C-c <f9>") '(lambda () (interactive) (find-file "~/org/emacs.org")))
-  
+
   ;; (setq org-clock-persist 'history)
   (org-clock-persistence-insinuate)
   (setq org-clock-persist t)
   (setq org-default-notes-file (concat org-directory "/refile.org"))
   (define-key global-map "\C-cc" 'org-capture)
-  
+
   (setq org-capture-templates
-  
+
   '(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
   "* TODO %?\n%U\n
-  
+
   %i\n
   %a")
-  
+
     ("m" "Meeting" entry (file "~/git/org/refile.org")
      "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-  
+
     ("n" "note" entry (file+headline "~/org/refile.org" "Note")
      "* NOTE %?\n%U\n
-  
+
   %i\n
   %a")
-  
+
   ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
    "* %?\n%U\n" :clock-in t :clock-resume t)
-  
+
   ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
   "** %c\n\n  %u\n  %i"
            :empty-lines 1)
-  
+
   ))
-  
+
   (setq org-link-abbrev-alist '(
   ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
   ("cpan" . "http://search.cpan.org/search?query=%s&mode=all")
@@ -344,12 +344,12 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   ; (require 'egg)
   ;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
   ;; (load-library "egg")
-  
-  
-  
-  
+
+
+
+
   ;; taken from http://doc.norang.ca/org-mode.org :
-  
+
   ;;
   ;; Resume clocking task when emacs is restarted
   (org-clock-persistence-insinuate)
@@ -379,7 +379,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (setq org-time-clocksum-format
         '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
   (setq bh/keep-clock-running nil)
-  
+
   (defun bh/clock-in-to-next (kw)
     "Switch a task from TODO to NEXT when clocking in.
   Skips capture tasks, projects, and subprojects.
@@ -392,7 +392,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
        ((and (member (org-get-todo-state) (list "NEXT"))
              (bh/is-project-p))
         "TODO"))))
-  
+
   (defun bh/find-project-task ()
     "Move point to the parent (project) task if any"
     (save-restriction
@@ -403,7 +403,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
             (setq parent-task (point))))
         (goto-char parent-task)
         parent-task)))
-  
+
   (defun bh/punch-in (arg)
     "Start continuous clocking and set the default task to the
   selected task.  If no task is selected set the Organization task
@@ -428,19 +428,19 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
         (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
             (org-clock-in '(16))
           (bh/clock-in-organization-task-as-default)))))
-  
+
   (defun bh/punch-out ()
     (interactive)
     (setq bh/keep-clock-running nil)
     (when (org-clock-is-active)
       (org-clock-out))
     (org-agenda-remove-restriction-lock))
-  
+
   (defun bh/clock-in-default-task ()
     (save-excursion
       (org-with-point-at org-clock-default-task
         (org-clock-in))))
-  
+
   (defun bh/clock-in-parent-task ()
     "Move point to the parent (project) task if any and clock in"
     (let ((parent-task))
@@ -455,57 +455,57 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
                 (org-clock-in))
             (when bh/keep-clock-running
               (bh/clock-in-default-task)))))))
-  
+
   ;; (defvar bh/organization-task-id "eb155a82-92b2-4f25-a3c6-0304591af2f9")
   (defvar bh/organization-task-id "20140625-424242-424242")
-  
+
   (defun bh/clock-in-organization-task-as-default ()
     (interactive)
     (org-with-point-at (org-id-find bh/organization-task-id 'marker)
       (org-clock-in '(16))))
-  
+
   (defun bh/clock-out-maybe ()
     (when (and bh/keep-clock-running
                (not org-clock-clocking-in)
                (marker-buffer org-clock-default-task)
                (not org-clock-resolving-clocks-due-to-idleness))
       (bh/clock-in-parent-task)))
-  
+
   (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
-  
+
   (defvar bh/insert-inactive-timestamp t)
-  
+
   (defun bh/toggle-insert-inactive-timestamp ()
     (interactive)
     (setq bh/insert-inactive-timestamp (not bh/insert-inactive-timestamp))
     (message "Heading timestamps are %s" (if bh/insert-inactive-timestamp "ON" "OFF")))
-  
+
   (defun bh/insert-inactive-timestamp ()
     (interactive)
     (org-insert-time-stamp nil t t nil nil nil))
-  
+
   (defun bh/insert-heading-inactive-timestamp ()
     (save-excursion
       (when bh/insert-inactive-timestamp
         (org-return)
         (org-cycle)
         (bh/insert-inactive-timestamp))))
-  
+
   (add-hook 'org-insert-heading-hook 'bh/insert-heading-inactive-timestamp 'append)
-  
+
   ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
   (setq org-refile-targets (quote ((nil :maxlevel . 9)
                                    (org-agenda-files :maxlevel . 9))))
-  
+
   ; Use full outline paths for refile targets - we file directly with IDO
   (setq org-refile-use-outline-path t)
-  
+
   ; Targets complete directly with IDO
   (setq org-outline-path-complete-in-steps nil)
-  
+
   ; Allow refile to create parent tasks with confirmation
   (setq org-refile-allow-creating-parent-nodes (quote confirm))
-  
+
   ; Use IDO for both buffer and file completion and ido-everywhere to t
   (setq org-completion-use-ido t)
   (setq ido-everywhere t)
@@ -516,16 +516,16 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (setq ido-default-buffer-method 'selected-window)
   ; Use the current window for indirect buffer display
   (setq org-indirect-buffer-display 'current-window)
-  
+
   ;;;; Refile settings
   ; Exclude DONE state tasks from refile targets
   (defun bh/verify-refile-target ()
     "Exclude todo keywords with a done state from refile targets"
     (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-  
+
   (setq org-refile-target-verify-function 'bh/verify-refile-target)
-  
-  
+
+
   (global-set-key (kbd "<f12>") 'org-agenda)
   (global-set-key (kbd "<f9> c") 'calendar)
   (global-set-key (kbd "<f9> I") 'bh/punch-in)
@@ -536,16 +536,16 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (global-set-key (kbd "C-<f10>") 'next-buffer)
   (global-set-key (kbd "<f11>") 'org-clock-goto)
   (global-set-key (kbd "C-<f11>") 'org-clock-in)
-  
-  
-  
+
+
+
   (add-hook 'org-mode-hook
     (lambda ()
       (auto-fill-mode)
       (flyspell-mode)
       ))
-  
-  
+
+
 #+END_SRC
 
 *** cfengine
@@ -553,22 +553,22 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 #+BEGIN_SRC emacs-lisp
   (load-library "cfengine")
   (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
-  
+
   ;; post-commit and post-merge hook for git:
   ;; #!/bin/bash
   ;; rm .git/etags
   ;; find ${PWD} -type f -regex ".*\(\.cf\|_pl\.dat\|_conf.dat\)" | xargs etags --append --output=.git/etags
   ;; set link for emacs:
   ;; ln -s ~/.cfagent/inputs/../.git/etags ~/.cfengine_tags
-  
+
   (defun load-git-cfengine ()
     "Load config and tags file of git cfengine repo"
   (interactive) (visit-tags-table "~/.cfengine_tags")
   (interactive) (find-file "~/.cfagent/inputs/config.cf")
   )
-  
+
   ;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
-  
+
   (defun cfe-config-adduser-ldap ( user )
     "Insert usertemplate based on ldap information for config.cf"
     (interactive "sUser: ")
@@ -582,9 +582,9 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
         \"users[" user "][shell]\" string => \"/bin/bash\";
         \"users[" user "][flags]\" string => \"-m\";
         \"users[" user "][authorized_keys][0]\" string => \"\";" )
-  
+
   )
-  
+
   (defun cfe-config-adduser ( user )
     "Insert usertemplate for config.cf"
     (interactive "sUser: ")
@@ -598,9 +598,9 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
         \"users[" user "][shell]\" string => \"/bin/bash\";
         \"users[" user "][flags]\" string => \"-m\";
         \"users[" user "][authorized_keys][0]\" string => \"\";" )
-  
+
   )
-  
+
   (defun cfe-insert-bundle ( name )
     "Insert bundletemplate"
     (interactive "sBundle: ")
@@ -610,20 +610,20 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   #
   #=cut
   #
-  
+
   bundle " name "
   {
     vars:
-  
+
     files:
-  
+
     methods:
-  
+
     classes:
-  
+
   }")
   )
-  
+
   (add-hook 'cfengine3-mode-hook
     (lambda ()
       (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
@@ -631,8 +631,8 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
       (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
       (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
       ))
-  
-  
+
+
 #+END_SRC
 
 for C-c T you can use a file like this one:
@@ -642,29 +642,29 @@ for C-c T you can use a file like this one:
   #!/bin/bash
   :<<cut
   =cut
-  
+
   =pod
-  
+
   =head1 NAME
-  
+
   cfengine_update_testing
-  
+
   =head1 DESCRIPTION
-  
+
   sync cfengine inputs to agtest03 and run failsafe.
-  
+
   =cut
-  
+
   cf-promises -D customlib_active || exit 3
   rsync -av --progress --delete -e ssh ~/.cfagent/inputs/ agtest03:/var/cfengine/masterfiles/
   ssh agtest03 "/usr/local/sbin/cf-agent -f /var/cfengine/inputs/failsafe.cf"
-  
+
   :<<=cut
-  
+
   =head1 AUTHOR
-  
+
   Andreas Gerler <baron@bundesbrandschatzamt.de>
-  
+
   =cut
 #+END_SRC
 
@@ -705,7 +705,7 @@ You may start it at the end of the config file.
 #+BEGIN_SRC emacs-lisp
   (load-library "tramp")
   (setq default-tramp-method "sftp")
-  
+
   ;; with this you can do /sudo:ssh-host:file-on-ssh-host
   (add-to-list 'tramp-default-proxies-alist '(".*" "\`root\'" "/ssh:%h:"))
 
@@ -725,7 +725,7 @@ from environment variable http_proxy
       (setq twittering-cert-file "/etc/ssl/certs/ca-bundle.crt") )
     )
   )
-  
+
   (setq twittering-use-master-password t)
 
 #+END_SRC
@@ -754,7 +754,7 @@ from environment variable http_proxy
       ad-do-it
       (when (not (display-graphic-p))
         (setenv "GPG_AGENT_INFO" agent))))
-  
+
   ;; (defadvice epg--start (around advice-epg-disable-agent disable)
   ;;   "Don't allow epg--start to use gpg-agent in plain text terminals."
   ;;   (if (display-graphic-p)
@@ -773,7 +773,7 @@ from environment variable http_proxy
 #+BEGIN_SRC emacs-lisp
   (require 'cperl-mode)
   (fset 'perl-mode 'cperl-mode)
-  
+
   (eval-after-load "cperl-mode"
       '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
 
@@ -799,6 +799,14 @@ from environment variable http_proxy
 
 #+END_SRC
 
+*** remove trailing whitespace
+    [2014-09-24 Wed 16:56]
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+#+END_SRC
+
 *** mode-line menu-bar etc
 
 #+BEGIN_SRC emacs-lisp
@@ -815,57 +823,75 @@ from environment variable http_proxy
 
 #+END_SRC
 
+*** window management
+    [2014-09-24 Wed 13:03]
+
+Bind f3 and f4 to previous/next pane.
+#+BEGIN_SRC emacs-lisp
+  (defun move-cursor-next-pane ()
+    "Move cursor to the next pane."
+    (interactive)
+    (other-window 1))
+
+  (defun move-cursor-previous-pane ()
+    "Move cursor to the previous pane."
+    (interactive)
+    (other-window -1))
+
+  (global-set-key (kbd "<f3>") 'move-cursor-previous-pane)
+  (global-set-key (kbd "<f4>") 'move-cursor-next-pane)
+#+END_SRC
 *** other stuff
 
 #+BEGIN_SRC emacs-lisp
       ;;; * Specify printing format
       (setq ps-paper-type 'a4)
-      
+
       ;;; * Set ispell dictionary
       (setq ispell-dictionary "english")
-      
+
       ;;; * Set Shell for M-| command
       (setq shell-file-name "/bin/bash")
-      
+
       ;;; * Set Shell used by TeX
       (setq tex-shell-file-name "/bin/bash")
-      
+
       ;;; * Set grep command options
       (setq grep-command "grep -i -nH -e ")
-      
+
       ;;; * Confirm quit
       (setq confirm-kill-emacs 'yes-or-no-p)
-    
+
       ;;; * Ignore case when completing file names
       (setq read-file-name-completion-ignore-case t)
-      
+
       ;;; * Highlight parenthesis pairs
       (show-paren-mode 1)
-      
+
       ;;; * Blinking parenthesis
       (setq blink-matching-paren-distance nil)
-      
+
       ;;; * Highlight text between parens
       (setq show-paren-style 'expression)
-      
+
       ;;; * Use buffer nane as frame title
       (setq frame-title-format "%b - emacs")
-      
+
       ;;; * Completion in mini-buffer
       (icomplete-mode t)
-      
+
       ;;; * Stack minibuffers
       (setq enable-recursive-minibuffers t)
-      
+
       ;;; * RecentFiles http://www.emacswiki.org/emacs/RecentFiles
       (require 'recentf)
       (recentf-mode 1)
       (setq recentf-max-menu-items 42)
       (global-set-key "\C-cr" 'recentf-open-files)
-      
+
       ;;; * ipcalc https://github.com/dotemacs/ipcalc.el
       (require 'ipcalc)
-      
+
       ;;; * Some nice functions
       ;;(blink-matching-paren 1)
       ;;(paren-activate)
@@ -877,12 +903,12 @@ from environment variable http_proxy
       "Insert the current timestamp"
       (interactive)
       (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
-      
+
       ;; eshell-here: Thanks to Howard Abrahams:
       ;; http://www.howardism.org/Technical/Emacs/eshell-fun.html
       ;;
       ;; modified because current version lacks function have window-total-height.
-      
+
       (defun eshell-here ()
         "Opens up a new shell in the directory associated with the
       current buffer's file. The eshell is renamed to match that
@@ -898,19 +924,19 @@ from environment variable http_proxy
           (other-window 1)
           (eshell "new")
           (rename-buffer (concat "*eshell: " name "*"))
-      
+
           (insert (concat "ls"))
           (eshell-send-input)))
-      
+
       (define-key global-map "\C-c!" 'eshell-here)
-      
+
       (defun eshell/x ()
         (insert "exit")
         (eshell-send-input)
         (delete-window))
-    
-    
-    
+
+
+
       (defun eshell/ssh (&rest args)
       "Secure shell"
       (let ((cmd (eshell-flatten-and-stringify
@@ -928,7 +954,7 @@ from environment variable http_proxy
       nil)
       (t
       (apply 'eshell-exec-visual (cons "ssh" args))))))
-      
+
       (defun goto-match-paren (arg)
         "Go to the matching parenthesis if on parenthesis, otherwise insert %.
       vi style of % jumping to matching brace."
@@ -937,18 +963,18 @@ from environment variable http_proxy
               ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
               (t (self-insert-command (or arg 1)))))
       (global-set-key "%" 'goto-match-paren)
-      
+
       ;;(move-overlay hl-line-overlay
       ;;            (line-beginning-position) (1+ (line-end-position))
       ;;            (current-buffer)))))
-      
+
       ;; (set-face-background-pixmap 'default "~/.xemacs/xemacs-bg.xpm")
       (set-foreground-color "green")
       (set-background-color "black")
-      
+
       ;; pos1: goto start of line, start of screen, start of buffer
       ;; end: goto end of line, end of screen, end of buffer
-      
+
       (global-set-key '[(home)] 'chb-home)
       (global-set-key '[(end)] 'chb-end)
       ;;
@@ -964,7 +990,7 @@ from environment variable http_proxy
         (beginning-of-line))
        (t
         (goto-char (point-min)))))))
-      
+
       (defun chb-end ()
       (interactive)
       (setq zmacs-region-stays t)
@@ -980,12 +1006,12 @@ from environment variable http_proxy
                 (end-of-line))
                (t
                 (goto-char (point-max)))))))
-      
-      
-      
-      
+
+
+
+
       ;; safe files with #! in first line as user executable
-      
+
       (add-hook `after-safe-hook
                 #'(lambda ()
                    (and (save-excursion
@@ -998,33 +1024,26 @@ from environment variable http_proxy
                         (shell-command (concat "chmod u+x " buffer-file-name))
                         (message
                          (concat "Saved as script: " buffer-file-name)))))
-      
+
       ;;
       ;; list of recently opened files
       ;;
-      
+
       ;; (load "recent-files")
       ;; (setq recent-files-dont-include
       ;;      '("~$" "tmp/." "INBOX" ".bbdb" ".newsrc." ))
-      
+
       ;; (setq recent-files-non-permanent-submenu t)
       ;; (setq recent-files-commands-submenu t)
       ;; (setq recent-files-number-of-entries 30)
       ;; (recent-files-initialize)
-      
-      ;;  Make the <ctrl> c F12 key toggle Whitespace mode on and off.  Whitespace mode causes 
-      ;; all hard tabs to be highlighted.  You can also configure it to highlight space characters 
-      ;; in a different color.  There is also an untabify function to convert hard tabs to the 
-      ;; appropriate number of spaces, and a tabify function to convert groups of spaces to 
-      ;; hard tabs. 
-      (global-set-key (kbd "C-c <f12>") 'whitespace-mode)
-      
-      
+
+
       ;; (add-hook 'find-file-hooks 'fume-setup-buffer)
       ;; (add-hook 'Manual-mode-hook 'turn-on-fume-mode)
-      
+
       ;; (function-menu USE-MENUBAR RETURN-ONLY MENU-ITEM-FUNCTION)
-        
+
       ;;====================================================================
       ;;The Following Code Will Enable Me To Use The "Fume" Package Which
       ;;Creates, On The Menubar, A "Functions" Menu Containing The List Of
@@ -1033,7 +1052,7 @@ from environment variable http_proxy
       ;;
       ;;Setq-Default Set The Default Value Of A Var.  This Def. Val. Is Seen
       ;;In Buffers That *Don'T* Have Their Own Values For The Variable.
-      
+
       ;(require function-menu)
       ;(Define-Key Global-Map 'F8 'Function-Menu)
       ;(Add-Hook 'Find-File-Hooks 'Fume-Add-Menubar-Entry)
@@ -1041,7 +1060,7 @@ from environment variable http_proxy
       ;(Define-Key Global-Map "\C-Cg" 'Fume-Prompt-Function-Goto)
       ;(Define-Key Global-Map '(Shift Button3) 'Mouse-Function-Menu)
       ;(Define-Key Global-Map '(Meta  Button1) 'Fume-Mouse-Function-Goto)
-      
+
       ;(Add-Hook
       ; 'Find-File-Hooks
       ; (Function
@@ -1054,73 +1073,81 @@ from environment variable http_proxy
       ;                 (>= Emacs-Minor-Version 13)))
       ;             (Not (Eq Major-Mode 'Latex-Mode)))
       ;        (Fume-Add-Menubar-Entry))
-      ;    ))) 
-      
-      
+      ;    )))
+
+
   (define-key global-map "\C-c\S-t" 'visit-tags-table)
   (define-key global-map "\C-cf" 'tags-search)
-    
+
   (define-prefix-command 'bba/toggle)
   (define-key global-map "\C-ct" 'bba/toggle)
-  
+
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
+  ;; Toggle Whitespace mode on and off.  Whitespace mode causes
+  ;; all hard tabs to be highlighted.  You can also configure it to highlight space characters
+  ;; in a different color.  There is also an untabify function to convert hard tabs to the
+  ;; appropriate number of spaces, and a tabify function to convert groups of spaces to
+  ;; hard tabs.
+  (define-key bba/toggle "w" 'whitespace-mode)
+
+
   (define-prefix-command 'bba/launcher)
   (define-key global-map "\C-xl" 'bba/launcher)
-  
+
   (define-key bba/launcher "c" 'calculator)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "s" 'shell)
-      
-      (define-key global-map "\C-c\C-t" 'insert-timestamp)
-      (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
-      
-      (define-key global-map "\C-c\S-g" 'rgrep)
-      (define-key global-map "\C-cf" 'load-git-cfengine)
-      
-      (define-key global-map "\C-c\C-w" 'fixup-whitespace)
-      
-      
+
+  (define-key global-map "\C-c\C-t" 'insert-timestamp)
+  (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
+
+  (define-key global-map "\C-c\S-g" 'rgrep)
+  (define-key global-map "\C-cf" 'load-git-cfengine)
+
+  (define-key global-map "\C-c\C-w" 'fixup-whitespace)
+
+
       (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
       (define-key global-map "\M-g\M-b" 'magit-branch-manager)
       (define-key global-map "\M-gb" 'magit-blame-mode)
       (define-key global-map "\C-cm" 'magit-status)
-      
+
       (define-key global-map "\C-cw" (lambda ()
                                        (interactive)
                                        (let ((woman-use-topic-at-point t))
                                          (woman))))
       (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
-      
+
       ;;; ** Use C-+ and C-- to adjust font size
-      
+
       (define-key global-map (kbd "C-+") 'text-scale-increase)
       (define-key global-map (kbd "C--") 'text-scale-decrease)
-      
+
       ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
-      
+
       ;; (global-set-key (kbd "<kp-subtract>") 'ergoemacs-close-current-buffer)
       ;; (global-set-key (kbd "<kp-divide>") 'ergoemacs-previous-user-buffer)
       ;; (global-set-key (kbd "<kp-multiply>") 'ergoemacs-next-user-buffer)
-      
+
       ;; (global-set-key (kbd "<C-kp-divide>") 'ergoemacs-previous-emacs-buffer)
       ;; (global-set-key (kbd "<C-kp-multiply>") 'ergoemacs-next-emacs-buffer)
-      
+
       ;; (global-set-key (kbd "<kp-decimal>") 'other-window)
       ;; (global-set-key (kbd "<kp-0>") 'delete-window)
       ;; (global-set-key (kbd "<kp-1>") 'delete-other-windows)
       ;; (global-set-key (kbd "<kp-2>") 'split-window-vertically)
       ;; (global-set-key (kbd "<kp-3>") 'xah-open-file-at-cursor)
-      
+
       ;; (global-set-key (kbd "<kp-9>") 'isearch-forward)
-      
+
       (setq custom-file
             (expand-file-name "custom.el"
                               (expand-file-name ".xemacs" "~")))
     ;;  (load-file user-init-file)
       (load-file custom-file)
-    
+
 #+END_SRC
 
 *** dns-mode
@@ -1135,9 +1162,9 @@ from environment variable http_proxy
     (if (y-or-n-p (format "rndc reload %s?" zonefile))
         (shell-command (concat "rndc reload " zonefile ) ) )
     )
-  
+
   )
-  
+
   (add-hook 'dns-mode-hook
     (lambda ()
       (define-key dns-mode-map "\C-c\C-r" 'dns-rndc)
@@ -1158,7 +1185,7 @@ Display greetings:
 ** old config
 
 #+BEGIN_SRC emacs-lisp :eval no :tangle no
-    
+
     ;; seting the load-path for load-library:
     (setq load-path
     (append
@@ -1166,21 +1193,21 @@ Display greetings:
     (list (expand-file-name "~/.xemacs/"))
     ;;           (expand-file-name "/usr/share/emacs/lisp/")
     load-path))
-    
+
     ;; Some general links regarding these configs:
     ;;
     ;; http://www.emacswiki.org/emacs/EmacsCrashCode
     ;; http://www.emacswiki.org/emacs/EmacsCrashTips
     ;; http://www.emacswiki.org/emacs/EmacsNiftyTricks
-    
+
     ;; enable debugging if you run into problems regarding your config:
     ;;(setq debug-on-error t)
-    
+
     ;;; * Emacs server
     (require 'server)
     (unless (server-running-p)
       (server-start))
-    
+
     ;; define function to shutdown emacs server instance
     (defun server-shutdown ()
       "Save buffers, Quit, and Shutdown (kill) server"
@@ -1189,48 +1216,48 @@ Display greetings:
       (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
       (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
       (setq twittering-cert-file nil )
-    
+
       (kill-emacs)
       )
-    
+
     ;;; * http://www.emacswiki.org/emacs/ELPA
     (require 'package)
-    
+
     (package-initialize)
-    
+
     (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
     ;;(require 'rainbow-delimiters)
     ;;(global-rainbow-delimiters-mode)
-    
+
     (require 'centered-cursor-mode)
-    
+
     ;;; * load template support
     (require 'template)
     (template-initialize)
-    
+
     ;; The file names are absolute, not relative, locations
     ;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
     (setq synonyms-file        "~/.xemacs/mthesaur.txt")
     (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
     (require 'synonyms)
     (define-key global-map (kbd "C-c ?") 'synonyms)
-    
+
     ;; load yaml-mode
     ;; (require 'yaml-mode)
     ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
-    
+
     (require 'htmlize )
-    
+
     ;;; * vc-git
     (require 'vc-git)
       (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
-    
+
     ;;; * ace-jump-mode
     (require 'ace-jump-mode)
     (define-key global-map (kbd "C-c C-@") 'ace-jump-mode)
-    
+
     ;;; * ido-mode
-    
+
     (ido-mode t)
     (setq ido-enable-prefix nil
           ido-enable-flex-matching t
@@ -1241,39 +1268,39 @@ Display greetings:
           ido-max- 10)
     ;; (require 'ido-vertical-mode)
     ;; (ido-vertical-mode)
-    
+
     ;; (defun sd/ido-define-keys() ;; C-n/p is more intuitive in vertical layout
     ;;   (define-key ido-completion-map (kbd "C-n") 'ido-next-match)
     ;;   (define-key ido-completion-map (kbd "<down>") 'ido-next-match)
     ;;   (define-key ido-completion-map (kbd "C-p") 'ido-prev-match)
     ;;   (define-key ido-completion-map (kbd "<up>") 'ido-prev-match)
     ;; )
-    
+
     ;;; * visual-regexp
-    
+
     (require 'visual-regexp)
     (define-key global-map (kbd "M-&") 'vr/query-replace)
     (define-key global-map (kbd "M-/") 'vr/replace)
-    
+
     ;;; *  load org mode
     ;; See http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html for details
-    
+
     (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/org-8.2.3c")
     (require 'org)
-    
+
     ;; run these commands to make org-protocol work in gnome:
     ;; gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/command '/usr/bin/emacsclient %s' --type String
     ;; gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/enabled --type Boolean true
     ;;
     ;; this is how your firefox bookmark must look like:
     ;; javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
-    
+
     (require 'org-protocol)
-    
+
     (if (eq system-type 'darwin)
         (require 'org-mac-protocol)
     )
-    
+
     ;; (require 'org-install)
     (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
     (define-key global-map "\C-cl" 'org-store-link)
@@ -1288,7 +1315,7 @@ Display greetings:
                                  "~/org/refile.org"
                                  "~/org/workhours.org"
                                  ))
-    
+
     ; Some initial languages we want org-babel to support
     (org-babel-do-load-languages
      'org-babel-load-languages
@@ -1305,12 +1332,12 @@ Display greetings:
        ))
 
     (setq org-html-head "<style type=\"text/css\">
-body { 
+body {
     background-color: #bbbbbb;
 }     </style>")
-  
-  
-  body { 
+
+
+  body {
       background-color: #bbbbbb;
       color: #000000;
       margin: 0px;
@@ -1320,7 +1347,7 @@ body {
     ;;(setq org-html-preamble nil
     ;;     org-html-postamble nil
     ;;      org-html-head "")
-    
+
     ;; (setq org-html-preamble nil
     ;;       org-html-postamble nil
     ;;       org-html-include-default-style nil
@@ -1329,48 +1356,48 @@ body {
     ;;       org-export-html-style "body-only"
     ;; )
     ;; body-only option ?
-    
+
     ;; (setq html (org-export-as-html 3 nil nil 1))
-    
+
     (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
-    
+
     (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
     (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
     (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))
     (global-set-key (kbd "C-c <f9>") '(lambda () (interactive) (find-file "~/org/emacs.org")))
-    
+
     ;; (setq org-clock-persist 'history)
     (org-clock-persistence-insinuate)
     (setq org-clock-persist t)
     (setq org-default-notes-file (concat org-directory "/refile.org"))
     (define-key global-map "\C-cc" 'org-capture)
-    
+
     (setq org-capture-templates
-    
+
     '(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
     "* TODO %?\n%U\n
-    
+
     %i\n
     %a")
-    
+
       ("m" "Meeting" entry (file "~/git/org/refile.org")
        "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-    
+
       ("n" "note" entry (file+headline "~/org/refile.org" "Note")
        "* NOTE %?\n%U\n
-    
+
     %i\n
     %a")
-    
+
     ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
      "* %?\n%U\n" :clock-in t :clock-resume t)
-    
+
     ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
     "** %c\n\n  %u\n  %i"
              :empty-lines 1)
-    
+
     ))
-    
+
     (setq org-link-abbrev-alist '(
     ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
     ("cpan" . "http://search.cpan.org/search?query=%s&mode=all")
@@ -1387,12 +1414,12 @@ body {
     ; (require 'egg)
     ;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
     ;; (load-library "egg")
-    
-    
-    
-    
+
+
+
+
     ;; taken from http://doc.norang.ca/org-mode.org :
-    
+
     ;;
     ;; Resume clocking task when emacs is restarted
     (org-clock-persistence-insinuate)
@@ -1422,7 +1449,7 @@ body {
     (setq org-time-clocksum-format
           '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
     (setq bh/keep-clock-running nil)
-    
+
     (defun bh/clock-in-to-next (kw)
       "Switch a task from TODO to NEXT when clocking in.
     Skips capture tasks, projects, and subprojects.
@@ -1435,7 +1462,7 @@ body {
          ((and (member (org-get-todo-state) (list "NEXT"))
                (bh/is-project-p))
           "TODO"))))
-    
+
     (defun bh/find-project-task ()
       "Move point to the parent (project) task if any"
       (save-restriction
@@ -1446,7 +1473,7 @@ body {
               (setq parent-task (point))))
           (goto-char parent-task)
           parent-task)))
-    
+
     (defun bh/punch-in (arg)
       "Start continuous clocking and set the default task to the
     selected task.  If no task is selected set the Organization task
@@ -1471,19 +1498,19 @@ body {
           (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
               (org-clock-in '(16))
             (bh/clock-in-organization-task-as-default)))))
-    
+
     (defun bh/punch-out ()
       (interactive)
       (setq bh/keep-clock-running nil)
       (when (org-clock-is-active)
         (org-clock-out))
       (org-agenda-remove-restriction-lock))
-    
+
     (defun bh/clock-in-default-task ()
       (save-excursion
         (org-with-point-at org-clock-default-task
           (org-clock-in))))
-    
+
     (defun bh/clock-in-parent-task ()
       "Move point to the parent (project) task if any and clock in"
       (let ((parent-task))
@@ -1498,57 +1525,57 @@ body {
                   (org-clock-in))
               (when bh/keep-clock-running
                 (bh/clock-in-default-task)))))))
-    
+
     ;; (defvar bh/organization-task-id "eb155a82-92b2-4f25-a3c6-0304591af2f9")
     (defvar bh/organization-task-id "20140625-424242-424242")
-    
+
     (defun bh/clock-in-organization-task-as-default ()
       (interactive)
       (org-with-point-at (org-id-find bh/organization-task-id 'marker)
         (org-clock-in '(16))))
-    
+
     (defun bh/clock-out-maybe ()
       (when (and bh/keep-clock-running
                  (not org-clock-clocking-in)
                  (marker-buffer org-clock-default-task)
                  (not org-clock-resolving-clocks-due-to-idleness))
         (bh/clock-in-parent-task)))
-    
+
     (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
-    
+
     (defvar bh/insert-inactive-timestamp t)
-    
+
     (defun bh/toggle-insert-inactive-timestamp ()
       (interactive)
       (setq bh/insert-inactive-timestamp (not bh/insert-inactive-timestamp))
       (message "Heading timestamps are %s" (if bh/insert-inactive-timestamp "ON" "OFF")))
-    
+
     (defun bh/insert-inactive-timestamp ()
       (interactive)
       (org-insert-time-stamp nil t t nil nil nil))
-    
+
     (defun bh/insert-heading-inactive-timestamp ()
       (save-excursion
         (when bh/insert-inactive-timestamp
           (org-return)
           (org-cycle)
           (bh/insert-inactive-timestamp))))
-    
+
     (add-hook 'org-insert-heading-hook 'bh/insert-heading-inactive-timestamp 'append)
-    
+
     ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
     (setq org-refile-targets (quote ((nil :maxlevel . 9)
                                      (org-agenda-files :maxlevel . 9))))
-    
+
     ; Use full outline paths for refile targets - we file directly with IDO
     (setq org-refile-use-outline-path t)
-    
+
     ; Targets complete directly with IDO
     (setq org-outline-path-complete-in-steps nil)
-    
+
     ; Allow refile to create parent tasks with confirmation
     (setq org-refile-allow-creating-parent-nodes (quote confirm))
-    
+
     ; Use IDO for both buffer and file completion and ido-everywhere to t
     (setq org-completion-use-ido t)
     (setq ido-everywhere t)
@@ -1559,16 +1586,16 @@ body {
     (setq ido-default-buffer-method 'selected-window)
     ; Use the current window for indirect buffer display
     (setq org-indirect-buffer-display 'current-window)
-    
+
     ;;;; Refile settings
     ; Exclude DONE state tasks from refile targets
     (defun bh/verify-refile-target ()
       "Exclude todo keywords with a done state from refile targets"
       (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-    
+
     (setq org-refile-target-verify-function 'bh/verify-refile-target)
-    
-    
+
+
     (global-set-key (kbd "<f12>") 'org-agenda)
     (global-set-key (kbd "<f9> c") 'calendar)
     (global-set-key (kbd "<f9> I") 'bh/punch-in)
@@ -1579,27 +1606,27 @@ body {
     (global-set-key (kbd "C-<f10>") 'next-buffer)
     (global-set-key (kbd "<f11>") 'org-clock-goto)
     (global-set-key (kbd "C-<f11>") 'org-clock-in)
-    
-    
-    
+
+
+
     ;;
-    
-    
-    
+
+
+
     ;;; * cfengine
     (load-library "cfengine")
     ;;; * enable mouse-wheel
     (load-library "mwheel")
     (mwheel-install)
     ;;   (load-library "todo-mode")
-    
+
     ;;; * tramp
     (load-library "tramp")
     (setq default-tramp-method "sftp")
-    
+
     ;; with this you can do /sudo:ssh-host:file-on-ssh-host
     (add-to-list 'tramp-default-proxies-alist '(".*" "\`root\'" "/ssh:%h:"))
-    
+
     ;;; * twitter http://www.twmode.sourceforge.net/
     (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
     (require 'twittering-mode)
@@ -1609,31 +1636,31 @@ body {
         (setq twittering-cert-file "/etc/ssl/certs/ca-bundle.crt") )
       )
     )
-    
+
     (setq twittering-use-master-password t)
-    
+
     ;;; * Big Brother Database
-    
+
     ;; (require 'bbdb)
     ;; (bbdb-initialize)
-    
+
     ;;; * Malyon
     ;; http://www.emacswiki.org/emacs/MalyonMode
-    
+
     (require 'malyon)
-    
+
     ;;; * TemplateToolkit
-    
+
     (add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
-    
+
     ;;; * AucTex:
-    
+
     (setq TeX-auto-save t)
     (setq TeX-parse-self t)
     (setq-default TeX-master nil)
-    
+
     ;;; * EPG/GPG:
-    
+
     ;; Do not use gpg agent when runing in terminal
     (defadvice epg--start (around advice-epg-disable-agent activate)
       (let ((agent (getenv "GPG_AGENT_INFO")))
@@ -1642,7 +1669,7 @@ body {
         ad-do-it
         (when (not (display-graphic-p))
           (setenv "GPG_AGENT_INFO" agent))))
-    
+
     ;; (defadvice epg--start (around advice-epg-disable-agent disable)
     ;;   "Don't allow epg--start to use gpg-agent in plain text terminals."
     ;;   (if (display-graphic-p)
@@ -1653,97 +1680,97 @@ body {
     ;;       (setenv "GPG_AGENT_INFO" agent))))
     ;; (ad-enable-advice 'epg--start 'around 'advice-epg-disable-agent)
     ;; (ad-activate 'epg--start)
-    
+
     ;;; * Perl
-    
+
     ;; load cperl-mode for perl files
     (require 'cperl-mode)
     (fset 'perl-mode 'cperl-mode)
-    
+
     (eval-after-load "cperl-mode"
         '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
-    
+
     ;;; * auto-completion
-    
+
     (require 'auto-complete-config)
     (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
     (add-to-list 'ac-dictionary "~/.dict")
     (ac-config-default)
     (add-to-list 'ac-modes 'cfengine3-mode)
     (add-to-list 'ac-modes 'dns-mode)
-    
-    
+
+
     ;;; * syntax-highlighting
     (font-lock-mode)
     (global-font-lock-mode 1)
-    
+
     ;;; * Display Line Number and Col Number in mode-line
     (column-number-mode t)
     (line-number-mode t)
-    
+
     ;;; * Display time / email in mode-line
     (setq display-time-24hr-format t)
     (display-time)
-    
+
     ;;; * No menubar
     (menu-bar-mode -1)
-    
+
     ;;; * No toolbar
     (if window-system
         (tool-bar-mode -1)
     )
-    
+
     ;;; * Specify printing format
     (setq ps-paper-type 'a4)
-    
+
     ;;; * Set ispell dictionary
     (setq ispell-dictionary "english")
-    
+
     ;;; * Set Shell for M-| command
     (setq shell-file-name "/bin/bash")
-    
+
     ;;; * Set Shell used by TeX
     (setq tex-shell-file-name "/bin/bash")
-    
+
     ;;; * Set grep command options
     (setq grep-command "grep -i -nH -e ")
-    
+
     ;;; * Confirm quit
     (setq confirm-kill-emacs 'yes-or-no-p)
-    
+
     ;;; * Quick file access with bar
     ;; (speedbar t)
-    
+
     ;;; * Ignore case when completing file names
     (setq read-file-name-completion-ignore-case t)
-    
+
     ;;; * Highlight parenthesis pairs
     (show-paren-mode 1)
-    
+
     ;;; * Blinking parenthesis
     (setq blink-matching-paren-distance nil)
-    
+
     ;;; * Highlight text between parens
     (setq show-paren-style 'expression)
-    
+
     ;;; * Use buffer nane as frame title
     (setq frame-title-format "%b - emacs")
-    
+
     ;;; * Completion in mini-buffer
     (icomplete-mode t)
-    
+
     ;;; * Stack minibuffers
     (setq enable-recursive-minibuffers t)
-    
+
     ;;; * RecentFiles http://www.emacswiki.org/emacs/RecentFiles
     (require 'recentf)
     (recentf-mode 1)
     (setq recentf-max-menu-items 42)
     (global-set-key "\C-cr" 'recentf-open-files)
-    
+
     ;;; * ipcalc https://github.com/dotemacs/ipcalc.el
     (require 'ipcalc)
-    
+
     ;;; * Some nice functions
     ;;(blink-matching-paren 1)
     ;;(paren-activate)
@@ -1755,12 +1782,12 @@ body {
     "Insert the current timestamp"
     (interactive)
     (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
-    
+
     ;; eshell-here: Thanks to Howard Abrahams:
     ;; http://www.howardism.org/Technical/Emacs/eshell-fun.html
     ;;
     ;; modified because current version lacks function have window-total-height.
-    
+
     (defun eshell-here ()
       "Opens up a new shell in the directory associated with the
     current buffer's file. The eshell is renamed to match that
@@ -1776,32 +1803,32 @@ body {
         (other-window 1)
         (eshell "new")
         (rename-buffer (concat "*eshell: " name "*"))
-    
+
         (insert (concat "ls"))
         (eshell-send-input)))
-    
+
     (define-key global-map "\C-c!" 'eshell-here)
-    
+
     (defun eshell/x ()
       (insert "exit")
       (eshell-send-input)
       (delete-window))
-    
+
     ;; post-commit and post-merge hook for git:
     ;; #!/bin/bash
     ;; rm .git/etags
     ;; find ${PWD} -type f -regex ".*\(\.cf\|_pl\.dat\|_conf.dat\)" | xargs etags --append --output=.git/etags
     ;; set link for emacs:
     ;; ln -s ~/.cfagent/inputs/../.git/etags ~/.cfengine_tags
-    
+
     (defun load-git-cfengine ()
       "Load config and tags file of git cfengine repo"
     (interactive) (visit-tags-table "~/.cfengine_tags")
     (interactive) (find-file "~/.cfagent/inputs/config.cf")
     )
-    
+
     ;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
-    
+
     (defun cfe-config-adduser-ldap ( user )
       "Insert usertemplate based on ldap information for config.cf"
       (interactive "sUser: ")
@@ -1815,9 +1842,9 @@ body {
           \"users[" user "][shell]\" string => \"/bin/bash\";
           \"users[" user "][flags]\" string => \"-m\";
           \"users[" user "][authorized_keys][0]\" string => \"\";" )
-    
+
     )
-    
+
     (defun cfe-config-adduser ( user )
       "Insert usertemplate for config.cf"
       (interactive "sUser: ")
@@ -1831,9 +1858,9 @@ body {
           \"users[" user "][shell]\" string => \"/bin/bash\";
           \"users[" user "][flags]\" string => \"-m\";
           \"users[" user "][authorized_keys][0]\" string => \"\";" )
-    
+
     )
-    
+
     (defun cfe-insert-bundle ( name )
       "Insert bundletemplate"
       (interactive "sBundle: ")
@@ -1843,38 +1870,38 @@ body {
     #
     #=cut
     #
-    
+
     bundle " name "
     {
       vars:
-    
+
       files:
-    
+
       methods:
-    
+
       classes:
-    
+
     }")
     )
-    
+
     (add-hook 'cfengine3-mode-hook
       (lambda ()
         (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
         (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
         (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
         ))
-    
+
     (add-hook 'org-mode-hook
       (lambda ()
         (auto-fill-mode)
         ))
-    
+
     (add-hook 'latex-mode-hook
       (lambda ()
         (auto-fill-mode)
         ))
-    
-    
+
+
     (defun dns-rndc ()
     "Do rndc reload of current buffers filename."
     (interactive)
@@ -1884,14 +1911,14 @@ body {
       (if (y-or-n-p (format "rndc reload %s?" zonefile))
           (shell-command (concat "rndc reload " zonefile ) ) )
       )
-    
+
     )
-    
+
     (add-hook 'dns-mode-hook
       (lambda ()
         (define-key dns-mode-map "\C-c\C-r" 'dns-rndc)
         ))
-    
+
     ;; (defun cfe-lookup-docs ()
     ;;  "Search current word from buffer in online docs."
     ;;  (interactive)
@@ -1902,9 +1929,9 @@ body {
     ;;                   (point)
     ;;                   )
     ;;                 )))
-    
-    
-    
+
+
+
     (defun eshell/ssh (&rest args)
     "Secure shell"
     (let ((cmd (eshell-flatten-and-stringify
@@ -1922,7 +1949,7 @@ body {
     nil)
     (t
     (apply 'eshell-exec-visual (cons "ssh" args))))))
-    
+
     (defun goto-match-paren (arg)
       "Go to the matching parenthesis if on parenthesis, otherwise insert %.
     vi style of % jumping to matching brace."
@@ -1931,18 +1958,18 @@ body {
             ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
             (t (self-insert-command (or arg 1)))))
     (global-set-key "%" 'goto-match-paren)
-    
+
     ;;(move-overlay hl-line-overlay
     ;;            (line-beginning-position) (1+ (line-end-position))
     ;;            (current-buffer)))))
-    
+
     ;; (set-face-background-pixmap 'default "~/.xemacs/xemacs-bg.xpm")
     (set-foreground-color "green")
     (set-background-color "black")
-    
+
     ;; pos1: goto start of line, start of screen, start of buffer
     ;; end: goto end of line, end of screen, end of buffer
-    
+
     (global-set-key '[(home)] 'chb-home)
     (global-set-key '[(end)] 'chb-end)
     ;;
@@ -1958,7 +1985,7 @@ body {
       (beginning-of-line))
      (t
       (goto-char (point-min)))))))
-    
+
     (defun chb-end ()
     (interactive)
     (setq zmacs-region-stays t)
@@ -1974,12 +2001,12 @@ body {
               (end-of-line))
              (t
               (goto-char (point-max)))))))
-    
-    
-    
-    
+
+
+
+
     ;; safe files with #! in first line as user executable
-    
+
     (add-hook `after-safe-hook
               #'(lambda ()
                  (and (save-excursion
@@ -1992,33 +2019,33 @@ body {
                       (shell-command (concat "chmod u+x " buffer-file-name))
                       (message
                        (concat "Saved as script: " buffer-file-name)))))
-    
+
     ;;
     ;; list of recently opened files
     ;;
-    
+
     ;; (load "recent-files")
     ;; (setq recent-files-dont-include
     ;;      '("~$" "tmp/." "INBOX" ".bbdb" ".newsrc." ))
-    
+
     ;; (setq recent-files-non-permanent-submenu t)
     ;; (setq recent-files-commands-submenu t)
     ;; (setq recent-files-number-of-entries 30)
     ;; (recent-files-initialize)
-    
-    ;;  Make the <ctrl> c F12 key toggle Whitespace mode on and off.  Whitespace mode causes 
-    ;; all hard tabs to be highlighted.  You can also configure it to highlight space characters 
-    ;; in a different color.  There is also an untabify function to convert hard tabs to the 
-    ;; appropriate number of spaces, and a tabify function to convert groups of spaces to 
-    ;; hard tabs. 
+
+    ;;  Make the <ctrl> c F12 key toggle Whitespace mode on and off.  Whitespace mode causes
+    ;; all hard tabs to be highlighted.  You can also configure it to highlight space characters
+    ;; in a different color.  There is also an untabify function to convert hard tabs to the
+    ;; appropriate number of spaces, and a tabify function to convert groups of spaces to
+    ;; hard tabs.
     (global-set-key (kbd "C-c <f12>") 'whitespace-mode)
-    
-    
+
+
     ;; (add-hook 'find-file-hooks 'fume-setup-buffer)
     ;; (add-hook 'Manual-mode-hook 'turn-on-fume-mode)
-    
+
     ;; (function-menu USE-MENUBAR RETURN-ONLY MENU-ITEM-FUNCTION)
-      
+
     ;;====================================================================
     ;;The Following Code Will Enable Me To Use The "Fume" Package Which
     ;;Creates, On The Menubar, A "Functions" Menu Containing The List Of
@@ -2027,7 +2054,7 @@ body {
     ;;
     ;;Setq-Default Set The Default Value Of A Var.  This Def. Val. Is Seen
     ;;In Buffers That *Don'T* Have Their Own Values For The Variable.
-    
+
     ;(require function-menu)
     ;(Define-Key Global-Map 'F8 'Function-Menu)
     ;(Add-Hook 'Find-File-Hooks 'Fume-Add-Menubar-Entry)
@@ -2035,7 +2062,7 @@ body {
     ;(Define-Key Global-Map "\C-Cg" 'Fume-Prompt-Function-Goto)
     ;(Define-Key Global-Map '(Shift Button3) 'Mouse-Function-Menu)
     ;(Define-Key Global-Map '(Meta  Button1) 'Fume-Mouse-Function-Goto)
-    
+
     ;(Add-Hook
     ; 'Find-File-Hooks
     ; (Function
@@ -2048,53 +2075,53 @@ body {
     ;                 (>= Emacs-Minor-Version 13)))
     ;             (Not (Eq Major-Mode 'Latex-Mode)))
     ;        (Fume-Add-Menubar-Entry))
-    ;    ))) 
-    
-    
+    ;    )))
+
+
     (define-key global-map "\C-ct" 'visit-tags-table)
     (define-key global-map "\C-cf" 'tags-search)
-    
+
     (define-key global-map "\C-c\C-t" 'insert-timestamp)
     (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
-    
+
     (define-key global-map "\C-cf" 'load-git-cfengine)
-    
+
     (define-key global-map "\C-c\C-w" 'fixup-whitespace)
-    
-    
+
+
     (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
     (define-key global-map "\M-g\M-b" 'magit-branch-manager)
     (define-key global-map "\M-gb" 'magit-blame-mode)
     (define-key global-map "\C-cm" 'magit-status)
-    
+
     (define-key global-map "\C-cw" (lambda ()
                                      (interactive)
                                      (let ((woman-use-topic-at-point t))
                                        (woman))))
     (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
-    
+
     ;;; ** Use C-+ and C-- to adjust font size
-    
+
     (define-key global-map (kbd "C-+") 'text-scale-increase)
     (define-key global-map (kbd "C--") 'text-scale-decrease)
-    
+
     ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
-    
+
     ;; (global-set-key (kbd "<kp-subtract>") 'ergoemacs-close-current-buffer)
     ;; (global-set-key (kbd "<kp-divide>") 'ergoemacs-previous-user-buffer)
     ;; (global-set-key (kbd "<kp-multiply>") 'ergoemacs-next-user-buffer)
-    
+
     ;; (global-set-key (kbd "<C-kp-divide>") 'ergoemacs-previous-emacs-buffer)
     ;; (global-set-key (kbd "<C-kp-multiply>") 'ergoemacs-next-emacs-buffer)
-    
+
     ;; (global-set-key (kbd "<kp-decimal>") 'other-window)
     ;; (global-set-key (kbd "<kp-0>") 'delete-window)
     ;; (global-set-key (kbd "<kp-1>") 'delete-other-windows)
     ;; (global-set-key (kbd "<kp-2>") 'split-window-vertically)
     ;; (global-set-key (kbd "<kp-3>") 'xah-open-file-at-cursor)
-    
+
     ;; (global-set-key (kbd "<kp-9>") 'isearch-forward)
-    
+
     (setq custom-file
           (expand-file-name "custom.el"
                             (expand-file-name ".xemacs" "~")))
