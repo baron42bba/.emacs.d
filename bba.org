@@ -12,7 +12,7 @@ extensively first.
 
 To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what used to be the =~/.emacs= file):
 
-#+BEGIN_SRC emccs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 ;; This sets up the load path so that we can override it
 ;; (package-initialize)
 ;; Override the packages with the git version of Org and other packages
@@ -676,6 +676,30 @@ for C-c T you can use a file like this one:
 
 #+END_SRC
 
+*** [[http://emacs.wordpress.com/2007/06/21/tip-of-the-day/][tip of the day]]
+    [2014-09-24 Wed 12:06]
+
+Display an Emacs tip of the day.
+You may start it at the end of the config file.
+
+#+BEGIN_SRC emacs-lisp
+(defun totd ()
+  (interactive)
+  (random t) ;; seed with time-of-day
+  (with-output-to-temp-buffer "*Tip of the day*"
+    (let* ((commands (loop for s being the symbols
+                           when (commandp s) collect s))
+           (command (nth (random (length commands)) commands)))
+      (princ
+       (concat "Your tip for the day is:\n"
+               "========================\n\n"
+               (describe-function command)
+               "\n\nInvoke with:\n\n"
+               (with-temp-buffer
+                 (where-is command t)
+                 (buffer-string)))))))
+#+END_SRC
+
 *** TRAMP
 
 #+BEGIN_SRC emacs-lisp
@@ -1127,6 +1151,7 @@ Display greetings:
 
 #+BEGIN_SRC emacs-lisp
   (message "All done, %s!" (user-login-name) )
+  (totd)
 #+END_SRC
 
     [2014-08-27 Wed 11:02]
