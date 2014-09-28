@@ -823,6 +823,49 @@ from environment variable http_proxy
 
 #+END_SRC
 
+*** Art Bollocks Mode
+    [2014-09-28 Sun 22:33]
+
+Keeps track of your writing.
+Includes [[http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests#Flesch_Reading_Ease][Flesch Reading Ease]] and [[http://en.wikipedia.org/wiki/Flesch–Kincaid_readability_test#Flesch.E2.80.93Kincaid_Grade_Level][Flesch Grade Level]].
+With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode-el-and-writing-more-clearly/][Sacha Chua]].
+
+#+BEGIN_SRC emacs-lisp
+(require 'artbollocks-mode)
+;; Avoid these phrases
+(setq weasel-words-regex
+      (concat "\\b" (regexp-opt
+                     '("one of the"
+                       "should"
+                       "just"
+                       "sort of"
+                       "a lot"
+                       "probably"
+                       "maybe"
+                       "perhaps"
+                       "I think"
+                       "really"
+                       "pretty"
+                       "maybe"
+                       "nice"
+                       "action"
+                       "utilize"
+                       "leverage") t) "\\b"))
+;; Fix a bug in the regular expression to catch repeated words
+(setq lexical-illusions-regex "\\b\\(\\w+\\)\\W+\\(\\1\\)\\b")
+;; Don't show the art critic words, or at least until I figure
+;; out my own jargon
+(setq artbollocks nil)
+;; Make sure keywords are case-insensitive
+(defadvice search-for-keyword (around sacha activate)
+  "Match in a case-insensitive way."
+  (let ((case-fold-search t))
+    ad-do-it))
+
+(add-hook 'text-mode-hook 'artbollocks-mode)
+(add-hook 'org-mode-hook  'artbollocks-mode)
+#+END_SRC
+
 *** window management
     [2014-09-24 Wed 13:03]
 
