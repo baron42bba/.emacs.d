@@ -133,7 +133,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (setq synonyms-file        "~/.xemacs/mthesaur.txt")
   (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
   (require 'synonyms)
-  (define-key global-map (kbd "C-c ?") 'synonyms)
+;;  (define-key global-map (kbd "C-c ?") 'synonyms)
 
 #+END_SRC
 
@@ -1142,6 +1142,7 @@ Bind f3 and f4 to previous/next pane.
   (define-key bba/launcher "c" 'calculator)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "s" 'shell)
+  (define-key bba/launcher "S" 'synonyms)
 
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
