@@ -1118,6 +1118,7 @@ Bind f3 and f4 to previous/next pane.
       ;        (Fume-Add-Menubar-Entry))
       ;    )))
 
+  (define-key global-map "\C-x\S-f" 'find-file-at-point)
 
   (define-key global-map "\C-c\S-t" 'visit-tags-table)
   (define-key global-map "\C-cf" 'tags-search)
@@ -1151,7 +1152,6 @@ Bind f3 and f4 to previous/next pane.
   (define-key global-map "\C-cf" 'load-git-cfengine)
 
   (define-key global-map "\C-c\C-w" 'fixup-whitespace)
-
 
       (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
       (define-key global-map "\M-g\M-b" 'magit-branch-manager)
