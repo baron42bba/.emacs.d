@@ -815,7 +815,9 @@ from environment variable http_proxy
   (setq display-time-24hr-format t)
   (display-time)
 
-  (menu-bar-mode -1)
+  ( if (not window-system)
+      (menu-bar-mode -1)
+    )
 
   (if window-system
       (tool-bar-mode -1)
