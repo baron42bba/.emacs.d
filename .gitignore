@@ -1,3 +1,9 @@
-bba.el
+/bba.el
 *.elc
 archive-contents
+/ac-comphist.dat
+/elpa/archives/*
+/eshell/*
+/history
+/mthesaur.txt.cache
+/org-clock-save.el*

@@ -19,12 +19,12 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 
   (setq load-path
   (append
-  (list (expand-file-name "~/.xemacs/"))
+  (list (expand-file-name "~/.emacs.d/"))
   ;;           (expand-file-name "/usr/share/emacs/lisp/")
   load-path))
 
 
-(add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/org-8.2.3c")
+(add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/org-8.2.3c")
 
 ;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
 ;; Load the rest of the packages
@@ -32,7 +32,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 ;; (setq package-enable-at-startup nil)
 (require 'org)
 (require 'ob-tangle)
-(org-babel-load-file (expand-file-name "~/.xemacs/bba.org"))
+(org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))
 
 #+END_SRC
 
@@ -75,8 +75,8 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.xemacs/elpa")
-  (add-to-list 'load-path "~/.xemacs/elpa/popup-20140207.1702")
+  (add-to-list 'load-path "~/.emacs.d/elpa")
+  (add-to-list 'load-path "~/.emacs.d/elpa/popup-20140207.1702")
   (require 'package)
   (package-initialize)
 
@@ -87,15 +87,15 @@ Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.xemacs/elpa/smartparens-20140819.203")
-  (add-to-list 'load-path "~/.xemacs/elpa/dash-20140811.523")
+  (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20140819.203")
+  (add-to-list 'load-path "~/.emacs.d/elpa/dash-20140811.523")
   (require 'smartparens)
   (smartparens-global-mode 1)
 #+END_SRC
 *** guide-key
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.xemacs/elpa/popwin-20140902.1727")
-  (add-to-list 'load-path "~/.xemacs/elpa/guide-key-20140828.807")
+  (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20140902.1727")
+  (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20140828.807")
   (require 'guide-key)
   (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c" "C-x l"))
   (setq guide-key/recursive-key-sequence-flag t)
@@ -130,7 +130,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
 #+BEGIN_SRC emacs-lisp
   ;; The file names are absolute, not relative, locations
   ;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
-  (setq synonyms-file        "~/.xemacs/mthesaur.txt")
+  (setq synonyms-file        "~/.emacs.d/mthesaur.txt")
   (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
   (require 'synonyms)
 ;;  (define-key global-map (kbd "C-c ?") 'synonyms)
@@ -342,7 +342,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   ;; example: [[bmap:space needle]]
   ;; load git support
   ; (require 'egg)
-  ;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
+  ;; (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/egg")
   ;; (load-library "egg")
 
 
@@ -717,7 +717,7 @@ BUGBUG: set `twittering-proxy-server' and `twittering-proxy-port' with strings
 from environment variable http_proxy
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
+  (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/twittering-mode-3.0.0")
   (require 'twittering-mode)
   (cond
    ((string-equal system-type "gnu/linux")
@@ -782,9 +782,9 @@ from environment variable http_proxy
 *** auto-completion
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.xemacs/elpa/auto-complete-20140618.2217")
+  (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20140618.2217")
   (require 'auto-complete-config)
-  (add-to-list 'ac-dictionary-directories "~/.xemacs/elpa/auto-complete-20140618.2217")
+  (add-to-list 'ac-dictionary-directories "~/.emacs.d/elpa/auto-complete-20140618.2217")
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
   (ac-config-default)
   (add-to-list 'ac-modes 'cfengine3-mode)
@@ -1013,7 +1013,7 @@ Bind f3 and f4 to previous/next pane.
       ;;            (line-beginning-position) (1+ (line-end-position))
       ;;            (current-buffer)))))
 
-      ;; (set-face-background-pixmap 'default "~/.xemacs/xemacs-bg.xpm")
+      ;; (set-face-background-pixmap 'default "~/.emacs.d/xemacs-bg.xpm")
       (set-foreground-color "green")
       (set-background-color "black")
 
@@ -1190,7 +1190,7 @@ Bind f3 and f4 to previous/next pane.
 
       (setq custom-file
             (expand-file-name "custom.el"
-                              (expand-file-name ".xemacs" "~")))
+                              (expand-file-name ".emacs.d" "~")))
     ;;  (load-file user-init-file)
       (load-file custom-file)
 
@@ -1236,7 +1236,7 @@ Display greetings:
     (setq load-path
     (append
     ;; (list (expand-file-name "/usr/local/lib/xemacs/xemacs-packages/lisp/"))
-    (list (expand-file-name "~/.xemacs/"))
+    (list (expand-file-name "~/.emacs.d/"))
     ;;           (expand-file-name "/usr/share/emacs/lisp/")
     load-path))
 
@@ -1283,7 +1283,7 @@ Display greetings:
 
     ;; The file names are absolute, not relative, locations
     ;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
-    (setq synonyms-file        "~/.xemacs/mthesaur.txt")
+    (setq synonyms-file        "~/.emacs.d/mthesaur.txt")
     (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
     (require 'synonyms)
     (define-key global-map (kbd "C-c ?") 'synonyms)
@@ -1331,7 +1331,7 @@ Display greetings:
     ;;; *  load org mode
     ;; See http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html for details
 
-    (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/org-8.2.3c")
+    (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/org-8.2.3c")
     (require 'org)
 
     ;; run these commands to make org-protocol work in gnome:
@@ -1458,7 +1458,7 @@ body {
     ;; example: [[bmap:space needle]]
     ;; load git support
     ; (require 'egg)
-    ;; (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/egg")
+    ;; (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/egg")
     ;; (load-library "egg")
 
 
@@ -1674,7 +1674,7 @@ body {
     (add-to-list 'tramp-default-proxies-alist '(".*" "\`root\'" "/ssh:%h:"))
 
     ;;; * twitter http://www.twmode.sourceforge.net/
-    (add-to-list 'load-path "~/.xemacs/xemacs-packages/lisp/twittering-mode-3.0.0")
+    (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/twittering-mode-3.0.0")
     (require 'twittering-mode)
     (cond
      ((string-equal system-type "gnu/linux")
@@ -2009,7 +2009,7 @@ body {
     ;;            (line-beginning-position) (1+ (line-end-position))
     ;;            (current-buffer)))))
 
-    ;; (set-face-background-pixmap 'default "~/.xemacs/xemacs-bg.xpm")
+    ;; (set-face-background-pixmap 'default "~/.emacs.d/xemacs-bg.xpm")
     (set-foreground-color "green")
     (set-background-color "black")
 
@@ -2170,7 +2170,7 @@ body {
 
     (setq custom-file
           (expand-file-name "custom.el"
-                            (expand-file-name ".xemacs" "~")))
+                            (expand-file-name ".emacs.d" "~")))
     (load-file user-init-file)
     (load-file custom-file)
 #+END_SRC
