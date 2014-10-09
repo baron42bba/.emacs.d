@@ -105,7 +105,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (require 'smartparens)
   (smartparens-global-mode 1)
 #+END_SRC
-*** guide-key
+*** [[https://github.com/kai2nenobu/guide-key][guide-key]]
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20140902.1727")
   (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20140828.807")

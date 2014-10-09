@@ -7,3 +7,4 @@ archive-contents
 /history
 /mthesaur.txt.cache
 /org-clock-save.el*
+/tramp
