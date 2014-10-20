@@ -1,0 +1,19 @@
+# -*- mode: snippets -*-
+# name: getopt
+# key: getopt
+# --
+
+my %params;
+
+my $result = GetOptions ($0
+                           "help|h"    => \\\$params{help},
+                           "verbose|v"   =>  \\\$params{verbose},
+                           "man|m"      => \\\$params{man}
+                          );
+
+  if ( \$params{man} ) { pod2usage( -verbose => 2 ); }
+
+  if ( \$params{help} )
+  {
+    pod2usage(1);
+  }

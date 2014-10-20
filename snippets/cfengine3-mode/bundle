@@ -1,0 +1,22 @@
+# -*- mode: snippets -*-
+# name: bundle
+# key: insbund
+# --
+#=head2 bundle ${1:name}
+#
+#
+#
+#=cut
+#
+
+bundle $1
+{
+  vars:
+      $0
+  files:
+
+  methods:
+
+  classes:
+
+}

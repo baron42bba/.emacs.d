@@ -9,10 +9,10 @@
  '(magit-commit-signoff t)
  '(magit-repo-dirs (quote ("~/git")))
  '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("marmalade" . "http://marmalade-repo.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages/"))))
- '(package-user-dir "~/.xemacs/elpa")
+ '(package-user-dir "~/.emacs.d/elpa")
  '(recentf-max-saved-items 42)
  '(savehist-mode t nil (savehist))
- '(template-default-directories (quote ("~/.xemacs/templates/")))
+ '(template-default-directories (quote ("~/.emacs.d/templates/")))
  '(toolbar-visible-p nil)
  '(vc-handled-backends (quote (RCS CVS SVN SCCS Bzr Hg Mtn Arch))))
 (custom-set-faces

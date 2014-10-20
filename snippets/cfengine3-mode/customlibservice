@@ -1,0 +1,74 @@
+# -*- mode: snippets -*-
+# name: custserv
+# key: custserv
+# --
+#=head2 bundle agent customlib_${1:name}
+#
+# $0
+#
+#=cut
+#
+
+bundle agent customlib_$1
+{
+  meta:
+      "tags" slist => { "customlib_active" };
+
+  methods:
+    $1.(centos_6|redhat_6)::
+      "customlib_$1_packages" usebundle => customlib_$1_packages;
+
+}
+
+#=head2 bundle agent customlib_$1_packages
+#
+#
+#
+#=cut
+
+
+bundle agent customlib_$1_packages
+{
+  vars:
+    $1::
+      "install_packages" slist => {
+                                    ""
+                                  };
+    !$1::
+      "remove_packages" slist => {
+                                   ""
+                                 };
+
+  packages:
+     $1::
+      "\${install_packages}"
+      package_policy => "add",
+      package_method => yum_rpm;
+
+    !$1::
+      "\${remove_packages}"
+      package_policy => "delete",
+      package_method => yum_rpm;
+
+}
+
+
+#=head2 bundle agent customlib_$1_configure_$1
+#
+#
+#
+#=cut
+#
+
+bundle agent customlib_$1_configure_$1
+{
+
+  vars:
+
+  files:
+
+  methods:
+
+  classes:
+
+}

@@ -105,6 +105,17 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (require 'smartparens)
   (smartparens-global-mode 1)
 #+END_SRC
+*** yasnippet
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path
+               "~/.emacs.d/elpa/yasnippet-20141017.736")
+  (require 'yasnippet)
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas-global-mode 1)
+
+#+END_SRC
+
 *** [[https://github.com/kai2nenobu/guide-key][guide-key]]
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20140902.1727")
