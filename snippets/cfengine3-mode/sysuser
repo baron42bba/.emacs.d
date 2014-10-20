@@ -1,0 +1,14 @@
+# -*- mode: snippets -*-
+# name: sysuser
+# key: sysuser
+# --
+      "users[${1:user}][login]" string => "$1";
+      "users[$1][fullname]" string => "${2:Full Name}";
+      "users[$1][uid]" string => "${3:uid}";
+      "users[$1][gid]" string => "$3";
+      "users[$1][group]" string => "$1";
+      "users[$1][groups]" string => "";
+      "users[$1][home]" string => "/home/$1";
+      "users[$1][shell]" string => "/bin/bash";
+      "users[$1][flags]" string => "-m";
+      "users[$1][authorized_keys][0]" string => "$0";
