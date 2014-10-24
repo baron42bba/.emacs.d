@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: mkdir
+# key: mkdir
+# --
+"${1:file}/."
+handle    => "\$(this.bundle)_$2",
+comment   => "$3",
+create    => "${4:$$(yas-choose-value '("true" "false"))}",
+perms     => mog("${5:700}","${6:root}","${7:root}");
