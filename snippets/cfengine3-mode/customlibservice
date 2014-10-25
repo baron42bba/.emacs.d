@@ -2,7 +2,7 @@
 # name: custserv
 # key: custserv
 # --
-#=head2 bundle agent customlib_${1:name}
+#=head2 bundle agent customlib_${1:`(car (last (split-string (file-name-sans-extension (buffer-file-name)) "/" t)))`}
 #
 # $0
 #
