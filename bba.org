@@ -866,6 +866,8 @@ from environment variable http_proxy
       (tool-bar-mode -1)
   )
 
+  (setq initial-scratch-message "") ;; Uh, I know what Scratch is for
+
 #+END_SRC
 
 *** Art Bollocks Mode
