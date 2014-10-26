@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: filecplocal
+# key: filecplocal
+# --
+"${1:file}"
+handle => "create_$2",
+comment => "copy $1",
+perms => mog("${3:644}","${4:root}","${5:root}"),
+copy_from => local_dcp("$(this.promise_dirname)/templates/${6}" );

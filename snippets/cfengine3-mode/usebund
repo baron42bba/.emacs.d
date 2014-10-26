@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: usebund
+# key: usebund
+# --
+"customlib_`(car (last (split-string (file-name-sans-extension (buffer-file-name)) "/" t)))`_$2" usebundle => customlib_`(car (last (split-string (file-name-sans-extension (buffer-file-name)) "/" t)))`_$2;

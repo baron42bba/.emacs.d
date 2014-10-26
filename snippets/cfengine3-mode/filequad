@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: filequad
+# key: filequad
+# --
+"${1:file}"
+handle => "create_$2",
+comment => "copy $1",
+perms => mog("${3:644}","${4:root}","${5:root}"),
+create => "${6:$$(yas-choose-value '("true" "false"))}",
+copy_from => quad_remote_copy("$(this.promise_dirname)/templates/${7}","\${shared_global_environment.mps1}", "\${shared_global_environment.mps2}", "\${shared_global_environment.mps3}", "\${shared_global_environment.mps4}" );
