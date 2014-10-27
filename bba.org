@@ -1061,6 +1061,7 @@ safe files with #! in first line as user executable.
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
+  (define-key bba/toggle "w" 'which-function-mode)
 #+END_SRC
 
 Toggle Whitespace mode on and off.  Whitespace mode causes all hard
