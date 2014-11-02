@@ -1016,6 +1016,22 @@ window-total-height.
 
 #+END_SRC
 
+*** [[http://stackoverflow.com/questions/3035337/in-emacs-can-you-evaluate-an-emacs-lisp-expression-and-replace-it-with-the-resul][eval emacs lisp expression and replace it]]
+    [2014-11-02 Sun 18:21]
+
+Use =C-c E= to evaluate and replace the last s-expression.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba/eval-last-sexp-replace ()
+    "replace the last s-expression with its evaluated result"
+    (interactive)
+    (backward-kill-sexp)
+    (prin1 (eval (read (current-kill 0)))
+           (current-buffer)))
+
+  (define-key global-map "\C-c\S-e" 'bba/eval-last-sexp-replace)
+#+END_SRC
+
 *** goto-match-paren
 #+BEGIN_SRC emacs-lisp
       (defun goto-match-paren (arg)
