@@ -1111,6 +1111,10 @@ function to convert groups of spaces to hard tabs.
   (define-key global-map "\M-gb" 'magit-blame-mode)
   (define-key global-map "\C-cm" 'magit-status)
 
+  (define-key global-map "\C-c\S-f" (lambda()
+                                   (interactive)
+                                   (message (buffer-file-name))))
+
   (define-key global-map "\C-cw" (lambda ()
                                    (interactive)
                                    (let ((woman-use-topic-at-point t))
