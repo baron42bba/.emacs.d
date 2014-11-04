@@ -820,7 +820,8 @@ from environment variable http_proxy
   (fset 'perl-mode 'cperl-mode)
 
   (eval-after-load "cperl-mode"
-      '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
+    '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
+
 
 #+END_SRC
 
@@ -848,7 +849,57 @@ from environment variable http_proxy
     [2014-09-24 Wed 16:56]
 
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  (eval-after-load "cfengine3-mode"
+    '(add-hook 'cfengine3-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                   (lambda()
+                                                     (save-excursion
+                                                       (delete-trailing-whitespace))))
+                                 )
+               ))
+
+
+  (eval-after-load "cperl-mode"
+    '(add-hook 'cperl-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                    (lambda()
+                                                      (save-excursion
+                                                        (delete-trailing-whitespace))))
+                                  )
+               ))
+
+  (eval-after-load "dns-mode"
+    '(add-hook 'dns-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                  (lambda()
+                                                    (save-excursion
+                                                      (delete-trailing-whitespace))))
+                                )
+               ))
+
+  (eval-after-load "json-mode"
+    '(add-hook 'json-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                   (lambda()
+                                                     (save-excursion
+                                                       (delete-trailing-whitespace))))
+                                 )
+               ))
+
+  (eval-after-load "org-mode"
+    '(add-hook 'org-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                  (lambda()
+                                                    (save-excursion
+                                                      (delete-trailing-whitespace))))
+                                )
+               ))
+
+  (eval-after-load "text-mode"
+    '(add-hook 'text-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                   (lambda()
+                                                     (save-excursion
+                                                       (delete-trailing-whitespace))))
+                                 )
+               ))
+
+
+
 
 #+END_SRC
 
