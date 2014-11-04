@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: sub
+# key: sub
+# --
+
+=head2 ${1:function_name}
+
+$2
+
+=cut
+
+sub $1 {
+  $0
+
+
+}
