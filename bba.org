@@ -333,7 +333,10 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 
 
-    (global-set-key (kbd "C-c <f9>") '(lambda () (interactive) (find-file "~/org/emacs.org")))
+    (global-set-key (kbd "C-c <f9>") '(lambda () (interactive)
+                                        ( if (file-exists-p "~/org/emacs.org")
+                                            (find-file "~/org/emacs.org")
+                                          (find-file "~/.emacs.d/org/emacs.org"))))
 
     ;; (setq org-clock-persist 'history)
     (org-clock-persistence-insinuate)
