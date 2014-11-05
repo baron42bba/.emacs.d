@@ -1197,6 +1197,16 @@ function to convert groups of spaces to hard tabs.
 
 #+END_SRC
 
+=isearch-forward-regexp= is much more useful than =isearch-forward= so
+we use that as default:
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-s") 'isearch-forward-regexp)
+  (global-set-key (kbd "C-r") 'isearch-backward-regexp)
+  (global-set-key (kbd "C-M-s") 'isearch-forward)
+  (global-set-key (kbd "C-M-r") 'isearch-backward)
+#+END_SRC
+
 *** configure some default values
     [2014-10-02 Thu 00:27]
 
