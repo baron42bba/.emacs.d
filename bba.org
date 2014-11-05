@@ -1148,6 +1148,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "S" 'synonyms)
+  (define-key bba/launcher "t" 'git-timemachine)
 
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
