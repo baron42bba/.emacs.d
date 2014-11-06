@@ -1129,6 +1129,7 @@ safe files with #! in first line as user executable.
   (define-key global-map "\C-ct" 'bba/toggle)
 
   (define-key bba/toggle "f" 'auto-fill-mode)
+  (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
   (define-key bba/toggle "w" 'which-function-mode)
