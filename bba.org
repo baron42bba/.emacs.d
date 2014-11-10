@@ -676,7 +676,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
       (define-key cfengine3-mode-map "\C-c\S-t" (lambda() (interactive) (shell-command "~/bin/cfengine_update_testing.sh" )))
       (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
       (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
-      (define-key cfengine3-mode-map "\C-c,") (lambda() (interactive) (browse-url (concat "http://cf-learn.info/search_cfdoc.html?search=" (word-at-point)))))
+      (define-key cfengine3-mode-map "\C-c,") (lambda() (interactive) (browse-url (concat "http://cf-learn.info/search_cfdoc.html?search=" (word-at-point))))
       ))
 
 
