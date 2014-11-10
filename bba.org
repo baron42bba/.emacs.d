@@ -1133,7 +1133,7 @@ safe files with #! in first line as user executable.
   (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
-  (define-key bba/toggle "w" 'which-function-mode)
+  (define-key bba/toggle "\S-w" 'which-function-mode)
 #+END_SRC
 
 Toggle Whitespace mode on and off.  Whitespace mode causes all hard
@@ -1148,6 +1148,7 @@ function to convert groups of spaces to hard tabs.
   (define-prefix-command 'bba/launcher)
   (define-key global-map "\C-xl" 'bba/launcher)
 
+  (define-key bba/launcher "b" 'browse-url-at-point)
   (define-key bba/launcher "c" 'calculator)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "i" 'ielm)
