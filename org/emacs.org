@@ -19,10 +19,13 @@
 | F4                | next-buffer                                                                               |
 |-------------------+-------------------------------------------------------------------------------------------|
 | C-c t f           | toggle auto-fill-mode                                                                     |
+| C-c t i           | toggle impatient-mode                                                                     |
 | C-c t p           | toggle smartparens-mode                                                                   |
 | C-c t s           | toggle flyspell-mode                                                                      |
-| C-c t w           | toggle which-function-mode                                                                |
+| C-c t W           | toggle which-function-mode                                                                |
+| C-c t w           | toggle whitespace-mode                                                                    |
 |-------------------+-------------------------------------------------------------------------------------------|
+| C-x l b           | browse-url-at-point                                                                       |
 | C-x l c           | calculator                                                                                |
 | C-x l d           | ediff-buffers                                                                             |
 | C-x l i           | ielm                                                                                      |
@@ -30,9 +33,11 @@
 | C-x l S           | synonyms                                                                                  |
 | C-x l t           | git-timemachine                                                                           |
 |-------------------+-------------------------------------------------------------------------------------------|
+| M-p               | move current line up                                                                      |
+| M-n               | move current line down                                                                    |
+|-------------------+-------------------------------------------------------------------------------------------|
 | F11               | org-clock-goto                                                                            |
 | C-F11             | org-clock-in                                                                              |
-| C-c F12           | toogle Whitespace mode                                                                    |
 | F12               | org-agenda                                                                                |
 |-------------------+-------------------------------------------------------------------------------------------|
 | C-c a             | org-agenda                                                                                |

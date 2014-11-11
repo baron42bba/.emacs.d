@@ -1119,6 +1119,38 @@ safe files with #! in first line as user executable.
 
 #+END_SRC
 
+*** move lines
+    [2014-11-11 Tue 12:24]
+
+=M-p= and =M-n= to move current line up or down.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba/move-line (n)
+    "Move the current line up or down by N lines."
+    (interactive "p")
+    (let* ((column (current-column))
+           (start (progn (beginning-of-line) (point)))
+           (end (progn (end-of-line) (forward-char) (point)))
+           (line-text (delete-and-extract-region start end)))
+      (forward-line n)
+      (insert line-text)
+      (forward-line -1)
+      (forward-char column)))
+
+  (defun bba/move-line-up (n)
+    "Move the current line up by N lines."
+    (interactive "p")
+    (bba/move-line (if (null n) -1 (- n))))
+
+  (defun bba/move-line-down (n)
+    "Move the current line down by N lines."
+    (interactive "p")
+    (bba/move-line (if (null n) 1 n)))
+
+  (define-key global-map (kbd "M-p") 'bba/move-line-up)
+  (global-set-key (kbd "M-n") 'bba/move-line-down)
+
+#+END_SRC
 *** key bindings
 #+BEGIN_SRC emacs-lisp
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
@@ -1183,23 +1215,6 @@ function to convert groups of spaces to hard tabs.
 
   (define-key global-map (kbd "C-+") 'text-scale-increase)
   (define-key global-map (kbd "C--") 'text-scale-decrease)
-
-      ;; NUMBERIC KEYPAD. nice number pad conveniences as extra function keys
-
-      ;; (global-set-key (kbd "<kp-subtract>") 'ergoemacs-close-current-buffer)
-      ;; (global-set-key (kbd "<kp-divide>") 'ergoemacs-previous-user-buffer)
-      ;; (global-set-key (kbd "<kp-multiply>") 'ergoemacs-next-user-buffer)
-
-      ;; (global-set-key (kbd "<C-kp-divide>") 'ergoemacs-previous-emacs-buffer)
-      ;; (global-set-key (kbd "<C-kp-multiply>") 'ergoemacs-next-emacs-buffer)
-
-      ;; (global-set-key (kbd "<kp-decimal>") 'other-window)
-      ;; (global-set-key (kbd "<kp-0>") 'delete-window)
-      ;; (global-set-key (kbd "<kp-1>") 'delete-other-windows)
-      ;; (global-set-key (kbd "<kp-2>") 'split-window-vertically)
-      ;; (global-set-key (kbd "<kp-3>") 'xah-open-file-at-cursor)
-
-      ;; (global-set-key (kbd "<kp-9>") 'isearch-forward)
 
 #+END_SRC
 
