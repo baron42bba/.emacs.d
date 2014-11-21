@@ -1213,6 +1213,9 @@ function to convert groups of spaces to hard tabs.
                                    (interactive)
                                    (let ((woman-use-topic-at-point t))
                                      (woman))))
+
+  (define-key global-map "\C-cy" 'yas/describe-tables)
+
   (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
 
   ;;; ** Use C-+ and C-- to adjust font size
