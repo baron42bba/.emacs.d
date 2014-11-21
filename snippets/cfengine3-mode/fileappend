@@ -3,9 +3,9 @@
 # key: fileappend
 # --
 "${1:file}"
-handle => "edit_$2",
+handle => "edit_${1:$(replace-regexp-in-string "[ /.-]" "_" (yas-text))}",
 comment => "configure $1",
 perms => mog("${3:644}","${4:root}","${5:root}"),
 create => "${6:$$(yas-choose-value '("true" "false"))}",
 edit_defaults => empty,
-edit_line => append_if_no_lines( "${7}" );
+edit_line => append_if_no_lines( "$7" );
