@@ -597,91 +597,94 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 *** cfengine
 
 #+BEGIN_SRC emacs-lisp
-   (load-library "cfengine")
-   (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
+  ;;   (load-library "cfengine")
+     (load-file (expand-file-name "~/.emacs.d/cfengine.el"))
+     (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
 
-   ;; post-commit and post-merge hook for git:
-   ;; #!/bin/bash
-   ;; rm .git/etags
-   ;; find ${PWD} -type f -regex ".*\(\.cf\|_pl\.dat\|_conf.dat\)" | xargs etags --append --output=.git/etags
-   ;; set link for emacs:
-   ;; ln -s ~/.cfagent/inputs/../.git/etags ~/.cfengine_tags
+     ;; post-commit and post-merge hook for git:
+     ;; #!/bin/bash
+     ;; rm .git/etags
+     ;; find ${PWD} -type f -regex ".*\(\.cf\|_pl\.dat\|_conf.dat\)" | xargs etags --append --output=.git/etags
+     ;; set link for emacs:
+     ;; ln -s ~/.cfagent/inputs/../.git/etags ~/.cfengine_tags
 
-   (defun load-git-cfengine ()
-     "Load config and tags file of git cfengine repo"
-   (interactive) (visit-tags-table "~/.cfengine_tags")
-   (interactive) (find-file "~/.cfagent/inputs/config.cf")
-   )
+     (defun load-git-cfengine ()
+       "Load config and tags file of git cfengine repo"
+     (interactive) (visit-tags-table "~/.cfengine_tags")
+     (interactive) (find-file "~/.cfagent/inputs/config.cf")
+     )
 
-   ;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
+     ;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
 
-   (defun cfe-config-adduser-ldap ( user )
-     "Insert usertemplate based on ldap information for config.cf"
-     (interactive "sUser: ")
-     (insert "      \"users[" user "][login]\" string => \"" user "\";
-         \"users[" user "][fullname]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " givenName ")) 0 -1) " " (substring ( shell-command-to-string (concat "ldapse " user " sn ")) 0 -1) "\";
-         \"users[" user "][uid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1) "\";
-         \"users[" user "][gid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1)"\";
-         \"users[" user "][group]\" string => \"" user "\";
-         \"users[" user "][groups]\" string => \"adm,apache,games\";
-         \"users[" user "][home]\" string => \"/home/" user "\";
-         \"users[" user "][shell]\" string => \"/bin/bash\";
-         \"users[" user "][flags]\" string => \"-m\";
-         \"users[" user "][authorized_keys][0]\" string => \"\";" )
+     (defun cfe-config-adduser-ldap ( user )
+       "Insert usertemplate based on ldap information for config.cf"
+       (interactive "sUser: ")
+       (insert "      \"users[" user "][login]\" string => \"" user "\";
+           \"users[" user "][fullname]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " givenName ")) 0 -1) " " (substring ( shell-command-to-string (concat "ldapse " user " sn ")) 0 -1) "\";
+           \"users[" user "][uid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1) "\";
+           \"users[" user "][gid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1)"\";
+           \"users[" user "][group]\" string => \"" user "\";
+           \"users[" user "][groups]\" string => \"adm,apache,games\";
+           \"users[" user "][home]\" string => \"/home/" user "\";
+           \"users[" user "][shell]\" string => \"/bin/bash\";
+           \"users[" user "][flags]\" string => \"-m\";
+           \"users[" user "][authorized_keys][0]\" string => \"\";" )
 
-   )
+     )
 
-   (defun cfe-config-adduser ( user )
-     "Insert usertemplate for config.cf"
-     (interactive "sUser: ")
-     (insert "      \"users[" user "][login]\" string => \"" user "\";
-         \"users[" user "][fullname]\" string => \"\";
-         \"users[" user "][uid]\" string => \"\";
-         \"users[" user "][gid]\" string => \"\";
-         \"users[" user "][group]\" string => \"" user "\";
-         \"users[" user "][groups]\" string => \"" user "\";
-         \"users[" user "][home]\" string => \"/home/" user "\";
-         \"users[" user "][shell]\" string => \"/bin/bash\";
-         \"users[" user "][flags]\" string => \"-m\";
-         \"users[" user "][authorized_keys][0]\" string => \"\";" )
+     (defun cfe-config-adduser ( user )
+       "Insert usertemplate for config.cf"
+       (interactive "sUser: ")
+       (insert "      \"users[" user "][login]\" string => \"" user "\";
+           \"users[" user "][fullname]\" string => \"\";
+           \"users[" user "][uid]\" string => \"\";
+           \"users[" user "][gid]\" string => \"\";
+           \"users[" user "][group]\" string => \"" user "\";
+           \"users[" user "][groups]\" string => \"" user "\";
+           \"users[" user "][home]\" string => \"/home/" user "\";
+           \"users[" user "][shell]\" string => \"/bin/bash\";
+           \"users[" user "][flags]\" string => \"-m\";
+           \"users[" user "][authorized_keys][0]\" string => \"\";" )
 
-   )
+     )
 
-   (defun cfe-insert-bundle ( name )
-     "Insert bundletemplate"
-     (interactive "sBundle: ")
-     (insert "#=head2 bundle " name "
-   #
-   #
-   #
-   #=cut
-   #
+     (defun cfe-insert-bundle ( name )
+       "Insert bundletemplate"
+       (interactive "sBundle: ")
+       (insert "#=head2 bundle " name "
+     #
+     #
+     #
+     #=cut
+     #
 
-   bundle " name "
-   {
-     vars:
+     bundle " name "
+     {
+       vars:
 
-     files:
+       files:
 
-     methods:
+       methods:
 
-     classes:
+       classes:
 
-   }")
-   )
+     }")
+     )
 
-   (add-hook 'cfengine3-mode-hook
-     (lambda ()
-       (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
-       (define-key cfengine3-mode-map "\C-c\S-t" (lambda()
+     (add-hook 'cfengine3-mode-hook
+       (lambda ()
+         (which-function-mode)
+
+         (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
+         (define-key cfengine3-mode-map "\C-c\S-t" (lambda()
+                                                     (interactive)
+                                                     (shell-command "~/bin/cfengine_update_testing.sh" )))
+         (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
+         (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
+         (define-key cfengine3-mode-map "\C-c," (lambda()
                                                    (interactive)
-                                                   (shell-command "~/bin/cfengine_update_testing.sh" )))
-       (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
-       (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
-       (define-key cfengine3-mode-map "\C-c," (lambda()
-                                                 (interactive)
-                                                 (browse-url (concat "http://cf-learn.info/search_cfdoc.html?search=" (word-at-point)))))
-       ))
+                                                   (browse-url (concat "http://cf-learn.info/search_cfdoc.html?search=" (word-at-point)))))
+         ))
 
 
 #+END_SRC
