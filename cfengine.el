@@ -1,6 +1,6 @@
 ;;; cfengine.el --- mode for editing Cfengine files
 
-;; Copyright (C) 2001-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
 ;; Author: Dave Love <fx@gnu.org>
 ;; Maintainer: Ted Zlatanov <tzz@lifelogs.com>
@@ -31,16 +31,13 @@
 ;; Provides support for editing GNU Cfengine files, including
 ;; font-locking, Imenu and indentation, but with no special keybindings.
 
-;; The CFEngine 3.x support doesn't have Imenu support but patches are
-;; welcome.
-
 ;; By default, CFEngine 3.x syntax is used.
 
 ;; You can set it up so either `cfengine2-mode' (2.x and earlier) or
 ;; `cfengine3-mode' (3.x) will be picked, depending on the buffer
 ;; contents:
 
-(add-to-list 'auto-mode-alist '("\\.cf\\'" . cfengine-auto-mode))
+;; (add-to-list 'auto-mode-alist '("\\.cf\\'" . cfengine-auto-mode))
 
 ;; OR you can choose to always use a specific version, if you prefer
 ;; it:
@@ -51,7 +48,10 @@
 
 ;; It's *highly* recommended that you enable the eldoc minor mode:
 
-(add-hook 'cfengine3-mode-hook 'turn-on-eldoc-mode)
+;; (add-hook 'cfengine3-mode-hook 'eldoc-mode)
+
+;; It's *highly* recommended that you use this mode with the latest
+;; Emacs, or at least 24.1.
 
 ;; This is not the same as the mode written by Rolf Ebert
 ;; <ebert@waporo.muc.de>, distributed with cfengine-2.0.5.  It does
@@ -63,6 +63,12 @@
 (defalias 'cfengine-prog-mode (if (fboundp 'prog-mode)
                                   'prog-mode
                                 'fundamental-mode))
+
+;; `setq-local' was introduced in 24.3
+(eval-when-compile
+  (or (fboundp 'setq-local)
+      (defmacro setq-local (var val)
+        `(set (make-local-variable ',var) ,val))))
 
 (autoload 'json-read "json")
 (autoload 'regexp-opt "regexp-opt")
@@ -89,11 +95,12 @@
 Used for syntax discovery and checking.  Set to nil to disable
 the `compile-command' override.  In that case, the ElDoc support
 will use a fallback syntax definition."
+  :version "24.4"
   :group 'cfengine
-  :type 'file)
+  :type '(choice file (const nil)))
 
 (defcustom cfengine-parameters-indent '(promise pname 0)
-  "*Indentation of CFEngine3 promise parameters (hanging indent).
+  "Indentation of CFEngine3 promise parameters (hanging indent).
 
 For example, say you have this code:
 
@@ -147,7 +154,7 @@ bundle agent rcfiles
                 perms => mog(\"600\", \"tzz\", \"tzz\");
 }
 "
-
+  :version "24.4"
   :group 'cfengine
   :type '(list
           (choice (const :tag "Anchor at beginning of promise" promise)
@@ -161,6 +168,10 @@ bundle agent rcfiles
 
 (defvar cfengine-mode-syntax-cache nil
   "Cache for `cfengine-mode' syntax trees obtained from 'cf-promises -s json'.")
+
+; Be sure to keep these two in sync with libpromises/cf3.defs.h
+(defconst cfengine3-uint-range "0,2147483647")
+(defconst cfengine3-sint-range "-2147483648,2147483647")
 
 (defconst cfengine3-fallback-syntax
   '((functions
@@ -189,13 +200,13 @@ bundle agent rcfiles
       (category . "data") (variadic . :json-false)
       (parameters . [((range . "[a-zA-Z0-9_$(){}\\[\\].:]+") (type . "string"))
                      ((range . "head,tail") (type . "option"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "slist") (status . "normal"))
      (strftime
       (category . "data") (variadic . :json-false)
       (parameters . [((range . "gmtime,localtime") (type . "option"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "string") (status . "normal"))
      (strcmp
       (category . "data") (variadic . :json-false)
@@ -206,7 +217,7 @@ bundle agent rcfiles
       (category . "data") (variadic . :json-false)
       (parameters . [((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "slist") (status . "normal"))
      (splayclass
       (category . "utils") (variadic . :json-false)
@@ -231,10 +242,10 @@ bundle agent rcfiles
      (selectservers
       (category . "communication") (variadic . :json-false)
       (parameters . [((range . "@[(][a-zA-Z0-9]+[)]") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))
                      ((range . "[a-zA-Z0-9_$(){}\\[\\].:]+") (type . "string"))])
       (returnType . "int") (status . "normal"))
      (reverse
@@ -308,17 +319,17 @@ bundle agent rcfiles
      (readtcp
       (category . "communication") (variadic . :json-false)
       (parameters . [((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "string") (status . "normal"))
      (readstringlist
       (category . "io") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "slist") (status . "normal"))
      (readstringarrayidx
       (category . "io") (variadic . :json-false)
@@ -326,8 +337,8 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (readstringarray
       (category . "io") (variadic . :json-false)
@@ -335,16 +346,16 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (readreallist
       (category . "io") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "rlist") (status . "normal"))
      (readrealarray
       (category . "io") (variadic . :json-false)
@@ -352,16 +363,16 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (readintlist
       (category . "io") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "ilist") (status . "normal"))
      (readintarray
       (category . "io") (variadic . :json-false)
@@ -369,18 +380,18 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (readfile
       (category . "io") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "string") (status . "normal"))
      (randomint
       (category . "data") (variadic . :json-false)
-      (parameters . [((range . "-99999999999,9999999999") (type . "int"))
-                     ((range . "-99999999999,9999999999") (type . "int"))])
+      (parameters . [((range . cfengine3-sint-range) (type . "int"))
+                     ((range . cfengine3-sint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (product
       (category . "data") (variadic . :json-false)
@@ -390,19 +401,19 @@ bundle agent rcfiles
       (category . "communication") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "slist") (status . "normal"))
      (peerleader
       (category . "communication") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "string") (status . "normal"))
      (peers
       (category . "communication") (variadic . :json-false)
       (parameters . [((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "slist") (status . "normal"))
      (parsestringarrayidx
       (category . "io") (variadic . :json-false)
@@ -410,8 +421,8 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (parsestringarray
       (category . "io") (variadic . :json-false)
@@ -419,8 +430,8 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (parserealarray
       (category . "io") (variadic . :json-false)
@@ -428,8 +439,8 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (parseintarray
       (category . "io") (variadic . :json-false)
@@ -437,8 +448,8 @@ bundle agent rcfiles
                      ((range . "\"?(/.*)") (type . "string"))
                      ((range . ".*") (type . "string"))
                      ((range . ".*") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "int") (status . "normal"))
      (or
       (category . "data") (variadic . t)
@@ -456,7 +467,7 @@ bundle agent rcfiles
      (nth
       (category . "data") (variadic . :json-false)
       (parameters . [((range . "[a-zA-Z0-9_$(){}\\[\\].:]+") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "string") (status . "normal"))
      (now
       (category . "system") (variadic . :json-false)
@@ -574,8 +585,8 @@ bundle agent rcfiles
       (returnType . "context") (status . "normal"))
      (irange
       (category . "data") (variadic . :json-false)
-      (parameters . [((range . "-99999999999,9999999999") (type . "int"))
-                     ((range . "-99999999999,9999999999") (type . "int"))])
+      (parameters . [((range . cfengine3-sint-range) (type . "int"))
+                     ((range . cfengine3-sint-range) (type . "int"))])
       (returnType . "irange") (status . "normal"))
      (iprange
       (category . "communication") (variadic . :json-false)
@@ -601,7 +612,7 @@ bundle agent rcfiles
       (returnType . "slist") (status . "normal"))
      (hostsseen
       (category . "communication") (variadic . :json-false)
-      (parameters . [((range . "0,99999999999") (type . "int"))
+      (parameters . [((range . cfengine3-uint-range) (type . "int"))
                      ((range . "lastseen,notseen") (type . "option"))
                      ((range . "name,address") (type . "option"))])
       (returnType . "slist") (status . "normal"))
@@ -673,7 +684,7 @@ bundle agent rcfiles
      (getenv
       (category . "system") (variadic . :json-false)
       (parameters . [((range . "[a-zA-Z0-9_$(){}\\[\\].:]+") (type . "string"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "string") (status . "normal"))
      (format
       (category . "data") (variadic . t)
@@ -685,7 +696,7 @@ bundle agent rcfiles
                      ((range . "[a-zA-Z0-9_$(){}\\[\\].:]+") (type . "string"))
                      ((range . "true,false,yes,no,on,off") (type . "option"))
                      ((range . "true,false,yes,no,on,off") (type . "option"))
-                     ((range . "0,99999999999") (type . "int"))])
+                     ((range . cfengine3-uint-range) (type . "int"))])
       (returnType . "slist") (status . "normal"))
      (filestat
       (category . "files") (variadic . :json-false)
@@ -823,24 +834,24 @@ bundle agent rcfiles
     "List of the action keywords supported by Cfengine.
 This includes those for cfservd as well as cfagent.")
 
-  (defconst cfengine3-defuns
-    (mapcar
-     'symbol-name
-     '(bundle body))
+  (defconst cfengine3-defuns '("bundle" "body")
     "List of the CFEngine 3.x defun headings.")
 
-  (defconst cfengine3-defuns-regex
-    (regexp-opt cfengine3-defuns t)
+  (defconst cfengine3-defuns-regex (regexp-opt cfengine3-defuns t)
     "Regex to match the CFEngine 3.x defuns.")
+
+  (defconst cfengine3-defun-full-re (concat "^\\s-*" cfengine3-defuns-regex
+                                            "\\s-+\\(\\(?:\\w\\|\\s_\\)+\\)" ;type
+                                            "\\s-+\\(\\(?:\\w\\|\\s_\\)+\\)" ;id
+                                            )
+    "Regexp matching full defun declaration (excluding argument list).")
 
   (defconst cfengine3-class-selector-regex "\\([[:alnum:]_().&|!:]+\\)::")
 
   (defconst cfengine3-category-regex "\\([[:alnum:]_]+\\):")
 
-  (defconst cfengine3-vartypes
-    (mapcar
-     'symbol-name
-     '(string int real slist ilist rlist irange rrange counter data))
+  (defconst cfengine3-vartypes '("string" "int" "real" "slist" "ilist" "rlist"
+                                 "irange" "rrange" "counter" "data")
     "List of the CFEngine 3.x variable types."))
 
 (defconst cfengine-font-lock-syntactic-keywords
@@ -1245,41 +1256,43 @@ Should not be necessary unless you reinstall CFEngine."
   (setq cfengine-mode-syntax-cache nil))
 
 (defun cfengine3-make-syntax-cache ()
-  "Build the CFEngine 3 syntax cache.
-Calls `cfengine-cf-promises' with \"-s json\""
-  (let ((syntax (cddr (assoc cfengine-cf-promises cfengine-mode-syntax-cache))))
-    (if cfengine-cf-promises
-        (or syntax
-            (with-demoted-errors
-                (with-temp-buffer
-                  (call-process-shell-command cfengine-cf-promises
-                                              nil   ; no input
-                                              t     ; current buffer
-                                              nil   ; no redisplay
-                                              "-s" "json")
-                  (goto-char (point-min))
-                  (setq syntax (json-read))
-                  (setq cfengine-mode-syntax-cache
-                        (cons (cons cfengine-cf-promises syntax)
-                              cfengine-mode-syntax-cache))
-                  (setq cfengine-mode-syntax-functions-regex
-                        (regexp-opt (mapcar (lambda (def)
-                                              (format "%s" (car def)))
-                                            (cdr (assq 'functions syntax)))
-                                    'symbols))))))
-    cfengine3-fallback-syntax))
+  "Build the CFEngine 3 syntax cache and return the syntax.
+Calls `cfengine-cf-promises' with \"-s json\"."
+  (or (cdr (assoc cfengine-cf-promises cfengine-mode-syntax-cache))
+      (let ((syntax (or (when cfengine-cf-promises
+                          (with-demoted-errors "cfengine3-make-syntax-cache: %S"
+                            (with-temp-buffer
+                              (or (zerop (process-file cfengine-cf-promises
+                                                       nil ; no input
+                                                       t   ; output
+                                                       nil ; no redisplay
+                                                       "-s" "json"))
+                                  (error "%s" (buffer-substring
+                                               (point-min)
+                                               (progn (goto-char (point-min))
+                                                      (line-end-position)))))
+                              (goto-char (point-min))
+                              (json-read))))
+                        cfengine3-fallback-syntax)))
+        (push (cons cfengine-cf-promises syntax)
+              cfengine-mode-syntax-cache)
+        (setq cfengine-mode-syntax-functions-regex
+              (regexp-opt (mapcar (lambda (def)
+                                    (format "%s" (car def)))
+                                  (cdr (assq 'functions syntax)))
+                          'symbols))
+        syntax)))
 
 (defun cfengine3-documentation-function ()
   "Document CFengine 3 functions around point.
-Intended as the value of `eldoc-documentation-function', which
-see.  Use it by executing `turn-on-eldoc-mode'."
+Intended as the value of `eldoc-documentation-function', which see.
+Use it by enabling `eldoc-mode'."
   (let ((fdef (cfengine3--current-function)))
     (when fdef
       (cfengine3-format-function-docstring fdef))))
 
 (defun cfengine3-completion-function ()
   "Return completions for function name around or before point."
-  (cfengine3-make-syntax-cache)
   (let* ((bounds (save-excursion
                    (let ((p (point)))
                      (skip-syntax-backward "w_" (point-at-bol))
@@ -1324,6 +1337,31 @@ see.  Use it by executing `turn-on-eldoc-mode'."
   ;; Doze path separators.
   (modify-syntax-entry ?\\ "." table))
 
+(defconst cfengine3--prettify-symbols-alist
+  '(("->"  . ?→)
+    ("=>"  . ?⇒)
+    ("::" . ?∷)))
+
+(defun cfengine3-create-imenu-index ()
+  "A function for `imenu-create-index-function'.
+Note: defun name is separated by space such as `body
+package_method opencsw' and imenu will replace spaces according
+to `imenu-space-replacement' (which see)."
+  (goto-char (point-min))
+  (let ((defuns ()))
+    (while (re-search-forward cfengine3-defun-full-re nil t)
+      (push (cons (mapconcat #'match-string '(1 2 3) " ")
+                  (copy-marker (match-beginning 3)))
+            defuns))
+    (nreverse defuns)))
+
+(defun cfengine3-current-defun ()
+  "A function for `add-log-current-defun-function'."
+  (end-of-line)
+  (beginning-of-defun)
+  (and (looking-at cfengine3-defun-full-re)
+       (mapconcat #'match-string '(1 2 3) " ")))
+
 ;;;###autoload
 (define-derived-mode cfengine3-mode cfengine-prog-mode "CFE3"
   "Major mode for editing CFEngine3 input.
@@ -1335,8 +1373,11 @@ to the action header."
   (cfengine-common-syntax cfengine3-mode-syntax-table)
 
   (set (make-local-variable 'indent-line-function) #'cfengine3-indent-line)
+
   (setq font-lock-defaults
-        '(cfengine3-font-lock-keywords nil nil nil beginning-of-defun))
+        '(cfengine3-font-lock-keywords
+          nil nil nil beginning-of-defun))
+  (setq-local prettify-symbols-alist cfengine3--prettify-symbols-alist)
 
   ;; `compile-command' is almost never a `make' call with CFEngine so
   ;; we override it
@@ -1347,20 +1388,19 @@ to the action header."
                  (when buffer-file-name
                    (shell-quote-argument buffer-file-name)))))
 
-  (set (make-local-variable 'flycheck-cfengine-executable)
-       cfengine-cf-promises)
+  (setq-local flycheck-cfengine-executable cfengine-cf-promises)
 
-  (set (make-local-variable 'eldoc-documentation-function)
-       #'cfengine3-documentation-function)
+  (setq-local eldoc-documentation-function #'cfengine3-documentation-function)
 
   (add-hook 'completion-at-point-functions
             #'cfengine3-completion-function nil t)
 
   ;; Use defuns as the essential syntax block.
-  (set (make-local-variable 'beginning-of-defun-function)
-       #'cfengine3-beginning-of-defun)
-  (set (make-local-variable 'end-of-defun-function)
-       #'cfengine3-end-of-defun))
+  (setq-local beginning-of-defun-function #'cfengine3-beginning-of-defun)
+  (setq-local end-of-defun-function #'cfengine3-end-of-defun)
+
+  (setq-local imenu-create-index-function #'cfengine3-create-imenu-index)
+  (setq-local add-log-current-defun-function #'cfengine3-current-defun))
 
 ;;;###autoload
 (define-derived-mode cfengine2-mode cfengine-prog-mode "CFE2"
@@ -1394,15 +1434,18 @@ to the action header."
 
 ;;;###autoload
 (defun cfengine-auto-mode ()
-  "Choose between `cfengine2-mode' and `cfengine3-mode' depending
-on the buffer contents"
-  (let ((v3 nil))
-    (save-restriction
-      (goto-char (point-min))
-      (while (not (or (eobp) v3))
-        (setq v3 (looking-at (concat cfengine3-defuns-regex "\\_>")))
-        (forward-line)))
-    (if v3 (cfengine3-mode) (cfengine2-mode))))
+  "Choose `cfengine2-mode' or `cfengine3-mode' by buffer contents."
+  (interactive)
+  (if (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char (point-min))
+          (forward-comment (point-max))
+          (or (eobp)
+              (re-search-forward
+               (concat "^\\s-*" cfengine3-defuns-regex "\\_>") nil t))))
+      (cfengine3-mode)
+    (cfengine2-mode)))
 
 (defalias 'cfengine-mode 'cfengine3-mode)
 
