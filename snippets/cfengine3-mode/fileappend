@@ -2,7 +2,7 @@
 # name: fileappend
 # key: fileappend
 # --
-"${1:file}"
+"$1"
 handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_edit" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
 comment => "configure $1",
 perms => mog("${3:644}","${4:root}","${5:root}"),

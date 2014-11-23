@@ -2,4 +2,4 @@
 # name: usebund
 # key: usebund
 # --
-"customlib_`(car (last (split-string (file-name-sans-extension (buffer-file-name)) "/" t)))`_$2" usebundle => customlib_`(car (last (split-string (file-name-sans-extension (buffer-file-name)) "/" t)))`_$2;
+"customlib_`(replace-regexp-in-string "[ /.-]" "_" ( file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`_$1" usebundle => customlib_`(replace-regexp-in-string "[ /.-]" "_" ( file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`_$1;

@@ -3,8 +3,8 @@
 # key: filetemplate
 # --
 "${1:file}"
-handle => "edit_$2",
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_edit" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
 comment => "configure $1",
-perms => mog("${3:440}","${4:root}","${5:root}"),
-create => "${6:$$(yas-choose-value '("true" "false"))}",
-edit_template => "\$(this.promise_dirname)/templates/${7}";
+perms => mog("${2:440}","${3:root}","${4:root}"),
+create => "${5:$$(yas-choose-value '("true" "false"))}",
+edit_template => "\$(this.promise_dirname)/templates/${6}";

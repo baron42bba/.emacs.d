@@ -3,7 +3,7 @@
 # key: mkdir
 # --
 "${1:file}/."
-handle    => "\$(this.bundle)_$2",
-comment   => "$3",
-create    => "${4:$$(yas-choose-value '("true" "false"))}",
-perms     => mog("${5:700}","${6:root}","${7:root}");
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_mkdir" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
+comment   => "mkdir $1",
+create    => "${3:$$(yas-choose-value '("true" "false"))}",
+perms     => mog("${4:700}","${5:root}","${6:root}");

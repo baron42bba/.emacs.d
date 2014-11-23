@@ -3,8 +3,8 @@
 # key: filesetvalini
 # --
 "${1:file}"
-handle => "edit_$2",
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_edit" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
 comment => "configure $1",
-perms => mog("${3:600}","${4:root}","${5:root}"),
-create => "${6:$$(yas-choose-value '("true" "false"))}",
-edit_line => set_variable_values_ini( "\$(this.bundle).${7}", "${8:section}" );
+perms => mog("${2:600}","${3:root}","${4:root}"),
+create => "${5:$$(yas-choose-value '("true" "false"))}",
+edit_line => set_variable_values_ini( "\$(this.bundle).${6}", "${7:section}" );
