@@ -2,14 +2,14 @@
 # name: bundle
 # key: insbund
 # --
-#=head2 bundle ${1:name}
+#=head2 bundle ${1:agent} ${2:`(concat (replace-regexp-in-string "[ /.-]" "_" ( file-name-nondirectory (file-name-sans-extension (buffer-file-name)))) "_")`}
 #
 #
 #
 #=cut
 #
 
-bundle $1
+bundle $1 $2
 {
   vars:
       $0
