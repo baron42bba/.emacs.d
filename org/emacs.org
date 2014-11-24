@@ -72,7 +72,7 @@
 | M-x ispell-buffer | check spelling of entire buffer                                                           |
 | C-c ?             | synonyms                                                                                  |
 |-------------------+-------------------------------------------------------------------------------------------|
-| C-c y             | yas/describe-tables                                                                       |
+| C-c y             | yas/insert-snippet                                                                        |
 | C-c b             | cfe-insert-bundle                                                                         |
 | C-c T             | run ~/bin/cfengine_update_testing.sh                                                      |
 | C-c C-w           | fixup-whitespace                                                                          |

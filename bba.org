@@ -1217,7 +1217,7 @@ function to convert groups of spaces to hard tabs.
                                    (let ((woman-use-topic-at-point t))
                                      (woman))))
 
-  (define-key global-map "\C-cy" 'yas/describe-tables)
+  (define-key global-map "\C-cy" 'yas/insert-snippet)
 
   (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
 
