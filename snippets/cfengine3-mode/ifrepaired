@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ifrepaired
+# key: ifrep
+# --
+classes => if_repaired("`(replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function)))`_$0");
