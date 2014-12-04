@@ -1198,6 +1198,7 @@ function to convert groups of spaces to hard tabs.
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
+  (define-key global-map "\C-ci" 'imenu)
   (define-key global-map "\C-c\S-g" 'rgrep)
   (define-key global-map "\C-cf" 'load-git-cfengine)
 
