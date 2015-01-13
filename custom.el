@@ -1,8 +1,8 @@
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(blink-cursor-mode t)
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(history-length 1000)
@@ -10,16 +10,17 @@
  '(magit-repo-dirs (quote ("~/git")))
  '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("marmalade" . "http://marmalade-repo.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages/"))))
  '(package-user-dir "~/.emacs.d/elpa")
+ '(paradox-github-token t)
  '(recentf-max-saved-items 42)
  '(savehist-mode t nil (savehist))
  '(template-default-directories (quote ("~/.emacs.d/templates/")))
  '(toolbar-visible-p nil)
  '(vc-handled-backends (quote (RCS CVS SVN SCCS Bzr Hg Mtn Arch))))
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(default ((t (:size "14pt" :family "Lucidatypewriter"))))
  '(cursor ((t (:foreground "red"))))
  '(rainbow-delimiters-depth-1-face ((((background dark)) (:foreground "gray90"))))

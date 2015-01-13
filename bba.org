@@ -778,7 +778,7 @@ BUGBUG: set `twittering-proxy-server' and `twittering-proxy-port' with strings
 from environment variable http_proxy
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/twittering-mode-3.0.0")
+  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20150105.333")
   (require 'twittering-mode)
   (cond
    ((string-equal system-type "gnu/linux")
@@ -788,6 +788,9 @@ from environment variable http_proxy
   )
 
   (setq twittering-use-master-password t)
+
+  (if (getenv "http_proxy")
+      (twittering-toggle-proxy))
 
 #+END_SRC
 
@@ -1199,6 +1202,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "S" 'synonyms)
   (define-key bba/launcher "t" 'git-timemachine)
+  (define-key bba/launcher "T" 'twittering-mode)
 
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
