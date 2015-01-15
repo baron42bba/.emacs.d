@@ -21,7 +21,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:size "14pt" :family "Lucidatypewriter"))))
  '(cursor ((t (:foreground "red"))))
  '(rainbow-delimiters-depth-1-face ((((background dark)) (:foreground "gray90"))))
  '(rainbow-delimiters-depth-2-face ((((background dark)) (:foreground "#ff82ab"))))
