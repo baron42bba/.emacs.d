@@ -1179,6 +1179,8 @@ safe files with #! in first line as user executable.
 combine key strokes to access commands even faster.
 
 #+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20140929.2246")
+
   (require 'key-chord)
   (key-chord-mode 1)
   (setq key-chord-two-keys-delay 0.16)
