@@ -1166,6 +1166,21 @@ safe files with #! in first line as user executable.
   (global-set-key (kbd "M-n") 'bba/move-line-down)
 
 #+END_SRC
+*** [[http://emacswiki.org/emacs/KeyChord][key-chord]]
+
+combine key strokes to access commands even faster.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'key-chord)
+  (key-chord-mode 1)
+  (setq key-chord-two-keys-delay 0.16)
+  (key-chord-define cfengine3-mode-map ";;" "\C-e;")
+  (key-chord-define cperl-mode-map ";;" "\C-e;")
+  (key-chord-define-global "uu" 'undo)
+  (key-chord-define-global "xb" 'ido-switch-buffer)
+  (key-chord-define-global "xf" 'ido-find-file)
+#+END_SRC
+
 *** key bindings
 #+BEGIN_SRC emacs-lisp
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
