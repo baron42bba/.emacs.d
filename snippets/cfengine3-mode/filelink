@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: filelink
+# key: fileln
+# --
+"${1:file}"
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_link" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
+comment => "ln -s $1",
+move_obstructions => "${5:$$(yas-choose-value '("true" "false"))}",
+link_from => ln_s( "$6" );
