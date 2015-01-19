@@ -1360,6 +1360,10 @@ Stack minibuffers
   (setq enable-recursive-minibuffers t)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (setq ediff-split-window-function 'split-window-horizontally)
+#+END_SRC
+
 Some nice functions
 
 #+BEGIN_SRC emacs-lisp
