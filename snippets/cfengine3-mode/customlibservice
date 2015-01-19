@@ -17,6 +17,7 @@ bundle agent customlib_$1
   methods:
     $1.(centos_6|redhat_6)::
       "customlib_$1_packages" usebundle => customlib_$1_packages;
+      "customlib_$1_configure_$1" usebundle => customlib_$1_configure_$1;
 
 }
 
