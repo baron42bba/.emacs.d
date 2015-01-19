@@ -19,26 +19,26 @@ Some general links regarding these configuration:
 To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what used to be the =~/.emacs= file):
 
 #+BEGIN_SRC emacs-lisp :tangle no
-;; This sets up the load path so that we can override it
-;; (package-initialize)
-;; Override the packages with the git version of Org and other packages
+  ;; This sets up the load path so that we can override it
+  ;; (package-initialize)
+  ;; Override the packages with the git version of Org and other packages
 
-  (setq load-path
-  (append
-  (list (expand-file-name "~/.emacs.d/"))
-  ;;           (expand-file-name "/usr/share/emacs/lisp/")
-  load-path))
+    (setq load-path
+    (append
+    (list (expand-file-name "~/.emacs.d/") (expand-file-name "~/.emacs.d/elpa/org-20150112"))
+    ;;           (expand-file-name "/usr/share/emacs/lisp/")
+    load-path))
 
 
-(add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/org-8.2.3c")
+  (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/org-8.2.3c")
 
-;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
-;; Load the rest of the packages
-;; (package-initialize t)
-;; (setq package-enable-at-startup nil)
-(require 'org)
-(require 'ob-tangle)
-(org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))
+  ;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
+  ;; Load the rest of the packages
+  ;; (package-initialize t)
+  ;; (setq package-enable-at-startup nil)
+  (require 'org)
+  (require 'ob-tangle)
+  (org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))
 
 #+END_SRC
 
