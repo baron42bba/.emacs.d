@@ -6,7 +6,7 @@ use Pod::Usage;
 
 =head1 NAME
 
-(>>>FILE<<<) - 
+(>>>FILE<<<) -
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ use Pod::Usage;
 =cut
 
 sub main {
-    my ( $help, $man, verbose );
+    my ( $help, $man, $verbose );
 
     my $result = GetOptions (
 	"help|h"    => \$help,
