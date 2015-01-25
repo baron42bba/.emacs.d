@@ -110,6 +110,14 @@ If you are in need enable debugging:
       )
 #+END_SRC
 
+*** fullframe
+open ibuffer and magit-status in fullframe mode.
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20140619.305")
+  (require 'fullframe)
+  (fullframe magit-status magit-mode-quit-window)
+  (fullframe ibuffer ibuffer-quit)
+#+END_SRC
 *** smartparens-mode
 Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
