@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: filerm
+# key: filerm
+# --
+"$1"
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_edit" (replace-regexp-in-string "[* /.-]" "_" (yas-text)))}",
+comment => "delete ${2:$1}",
+delete => tidy,
+file_select => ex_list( "$3");
