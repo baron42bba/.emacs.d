@@ -1,0 +1,10 @@
+# -*- mode: snippets -*-
+# name: srcsession
+# expand-env: ((yas-indent-line 'fixed))
+# key: <ssession
+# --
+* Create a session for Emacs:
+
+#+BEGIN_SRC sh :session client
+ssh $0
+#+END_SRC

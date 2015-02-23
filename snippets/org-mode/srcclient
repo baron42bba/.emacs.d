@@ -1,0 +1,7 @@
+# -*- mode: snippets -*-
+# name: srcclient
+# key: <sclient
+# --
+#+BEGIN_SRC :session client :results verbatim drawer
+$0
+#+END_SRC
