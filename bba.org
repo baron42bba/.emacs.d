@@ -305,7 +305,12 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
                                  ))
     )
 
-    ; Some initial languages we want org-babel to support
+#+END_SRC
+
+Some initial languages we want org-babel to support
+
+#+BEGIN_SRC emacs-lisp
+
     (org-babel-do-load-languages
      'org-babel-load-languages
      '(
@@ -336,6 +341,12 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
     ;; (setq html (org-export-as-html 3 nil nil 1))
 
 
+#+END_SRC
+
+Define some shortcuts to access major org files.
+
+#+BEGIN_SRC emacs-lisp
+
 
     (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
 
@@ -358,6 +369,24 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
                                             (find-file "~/org/emacs.org")
                                           (find-file "~/.emacs.d/org/emacs.org"))))
 
+#+END_SRC
+
+Tag tasks with GTD contexts
+
+#+BEGIN_SRC emacs-lisp
+               (setq org-tag-alist '(("@work" . ?b)
+                                     ("@home" . ?h)
+                                     ("@errands" . ?e)
+                                     ("@coding" . ?c)
+                                     ("@phone" . ?p)
+                                     ("@reading" . ?r)
+                                     ("@computer" . ?l)
+                                     ))
+
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+
     ;; (setq org-clock-persist 'history)
     (org-clock-persistence-insinuate)
     (setq org-clock-persist t)
@@ -367,12 +396,14 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
     (setq org-capture-templates
 
     '(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
-    "* TODO %?\n%U\n
+    "* TODO %^{Task}\n%U\n
 
     %i\n
-    %a")
+    %a\n
+    %?
+    ")
 
-      ("m" "Meeting" entry (file "~/git/org/refile.org")
+      ("m" "Meeting" entry (file "~/org/refile.org")
        "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
 
       ("n" "note" entry (file+headline "~/org/refile.org" "Note")
@@ -380,6 +411,14 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
     %i\n
     %a")
+
+      ("w" "work todo" (file+headline "~/workorg/work.org" "todolist")
+       "* TODO %{Task}\n%U\n
+
+    %i\n
+    %a\n
+    %?"
+       )
 
     ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
      "* %?\n%U\n" :clock-in t :clock-resume t)
@@ -389,6 +428,12 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
              :empty-lines 1)
 
     ))
+
+#+END_SRC
+
+Define some handy link abbreviations
+
+#+BEGIN_SRC emacs-lisp
 
     (setq org-link-abbrev-alist '(
     ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
@@ -403,8 +448,13 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
     ))
     ;; example: [[bmap:space needle]]
 
+#+END_SRC
 
-    ;; taken from http://doc.norang.ca/org-mode.org :
+Some clock stuff.
+taken from http://doc.norang.ca/org-mode.org
+
+#+BEGIN_SRC emacs-lisp
+
 
     ;;
     ;; Resume clocking task when emacs is restarted
