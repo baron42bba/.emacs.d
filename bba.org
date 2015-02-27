@@ -154,7 +154,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
   (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20140902.1727")
   (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20140828.807")
   (require 'guide-key)
-  (setq guide-key/guide-key-sequence '("C-x r" "C-x 4" "C-c" "C-x l" "<f9>"))
+  (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-x l" "<f9>"))
   (setq guide-key/recursive-key-sequence-flag t)
   (setq guide-key/idle-delay 3)
   (guide-key-mode 1)
@@ -929,6 +929,7 @@ from environment variable http_proxy
   (ac-config-default)
   (add-to-list 'ac-modes 'cfengine3-mode)
   (add-to-list 'ac-modes 'dns-mode)
+  (add-to-list 'ac-sources 'ac-source-yasnippet)
 
 #+END_SRC
 
