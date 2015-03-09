@@ -3,7 +3,7 @@
 # key: filecplocal
 # --
 "${1:file}"
-handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_create" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_create" (replace-regexp-in-string "[ )$(/.-]" "_" (yas-text)))}",
 comment => "copy $1",
 perms => mog("${3:644}","${4:root}","${5:root}"),
 copy_from => local_dcp("$(this.promise_dirname)/templates/${6}" );
