@@ -3,7 +3,7 @@
 # key: filequad
 # --
 "${1:file}"
-handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_create" (replace-regexp-in-string "[ /.-]" "_" (yas-text)))}",
+handle => "${1:$(concat (replace-regexp-in-string "^bundle_agent_" "" (replace-regexp-in-string "[ /.-]" "_" (which-function))) "_create" (replace-regexp-in-string "[ )$(/.-]" "_" (yas-text)))}",
 comment => "copy $1",
 perms => mog("${2:644}","${3:root}","${4:root}"),
 create => "${5:$$(yas-choose-value '("true" "false"))}",
