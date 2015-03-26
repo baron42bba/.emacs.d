@@ -59,7 +59,7 @@ If you are in need enable debugging:
 
 *** run in servermode
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (require 'server)
   (unless (server-running-p)
     (server-start))
