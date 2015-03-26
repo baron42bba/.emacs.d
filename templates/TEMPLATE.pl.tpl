@@ -4,6 +4,8 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 
+my %params;
+
 =head1 NAME
 
 (>>>FILE<<<) -
@@ -14,6 +16,8 @@ use Pod::Usage;
 
 =head1 SYNOPSIS
 
+=head1 EXAMPLES
+
 =head1 SUBS
 
 =head2 main
@@ -21,17 +25,16 @@ use Pod::Usage;
 =cut
 
 sub main {
-    my ( $help, $man, $verbose );
 
     my $result = GetOptions (
-	"help|h"    => \$help,
-	"verbose|v"   =>  \$verbose,
-	"man|m"      => \$man
-	);
+			     "help|h"		=> \$params{help},
+			     "verbose|v"        => \$params{verbose},
+			     "man|m"		=> \$params{man}
+			    );
 
-    if ( $man ) { pod2usage( -verbose => 2 ); }
+    if ( $params{man} ) { pod2usage( -verbose => 2 ); }
 
-    if ( ! ( $server ) || $help )
+    if ( ! ( $server ) || $params{help} )
     {
 	pod2usage(1);
     }
