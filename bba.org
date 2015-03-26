@@ -144,9 +144,12 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
 *** [[https://github.com/flycheck/flycheck][flycheck]]
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20150125.601")
-(require 'flycheck)
-(add-hook 'after-init-hook #'global-flycheck-mode)
+    (if (= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20150125.601")
+          (require 'flycheck)
+          (add-hook 'after-init-hook #'global-flycheck-mode)
+          ))
 #+END_SRC
 
 *** [[https://github.com/kai2nenobu/guide-key][guide-key]]
