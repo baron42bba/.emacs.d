@@ -131,6 +131,18 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
         (smartparens-global-mode 1)
         ))
 #+END_SRC
+*** expand-region
+    [2015-04-02 Thu 10:32]
+
+#+BEGIN_SRC emacs-lisp
+  (if (= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20141223.1328")
+        (require 'expand-region)
+        (global-set-key (kbd "C-=") 'er/expand-region)
+        ))
+
+#+END_SRC
 *** yasnippet
 
 #+BEGIN_SRC emacs-lisp
@@ -1260,6 +1272,13 @@ combine key strokes to access commands even faster.
   (key-chord-define-global "uu" 'undo)
   (key-chord-define-global "xb" 'ido-switch-buffer)
   (key-chord-define-global "xf" 'ido-find-file)
+  (if (= emacs-major-version 24)
+      (progn
+        (key-chord-define-global "==" 'er/expand-region)
+        (key-chord-define-global "--" 'er/contract-region)
+        ))
+
+
 #+END_SRC
 
 *** key bindings
