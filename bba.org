@@ -93,23 +93,37 @@ If you are in need enable debugging:
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
-    (if (>= emacs-major-version 24)
-        (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa")
-          (add-to-list 'load-path "~/.emacs.d/elpa/popup-20140207.1702")
-          (require 'package)
-          (package-initialize)
-          )
+  (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
-        (require 'magit)
-        (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-0.0.9")
-        (require 'yaml-mode)
+        (add-to-list 'load-path "~/.emacs.d/elpa")
+        (add-to-list 'load-path "~/.emacs.d/elpa/popup-20140207.1702")
+        (require 'package)
+        (package-initialize)
         )
-
+    (progn
+      (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
+      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-0.0.9")
+      (require 'yaml-mode)
       )
+
+    )
 #+END_SRC
 
+*** magit
+
+For annotated tags prepare message with commit messages since last tag.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'magit)
+  (add-hook 'magit-log-edit-mode-hook
+            (lambda ()
+              (when (magit-log-edit-get-field 'tag-name)
+                (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" ))
+                )
+              )
+            )
+
+#+END_SRC
 *** fullframe
 open ibuffer and magit-status in fullframe mode.
 #+BEGIN_SRC emacs-lisp
