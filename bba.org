@@ -1107,7 +1107,8 @@ Bind f3 and f4 to previous/next pane.
   (require 'recentf)
   (recentf-mode 1)
   (setq recentf-max-menu-items 42)
-  (global-set-key "\C-cr" 'recentf-open-files)
+  (if (<= emacs-major-version 23)
+      (global-set-key "\C-cr" 'recentf-open-files))
 #+END_SRC
 
 *** insert-date function
@@ -1257,6 +1258,32 @@ safe files with #! in first line as user executable.
   (global-set-key (kbd "M-n") 'bba/move-line-down)
 
 #+END_SRC
+*** helm
+
+Some links you might check out:
+
+- [[http://tuhdo.github.io/helm-intro.html][A Package in a league of its own: Helm]]
+- [[http://wikemacs.org/wiki/Helm][Helm - WikEmacs]]
+- [[http://emacs.stackexchange.com/questions/2867/how-should-i-change-my-workflow-when-moving-from-ido-to-helm][How should I change my workflow when moving from IDO to Helm - Emacs
+  Stack Exchange]]
+
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path
+                     "~/.emacs.d/elpa/helm-20150403.101")
+        (require 'helm)
+        (helm-mode 1)
+        (global-set-key (kbd "M-y") 'helm-show-kill-ring)
+        (global-set-key (kbd "C-c w") 'helm-man-woman)
+        (global-set-key (kbd "M-x") 'helm-M-x)
+        (global-set-key "\C-cr" 'helm-recentf)
+        (global-set-key (kbd "M-s o") 'helm-occur)
+        (define-key global-map "\C-x\C-b" 'helm-buffers-list)
+        )
+  )
+
+#+END_SRC
 *** [[http://emacswiki.org/emacs/KeyChord][key-chord]]
 
 combine key strokes to access commands even faster.
@@ -1305,55 +1332,60 @@ to convert hard tabs to the appropriate number of spaces, and a tabify
 function to convert groups of spaces to hard tabs.
 
 #+BEGIN_SRC emacs-lisp
-  (define-key bba/toggle "w" 'whitespace-mode)
+    (define-key bba/toggle "w" 'whitespace-mode)
 
-  (define-prefix-command 'bba/launcher)
-  (define-key global-map "\C-xl" 'bba/launcher)
+    (define-prefix-command 'bba/launcher)
+    (define-key global-map "\C-xl" 'bba/launcher)
 
-  (define-key bba/launcher "b" 'browse-url-at-point)
-  (define-key bba/launcher "c" 'calculator)
-  (define-key bba/launcher "d" 'ediff-buffers)
-  (define-key bba/launcher "e" 'elfeed)
-  (define-key bba/launcher "i" 'ielm)
-  (define-key bba/launcher "s" 'shell)
-  (define-key bba/launcher "S" 'synonyms)
-  (define-key bba/launcher "t" 'git-timemachine)
-  (define-key bba/launcher "T" 'twittering-mode)
+    (define-key bba/launcher "b" 'browse-url-at-point)
+    (define-key bba/launcher "c" 'calculator)
+    (define-key bba/launcher "d" 'ediff-buffers)
+    (define-key bba/launcher "e" 'elfeed)
+    (define-key bba/launcher "i" 'ielm)
+    (define-key bba/launcher "s" 'shell)
+    (define-key bba/launcher "S" 'synonyms)
+    (define-key bba/launcher "t" 'git-timemachine)
+    (define-key bba/launcher "T" 'twittering-mode)
 
-  (define-key global-map "\C-c\C-t" 'insert-timestamp)
-  (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
+    (define-key global-map "\C-c\C-t" 'insert-timestamp)
+    (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
-  (define-key global-map "\C-ci" 'imenu)
-  (define-key global-map "\C-c\S-g" 'rgrep)
-  (define-key global-map "\C-cf" 'load-git-cfengine)
+    (define-key global-map "\C-ci" 'imenu)
+    (define-key global-map "\C-c\S-g" 'rgrep)
+    (define-key global-map "\C-cf" 'load-git-cfengine)
 
-  (define-key global-map "\C-c\C-w" 'fixup-whitespace)
+    (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
-  (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
-  (define-key global-map "\M-g\M-b" 'magit-branch-manager)
-  (define-key global-map "\M-gb" 'magit-blame-mode)
-  (define-key global-map "\C-cm" 'magit-status)
+    (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
+    (define-key global-map "\M-g\M-b" 'magit-branch-manager)
+    (define-key global-map "\M-gb" 'magit-blame-mode)
+    (define-key global-map "\C-cm" 'magit-status)
 
-  (define-key global-map "\C-c\S-f" (lambda()
-                                   (interactive)
-                                   (message (buffer-file-name))))
+    (define-key global-map "\C-c\S-f" (lambda()
+                                     (interactive)
+                                     (message (buffer-file-name))))
 
-  (define-key global-map "\C-cw" (lambda ()
-                                   (interactive)
-                                   (let ((woman-use-topic-at-point t))
-                                     (woman))))
+    (if (<= emacs-major-version 23)
+        (progn
+          (define-key global-map "\C-cw" (lambda ()
+                                           (interactive)
+                                           (let ((woman-use-topic-at-point t))
+                                             (woman))))
+          (define-key global-map "\C-x\C-b" 'ibuffer)
+          )
+    )
 
-  (define-key global-map "\C-cy" 'yas/insert-snippet)
+    (define-key global-map "\C-cy" 'yas/insert-snippet)
 
-  (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
+    (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
 
-  ;;; ** Use C-+ and C-- to adjust font size
+    ;;; ** Use C-+ and C-- to adjust font size
 
-  (define-key global-map (kbd "C-+") 'text-scale-increase)
-  (define-key global-map (kbd "C--") 'text-scale-decrease)
+    (define-key global-map (kbd "C-+") 'text-scale-increase)
+    (define-key global-map (kbd "C--") 'text-scale-decrease)
 
 
-  (define-key global-map "\C-x\C-b" 'ibuffer)
+
 #+END_SRC
 
 =isearch-forward-regexp= is much more useful than =isearch-forward= so
@@ -1523,6 +1555,9 @@ Some nice functions
 
 #+END_SRC
 *** dns-mode
+
+If you edit zone files via TRAMP you might want to activate them via
+=rndc reload=. =C-c C-r= just does that for you.
 
 #+BEGIN_SRC emacs-lisp
   (defun dns-rndc ()
