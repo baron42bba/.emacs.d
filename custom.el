@@ -12,7 +12,6 @@
  '(package-user-dir "~/.emacs.d/elpa")
  '(paradox-github-token t)
  '(recentf-max-saved-items 42)
- '(savehist-mode t nil (savehist))
  '(template-default-directories (quote ("~/.emacs.d/templates/")))
  '(toolbar-visible-p nil)
  '(vc-handled-backends (quote (RCS CVS SVN SCCS Bzr Hg Mtn Arch))))

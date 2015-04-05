@@ -1543,7 +1543,15 @@ Some nice functions
       ))
 
 #+END_SRC
+*** save history
+    [2015-04-05 Sun 12:57]
 
+#+BEGIN_SRC emacs-lisp
+  (savehist-mode 1)
+  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
+  (setq savehist-file "~/.emacs.d/history")
+
+#+END_SRC
 *** done
 
 Display greetings:
