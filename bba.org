@@ -153,7 +153,8 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20141223.1328")
         (require 'expand-region)
-        (global-set-key (kbd "C-=") 'er/expand-region)
+        (define-key global-map (kbd "C-c <f11>") 'er/contract-region )
+        (define-key global-map (kbd "C-c <f12>") 'er/expand-region )
         ))
 
 #+END_SRC
@@ -1315,8 +1316,6 @@ combine key strokes to access commands even faster.
   (key-chord-define-global "xf" 'ido-find-file)
   (if (>= emacs-major-version 24)
       (progn
-        (key-chord-define-global "==" 'er/expand-region)
-        (key-chord-define-global "--" 'er/contract-region)
         ))
 
 
