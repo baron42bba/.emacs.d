@@ -1226,8 +1226,9 @@ Use =C-c E= to evaluate and replace the last s-expression.
 safe files with #! in first line as user executable.
 
 #+BEGIN_SRC emacs-lisp
-  (add-hook `after-safe-hook
+  (add-hook `after-save-hook
             #'(lambda ()
+                (check-parens)
                 (and (save-excursion
                        (save-restriction
                          (widen)
