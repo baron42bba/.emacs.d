@@ -48,7 +48,7 @@
 
 ;; It's *highly* recommended that you enable the eldoc minor mode:
 
-;; (add-hook 'cfengine3-mode-hook 'eldoc-mode)
+(add-hook 'cfengine3-mode-hook 'eldoc-mode)
 
 ;; It's *highly* recommended that you use this mode with the latest
 ;; Emacs, or at least 24.1.
