@@ -708,7 +708,7 @@ taken from http://doc.norang.ca/org-mode.org
 
 #+BEGIN_SRC emacs-lisp
   ;;   (load-library "cfengine")
-     (load-file (expand-file-name "~/.emacs.d/cfengine.el"))
+     (load-file (expand-file-name "~/.emacs.d/lisp/cfengine.el"))
      (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
 
      ;; post-commit and post-merge hook for git:
