@@ -30,7 +30,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
     load-path))
 
 
-  (add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/org-8.2.3c")
+  (add-to-list 'load-path "~/.emacs/elpa/org-20150427")
 
   ;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
   ;; Load the rest of the packages
@@ -90,6 +90,15 @@ If you are in need enable debugging:
 
 #+END_SRC
 
+*** async
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/async-20150412.2207")
+        (require 'async)
+        )
+    )
+#+END_SRC
 *** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1287,7 +1296,7 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20150403.101")
+                     "~/.emacs.d/elpa/helm-20150426.2119")
         (require 'helm)
         (helm-mode 1)
         (global-set-key (kbd "M-y") 'helm-show-kill-ring)
