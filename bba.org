@@ -1316,6 +1316,11 @@ Some links you might check out:
                         (kbd "M-p")
                         'helm-eshell-history)
                       ))
+        (setq helm-mini-default-sources '(helm-source-buffers-list
+                                          helm-source-recentf
+                                          helm-source-bookmarks
+                                          helm-source-buffer-not-found))
+        (define-key global-map "\C-xb" 'helm-mini)
         )
   )
 
