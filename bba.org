@@ -127,7 +127,9 @@ For annotated tags prepare message with commit messages since last tag.
   (add-hook 'magit-log-edit-mode-hook
             (lambda ()
               (when (magit-log-edit-get-field 'tag-name)
-                (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" ))
+                (progn
+                  (end-of-buffer)
+                (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" )))
                 )
               )
             )
