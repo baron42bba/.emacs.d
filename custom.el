@@ -22,6 +22,7 @@
  ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "green" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 1 :width normal :foundry "default" :family "default"))))
  '(cursor ((t (:foreground "red"))))
+ '(helm-selection ((((background dark)) (:background "white" :distant-foreground "black")) (((background light)) (:background "#b5ffd1" :distant-foreground "black"))))
  '(rainbow-delimiters-depth-1-face ((((background dark)) (:foreground "gray90"))))
  '(rainbow-delimiters-depth-2-face ((((background dark)) (:foreground "#ff82ab"))))
  '(rainbow-delimiters-depth-3-face ((((background dark)) (:foreground "#66ffff"))))
