@@ -1,3 +1,4 @@
+#+STARTUP: showall
 #+TITLE: bba emacs configuration
 #+OPTIONS: toc:4 h:4
 
@@ -1623,10 +1624,29 @@ If you edit zone files via TRAMP you might want to activate them via
 *** save history
     [2015-04-05 Sun 12:57]
 
+Write a history of your emacs into your org git repository.
+You have it available on every system and it's still private at it's
+not in the public git emacs configuration.
+
+- kill ring
+- search ring
+- regexp-search-ring
+- last-kbd-macro
+- kmacro-ring
+
+all in your history.
+
 #+BEGIN_SRC emacs-lisp
   (savehist-mode 1)
   (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring))
-  (setq savehist-file "~/.emacs.d/history")
+  (if (equal "work" (getenv "SYSENV"))
+      (if (file-exists-p "~/workorg")
+          (setq savehist-file "~/workorg/emacshistory")
+        )
+    (if (file-exists-p "~/org")
+        (setq savehist-file "~/org/emacshistory")
+      )
+  )
 
 #+END_SRC
 *** done
