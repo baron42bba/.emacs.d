@@ -1294,6 +1294,7 @@ Some links you might check out:
 - [[http://wikemacs.org/wiki/Helm][Helm - WikEmacs]]
 - [[http://emacs.stackexchange.com/questions/2867/how-should-i-change-my-workflow-when-moving-from-ido-to-helm][How should I change my workflow when moving from IDO to Helm - Emacs
   Stack Exchange]]
+- [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
 
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
