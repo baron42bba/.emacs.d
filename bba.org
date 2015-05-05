@@ -157,6 +157,49 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
         (smartparens-global-mode 1)
         ))
 #+END_SRC
+*** [[https://github.com/hrs/engine-mode][engine-mode]]
+
+search the web on your fingertips. C-c /.
+
+|---+-------------|
+| a | amazon.de   |
+| b | bing        |
+| m | google maps |
+| w | wikipedia   |
+| y | youtube     |
+|---+-------------|
+
+
+#+BEGIN_SRC emacs-lisp
+  (require 'engine-mode)
+
+  (defengine amazon
+    "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
+    "a"
+    )
+
+  (defengine bing
+    "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
+    "b"
+    )
+
+  (defengine google-maps
+    "http://maps.google.com/maps?q=%s"
+    "m"
+    )
+
+  (defengine wikipedia
+    "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+    "w"
+    )
+
+  (defengine youtube
+    "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
+    "y"
+    )
+  (engine-mode 1)
+#+END_SRC
+
 *** expand-region
     [2015-04-02 Thu 10:32]
 
@@ -1363,6 +1406,7 @@ combine key strokes to access commands even faster.
   (define-prefix-command 'bba/toggle)
   (define-key global-map "\C-ct" 'bba/toggle)
 
+  (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
