@@ -1624,7 +1624,7 @@ If you edit zone files via TRAMP you might want to activate them via
 
 #+BEGIN_SRC emacs-lisp
   (savehist-mode 1)
-  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
+  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring))
   (setq savehist-file "~/.emacs.d/history")
 
 #+END_SRC
