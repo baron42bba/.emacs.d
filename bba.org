@@ -262,6 +262,9 @@ search the web on your fingertips. C-c /.
 
 *** template support
 
+Some default templates for new files are stored in [[templates/]].
+No need to start .pl .sh from scratch.
+
 #+BEGIN_SRC emacs-lisp
   (require 'template)
   (template-initialize)
@@ -1641,6 +1644,16 @@ Some nice functions
     (load-file custom-file)
 
 #+END_SRC
+
+*** Set default font on Mac
+
+#+BEGIN_SRC emacs-lisp
+  (if (string-equal system-type "darwin")
+   (set-default-font "Monaco 14"))
+#+END_SRC
+
+
+
 *** dns-mode
 
 If you edit zone files via TRAMP you might want to activate them via
