@@ -1634,6 +1634,32 @@ Some nice functions
 
 #+END_SRC
 
+*** set theme bba1
+
+#+BEGIN_SRC emacs-lisp
+  (deftheme bba1 "DOCSTRING for bba1")
+    (custom-theme-set-faces 'bba1
+     '(default ((t (:foreground "#07e30d" :background "#282828" ))))
+     '(cursor ((t (:background "#f09213" ))))
+     '(fringe ((t (:background "#131313" ))))
+     '(mode-line ((t (:foreground "#282828" :background "#d96503" ))))
+     '(region ((t (:background "#7a7674" ))))
+     '(secondary-selection ((t (:background "#584e47" ))))
+     '(font-lock-builtin-face ((t (:foreground "#fe8019" ))))
+     '(font-lock-comment-face ((t (:foreground "#df7114" ))))
+     '(font-lock-function-name-face ((t (:foreground "#b8bb26" ))))
+     '(font-lock-keyword-face ((t (:foreground "#fb4934" ))))
+     '(font-lock-string-face ((t (:foreground "#b8bb26" ))))
+     '(font-lock-type-face ((t (:foreground "#d3869b" ))))
+     '(font-lock-constant-face ((t (:foreground "#d3869b" ))))
+     '(font-lock-variable-name-face ((t (:foreground "#83a598" ))))
+     '(minibuffer-prompt ((t (:foreground "#b8bb26" :bold t ))))
+     '(font-lock-warning-face ((t (:foreground "red" :bold t ))))
+     )
+  (provide-theme 'bba1)
+
+#+END_SRC
+
 *** load custom file
     [2014-10-02 Thu 00:37]
 
