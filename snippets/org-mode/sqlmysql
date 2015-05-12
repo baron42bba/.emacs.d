@@ -1,0 +1,14 @@
+# -*- mode: snippets -*-
+# name: sqlmysql
+# expand-env: ((yas-indent-line 'fixed))
+# key: sqlmysql
+# --
+:PROPERTIES:
+:engine: mysql
+:dbhost: ${1:localhost}
+:dbuser: ${2:user}
+:dbpassword: ${3:password}
+:cmdline: --protocol=tcp
+:exports: both
+:END:
+$0

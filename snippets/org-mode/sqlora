@@ -1,0 +1,11 @@
+# -*- mode: snippets -*-
+# name: sqlora
+# expand-env: ((yas-indent-line 'fixed))
+# key: sqlora
+# --
+:PROPERTIES:
+:engine: dbi
+:cmdline: dbi:Oracle://${1:localhost}:${2:1521}/${3:SID} ${4:user} ${5:password}
+:exports: both
+:END:
+$0
