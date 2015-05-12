@@ -39,6 +39,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
   ;; (setq package-enable-at-startup nil)
   (require 'org)
   (require 'ob-tangle)
+  (require 'ob-sql)
   (org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))
 
 #+END_SRC
