@@ -71,6 +71,9 @@ If you are in need enable debugging:
 
 *** define emacs shutdown function
 
+I like to commit my notes in my org and workorg folders after a days work.
+Keep track of your important stuff!
+
 #+BEGIN_SRC emacs-lisp
 
   ;; define function to shutdown emacs server instance
@@ -217,6 +220,10 @@ search the web on your fingertips. C-c /.
 #+END_SRC
 *** yasnippet
 
+My first thought: Nice. But do I have a use case? After half a year I
+cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]] code with
+snippets. Some help for Perl and even for org-mode.
+
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path
                "~/.emacs.d/elpa/yasnippet-20141017.736")
@@ -237,6 +244,9 @@ search the web on your fingertips. C-c /.
 #+END_SRC
 
 *** [[https://github.com/kai2nenobu/guide-key][guide-key]]
+
+Probably the best help to keep track of the not every day used keybindings.
+
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20140902.1727")
   (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20140828.807")
@@ -320,6 +330,8 @@ No need to start .pl .sh from scratch.
 
 *** ido-mode
 
+I still like ido-find-file.
+
 #+BEGIN_SRC emacs-lisp
   (ido-mode t)
   (setq ido-enable-prefix nil
@@ -354,6 +366,10 @@ No need to start .pl .sh from scratch.
 *** org-mode
 
 See [[http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html][orgtutorial_dto]] for details.
+
+It's worth to use Emacs for org-mode alone.
+[[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] and [[http://www.howardism.org/Technical/Emacs/literate-database.html][Literate Database Work]] are only 2 use cases.
+With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's easy to generate beautiful output.
 
 Run these commands to make org-protocol work in gnome:
 
@@ -811,34 +827,10 @@ taken from http://doc.norang.ca/org-mode.org
 
      )
 
-     (defun cfe-insert-bundle ( name )
-       "Insert bundletemplate"
-       (interactive "sBundle: ")
-       (insert "#=head2 bundle " name "
-     #
-     #
-     #
-     #=cut
-     #
-
-     bundle " name "
-     {
-       vars:
-
-       files:
-
-       methods:
-
-       classes:
-
-     }")
-     )
-
      (add-hook 'cfengine3-mode-hook
        (lambda ()
          (which-function-mode)
 
-         (define-key cfengine3-mode-map "\C-cb" 'cfe-insert-bundle)
          (define-key cfengine3-mode-map "\C-c\S-t" (lambda()
                                                      (interactive)
                                                      (shell-command "~/bin/cfengine_update_testing.sh" )))
@@ -855,7 +847,7 @@ taken from http://doc.norang.ca/org-mode.org
 for C-c T you can use a file like this one:
 
 #+NAME: ~/bin/cfengine_update_testing.sh
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :tangle no
   #!/bin/bash
   :<<cut
   =cut
@@ -931,9 +923,6 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 #+END_SRC
 
 *** [[http://www.twmode.sourceforge.net/][twitter]]
-
-BUGBUG: set `twittering-proxy-server' and `twittering-proxy-port' with strings
-from environment variable http_proxy
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20150105.333")
@@ -1035,6 +1024,9 @@ from environment variable http_proxy
 
 *** remove trailing whitespace
     [2014-09-24 Wed 16:56]
+
+There are some file formats out there where you shouldn't use this
+function. [[http://en.wikipedia.org/wiki/YAML][YAML]] is only one of them.
 
 #+BEGIN_SRC emacs-lisp
   (eval-after-load "cfengine3-mode"
@@ -1204,7 +1196,7 @@ Bind f3 and f4 to previous/next pane.
 #+END_SRC
 
 *** [[http://www.howardism.org/Technical/Emacs/eshell-fun.html][eshell-here]]
-Thanks to Howard Abrahams.
+Thanks to Howard Abrams.
 modified because current version lacks function have
 window-total-height.
 
@@ -1639,6 +1631,8 @@ Some nice functions
 #+END_SRC
 
 *** set theme bba1
+
+[[https://emacsfodder.github.io/emacs-theme-editor/][Emacs Theme Editor]] is a nice tool to define your colors.
 
 #+BEGIN_SRC emacs-lisp
   (deftheme bba1 "DOCSTRING for bba1")
