@@ -37,6 +37,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
   ;; Load the rest of the packages
   ;; (package-initialize t)
   ;; (setq package-enable-at-startup nil)
+  (setq org-use-extra-keys t)
   (require 'org)
   (require 'ob-tangle)
   (require 'ob-sql)
@@ -369,32 +370,33 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 
 #+BEGIN_SRC emacs-lisp
-    (require 'org-protocol)
+  (require 'org-protocol)
 
-    (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-    (define-key global-map "\C-cl" 'org-store-link)
-    (define-key global-map "\C-ca" 'org-agenda)
-    (setq org-log-done t)
-    (setq org-id-method (quote uuidgen))
+  (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+  (define-key global-map "\C-cl" 'org-store-link)
+  (define-key global-map "\C-ca" 'org-agenda)
+  (setq org-log-done t)
+  (setq org-id-method (quote uuidgen))
+  (setq org-src-window-setup 'current-window)
 
-    (if (equal "work" (getenv "SYSENV"))
-    (setq org-agenda-files (list "~/workorg/work.org"
-                                 "~/org/notes.org"
-                                 "~/org/emacs.org"
-                                 "~/org/private.org"
-                                 "~/org/it.org"
-                                 "~/org/refile.org"
-                                 "~/org/workhours.org"
-                                 ))
-    (setq org-agenda-files (list "~/org/work.org"
-                                 "~/org/notes.org"
-                                 "~/org/emacs.org"
-                                 "~/org/private.org"
-                                 "~/org/it.org"
-                                 "~/org/refile.org"
-                                 "~/org/workhours.org"
-                                 ))
-    )
+  (if (equal "work" (getenv "SYSENV"))
+  (setq org-agenda-files (list "~/workorg/work.org"
+                               "~/org/notes.org"
+                               "~/org/emacs.org"
+                               "~/org/private.org"
+                               "~/org/it.org"
+                               "~/org/refile.org"
+                               "~/org/workhours.org"
+                               ))
+  (setq org-agenda-files (list "~/org/work.org"
+                               "~/org/notes.org"
+                               "~/org/emacs.org"
+                               "~/org/private.org"
+                               "~/org/it.org"
+                               "~/org/refile.org"
+                               "~/org/workhours.org"
+                               ))
+  )
 
 #+END_SRC
 
@@ -1182,7 +1184,8 @@ Bind f3 and f4 to previous/next pane.
 #+BEGIN_SRC emacs-lisp
   (require 'recentf)
   (recentf-mode 1)
-  (setq recentf-max-menu-items 42)
+  (setq recentf-max-saved-items 200
+        recentf-max-menu-items 42)
   (if (<= emacs-major-version 23)
       (global-set-key "\C-cr" 'recentf-open-files))
 #+END_SRC
