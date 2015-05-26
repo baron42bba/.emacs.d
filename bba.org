@@ -144,10 +144,14 @@ For annotated tags prepare message with commit messages since last tag.
 *** fullframe
 open ibuffer and magit-status in fullframe mode.
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20140619.305")
-  (require 'fullframe)
-  (fullframe magit-status magit-mode-quit-window)
-  (fullframe ibuffer ibuffer-quit)
+    (if (>= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20140619.305")
+          (require 'fullframe)
+          (fullframe magit-status magit-mode-quit-window)
+          (fullframe ibuffer ibuffer-quit)
+          )
+      )
 #+END_SRC
 *** smartparens-mode
 Enable smart parens in all modes.
@@ -176,33 +180,37 @@ search the web on your fingertips. C-c /.
 
 
 #+BEGIN_SRC emacs-lisp
-  (require 'engine-mode)
+    (if (>= emacs-major-version 24)
+        (progn
+          (require 'engine-mode)
 
-  (defengine amazon
-    "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
-    "a"
-    )
+          (defengine amazon
+            "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
+            "a"
+            )
 
-  (defengine bing
-    "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
-    "b"
-    )
+          (defengine bing
+            "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
+            "b"
+            )
 
-  (defengine google-maps
-    "http://maps.google.com/maps?q=%s"
-    "m"
-    )
+          (defengine google-maps
+            "http://maps.google.com/maps?q=%s"
+            "m"
+            )
 
-  (defengine wikipedia
-    "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
-    "w"
-    )
+          (defengine wikipedia
+            "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+            "w"
+            )
 
-  (defengine youtube
-    "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
-    "y"
-    )
-  (engine-mode 1)
+          (defengine youtube
+            "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
+            "y"
+            )
+          (engine-mode 1)
+          )
+      )
 #+END_SRC
 
 *** expand-region
@@ -225,12 +233,16 @@ cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]]
 snippets. Some help for Perl and even for org-mode.
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path
-               "~/.emacs.d/elpa/yasnippet-20141017.736")
-  (require 'yasnippet)
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-  (yas-global-mode 1)
-  (define-key global-map "\C-cy" 'yas/insert-snippet)
+    (if (>= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path
+                       "~/.emacs.d/elpa/yasnippet-20141017.736")
+          (require 'yasnippet)
+          (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+          (yas-global-mode 1)
+          (define-key global-map "\C-cy" 'yas/insert-snippet)
+          )
+      )
 #+END_SRC
 *** [[https://github.com/flycheck/flycheck][flycheck]]
 
@@ -305,7 +317,11 @@ No need to start .pl .sh from scratch.
 *** htmlize
 
 #+BEGIN_SRC emacs-lisp
-  (require 'htmlize )
+  (if (>= emacs-major-version 24)
+      (progn
+        (require 'htmlize )
+        )
+  )
 
 
 #+END_SRC
@@ -358,9 +374,13 @@ I still like ido-find-file.
 *** visual-regexp
 
 #+BEGIN_SRC emacs-lisp
-  (require 'visual-regexp)
-  (define-key global-map (kbd "M-&") 'vr/query-replace)
-  (define-key global-map (kbd "M-/") 'vr/replace)
+  (if (>= emacs-major-version 24)
+      (progn
+        (require 'visual-regexp)
+        (define-key global-map (kbd "M-&") 'vr/query-replace)
+        (define-key global-map (kbd "M-/") 'vr/replace)
+        )
+  )
 #+END_SRC
 
 *** org-mode
@@ -1111,39 +1131,43 @@ Includes [[http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests
 With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode-el-and-writing-more-clearly/][Sacha Chua]].
 
 #+BEGIN_SRC emacs-lisp
-(require 'artbollocks-mode)
-;; Avoid these phrases
-(setq weasel-words-regex
-      (concat "\\b" (regexp-opt
-                     '("one of the"
-                       "should"
-                       "just"
-                       "sort of"
-                       "a lot"
-                       "probably"
-                       "maybe"
-                       "perhaps"
-                       "I think"
-                       "really"
-                       "pretty"
-                       "maybe"
-                       "nice"
-                       "action"
-                       "utilize"
-                       "leverage") t) "\\b"))
-;; Fix a bug in the regular expression to catch repeated words
-(setq lexical-illusions-regex "\\b\\(\\w+\\)\\W+\\(\\1\\)\\b")
-;; Don't show the art critic words, or at least until I figure
-;; out my own jargon
-(setq artbollocks nil)
-;; Make sure keywords are case-insensitive
-(defadvice search-for-keyword (around sacha activate)
-  "Match in a case-insensitive way."
-  (let ((case-fold-search t))
-    ad-do-it))
+    (if (>= emacs-major-version 24)
+        (progn
+          (require 'artbollocks-mode)
+          ;; Avoid these phrases
+          (setq weasel-words-regex
+                (concat "\\b" (regexp-opt
+                               '("one of the"
+                                 "should"
+                                 "just"
+                                 "sort of"
+                                 "a lot"
+                                 "probably"
+                                 "maybe"
+                                 "perhaps"
+                                 "I think"
+                                 "really"
+                                 "pretty"
+                                 "maybe"
+                                 "nice"
+                                 "action"
+                                 "utilize"
+                                 "leverage") t) "\\b"))
+          ;; Fix a bug in the regular expression to catch repeated words
+          (setq lexical-illusions-regex "\\b\\(\\w+\\)\\W+\\(\\1\\)\\b")
+          ;; Don't show the art critic words, or at least until I figure
+          ;; out my own jargon
+          (setq artbollocks nil)
+          ;; Make sure keywords are case-insensitive
+          (defadvice search-for-keyword (around sacha activate)
+            "Match in a case-insensitive way."
+            (let ((case-fold-search t))
+              ad-do-it))
 
-(add-hook 'text-mode-hook 'artbollocks-mode)
-(add-hook 'org-mode-hook  'artbollocks-mode)
+          (add-hook 'text-mode-hook 'artbollocks-mode)
+          (add-hook 'org-mode-hook  'artbollocks-mode)
+          )
+      )
 #+END_SRC
 
 *** window management
@@ -1585,7 +1609,7 @@ Some nice functions
 
     ;;(move-overlay hl-line-overlay
     ;;            (line-beginning-position) (1+ (line-end-position))
-    ;;            (current-buffer)))))
+    ;;            (current-buffer))
 
     ;; (set-face-background-pixmap 'default "~/.emacs.d/xemacs-bg.xpm")
     (set-foreground-color "green")
@@ -1761,7 +1785,7 @@ body {
       margin: 0px;
       padding: 0px;
       height: 100%;
-  }')
+  }'
 
 
 
@@ -1774,7 +1798,7 @@ body {
 
     ;;(move-overlay hl-line-overlay
     ;;            (line-beginning-position) (1+ (line-end-position))
-    ;;            (current-buffer)))))
+    ;;            (current-buffer))
 
     ;; (set-face-background-pixmap 'default "~/.emacs.d/xemacs-bg.xpm")
     (set-foreground-color "green")
