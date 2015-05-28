@@ -1315,10 +1315,18 @@ safe files with #! in first line as user executable.
                          (goto-char (point-min))
                          (save-match-data
                            (looking-at "^#!"))))
-                     (not (file-executable-p buffer-file-name))
-                     (shell-command (concat "chmod u+x " buffer-file-name))
-                     (message
-                      (concat "Saved as script: " buffer-file-name)))))
+                     (if (file-remote-p buffer-file-name)
+                         (progn
+                           (not (file-executable-p buffer-file-name))
+                           (shell-command (concat "chmod u+x " (file-name-nondirectory buffer-file-name)))
+                           (message
+                            (concat "Saved as script via tramp: " buffer-file-name))
+                           )
+                       (progn
+                         (not (file-executable-p buffer-file-name))
+                         (shell-command (concat "chmod u+x " buffer-file-name))
+                         (message
+                          (concat "Saved as script: " buffer-file-name)))))))
 
 #+END_SRC
 
