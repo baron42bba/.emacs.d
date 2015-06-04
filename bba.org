@@ -472,6 +472,25 @@ Some initial languages we want org-babel to support
 
 #+END_SRC
 
+Find next and previous =#+BEGIN_SRC sh= block.
+Very useful for repetitive literate devops jobs.
+<C-c> <S-n> then <C-c><C-c> and so on.
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook
+            (lambda ()
+
+              (fset 'bba/org-search-src-sh
+                    (lambda (&optional arg) "Find next BEGIN_SRC sh block." (interactive "p") (kmacro-exec-ring-item (quote ([19 94 35 92 43 66 69 71 73 78 95 83 82 67 32 115 104 down] 0 "%d")) arg)))
+              (define-key org-mode-map "\C-c\S-n" 'bba/org-search-src-sh)
+
+              (fset 'bba/org-search-src-sh-reverse
+                    (lambda (&optional arg) "Find previous BEGIN_SRC sh block." (interactive "p") (kmacro-exec-ring-item (quote ([18 94 35 92 43 66 69 71 73 78 95 83 82 67 32 115 104 18 down] 0 "%d")) arg)))
+              (define-key org-mode-map "\C-c\S-p" 'bba/org-search-src-sh-reverse)
+  ))
+
+#+END_SRC
+
 Define some shortcuts to access major org files.
 
 #+BEGIN_SRC emacs-lisp
