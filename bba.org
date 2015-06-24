@@ -182,6 +182,7 @@ search the web on your fingertips. C-c /.
 |---+-------------|
 | a | amazon.de   |
 | b | bing        |
+| c | cfengine    |
 | m | google maps |
 | w | wikipedia   |
 | y | youtube     |
@@ -189,37 +190,42 @@ search the web on your fingertips. C-c /.
 
 
 #+BEGIN_SRC emacs-lisp
-    (if (>= emacs-major-version 24)
-        (progn
-          (require 'engine-mode)
+  (if (>= emacs-major-version 24)
+      (progn
+        (require 'engine-mode)
 
-          (defengine amazon
-            "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
-            "a"
-            )
-
-          (defengine bing
-            "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
-            "b"
-            )
-
-          (defengine google-maps
-            "http://maps.google.com/maps?q=%s"
-            "m"
-            )
-
-          (defengine wikipedia
-            "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
-            "w"
-            )
-
-          (defengine youtube
-            "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
-            "y"
-            )
-          (engine-mode 1)
+        (defengine amazon
+          "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
+          "a"
           )
-      )
+
+        (defengine bing
+          "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
+          "b"
+          )
+
+        (defengine cfengine
+          "https://docs.cfengine.com/latest/search.html?q=%s"
+          "c"
+          )
+
+        (defengine google-maps
+          "http://maps.google.com/maps?q=%s"
+          "m"
+          )
+
+        (defengine wikipedia
+          "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+          "w"
+          )
+
+        (defengine youtube
+          "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
+          "y"
+          )
+        (engine-mode 1)
+        )
+    )
 #+END_SRC
 
 *** expand-region
@@ -884,7 +890,7 @@ taken from http://doc.norang.ca/org-mode.org
          (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
          (define-key cfengine3-mode-map "\C-c," (lambda()
                                                    (interactive)
-                                                   (browse-url (concat "http://cf-learn.info/search_cfdoc.html?search=" (word-at-point)))))
+                                                   (browse-url (concat "https://docs.cfengine.com/latest/search.html?q=" (word-at-point)))))
          ))
 
 
@@ -1227,7 +1233,7 @@ Bind f3 and f4 to previous/next pane.
   (require 'recentf)
   (recentf-mode 1)
   (setq recentf-max-saved-items 200
-        recentf-max-menu-items 42)
+        recentf-max-menu-items 142)
   (if (<= emacs-major-version 23)
       (global-set-key "\C-cr" 'recentf-open-files))
 #+END_SRC
