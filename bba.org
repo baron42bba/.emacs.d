@@ -961,7 +961,7 @@ You may start it at the end of the config file.
 
 #+BEGIN_SRC emacs-lisp
   (load-library "tramp")
-  (setq default-tramp-method "sftp")
+  (setq default-tramp-method "sshx")
 #+END_SRC
 
 With this you can do /sudo:ssh-host:file-on-ssh-host
