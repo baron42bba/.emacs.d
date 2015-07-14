@@ -1,14 +1,10 @@
 ;;; smartparens-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (turn-off-show-smartparens-mode turn-on-show-smartparens-mode
-;;;;;;  show-smartparens-global-mode show-smartparens-mode turn-off-smartparens-mode
-;;;;;;  turn-on-smartparens-mode smartparens-global-mode turn-on-smartparens-strict-mode
-;;;;;;  smartparens-global-strict-mode smartparens-strict-mode smartparens-mode
-;;;;;;  sp-use-smartparens-bindings sp-use-paredit-bindings sp-cheat-sheet)
-;;;;;;  "smartparens" "smartparens.el" (21516 47501 0 0))
+;;;### (autoloads nil "smartparens" "smartparens.el" (21908 14185
+;;;;;;  0 0))
 ;;; Generated autoloads from smartparens.el
 
 (autoload 'sp-cheat-sheet "smartparens" "\
@@ -29,18 +25,18 @@ better orientation.
 
 \(fn &optional ARG)" t nil)
 
-(defvar sp-keymap (make-sparse-keymap) "\
+(defvar smartparens-mode-map (make-sparse-keymap) "\
 Keymap used for `smartparens-mode'.")
 
 (autoload 'sp-use-paredit-bindings "smartparens" "\
-Initiate `sp-keymap' with paredit-compatible bindings for
+Initiate `smartparens-mode-map' with paredit-compatible bindings for
 corresponding functions provided by smartparens.  See variable
 `sp-paredit-bindings'.
 
 \(fn)" t nil)
 
 (autoload 'sp-use-smartparens-bindings "smartparens" "\
-Initiate `sp-keymap' with smartparens bindings for navigation functions.
+Initiate `smartparens-mode-map' with smartparens bindings for navigation functions.
 See variable `sp-smartparens-bindings'.
 
 \(fn)" t nil)
@@ -50,9 +46,9 @@ Toggle smartparens mode.
 
 You can enable pre-set bindings by customizing
 `sp-base-key-bindings' variable.  The current content of
-`sp-keymap' is:
+`smartparens-mode-map' is:
 
- \\{sp-keymap}
+ \\{smartparens-mode-map}
 
 \(fn &optional ARG)" t nil)
 
@@ -122,6 +118,17 @@ See `smartparens-mode' for more information on Smartparens mode.
 (autoload 'turn-on-smartparens-mode "smartparens" "\
 Turn on `smartparens-mode'.
 
+This function is used to turn on `smartparens-global-mode'.
+
+By default `smartparens-global-mode' ignores buffers with
+`mode-class' set to special, but only if they are also not comint
+buffers.
+
+Additionally, buffers on `sp-ignore-modes-list' are ignored.
+
+You can still turn on smartparens in these mode manually (or
+in mode's startup-hook etc.) by calling `smartparens-mode'.
+
 \(fn)" t nil)
 
 (autoload 'turn-off-smartparens-mode "smartparens" "\
@@ -171,17 +178,16 @@ Turn off `show-smartparens-mode'.
 
 ;;;***
 
-;;;### (autoloads nil nil ("smartparens-config.el" "smartparens-html.el"
-;;;;;;  "smartparens-latex.el" "smartparens-lua.el" "smartparens-pkg.el"
-;;;;;;  "smartparens-ruby.el") (21516 47501 171084 0))
+;;;### (autoloads nil nil ("smartparens-config.el" "smartparens-haskell.el"
+;;;;;;  "smartparens-html.el" "smartparens-latex.el" "smartparens-lua.el"
+;;;;;;  "smartparens-pkg.el" "smartparens-python.el" "smartparens-ruby.el")
+;;;;;;  (21908 14185 513201 0))
 
 ;;;***
 
-(provide 'smartparens-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; smartparens-autoloads.el ends here

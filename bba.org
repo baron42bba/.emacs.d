@@ -171,8 +171,8 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20140819.203")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20140811.523")
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20150628.1418")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
         (require 'smartparens)
         (smartparens-global-mode 1)
         ))

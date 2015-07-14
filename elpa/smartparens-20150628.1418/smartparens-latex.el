@@ -64,7 +64,7 @@
       (goto-char me)
       (looking-at-p "\\sw"))))
 
-(defun sp-latex-skip-double-quote (_ action _)
+(defun sp-latex-skip-double-quote (_1 action _2)
   (when (eq action 'insert)
     (when (looking-at-p "''''")
       (delete-char -2)
@@ -87,6 +87,7 @@ This predicate is only tested on \"insert\" action."
                  latex-mode
                  )
   (sp-local-pair "`" "'"
+                 :actions '(:rem autoskip)
                  :skip-match 'sp-latex-skip-match-apostrophe
                  :unless '(sp-latex-point-after-backslash))
   ;; math modes, yay.  The :actions are provided automatically if
