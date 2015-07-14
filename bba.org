@@ -98,7 +98,7 @@ Keep track of your important stuff!
 
 *** async
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
+  (if (>= emacs-major-version 25)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/async-20150412.2207")
         (require 'async)
@@ -971,7 +971,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 *** [[http://www.twmode.sourceforge.net/][twitter]]
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20150105.333")
+  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20150131.708")
   (require 'twittering-mode)
   (cond
    ((string-equal system-type "gnu/linux")
