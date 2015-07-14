@@ -1,8 +1,8 @@
 ;;; engine-mode.el --- Define and query search engines from within Emacs.
 
 ;; Author: Harry R. Schwartz <hello@harryrschwartz.com>
-;; Version: 2015.02.07
-;; Package-Version: 20150323.2148
+;; Version: 2015.06.13
+;; Package-Version: 20150613.759
 ;; URL: https://github.com/hrs/engine-mode/engine-mode.el
 
 ;; This file is NOT part of GNU Emacs.
@@ -24,11 +24,11 @@
 ;; results in your default browser.
 
 ;; The `defengine' macro can also take an optional key combination,
-;; prefixed with `engine/keymap-prefix' (which defaults to "C-c /"):
+;; prefixed with "C-c /":
 
 ;; (defengine duckduckgo
 ;;   "https://duckduckgo.com/?q=%s"
-;;   "d")
+;;   :keybinding "d")
 
 ;; `C-c / d' is now bound to the new function
 ;; engine/search-duckduckgo'! Nifty.
@@ -51,17 +51,30 @@
 ;;; Code:
 (eval-when-compile (require 'cl))
 
+(defvar engine-mode-map (make-sparse-keymap))
+(defvar engine-mode-prefixed-map (make-sparse-keymap))
+
 (define-minor-mode engine-mode
   "Minor mode for defining and querying search engines through Emacs.
 
 \\{engine-mode-map}"
   :global t
-  :keymap (make-sparse-keymap))
+  :keymap engine-mode-map)
 
-(defcustom engine/keymap-prefix (kbd "C-c /")
-  "Engine-mode keymap prefix."
+(defun engine/set-keymap-prefix (prefix-key)
+  "Bind the engine-mode keymap to a new prefix.
+For example, to use \"C-c s\" instead of the default \"C-c /\":
+
+(engine/set-keymap-prefix (kbd \"C-c s\"))"
+  (define-key engine-mode-map prefix-key engine-mode-prefixed-map))
+
+(engine/set-keymap-prefix (kbd "C-c /"))
+
+(defcustom engine/browser-function browse-url-browser-function
+  "The default browser function used when opening a URL in an engine.
+Defaults to `browse-url-browser-function'."
   :group 'engine-mode
-  :type 'string)
+  :type 'symbol)
 
 (defun engine/search-prompt (engine-name)
   (concat "Search " (capitalize engine-name) ": "))
@@ -75,12 +88,13 @@
       (buffer-substring (region-beginning) (region-end))
     (engine/prompted-search-term engine-name)))
 
-(defun engine/execute-search (search-engine-url search-term)
+(defun engine/execute-search (search-engine-url browser-function search-term)
   "Display the results of the query."
   (interactive)
-  (browse-url
-   (format search-engine-url
-           (url-hexify-string search-term))))
+  (let ((browse-url-browser-function browser-function))
+    (browse-url
+     (format search-engine-url
+             (url-hexify-string search-term)))))
 
 (defun engine/function-name (engine-name)
   (intern (concat "engine/search-" (downcase (symbol-name engine-name)))))
@@ -90,31 +104,45 @@
           (capitalize (symbol-name engine-name))
           " for the selected text. Prompt for input if none is selected."))
 
-(defun engine/scope-keybinding (keybinding)
-  (concat engine/keymap-prefix " " keybinding))
-
 (defun engine/bind-key (engine-name keybinding)
   (when keybinding
-    `(define-key engine-mode-map (kbd ,(engine/scope-keybinding keybinding))
+    `(define-key engine-mode-prefixed-map ,keybinding
        (quote ,(engine/function-name engine-name)))))
 
-(defmacro defengine (engine-name search-engine-url &optional keybinding)
+(cl-defmacro defengine (engine-name search-engine-url &key keybinding docstring (browser 'engine/browser-function) (term-transformation-hook 'identity))
   "Define a custom search engine.
 
 `engine-name' is a symbol naming the engine.
 `search-engine-url' is the url to be queried, with a \"%s\"
 standing in for the search term.
-The optional value `keybinding' is a string describing the key to
-bind the new function.
+The optional keyword argument `docstring' assigns a docstring to
+the generated function. A reasonably sensible docstring will be
+generated if a custom one isn't provided.
+The optional keyword argument `browser` assigns the browser
+function to be used when opening the URL.
+The optional keyword argument `term-transformation-hook' is a
+function that will be applied to the search term before it's
+substituted into `search-engine-url'. For example, if we wanted
+to always upcase our search terms, we might use:
 
-Keybindings are prefixed by the `engine/keymap-prefix', which
-defaults to `C-c /'.
+(defengine duckduckgo
+  \"https://duckduckgo.com/?q=%s\"
+  :term-transformation-hook 'upcase)
+
+In this case, searching for \"foobar\" will hit the url
+\"https://duckduckgo.com/?q=FOOBAR\".
+
+The optional keyword argument `keybinding' is a string describing
+the key to bind the new function.
+
+Keybindings are in the `engine-mode-map', so they're prefixed.
 
 For example, to search Wikipedia, use:
 
   (defengine wikipedia
     \"http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s\"
-    \"w\")
+    :keybinding \"w\"
+    :docstring \"Search Wikipedia!\")
 
 Hitting \"C-c / w\" will be bound to the newly-defined
 `engine/search-wikipedia' function."
@@ -122,10 +150,10 @@ Hitting \"C-c / w\" will be bound to the newly-defined
   (assert (symbolp engine-name))
   `(prog1
      (defun ,(engine/function-name engine-name) (search-term)
-       ,(engine/docstring engine-name)
+       ,(or docstring (engine/docstring engine-name))
        (interactive
         (list (engine/get-query ,(symbol-name engine-name))))
-       (engine/execute-search ,search-engine-url search-term))
+       (engine/execute-search ,search-engine-url ,browser (,term-transformation-hook search-term)))
      ,(engine/bind-key engine-name keybinding)))
 
 (provide 'engine-mode)

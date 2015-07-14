@@ -197,27 +197,27 @@ search the web on your fingertips. C-c /.
 
           (defengine amazon
             "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
-            "a"
+            :keybinding "a"
             )
 
           (defengine bing
             "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
-            "b"
+            :keybinding "b"
             )
 
           (defengine google-maps
             "http://maps.google.com/maps?q=%s"
-            "m"
+            :keybinding "m"
             )
 
           (defengine wikipedia
             "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
-            "w"
+            :keybinding "w"
             )
 
           (defengine youtube
             "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
-            "y"
+            :keybinding "y"
             )
           (engine-mode 1)
           )
