@@ -1,8 +1,9 @@
 ;;; flycheck-ert.el --- Flycheck: ERT extensions  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013-2015  Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Copyright (C) 2013-2015 Sebastian Wiesner and Flycheck contributors
 
 ;; Author: Sebastian Wiesner <swiesner@lunaryorn.com>
+;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://github.com/flycheck/flycheck
 
 ;; This file is not part of GNU Emacs.
@@ -123,7 +124,7 @@ After BODY, restore the old state of Global Flycheck Mode."
          (progn
            (global-flycheck-mode 1)
            ,@body)
-       (global-flycheck-mode old-state))))
+       (global-flycheck-mode (if old-state 1 -1)))))
 
 (defmacro flycheck-ert-with-env (env &rest body)
   "Add ENV to `process-environment' in BODY.
