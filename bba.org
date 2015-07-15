@@ -118,7 +118,7 @@ Keep track of your important stuff!
         )
     (progn
       (add-to-list 'load-path "~/.emacs.d/elpa/magit-20150704.855")
-      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-0.0.9")
+      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
       (require 'yaml-mode)
       )
 

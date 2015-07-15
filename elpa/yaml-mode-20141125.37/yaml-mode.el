@@ -1,11 +1,12 @@
 ;;; yaml-mode.el --- Major mode for editing YAML files
 
-;; Copyright (C) 2010-2013 Yoshiki Kurihara
+;; Copyright (C) 2010-2014 Yoshiki Kurihara
 
 ;; Author: Yoshiki Kurihara <clouder@gmail.com>
 ;;         Marshall T. Vandegrift <llasram@gmail.com>
 ;; Keywords: data yaml
-;; Version: 0.0.9
+;; Package-Version: 20141125.37
+;; Version: 0.0.11
 
 ;; This file is not part of Emacs
 
@@ -115,13 +116,10 @@ that key is pressed to begin a block literal."
 
 ;; Constants
 
-(defconst yaml-mode-version "0.0.9" "Version of `yaml-mode'.")
+(defconst yaml-mode-version "0.0.11" "Version of `yaml-mode'.")
 
 (defconst yaml-blank-line-re "^ *$"
   "Regexp matching a line containing only (valid) whitespace.")
-
-(defconst yaml-comment-re "\\(?:^\\|\\s-+\\)\\(#.*\\)"
-  "Regexp matching a line containing a YAML comment or delimiter.")
 
 (defconst yaml-directive-re "^\\(?:--- \\)? *%\\(\\w+\\)"
   "Regexp matching a line contatining a YAML directive.")
@@ -194,8 +192,7 @@ that key is pressed to begin a block literal."
   (define-key yaml-mode-map ">" 'yaml-electric-bar-and-angle)
   (define-key yaml-mode-map "-" 'yaml-electric-dash-and-dot)
   (define-key yaml-mode-map "." 'yaml-electric-dash-and-dot)
-  (define-key yaml-mode-map [backspace] 'yaml-electric-backspace)
-  (define-key yaml-mode-map "\C-j" 'newline-and-indent))
+  (define-key yaml-mode-map [backspace] 'yaml-electric-backspace))
 
 (defvar yaml-mode-syntax-table nil
   "Syntax table in use in `yaml-mode' buffers.")
@@ -221,6 +218,7 @@ that key is pressed to begin a block literal."
   "Simple mode to edit YAML.
 
 \\{yaml-mode-map}"
+  :syntax-table yaml-mode-syntax-table
   (set (make-local-variable 'comment-start) "# ")
   (set (make-local-variable 'comment-start-skip) "#+ *")
   (set (make-local-variable 'indent-line-function) 'yaml-indent-line)
@@ -228,26 +226,26 @@ that key is pressed to begin a block literal."
   (set (make-local-variable 'font-lock-defaults)
        '(yaml-font-lock-keywords
          nil nil nil nil
-         (font-lock-syntactic-keywords . yaml-font-lock-syntactic-keywords))))
+         (font-lock-syntactic-keywords . yaml-font-lock-syntactic-keywords)))
+  (font-lock-fontify-buffer))
 
 
 ;; Font-lock support
 
 (defvar yaml-font-lock-keywords
    (list
-    (cons yaml-comment-re '(1 font-lock-comment-face))
     (cons yaml-constant-scalars-re '(1 font-lock-constant-face))
     (cons yaml-tag-re '(0 font-lock-type-face))
-    (cons yaml-node-anchor-alias-re '(0 font-lock-function-name-face t))
-    (cons yaml-hash-key-re '(1 font-lock-variable-name-face t))
+    (cons yaml-node-anchor-alias-re '(0 font-lock-function-name-face))
+    (cons yaml-hash-key-re '(1 font-lock-variable-name-face))
     (cons yaml-document-delimiter-re '(0 font-lock-comment-face))
     (cons yaml-directive-re '(1 font-lock-builtin-face))
-    '(yaml-font-lock-block-literals 0 font-lock-string-face t)
+    '(yaml-font-lock-block-literals 0 font-lock-string-face)
     '("^[\t]+" 0 'yaml-tab-face t))
    "Additional expressions to highlight in YAML mode.")
 
 (defvar yaml-font-lock-syntactic-keywords
-  (list '(yaml-syntactic-block-literals 0 "." t))
+  (list '(yaml-syntactic-block-literals 0 "."))
   "Additional syntax features to highlight in YAML mode.")
 
 
