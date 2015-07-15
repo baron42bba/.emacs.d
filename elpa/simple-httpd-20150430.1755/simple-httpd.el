@@ -4,8 +4,8 @@
 
 ;; Author: Christopher Wellons <wellons@nullprogram.com>
 ;; URL: https://github.com/skeeto/emacs-http-server
-;; Version: 20140908.1908
-;; X-Original-Version: 1.4.5
+;; Package-Version: 20150430.1755
+;; Version: 1.4.6
 ;; Package-Requires: ((cl-lib "0.3"))
 
 ;;; Commentary:
@@ -96,6 +96,9 @@
 
 ;;; History:
 
+;; Version 1.4.6: fixes
+;;   * Added httpd-serve-directory
+;;   * Fix some encoding issues
 ;; Version 1.4.5: fixes
 ;;   * Update to cl-lib from cl
 ;; Version 1.4.4: features
@@ -443,11 +446,12 @@ A servlet that says hello,
   "Parse an endpoint definition template for use with `defservlet*'."
   (cl-loop for item in (split-string (symbol-name symbol) "/")
            for n upfrom 0
-           when (eql (aref item 0) ?:)
+           when (and (> (length item) 0) (eql (aref item 0) ?:))
            collect (cons (intern (substring item 1)) n) into vars
            else collect item into path
-           finally (return
-                    (cl-values (intern (mapconcat #'identity path "/")) vars))))
+           finally
+           (cl-return
+            (cl-values (intern (mapconcat #'identity path "/")) vars))))
 
 (defvar httpd-path nil
   "Anaphoric variable for `defservlet*'.")
