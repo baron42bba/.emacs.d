@@ -111,7 +111,7 @@ Keep track of your important stuff!
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa")
-        (add-to-list 'load-path "~/.emacs.d/elpa/popup-20140207.1702")
+        (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
         (require 'package)
         (package-initialize)
         (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
