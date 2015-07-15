@@ -1,11 +1,11 @@
 ;;; popwin.el --- Popup Window Manager.
 
-;; Copyright (C) 2011, 2012, 2013, 2014  Tomohiro Matsuyama
+;; Copyright (C) 2011-2015  Tomohiro Matsuyama
 
-;; Author: Tomohiro Matsuyama <tomo@cx4a.org>
+;; Author: Tomohiro Matsuyama <m2ym.pub@gmail.com>
 ;; Keywords: convenience
-;; Version: 20140902.1727
-;; X-Original-Version: 0.7.0alpha
+;; Package-Version: 20150315.600
+;; Version: 1.0.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@
 
 (eval-when-compile (require 'cl))
 
-(defconst popwin:version "0.7.0alpha")
+(defconst popwin:version "1.0.0")
 
 
 
@@ -100,6 +100,11 @@ the selected window."
     (if (>= emacs-major-version 24)
         (switch-to-buffer buffer-or-name norecord t)
       (switch-to-buffer buffer-or-name norecord))))
+
+(defun popwin:select-window (window &optional norecord)
+  "Call `select-window' with saving the current buffer."
+  (save-current-buffer
+    (select-window window norecord)))
 
 (defun popwin:buried-buffer-p (buffer)
   "Return t if BUFFER might be thought of as a buried buffer."
@@ -190,7 +195,10 @@ HFACTOR, and vertical factor VFACTOR."
             (window-dedicated-p node))
     (destructuring-bind (dir edges . windows) node
       (append (list dir edges)
-              (mapcar 'popwin:window-config-tree-1 windows)))))
+              (loop for window in windows
+                    unless (and (windowp window)
+                                (window-parameter window 'window-side))
+                    collect (popwin:window-config-tree-1 window))))))
 
 (defun popwin:window-config-tree ()
   "Return `window-tree' with replacing window values in the tree
@@ -212,7 +220,7 @@ new-window."
         (with-selected-window window
           (popwin:switch-to-buffer buffer t))
         (when selected
-          (select-window window))
+          (popwin:select-window window))
         (set-window-point window point)
         (set-window-start window start t)
         (when dedicated
@@ -981,7 +989,7 @@ be used for `popwin:universal-display'."
 (defun popwin:universal-display ()
   "Call the following command interactively with letting
 `popwin:special-display-config' be
-`popwin:universal-display-config'. This wil be useful when
+`popwin:universal-display-config'. This will be useful when
 displaying buffers in popup windows temporarily."
   (interactive)
   (let ((command (key-binding (read-key-sequence "" t)))

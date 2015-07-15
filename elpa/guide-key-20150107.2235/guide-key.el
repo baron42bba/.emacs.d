@@ -4,9 +4,9 @@
 
 ;; Author: Tsunenobu Kai <kai2nenobu@gmail.com>
 ;; URL: https://github.com/kai2nenobu/guide-key
-;; Version: 20140828.807
-;; X-Original-Version: 1.2.3
-;; Package-Requires: ((popwin "0.3.0"))
+;; Package-Version: 20150107.2235
+;; Version: 1.2.5
+;; Package-Requires: ((dash "2.10.0") (popwin "0.3.0") (s "1.9.0"))
 ;; Keywords: help convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -62,18 +62,30 @@
 ;; When you press these prefix keys, key bindings are automatically
 ;; popped up after a short delay (1 second by default).
 ;;
+;; To activate guide-key for any key sequence instead of just the ones
+;; listed above then use:
+;;
+;;   (setq guide-key/guide-key-sequence t)
+;;
 ;; guide-key can highlight commands which match a specified regular expression.
-;; Key bindings following "C-x r" are rectangle family and register family.
-;; If you want to highlight only rectangle family commands, put this setting
-;; in your init.el.
+;; Key bindings following "C-x r" are rectangle family, register family and
+;; bookmark family.  If you want to highlight only rectangle family
+;; commands, put this setting in your init.el.
 ;;
 ;;   (setq guide-key/highlight-command-regexp "rectangle")
 ;;
-;; This feature makes it easy to find commands and learn their key bindings. If
-;; you want to highlight both rectangle family and register family, set an
-;; adequate regular expression like this.
+;; This feature makes it easy to find commands and learn their key bindings.
+;; If you want to highlight all families, you can specify multiple regular
+;; expressions and faces as below.
 ;;
-;;   (setq guide-key/highlight-command-regexp "rectangle\\|register")
+;;   (setq guide-key/highlight-command-regexp
+;;         '("rectangle"
+;;           ("register" . font-lock-type-face)
+;;           ("bookmark" . font-lock-warning-face)))
+;;
+;; If an element of `guide-key/highlight-command-regexp' is cons, its car
+;; means a regular expression to highlight, and its cdr means a face put on
+;; command names.
 ;;
 ;; Moreover, prefix commands are automatically highlighted.
 ;;
@@ -192,10 +204,12 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl))
+  (require 'cl)
+  (require 'face-remap))
 
+(require 'dash)
 (require 'popwin)
-(require 'face-remap)
+(require 's)
 
 ;;; variables
 (defgroup guide-key nil
@@ -211,7 +225,9 @@ are allowed.
 
 In addition, an element of this list can be a list whose car is
 the symbol for a certain mode, and whose cdr is a list of key
-sequences to consider only if that mode is active."
+sequences to consider only if that mode is active.
+
+Set this variable to `t' to enable for any key sequence."
   :type '(repeat (choice (string :tag "Prefix key sequence")
                          (cons :tag "Mode specific sequence"
                                (symbol :tag "Symbol for mode")
@@ -239,14 +255,16 @@ If a command name matches this regexp, it is highlighted with
 `guide-key/highlight-command-face'.
 
 This variable can be a list and its element is either a regexp or
-a cons cell, its car is a regexp and its cdr is a face. If
-regexp, commands which match the regexp are highlighted with
-`guide-key/highlight-command-face'. If cons cell, commands
-which match the car regexp are highlighted with the cdr face."
+a cons cell, its car is a regexp and its cdr is face symbol or
+color name string.  If regexp, commands which match the regexp
+are highlighted with `guide-key/highlight-command-face'.  If cons
+cell, commands which match the car regexp are highlighted with
+the cdr face or color."
   :type '(choice (regexp :tag "Regexp to highlight")
                  (repeat (choice (regexp :tag "Regexp to highlight")
                                  (cons (regexp :tag "Regexp to highlight")
-                                       (face   :tag "Face on command")))))
+                                       (choice (face   :tag "Face on command")
+                                               (string :tag "Color name string"))))))
   :group 'guide-key)
 
 (defcustom guide-key/align-command-by-space-flag nil
@@ -337,7 +355,7 @@ positive, otherwise disable."
 
 (defun guide-key/popup-function (&optional input)
   "Popup function called after delay of `guide-key/idle-delay' second."
-  (let ((key-seq (or input (this-command-keys-vector)))
+  (let ((key-seq (or input (this-single-command-keys)))
         (regexp guide-key/highlight-command-regexp))
     (let ((dsc-buf (current-buffer))
 	  (max-width 0))
@@ -356,7 +374,7 @@ positive, otherwise disable."
 ;;; internal functions
 (defun guide-key/polling-function ()
   "Polling function executed every `guide-key/polling-time' second."
-  (let ((key-seq (this-command-keys-vector)))
+  (let ((key-seq (this-single-command-keys)))
     (if (guide-key/popup-guide-buffer-p key-seq)
         (when (guide-key/update-guide-buffer-p key-seq)
           (guide-key/turn-on-idle-timer))
@@ -405,11 +423,12 @@ window.  Otherwise, return the width of popup window"
 (defun guide-key/popup-guide-buffer-p (key-seq)
   "Return t if guide buffer should be popped up."
   (and (> (length key-seq) 0)
-       (or (member key-seq (guide-key/buffer-key-seqences))
+       (or (eq guide-key/guide-key-sequence t)
+           (member key-seq (guide-key/buffer-key-sequences))
            (and guide-key/recursive-key-sequence-flag
                 (guide-key/popup-guide-buffer-p (guide-key/vbutlast key-seq))))))
 
-(defun guide-key/buffer-key-seqences ()
+(defun guide-key/buffer-key-sequences ()
   "Return a list of key sequences (vector representation) in current buffer."
   (let (lst)
     ;; global key sequences
@@ -533,7 +552,10 @@ appropriate face is not found."
                                'guide-key/highlight-command-face))
                             ((consp elm)
                              (when (string-match (car elm) string)
-                               (cdr elm))))
+                               (if (stringp (cdr elm))
+                                   ;; anonymous face, see (info "(elisp)Faces")
+                                   (list :foreground (cdr elm))
+                                 (cdr elm)))))
                    return it)))
       )))
 
@@ -606,10 +628,11 @@ functions; this-command-keys and this-command-keys-vector."
 ;;; debug
 (defun guide-key/message-events ()
   ""
-  (message (format "lce:%S tck:%S tckv:%S lie:%S uce:%S"
+  (message (format "lce:%S tck:%S tckv:%S tsck:%S lie:%S uce:%S"
                    last-command-event
                    (this-command-keys)
                    (this-command-keys-vector)
+                   (this-single-command-keys)
                    last-input-event
                    unread-command-events
                    )))

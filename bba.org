@@ -278,8 +278,8 @@ snippets. Some help for Perl and even for org-mode.
 Probably the best help to keep track of the not every day used keybindings.
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20140902.1727")
-  (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20140828.807")
+  (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
+  (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
   (require 'guide-key)
   (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-x l" "<f9>"))
   (setq guide-key/recursive-key-sequence-flag t)
