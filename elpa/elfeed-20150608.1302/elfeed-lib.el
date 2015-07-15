@@ -39,7 +39,9 @@
 `timer-duration' but allows a bit more flair."
   (if (numberp time)
       time
-    (timer-duration (replace-regexp-in-string "\\(ago\\|old\\|-\\)" "" time))))
+    (when (string-match-p "[[:alpha:]]" time)
+      (let ((clean (replace-regexp-in-string "\\(ago\\|old\\|-\\)" " " time)))
+        (timer-duration clean)))))
 
 (defun elfeed-looks-like-url-p (string)
   "Return true if STRING looks like it could be a URL."
@@ -70,19 +72,35 @@ Align should be a keyword :left or :right."
   (let ((trim (replace-regexp-in-string "[\n\t]+" " " (or name ""))))
     (replace-regexp-in-string "^ +\\| +$" "" trim)))
 
+(defun elfeed-parse-simple-iso-8601 (string)
+  "Attempt to parse STRING as a simply formatted ISO 8601 date.
+Examples: 2015-02-22, 2015-02, 20150222"
+  (save-match-data
+    (let ((re "^\\([0-9]\\{4\\}\\)-?\\([0-9]\\{2\\}\\)-?\\([0-9]\\{2\\}\\)?$")
+          (clean (elfeed-cleanup string)))
+      (when (string-match re clean)
+        (let ((year (string-to-number (match-string 1 clean)))
+              (month (string-to-number (match-string 2 clean)))
+              (day (string-to-number (or (match-string 3 clean) "1"))))
+          (when (and (>= year 1900) (< year 2200))
+            (float-time (encode-time 0 0 0 day month year t))))))))
+
 (defun elfeed-float-time (&optional date)
   "Like `float-time' but accept anything reasonable for DATE,
 defaulting to the current time if DATE could not be parsed. Date
 is allowed to be relative to now (`elfeed-time-duration')."
   (cl-typecase date
     (string
-     (let ((duration (elfeed-time-duration date)))
-       (if duration
-           (- (float-time) duration)
-         (let ((time (ignore-errors (date-to-time date))))
-           (if (equal time '(14445 17280)) ; date-to-time silently failed
-               (float-time)
-             (float-time time))))))
+     (let ((iso-8601 (elfeed-parse-simple-iso-8601 date)))
+       (if iso-8601
+           iso-8601
+         (let ((duration (elfeed-time-duration date)))
+           (if duration
+               (- (float-time) duration)
+             (let ((time (ignore-errors (date-to-time date))))
+               (if (equal time '(14445 17280)) ; date-to-time silently failed
+                   (float-time)
+                 (float-time time))))))))
     (integer date)
     (list (float-time date))
     (otherwise (float-time))))
@@ -204,6 +222,36 @@ If no such line exists, point is left in place."
     (setf (point) (point-min))
     (unless (search-forward-regexp "^$" nil t)
       (setf (point) start))))
+
+(defun elfeed--shuffle (seq)
+  "Destructively shuffle SEQ."
+  (let ((n (length seq)))
+    (prog1 seq  ; don't use dotimes result (bug#16206)
+      (dotimes (i n)
+        (cl-rotatef (elt seq i) (elt seq (+ i (cl-random (- n i)))))))))
+
+(defun elfeed-split-ranges-to-numbers (str n)
+  "Convert STR containing enclosure numbers into a list of numbers.
+STR is a string; N is the highest possible number in the list.
+This includes expanding e.g. 3-5 into 3,4,5.  If the letter
+\"a\" ('all')) is given, that is expanded to a list with numbers [1..n]."
+  (let ((str-split (split-string str))
+        beg end list)
+    (dolist (elem str-split list)
+      ;; special number "a" converts into all enclosures 1-N.
+      (when (equal elem "a")
+        (setf elem (concat "1-" (int-to-string n))))
+      (if (string-match "\\([0-9]+\\)-\\([0-9]+\\)" elem)
+          ;; we have found a range A-B, which needs converting
+          ;; into the numbers A, A+1, A+2, ... B.
+          (progn
+            (setf beg (string-to-number (match-string 1 elem))
+                  end (string-to-number (match-string 2 elem)))
+            (while (<= beg end)
+              (setf list (nconc list (list beg))
+                    beg (1+ beg))))
+        ;; else just a number
+        (push (string-to-number elem) list)))))
 
 (provide 'elfeed-lib)
 

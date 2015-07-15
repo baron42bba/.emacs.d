@@ -91,7 +91,8 @@ the :last-update time is updated.")
   "Merge B into A, preserving A's tags. Return true if an actual
 update occurred, not counting content."
   (setf (elfeed-entry-tags b) (elfeed-entry-tags a)
-        (elfeed-entry-content a) (elfeed-entry-content b))
+        (elfeed-entry-content a) (elfeed-entry-content b)
+        (elfeed-entry-meta b) (elfeed-entry-meta a))
   (not
    (zerop
     (cl-loop for i from 0 below (length a)
@@ -207,6 +208,18 @@ Use `elfeed-db-return' to exit early and optionally return data.
             ,@body))
         elfeed-db-index))))
 
+(defun elfeed-feed-entries (feed-or-id)
+  "Return a list of all entries for a particular feed.
+The FEED-OR-ID may be a feed struct or a feed ID (url)."
+  (let ((feed-id (if (elfeed-feed-p feed-or-id)
+                     (elfeed-feed-id feed-or-id)
+                   feed-or-id)))
+    (let ((entries))
+      (with-elfeed-db-visit (entry feed)
+        (when (equal (elfeed-feed-id feed) feed-id)
+          (push entry entries)))
+      (nreverse entries))))
+
 (defun elfeed-apply-hooks-now ()
   "Apply `elfeed-new-entry-hook' to all entries in the database."
   (interactive)
@@ -217,6 +230,16 @@ Use `elfeed-db-return' to exit early and optionally return data.
 (defmacro elfeed-db-return (&optional value)
   "Use this to exit early and return VALUE from `with-elfeed-db-visit'."
   `(throw 'elfeed-db-done ,value))
+
+(defun elfeed-db-get-all-tags ()
+  "Return a list of all tags currently in the database."
+  (let ((table (make-hash-table :test 'eq)))
+    (with-elfeed-db-visit (e _)
+      (dolist (tag (elfeed-entry-tags e))
+        (setf (gethash tag table) tag)))
+    (let ((tags ()))
+      (maphash (lambda (k _) (push k tags)) table)
+      (cl-sort tags #'string< :key #'symbol-name))))
 
 ;; Saving and Loading:
 
@@ -301,18 +324,26 @@ This function increases the size of the structs in the database."
     (elfeed-entry (setf (elfeed-entry-meta thing) plist))
     (otherwise (error "Don't know how to access metadata on %S" thing))))
 
-(defun elfeed-meta (thing key)
+(defun elfeed-db--plist-fixup (plist)
+  "Remove nil values from PLIST."
+  (cl-loop for (k v) on plist by #'cddr
+           when (not (null v))
+           collect k and collect v))
+
+(defun elfeed-meta (thing key &optional default)
   "Access metadata for THING (entry, feed) under KEY."
-  (plist-get (elfeed-meta--plist thing) key))
+  (or (plist-get (elfeed-meta--plist thing) key)
+      default))
 
 (defun elfeed-meta--put (thing key value)
   "Set metadata to VALUE on THING under KEY."
   (when (not (elfeed-readable-p value)) (error "New value must be readable."))
   (let ((new-plist (plist-put (elfeed-meta--plist thing) key value)))
     (prog1 value
-      (elfeed-meta--set-plist thing new-plist))))
+      (elfeed-meta--set-plist thing (elfeed-db--plist-fixup new-plist)))))
 
-(gv-define-simple-setter elfeed-meta elfeed-meta--put)
+(gv-define-setter elfeed-meta (value thing key &optional _default)
+  `(elfeed-meta--put ,thing ,key ,value))
 
 ;; Filesystem storage:
 
@@ -408,9 +439,20 @@ This function increases the size of the structs in the database."
   (ignore-errors
     (delete-file (elfeed-ref--file ref))))
 
+(defun elfeed-db-gc-empty-feeds ()
+  "Remove feeds with no entries from the database."
+  (let ((seen (make-hash-table :test 'equal)))
+    (with-elfeed-db-visit (entry feed)
+      (setf (gethash (elfeed-feed-id feed) seen) feed))
+    (maphash (lambda (id _)
+               (unless (gethash id seen)
+                 (remhash id elfeed-db-feeds)))
+             elfeed-db-feeds)))
+
 (defun elfeed-db-gc (&optional stats-p)
   "Clean up unused content from the content database. If STATS is
 true, return the space cleared in bytes."
+  (elfeed-db-gc-empty-feeds)
   (let* ((data (expand-file-name "data" elfeed-db-directory))
          (dirs (directory-files data t "^[0-9a-z]\\{2\\}$"))
          (ids (cl-mapcan (lambda (d) (directory-files d nil nil t)) dirs))

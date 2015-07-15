@@ -1,10 +1,9 @@
 ;;; elfeed-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (elfeed-export-opml elfeed-load-opml elfeed elfeed-update)
-;;;;;;  "elfeed" "elfeed.el" (21691 56987 0 0))
+;;;### (autoloads nil "elfeed" "elfeed.el" (21908 14285 0 0))
 ;;; Generated autoloads from elfeed.el
 
 (autoload 'elfeed-update "elfeed" "\
@@ -32,16 +31,14 @@ Export the current feed listing to OPML-formatted FILE.
 ;;;***
 
 ;;;### (autoloads nil nil ("elfeed-db.el" "elfeed-lib.el" "elfeed-pkg.el"
-;;;;;;  "elfeed-search.el" "elfeed-show.el" "xml-query.el") (21691
-;;;;;;  56987 496165 0))
+;;;;;;  "elfeed-search.el" "elfeed-show.el" "xml-query.el") (21908
+;;;;;;  14285 676992 0))
 
 ;;;***
 
-(provide 'elfeed-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; elfeed-autoloads.el ends here

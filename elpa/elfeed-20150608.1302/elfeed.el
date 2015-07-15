@@ -56,10 +56,13 @@
 (require 'xml)
 (require 'xml-query)
 (require 'url-parse)
+(require 'url-queue)
 
 (defgroup elfeed nil
   "An Emacs web feed reader."
   :group 'comm)
+
+(defconst elfeed-version "1.1.2")
 
 (defcustom elfeed-feeds ()
   "List of all feeds that Elfeed should follow. You must add your
@@ -77,7 +80,8 @@ entries as tags (\"autotags\"). For example,
 All entries from the \"baz\" feed will be tagged as \"comic\"
 when they are first discovered."
   :group 'elfeed
-  :type 'list)
+  :type '(repeat (choice string
+                         (cons string (repeat symbol)))))
 
 (provide 'elfeed)
 
@@ -88,71 +92,51 @@ when they are first discovered."
 (defcustom elfeed-initial-tags '(unread)
   "Initial tags for new entries."
   :group 'elfeed
-  :type 'list)
+  :type '(repeat symbol))
 
 ;; Fetching:
 
-(defcustom elfeed-max-connections
-  ;; Windows Emacs cannot open many sockets at once.
-  (if (or (not (and (fboundp 'gnutls-available-p) (gnutls-available-p)))
-          (eq system-type 'windows-nt))
-      1
-    4)
-  "The maximum number of feeds to be fetched in parallel."
-  :group 'elfeed
-  :type 'integer)
+(define-obsolete-variable-alias
+  'elfeed-max-connections 'url-queue-parallel-processes nil)
 
-(defvar elfeed-connections nil
-  "List of callbacks awaiting responses.")
+(defvar elfeed-http-error-hooks ()
+  "Hooks to run when an http connection error occurs.
+It is called with 2 arguments. The first argument is the url of
+the failing feed. The second argument is the http status code.")
 
-(defvar elfeed-waiting nil
-  "List of requests awaiting connections.")
+(defvar elfeed-parse-error-hooks ()
+  "Hooks to run when an error occurs during the parsing of a feed.
+It is called with 2 arguments. The first argument is the url of
+the failing feed. The second argument is the error message .")
 
-(defvar elfeed--connection-counter 0
-  "Provides unique connection identifiers.")
+(defvar elfeed-update-hooks ()
+  "Hooks to run any time a feed update has completed a request.
+It is called with 1 argument: the URL of the feed that was just
+updated. The hook is called even when no new entries were
+found.")
 
-(defun elfeed--check-queue ()
-  "Start waiting connections if connection slots are available."
-  (while (and elfeed-waiting
-              (< (length elfeed-connections) elfeed-max-connections))
-    (let ((request (pop elfeed-waiting)))
-      (cl-destructuring-bind (_ url cb) request
-        (push request elfeed-connections)
-        (condition-case error
-            (url-retrieve url cb nil :silent)
-          (error (with-temp-buffer (funcall cb (list :error error)))))))))
+(define-obsolete-variable-alias
+  'elfeed-connections 'url-queue nil)
 
-(defun elfeed--wrap-callback (id cb)
-  "Return a function that manages the elfeed queue."
-  (lambda (status)
-    (unwind-protect
-        (funcall cb status)
-      (setf elfeed-connections (cl-delete id elfeed-connections :key #'car))
-      (elfeed--check-queue))))
+(define-obsolete-variable-alias
+  'elfeed-waiting 'url-queue nil)
 
-(defun elfeed-fetch (url callback)
-  "Basically wraps `url-retrieve' but uses the connection limiter."
-  (let* ((id (cl-incf elfeed--connection-counter))
-         (cb (elfeed--wrap-callback id callback)))
-    (push (list id url cb) elfeed-waiting)
-    (elfeed--check-queue)))
-
-(defmacro with-elfeed-fetch (url &rest body)
+(defmacro elfeed-with-fetch (url &rest body)
   "Asynchronously run BODY in a buffer with the contents from
 URL. This macro is anaphoric, with STATUS referring to the status
 from `url-retrieve'."
   (declare (indent defun))
-  `(elfeed-fetch ,url (lambda (status) ,@body (kill-buffer))))
+  `(url-queue-retrieve ,url (lambda (status) ,@body) () t t))
 
 (defun elfeed-unjam ()
   "Manually clear the connection pool when connections fail to timeout.
-This is a short-term workaround for connection handling issues."
+This is a workaround for issues in `url-queue-retrieve'."
   (interactive)
-  (let ((fails (mapcar #'cl-second elfeed-connections)))
+  (let ((fails (mapcar #'url-queue-url elfeed-connections)))
     (when fails
       (message "Elfeed aborted feeds: %s" (mapconcat #'identity fails " ")))
-    (setf elfeed-connections nil)
-    (elfeed--check-queue)))
+    (setf url-queue nil))
+  (elfeed-search-update :force))
 
 ;; Parsing:
 
@@ -184,8 +168,12 @@ NIL for unknown."
                     (date (or (xml-query '(published *) entry)
                               (xml-query '(updated *) entry)
                               (xml-query '(date *) entry)))
-                    (content (or (xml-query '(content *) entry)
-                                 (xml-query '(summary *) entry)))
+                    (content
+                     (let ((all-content
+                            (or (xml-query-all '(content *) entry)
+                                (xml-query-all '(summary *) entry))))
+                       (when all-content
+                         (apply #'concat all-content))))
                     (id (or (xml-query '(id *) entry) link
                             (elfeed-generate-id content)))
                     (type (or (xml-query '(content :type) entry)
@@ -224,7 +212,9 @@ NIL for unknown."
                     (link (or (xml-query '(link *) item) guid))
                     (date (or (xml-query '(pubDate *) item)
                               (xml-query '(date *) item)))
-                    (description (xml-query '(description *) item))
+                    (content (or (xml-query-all '(encoded *) item)
+                                 (xml-query-all '(description *) item)))
+                    (description (apply #'concat content))
                     (id (or guid link (elfeed-generate-id description)))
                     (full-id (cons feed-id (elfeed-cleanup id)))
                     (original (elfeed-db-get-entry full-id))
@@ -262,7 +252,8 @@ NIL for unknown."
                     (link (xml-query '(link *) item))
                     (date (or (xml-query '(pubDate *) item)
                               (xml-query '(date *) item)))
-                    (description (xml-query '(description *) item))
+                    (description
+                     (apply #'concat (xml-query-all '(description *) item)))
                     (id (or link (elfeed-generate-id description)))
                     (full-id (cons feed-id (elfeed-cleanup id)))
                     (original (elfeed-db-get-entry full-id)))
@@ -293,13 +284,25 @@ Only a list of strings will be returned."
                url-or-feed)))
     (mapcar #'elfeed-keyword->symbol (cdr (assoc url elfeed-feeds)))))
 
+(defun elfeed-handle-http-error (url status)
+  "Handle an http error during retrieval of URL with STATUS code."
+  (cl-incf (elfeed-meta (elfeed-db-get-feed url) :failures 0))
+  (run-hook-with-args 'elfeed-http-error-hooks url status)
+  (message "Elfeed fetch failed for %s: %S" url status))
+
+(defun elfeed-handle-parse-error (url error)
+  "Handle parse error during parsing of URL with ERROR message."
+  (cl-incf (elfeed-meta (elfeed-db-get-feed url) :failures 0))
+  (run-hook-with-args 'elfeed-parse-error-hooks url error)
+  (message "Elfeed parse failed for %s: %s" url error))
+
 (defun elfeed-update-feed (url)
   "Update a specific feed."
   (interactive (list (completing-read "Feed: " (elfeed-feed-list))))
-  (with-elfeed-fetch url
+  (elfeed-with-fetch url
     (if (and status (eq (car status) :error))
         (let ((print-escape-newlines t))
-          (message "Elfeed update failed for %s: %S" url status))
+          (elfeed-handle-http-error url status))
       (condition-case error
           (progn
             (elfeed-move-to-first-empty-line)
@@ -309,9 +312,13 @@ Only a list of strings will be returned."
                               (:atom (elfeed-entries-from-atom url xml))
                               (:rss (elfeed-entries-from-rss url xml))
                               (:rss1.0 (elfeed-entries-from-rss1.0 url xml))
-                              (otherwise (error "Unknown feed type.")))))
+                              (otherwise
+                               (error (elfeed-handle-parse-error
+                                       url "Unknown feed type."))))))
               (elfeed-db-add entries)))
-        (error (message "Elfeed update failed for %s: %s" url error))))))
+        (error (elfeed-handle-parse-error url error))))
+    (kill-buffer)
+    (run-hook-with-args 'elfeed-update-hooks url)))
 
 (defun elfeed-add-feed (url)
   "Manually add a feed to the database."
@@ -323,14 +330,16 @@ Only a list of strings will be returned."
   (cl-pushnew url elfeed-feeds)
   (when (called-interactively-p 'any)
     (customize-save-variable 'elfeed-feeds elfeed-feeds))
-  (elfeed-update-feed url))
+  (elfeed-update-feed url)
+  (elfeed-search-update :force))
 
 ;;;###autoload
 (defun elfeed-update ()
   "Update all the feeds in `elfeed-feeds'."
   (interactive)
   (message "Elfeed update: %s" (format-time-string "%B %e %Y %H:%M:%S %Z"))
-  (mapc #'elfeed-update-feed (elfeed-feed-list))
+  (mapc #'elfeed-update-feed (elfeed--shuffle (elfeed-feed-list)))
+  (elfeed-search-update :force)
   (elfeed-db-save))
 
 ;;;###autoload
