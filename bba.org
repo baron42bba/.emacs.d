@@ -69,6 +69,43 @@ If you are in need enable debugging:
 
 #+END_SRC
 
+*** set environment variables on osx
+    [2015-07-16 Thu 19:10]
+
+If running standalone on OSX we need to get some environment variables
+from bash.
+
+#+BEGIN_SRC emacs-lisp
+  (if (string-equal system-type "darwin")
+          (progn
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $PATH")))
+              (setenv "PATH" path)
+              (setq exec-path
+                    (append
+                     (split-string-and-unquote path ":")
+                     exec-path)))
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $ORACLE_HOME")))
+              (setenv "ORACLE_HOME" path)
+              )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $CLASSPATH")))
+              (setenv "CLASSPATH" path)
+              )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $NLS_LANG")))
+              (setenv "NLS_LANG" path)
+              )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $TNS_ADMIN")))
+              (setenv "TNS_ADMIN" path)
+              )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $DYLD_LIBRARY_PATH")))
+              (setenv "DYLD_LIBRARY_PATH" path)
+              )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $SYSENV")))
+              (setenv "SYSENV" path)
+              )
+            )
+      )
+#+END_SRC
+
 *** define emacs shutdown function
 
 I like to commit my notes in my org and workorg folders after a days work.
