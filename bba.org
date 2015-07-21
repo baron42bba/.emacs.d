@@ -1120,13 +1120,24 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 There are some file formats out there where you shouldn't use this
 function. [[http://en.wikipedia.org/wiki/YAML][YAML]] is only one of them.
+You can disable this functionality on a per file basis by adding lines
+like these:
+
+#+BEGIN_SRC cperl
+    # Local Variables:
+    # bba-keep-whitespaces: 1
+    # End:
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
   (eval-after-load "cfengine3-mode"
     '(add-hook 'cfengine3-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
-                                                     (save-excursion
-                                                       (delete-trailing-whitespace))))
+                                                      (unless (boundp 'bba-keep-whitespaces)
+                                                        (save-excursion
+                                                          (delete-trailing-whitespace)))
+                                                      )
+                                                   )
                                  )
                ))
 
@@ -1134,8 +1145,11 @@ function. [[http://en.wikipedia.org/wiki/YAML][YAML]] is only one of them.
   (eval-after-load "cperl-mode"
     '(add-hook 'cperl-mode-hook (lambda() (add-hook 'write-contents-functions
                                                     (lambda()
-                                                      (save-excursion
-                                                        (delete-trailing-whitespace))))
+                                                      (unless (boundp 'bba-keep-whitespaces)
+                                                        (save-excursion
+                                                          (delete-trailing-whitespace)))
+                                                      )
+                                                    )
                                   )
                ))
 
@@ -1143,7 +1157,8 @@ function. [[http://en.wikipedia.org/wiki/YAML][YAML]] is only one of them.
     '(add-hook 'dns-mode-hook (lambda() (add-hook 'write-contents-functions
                                                   (lambda()
                                                     (save-excursion
-                                                      (delete-trailing-whitespace))))
+                                                      (delete-trailing-whitespace)))
+                                                  )
                                 )
                ))
 
@@ -1151,23 +1166,28 @@ function. [[http://en.wikipedia.org/wiki/YAML][YAML]] is only one of them.
     '(add-hook 'json-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
                                                      (save-excursion
-                                                       (delete-trailing-whitespace))))
+                                                       (delete-trailing-whitespace)))
+                                                   )
                                  )
                ))
 
   (eval-after-load "org-mode"
     '(add-hook 'org-mode-hook (lambda() (add-hook 'write-contents-functions
                                                   (lambda()
-                                                    (save-excursion
-                                                      (delete-trailing-whitespace))))
+                                                    (unless (boundp 'bba-keep-whitespaces)
+                                                      (save-excursion
+                                                        (delete-trailing-whitespace)))))
                                 )
                ))
 
   (eval-after-load "text-mode"
     '(add-hook 'text-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
-                                                     (save-excursion
-                                                       (delete-trailing-whitespace))))
+                                                     (unless (boundp 'bba-keep-whitespaces)
+                                                       (save-excursion
+                                                         (delete-trailing-whitespace)))
+                                                     )
+                                                   )
                                  )
                ))
 
