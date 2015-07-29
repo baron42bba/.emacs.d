@@ -318,7 +318,7 @@ Probably the best help to keep track of the not every day used keybindings.
   (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
   (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
   (require 'guide-key)
-  (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-x l" "<f9>"))
+  (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-h" "C-x l" "<f9>"))
   (setq guide-key/recursive-key-sequence-flag t)
   (setq guide-key/idle-delay 3)
   (guide-key-mode 1)
