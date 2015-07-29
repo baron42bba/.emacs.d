@@ -145,21 +145,22 @@ Keep track of your important stuff!
 * [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
+    (if (>= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path "~/.emacs.d/elpa")
+          (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
+          (require 'package)
+          (package-initialize)
+          (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+          (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
+          )
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa")
-        (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
-        (require 'package)
-        (package-initialize)
-        (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/magit-20150704.855")
+        (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
+        (require 'yaml-mode)
         )
-    (progn
-      (add-to-list 'load-path "~/.emacs.d/elpa/magit-20150704.855")
-      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
-      (require 'yaml-mode)
-      )
 
-    )
+      )
 #+END_SRC
 
 * magit
