@@ -1851,6 +1851,7 @@ all in your history.
 #+BEGIN_SRC emacs-lisp
   (savehist-mode 1)
   (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring))
+  (setq history-delete-duplicates t)
   (if (equal "work" (getenv "SYSENV"))
       (if (file-exists-p "~/workorg")
           (setq savehist-file "~/workorg/emacshistory")
