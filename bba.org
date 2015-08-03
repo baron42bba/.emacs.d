@@ -1,3 +1,5 @@
+# -*- org-export-babel-evaluate: nil;  -*-
+#+SETUPFILE: ~/git/github/org-html-themes/setup/theme-bigblow-local.setup
 #+STARTUP: showall
 #+TITLE: bba emacs configuration
 #+OPTIONS: toc:4 h:4
@@ -50,9 +52,7 @@ You might want to run =C-u 0 M-x byte-recompile-directory= after a
 fresh clone. Install the githooks and your .elc files will get
 recompiled after a git pull.
 
-** new config
-
-*** debugging
+* debugging
 
 If you are in need enable debugging:
 
@@ -60,7 +60,7 @@ If you are in need enable debugging:
 (setq debug-on-error t)
 #+END_SRC
 
-*** run in servermode
+* run in servermode
 
 #+BEGIN_SRC emacs-lisp
   (require 'server)
@@ -69,7 +69,7 @@ If you are in need enable debugging:
 
 #+END_SRC
 
-*** set environment variables on osx
+* set environment variables on osx
     [2015-07-16 Thu 19:10]
 
 If running standalone on OSX we need to get some environment variables
@@ -106,7 +106,7 @@ from bash.
       )
 #+END_SRC
 
-*** define emacs shutdown function
+* define emacs shutdown function
 
 I like to commit my notes in my org and workorg folders after a days work.
 Keep track of your important stuff!
@@ -133,7 +133,7 @@ Keep track of your important stuff!
 
 #+END_SRC
 
-*** async
+* async
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 25)
       (progn
@@ -142,27 +142,28 @@ Keep track of your important stuff!
         )
     )
 #+END_SRC
-*** [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
+* [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
+    (if (>= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path "~/.emacs.d/elpa")
+          (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
+          (require 'package)
+          (package-initialize)
+          (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+          (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
+          )
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa")
-        (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
-        (require 'package)
-        (package-initialize)
-        (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/magit-20150704.855")
+        (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
+        (require 'yaml-mode)
         )
-    (progn
-      (add-to-list 'load-path "~/.emacs.d/elpa/magit-20150704.855")
-      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
-      (require 'yaml-mode)
-      )
 
-    )
+      )
 #+END_SRC
 
-*** magit
+* magit
 
 For annotated tags prepare message with commit messages since last tag.
 
@@ -180,7 +181,7 @@ For annotated tags prepare message with commit messages since last tag.
             )
 
 #+END_SRC
-*** fullframe
+* fullframe
 open ibuffer and magit-status in fullframe mode.
 #+BEGIN_SRC emacs-lisp
     (if (>= emacs-major-version 24)
@@ -192,7 +193,7 @@ open ibuffer and magit-status in fullframe mode.
           )
       )
 #+END_SRC
-*** [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Window-Convenience.html][winner-mode]]
+* [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Window-Convenience.html][winner-mode]]
     [2015-06-10 Wed 09:33]
 
 Get undo for your window layout.
@@ -201,7 +202,7 @@ Get undo for your window layout.
   (if (>= emacs-major-version 24)
       (winner-mode 1))
 #+END_SRC
-*** smartparens-mode
+* smartparens-mode
 Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
 
@@ -214,7 +215,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
         (smartparens-global-mode 1)
         ))
 #+END_SRC
-*** [[https://github.com/hrs/engine-mode][engine-mode]]
+* [[https://github.com/hrs/engine-mode][engine-mode]]
 
 search the web on your fingertips. C-c /.
 
@@ -268,7 +269,7 @@ search the web on your fingertips. C-c /.
     )
 #+END_SRC
 
-*** expand-region
+* expand-region
     [2015-04-02 Thu 10:32]
 
 #+BEGIN_SRC emacs-lisp
@@ -281,7 +282,7 @@ search the web on your fingertips. C-c /.
         ))
 
 #+END_SRC
-*** yasnippet
+* yasnippet
 
 My first thought: Nice. But do I have a use case? After half a year I
 cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]] code with
@@ -299,7 +300,7 @@ snippets. Some help for Perl and even for org-mode.
           )
       )
 #+END_SRC
-*** [[https://github.com/flycheck/flycheck][flycheck]]
+* [[https://github.com/flycheck/flycheck][flycheck]]
 
 #+BEGIN_SRC emacs-lisp
     (if (>= emacs-major-version 24)
@@ -310,7 +311,7 @@ snippets. Some help for Perl and even for org-mode.
           ))
 #+END_SRC
 
-*** [[https://github.com/kai2nenobu/guide-key][guide-key]]
+* [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 Probably the best help to keep track of the not every day used keybindings.
 
@@ -318,12 +319,12 @@ Probably the best help to keep track of the not every day used keybindings.
   (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
   (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
   (require 'guide-key)
-  (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-x l" "<f9>"))
+  (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-h" "C-x l" "<f9>"))
   (setq guide-key/recursive-key-sequence-flag t)
   (setq guide-key/idle-delay 3)
   (guide-key-mode 1)
 #+END_SRC
-*** latex
+* latex
 
 #+BEGIN_SRC emacs-lisp
   (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
@@ -339,7 +340,7 @@ Probably the best help to keep track of the not every day used keybindings.
 
 #+END_SRC
 
-*** template support
+* template support
 
 Some default templates for new files are stored in [[templates/]].
 No need to start .pl .sh from scratch.
@@ -349,7 +350,7 @@ No need to start .pl .sh from scratch.
   (template-initialize)
 #+END_SRC
 
-*** thesaurus
+* thesaurus
 
 #+BEGIN_SRC emacs-lisp
   ;; The file names are absolute, not relative, locations
@@ -361,7 +362,7 @@ No need to start .pl .sh from scratch.
 
 #+END_SRC
 
-*** yaml mode
+* yaml mode
 #+BEGIN_SRC emacs-lisp
   ;; load yaml-mode
   ;; (require 'yaml-mode)
@@ -369,7 +370,7 @@ No need to start .pl .sh from scratch.
 
 #+END_SRC
 
-*** htmlize
+* htmlize
 
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
@@ -381,7 +382,7 @@ No need to start .pl .sh from scratch.
 
 #+END_SRC
 
-*** vc-git
+* vc-git
 
 #+BEGIN_SRC emacs-lisp
   (require 'vc-git)
@@ -389,7 +390,7 @@ No need to start .pl .sh from scratch.
 
 #+END_SRC
 
-*** ace-jump-mode
+* ace-jump-mode
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/ace-jump-mode-20140616.115")
@@ -399,7 +400,7 @@ No need to start .pl .sh from scratch.
 
 #+END_SRC
 
-*** ido-mode
+* ido-mode
 
 I still like ido-find-file.
 
@@ -426,7 +427,7 @@ I still like ido-find-file.
 #+END_SRC
 
 
-*** visual-regexp
+* visual-regexp
 
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
@@ -438,7 +439,7 @@ I still like ido-find-file.
   )
 #+END_SRC
 
-*** org-mode
+* org-mode
 
 See [[http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html][orgtutorial_dto]] for details.
 
@@ -865,7 +866,7 @@ taken from http://doc.norang.ca/org-mode.org
 
 #+END_SRC
 
-*** cfengine
+* cfengine
 
 #+BEGIN_SRC emacs-lisp
   ;;   (load-library "cfengine")
@@ -969,7 +970,7 @@ for C-c T you can use a file like this one:
   =cut
 #+END_SRC
 
-*** mwheel
+* mwheel
 
 #+BEGIN_SRC emacs-lisp
   (load-library "mwheel")
@@ -977,7 +978,7 @@ for C-c T you can use a file like this one:
 
 #+END_SRC
 
-*** [[http://emacs.wordpress.com/2007/06/21/tip-of-the-day/][tip of the day]]
+* [[http://emacs.wordpress.com/2007/06/21/tip-of-the-day/][tip of the day]]
     [2014-09-24 Wed 12:06]
 
 Display an Emacs tip of the day.
@@ -1001,7 +1002,7 @@ You may start it at the end of the config file.
                  (buffer-string)))))))
 #+END_SRC
 
-*** TRAMP
+* TRAMP
 
 #+BEGIN_SRC emacs-lisp
   (load-library "tramp")
@@ -1015,7 +1016,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
   (add-to-list 'tramp-default-proxies-alist '(".*" "\`root\'" "/ssh:%h:"))
 #+END_SRC
 
-*** [[http://www.twmode.sourceforge.net/][twitter]]
+* [[http://www.twmode.sourceforge.net/][twitter]]
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20150131.708")
@@ -1034,7 +1035,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 #+END_SRC
 
-*** elfeed
+* elfeed
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
@@ -1044,20 +1045,20 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
         (elfeed-org)
         (setq rmh-elfeed-org-files (list "~/org/elfeed.org"))))
 #+END_SRC
-*** [[http://www.emacswiki.org/emacs/MalyonMode][Mylon]]
+* [[http://www.emacswiki.org/emacs/MalyonMode][Mylon]]
 
 #+BEGIN_SRC emacs-lisp
   (require 'malyon)
 #+END_SRC
 
-*** TemplateToolkit
+* TemplateToolkit
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
 
 #+END_SRC
 
-*** EPG/GPG
+* EPG/GPG
 
 #+BEGIN_SRC emacs-lisp
   ;; Do not use gpg agent when runing in terminal
@@ -1082,7 +1083,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 #+END_SRC
 
-*** Perl
+* Perl
 
 #+BEGIN_SRC emacs-lisp
   (require 'cperl-mode)
@@ -1094,7 +1095,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 #+END_SRC
 
-*** auto-completion
+* auto-completion
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20150618.1949")
@@ -1108,14 +1109,14 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 #+END_SRC
 
-*** syntax-highlighting
+* syntax-highlighting
 #+BEGIN_SRC emacs-lisp
   (font-lock-mode)
   (global-font-lock-mode 1)
 
 #+END_SRC
 
-*** remove trailing whitespace
+* remove trailing whitespace
     [2014-09-24 Wed 16:56]
 
 There are some file formats out there where you shouldn't use this
@@ -1196,7 +1197,7 @@ like these:
 
 #+END_SRC
 
-*** mode-line menu-bar etc
+* mode-line menu-bar etc
 
 #+BEGIN_SRC emacs-lisp
   (column-number-mode t)
@@ -1216,7 +1217,7 @@ like these:
 
 #+END_SRC
 
-*** Art Bollocks Mode
+* Art Bollocks Mode
     [2014-09-28 Sun 22:33]
 
 Keeps track of your writing.
@@ -1263,7 +1264,7 @@ With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode
       )
 #+END_SRC
 
-*** window management
+* window management
     [2014-09-24 Wed 13:03]
 
 Bind f3 and f4 to previous/next pane.
@@ -1282,13 +1283,13 @@ Bind f3 and f4 to previous/next pane.
   (global-set-key (kbd "<f4>") 'move-cursor-next-pane)
 #+END_SRC
 
-*** [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
+* [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
 #+BEGIN_SRC emacs-lisp
       (require 'ipcalc)
 
 #+END_SRC
 
-*** [[http://www.emacswiki.org/emacs/RecentFiles][RecentFiles]]
+* [[http://www.emacswiki.org/emacs/RecentFiles][RecentFiles]]
 
 #+BEGIN_SRC emacs-lisp
   (require 'recentf)
@@ -1299,20 +1300,24 @@ Bind f3 and f4 to previous/next pane.
       (global-set-key "\C-cr" 'recentf-open-files))
 #+END_SRC
 
-*** insert-date function
+* insert-date function
 #+BEGIN_SRC emacs-lisp
-      (defun insert-date ()
-      "Insert the current date"
-      (interactive)
-      (insert-string (format-time-string "%B %e, %Y")))
-      (defun insert-timestamp ()
-      "Insert the current timestamp"
-      (interactive)
-      (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+  (defun insert-date ()
+  "Insert the current date"
+  (interactive)
+  (insert-string (format-time-string "%B %e, %Y")))
+  (defun insert-timestamp ()
+  "Insert the current timestamp"
+  (interactive)
+  (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+  (defun bba-insert-name ()
+  "Insert name and emailaddress of current systemuser."
+  (interactive)
+  (insert-string (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
 
 #+END_SRC
 
-*** [[http://www.howardism.org/Technical/Emacs/eshell-fun.html][eshell-here]]
+* [[http://www.howardism.org/Technical/Emacs/eshell-fun.html][eshell-here]]
 Thanks to Howard Abrams.
 modified because current version lacks function have
 window-total-height.
@@ -1366,7 +1371,7 @@ window-total-height.
 
 #+END_SRC
 
-*** [[http://stackoverflow.com/questions/3035337/in-emacs-can-you-evaluate-an-emacs-lisp-expression-and-replace-it-with-the-resul][eval emacs lisp expression and replace it]]
+* [[http://stackoverflow.com/questions/3035337/in-emacs-can-you-evaluate-an-emacs-lisp-expression-and-replace-it-with-the-resul][eval emacs lisp expression and replace it]]
     [2014-11-02 Sun 18:21]
 
 Use =C-c E= to evaluate and replace the last s-expression.
@@ -1382,7 +1387,7 @@ Use =C-c E= to evaluate and replace the last s-expression.
   (define-key global-map "\C-c\S-e" 'bba/eval-last-sexp-replace)
 #+END_SRC
 
-*** goto-match-paren
+* goto-match-paren
 #+BEGIN_SRC emacs-lisp
       (defun goto-match-paren (arg)
         "Go to the matching parenthesis if on parenthesis, otherwise insert %.
@@ -1395,7 +1400,7 @@ Use =C-c E= to evaluate and replace the last s-expression.
 
 #+END_SRC
 
-*** safe hash bang files executable
+* safe hash bang files executable
 safe files with #! in first line as user executable.
 
 #+BEGIN_SRC emacs-lisp
@@ -1423,7 +1428,7 @@ safe files with #! in first line as user executable.
 
 #+END_SRC
 
-*** move lines
+* move lines
     [2014-11-11 Tue 12:24]
 
 =M-p= and =M-n= to move current line up or down.
@@ -1455,7 +1460,7 @@ safe files with #! in first line as user executable.
   (global-set-key (kbd "M-n") 'bba/move-line-down)
 
 #+END_SRC
-*** helm
+* helm
 
 Some links you might check out:
 
@@ -1478,6 +1483,7 @@ Some links you might check out:
         (global-set-key "\C-cr" 'helm-recentf)
         (global-set-key (kbd "M-s o") 'helm-occur)
         (define-key global-map "\C-x\C-b" 'helm-buffers-list)
+        (define-key global-map "\C-x\C-k\C-h" 'helm-execute-kmacro)
         (define-key global-map "\C-cy" 'helm-yas-complete)
         (setq helm-yas-display-key-on-candidate t)
 
@@ -1499,7 +1505,7 @@ Some links you might check out:
   )
 
 #+END_SRC
-*** [[http://emacswiki.org/emacs/KeyChord][key-chord]]
+* [[http://emacswiki.org/emacs/KeyChord][key-chord]]
 
 combine key strokes to access commands even faster.
 
@@ -1521,7 +1527,7 @@ combine key strokes to access commands even faster.
 
 #+END_SRC
 
-*** key bindings
+* key bindings
 #+BEGIN_SRC emacs-lisp
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
 
@@ -1610,7 +1616,7 @@ we use that as default:
   (global-set-key (kbd "C-M-r") 'isearch-backward)
 #+END_SRC
 
-*** configure some default values
+* configure some default values
     [2014-10-02 Thu 00:27]
 
 Specify printing format
@@ -1704,7 +1710,7 @@ Some nice functions
 #+END_SRC
 
 
-*** other stuff
+* other stuff
 
 #+BEGIN_SRC emacs-lisp
 
@@ -1755,7 +1761,7 @@ Some nice functions
 
 #+END_SRC
 
-*** set theme bba1
+* set theme bba1
 
 [[https://emacsfodder.github.io/emacs-theme-editor/][Emacs Theme Editor]] is a nice tool to define your colors.
 
@@ -1783,7 +1789,7 @@ Some nice functions
 
 #+END_SRC
 
-*** load custom file
+* load custom file
     [2014-10-02 Thu 00:37]
 
 #+BEGIN_SRC emacs-lisp
@@ -1795,7 +1801,7 @@ Some nice functions
 
 #+END_SRC
 
-*** Set default font on Mac
+* Set default font on Mac
 
 #+BEGIN_SRC emacs-lisp
   (if (string-equal system-type "darwin")
@@ -1804,7 +1810,7 @@ Some nice functions
 
 
 
-*** dns-mode
+* dns-mode
 
 If you edit zone files via TRAMP you might want to activate them via
 =rndc reload=. =C-c C-r= just does that for you.
@@ -1828,7 +1834,7 @@ If you edit zone files via TRAMP you might want to activate them via
       ))
 
 #+END_SRC
-*** save history
+* save history
     [2015-04-05 Sun 12:57]
 
 Write a history of your emacs into your org git repository.
@@ -1846,6 +1852,8 @@ all in your history.
 #+BEGIN_SRC emacs-lisp
   (savehist-mode 1)
   (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring))
+  (setq kmacro-ring-max 42)
+  (setq history-delete-duplicates t)
   (if (equal "work" (getenv "SYSENV"))
       (if (file-exists-p "~/workorg")
           (setq savehist-file "~/workorg/emacshistory")
@@ -1853,10 +1861,14 @@ all in your history.
     (if (file-exists-p "~/org")
         (setq savehist-file "~/org/emacshistory")
       )
+    (if (file-exists-p savehist-file)
+        (load-file savehist-file)
+        )
+
   )
 
 #+END_SRC
-*** done
+* done
 
 Display greetings:
 
@@ -1866,7 +1878,7 @@ Display greetings:
 #+END_SRC
 
     [2014-08-27 Wed 11:02]
-** old config
+* old config
 
 #+BEGIN_SRC emacs-lisp :eval no :tangle no
 
