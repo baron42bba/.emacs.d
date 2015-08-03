@@ -1,0 +1,46 @@
+# -*- mode: snippet -*-
+# name: params
+# key: params
+
+\# parse parameters
+
+for param in "$@"
+do
+    case $param in
+	-${1:f}=*|--${2:file}=*)
+	    ${2:$(upcase (yas-text))}="\${param#*=}"
+	    shift # past argument=value
+	    ;;
+	-${3:r}=*|--${4:repodir}=*)
+	    ${4:$(upcase (yas-text))}="\${param#*=}"
+	    shift # past argument=value
+	    ;;
+	$0
+	-v|--verbose)
+	    VERBOSE=1
+	    shift # past argument=value
+	    ;;
+	-h|--help)
+	    pod2usage \$0
+	    exit
+	    ;;
+	-m|--man)
+	    perldoc \$0
+	    exit
+	    ;;
+	*)
+	    echo "unknown option $param"
+	    echo
+	    pod2usage \$0
+	    exit
+	    ;;
+    esac
+done
+
+if ! [ ${2:$(upcase (yas-text))} ] || ! [ ${4:$(upcase (yas-text))} ]
+then
+    echo "$2 or $3 not defined"
+    echo
+    pod2usage \$0
+    exit
+fi
