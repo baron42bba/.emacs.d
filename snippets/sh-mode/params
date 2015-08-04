@@ -1,8 +1,9 @@
 # -*- mode: snippet -*-
 # name: params
 # key: params
+# --
 
-\# parse parameters
+# parse parameters
 
 for param in "$@"
 do
