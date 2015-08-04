@@ -102,6 +102,12 @@ from bash.
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $SYSENV")))
               (setenv "SYSENV" path)
               )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $http_proxy")))
+              (setenv "http_proxy" path)
+              )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $https_proxy")))
+              (setenv "https_proxy" path)
+              )
             )
       )
 #+END_SRC
