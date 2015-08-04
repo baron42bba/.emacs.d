@@ -1552,6 +1552,24 @@ Some links you might check out:
   )
 
 #+END_SRC
+
+* browser switch
+
+switch default browser between eww and default.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-switch-default-browser ()
+      "switch between default browser and eww"
+    (interactive)
+    (if (string-equal "browse-url-default-browser" browse-url-browser-function)
+        (setq browse-url-browser-function 'eww-browse-url)
+      (setq browse-url-browser-function 'browse-url-default-browser)
+      )
+    (message "%s" browse-url-browser-function)
+    )
+
+#+END_SRC
+
 * [[http://emacswiki.org/emacs/KeyChord][key-chord]]
 
 combine key strokes to access commands even faster.
@@ -1585,6 +1603,7 @@ combine key strokes to access commands even faster.
   (define-key global-map "\C-ct" 'bba/toggle)
 
   (define-key bba/toggle "a" 'artbollocks-mode)
+  (define-key bba/toggle "b" 'bba-switch-default-browser)
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
