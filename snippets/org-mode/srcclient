@@ -2,6 +2,6 @@
 # name: srcclient
 # key: <sclient
 # --
-#+BEGIN_SRC sh :session client :results verbatim drawer
+#+BEGIN_SRC sh :session ${1:client} :results ${2:$$(yas-choose-value '("verbatim drawer" "silent"))}
 $0
 #+END_SRC
