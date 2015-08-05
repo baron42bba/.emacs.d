@@ -229,6 +229,8 @@ search the web on your fingertips. C-c /.
 | a | amazon.de   |
 | b | bing        |
 | c | cfengine    |
+| g | google      |
+| G | github      |
 | m | google maps |
 | w | wikipedia   |
 | y | youtube     |
@@ -255,6 +257,16 @@ search the web on your fingertips. C-c /.
             :keybinding "c"
             )
 
+
+          (defengine github
+            "http://www.github.com/search?q=%s"
+            :keybinding "G"
+            )
+
+          (defengine google
+            "http://www.google.com/?q=%s"
+            :keybinding "g"
+            )
 
           (defengine google-maps
             "http://maps.google.com/maps?q=%s"
@@ -1581,7 +1593,9 @@ combine key strokes to access commands even faster.
   (key-chord-mode 1)
   (setq key-chord-two-keys-delay 0.16)
   (key-chord-define cfengine3-mode-map ";;" "\C-e;")
+  (key-chord-define cfengine3-mode-map ",," "\C-e,")
   (key-chord-define cperl-mode-map ";;" "\C-e;")
+  (key-chord-define cperl-mode-map ",," "\C-e,")
   (key-chord-define-global "uu" 'undo)
   (key-chord-define-global "xb" 'ido-switch-buffer)
   (key-chord-define-global "xf" 'ido-find-file)
