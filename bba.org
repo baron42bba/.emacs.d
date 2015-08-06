@@ -241,6 +241,7 @@ search the web on your fingertips. C-c /.
   (if (>= emacs-major-version 24)
       (progn
         (require 'engine-mode)
+        (setq engine/browser-function 'eww-browse-url)
 
           (defengine amazon
             "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
