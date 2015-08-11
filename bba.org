@@ -176,12 +176,16 @@ For annotated tags prepare message with commit messages since last tag.
 #+BEGIN_SRC emacs-lisp
   (require 'magit)
   (setq magit-last-seen-setup-instructions "1.4.0")
-  (add-hook 'magit-log-edit-mode-hook
-            (lambda ()
-              (when (magit-log-edit-get-field 'tag-name)
+  (add-hook 'git-commit-mode-hook
+            (lambda()
+              (when (equal "TAG_EDITMSG" (buffer-name))
                 (progn
-                  (end-of-buffer)
-                (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" )))
+                  (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" ))
+                  (newline)
+                  (beginning-of-buffer)
+                  (newline)
+                  (beginning-of-buffer)
+                  )
                 )
               )
             )
