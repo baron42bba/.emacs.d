@@ -17,23 +17,14 @@ if .emacs and .emacs.d exists fetch git.bundesbrandschatzamt.de emacs config.
 if [ ! -e ${HOME}/.emacs.d ]; then
     git clone http://git.bundesbrandschatzamt.de/emacsconfig.git ${HOME}/.emacs.d
     cat >${HOME}/.emacs <<EOF
-;; This sets up the load path so that we can override it
-;; (package-initialize)
 ;; Override the packages with the git version of Org and other packages
 
-  (setq load-path
-  (append
-  (list (expand-file-name "~/.emacs.d/"))
-  ;;           (expand-file-name "/usr/share/emacs/lisp/")
-  load-path))
+(setq load-path
+(append
+(list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-20150629"))
+load-path))
 
-
-(add-to-list 'load-path "~/.emacs.d/xemacs-packages/lisp/org-8.2.3c")
-
-;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
-;; Load the rest of the packages
-;; (package-initialize t)
-;; (setq package-enable-at-startup nil)
+(setq org-use-extra-keys t)
 (require 'org)
 (require 'ob-tangle)
 (org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))

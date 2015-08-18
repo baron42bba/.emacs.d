@@ -161,6 +161,7 @@ Keep track of your important stuff!
           (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
           )
       (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/cl-lib-0.5")
         (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
         (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
         (require 'yaml-mode)
@@ -312,16 +313,12 @@ cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]]
 snippets. Some help for Perl and even for org-mode.
 
 #+BEGIN_SRC emacs-lisp
-    (if (>= emacs-major-version 24)
-        (progn
           (add-to-list 'load-path
                        "~/.emacs.d/elpa/yasnippet-20150415.244")
           (require 'yasnippet)
           (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
           (yas-global-mode 1)
           (define-key global-map "\C-cy" 'yas/insert-snippet)
-          )
-      )
 #+END_SRC
 * [[https://github.com/flycheck/flycheck][flycheck]]
 
