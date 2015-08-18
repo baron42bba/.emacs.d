@@ -161,7 +161,7 @@ Keep track of your important stuff!
           (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
           )
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/magit-20150704.855")
+        (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
         (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
         (require 'yaml-mode)
         )
@@ -339,13 +339,17 @@ snippets. Some help for Perl and even for org-mode.
 Probably the best help to keep track of the not every day used keybindings.
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
-  (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
-  (require 'guide-key)
-  (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-h" "C-x l" "<f9>"))
-  (setq guide-key/recursive-key-sequence-flag t)
-  (setq guide-key/idle-delay 3)
-  (guide-key-mode 1)
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
+        (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
+        (require 'guide-key)
+        (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-h" "C-x l" "<f9>"))
+        (setq guide-key/recursive-key-sequence-flag t)
+        (setq guide-key/idle-delay 3)
+        (guide-key-mode 1)
+        )
+    )
 #+END_SRC
 * latex
 
