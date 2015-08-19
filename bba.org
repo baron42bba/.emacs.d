@@ -274,6 +274,11 @@ search the web on your fingertips. C-c /.
             :keybinding "g"
             )
 
+          (defengine leo
+            "http://dict.leo.org/ende/index_de.html#/search=%s"
+            :keybinding "l"
+            )
+
           (defengine google-maps
             "http://maps.google.com/maps?q=%s"
             :keybinding "m"
@@ -289,6 +294,7 @@ search the web on your fingertips. C-c /.
             :keybinding "y"
             )
           (engine-mode 1)
+          (engine/set-keymap-prefix (kbd "C-c C-/"))
         )
     )
 #+END_SRC
