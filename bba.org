@@ -1854,6 +1854,13 @@ Some nice functions
 
 #+END_SRC
 
+You have to work hard to be lazy.
+
+#+BEGIN_SRC emacs-lisp
+  (defalias 'ts 'transpose-sentences)
+  (defalias 'tp 'transpose-paragraphs)
+#+END_SRC
+
 * set theme bba1
 
 [[https://emacsfodder.github.io/emacs-theme-editor/][Emacs Theme Editor]] is a nice tool to define your colors.
