@@ -885,12 +885,15 @@ taken from http://doc.norang.ca/org-mode.org
                   (lambda ()
                     (auto-fill-mode)
                     (flyspell-mode)
+                    (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
+
                     ))
         )
     (progn
       (add-hook 'org-mode-hook
                 (lambda ()
-                  (auto-fill-mode))
+                  (auto-fill-mode)
+                  (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org"))))
                 ))
 
     )

@@ -1,0 +1,12 @@
+|--------------+-------------+------------------------------------------------------|
+| snippet name | keyword     | description                                          |
+|--------------+-------------+------------------------------------------------------|
+| babel-sh     | babel-shell | skeleton to generate a sh file out of an org file    |
+| blog         | blog        | skeleton for a blog entry                            |
+| sqlmysql     | sqlmysql    | properties to connect to MySQL via org               |
+| sqlora       | sqlora      | properties to connect to Oracle via org and Perl DBI |
+| <sclient     | srcclient   | SRC snippet executable on a shell session            |
+| <ssession    | srcsession  | create a shell session and connect to a host via ssh |
+| table2       | table2      | create org table with name and Amount Summary        |
+| title        | title       | skeleton for TITLE                                   |
+|--------------+-------------+------------------------------------------------------|
