@@ -1,0 +1,21 @@
+|------------------+------------------+-------------------------------------------------------|
+| keyword          | snippet name     | description                                           |
+|------------------+------------------+-------------------------------------------------------|
+| insbund          | bundle           | basic bundle skeleton                                 |
+| custserv         | customlibservice | skeleton for promise files in customlib/services/     |
+| fileappend       | fileappend       | append lines to file if missing.                      |
+| filecplocal      | filecplocal      | copy file from this.promise_dirname/templates/        |
+| fileexpand       | fileexpand       | expand_variables from template file                   |
+| fileln           | filelink         | create soft link                                      |
+| filequad         | filequad         | use shared_global_environment remote quad copy        |
+| filerm           | fileremove       | delete file                                           |
+| filesetval       | filesetval       | set_variable_values                                   |
+| filesetvalini    | filesetvalini    | set_variable_values_ini                               |
+| filesetvalquoted | filesetvalquoted | set_quoted_values                                     |
+| filetemplate     | filetemplate     | edit_template                                         |
+| ifrep            | ifrepaired       | classes => if_repaired                                |
+| mkdir            | mkdir            | create directory and/or check permissions.            |
+| sysuser          | sysuser          | skeleton for def.cf users.                            |
+| tb               | thisbundle       | replace tb with current bundle name. for strings etc. |
+| usebund          | usebund          | usebundle skeleton.                                   |
+|------------------+------------------+-------------------------------------------------------|
