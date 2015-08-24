@@ -16,20 +16,6 @@ if .emacs and .emacs.d exists fetch git.bundesbrandschatzamt.de emacs config.
 
 if [ ! -e ${HOME}/.emacs.d ]; then
     git clone http://git.bundesbrandschatzamt.de/emacsconfig.git ${HOME}/.emacs.d
-    cat >${HOME}/.emacs <<EOF
-;; Override the packages with the git version of Org and other packages
-
-(setq load-path
-(append
-(list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-20150629"))
-load-path))
-
-(setq org-use-extra-keys t)
-(require 'org)
-(require 'ob-tangle)
-(org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))
-
-EOF
 
 else
     cd ${HOME}/.emacs.d
