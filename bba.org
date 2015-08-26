@@ -1635,6 +1635,7 @@ combine key strokes to access commands even faster.
   (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "b" 'bba-switch-default-browser)
   (define-key bba/toggle "f" 'auto-fill-mode)
+  (define-key bba/toggle "\S-f" 'follow-mode)
   (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
