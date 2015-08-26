@@ -1272,6 +1272,33 @@ like these:
 
 #+END_SRC
 
+
+* rpm spec buildrpm
+    [2015-07-23 Thu 13:22]
+
+Use C-c C-c to run rpmbuild if buffer is spec file.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-build-rpm ()
+  "Do rpmbuild -ba, with the current buffers filename."
+  (interactive)
+  (string-match "\\([^:]*\\)$" buffer-file-name)
+  (let* ((spec-file (match-string 1 buffer-file-name))
+         )
+    (compile (concat "rpmbuild -ba " spec-file))
+    ;; (shell-command (concat "rpmbuild -ba " spec-file))
+    )
+  )
+
+  (add-hook 'sh-mode-hook
+            (lambda ()
+              (progn
+                (if (string-match ".spec$" buffer-file-name)
+                (define-key sh-mode-map "\C-c\C-c" 'bba-build-rpm))
+      )))
+
+#+END_SRC
+
 * mode-line menu-bar etc
 
 #+BEGIN_SRC emacs-lisp
@@ -1777,7 +1804,7 @@ Highlight text between parens
   (setq show-paren-style 'expression)
 #+END_SRC
 
-Use buffer nane as frame title
+Use buffer name as frame title
 
 #+BEGIN_SRC emacs-lisp
   (setq frame-title-format "%b - emacs")
@@ -1789,11 +1816,16 @@ Completion in mini-buffer
   (icomplete-mode t)
 #+END_SRC
 
-
 Stack minibuffers
 
 #+BEGIN_SRC emacs-lisp
   (setq enable-recursive-minibuffers t)
+#+END_SRC
+
+Make dired human readable
+
+#+BEGIN_SRC emacs-lisp
+  (setq dired-listing-switches "-alh")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
