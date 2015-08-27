@@ -1756,6 +1756,12 @@ Specify printing format
   (setq ps-paper-type 'a4)
 #+END_SRC
 
+compilation output
+
+#+BEGIN_SRC emacs-lisp
+  (setq compilation-scroll-output 'first-error)
+#+END_SRC
+
 Set ispell dictionary
 
 #+BEGIN_SRC emacs-lisp
