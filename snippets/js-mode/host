@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: host
+# key: host
+# useful for networkinformation.json
+# --
+"${1:host.site}" : {
+    "fqdn": "$1",
+    "network": {
+	"${2:eth0}": {
+	    "mac": "${3:42:42:42:42:42:42$(upcase yas-text)}",
+	    "ip": "$4",
+	    "netmask": "${5:255.255.255.0}"
+	},
+	"server_os": "${6:OREL V6 STANDARD}",
+	"nagios": {
+	    "site": "${7:monitoring host}",
+	    "hosttemplate": "${8:generic-linux}"
+	}
+    }
+}$0
