@@ -151,23 +151,24 @@ Keep track of your important stuff!
 * [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
 #+BEGIN_SRC emacs-lisp
-    (if (>= emacs-major-version 24)
-        (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa")
-          (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
-          (require 'package)
-          (package-initialize)
-          (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-          (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
-          )
+  (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/cl-lib-0.5")
-        (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
-        (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
-        (require 'yaml-mode)
+        (add-to-list 'load-path "~/.emacs.d/elpa")
+        (add-to-list 'load-path "~/.emacs.d/elpa/popup-20150626.711")
+        (require 'package)
+        (package-initialize)
+        (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+        (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
+        (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
         )
-
+    (progn
+      (add-to-list 'load-path "~/.emacs.d/elpa/cl-lib-0.5")
+      (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
+      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
+      (require 'yaml-mode)
       )
+
+    )
 #+END_SRC
 
 * magit
@@ -476,6 +477,19 @@ See [[http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html][orgtutorial_dt
 It's worth to use Emacs for org-mode alone.
 [[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] and [[http://www.howardism.org/Technical/Emacs/literate-database.html][Literate Database Work]] are only 2 use cases.
 With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's easy to generate beautiful output.
+
+** org-plus-contrib
+
+Some extra functionality from the org package repository.
+
+#+BEGIN_SRC emacs-lisp
+    (if (>= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20150831")
+          (require 'org-mime)
+          ))
+
+#+END_SRC
 
 ** org-protocol
 
