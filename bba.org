@@ -485,7 +485,7 @@ Some extra functionality from the org package repository.
 #+BEGIN_SRC emacs-lisp
     (if (>= emacs-major-version 24)
         (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20150831")
+          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20150831" t)
           (require 'org-mime)
           ))
 
@@ -1856,6 +1856,13 @@ Make dired human readable
 
 #+BEGIN_SRC emacs-lisp
   (setq ediff-split-window-function 'split-window-horizontally)
+#+END_SRC
+
+use smtp for sending emails
+
+#+BEGIN_SRC emacs-lisp
+  (setq send-mail-function "smtpmail-send-it")
+
 #+END_SRC
 
 Some nice functions
