@@ -1858,10 +1858,16 @@ Make dired human readable
   (setq ediff-split-window-function 'split-window-horizontally)
 #+END_SRC
 
-use smtp for sending emails
+use smtp for sending emails.
+set your mailserver settings outside of this file.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (setq smtpmail-smtp-server "your.mailserver")
+  (setq smtpmail-smtp-service "25")
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (setq send-mail-function "smtpmail-send-it")
+  (setq send-mail-function 'smtpmail-send-it)
 
 #+END_SRC
 
