@@ -1130,6 +1130,89 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 #+END_SRC
 
+* [[http://www.mew.org][mew]] email
+
+#+BEGIN_SRC emacs-lisp
+  (autoload 'mew "mew" nil t)
+  (autoload 'mew-send "mew" nil t)
+
+  ;; Optional setup (Red Mail menu):
+  (setq read-mail-command 'mew)
+
+  ;; Optional setup (e.g. C-xm for sending a message):
+  (autoload 'new-user-agent-compose "mew" nil t)
+
+  (if (boundp 'mail-user-agent)
+      (setq mail-user-agent 'mew-user-agent))
+  (if (fboundp 'define-mail-user-agent)
+      (define-mail-user-agent
+        'mew-user-agent
+        'mew-user-agent-compose
+        'mew-draft-send-message
+        'mew-draft-kill
+        'mew-send-hook))
+#+END_SRC
+
+When booting, Mew reads the file [[~/.mew.el]]. All Mew configurations
+should be written in this file.
+
+To configure your e-mail address, the followings are necessary.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; (setq mew-name "your name") ;; (user-full-name)
+  ;; (setq mew-user "user name of e-mail address") ;; (user-login-name)
+  (setq mew-mail-domain "domain of e-mail address")
+#+END_SRC
+
+To send e-mail messages by SMTP, the following is necessary.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (setq mew-smtp-server "your SMTP server") ;; if not localhost
+  ;; (setq mew-smtp-ssl t)
+  ;; (setq mew-smtp-port "587")
+
+#+END_SRC
+
+If you want to use POP to receive e-mail messages, the followings are
+necessary.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; (setq mew-pop-user "your POP account") ;; (user-login-name)
+  (setq mew-pop-server "your POP server") ;; if not localhost
+#+END_SRC
+
+If you want to use a local mailbox to receive e-mail messages, the
+followings are necessary.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; To use local mailbox "mbox" or "maildir" instead of POP
+  (setq mew-mailbox-type 'mew)
+  (setq new-mbox-command "incm")
+  (setq mew-mbox-command-arg "-u -d /path/to/mbox")
+  ;; If /path/to/mbox is a file, it means "mbox".
+  ;; If /path/to/mbox is a directory, it means "maildir".
+#+END_SRC
+
+If you want to use IMAP to receive e-mail-messages, the followings are
+necessary.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (setq mew-proto "%")
+  ;; (setq mew-imap-user "your IMAP account) ;; (user-login-name)
+  (setq mew-imap-server "your IMAP server") ;; if not localhost
+  ;; (setq mew-imap-ssl t)
+  ;; (setq mew-imap-port "993)
+  ;; (setq mew-prog-ssl-arg "fips=no\nverify=0\n")
+#+END_SRC
+
+To read and/or write articles of NetNews, the followings are
+necessary.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  ;; (setq mew-nntp-user "your NNTP account")
+  (setq mew-nntp-server "your NNTP server")
+#+END_SRC
+
 * elfeed
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
