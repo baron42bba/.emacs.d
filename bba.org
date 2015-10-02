@@ -112,6 +112,8 @@ from bash.
       )
 #+END_SRC
 
+#+RESULTS:
+
 * define emacs shutdown function
 
 I like to commit my notes in my org and workorg folders after a days work.
@@ -244,60 +246,64 @@ search the web on your fingertips. C-c /.
 
 
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
-      (progn
-        (require 'engine-mode)
-        (setq engine/browser-function 'eww-browse-url)
+    (if (>= emacs-major-version 24)
+        (progn
+          (require 'engine-mode)
 
-          (defengine amazon
-            "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
-            :keybinding "a"
-            )
+            (defengine amazon
+              "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
+              :keybinding "a"
+              )
 
-          (defengine bing
-            "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
-            :keybinding "b"
-            )
+            (defengine bing
+              "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
+              :browser 'eww-browse-url
+              :keybinding "b"
+              )
 
-          (defengine cfengine
-            "https://docs.cfengine.com/latest/search.html?q=%s"
-            :keybinding "c"
-            )
+            (defengine cfengine
+              "https://docs.cfengine.com/latest/search.html?q=%s"
+              :browser 'eww-browse-url
+              :keybinding "c"
+              )
 
 
-          (defengine github
-            "http://www.github.com/search?q=%s"
-            :keybinding "G"
-            )
+            (defengine github
+              "http://www.github.com/search?q=%s"
+              :browser 'eww-browse-url
+              :keybinding "G"
+              )
 
-          (defengine google
-            "http://www.google.com/?q=%s"
-            :keybinding "g"
-            )
+            (defengine google
+              "http://www.google.com/?q=%s"
+              :browser 'eww-browse-url
+              :keybinding "g"
+              )
 
-          (defengine leo
-            "http://dict.leo.org/ende/index_de.html#/search=%s"
-            :keybinding "l"
-            )
+            (defengine leo
+              "http://dict.leo.org/ende/index_de.html#/search=%s"
+              :keybinding "l"
+              )
 
-          (defengine google-maps
-            "http://maps.google.com/maps?q=%s"
-            :keybinding "m"
-            )
+            (defengine google-maps
+              "http://maps.google.com/maps?q=%s"
+              :keybinding "m"
+              )
 
-          (defengine wikipedia
-            "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
-            :keybinding "w"
-            )
+            (defengine wikipedia
+              "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+              :browser 'eww-browse-url
+              :keybinding "w"
+              )
 
-          (defengine youtube
-            "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
-            :keybinding "y"
-            )
-          (engine-mode 1)
-          (engine/set-keymap-prefix (kbd "C-c C-/"))
-        )
-    )
+            (defengine youtube
+              "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
+              :keybinding "y"
+              )
+            (engine-mode 1)
+            (engine/set-keymap-prefix (kbd "C-c C-/"))
+          )
+      )
 #+END_SRC
 
 * expand-region
