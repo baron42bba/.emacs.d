@@ -2127,6 +2127,15 @@ all in your history.
   )
 
 #+END_SRC
+* post
+  [2015-10-02 Fri 13:26]
+
+Some private settings outside this repository are loaded after this configuration.
+
+#+BEGIN_SRC emacs-lisp
+  (if (file-exists-p "~/.emacs_post.el")
+  (load-file "~/.emacs_post.el"))
+#+END_SRC
 * done
 
 Display greetings:
