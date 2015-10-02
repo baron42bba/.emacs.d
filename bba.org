@@ -966,6 +966,17 @@ that Youtube specifies. The advantage (over simply writing out the
 iframe) is that this link can be clicked in org-mode, and can be
 exported to other formats as well.
 
+
+** org-mime-org-buffer-htmlize
+
+Use =C-c M= to send a multipart email with .org as text and exported
+html.
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook
+            (lambda()
+              (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
+#+END_SRC
 * cfengine
 
 #+BEGIN_SRC emacs-lisp
