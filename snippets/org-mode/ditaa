@@ -1,0 +1,7 @@
+# -*- mode: snippets -*-
+# name: ditaa
+# key: <sditaa
+# --
+#+BEGIN_SRC ditaa :file $1.png :cmdline -r -s 0.8 :exports ${2:$$(yas-choose-value '("results" "code" "both" "none"))} :cache ${3:$$(yas-choose-value '("yes" "no"))}
+$0
+#+END_SRC
