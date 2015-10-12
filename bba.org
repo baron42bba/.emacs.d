@@ -84,6 +84,9 @@ from bash.
                     (append
                      (split-string-and-unquote path ":")
                      exec-path)))
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $LANG")))
+              (setenv "LANG" path)
+              )
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $ORACLE_HOME")))
               (setenv "ORACLE_HOME" path)
               )
@@ -276,7 +279,6 @@ search the web on your fingertips. C-c /.
 
             (defengine google
               "http://www.google.com/?q=%s"
-              :browser 'eww-browse-url
               :keybinding "g"
               )
 
@@ -1591,6 +1593,14 @@ window-total-height.
       (t
       (apply 'eshell-exec-visual (cons "ssh" args))))))
 
+#+END_SRC
+
+Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right?
+
+#+BEGIN_SRC emacs-lisp
+    (defalias 'e 'find-file)
+    (defalias 'ff 'find-file)
+    (defalias 'emacs 'find-file)
 #+END_SRC
 
 * [[http://stackoverflow.com/questions/3035337/in-emacs-can-you-evaluate-an-emacs-lisp-expression-and-replace-it-with-the-resul][eval emacs lisp expression and replace it]]
