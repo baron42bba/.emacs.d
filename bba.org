@@ -1546,6 +1546,8 @@ Thanks to Howard Abrams.
 modified because current version lacks function have
 window-total-height.
 
+Bound to =C-X l !=
+
 #+BEGIN_SRC emacs-lisp
       (defun eshell-here ()
         "Opens up a new shell in the directory associated with the
@@ -1565,8 +1567,6 @@ window-total-height.
 
           (insert (concat "ls"))
           (eshell-send-input)))
-
-      (define-key global-map "\C-c!" 'eshell-here)
 
       (defun eshell/x ()
         (insert "exit")
@@ -1806,56 +1806,57 @@ to convert hard tabs to the appropriate number of spaces, and a tabify
 function to convert groups of spaces to hard tabs.
 
 #+BEGIN_SRC emacs-lisp
-  (define-key bba/toggle "w" 'whitespace-mode)
+    (define-key bba/toggle "w" 'whitespace-mode)
 
-  (define-prefix-command 'bba/launcher)
-  (define-key global-map "\C-xl" 'bba/launcher)
+    (define-prefix-command 'bba/launcher)
+    (define-key global-map "\C-xl" 'bba/launcher)
 
-  (define-key bba/launcher "b" 'browse-url-at-point)
-  (define-key bba/launcher "B" 'eww)
-  (define-key bba/launcher "c" 'calculator)
-  (define-key bba/launcher "d" 'ediff-buffers)
-  (define-key bba/launcher "e" 'elfeed)
-  (define-key bba/launcher "i" 'ielm)
-  (define-key bba/launcher "s" 'shell)
-  (define-key bba/launcher "S" 'synonyms)
-  (define-key bba/launcher "t" 'git-timemachine)
-  (define-key bba/launcher "T" 'twittering-mode)
+    (define-key bba/launcher "!" 'eshell-here)
+    (define-key bba/launcher "b" 'browse-url-at-point)
+    (define-key bba/launcher "B" 'eww)
+    (define-key bba/launcher "c" 'calculator)
+    (define-key bba/launcher "d" 'ediff-buffers)
+    (define-key bba/launcher "e" 'elfeed)
+    (define-key bba/launcher "i" 'ielm)
+    (define-key bba/launcher "s" 'shell)
+    (define-key bba/launcher "S" 'synonyms)
+    (define-key bba/launcher "t" 'git-timemachine)
+    (define-key bba/launcher "T" 'twittering-mode)
 
-  (define-key global-map "\C-c\C-t" 'insert-timestamp)
-  (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
+    (define-key global-map "\C-c\C-t" 'insert-timestamp)
+    (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
-  (define-key global-map "\C-ci" 'imenu)
-  (define-key global-map "\C-c\S-g" 'rgrep)
-  (define-key global-map "\C-cf" 'load-git-cfengine)
+    (define-key global-map "\C-ci" 'imenu)
+    (define-key global-map "\C-c\S-g" 'rgrep)
+    (define-key global-map "\C-cf" 'load-git-cfengine)
 
-  (define-key global-map "\C-c\C-w" 'fixup-whitespace)
+    (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
-  (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
-  (define-key global-map "\M-g\M-b" 'magit-branch-manager)
-  (define-key global-map "\M-gb" 'magit-blame-mode)
-  (define-key global-map "\C-cm" 'magit-status)
+    (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
+    (define-key global-map "\M-g\M-b" 'magit-branch-manager)
+    (define-key global-map "\M-gb" 'magit-blame-mode)
+    (define-key global-map "\C-cm" 'magit-status)
 
-  (define-key global-map "\C-c\S-f" (lambda()
-                                   (interactive)
-                                   (message (buffer-file-name))))
+    (define-key global-map "\C-c\S-f" (lambda()
+                                     (interactive)
+                                     (message (buffer-file-name))))
 
-  (if (<= emacs-major-version 23)
-      (progn
-        (define-key global-map "\C-cw" (lambda ()
-                                         (interactive)
-                                         (let ((woman-use-topic-at-point t))
-                                           (woman))))
-        (define-key global-map "\C-x\C-b" 'ibuffer)
-        )
-  )
+    (if (<= emacs-major-version 23)
+        (progn
+          (define-key global-map "\C-cw" (lambda ()
+                                           (interactive)
+                                           (let ((woman-use-topic-at-point t))
+                                             (woman))))
+          (define-key global-map "\C-x\C-b" 'ibuffer)
+          )
+    )
 
-  (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
+    (define-key global-map "\C-c\M-d" 'diff-buffer-with-file)
 
-  ;;; ** Use C-+ and C-- to adjust font size
+    ;;; ** Use C-+ and C-- to adjust font size
 
-  (define-key global-map (kbd "C-+") 'text-scale-increase)
-  (define-key global-map (kbd "C--") 'text-scale-decrease)
+    (define-key global-map (kbd "C-+") 'text-scale-increase)
+    (define-key global-map (kbd "C--") 'text-scale-decrease)
 
 
 
