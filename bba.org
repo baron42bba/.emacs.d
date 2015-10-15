@@ -87,6 +87,10 @@ from bash.
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $LANG")))
               (setenv "LANG" path)
               )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $SSH_AUTH_SOCK")))
+              (setq ssh-auth-sock path)
+              (setenv "SSH_AUTH_SOCK" path)
+              )
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $ORACLE_HOME")))
               (setenv "ORACLE_HOME" path)
               )
@@ -230,6 +234,7 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
         (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
         (require 'smartparens)
         (smartparens-global-mode 1)
+        (define-key smartparens-mode-map (kbd "C-'") 'sp-rewrap-sexp)
         ))
 #+END_SRC
 * [[https://github.com/hrs/engine-mode][engine-mode]]
@@ -337,13 +342,36 @@ snippets. Some help for Perl and even for org-mode.
 #+END_SRC
 * [[https://github.com/flycheck/flycheck][flycheck]]
 
+modified puppet-lint definition to include no-80chars-check and fixed
+log-format.
+
 #+BEGIN_SRC emacs-lisp
-    (if (>= emacs-major-version 24)
-        (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20150703.359")
-          (require 'flycheck)
-          (add-hook 'after-init-hook #'global-flycheck-mode)
-          ))
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20150703.359")
+        (require 'flycheck)
+        (add-hook 'after-init-hook #'global-flycheck-mode)
+
+        (flycheck-define-checker puppet-lint
+          "A Puppet DSL style checker using puppet-lint.
+
+  See URL `http://puppet-lint.com/'."
+          ;; We must check the original file, because Puppetlint is quite picky on the
+          ;; names of files and there place in the directory structure, to comply with
+          ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
+          ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
+          ;; temporary file will cause an error.
+          :command ("puppet-lint"
+                    "--no-80chars-check" "--log-format" "%{path}:%{line}:%{kind}: %{message} (%{check})"
+                    source-original)
+          :error-patterns
+          ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
+           (error line-start (file-name) ":" line ":error: " (message) line-end))
+          :modes puppet-mode
+          ;; Since we check the original file, we can only use this syntax checker if
+          ;; the buffer is actually linked to a file, and if it is not modified.
+          :predicate flycheck-buffer-saved-p)
+        ))
 #+END_SRC
 
 * [[https://github.com/kai2nenobu/guide-key][guide-key]]
@@ -1638,7 +1666,8 @@ safe files with #! in first line as user executable.
 #+BEGIN_SRC emacs-lisp
   (add-hook `after-save-hook
             #'(lambda ()
-                (check-parens)
+                  (if (not (string-match ".htm" buffer-file-name))(check-parens))
+
                 (and (save-excursion
                        (save-restriction
                          (widen)
@@ -1820,6 +1849,7 @@ function to convert groups of spaces to hard tabs.
     (define-key bba/launcher "i" 'ielm)
     (define-key bba/launcher "s" 'shell)
     (define-key bba/launcher "S" 'synonyms)
+    (define-key bba/launcher "\C-s" 'helm-swoop)
     (define-key bba/launcher "t" 'git-timemachine)
     (define-key bba/launcher "T" 'twittering-mode)
 
