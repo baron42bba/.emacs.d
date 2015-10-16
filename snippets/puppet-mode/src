@@ -1,0 +1,4 @@
+# name: source
+# key: src
+# --
+source => 'puppet://${1:source}',

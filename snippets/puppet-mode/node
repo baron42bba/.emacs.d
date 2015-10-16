@@ -1,0 +1,6 @@
+# name: node { ... }
+# key: node
+# --
+node '${1:name}' {
+  include $0
+}

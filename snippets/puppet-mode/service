@@ -1,0 +1,11 @@
+# name: service { ... }
+# key: service
+# --
+service { '${1:name}':
+  ensure    => ${2:running},
+  require   => ${3:Package["requiree"]},
+  ${4:hasrestart => ${5:$$(yas-choose-value '("true" "false"))}},
+  ${6:hasstatus => ${7:$$(yas-choose-value '("true" "false"))}}
+}
+
+$0

@@ -1,0 +1,14 @@
+# name: package { ... provider ... }
+# key: package
+# --
+package { '${1:name}':
+  ensure   => ${2:$$(yas-choose-value '("latest" "installed"))},
+  provider => 'dpkg',
+  source   => "/var/cache/apt/archives/$3",
+  require  => [
+                File['/var/cache/apt/archives/$4'],
+                Package['$5'],
+              ]
+}
+
+$0
