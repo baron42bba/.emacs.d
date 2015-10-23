@@ -87,6 +87,9 @@ from bash.
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $LANG")))
               (setenv "LANG" path)
               )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $PYTHONPATH")))
+              (setenv "PYTHONPATH" path)
+              )
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $SSH_AUTH_SOCK")))
               (setq ssh-auth-sock path)
               (setenv "SSH_AUTH_SOCK" path)
@@ -214,6 +217,7 @@ open ibuffer and magit-status in fullframe mode.
           )
       )
 #+END_SRC
+
 * [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Window-Convenience.html][winner-mode]]
     [2015-06-10 Wed 09:33]
 
@@ -223,6 +227,7 @@ Get undo for your window layout.
   (if (>= emacs-major-version 24)
       (winner-mode 1))
 #+END_SRC
+
 * smartparens-mode
 Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
