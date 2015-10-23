@@ -958,11 +958,18 @@ taken from http://doc.norang.ca/org-mode.org
                     (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
                     (when (display-graphic-p)
                       (rainbow-delimiters-mode))
-                    ))
+                    )
+                  )
         (add-hook 'text-mode-hook
                   (lambda ()
                     (auto-fill-mode)
                     (flyspell-mode)
+                    )
+                  )
+        (add-hook 'prog-mode-hook
+                  (lambda ()
+                    (when (display-graphic-p)
+                      (rainbow-delimiters-mode))
                     )
                   )
         )
@@ -1742,6 +1749,33 @@ safe files with #! in first line as user executable.
   (global-set-key (kbd "M-n") 'bba/move-line-down)
 
 #+END_SRC
+* ggtags
+
+Configure [[https://github.com/leoliu/ggtags][ggtags]] and [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]] to use [[https://www.gnu.org/software/global/][GNU Global]].
+If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
+
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20150814.842" t)
+        (require 'ggtags)
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20151016.201" t)
+        (require 'helm-gtags)
+        (add-hook 'puppet-mode-hook
+                  (lambda()
+                    (ggtags-mode 1)
+                    (helm-gtags-mode 1)))
+        (add-hook 'python-mode-hook
+                  (lambda()
+                    (ggtags-mode 1)
+                    (helm-gtags-mode 1)))
+        (add-hook 'cperl-mode-hook
+                  (lambda()
+                    (ggtags-mode 1)
+                    (helm-gtags-mode 1)))
+        ))
+#+END_SRC
+
 * helm
 
 Some links you might check out:
