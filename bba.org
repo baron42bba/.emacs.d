@@ -1812,8 +1812,8 @@ combine key strokes to access commands even faster.
   (setq key-chord-two-keys-delay 0.16)
   (key-chord-define cfengine3-mode-map ";;" "\C-e;")
   (key-chord-define cfengine3-mode-map ",," "\C-e,")
-  (key-chord-define cperl-mode-map ";;" "\C-e;")
-  (key-chord-define cperl-mode-map ",," "\C-e,")
+  (key-chord-define prog-mode-map ";;" "\C-e;")
+  (key-chord-define prog-mode-map ",," "\C-e,")
   (key-chord-define-global "uu" 'undo)
   (key-chord-define-global "xb" 'ido-switch-buffer)
   (key-chord-define-global "xf" 'ido-find-file)
@@ -1844,6 +1844,7 @@ combine key strokes to access commands even faster.
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "r" 'rainbow-delimiters-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
+  (define-key bba/toggle "v" 'visual-line-mode)
   (define-key bba/toggle "\S-w" 'which-function-mode)
 #+END_SRC
 
