@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: setupfile
+# key: setupfile
+# --
+#+SETUPFILE: ~/git/github/org-html-themes/setup/theme-${1:$$(yas-choose-value '("bigblow" "bigblow-local" "readtheorg" "readtheorg-local"))}.setup
+$0
