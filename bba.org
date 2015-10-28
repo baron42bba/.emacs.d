@@ -1863,6 +1863,13 @@ combine key strokes to access commands even faster.
 
 #+END_SRC
 
+* aliases
+
+#+BEGIN_SRC emacs-lisp
+  (defalias 'ts 'transpose-sentences)
+  (defalias 'tp 'transpose-paragraphs)
+#+END_SRC
+
 * key bindings
 #+BEGIN_SRC emacs-lisp
   (define-key global-map (kbd "M-@") 'cycle-spacing)
@@ -1877,6 +1884,7 @@ combine key strokes to access commands even faster.
 
   (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "b" 'bba-switch-default-browser)
+  (define-key bba/toggle "e" 'eldoc-mode)
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "\S-f" 'follow-mode)
   (define-key bba/toggle "i" 'impatient-mode)
