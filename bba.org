@@ -76,6 +76,8 @@ If running standalone on OSX we need to get some environment variables
 from bash.
 
 #+BEGIN_SRC emacs-lisp
+  (setenv "EDITOR" "emacsclient")
+
   (if (string-equal system-type "darwin")
           (progn
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $PATH")))
