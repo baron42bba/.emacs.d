@@ -1873,6 +1873,26 @@ combine key strokes to access commands even faster.
   (defalias 'tp 'transpose-paragraphs)
 #+END_SRC
 
+* [[http://mbork.pl/2015-10-31_Smart_comma_and_other_punctuation][smart comma]]
+
+Thanks to Marcin Borkowski for this code snippet.
+
+#+BEGIN_SRC emacs-lisp
+(defun smart-self-insert-punctuation (count)
+  "If COUNT=1 and the point is after a space, insert the relevant
+character before any spaces."
+  (interactive "p")
+  (if (and (= count 1)
+           (eq (char-before) ?\s))
+      (save-excursion
+        (skip-chars-backward " ")
+        (self-insert-command 1))
+    (self-insert-command count)))
+
+(global-set-key "," #'smart-self-insert-punctuation)
+
+#+END_SRC
+
 * key bindings
 #+BEGIN_SRC emacs-lisp
   (define-key global-map (kbd "M-@") 'cycle-spacing)
