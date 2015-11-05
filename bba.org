@@ -1367,6 +1367,18 @@ necessary.
 
 #+END_SRC
 
+* abbreviation
+
+Watching [[https://www.youtube.com/watch?v%3DFtieBc3KptU][Emacs For Writers]] by [[https://github.com/incandescentman][Jay Dixit]] I had to configure abbreviations.
+
+#+BEGIN_SRC emacs-lisp
+  (setq abbrev-file-name "~/org/abbrev_defs")
+  (if (file-exists-p abbrev-file-name)
+      (quietly-read-abbrev-file))
+  (setq default-abbrev-mode t)
+  (setq save-abbrevs 'silently)
+#+END_SRC
+
 * syntax-highlighting
 #+BEGIN_SRC emacs-lisp
   (font-lock-mode)
