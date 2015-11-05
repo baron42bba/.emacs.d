@@ -1919,6 +1919,7 @@ character before any spaces."
   (define-prefix-command 'bba/toggle)
   (define-key global-map "\C-ct" 'bba/toggle)
 
+  (define-key bba/toggle "\S-a" 'abbrev-mode)
   (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "b" 'bba-switch-default-browser)
   (define-key bba/toggle "e" 'eldoc-mode)
