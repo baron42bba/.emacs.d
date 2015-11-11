@@ -234,18 +234,44 @@ Get undo for your window layout.
 #+END_SRC
 
 * smartparens-mode
+
 Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
+Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-pairs]].
 
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
-      (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20150628.1418")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
-        (require 'smartparens)
-        (smartparens-global-mode 1)
-        (define-key smartparens-mode-map (kbd "C-'") 'sp-rewrap-sexp)
-        ))
+    (if (>= emacs-major-version 24)
+        (progn
+          (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20150628.1418")
+          (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
+          (require 'smartparens)
+          (smartparens-global-mode 1)
+          (defmacro def-pairs (pairs)
+            `(progn
+               ,@(loop for (key . val) in pairs
+                       collect
+                       `(defun ,(read (concat
+                                       "wrap-with-"
+                                       (prin1-to-string key)
+                                       "s"))
+                            (&optional arg)
+                          (interactive "p")
+                          (sp-wrap-with-pair ,val)))))
+
+          (def-pairs ((paren        . "(")
+                      (bracket      . "[")
+                      (brace        . "{")
+                      (single-quote . "'")
+                      (double-quote . "\"")
+                      (back-quote   . "`")))
+
+          (define-key smartparens-mode-map (kbd "C-'") 'sp-rewrap-sexp)
+          (define-key smartparens-mode-map (kbd "C-c (") 'wrap-with-parens)
+          (define-key smartparens-mode-map (kbd "C-c ]") 'sp-backward-unwrap-sexp)
+          (define-key smartparens-mode-map (kbd "C-c )") 'sp-unwrap-sexp)
+          (define-key smartparens-mode-map (kbd "C-c [") 'wrap-with-brackets)
+          (define-key smartparens-mode-map (kbd "C-c {") 'wrap-with-braces)
+          ))
 #+END_SRC
 
 * [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
@@ -1451,6 +1477,17 @@ like these:
                                 )
                ))
 
+  (eval-after-load "puppet-mode"
+    '(add-hook 'puppet-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                   (lambda()
+                                                      (unless (boundp 'bba-keep-whitespaces)
+                                                        (save-excursion
+                                                          (delete-trailing-whitespace)))
+                                                      )
+                                                   )
+                                 )
+               ))
+
   (eval-after-load "text-mode"
     '(add-hook 'text-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
@@ -1846,7 +1883,7 @@ Some links you might check out:
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20151019.230")
         (require 'helm-descbinds)
-        (define-key global-map (kbd "\C-h b") 'helm-descbinds)
+        (define-key global-map (kbd "C-h b") 'helm-descbinds)
         )
   )
 #+END_SRC
