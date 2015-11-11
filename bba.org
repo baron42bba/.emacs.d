@@ -158,7 +158,7 @@ Keep track of your important stuff!
 
 * async
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 25)
+  (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/async-20150529.529")
         (require 'async)
@@ -1879,7 +1879,7 @@ Some links you might check out:
 * helm-descbinds
 
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 25)
+  (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20151019.230")
         (require 'helm-descbinds)
