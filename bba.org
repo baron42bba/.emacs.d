@@ -1922,6 +1922,7 @@ combine key strokes to access commands even faster.
   (key-chord-define-global "uu" 'undo)
   (key-chord-define-global "xb" 'ido-switch-buffer)
   (key-chord-define-global "xf" 'ido-find-file)
+  (key-chord-define-global "xx" 'helm-M-x)
   (if (>= emacs-major-version 24)
       (progn
         ))
