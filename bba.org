@@ -1998,8 +1998,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "!" 'eshell-here)
   (define-key bba/launcher "b" 'browse-url-at-point)
   (define-key bba/launcher "B" 'eww)
-  (define-key bba/launcher "a" 'bba-aws-desc-instances)
-  (define-key bba/launcher "c" 'calculator)
+  (define-key bba/launcher "c" 'helm-calcul-expression)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
@@ -2020,7 +2019,7 @@ function to convert groups of spaces to hard tabs.
 
   (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
   (define-key global-map "\M-g\M-b" 'magit-branch-manager)
-  (define-key global-map "\M-gb" 'magit-blame-mode)
+  (define-key global-map "\M-gb" 'magit-blame-popup)
   (define-key global-map "\C-cm" 'magit-status)
 
   (define-key global-map "\C-c\S-f" (lambda()
