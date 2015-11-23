@@ -1066,6 +1066,16 @@ html.
             (lambda()
               (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
 #+END_SRC
+
+** org-ellipsis
+
+#+BEGIN_SRC emacs-lisp
+  (when (display-graphic-p)
+    (setq org-ellipsis "↴↴↴")
+    )
+
+#+END_SRC
+
 * cfengine
 
 #+BEGIN_SRC emacs-lisp
