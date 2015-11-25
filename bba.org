@@ -142,15 +142,13 @@ Keep track of your important stuff!
     (interactive)
     (save-some-buffers)
     (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'")
+    (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
     (if (equal "work" (getenv "SYSENV"))
         (progn
           (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git commit -a -m 'autocommit'")
           (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git push origin")
-          )
-      (progn
-        (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git push origin")
-        ))
-    (setq twittering-cert-file nil )
+          ))
+    (setq twittering-cert-file nil)
     (kill-emacs)
     )
 
