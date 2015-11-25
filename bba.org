@@ -2034,7 +2034,12 @@ function to convert groups of spaces to hard tabs.
   (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
   (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
-  (define-key global-map "\M-g\S-d" 'magit-file-delete)
+  (define-key global-map "\M-g\S-d" '(lambda()
+                                     (interactive)
+                                     (call-interactively 'magit-file-delete)
+                                     (kill-buffer)
+                                     )
+    )
   (define-key global-map "\M-g\M-b" 'magit-branch-manager)
   (define-key global-map "\M-gb" 'magit-blame-popup)
   (define-key global-map "\C-cm" 'magit-status)
