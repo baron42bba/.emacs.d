@@ -1761,7 +1761,12 @@ safe files with #! in first line as user executable.
 #+BEGIN_SRC emacs-lisp
   (add-hook `after-save-hook
             #'(lambda ()
-                  (if (not (string-match ".htm" buffer-file-name))(check-parens))
+                (if (not
+                     (or
+                      (string-match ".htm" buffer-file-name)
+                      (string-match ".org" buffer-file-name))
+                     )
+                    (check-parens))
 
                 (and (save-excursion
                        (save-restriction
