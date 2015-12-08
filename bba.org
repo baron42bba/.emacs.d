@@ -1538,8 +1538,9 @@ Use C-c C-c to run rpmbuild if buffer is spec file.
   (add-hook 'sh-mode-hook
             (lambda ()
               (progn
-                (if (string-match ".spec$" buffer-file-name)
-                (define-key sh-mode-map "\C-c\C-c" 'bba-build-rpm))
+                (if (buffer-file-name)
+                    (if (string-match ".spec$" buffer-file-name)
+                        (define-key sh-mode-map "\C-c\C-c" 'bba-build-rpm)))
       )))
 
 #+END_SRC
