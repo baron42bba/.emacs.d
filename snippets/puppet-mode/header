@@ -1,0 +1,21 @@
+# name: header
+# key: header
+# --
+# == Class: ${1:name}
+#
+# ${2:description}
+#
+# == Examples
+#
+# class { '$1': }
+#
+# == Authors
+#
+# `(insert-timestamp)`
+#
+# === Copyright
+#
+# Copyright `(insert-string (format-time-string "%Y"))` $3
+class $1 {
+  $0
+}
