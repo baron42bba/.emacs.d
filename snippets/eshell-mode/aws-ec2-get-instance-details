@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-instance-details
+# key: aws-ec2-get-instance-details
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ec2 describe-instances --instance-ids ${2:`(yank)`} $0
