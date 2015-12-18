@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-dns-names
+# key: aws-ec2-get-dns-names
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ec2 describe-instances --filters "Name=tag:Name,Values=$2" --query "Reservations[].Instances[?State.Name=='running'].[InstanceId, PublicDnsName]" --output ${3:$$(yas-choose-value '("table" "text" "json"))} $0
