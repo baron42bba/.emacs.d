@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-instances
+# key: aws-ec2-get-instances
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ec2 describe-instances --query 'Reservations[].Instances[].[join(\`,\`,Tags[?Key==\`Name\`].Value),InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone]' --output ${3:$$(yas-choose-value '("text" "table" "json"))} $0
