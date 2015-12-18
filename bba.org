@@ -384,15 +384,43 @@ search the web on your fingertips. C-c /.
 My first thought: Nice. But do I have a use case? After half a year I
 cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]] code with
 snippets. Some help for Perl and even for org-mode.
+Thought about using snippets for shell-mode and eshell-mode?
 
 #+BEGIN_SRC emacs-lisp
-          (add-to-list 'load-path
-                       "~/.emacs.d/elpa/yasnippet-20150415.244")
-          (require 'yasnippet)
-          (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-          (yas-global-mode 1)
-          (define-key global-map "\C-cy" 'yas/insert-snippet)
+  (add-to-list 'load-path
+               "~/.emacs.d/elpa/yasnippet-20150415.244")
+  (require 'yasnippet)
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas-global-mode 1)
+  (define-key global-map "\C-cy" 'yas-insert-snippet)
+    (if (>= emacs-major-version 24)
+        (add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
 #+END_SRC
+
+From http://emacswiki.org/emacs/Yasnippet
+#+begin_src emacs-lisp
+    (if (>= emacs-major-version 24)
+        (defun yas-shk-helm-prompt (prompt choices &optional display-fn)
+          "Use helm to select a snippet. Put this into `yas/prompt-functions.'"
+          (interactive)
+          (setq display-fn (or display-fn 'identity))
+          (if (require 'helm-config)
+              (let (tmpsource cands result rmap)
+                (setq cands (mapcar (lambda (x) (funcall display-fn x)) choices))
+                (setq rmap (mapcar (lambda (x) (cons (funcall display-fn x) x)) choices))
+                (setq tmpsource
+                      (list
+                       (cons 'name prompt)
+                       (cons 'candidates cands)
+                       '(action . (("Expand" . (lambda (selection) selection))))
+                       ))
+                (setq result (helm-other-buffer '(tmpsource) "*helm-select-yasnippet"))
+                (if (null result)
+                    (signal 'quit "user quit!")
+                  (cdr (assoc result rmap))))
+            nil)))
+#+end_src
+
 
 * [[https://github.com/flycheck/flycheck][flycheck]]
 
