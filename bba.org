@@ -722,6 +722,7 @@ Very useful for repetitive literate devops jobs.
   (if (equal "work" (getenv "SYSENV"))
       (progn
         (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
+        (global-set-key (kbd "C-c S-<f6>") '(lambda () (interactive) (find-file "~/workorg/work_archive.org")))
         (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/workorg/workhours.org")))
         )
     (progn
