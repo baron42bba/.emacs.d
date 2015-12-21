@@ -385,16 +385,25 @@ My first thought: Nice. But do I have a use case? After half a year I
 cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]] code with
 snippets. Some help for Perl and even for org-mode.
 Thought about using snippets for shell-mode and eshell-mode?
-
+=ha-autoinsert-yas-expand= copied from Howard Abrams.
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path
                "~/.emacs.d/elpa/yasnippet-20150415.244")
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode 1)
+  (auto-insert-mode 1)
+  (setq auto-insert-directory "~/.emacs.d/templates")
   (define-key global-map "\C-cy" 'yas-insert-snippet)
     (if (>= emacs-major-version 24)
         (add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
+  (defun ha-autoinsert-yas-expand()
+    "Replace text in yasnippet template."
+    (yas-expand-snippet (buffer-string) (point-min) (point-max)))
+  (define-auto-insert "\\.sh$" ["default-sh.sh" ha-autoinsert-yas-expand])
+  (define-auto-insert "\\.pl$" ["default-pl.pl" ha-autoinsert-yas-expand])
+
+
 #+END_SRC
 
 From http://emacswiki.org/emacs/Yasnippet
@@ -488,16 +497,6 @@ Probably the best help to keep track of the not every day used keybindings.
       ))
 
 
-#+END_SRC
-
-* template support
-
-Some default templates for new files are stored in [[templates/]].
-No need to start .pl .sh from scratch.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'template)
-  (template-initialize)
 #+END_SRC
 
 * thesaurus
