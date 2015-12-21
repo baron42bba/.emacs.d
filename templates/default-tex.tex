@@ -1,0 +1,23 @@
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "letter"
+%%% End:
+\documentclass[10pt]{dinbrief}
+\usepackage{german}
+\disabledraftstandard
+%% \normaladdress
+\place{`latex-place`}
+\address{`latex-address`}
+\backaddress{`latex-backaddress`}
+\signature{`user-full-name`}
+\begin{document}
+\begin{letter}{${1:Name}\\\\
+                 ${2:Street}
+                 \\\\\\\\${3:zip city}\\\\\\\\\\\\}
+\subject{${4:Subject}}
+\opening{Sehr geehrte Damen und Herren,}
+$0
+\closing{Mit freundlichen Gr"u"sen}
+\encl{Anhang}
+\end{letter}
+\end{document}

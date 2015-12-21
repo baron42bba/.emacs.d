@@ -402,6 +402,7 @@ Thought about using snippets for shell-mode and eshell-mode?
     (yas-expand-snippet (buffer-string) (point-min) (point-max)))
   (define-auto-insert "\\.sh$" ["default-sh.sh" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.pl$" ["default-pl.pl" ha-autoinsert-yas-expand])
+  (define-auto-insert "\\.tex$" ["default-tex.tex" ha-autoinsert-yas-expand])
 
 
 #+END_SRC
