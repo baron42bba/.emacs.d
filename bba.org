@@ -158,7 +158,7 @@ Keep track of your important stuff!
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/async-20150529.529")
+        (add-to-list 'load-path "~/.emacs.d/elpa/async-20151123.256")
         (require 'async)
         )
     )
@@ -754,47 +754,47 @@ Very useful for repetitive literate devops jobs.
 
 #+BEGIN_SRC emacs-lisp
 
-    ;; (setq org-clock-persist 'history)
-    (org-clock-persistence-insinuate)
-    (setq org-clock-persist t)
-    (setq org-default-notes-file (concat org-directory "/refile.org"))
-    (define-key global-map "\C-cc" 'org-capture)
+  ;; (setq org-clock-persist 'history)
+  (org-clock-persistence-insinuate)
+  (setq org-clock-persist t)
+  (setq org-default-notes-file (concat org-directory "/refile.org"))
+  (define-key global-map "\C-cc" 'org-capture)
 
-    (setq org-capture-templates
+  (setq org-capture-templates
 
-    '(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
-    "* TODO %^{Task}\n%U\n
+  '(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
+  "* TODO %^{Task}\n%U\n
 
-    %i\n
-    %a\n
-    %?
-    ")
+  %i\n
+  %a\n
+  %?
+  ")
 
-      ("m" "Meeting" entry (file "~/org/refile.org")
-       "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+    ("m" "Meeting" entry (file "~/org/refile.org")
+     "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
 
-      ("n" "note" entry (file+headline "~/org/refile.org" "Note")
-       "* NOTE %?\n%U\n
+    ("n" "note" entry (file+headline "~/org/refile.org" "Note")
+     "* NOTE %?\n%U\n
 
-    %i\n
-    %a")
+  %i\n
+  %a")
 
-      ("w" "work todo" (file+headline "~/workorg/work.org" "todolist")
-       "* TODO %{Task}\n%U\n
+    ("w" "work todo" entry (file+headline "~/workorg/work.org" "Tasks")
+  "* TODO %^{Task}\n%U\n
 
-    %i\n
-    %a\n
-    %?"
-       )
+  %i\n
+  %a\n
+  %?
+  ")
 
-    ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
-     "* %?\n%U\n" :clock-in t :clock-resume t)
+  ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
+   "* %?\n%U\n" :clock-in t :clock-resume t)
 
-    ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
-    "** %c\n\n  %u\n  %i"
-             :empty-lines 1)
+  ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
+  "** %c\n\n  %u\n  %i"
+           :empty-lines 1)
 
-    ))
+  ))
 
 #+END_SRC
 

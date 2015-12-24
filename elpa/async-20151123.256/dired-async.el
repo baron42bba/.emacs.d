@@ -27,15 +27,15 @@
 ;;; Commentary:
 
 ;; This file provide a redefinition of `dired-create-file' function,
-;; which must be loaded *after* dired-aux.el, performs copies,
-;; moves and all what is handled by `dired-create-file' in the background
-;; using a slave Emacs process, by means of the async.el module.
+;; performs copies, moves and all what is handled by `dired-create-file'
+;; in the background using a slave Emacs process,
+;; by means of the async.el module.
 ;; To use it, put this in your .emacs:
-;;
-;;   (eval-after-load "dired-aux"
-;;     '(require 'dired-async))
-;;
-;;
+
+;;     (dired-async-mode 1)
+
+;; This will enable async copy/rename etc...
+;; in dired and helm.
 
 ;;; Code:
 
@@ -74,7 +74,7 @@ Should take same args as `message'."
   :group 'dired-async)
 
 (defface dired-async-mode-message
-    '((t (:background "Firebrick1")))
+    '((t (:foreground "Gold")))
   "Face used for `dired-async--modeline-mode' lighter."
   :group 'dired-async)
 
@@ -151,10 +151,11 @@ Should take same args as `message'."
 
 See `dired-create-files' for the behavior of arguments."
   (setq dired-async-operation nil)
-  (let (dired-create-files-failures failures async-fn-list
-                                    skipped (success-count 0) (total (length fn-list))
-                                    (callback `(lambda (&optional ignore)
-                                                 (dired-async-after-file-create ,(length fn-list)))))
+  (let (dired-create-files-failures
+        failures async-fn-list
+        skipped (success-count 0)
+        (total (length fn-list))
+        callback)
     (let (to overwrite-query
              overwrite-backup-query)    ; for dired-handle-overwrite
       (dolist (from fn-list)
@@ -215,7 +216,15 @@ ESC or `q' to not overwrite any of the remaining files,
                         (push (dired-make-relative from) failures)
                         (dired-log "%s `%s' to `%s' failed"
                                    operation from to)))
-                  (push (cons from to) async-fn-list))))))
+                  (push (cons from to) async-fn-list)))))
+      (setq callback
+            `(lambda (&optional ignore)
+               (dired-async-after-file-create ,total)
+               (when (string= ,(downcase operation) "rename")
+                 (cl-loop for (file . to) in ',async-fn-list
+                          do (and (get-file-buffer file)
+                                  (with-current-buffer (get-file-buffer file)
+                                    (set-visited-file-name to nil t))))))))
     ;; Handle error happening in host emacs.
     (cond
       (dired-create-files-failures

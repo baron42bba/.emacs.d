@@ -1,4 +1,4 @@
-;;; async --- Asynchronous processing in Emacs
+;;; async.el --- Asynchronous processing in Emacs
 
 ;; Copyright (C) 2012~2014 John Wiegley
 
@@ -128,12 +128,13 @@ as follows:
     (eval sexp)))
 
 (defun async--insert-sexp (sexp)
-  (prin1 sexp (current-buffer))
-  ;; Just in case the string we're sending might contain EOF
-  (encode-coding-region (point-min) (point-max) 'utf-8-unix)
-  (base64-encode-region (point-min) (point-max) t)
-  (goto-char (point-min)) (insert ?\")
-  (goto-char (point-max)) (insert ?\" ?\n))
+  (let (print-level print-length)
+    (prin1 sexp (current-buffer))
+    ;; Just in case the string we're sending might contain EOF
+    (encode-coding-region (point-min) (point-max) 'utf-8-unix)
+    (base64-encode-region (point-min) (point-max) t)
+    (goto-char (point-min)) (insert ?\")
+    (goto-char (point-max)) (insert ?\" ?\n)))
 
 (defun async--transmit-sexp (process sexp)
   (with-temp-buffer

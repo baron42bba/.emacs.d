@@ -42,7 +42,8 @@
 (require 'cl-lib)
 (require 'async)
 
-(defcustom async-bytecomp-allowed-packages '(async helm)
+(defcustom async-bytecomp-allowed-packages
+  '(async helm helm-core helm-ls-git helm-ls-hg magit)
   "Packages in this list will be compiled asynchronously by `package--compile'.
 All the dependencies of these packages will be compiled async too,
 so no need to add dependencies to this list.
@@ -108,6 +109,8 @@ All *.elc files are systematically deleted before proceeding."
 (declare-function package-desc-reqs "package.el" (cl-x))
 
 (defun async-bytecomp--get-package-deps (pkg &optional only)
+  ;; Same as `package--get-deps' but parse instead `package-archive-contents'
+  ;; because PKG is not already installed and not present in `package-alist'.
   (let* ((pkg-desc (cadr (assq pkg package-archive-contents)))
          (direct-deps (cl-loop for p in (package-desc-reqs pkg-desc)
                                for name = (car p)
@@ -126,21 +129,30 @@ All *.elc files are systematically deleted before proceeding."
 (defun async-bytecomp-get-allowed-pkgs ()
   (when (and async-bytecomp-allowed-packages
              (listp async-bytecomp-allowed-packages))
-    (cl-loop for p in async-bytecomp-allowed-packages
-             append (async-bytecomp--get-package-deps p) into reqs
-             finally return
-             (delete-dups
-              (append async-bytecomp-allowed-packages reqs)))))
+    (if package-archive-contents
+        (cl-loop for p in async-bytecomp-allowed-packages
+                 when (assq p package-archive-contents)
+                 append (async-bytecomp--get-package-deps p) into reqs
+                 finally return
+                 (delete-dups
+                  (append async-bytecomp-allowed-packages reqs)))
+        async-bytecomp-allowed-packages)))
 
 (defadvice package--compile (around byte-compile-async)
-  (let ((cur-package (package-desc-name pkg-desc)))
+  (let ((cur-package (package-desc-name pkg-desc))
+        (pkg-dir (package-desc-dir pkg-desc)))
     (if (or (equal async-bytecomp-allowed-packages '(all))
             (memq cur-package (async-bytecomp-get-allowed-pkgs)))
         (progn
           (when (eq cur-package 'async)
             (fmakunbound 'async-byte-recompile-directory))
-          (package-activate-1 pkg-desc)
-          (load "async-bytecomp") ; emacs-24.3 don't reload new files.
+          ;; Add to `load-path' the latest version of async and
+          ;; reload it when reinstalling async.
+          (when (string= cur-package "async")
+            (cl-pushnew pkg-dir load-path)
+            (load "async-bytecomp"))
+          ;; `async-byte-recompile-directory' will add directory
+          ;; as needed to `load-path'.
           (async-byte-recompile-directory (package-desc-dir pkg-desc) t))
         ad-do-it)))
 
