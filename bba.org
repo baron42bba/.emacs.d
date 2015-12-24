@@ -2023,6 +2023,8 @@ character before any spaces."
   (define-key global-map "\C-c\S-t" 'visit-tags-table)
   (define-key global-map "\C-cf" 'tags-search)
 
+  (define-key global-map (kbd "C-c M-s") 'string-edit-at-point)
+
   (define-prefix-command 'bba/toggle)
   (define-key global-map "\C-ct" 'bba/toggle)
 
