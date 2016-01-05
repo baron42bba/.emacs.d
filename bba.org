@@ -1857,6 +1857,18 @@ safe files with #! in first line as user executable.
 
 #+END_SRC
 
+* copy buffer file name to kill ring
+
+Sometimes you need the filename of your current buffer on the command
+line or somewhere else.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-copy-buffer-name ()
+    (interactive)
+    (kill-new (buffer-file-name)))
+#+END_SRC
+
+
 * ggtags
 
 Configure [[https://github.com/leoliu/ggtags][ggtags]] and [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]] to use [[https://www.gnu.org/software/global/][GNU Global]].
