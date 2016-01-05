@@ -540,9 +540,24 @@ Probably the best help to keep track of the not every day used keybindings.
 
 #+END_SRC
 
-* ace-jump-mode
+* [[https://github.com/abo-abo/avy/blob/master/README.md][avy]]
+
+Replaced the deprecated [[https://github.com/winterTTr/ace-jump-mode][ace-jump-mode]] with [[help:avy-goto-char][avy-goto-char]] and [[help:goto-line][goto-line]]
+with [[help:avy-goto-line][avy-goto-line]].
 
 #+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/avy-20160105.245")
+  (require 'avy)
+  (define-key global-map (kbd "C-c C-@") 'avy-goto-char)
+  (define-key global-map (kbd "C-c C-SPC") 'avy-goto-char)
+  (define-key global-map (kbd "M-g g") 'avy-goto-line)
+
+
+#+END_SRC
+
+* ace-jump-mode
+
+#+BEGIN_SRC emacs-lisp :tangle no
   (add-to-list 'load-path "~/.emacs.d/elpa/ace-jump-mode-20140616.115")
   (require 'ace-jump-mode)
   (define-key global-map (kbd "C-c C-@") 'ace-jump-mode)
