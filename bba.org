@@ -388,7 +388,7 @@ Thought about using snippets for shell-mode and eshell-mode?
 =ha-autoinsert-yas-expand= copied from Howard Abrams.
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path
-               "~/.emacs.d/elpa/yasnippet-20150415.244")
+               "~/.emacs.d/elpa/yasnippet-20151212.2133")
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode 1)
