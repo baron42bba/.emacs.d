@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-start-stop-instance
+# key: aws-ec2-start_stop-instance
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ec2 ${2:$$(yas-choose-value '("start-instances" "stop-instances"))} --instance-ids ${3:`(yank)`} $0
