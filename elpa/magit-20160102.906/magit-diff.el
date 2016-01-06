@@ -1,6 +1,6 @@
 ;;; magit-diff.el --- inspect Git diffs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2015  The Magit Project Contributors
+;; Copyright (C) 2010-2016  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -960,14 +960,14 @@ which, as the name suggests always visits the actual file."
                      (or (get-file-buffer file)
                          (find-file-noselect file))))
       (magit-display-file-buffer buffer)
-      (when line
-        (goto-char (point-min))
-        (forward-line (1- line))
-        (when col
-          (move-to-column col)))
-      (when unmerged-p
-        (smerge-start-session))
       (with-current-buffer buffer
+        (when line
+          (goto-char (point-min))
+          (forward-line (1- line))
+          (when col
+            (move-to-column col)))
+        (when unmerged-p
+          (smerge-start-session))
         (run-hooks 'magit-diff-visit-file-hook)))))
 
 (defvar magit-display-file-buffer-function

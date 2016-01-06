@@ -1,6 +1,6 @@
 ;;; magit-git.el --- Git functionality  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2015  The Magit Project Contributors
+;; Copyright (C) 2010-2016  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -965,12 +965,12 @@ where COMMITS is the number of commits in TAG but not in REV."
             (magit-git-items "ls-files" "-z" "--stage")))
 
 (defun magit-branch-p (string)
-  (and (or (member string (magit-list-branches))
-           (member string (magit-list-branch-names))) t))
+  (or (car (member string (magit-list-branches)))
+      (car (member string (magit-list-branch-names)))))
 
-(defun magit-local-branch-p (branch)
-  (and (or (member branch (magit-list-local-branches))
-           (member branch (magit-list-local-branch-names))) t))
+(defun magit-local-branch-p (string)
+  (or (car (member string (magit-list-local-branches)))
+      (car (member string (magit-list-local-branch-names)))))
 
 (defun magit-branch-set-face (branch)
   (propertize branch 'face (if (magit-local-branch-p branch)
@@ -1097,7 +1097,8 @@ Return a list of two integers: (A>B B>A)."
 (defmacro magit-with-temp-index (tree arg &rest body)
   (declare (indent 2) (debug (form form body)))
   (let ((file (cl-gensym "file")))
-    `(let ((,file (magit-git-dir (make-temp-name "index.magit."))))
+    `(let ((,file (magit-convert-git-filename
+                   (magit-git-dir (make-temp-name "index.magit.")))))
        (setq ,file (or (file-remote-p ,file 'localname) ,file))
        (unwind-protect
            (progn (--when-let ,tree
@@ -1223,7 +1224,8 @@ Return a list of two integers: (A>B B>A)."
          (exclude (or exclude current))
          (default (or (and (not (equal atpoint exclude)) atpoint)
                       (and (not (equal current exclude)) current)
-                      secondary-default (magit-get-previous-branch))))
+                      secondary-default
+                      (magit-get-previous-branch))))
     (magit-completing-read prompt (delete exclude (magit-list-branch-names))
                            nil t nil 'magit-revision-history default)))
 
@@ -1234,7 +1236,8 @@ Return a list of two integers: (A>B B>A)."
          (exclude (or exclude current))
          (default (or (and (not (equal atpoint exclude)) atpoint)
                       (and (not (equal current exclude)) current)
-                      secondary-default (magit-get-previous-branch))))
+                      secondary-default
+                      (magit-get-previous-branch))))
     (or (magit-completing-read prompt (delete exclude (magit-list-refnames))
                                nil nil nil 'magit-revision-history default)
         (user-error "Nothing selected"))))

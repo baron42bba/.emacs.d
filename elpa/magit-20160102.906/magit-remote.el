@@ -1,6 +1,6 @@
 ;;; magit-remote.el --- transfer Git commits  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2008-2015  The Magit Project Contributors
+;; Copyright (C) 2008-2016  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -33,16 +33,16 @@
 
 ;;; Clone
 
-(defcustom magit-clone-set-branch.pushDefault 'ask
-  "Whether to set the value of `branch.pushDefault' after cloning.
+(defcustom magit-clone-set-remote.pushDefault 'ask
+  "Whether to set the value of `remote.pushDefault' after cloning.
 
 If t, then set without asking.  If nil, then don't set.  If
 `ask', then ask."
   :package-version '(magit . "2.4.0")
   :group 'magit-commands
-  :type '(choice (const "set" t)
-                 (const "ask" ask)
-                 (const "don't set" nil)))
+  :type '(choice (const :tag "set" t)
+                 (const :tag "ask" ask)
+                 (const :tag "don't set" nil)))
 
 ;;;###autoload
 (defun magit-clone (repository directory)
@@ -60,17 +60,17 @@ Then show the status buffer for the new repository."
                            ;; Stop cygwin git making a "c:" directory.
                            (magit-convert-git-filename directory))
            0)
-    (when (or (eq  magit-clone-set-branch.pushDefault t)
-              (and magit-clone-set-branch.pushDefault
-                   (y-or-n-p "Set `branch.pushDefault' to \"origin\"? ")))
-      (magit-call-git "config" "branch.pushDefault" "origin"))
+    (when (or (eq  magit-clone-set-remote.pushDefault t)
+              (and magit-clone-set-remote.pushDefault
+                   (y-or-n-p "Set `remote.pushDefault' to \"origin\"? ")))
+      (magit-call-git "config" "remote.pushDefault" "origin"))
     (message "Cloning %s...done" repository)
     (magit-status-internal directory)))
 
 ;;; Setup
 
-(defcustom magit-remote-add-set-branch.pushDefault 'ask-if-unset
-  "Whether to set the value of `branch.pushDefault' after adding a remote.
+(defcustom magit-remote-add-set-remote.pushDefault 'ask-if-unset
+  "Whether to set the value of `remote.pushDefault' after adding a remote.
 
 If `ask', then always ask.  If `ask-if-unset', then ask, but only
 if the variable isn't set already.  If nil, then don't ever set.
@@ -79,10 +79,10 @@ name of the name of the added remote is equal to that string and
 the variable isn't already set."
   :package-version '(magit . "2.4.0")
   :group 'magit-commands
-  :type '(choice (const  "ask if unset" ask-if-unset)
-                 (const  "always ask" ask)
-                 (string "set if named")
-                 (const  "don't set")))
+  :type '(choice (const  :tag "ask if unset" ask-if-unset)
+                 (const  :tag "always ask" ask)
+                 (string :tag "set if named")
+                 (const  :tag "don't set")))
 
 ;;;###autoload (autoload 'magit-remote-popup "magit-remote" nil t)
 (magit-define-popup magit-remote-popup
@@ -105,13 +105,13 @@ the variable isn't already set."
   "Add a remote named REMOTE and fetch it."
   (interactive (list (magit-read-string-ns "Remote name")
                      (magit-read-url "Remote url")))
-  (if (pcase (list magit-remote-add-set-branch.pushDefault
-                   (magit-get "branch.defaultPush"))
+  (if (pcase (list magit-remote-add-set-remote.pushDefault
+                   (magit-get "remote.defaultPush"))
         (`(,(pred stringp) ,_) t)
         ((or `(ask ,_) `(ask-if-unset nil))
-         (y-or-n-p (format "Set `branch.pushDefault' to \"%s\"? " remote))))
+         (y-or-n-p (format "Set `remote.pushDefault' to \"%s\"? " remote))))
       (progn (magit-call-git "remote" "add" "-f" remote url)
-             (magit-call-git "config" "branch.pushDefault" remote)
+             (magit-call-git "config" "remote.pushDefault" remote)
              (magit-refresh))
     (magit-run-git-async "remote" "add" "-f" remote url)))
 
@@ -436,9 +436,12 @@ upstream can be changed before pushed to it."
   (interactive
    (list (magit-push-arguments)
          (and (magit--push-current-set-upstream-p current-prefix-arg)
-              (magit-read-remote-branch
-               (format "Set upstream of %s and push there"
-                       (magit-get-current-branch))))))
+              (let ((branch (magit-get-current-branch)))
+                (magit-read-other-branch
+                 (format "Set upstream of %s and push there" branch)
+                 nil (or (magit-branch-p "origin/master")
+                         (and (not (equal branch "master"))
+                              (magit-branch-p "master"))))))))
   (--if-let (magit-get-current-branch)
       (progn
         (when upstream
@@ -527,7 +530,7 @@ branch as default."
 This command simply runs \"git push -v [ARGS]\".  ARGS are the
 arguments specified in the popup buffer.  No explicit refspec
 arguments are used.  Instead the behavior depends on at least
-these Git variables: `push.default', `branch.pushDefault',
+these Git variables: `push.default', `remote.pushDefault',
 `branch.<branch>.pushRemote', `branch.<branch>.remote',
 `branch.<branch>.merge', and `remote.<remote>.push'.
 
@@ -580,7 +583,7 @@ The REMOTE is read in the minibuffer.
 This command simply runs \"git push -v [ARGS] REMOTE\".  ARGS
 are the arguments specified in the popup buffer.  No refspec
 arguments are used.  Instead the behavior depends on at least
-these Git variables: `push.default', `branch.pushDefault',
+these Git variables: `push.default', `remote.pushDefault',
 `branch.<branch>.pushRemote', `branch.<branch>.remote',
 `branch.<branch>.merge', and `remote.<remote>.push'.
 

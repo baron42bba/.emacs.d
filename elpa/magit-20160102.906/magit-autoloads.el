@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "git-rebase" "git-rebase.el" (22140 7080 0
+;;;### (autoloads nil "git-rebase" "git-rebase.el" (22154 38258 0
 ;;;;;;  0))
 ;;; Generated autoloads from git-rebase.el
 
@@ -23,7 +23,7 @@ running 'man git-rebase' at the command line) for details.
 
 ;;;***
 
-;;;### (autoloads nil "magit" "magit.el" (22140 7080 0 0))
+;;;### (autoloads nil "magit" "magit.el" (22154 38258 0 0))
 ;;; Generated autoloads from magit.el
 
 (autoload 'magit-status "magit" "\
@@ -492,7 +492,7 @@ Git, and Emacs in the echo area.
 
 ;;;***
 
-;;;### (autoloads nil "magit-apply" "magit-apply.el" (22140 7080
+;;;### (autoloads nil "magit-apply" "magit-apply.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-apply.el
 
@@ -529,7 +529,7 @@ Remove all changes from the staging area.
 
 ;;;***
 
-;;;### (autoloads nil "magit-bisect" "magit-bisect.el" (22140 7080
+;;;### (autoloads nil "magit-bisect" "magit-bisect.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-bisect.el
  (autoload 'magit-bisect-popup "magit-bisect" nil t)
@@ -581,7 +581,7 @@ bisect run'.
 
 ;;;***
 
-;;;### (autoloads nil "magit-blame" "magit-blame.el" (22140 7080
+;;;### (autoloads nil "magit-blame" "magit-blame.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-blame.el
  (autoload 'magit-blame-popup "magit-blame" nil t)
@@ -606,7 +606,7 @@ only arguments available from `magit-blame-popup' should be used.
 
 ;;;***
 
-;;;### (autoloads nil "magit-commit" "magit-commit.el" (22140 7080
+;;;### (autoloads nil "magit-commit" "magit-commit.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-commit.el
 
@@ -689,7 +689,7 @@ Create a squash commit targeting COMMIT and instantly rebase.
 
 ;;;***
 
-;;;### (autoloads nil "magit-diff" "magit-diff.el" (22140 7080 0
+;;;### (autoloads nil "magit-diff" "magit-diff.el" (22154 38258 0
 ;;;;;;  0))
 ;;; Generated autoloads from magit-diff.el
 
@@ -755,7 +755,7 @@ for a revision.
 
 ;;;***
 
-;;;### (autoloads nil "magit-ediff" "magit-ediff.el" (22140 7080
+;;;### (autoloads nil "magit-ediff" "magit-ediff.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-ediff.el
  (autoload 'magit-ediff-popup "magit-ediff" nil t)
@@ -836,7 +836,7 @@ Show changes introduced by COMMIT using Ediff.
 
 ;;;***
 
-;;;### (autoloads nil "magit-extras" "magit-extras.el" (22140 7080
+;;;### (autoloads nil "magit-extras" "magit-extras.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-extras.el
 
@@ -907,7 +907,7 @@ on a position in a file-visiting buffer.
 
 ;;;***
 
-;;;### (autoloads nil "magit-log" "magit-log.el" (22140 7080 0 0))
+;;;### (autoloads nil "magit-log" "magit-log.el" (22154 38258 0 0))
 ;;; Generated autoloads from magit-log.el
 
 (autoload 'magit-log-current "magit-log" "\
@@ -975,7 +975,7 @@ Show commits in a branch that are not merged in the upstream branch.
 
 ;;;***
 
-;;;### (autoloads nil "magit-remote" "magit-remote.el" (22140 7080
+;;;### (autoloads nil "magit-remote" "magit-remote.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-remote.el
 
@@ -1115,7 +1115,7 @@ Push somewhere without using an explicit refspec.
 This command simply runs \"git push -v [ARGS]\".  ARGS are the
 arguments specified in the popup buffer.  No explicit refspec
 arguments are used.  Instead the behavior depends on at least
-these Git variables: `push.default', `branch.pushDefault',
+these Git variables: `push.default', `remote.pushDefault',
 `branch.<branch>.pushRemote', `branch.<branch>.remote',
 `branch.<branch>.merge', and `remote.<remote>.push'.
 
@@ -1139,7 +1139,7 @@ The REMOTE is read in the minibuffer.
 This command simply runs \"git push -v [ARGS] REMOTE\".  ARGS
 are the arguments specified in the popup buffer.  No refspec
 arguments are used.  Instead the behavior depends on at least
-these Git variables: `push.default', `branch.pushDefault',
+these Git variables: `push.default', `remote.pushDefault',
 `branch.<branch>.pushRemote', `branch.<branch>.remote',
 `branch.<branch>.merge', and `remote.<remote>.push'.
 
@@ -1174,8 +1174,8 @@ is asked to pull.  START has to be reachable from that commit.
 
 ;;;***
 
-;;;### (autoloads nil "magit-sequence" "magit-sequence.el" (22140
-;;;;;;  7080 0 0))
+;;;### (autoloads nil "magit-sequence" "magit-sequence.el" (22154
+;;;;;;  38258 0 0))
 ;;; Generated autoloads from magit-sequence.el
 
 (autoload 'magit-sequencer-continue "magit-sequence" "\
@@ -1323,7 +1323,7 @@ Abort the current rebase operation, restoring the original branch.
 
 ;;;***
 
-;;;### (autoloads nil "magit-stash" "magit-stash.el" (22140 7080
+;;;### (autoloads nil "magit-stash" "magit-stash.el" (22154 38258
 ;;;;;;  0 0))
 ;;; Generated autoloads from magit-stash.el
  (autoload 'magit-stash-popup "magit-stash" nil t)
@@ -1423,7 +1423,7 @@ Show all diffs of a stash in a buffer.
 
 ;;;***
 
-;;;### (autoloads nil "magit-wip" "magit-wip.el" (22140 7080 0 0))
+;;;### (autoloads nil "magit-wip" "magit-wip.el" (22154 38258 0 0))
 ;;; Generated autoloads from magit-wip.el
 
 (defvar magit-wip-after-save-mode nil "\
@@ -1490,7 +1490,7 @@ command which is about to be called are committed.
 
 ;;;### (autoloads nil nil ("magit-core.el" "magit-git.el" "magit-mode.el"
 ;;;;;;  "magit-pkg.el" "magit-process.el" "magit-section.el" "magit-utils.el")
-;;;;;;  (22140 7080 159081 0))
+;;;;;;  (22154 38258 437343 0))
 
 ;;;***
 

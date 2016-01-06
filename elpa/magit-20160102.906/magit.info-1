@@ -8,7 +8,7 @@ to perform almost all of their daily version control tasks directly from
 within Emacs.  While many fine Git clients exist, only Magit and Git
 itself deserve to be called porcelains.
 
-     Copyright (C) 2015 Jonas Bernoulli <jonas@bernoul.li>
+     Copyright (C) 2015-2016 Jonas Bernoulli <jonas@bernoul.li>
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -38,7 +38,7 @@ to perform almost all of their daily version control tasks directly from
 within Emacs.  While many fine Git clients exist, only Magit and Git
 itself deserve to be called porcelains.
 
-     Copyright (C) 2015 Jonas Bernoulli <jonas@bernoul.li>
+     Copyright (C) 2015-2016 Jonas Bernoulli <jonas@bernoul.li>
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -970,6 +970,16 @@ undesirable.
           reverted.  If it is negative, then be quiet about it.  If user
           input arrives, then stop reverting.  After (the absolute value
           of) NUMBER seconds resume reverting.
+
+ -- User Option: magit-revert-buffers-only-for-tracked-files
+
+     This option controls whether only buffers that visit tracked files
+
+     If non-nil, then only tracked files may be reverted.  If nil, then
+     all files in the current repository may potentially be reverted.
+     Reverting untracked files should be safe and limiting to only
+     tracked files has the potential of causing very noticable delays,
+     so the default is to revert all buffers.
 
    Buffers can also be refreshed explicitly, which is useful in buffers
 that weren’t current during the last refresh and after changes were made
@@ -2945,9 +2955,9 @@ File: magit.info,  Node: Repository setup,  Next: Staging and unstaging,  Up: Ma
 
      The user is queried for a remote url and a local directory.
 
- -- User Option: magit-clone-set-branch.pushDefault
+ -- User Option: magit-clone-set-remote.pushDefault
 
-     Whether to set the value of ‘branch.pushDefault’ after cloning.
+     Whether to set the value of ‘remote.pushDefault’ after cloning.
 
      If ‘t’, then set without asking.  If ‘nil’, then don’t set.  If
      ‘ask’, then ask the user every time she clones a repository.
@@ -4414,9 +4424,9 @@ Also see *note (gitman)git-remote:: .
 
      Delete a remote, read from the minibuffer.
 
- -- User Option: magit-remote-add-set-branch.pushDefault
+ -- User Option: magit-remote-add-set-remote.pushDefault
 
-     Whether to set the value of ‘branch.pushDefault’ after adding a
+     Whether to set the value of ‘remote.pushDefault’ after adding a
      remote.
 
      If ‘ask’, then always ask.  If ‘ask-if-unset’, then ask, but only
@@ -4560,7 +4570,7 @@ them to the popup.
      This command simply runs ‘git push -v [ARGS]’.  ARGS are the
      arguments specified in the popup buffer.  No explicit refspec
      arguments are used.  Instead the behavior depends on at least these
-     Git variables: ‘push.default’, ‘branch.pushDefault’,
+     Git variables: ‘push.default’, ‘remote.pushDefault’,
      ‘branch.<branch>.pushRemote’, ‘branch.<branch>.remote’,
      ‘branch.<branch>.merge’, and ‘remote.<remote>.push’.
 
@@ -4572,7 +4582,7 @@ them to the popup.
      This command simply runs ‘git push -v [ARGS] REMOTE’.  ARGS are the
      arguments specified in the popup buffer.  No refspec arguments are
      used.  Instead the behavior depends on at least these Git
-     variables: ‘push.default’, ‘branch.pushDefault’,
+     variables: ‘push.default’, ‘remote.pushDefault’,
      ‘branch.<branch>.pushRemote’, ‘branch.<branch>.remote’,
      ‘branch.<branch>.merge’, and ‘remote.<remote>.push’.
 
@@ -6687,9 +6697,9 @@ Appendix B Keystroke Index
 * f u:                                   Fetching.            (line  17)
 * F u:                                   Pulling.             (line  17)
 * g:                                     Automatic refresh and revert.
-                                                              (line  68)
+                                                              (line  78)
 * G:                                     Automatic refresh and revert.
-                                                              (line  77)
+                                                              (line  87)
 * j:                                     Diff buffer.         (line  38)
 * k:                                     Viewing Git output.  (line  19)
 * k <1>:                                 Applying.            (line  37)
@@ -7156,9 +7166,9 @@ Appendix C Command Index
 * magit-reflog-head:                     Reflog.              (line  19)
 * magit-reflog-other:                    Reflog.              (line  15)
 * magit-refresh:                         Automatic refresh and revert.
-                                                              (line  68)
+                                                              (line  78)
 * magit-refresh-all:                     Automatic refresh and revert.
-                                                              (line  77)
+                                                              (line  87)
 * magit-remote-add:                      Remotes.             (line  13)
 * magit-remote-popup:                    Remotes.             (line   8)
 * magit-remote-remove:                   Remotes.             (line  28)

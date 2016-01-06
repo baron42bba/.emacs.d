@@ -1,6 +1,6 @@
 ;;; magit-log.el --- inspect Git history  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2015  The Magit Project Contributors
+;; Copyright (C) 2010-2016  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -1346,7 +1346,7 @@ commits."
   (if (equal (magit-rev-parse "HEAD")
              (magit-rev-parse "@{upstream}"))
       (magit-insert-recent-commits t)
-    (magit-insert-unpulled-from-pushremote)))
+    (magit-insert-unpulled-from-upstream)))
 
 (defun magit-insert-unpulled-cherries ()
   "Insert section showing unpulled commits.

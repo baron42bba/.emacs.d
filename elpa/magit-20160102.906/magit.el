@@ -1,6 +1,6 @@
 ;;; magit.el --- A Git porcelain inside Emacs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2008-2015  The Magit Project Contributors
+;; Copyright (C) 2008-2016  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -1551,10 +1551,11 @@ is the full reference of the upstream branch, on the remote."
                           (magit-get-current-branch))
                      (magit-read-local-branch "Change upstream of branch"))))
      (list branch (and (not (magit-get-upstream-branch branch))
-                       (magit-completing-read
+                       (magit-read-other-branch
                         (format "Change upstream of %s to" branch)
-                        (delete branch (magit-list-branch-names))
-                        nil nil nil 'magit-revision-history)))))
+                        nil (or (magit-branch-p "origin/master")
+                                (and (not (equal branch "master"))
+                                     (magit-branch-p "master"))))))))
   (if upstream
       (magit-run-git-no-revert
        "branch" (concat "--set-upstream-to=" upstream) branch)
@@ -2648,7 +2649,7 @@ expansion of EOB-FORMAT is inserted at the end of the buffer (if
 the buffer ends with a comment, then it is inserted right before
 that)."
   :package-version '(magit . "2.3.0")
-  :group 'magit-status
+  :group 'magit-commands
   :type '(list (choice (string :tag "Insert at point format")
                        (cons (string :tag "Insert at point format")
                              (repeat (string :tag "Argument to git show")))
