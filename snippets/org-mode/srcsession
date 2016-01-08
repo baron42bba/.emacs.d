@@ -1,4 +1,4 @@
-# -*- mode: snippets -*-
+# -*- mode: snippet -*-
 # name: srcsession
 # expand-env: ((yas-indent-line 'fixed))
 # key: <ssession
