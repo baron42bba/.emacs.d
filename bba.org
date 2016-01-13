@@ -127,7 +127,40 @@ from bash.
       )
 #+END_SRC
 
-#+RESULTS:
+* eshell and shell environment
+
+We don't need a =$PAGER= in Emacs:
+
+#+BEGIN_SRC emacs-lisp
+     (setenv "PAGER" "cat")
+#+END_SRC
+
+Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right?
+
+#+BEGIN_SRC emacs-lisp
+    (defalias 'e 'find-file)
+    (defalias 'ff 'find-file)
+    (defalias 'emacs 'find-file)
+#+END_SRC
+
+Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll’:
+
+  #+BEGIN_SRC elisp
+    (add-hook 'eshell-mode-hook
+              (lambda ()
+                ;; The 'ls' executable requires the Gnu version on the Mac
+                (let ((ls (if (file-exists-p "/opt/local/bin/gls")
+                              "/opt/local/bin/gls"
+                            "/bin/ls")))
+                  (eshell/alias "ll" (concat ls " -AlohG --color=always")))))
+  #+END_SRC
+
+What about =gd= to call the Diff command?
+
+   #+BEGIN_SRC elisp
+     (defalias 'gd 'magit-diff-unstaged)
+     (defalias 'gds 'magit-diff-staged)
+   #+END_SRC
 
 * define emacs shutdown function
 
@@ -240,38 +273,38 @@ See [[https://github.com/toctan/smartparens][Smartparens on github]].
 Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-pairs]].
 
 #+BEGIN_SRC emacs-lisp
-    (if (>= emacs-major-version 24)
-        (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20150628.1418")
-          (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
-          (require 'smartparens)
-          (smartparens-global-mode 1)
-          (defmacro def-pairs (pairs)
-            `(progn
-               ,@(loop for (key . val) in pairs
-                       collect
-                       `(defun ,(read (concat
-                                       "wrap-with-"
-                                       (prin1-to-string key)
-                                       "s"))
-                            (&optional arg)
-                          (interactive "p")
-                          (sp-wrap-with-pair ,val)))))
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20150628.1418")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
+        (require 'smartparens)
+        (smartparens-global-mode 1)
+        (defmacro def-pairs (pairs)
+          `(progn
+             ,@(loop for (key . val) in pairs
+                     collect
+                     `(defun ,(read (concat
+                                     "wrap-with-"
+                                     (prin1-to-string key)
+                                     "s"))
+                          (&optional arg)
+                        (interactive "p")
+                        (sp-wrap-with-pair ,val)))))
 
-          (def-pairs ((paren        . "(")
-                      (bracket      . "[")
-                      (brace        . "{")
-                      (single-quote . "'")
-                      (double-quote . "\"")
-                      (back-quote   . "`")))
+        (def-pairs ((paren        . "(")
+                    (bracket      . "[")
+                    (brace        . "{")
+                    (single-quote . "'")
+                    (double-quote . "\"")
+                    (back-quote   . "`")))
 
-          (define-key smartparens-mode-map (kbd "C-'") 'sp-rewrap-sexp)
-          (define-key smartparens-mode-map (kbd "C-c (") 'wrap-with-parens)
-          (define-key smartparens-mode-map (kbd "C-c ]") 'sp-backward-unwrap-sexp)
-          (define-key smartparens-mode-map (kbd "C-c )") 'sp-unwrap-sexp)
-          (define-key smartparens-mode-map (kbd "C-c [") 'wrap-with-brackets)
-          (define-key smartparens-mode-map (kbd "C-c {") 'wrap-with-braces)
-          ))
+        (define-key smartparens-mode-map (kbd "C-'") 'sp-rewrap-sexp)
+        (define-key smartparens-mode-map (kbd "C-c (") 'wrap-with-parens)
+        (define-key smartparens-mode-map (kbd "C-c ]") 'sp-backward-unwrap-sexp)
+        (define-key smartparens-mode-map (kbd "C-c )") 'sp-unwrap-sexp)
+        (define-key smartparens-mode-map (kbd "C-c [") 'wrap-with-brackets)
+        (define-key smartparens-mode-map (kbd "C-c {") 'wrap-with-braces)
+        ))
 #+END_SRC
 
 * [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
@@ -1722,58 +1755,66 @@ window-total-height.
 Bound to =C-X l !=
 
 #+BEGIN_SRC emacs-lisp
-      (defun eshell-here ()
-        "Opens up a new shell in the directory associated with the
-      current buffer's file. The eshell is renamed to match that
-      directory to make multiple eshell windows easier."
-        (interactive)
-        (let* ((parent (if (buffer-file-name)
-                           (file-name-directory (buffer-file-name))
-                         default-directory))
-           ;;    (height (/ (window-total-height) 3))
-               (name   (car (last (split-string parent "/" t)))))
-      ;;    (split-window-vertically (- height))
-          (split-window-vertically '-10)
-          (other-window 1)
-          (eshell "new")
-          (rename-buffer (concat "*eshell: " name "*"))
+  (defun eshell-here ()
+    "Opens up a new shell in the directory associated with the
+  current buffer's file. The eshell is renamed to match that
+  directory to make multiple eshell windows easier."
+    (interactive)
+    (let* ((parent (if (buffer-file-name)
+                       (file-name-directory (buffer-file-name))
+                     default-directory))
+       ;;    (height (/ (window-total-height) 3))
+           (name   (car (last (split-string parent "/" t)))))
+  ;;    (split-window-vertically (- height))
+      (split-window-vertically '-10)
+      (other-window 1)
+      (eshell "new")
+      (rename-buffer (concat "*eshell: " name "*"))
 
-          (insert (concat "ls"))
-          (eshell-send-input)))
+      (insert (concat "ls"))
+      (eshell-send-input)))
 
-      (defun eshell/x ()
-        (insert "exit")
-        (eshell-send-input)
-        (delete-window))
+  (defun eshell/x ()
+    (insert "exit")
+    (eshell-send-input)
+    (delete-window))
 
 
 
-      (defun eshell/ssh (&rest args)
-      "Secure shell"
-      (let ((cmd (eshell-flatten-and-stringify
-      (cons "ssh" args)))
-      (display-type (framep (selected-frame))))
-      (cond
-      ((and
-      (eq display-type 't)
-      (getenv "STY"))
-      (send-string-to-terminal (format "\033]83;screen %s\007" cmd)))
-      ((eq display-type 'x)
-      (eshell-do-eval
-      (eshell-parse-command
-      (format "rxvt -e %s &" cmd)))
-      nil)
-      (t
-      (apply 'eshell-exec-visual (cons "ssh" args))))))
+  (defun eshell/ssh (&rest args)
+  "Secure shell"
+  (let ((cmd (eshell-flatten-and-stringify
+  (cons "ssh" args)))
+  (display-type (framep (selected-frame))))
+  (cond
+  ((and
+  (eq display-type 't)
+  (getenv "STY"))
+  (send-string-to-terminal (format "\033]83;screen %s\007" cmd)))
+  ((eq display-type 'x)
+  (eshell-do-eval
+  (eshell-parse-command
+  (format "rxvt -e %s &" cmd)))
+  nil)
+  (t
+  (apply 'eshell-exec-visual (cons "ssh" args))))))
 
-#+END_SRC
 
-Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right?
+  (defun eshell-client (&optional arg)
+    "Opens up a new shell in the directory passed as argument.
+  The eshell is renamed to match that directory to make multiple
+  eshell windows easier."
+    (interactive)
+    (let* ((name (if arg
+                       arg
+                     default-directory))
+       ;;    (height (/ (window-total-height) 3))
+           )
+      (eshell "new")
+      (rename-buffer (concat "*eshell: " name "*"))
 
-#+BEGIN_SRC emacs-lisp
-    (defalias 'e 'find-file)
-    (defalias 'ff 'find-file)
-    (defalias 'emacs 'find-file)
+      (insert (concat "ls"))
+      (eshell-send-input)))
 #+END_SRC
 
 * [[http://stackoverflow.com/questions/3035337/in-emacs-can-you-evaluate-an-emacs-lisp-expression-and-replace-it-with-the-resul][eval emacs lisp expression and replace it]]
