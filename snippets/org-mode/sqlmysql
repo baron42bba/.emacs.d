@@ -7,8 +7,12 @@
 :engine: mysql
 :dbhost: ${1:localhost}
 :dbuser: ${2:user}
-:dbpassword: ${3:password}
+:dbpassword: ${3:(print bba-db)}
+:database: ${4:mysql}
 :cmdline: --protocol=tcp
 :exports: both
 :END:
+
+#+BEGIN_SRC sql
 $0
+#+END_SRC
