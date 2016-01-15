@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: fori
+# key: fori
+# --
+for i in $1; do echo \$\{i\}; $2; done$0
