@@ -243,6 +243,19 @@ For annotated tags prepare message with commit messages since last tag.
 
 #+END_SRC
 
+* [[https://github.com/larstvei/Focus][focus]]
+
+focus on the important stuff.
+
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/focus-20160111.522")
+        (require 'focus)
+        (setq focus-dimness -1)
+  ))
+#+END_SRC
+
 * fullframe
 open ibuffer and magit-status in fullframe mode.
 #+BEGIN_SRC emacs-lisp
