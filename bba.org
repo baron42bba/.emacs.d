@@ -532,6 +532,8 @@ Probably the best help to keep track of the not every day used keybindings.
 
 * latex
 
+Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
+
 #+BEGIN_SRC emacs-lisp
   (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
   (setq TeX-auto-save t)
@@ -541,6 +543,7 @@ Probably the best help to keep track of the not every day used keybindings.
   (add-hook 'latex-mode-hook
     (lambda ()
       (auto-fill-mode)
+      (orgtbl-mode)
       ))
 
 
@@ -1172,6 +1175,12 @@ html.
     (setq org-ellipsis "↴↴↴")
     )
 
+#+END_SRC
+
+** fontify
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-fontify-natively t)
 #+END_SRC
 
 * cfengine
