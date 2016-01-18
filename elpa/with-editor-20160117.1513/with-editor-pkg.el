@@ -1,9 +1,9 @@
-(define-package "magit-popup" "20151223.1341" "Define prefix-infix-suffix command combos"
+(define-package "with-editor" "20160117.1513" "Use the Emacsclient as $EDITOR"
   '((emacs "24.4")
     (async "20150909.2257")
     (dash "20151021.113"))
   :url "https://github.com/magit/magit" :keywords
-  '("bindings"))
+  '("tools"))
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:

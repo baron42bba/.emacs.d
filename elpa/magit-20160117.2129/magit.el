@@ -16,7 +16,7 @@
 ;;	Rémi Vanicat      <vanicat@debian.org>
 ;;	Yann Hodique      <yann.hodique@gmail.com>
 
-;; Package-Requires: ((emacs "24.4") (async "20150909.2257") (dash "20151021.113") (with-editor "20151111") (git-commit "20151111") (magit-popup "20151221"))
+;; Package-Requires: ((emacs "24.4") (async "20150909.2257") (dash "20151021.113") (with-editor "20160117.1513") (git-commit "20160117.1513") (magit-popup "20160117.1513"))
 ;; Keywords: git tools vc
 ;; Homepage: https://github.com/magit/magit
 
@@ -129,15 +129,42 @@ at all."
   :group 'magit-status
   :type 'hook)
 
-(defcustom magit-status-refresh-hook nil
-  "Hook run after a status buffer has been refreshed."
-  :package-version '(magit . "2.1.0")
-  :group 'magit-status
-  :type 'hook)
+(defvar magit-status-refresh-hook nil
+  "Hook run after a status buffer has been refreshed.")
+
+(make-obsolete-variable 'magit-status-refresh-hook "\
+use `magit-pre-refresh-hook', `magit-post-refresh-hook',
+  `magit-refresh-buffer-hook', or `magit-status-mode-hook' instead.
+
+  If you want to run a function every time the status buffer is
+  refreshed, in order to do something with that buffer, then use:
+
+    (add-hook 'magit-refresh-buffer-hook
+              (lambda ()
+                (when (derived-mode-p 'magit-status-mode)
+                  ...)))
+
+  If your hook function should run regardless of whether the
+  status buffer exists or not, then use `magit-pre-refresh-hook'
+  or `magit-post-refresh-hook'.
+
+  If your hook function only has to be run once, when the buffer
+  is first created, then `magit-status-mode-hook' instead.
+" "Magit 2.4.0")
 
 (defcustom magit-status-expand-stashes t
   "Whether the list of stashes is expanded initially."
   :package-version '(magit . "2.3.0")
+  :group 'magit-status
+  :type 'boolean)
+
+(defcustom magit-status-show-hashes-in-headers nil
+  "Whether headers in the status buffer show hashes.
+The functions which respect this option are
+`magit-insert-head-branch-header',
+`magit-insert-upstream-branch-header', and
+`magit-insert-push-branch-header'."
+  :package-version '(magit . "2.4.0")
   :group 'magit-status
   :type 'boolean)
 
@@ -496,6 +523,8 @@ detached `HEAD'."
       (if branch
           (magit-insert-section (branch branch)
             (insert (format "%-10s" "Head: "))
+            (when magit-status-show-hashes-in-headers
+              (insert (propertize commit 'face 'magit-hash) ?\s))
             (insert (propertize branch 'face 'magit-branch-local))
             (insert ?\s summary ?\n))
         (magit-insert-section (commit commit)
@@ -515,6 +544,9 @@ detached `HEAD'."
                           (if (magit-get-boolean "branch" branch "rebase")
                               "Rebase: "
                             "Merge: "))))
+      (--when-let (and magit-status-show-hashes-in-headers
+                       (magit-rev-format "%h" pull))
+        (insert (propertize it 'face 'magit-hash) ?\s))
       (insert (propertize pull 'face
                           (if (string= (magit-get "branch" branch "remote") ".")
                               'magit-branch-local
@@ -532,6 +564,9 @@ detached `HEAD'."
   (when push
     (magit-insert-section (branch push)
       (insert (format "%-10s" "Push: "))
+      (--when-let (and magit-status-show-hashes-in-headers
+                       (magit-rev-format "%h" push))
+        (insert (propertize it 'face 'magit-hash) ?\s))
       (insert (propertize push 'face 'magit-branch-remote) ?\s)
       (if (magit-rev-verify push)
           (insert (or (magit-rev-format "%s" push) ""))
@@ -1369,7 +1404,7 @@ of the new branch, instead of the starting-point itself."
           (magit-call-git "branch" "--set-upstream-to" it branch))
         (when (and (setq tracked (magit-get-upstream-branch current))
                    (setq base (magit-git-string "merge-base" current tracked))
-                   (not (magit-rev-equal base current)))
+                   (not (magit-rev-eq base current)))
           (magit-call-git "update-ref" "-m"
                           (format "reset: moving to %s" base)
                           (concat "refs/heads/" current) base))
@@ -1496,7 +1531,7 @@ With prefix, forces the rename even if NEW already exists.
            (magit-read-string-ns (format "Rename branch '%s' to" branch))
            current-prefix-arg)))
   (unless (string= old new)
-    (magit-run-git-no-revert "branch" (if force "-M" "-m") old new)))
+    (magit-run-git "branch" (if force "-M" "-m") old new)))
 
 ;;;;; Branch Variables
 
@@ -1545,21 +1580,26 @@ Together the Git variables `branch.<name>.remote' and
 `branch.<name>.merge' define the upstream branch of the local
 branch named NAME.  The value of `branch.<name>.remote' is the
 name of the upstream remote.  The value of `branch.<name>.merge'
-is the full reference of the upstream branch, on the remote."
+is the full reference of the upstream branch, on the remote.
+
+Non-interactively, when UPSTREAM is non-nil, then always set it
+as the new upstream, regardless of whether another upstream was
+already set.  When nil, then always unset."
   (interactive
    (let ((branch (or (and (not current-prefix-arg)
                           (magit-get-current-branch))
                      (magit-read-local-branch "Change upstream of branch"))))
      (list branch (and (not (magit-get-upstream-branch branch))
-                       (magit-read-other-branch
-                        (format "Change upstream of %s to" branch)
-                        nil (or (magit-branch-p "origin/master")
-                                (and (not (equal branch "master"))
-                                     (magit-branch-p "master"))))))))
+                       (magit-read-upstream-branch)))))
   (if upstream
-      (magit-run-git-no-revert
-       "branch" (concat "--set-upstream-to=" upstream) branch)
-    (magit-run-git-no-revert "branch" "--unset-upstream" branch)))
+      (-let (((remote . merge) (magit-split-branch-name upstream))
+             (branch (magit-get-current-branch)))
+        (magit-call-git "config" (format "branch.%s.remote" branch) remote)
+        (magit-call-git "config" (format "branch.%s.merge"  branch)
+                        (concat "refs/heads/" merge)))
+    (magit-call-git "branch" "--unset-upstream" branch))
+  (when (called-interactively-p 'any)
+    (magit-refresh)))
 
 (defun magit-format-branch*merge/remote ()
   (let* ((branch (or (magit-get-current-branch) "<name>"))
@@ -2048,7 +2088,7 @@ defaulting to the tag at point.
   (interactive (list (--if-let (magit-region-values 'tag)
                          (magit-confirm t nil "Delete %i tags" it)
                        (magit-read-tag "Delete tag" t))))
-  (magit-run-git-no-revert "tag" "-d" tags))
+  (magit-run-git "tag" "-d" tags))
 
 (defun magit-tag-prune (tags remote-tags remote)
   "Offer to delete tags missing locally from REMOTE, and vice versa."
@@ -2072,8 +2112,7 @@ defaulting to the tag at point.
   (when tags
     (magit-call-git "tag" "-d" tags))
   (when remote-tags
-    (magit-run-git-async-no-revert
-     "push" remote (--map (concat ":" it) remote-tags))))
+    (magit-run-git-async "push" remote (--map (concat ":" it) remote-tags))))
 
 ;;;; Notes
 
@@ -2173,12 +2212,12 @@ of Git's `note' command, default to operate on that ref."
                                     it)))
          current-prefix-arg))
   (if ref
-      (magit-run-git-no-revert "config" (and global "--global") "core.notesRef"
-                               (if (string-prefix-p "refs/" ref)
-                                   ref
-                                 (concat "refs/notes/" ref)))
-    (magit-run-git-no-revert "config" (and global "--global")
-                             "--unset" "core.notesRef")))
+      (magit-run-git "config" (and global "--global") "core.notesRef"
+                     (if (string-prefix-p "refs/" ref)
+                         ref
+                       (concat "refs/notes/" ref)))
+    (magit-run-git "config" (and global "--global")
+                   "--unset" "core.notesRef")))
 
 (defun magit-notes-set-display-refs (refs &optional global)
   "Set notes refs to be display in addition to \"core.notesRef\".
@@ -2202,8 +2241,7 @@ the current repository."
   (magit-git-success "config" "--unset-all" global "notes.displayRef")
   (dolist (ref refs)
     (magit-call-git "config" "--add" global "notes.displayRef" ref))
-  (let ((inhibit-magit-revert t))
-    (magit-refresh)))
+  (magit-refresh))
 
 (defun magit-notes-read-args (prompt)
  (list (magit-read-branch-or-commit prompt)
