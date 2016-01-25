@@ -1093,6 +1093,12 @@ taken from http://doc.norang.ca/org-mode.org
                     (flyspell-mode)
                     )
                   )
+        (add-hook 'snippet-mode-hook
+                  (lambda ()
+                    (auto-fill-mode -1)
+                    (flyspell-mode -1)
+                    )
+                  )
         (add-hook 'prog-mode-hook
                   (lambda ()
                     (when (display-graphic-p)
