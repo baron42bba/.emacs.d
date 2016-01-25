@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: buffer-redirect
+# key: buffer-redirect
+# To redirect output to an Emacs buffer
+# --
+> #<buffer ${1:*test*}>$0
