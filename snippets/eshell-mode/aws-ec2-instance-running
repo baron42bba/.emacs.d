@@ -2,4 +2,4 @@
 # name: aws-ec2-instance-running
 # key: aws-ec2-instance-running
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-instances --instance-ids $2 --query "Reservations[].Instances[].[InstanceId, State.Name]" --output ${3:$$(yas-choose-value '("table" "text" "json"))} $0
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-instances --instance-ids $4 --query "Reservations[].Instances[].[InstanceId, State.Name]" --output ${5:$$(yas-choose-value '("table" "text" "json"))} $0

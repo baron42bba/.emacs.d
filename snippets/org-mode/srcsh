@@ -4,6 +4,6 @@
 # If you want to reference the output in other src blocks you need a name.
 # --
 ${1:#+NAME: $2}
-#+BEGIN_SRC sh :cache ${3:$$(yas-choose-value '("yes" "no"))} :results ${4:$$(yas-choose-value '("table" "list"))}
+#+BEGIN_SRC sh ${3::session ${4:client}} :cache ${5:$$(yas-choose-value '("yes" "no"))} :results ${6:$$(yas-choose-value '("table" "list" "verbatim drawer"))}
 $0
 #+END_SRC
