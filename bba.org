@@ -898,7 +898,7 @@ taken from http://doc.norang.ca/org-mode.org
     ;; Change tasks to NEXT when clocking in
     (setq org-clock-in-switch-to-state 'bh/clock-in-to-next)
     ;; Separate drawers for clocking and logs
-    (setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
+    (setq org-drawers (quote ("PROPERTIES" "LOGBOOK" "RESULTS")))
     ;; Save clock data and state changes and notes in the LOGBOOK drawer
     (setq org-clock-into-drawer t)
     ;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
