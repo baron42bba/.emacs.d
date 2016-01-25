@@ -2001,6 +2001,7 @@ Some links you might check out:
         (global-set-key (kbd "M-s o") 'helm-occur)
         (define-key global-map "\C-x\C-b" 'helm-buffers-list)
         (define-key global-map "\C-x\C-k\C-h" 'helm-execute-kmacro)
+        (define-key global-map (kbd "C-x r b") 'helm-bookmarks)
         (define-key global-map "\C-cy" 'helm-yas-complete)
         (setq helm-yas-display-key-on-candidate t)
 
