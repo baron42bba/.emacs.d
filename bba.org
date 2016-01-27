@@ -69,6 +69,14 @@ If you are in need enable debugging:
 
 #+END_SRC
 
+Some aliases you might want to set in your bash to talk to your Emacs server:
+
+#+BEGIN_SRC sh :tangle no
+  alias e='emacsclient -n -a emacs'
+  alias magit='emacsclient -n -e "(magit-status \"$(pwd)\")"'
+  alias eshell='emacsclient -n -e "(eshell-client)"'
+#+END_SRC
+
 * set environment variables on osx
     [2015-07-16 Thu 19:10]
 
