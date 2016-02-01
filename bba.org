@@ -2324,6 +2324,12 @@ Make dired human readable
   (setq dired-listing-switches "-alh")
 #+END_SRC
 
+Guess copy target. If split window use others current directory.
+
+#+BEGIN_SRC emacs-lisp
+  (setq dired-dwim-target t)
+#+END_SRC
+
 #+BEGIN_SRC emacs-lisp
   (setq ediff-split-window-function 'split-window-horizontally)
 #+END_SRC
