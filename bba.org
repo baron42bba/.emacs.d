@@ -706,6 +706,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
   (setq org-log-done t)
   (setq org-id-method (quote uuidgen))
   (setq org-src-window-setup 'current-window)
+  (setq org-startup-indented 1)
 
   (if (equal "work" (getenv "SYSENV"))
   (setq org-agenda-files (list "~/workorg/work.org"
@@ -1092,7 +1093,10 @@ taken from http://doc.norang.ca/org-mode.org
                     (flyspell-mode)
                     (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
                     (when (display-graphic-p)
-                      (rainbow-delimiters-mode))
+                      (progn
+                        (org-bullets-mode 1)
+                        (rainbow-delimiters-mode))
+                      )
                     )
                   )
         (add-hook 'text-mode-hook
@@ -1186,7 +1190,7 @@ html.
 
 #+BEGIN_SRC emacs-lisp
   (when (display-graphic-p)
-    (setq org-ellipsis "↴↴↴")
+    (setq org-ellipsis " ↴↴↴")
     )
 
 #+END_SRC
