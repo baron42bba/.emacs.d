@@ -2166,6 +2166,8 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "!" 'eshell-here)
   (define-key bba/launcher "b" 'browse-url-at-point)
   (define-key bba/launcher "B" 'eww)
+  (define-key bba/launcher "\C-b" 'helm-safari-bookmarks)
+  (define-key bba/launcher "\C-h" 'helm-safari-history)
   (define-key bba/launcher "c" 'helm-calcul-expression)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'elfeed)
