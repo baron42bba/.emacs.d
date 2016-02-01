@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: tablesrcsh
+# key: <srcshtable
+# If you want to reference the output in other src blocks you need a name.
+# --
+#+NAME: ${1:`(replace-regexp-in-string "[: ]" "_" (replace-regexp-in-string "[][]" "" (replace-regexp-in-string ".*/" "" (org-display-outline-path nil nil nil t))))`}
+- $0
+
+${2:#+NAME: ${3:`(replace-regexp-in-string "[: ]" "_" (replace-regexp-in-string "[][]" "" (replace-regexp-in-string ".*/" "" (org-display-outline-path nil nil nil t))))`-src}}
+#+BEGIN_SRC sh ${4::session ${5:client}} :var HOSTS=$1 :cache ${6:$$(yas-choose-value '("yes" "no"))} :results ${7:$$(yas-choose-value '("verbatim drawer" "table" "list"))}
+  for i in \$\{HOSTS\}; do
+    echo "----------------------------------------"
+    echo \$\{i\}
+
+    echo "----------------------------------------"
+  done
+#+END_SRC
