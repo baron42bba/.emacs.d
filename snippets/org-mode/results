@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: results
+# key: :res
+# add results parameter to src block
+# --
+:results ${1:$$(yas-choose-value '("verbatim drawer" "table" "list" "silent"))} $0

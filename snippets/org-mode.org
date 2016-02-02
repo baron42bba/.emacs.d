@@ -3,12 +3,14 @@
 |--------------+-------------+------------------------------------------------------|
 | babel-sh     | babel-shell | skeleton to generate a sh file out of an org file    |
 | blog         | blog        | skeleton for a blog entry                            |
+| results      | :res        | add results parameter. for src block.                |
 | sqlmysql     | sqlmysql    | properties to connect to MySQL via org               |
 | sqlora       | sqlora      | properties to connect to Oracle via org and Perl DBI |
-| <sclient     | srcclient   | SRC snippet executable on a shell session            |
-| <srcsh       | srcsh       | SRC snippet with NAME and lots of parameters         |
-| <srcshtable  | srcshtable  | SRC snippet with org list for HOSTS loop.            |
-| <ssession    | srcsession  | create a shell session and connect to a host via ssh |
+| srcclient    | <sclient    | SRC snippet executable on a shell session            |
+| srcsh        | <srcsh      | SRC snippet with NAME and lots of parameters         |
+| srcshtable   | <srcshtable | SRC snippet with org table for HOSTS loop.           |
+| srcshlist    | <srcshlist  | SRC snippet with org list for HOSTS loop.            |
+| srcsession   | <ssession   | create a shell session and connect to a host via ssh |
 | table2       | table2      | create org table with name and Amount Summary        |
 | title        | title       | skeleton for TITLE                                   |
 |--------------+-------------+------------------------------------------------------|
