@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-rds-describe-db-instances
+# key: aws-rds-describe-db-instances
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} rds describe-db-instances --query "DBInstances[*].[DBInstanceIdentifier,DbiResourceId, Endpoint.Address]" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
