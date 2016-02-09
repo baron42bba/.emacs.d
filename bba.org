@@ -1738,6 +1738,8 @@ With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode
     [2014-09-24 Wed 13:03]
 
 Bind f3 and f4 to previous/next pane.
+Bind shift f3 and shift f4 to previous/next frame.
+
 #+BEGIN_SRC emacs-lisp
   (defun move-cursor-next-pane ()
     "Move cursor to the next pane."
@@ -1749,8 +1751,20 @@ Bind f3 and f4 to previous/next pane.
     (interactive)
     (other-window -1))
 
+  (defun move-cursor-next-frame ()
+    "Move cursor to the next frame."
+    (interactive)
+    (other-frame 1))
+
+  (defun move-cursor-previous-frame ()
+    "Move cursor to the previous frame."
+    (interactive)
+    (other-frame -1))
+
   (global-set-key (kbd "<f3>") 'move-cursor-previous-pane)
+  (global-set-key (kbd "S-<f3>") 'move-cursor-previous-frame)
   (global-set-key (kbd "<f4>") 'move-cursor-next-pane)
+  (global-set-key (kbd "S-<f4>") 'move-cursor-next-frame)
 #+END_SRC
 
 * [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
