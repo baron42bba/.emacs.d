@@ -13,6 +13,8 @@
 :exports: both
 :END:
 
+(setq bba-db "$5")$0
+
 #+BEGIN_SRC sql
-$0
+
 #+END_SRC

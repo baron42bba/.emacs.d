@@ -3,7 +3,7 @@
 # expand-env: ((yas-indent-line 'fixed))
 # key: <ssession
 # --
-* Create a session for Emacs:
+Create a session for Emacs:
 
 #+BEGIN_SRC sh :session ${1:client} :results silent
 ssh $0
