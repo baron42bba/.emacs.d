@@ -2046,6 +2046,12 @@ Some links you might check out:
                         (kbd "M-p")
                         'helm-eshell-history)
                       ))
+        (add-hook 'shell-mode-hook
+                  #'(lambda()
+                      (define-key shell-mode-map
+                        [remap comint-history-isearch-backward-regexp]
+                        'helm-comint-input-ring)
+                      ))
         (setq helm-mini-default-sources '(helm-source-buffers-list
                                           helm-source-recentf
                                           helm-source-bookmarks
