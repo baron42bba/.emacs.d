@@ -2624,6 +2624,26 @@ Use aws command line tool via Emacs.
          'fqdn-bounds-of-fqdn-at-point)
 #+END_SRC
 
+* thing-at-point-instanceID
+[2016-02-12 Fri 14:13]
+
+Amazon instance ID at point.
+
+#+BEGIN_SRC emacs-lisp
+  (defun instanceid-bounds-of-instanceid-at-point ()
+       "Return the start and end points of an Amazon instance ID at the current point.
+     The result is a paired list of character positions for an fqdn
+     located at the current point in the current buffer."
+       (save-excursion
+         (skip-chars-backward "-.0123456789abcdefi")
+         (if (looking-at "i-[-.0-9abcdef]+")
+             (cons (point) (match-end 0)) ; bounds of fqdn
+           nil))) ; no fqdn at point
+
+  (put 'instanceid 'bounds-of-thing-at-point
+         'instanceid-bounds-of-instanceid-at-point)
+#+END_SRC
+
 * post
   [2015-10-02 Fri 13:26]
 
