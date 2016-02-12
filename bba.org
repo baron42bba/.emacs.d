@@ -2203,11 +2203,16 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
+  (define-key bba/launcher "k" 'bba/keyboard-maestro)
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "S" 'synonyms)
   (define-key bba/launcher "\C-s" 'helm-swoop)
   (define-key bba/launcher "t" 'git-timemachine)
   (define-key bba/launcher "T" 'twittering-mode)
+
+  (define-prefix-command 'bba/keyboard-maestro)
+
+  (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssh-to-fqdn-at-point)
 
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
@@ -2559,6 +2564,31 @@ all in your history.
 
 #+END_SRC
 
+* start ssh in screen session
+[2016-02-11 Thu 12:42]
+
+This one uses Keyboard Maestro to launch a ssh in a screen session in iTerm2.
+Assumption clipboard is a dns name.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-screen-start-ssh-to-clipboard (&optional arg)
+  "Use a macro in Keyboard Maestro to ssh into a system in iterm screen session."
+  (interactive)
+  (if arg
+      (kill-new (thing-at-point arg))
+    )
+  (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-ssh-to-clipboard\"'" )
+  )
+
+  (defun bba-screen-start-ssh-to-fqdn-at-point()
+    "run ssh to fqdn in screen session. fallback to clipboard."
+    (interactive)
+    (bba-screen-start-ssh-to-clipboard 'fqdn)
+    )
+
+#+END_SRC
+
+
 * aws
 
 Use aws command line tool via Emacs.
@@ -2574,6 +2604,24 @@ Use aws command line tool via Emacs.
     (message "done.")
   )
 
+#+END_SRC
+
+* thing-at-point-fqdn
+[2016-02-12 Fri 14:13]
+
+#+BEGIN_SRC emacs-lisp
+  (defun fqdn-bounds-of-fqdn-at-point ()
+       "Return the start and end points of an fqdn at the current point.
+     The result is a paired list of character positions for an fqdn
+     located at the current point in the current buffer."
+       (save-excursion
+         (skip-chars-backward "-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+         (if (looking-at "[-.0-9a-zA-Z]+")
+             (cons (point) (match-end 0)) ; bounds of fqdn
+           nil))) ; no fqdn at point
+
+  (put 'fqdn 'bounds-of-thing-at-point
+         'fqdn-bounds-of-fqdn-at-point)
 #+END_SRC
 
 * post
