@@ -538,6 +538,17 @@ Probably the best help to keep track of the not every day used keybindings.
     )
 #+END_SRC
 
+* [[https://github.com/jekor/hidepw][hidepw]]
+[2016-02-11 Thu 16:10]
+
+Hide passwords on the screen from shoulder surfing.
+Single pipes interfere with org tables. Just go double.
+
+#+BEGIN_SRC emacs-lisp
+  (load-file (expand-file-name "~/.emacs.d/lisp/hidepw.el"))
+  (add-hook 'org-mode-hook  'hidepw-mode)
+  (setq hidepw-pattern "||\\(.*\\)||")
+#+END_SRC
 * latex
 
 Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
