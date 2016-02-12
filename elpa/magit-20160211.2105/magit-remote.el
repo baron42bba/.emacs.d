@@ -33,6 +33,12 @@
 
 ;;; Clone
 
+(defcustom magit-clone-set-remote-head nil
+  "Whether cloning creates the symbolic-ref `<remote>/HEAD'."
+  :package-version '(magit . "2.4.2")
+  :group 'magit-commands
+  :type 'boolean)
+
 (defcustom magit-clone-set-remote.pushDefault 'ask
   "Whether to set the value of `remote.pushDefault' after cloning.
 
@@ -60,11 +66,13 @@ Then show the status buffer for the new repository."
                            ;; Stop cygwin git making a "c:" directory.
                            (magit-convert-git-filename directory))
            0)
-    (when (or (eq  magit-clone-set-remote.pushDefault t)
-              (and magit-clone-set-remote.pushDefault
-                   (y-or-n-p "Set `remote.pushDefault' to \"origin\"? ")))
-      (let ((default-directory directory))
-        (magit-call-git "config" "remote.pushDefault" "origin")))
+    (let ((default-directory directory))
+      (when (or (eq  magit-clone-set-remote.pushDefault t)
+                (and magit-clone-set-remote.pushDefault
+                     (y-or-n-p "Set `remote.pushDefault' to \"origin\"? ")))
+        (magit-call-git "config" "remote.pushDefault" "origin"))
+      (unless magit-clone-set-remote-head
+        (magit-remote-unset-head "origin")))
     (message "Cloning %s...done" repository)
     (magit-status-internal directory)))
 
@@ -139,6 +147,28 @@ the variable isn't already set."
   "Delete the remote named REMOTE."
   (interactive (list (magit-read-remote "Delete remote")))
   (magit-run-git "remote" "rm" remote))
+
+;;;###autoload
+(defun magit-remote-set-head (remote &optional branch)
+  "Set the local representation of REMOTE's default branch.
+Query REMOTE and set the symbolic-ref refs/remotes/<remote>/HEAD
+accordingly.  With a prefix argument query for the branch to be
+used, which allows you to select an incorrect value if you fancy
+doing that."
+  (interactive
+   (let  ((remote (magit-read-remote "Set HEAD for remote")))
+     (list remote
+           (and current-prefix-arg
+                (magit-read-remote-branch (format "Set %s/HEAD to" remote)
+                                          remote nil nil t)))))
+  (magit-run-git "remote" "set-head" remote (or branch "--auto")))
+
+;;;###autoload
+(defun magit-remote-unset-head (remote)
+  "Unset the local representation of REMOTE's default branch.
+Delete the symbolic-ref \"refs/remotes/<remote>/HEAD\"."
+  (interactive (list (magit-read-remote "Unset HEAD for remote")))
+  (magit-run-git "remote" "set-head" remote "--delete"))
 
 ;;; Fetch
 
@@ -599,6 +629,8 @@ To add this command to the push popup add this to your init file:
   "Popup console for patch commands."
   'magit-commands
   :man-page "git-format-patch"
+  :switches '("Switches for formatting patches"
+              (?l "Add cover letter" "--cover-letter"))
   :options  '("Options for formatting patches"
               (?f "From"             "--from=")
               (?t "To"               "--to=")
@@ -631,7 +663,16 @@ HEAD but not from the specified commit)."
                  range
                (format "%s~..%s" range range))))
          (magit-patch-arguments)))
-  (magit-run-git "format-patch" range args))
+  (magit-call-git "format-patch" range args)
+  (when (member "--cover-letter" args)
+    (find-file
+     (expand-file-name
+      "0000-cover-letter.patch"
+      (let ((topdir (magit-toplevel)))
+        (or (--some (and (string-match "--output-directory=\\(.+\\)" it)
+                         (expand-file-name (match-string 1 it) topdir))
+                    args)
+            topdir))))))
 
 ;;;###autoload
 (defun magit-request-pull (url start end)

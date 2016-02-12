@@ -315,41 +315,39 @@ Identical to `process-file' but temporarily enable Cygwin's
                                         "noglob")))
                     '("CYGWIN" "MSYS")))))
 
-(defun magit-run-git-with-input (input &rest args)
+(defvar magit-this-process nil)
+
+(defun magit-run-git-with-input (&rest args)
   "Call Git in a separate process.
 ARGS is flattened and then used as arguments to Git.
 
-The first argument, INPUT, should be a buffer or the name of
-an existing buffer.  The content of that buffer is used as the
-process' standard input.  It may also be nil in which case the
-current buffer is used.
+The current buffer's content is used as the process' standard
+input.
 
 Option `magit-git-executable' specifies the Git executable and
 option `magit-git-global-arguments' specifies constant arguments.
 The remaining arguments ARGS specify arguments to Git, they are
-flattened before use.
-
-After Git returns, the current buffer (if it is a Magit buffer)
-as well as the current repository's status buffer are refreshed.
-When INPUT is nil then do not refresh any buffers.
-
-This function actually starts a asynchronous process, but it then
-waits for that process to return."
+flattened before use."
   (declare (indent 1))
-  (magit-start-git (or input (current-buffer)) args)
-  (magit-process-wait)
-  (when input (magit-refresh)))
-
-(defvar magit-this-process nil)
+  (if (file-remote-p default-directory)
+      ;; We lack `process-file-region', so fall back to asynch +
+      ;; waiting in remote case.
+      (progn
+        (magit-start-git (current-buffer) args)
+        (while (and magit-this-process
+                    (eq (process-status magit-this-process) 'run))
+          (sleep-for 0.005)))
+    (let ((process-environment (append (magit-cygwin-env-vars)
+                                       process-environment)))
+      (apply #'call-process-region (point-min) (point-max)
+             magit-git-executable nil nil nil
+             (magit-process-git-arguments args)))))
 
 (defun magit-run-git-with-logfile (file &rest args)
   "Call Git in a separate process and log its output to FILE.
-See `magit-run-git' for more information.
 This function might have a short halflive."
-  (magit-start-git nil args)
-  (process-put magit-this-process 'logfile file)
-  (set-process-filter magit-this-process 'magit-process-logfile-filter)
-  (magit-process-wait)
+  (apply #'magit-process-file magit-git-executable nil `(:file ,file) nil
+         (magit-process-git-arguments args))
   (magit-refresh))
 
 ;;; Asynchronous Processes
@@ -597,17 +595,6 @@ Magit status buffer."
           (insert (substring string (1+ ret-pos)))))
       (set-marker (process-mark proc) (point)))))
 
-(defun magit-process-logfile-filter (process string)
-  "Special filter used by `magit-run-git-with-logfile'."
-  (magit-process-filter process string)
-  (let ((file (process-get process 'logfile)))
-    (with-temp-file file
-      (when (file-exists-p file)
-        (insert-file-contents file)
-        (goto-char (point-max)))
-      (insert string)
-      (write-region (point-min) (point-max) file))))
-
 (defmacro magit-process-kill-on-abort (proc &rest body)
   (declare (indent 1) (debug (form body)))
   (let ((map (cl-gensym)))
@@ -714,11 +701,6 @@ as argument."
                               #'magit-maybe-start-credential-cache-daemon)))))))
 
 (add-hook 'magit-credential-hook #'magit-maybe-start-credential-cache-daemon)
-
-(defun magit-process-wait ()
-  (while (and magit-this-process
-              (eq (process-status magit-this-process) 'run))
-    (sleep-for 0.005)))
 
 (defun tramp-sh-handle-start-file-process--magit-tramp-process-environment
     (fn name buffer program &rest args)
