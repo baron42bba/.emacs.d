@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "helm-swoop" "helm-swoop.el" (21913 4100 0
+;;;### (autoloads nil "helm-swoop" "helm-swoop.el" (22215 7848 0
 ;;;;;;  0))
 ;;; Generated autoloads from helm-swoop.el
 
@@ -50,6 +50,16 @@ Applies all org-mode buffers to helm-multi-swoop
 Applies all buffers of the same mode as the current buffer to helm-multi-swoop
 
 \(fn &optional $QUERY)" t nil)
+
+(autoload 'helm-swoop-without-pre-input "helm-swoop" "\
+Start helm-swoop without pre input query.
+
+\(fn)" t nil)
+
+(autoload 'helm-swoop-symble-pre-input "helm-swoop" "\
+Start helm-swoop without pre input query.
+
+\(fn)" t nil)
 
 (autoload 'helm-multi-swoop-edit "helm-swoop" "\
 

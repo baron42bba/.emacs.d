@@ -2034,7 +2034,7 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20160105.2046")
+                     "~/.emacs.d/elpa/helm-20160217.958")
         (require 'helm)
         (helm-mode 1)
         (global-set-key (kbd "M-y") 'helm-show-kill-ring)
@@ -2078,7 +2078,7 @@ Some links you might check out:
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20151019.230")
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20160108.1947")
         (require 'helm-descbinds)
         (define-key global-map (kbd "C-h b") 'helm-descbinds)
         )

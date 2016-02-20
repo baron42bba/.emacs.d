@@ -1,13 +1,10 @@
 ;;; helm-projectile-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (helm-projectile helm-projectile-ag helm-projectile-ack
-;;;;;;  helm-projectile-grep helm-projectile-off helm-projectile-on
-;;;;;;  helm-projectile-find-other-file helm-projectile-find-file-dwim
-;;;;;;  helm-projectile-fuzzy-match) "helm-projectile" "helm-projectile.el"
-;;;;;;  (21906 14465 0 0))
+;;;### (autoloads nil "helm-projectile" "helm-projectile.el" (22215
+;;;;;;  7828 0 0))
 ;;; Generated autoloads from helm-projectile.el
 
 (defvar helm-projectile-fuzzy-match t "\
@@ -39,14 +36,15 @@ Turn off helm-projectile key bindings.
 \(fn)" t nil)
 
 (autoload 'helm-projectile-grep "helm-projectile" "\
-Helm version of projectile-grep.
+Helm version of `projectile-grep'.
+DIR is the project root, if not set then current directory is used
 
-\(fn)" t nil)
+\(fn &optional DIR)" t nil)
 
 (autoload 'helm-projectile-ack "helm-projectile" "\
 Helm version of projectile-ack.
 
-\(fn)" t nil)
+\(fn &optional DIR)" t nil)
 
 (autoload 'helm-projectile-ag "helm-projectile" "\
 Helm version of projectile-ag.
@@ -61,20 +59,13 @@ If invoked outside of a project, displays a list of known projects to jump.
 
 \(fn &optional ARG)" t nil)
 
-(eval-after-load 'projectile '(progn (define-key projectile-command-map (kbd "h") 'helm-projectile)))
+(eval-after-load 'projectile '(progn (define-key projectile-command-map (kbd "h") #'helm-projectile)))
 
 ;;;***
 
-;;;### (autoloads nil nil ("helm-projectile-pkg.el") (21906 14465
-;;;;;;  971196 0))
-
-;;;***
-
-(provide 'helm-projectile-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; helm-projectile-autoloads.el ends here
