@@ -297,7 +297,7 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20150628.1418")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20150704.253")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20151216.1315")
         (require 'smartparens)
         (smartparens-global-mode 1)
         (defmacro def-pairs (pairs)
