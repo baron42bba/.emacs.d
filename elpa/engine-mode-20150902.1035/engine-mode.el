@@ -1,8 +1,8 @@
 ;;; engine-mode.el --- Define and query search engines from within Emacs.
 
 ;; Author: Harry R. Schwartz <hello@harryrschwartz.com>
-;; Version: 2015.06.13
-;; Package-Version: 20150613.759
+;; Version: 1.0.0
+;; Package-Version: 20150902.1035
 ;; URL: https://github.com/hrs/engine-mode/engine-mode.el
 
 ;; This file is NOT part of GNU Emacs.

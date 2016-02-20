@@ -1529,9 +1529,9 @@ necessary.
 * auto-completion
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20150618.1949")
+  (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20160107.8")
   (require 'auto-complete-config)
-  (add-to-list 'ac-dictionary-directories "~/.emacs.d/elpa/auto-complete-20150618.1949")
+  (add-to-list 'ac-dictionary-directories "~/.emacs.d/elpa/auto-complete-20160107.8")
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
   (ac-config-default)
   (add-to-list 'ac-modes 'cfengine3-mode)
