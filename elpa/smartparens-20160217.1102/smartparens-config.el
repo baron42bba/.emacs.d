@@ -1,6 +1,6 @@
 ;;; smartparens-config.el --- Default configuration for smartparens package
 
-;; Copyright (C) 2013-2015 Matus Goljer
+;; Copyright (C) 2013-2016 Matus Goljer
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
@@ -53,20 +53,23 @@
 
 (defun sp-lisp-invalid-hyperlink-p (_1 action _2)
   (when (eq action 'navigate)
-    (or (and (looking-at "\\sw\\|\\s_")
-             (save-excursion
-               (backward-char 2)
-               (looking-at "\\sw\\|\\s_")))
-        (and (save-excursion
-               (backward-char 1)
-               (looking-at "\\sw\\|\\s_"))
-             (save-excursion
-               (forward-char 1)
-               (looking-at "\\sw\\|\\s_"))))))
+    ;; Ignore errors due to us being at the start or end of the
+    ;; buffer.
+    (ignore-errors
+      (or (and (looking-at "\\sw\\|\\s_")
+               (save-excursion
+                 (backward-char 2)
+                 (looking-at "\\sw\\|\\s_")))
+          (and (save-excursion
+                 (backward-char 1)
+                 (looking-at "\\sw\\|\\s_"))
+               (save-excursion
+                 (forward-char 1)
+                 (looking-at "\\sw\\|\\s_")))))))
 
 ;; emacs is lisp hacking enviroment, so we set up some most common
 ;; lisp modes too
-(sp-with-modes sp--lisp-modes
+(sp-with-modes sp-lisp-modes
   ;; disable ', it's the quote character!
   (sp-local-pair "'" nil :actions nil)
   ;; also only use the pseudo-quote inside strings where it serve as
@@ -81,6 +84,12 @@
                                  (or (sp-lisp-invalid-hyperlink-p "`" 'navigate '_)
                                      (not (sp-point-in-string-or-comment))))
                                 (t (not (sp-point-in-string-or-comment)))))))
+
+;; <rant>Unfortunately emacs devs in their glorious wisdom decided to
+;; make @ no longer have prefix syntax, it is now a symbol... because
+;; apparently its use in symbols is so frequent.  Anyway, since we
+;; can't really change that, let's use a regexp based solution</rant>
+(add-to-list 'sp-sexp-prefix (list 'emacs-lisp-mode 'regexp "\\(?:,@\\|[',`]\\)"))
 
 ;; TODO: this should only be active in docstring, otherwise we want
 ;; the regexp completion \\{\\}.  To handle this feature, we must
@@ -100,10 +109,13 @@
 (eval-after-load "lua-mode"      '(require 'smartparens-lua))
 (eval-after-load "ruby-mode"     '(require 'smartparens-ruby))
 (eval-after-load "enh-ruby-mode" '(require 'smartparens-ruby))
+(eval-after-load "rust-mode"     '(require 'smartparens-rust))
 (eval-after-load "haskell-mode"     '(require 'smartparens-haskell))
 (eval-after-load "haskell-interactive-mode"     '(require 'smartparens-haskell))
 (--each '("python-mode" "python")
   (eval-after-load it '(require 'smartparens-python)))
+(eval-after-load "scala-mode" '(require 'smartparens-scala))
+(eval-after-load "racket-mode" '(require 'smartparens-racket))
 
 (provide 'smartparens-config)
 

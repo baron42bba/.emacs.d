@@ -1,10 +1,10 @@
-;;; smartparens-python.el --- Additional configuration for Python based modes.
+;;; smartparens-racket.el --- Additional configuration for Racket based modes.
 
-;; Copyright (C) 2015 Matus Goljer
+;; Copyright (C) 2015 Vikraman Choudhury
 
-;; Author: Matus Goljer <matus.goljer@gmail.com>
-;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Created: 8 February 2015
+;; Author: Vikraman Choudhury <git@vikraman.org>
+;; Maintainer: Vikraman Choudhury <git@vikraman.org>
+;; Created: 26 Oct 2015
 ;; Keywords: abbrev convenience editing
 ;; URL: https://github.com/Fuco1/smartparens
 
@@ -29,10 +29,10 @@
 
 ;;; Commentary:
 
-;; This file provides some additional configuration for Python based
+;; This file provides some additional configuration for Racket based
 ;; modes.  To use it, simply add:
 ;;
-;; (require 'smartparens-python)
+;; (require 'smartparens-racket)
 ;;
 ;; into your configuration.  You can use this in conjunction with the
 ;; default config or your own configuration.
@@ -47,11 +47,9 @@
 
 (require 'smartparens)
 
-;; Python has no sexp suffices.  This fixes slurping
-;; (|sys).path.append---the dot should not travel with the closing
-;; paren
-(--each '(python-mode inferior-python-mode)
-  (add-to-list 'sp-sexp-suffix (list it 'regexp "")))
+(sp-with-modes '(racket-mode racket-repl-mode)
+  (sp-local-pair "`" nil :actions nil)
+  (sp-local-pair "#|" "|#"))
 
-(provide 'smartparens-python)
-;;; smartparens-python.el ends here
+(provide 'smartparens-racket)
+;;; smartparens-racket.el ends here
