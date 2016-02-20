@@ -1,11 +1,9 @@
 ;;; key-chord-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (key-chord-define key-chord-define-local key-chord-define-global
-;;;;;;  key-chord-mode) "key-chord" "key-chord.el" (21691 55638 0
-;;;;;;  0))
+;;;### (autoloads nil "key-chord" "key-chord.el" (22215 7909 0 0))
 ;;; Generated autoloads from key-chord.el
 
 (autoload 'key-chord-mode "key-chord" "\
@@ -60,16 +58,9 @@ If COMMAND is nil, the key-chord is removed.
 
 ;;;***
 
-;;;### (autoloads nil nil ("key-chord-pkg.el") (21691 55638 528056
-;;;;;;  0))
-
-;;;***
-
-(provide 'key-chord-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; key-chord-autoloads.el ends here

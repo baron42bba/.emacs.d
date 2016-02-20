@@ -2107,7 +2107,7 @@ switch default browser between eww and default.
 combine key strokes to access commands even faster.
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20140929.2246")
+  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20151209.104")
 
   (require 'key-chord)
   (key-chord-mode 1)
