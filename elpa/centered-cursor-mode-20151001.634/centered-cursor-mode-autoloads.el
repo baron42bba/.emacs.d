@@ -1,10 +1,10 @@
 ;;; centered-cursor-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads (centered-cursor-mode) "centered-cursor-mode" "centered-cursor-mode.el"
-;;;;;;  (21823 20143 0 0))
+;;;### (autoloads nil "centered-cursor-mode" "centered-cursor-mode.el"
+;;;;;;  (22215 9186 0 0))
 ;;; Generated autoloads from centered-cursor-mode.el
 
 (autoload 'centered-cursor-mode "centered-cursor-mode" "\
@@ -15,16 +15,9 @@ position (usually centered).
 
 ;;;***
 
-;;;### (autoloads nil nil ("centered-cursor-mode-pkg.el") (21823
-;;;;;;  20143 376262 0))
-
-;;;***
-
-(provide 'centered-cursor-mode-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; centered-cursor-mode-autoloads.el ends here
