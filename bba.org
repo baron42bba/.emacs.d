@@ -1366,7 +1366,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 * [[http://www.twmode.sourceforge.net/][twitter]]
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20150906.1003")
+  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20160207.156")
   (require 'twittering-mode)
   (cond
    ((string-equal system-type "gnu/linux")
