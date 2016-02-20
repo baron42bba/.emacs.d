@@ -1998,9 +1998,9 @@ If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20150814.842" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20151214.1344" t)
         (require 'ggtags)
-        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20151016.201" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20160202.503" t)
         (require 'helm-gtags)
         (add-hook 'puppet-mode-hook
                   (lambda()

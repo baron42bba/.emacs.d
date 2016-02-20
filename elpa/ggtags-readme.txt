@@ -10,12 +10,10 @@ for more details.
 
 All commands are available from the `Ggtags' menu in `ggtags-mode'.
 
-NEWS 0.8.10 (2015-06-12):
+NEWS 0.8.11 (2015-12-15):
 
-- Tags update on save is configurable by `ggtags-update-on-save'.
-- New command `ggtags-explain-tags' to explain how each file is
-  indexed in current project.
-- New user option `ggtags-sort-by-nearness' that sorts matched tags
-  by nearness to current directory.
+- `ggtags-highlight-tag-delay' is renamed to `ggtags-highlight-tag'
+- Tag highlighting can be disabled by setting
+  `ggtags-highlight-tag' to nil.
 
 See full NEWS on https://github.com/leoliu/ggtags#news

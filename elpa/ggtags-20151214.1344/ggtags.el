@@ -4,7 +4,7 @@
 
 ;; Author: Leo Liu <sdl.web@gmail.com>
 ;; Version: 0.8.11
-;; Package-Version: 20150814.842
+;; Package-Version: 20151214.1344
 ;; Keywords: tools, convenience
 ;; Created: 2013-01-29
 ;; URL: https://github.com/leoliu/ggtags
@@ -37,13 +37,11 @@
 ;;
 ;; All commands are available from the `Ggtags' menu in `ggtags-mode'.
 
-;;; NEWS 0.8.10 (2015-06-12):
+;;; NEWS 0.8.11 (2015-12-15):
 
-;; - Tags update on save is configurable by `ggtags-update-on-save'.
-;; - New command `ggtags-explain-tags' to explain how each file is
-;;   indexed in current project.
-;; - New user option `ggtags-sort-by-nearness' that sorts matched tags
-;;   by nearness to current directory.
+;; - `ggtags-highlight-tag-delay' is renamed to `ggtags-highlight-tag'
+;; - Tag highlighting can be disabled by setting
+;;   `ggtags-highlight-tag' to nil.
 ;;
 ;; See full NEWS on https://github.com/leoliu/ggtags#news
 
@@ -332,13 +330,17 @@ Nil means using the value of `completing-read-function'."
                  function)
   :group 'ggtags)
 
-(defcustom ggtags-highlight-tag-delay 0.25
-  "Time in seconds before highlighting tag at point."
+(define-obsolete-variable-alias 'ggtags-highlight-tag-delay 'ggtags-highlight-tag
+  "0.8.11")
+
+(defcustom ggtags-highlight-tag 0.25
+  "If non-nil time in seconds before highlighting tag at point.
+Set to `nil' to disable tag highlighting."
   :set (lambda (sym value)
-         (when (bound-and-true-p ggtags-highlight-tag-timer)
-           (timer-set-idle-time ggtags-highlight-tag-timer value t))
+         (when (fboundp 'ggtags-setup-highlight-tag-at-point)
+           (ggtags-setup-highlight-tag-at-point value))
          (set-default sym value))
-  :type 'number
+  :type '(choice (const :tag "Disable" nil) number)
   :group 'ggtags)
 
 (defcustom ggtags-bounds-of-tag-function (lambda ()
@@ -1630,7 +1632,7 @@ commands `next-error' and `previous-error'.
             (let ((compilation-auto-jump-to-first-error t))
               (compilation-auto-jump (current-buffer) (point)))
           (error (message "\
-ggtags: history match invalid, jump to first error instead")
+ggtags: history match invalid, jump to first match instead")
                  (first-error)))))
     ;; `compilation-filter' restores point and as a result commands
     ;; dependent on point such as `ggtags-navigation-next-file' and
@@ -2205,10 +2207,7 @@ to nil disables displaying this information.")
 ;;;###autoload
 (define-minor-mode ggtags-mode nil
   :lighter (:eval (if ggtags-navigation-mode "" " GG"))
-  (unless (timerp ggtags-highlight-tag-timer)
-    (setq ggtags-highlight-tag-timer
-          (run-with-idle-timer
-           ggtags-highlight-tag-delay t #'ggtags-highlight-tag-at-point)))
+  (ggtags-setup-highlight-tag-at-point ggtags-highlight-tag)
   (if ggtags-mode
       (progn
         (add-hook 'after-save-hook 'ggtags-after-save-function nil t)
@@ -2231,9 +2230,7 @@ to nil disables displaying this information.")
     (remove-function (local 'eldoc-documentation-function) 'ggtags-eldoc-function)
     (setq mode-line-buffer-identification
           (delq 'ggtags-mode-line-project-name mode-line-buffer-identification))
-    (and (overlayp ggtags-highlight-tag-overlay)
-         (delete-overlay ggtags-highlight-tag-overlay))
-    (setq ggtags-highlight-tag-overlay nil)))
+    (ggtags-cancel-highlight-tag-at-point 'keep-timer)))
 
 (defvar ggtags-highlight-tag-map
   (let ((map (make-sparse-keymap)))
@@ -2252,6 +2249,22 @@ to nil disables displaying this information.")
 ;; (put 'ggtags-active-tag 'mouse-face 'match)
 (put 'ggtags-active-tag 'help-echo
      "S-mouse-1 for definitions\nS-mouse-3 for references")
+
+(defun ggtags-setup-highlight-tag-at-point (flag)
+  (cond ((null flag) (ggtags-cancel-highlight-tag-at-point))
+        ((not (timerp ggtags-highlight-tag-timer))
+         (setq ggtags-highlight-tag-timer
+               (run-with-idle-timer flag t #'ggtags-highlight-tag-at-point)))
+        (t (timer-set-idle-time ggtags-highlight-tag-timer flag t))))
+
+(defun ggtags-cancel-highlight-tag-at-point (&optional keep-timer)
+  (when (and (not keep-timer)
+             (timerp ggtags-highlight-tag-timer))
+    (cancel-timer ggtags-highlight-tag-timer)
+    (setq ggtags-highlight-tag-timer nil))
+  (when ggtags-highlight-tag-overlay
+    (delete-overlay ggtags-highlight-tag-overlay)
+    (setq ggtags-highlight-tag-overlay nil)))
 
 (defun ggtags-highlight-tag-at-point ()
   (when (and ggtags-mode ggtags-project-root (ggtags-find-project))
