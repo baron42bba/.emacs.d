@@ -7,7 +7,7 @@
 ;; Maintainer: Vasilij Schneidermann <v.schneidermann@gmail.com>
 ;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: data yaml
-;; Package-Version: 20160217.653
+;; Package-Version: 20160220.340
 ;; Version: 0.0.12
 
 ;; This file is not part of Emacs
@@ -226,11 +226,7 @@ that key is pressed to begin a block literal."
 
   (set (make-local-variable 'syntax-propertize-function)
        'yaml-mode-syntax-propertize-function)
-  (setq font-lock-defaults '(yaml-font-lock-keywords))
-  (if (fboundp 'font-lock-flush)
-      (font-lock-flush)
-    (with-no-warnings
-      (font-lock-fontify-buffer))))
+  (setq font-lock-defaults '(yaml-font-lock-keywords)))
 
 
 ;; Font-lock support
