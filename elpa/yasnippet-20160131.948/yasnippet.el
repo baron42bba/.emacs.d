@@ -1,8 +1,8 @@
 ;;; yasnippet.el --- Yet another snippet extension for Emacs.
 
 ;; Copyright (C) 2008-2013, 2015 Free Software Foundation, Inc.
-;; Authors: pluskid <pluskid@gmail.com>,  João Távora <joaotavora@gmail.com>
-;; Maintainer: João Távora <joaotavora@gmail.com>
+;; Authors: pluskid <pluskid@gmail.com>,  João Távora <joaotavora@gmail.com>, Noam Postavsky <npostavs@gmail.com>
+;; Maintainer: Noam Postavsky <npostavs@gmail.com>
 ;; Version: 0.8.1
 ;; Package-version: 0.8.0
 ;; X-URL: http://github.com/capitaomorte/yasnippet
@@ -202,10 +202,9 @@ created with `yas-new-snippet'. "
 (defvaralias 'yas/root-directory 'yas-snippet-dirs)
 
 (defcustom yas-new-snippet-default "\
-# -*- mode: snippet; require-final-newline: nil -*-
+# -*- mode: snippet -*-
 # name: $1
-# key: ${2:${1:$(yas--key-from-desc yas-text)}}${3:
-# binding: ${4:direct-keybinding}}
+# key: ${2:${1:$(yas--key-from-desc yas-text)}}
 # --
 $0"
   "Default snippet to use when creating a new snippet.
@@ -213,10 +212,9 @@ If nil, don't use any snippet."
   :type 'string
   :group 'yasnippet)
 
-(defcustom yas-prompt-functions '(yas-x-prompt
-                                  yas-dropdown-prompt
+(defcustom yas-prompt-functions '(yas-dropdown-prompt
                                   yas-completing-prompt
-                                  yas-ido-prompt
+                                  yas-maybe-ido-prompt
                                   yas-no-prompt)
   "Functions to prompt for keys, templates, etc interactively.
 
@@ -462,10 +460,10 @@ Attention: These hooks are not run when exiting nested/stacked snippet expansion
   "Hooks to run just before expanding a snippet.")
 
 (defvar yas-buffer-local-condition
-  '(if (and (or (fourth (syntax-ppss))
-                (fifth (syntax-ppss)))
-	    this-command
-            (eq this-command 'yas-expand-from-trigger-key))
+  '(if (and (let ((ppss (syntax-ppss)))
+              (or (nth 3 ppss) (nth 4 ppss)))
+            (memq this-command '(yas-expand yas-expand-from-trigger-key
+                                            yas-expand-from-keymap)))
        '(require-snippet-condition . force-in-comment)
      t)
   "Snippet expanding condition.
@@ -1585,11 +1583,13 @@ Optional PROMPT sets the prompt to use."
                             (if display-fn (mapcar display-fn choices) choices)))))
      (keyboard-quit))))
 
+(defun yas-maybe-ido-prompt (prompt choices &optional display-fn)
+  (when (bound-and-true-p ido-mode)
+    (yas-ido-prompt prompt choices display-fn)))
+
 (defun yas-ido-prompt (prompt choices &optional display-fn)
-  (when (and (fboundp 'ido-completing-read)
-	     (or (>= emacs-major-version 24)
-		 ido-mode))
-    (yas-completing-prompt prompt choices display-fn #'ido-completing-read)))
+  (require 'ido)
+  (yas-completing-prompt prompt choices display-fn #'ido-completing-read))
 
 (defun yas-dropdown-prompt (_prompt choices &optional display-fn)
   (when (fboundp 'dropdown-list)
@@ -1803,16 +1803,18 @@ With prefix argument USE-JIT do jit-loading of snippets."
   "Reload the directories listed in `yas-snippet-dirs' or
 prompt the user to select one."
   (let (errors)
-    (if yas-snippet-dirs
-        (dolist (directory (reverse (yas-snippet-dirs)))
-          (cond ((file-directory-p directory)
-                 (yas-load-directory directory (not nojit))
-                 (if nojit
-                     (yas--message 3 "Loaded %s" directory)
-                   (yas--message 3 "Prepared just-in-time loading for %s" directory)))
-                (t
-                 (push (yas--message 0 "Check your `yas-snippet-dirs': %s is not a directory" directory) errors))))
-      (call-interactively 'yas-load-directory))
+    (if (null yas-snippet-dirs)
+        (call-interactively 'yas-load-directory)
+      (when (member yas--default-user-snippets-dir yas-snippet-dirs)
+        (make-directory yas--default-user-snippets-dir t))
+      (dolist (directory (reverse (yas-snippet-dirs)))
+        (cond ((file-directory-p directory)
+               (yas-load-directory directory (not nojit))
+               (if nojit
+                   (yas--message 3 "Loaded %s" directory)
+                 (yas--message 3 "Prepared just-in-time loading for %s" directory)))
+              (t
+               (push (yas--message 0 "Check your `yas-snippet-dirs': %s is not a directory" directory) errors)))))
     errors))
 
 (defun yas-reload-all (&optional no-jit interactive)
@@ -1938,7 +1940,7 @@ This works by stubbing a few functions, then calling
   (interactive)
   (message (concat "yasnippet (version "
                    yas--version
-                   ") -- pluskid <pluskid@gmail.com>/joaotavora <joaotavora@gmail.com>")))
+                   ") -- pluskid/joaotavora/npostavs")))
 
 
 ;;; Apropos snippet menu:
@@ -2351,7 +2353,6 @@ visited file in `snippet-mode'."
   (interactive)
   (let* ((yas-buffer-local-condition 'always)
          (templates (yas--all-templates (yas--get-snippet-tables)))
-         (yas-prompt-functions '(yas-ido-prompt yas-completing-prompt))
          (template (and templates
                         (or (yas--prompt-for-template templates
                                                      "Choose a snippet template to edit: ")
@@ -3382,12 +3383,26 @@ Move the overlay, or create it if it does not exit."
     (overlay-put yas--active-field-overlay 'insert-behind-hooks
                  '(yas--on-field-overlay-modification))))
 
-(defun yas--on-field-overlay-modification (overlay after? _beg _end &optional _length)
+(defun yas--skip-and-clear-field-p (field _beg _end &optional _length)
+  "Tell if newly modified FIELD should be cleared and skipped.
+BEG, END and LENGTH like overlay modification hooks."
+  (and (not (yas--field-modified-p field))
+       (= (point) (yas--field-start field))
+       (require 'delsel)
+       ;; `yank' sets `this-command' to t during execution.
+       (let ((clearp (get (if (commandp this-command) this-command
+                            this-original-command)
+                          'delete-selection)))
+         (when (and (not (memq clearp '(yank supersede kill)))
+                    (functionp clearp))
+           (setq clearp (funcall clearp)))
+         clearp)))
+
+(defun yas--on-field-overlay-modification (overlay after? beg end &optional length)
   "Clears the field and updates mirrors, conditionally.
 
-Only clears the field if it hasn't been modified and it point it
-at field start.  This hook doesn't do anything if an undo is in
-progress."
+Only clears the field if it hasn't been modified and point is at
+field start.  This hook does nothing if an undo is in progress."
   (unless (or yas--inhibit-overlay-hooks
               (not (overlayp yas--active-field-overlay)) ; Avoid Emacs bug #21824.
               (yas--undo-in-progress))
@@ -3399,8 +3414,7 @@ progress."
                (yas--field-update-display field))
              (yas--update-mirrors snippet))
             (field
-             (when (and (not (yas--field-modified-p field))
-                        (= (point) (yas--field-start field)))
+             (when (yas--skip-and-clear-field-p field beg end)
                (yas--skip-and-clear field))
              (setf (yas--field-modified-p field) t))))))
 

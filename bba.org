@@ -439,10 +439,11 @@ My first thought: Nice. But do I have a use case? After half a year I
 cannot live without it. I write most of my [[http://www.cfengine.com][CFEngine]] code with
 snippets. Some help for Perl and even for org-mode.
 Thought about using snippets for shell-mode and eshell-mode?
+snippets for =aws cli= are awesome!
 =ha-autoinsert-yas-expand= copied from Howard Abrams.
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path
-               "~/.emacs.d/elpa/yasnippet-20151212.2133")
+               "~/.emacs.d/elpa/yasnippet-20160131.948")
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode 1)
