@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "langtool" "langtool.el" (21908 14228 0 0))
+;;;### (autoloads nil "langtool" "langtool.el" (22215 7967 0 0))
 ;;; Generated autoloads from langtool.el
 
 (defalias 'langtool-check 'langtool-check-buffer)
