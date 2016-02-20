@@ -221,7 +221,7 @@ Keep track of your important stuff!
     (progn
       (add-to-list 'load-path "~/.emacs.d/elpa/cl-lib-0.5")
       (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
-      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20141125.37")
+      (add-to-list 'load-path "~/.emacs.d/elpa/yaml-mode-20160217.653")
       (require 'yaml-mode)
       )
 

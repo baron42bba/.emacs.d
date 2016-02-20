@@ -4,9 +4,11 @@
 
 ;; Author: Yoshiki Kurihara <clouder@gmail.com>
 ;;         Marshall T. Vandegrift <llasram@gmail.com>
+;; Maintainer: Vasilij Schneidermann <v.schneidermann@gmail.com>
+;; Package-Requires: ((emacs "24.1"))
 ;; Keywords: data yaml
-;; Package-Version: 20141125.37
-;; Version: 0.0.11
+;; Package-Version: 20160217.653
+;; Version: 0.0.12
 
 ;; This file is not part of Emacs
 
@@ -20,10 +22,9 @@
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
+;; You should have received a copy of the GNU General Public License along
+;; with this program; if not, write to the Free Software Foundation, Inc.,
+;; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 ;;; Commentary:
 
@@ -116,7 +117,7 @@ that key is pressed to begin a block literal."
 
 ;; Constants
 
-(defconst yaml-mode-version "0.0.11" "Version of `yaml-mode'.")
+(defconst yaml-mode-version "0.0.12" "Version of `yaml-mode'.")
 
 (defconst yaml-blank-line-re "^ *$"
   "Regexp matching a line containing only (valid) whitespace.")
@@ -145,7 +146,7 @@ that key is pressed to begin a block literal."
   "Regexp matching a single YAML hash key.")
 
 (defconst yaml-scalar-context-re
-  (concat "\\(?:^\\(?:--- \\)?\\|{\\|\\(?:[-,] +\\)+\\) *"
+  (concat "\\(?:^\\(?:--- \\)?\\|{\\|\\(?: *[-,] +\\)+\\) *"
           "\\(?:" yaml-bare-scalar-re " *: \\)?")
   "Regexp indicating the begininng of a scalar context.")
 
@@ -163,7 +164,7 @@ that key is pressed to begin a block literal."
   "Regexp matching a line beginning a YAML block literal.")
 
 (defconst yaml-nested-sequence-re
-  (concat "^\\(?: *- +\\)+"
+  (concat "^\\(?:\\(?: *- +\\)+\\|\\(:? *-$\\)\\)"
           "\\(?:" yaml-bare-scalar-re " *:\\(?: +.*\\)?\\)?$")
   "Regexp matching a line containing one or more nested YAML sequences.")
 
@@ -183,38 +184,36 @@ that key is pressed to begin a block literal."
 
 ;; Mode setup
 
-(defvar yaml-mode-map ()
+(defvar yaml-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "|" 'yaml-electric-bar-and-angle)
+    (define-key map ">" 'yaml-electric-bar-and-angle)
+    (define-key map "-" 'yaml-electric-dash-and-dot)
+    (define-key map "." 'yaml-electric-dash-and-dot)
+    (define-key map [backspace] 'yaml-electric-backspace)
+    map)
   "Keymap used in `yaml-mode' buffers.")
-(if yaml-mode-map
-    nil
-  (setq yaml-mode-map (make-sparse-keymap))
-  (define-key yaml-mode-map "|" 'yaml-electric-bar-and-angle)
-  (define-key yaml-mode-map ">" 'yaml-electric-bar-and-angle)
-  (define-key yaml-mode-map "-" 'yaml-electric-dash-and-dot)
-  (define-key yaml-mode-map "." 'yaml-electric-dash-and-dot)
-  (define-key yaml-mode-map [backspace] 'yaml-electric-backspace))
 
-(defvar yaml-mode-syntax-table nil
+(defvar yaml-mode-syntax-table
+  (let ((syntax-table (make-syntax-table)))
+    (modify-syntax-entry ?\' "\"" syntax-table)
+    (modify-syntax-entry ?\" "\"" syntax-table)
+    (modify-syntax-entry ?# "<" syntax-table)
+    (modify-syntax-entry ?\n ">" syntax-table)
+    (modify-syntax-entry ?\\ "\\" syntax-table)
+    (modify-syntax-entry ?- "w" syntax-table)
+    (modify-syntax-entry ?_ "_" syntax-table)
+    (modify-syntax-entry ?\( "." syntax-table)
+    (modify-syntax-entry ?\) "." syntax-table)
+    (modify-syntax-entry ?\{ "(}" syntax-table)
+    (modify-syntax-entry ?\} "){" syntax-table)
+    (modify-syntax-entry ?\[ "(]" syntax-table)
+    (modify-syntax-entry ?\] ")[" syntax-table)
+    syntax-table)
   "Syntax table in use in `yaml-mode' buffers.")
-(if yaml-mode-syntax-table
-    nil
-  (setq yaml-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?\' "\"" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\" "\"" yaml-mode-syntax-table)
-  (modify-syntax-entry ?# "<" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\\ "\\" yaml-mode-syntax-table)
-  (modify-syntax-entry ?- "w" yaml-mode-syntax-table)
-  (modify-syntax-entry ?_ "_" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\( "." yaml-mode-syntax-table)
-  (modify-syntax-entry ?\) "." yaml-mode-syntax-table)
-  (modify-syntax-entry ?\{ "(}" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\} "){" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\[ "(]" yaml-mode-syntax-table)
-  (modify-syntax-entry ?\] ")[" yaml-mode-syntax-table))
 
 ;;;###autoload
-(define-derived-mode yaml-mode fundamental-mode "YAML"
+(define-derived-mode yaml-mode text-mode "YAML"
   "Simple mode to edit YAML.
 
 \\{yaml-mode-map}"
@@ -223,31 +222,42 @@ that key is pressed to begin a block literal."
   (set (make-local-variable 'comment-start-skip) "#+ *")
   (set (make-local-variable 'indent-line-function) 'yaml-indent-line)
   (set (make-local-variable 'indent-tabs-mode) nil)
-  (set (make-local-variable 'font-lock-defaults)
-       '(yaml-font-lock-keywords
-         nil nil nil nil
-         (font-lock-syntactic-keywords . yaml-font-lock-syntactic-keywords)))
-  (font-lock-fontify-buffer))
+  (set (make-local-variable 'fill-paragraph-function) 'yaml-fill-paragraph)
+
+  (set (make-local-variable 'syntax-propertize-function)
+       'yaml-mode-syntax-propertize-function)
+  (setq font-lock-defaults '(yaml-font-lock-keywords))
+  (if (fboundp 'font-lock-flush)
+      (font-lock-flush)
+    (with-no-warnings
+      (font-lock-fontify-buffer))))
 
 
 ;; Font-lock support
 
 (defvar yaml-font-lock-keywords
-   (list
-    (cons yaml-constant-scalars-re '(1 font-lock-constant-face))
-    (cons yaml-tag-re '(0 font-lock-type-face))
-    (cons yaml-node-anchor-alias-re '(0 font-lock-function-name-face))
-    (cons yaml-hash-key-re '(1 font-lock-variable-name-face))
-    (cons yaml-document-delimiter-re '(0 font-lock-comment-face))
-    (cons yaml-directive-re '(1 font-lock-builtin-face))
-    '(yaml-font-lock-block-literals 0 font-lock-string-face)
-    '("^[\t]+" 0 'yaml-tab-face t))
+  `((,yaml-constant-scalars-re . (1 font-lock-constant-face))
+    (,yaml-tag-re . (0 font-lock-type-face))
+    (,yaml-node-anchor-alias-re . (0 font-lock-function-name-face))
+    (,yaml-hash-key-re . (1 font-lock-variable-name-face))
+    (,yaml-document-delimiter-re . (0 font-lock-comment-face))
+    (,yaml-directive-re . (1 font-lock-builtin-face))
+    (yaml-font-lock-block-literals 0 font-lock-string-face)
+    ("^[\t]+" 0 'yaml-tab-face t))
    "Additional expressions to highlight in YAML mode.")
 
-(defvar yaml-font-lock-syntactic-keywords
-  (list '(yaml-syntactic-block-literals 0 "."))
-  "Additional syntax features to highlight in YAML mode.")
-
+(defun yaml-mode-syntax-propertize-function (beg end)
+  "Unhighlight foo#bar tokens between BEG and END."
+  (save-excursion
+    (goto-char beg)
+    (while (search-forward "#" end t)
+      (save-excursion
+        (forward-char -1)
+        ;; both ^# and [ \t]# are comments
+        (when (and (not (bolp))
+                   (not (memq (preceding-char) '(?\s ?\t))))
+          (put-text-property (point) (1+ (point))
+                             'syntax-table (string-to-syntax "_")))))))
 
 (defun yaml-font-lock-block-literals (bound)
   "Find lines within block literals.
@@ -287,26 +297,6 @@ artificially limitted to the value of
                                        " *\\(.*\\)\n")
                                bound t))
           (set-match-data (nthcdr 2 (match-data))) t))))))
-
-(defun yaml-syntactic-block-literals (bound)
-  "Find quote characters within block literals.
-Finds the first quote character within a block literal (if any) after
-point and prior to BOUND.  Returns the position of the quote character
-in the match data, as consumed by matcher functions in
-`font-lock-syntactic-keywords'.  This allows the mode to treat ['\"]
-characters in block literals as punctuation syntax instead of string
-syntax, preventing unmatched quotes in block literals from painting
-the entire buffer in `font-lock-string-face'."
-  (let ((found nil))
-    (while (and (not found)
-                (/= (point) bound)
-                (yaml-font-lock-block-literals bound))
-      (let ((begin (match-beginning 0)) (end (match-end 0)))
-        (goto-char begin)
-        (cond
-         ((re-search-forward "['\"]" end t) (setq found t))
-         ((goto-char end)))))
-    found))
 
 
 ;; Indentation and electric keys
@@ -389,6 +379,46 @@ margin."
     (if (and (not arg) (looking-at yaml-document-delimiter-re))
         (delete-horizontal-space))))
 
+(defun yaml-narrow-to-block-literal ()
+  "Narrow the buffer to block literal if the point is in it,
+otherwise do nothing."
+  (interactive)
+  (save-excursion
+    (goto-char (point-at-bol))
+    (while (and (looking-at-p yaml-blank-line-re) (not (bobp)))
+      (forward-line -1))
+    (let ((nlines yaml-block-literal-search-lines)
+	  (min-level (current-indentation))
+	  beg)
+      (forward-line -1)
+      (while (and (/= nlines 0)
+		  (/= min-level 0)
+		  (not (looking-at-p yaml-block-literal-re))
+		  (not (bobp)))
+	(set 'nlines (1- nlines))
+	(unless (looking-at-p yaml-blank-line-re)
+	  (set 'min-level (min min-level (current-indentation))))
+	(forward-line -1))
+      (when (and (< (current-indentation) min-level)
+		  (looking-at-p yaml-block-literal-re))
+	(set 'min-level (current-indentation))
+	(forward-line)
+	(setq beg (point))
+	(while (and (not (eobp))
+		    (or (looking-at-p yaml-blank-line-re)
+			(> (current-indentation) min-level)))
+	  (forward-line))
+	(narrow-to-region beg (point))))))
+
+(defun yaml-fill-paragraph (&optional justify region)
+  "Fill paragraph.
+This behaves as `fill-paragraph' except that filling does not
+cross boundaries of block literals."
+  (interactive "*P")
+  (save-restriction
+    (yaml-narrow-to-block-literal)
+    (let ((fill-paragraph-function nil))
+      (fill-paragraph justify region))))
 
 (defun yaml-set-imenu-generic-expression ()
   (make-local-variable 'imenu-generic-expression)
@@ -406,7 +436,7 @@ margin."
   yaml-mode-version)
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.e?ya?ml$" . yaml-mode))
 
 (provide 'yaml-mode)
 
