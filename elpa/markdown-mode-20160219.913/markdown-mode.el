@@ -32,7 +32,7 @@
 ;; Maintainer: Jason R. Blevins <jrblevin@sdf.org>
 ;; Created: May 24, 2007
 ;; Version: 2.1
-;; Package-Version: 20160218.1732
+;; Package-Version: 20160219.913
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; Keywords: Markdown, GitHub Flavored Markdown, itex
 ;; URL: http://jblevins.org/projects/markdown-mode/
@@ -5167,8 +5167,9 @@ a list."
         (setq cpfx (match-string-no-properties 1))
         (cond
          ((string= cpfx pfx)
-          (replace-match
-           (concat pfx (number-to-string  (setq idx (1+ idx))) ". "))
+          (save-excursion
+            (replace-match
+             (concat pfx (number-to-string (setq idx (1+ idx))) ". ")))
           (setq sep nil))
          ;; indented a level
          ((string< pfx cpfx)
