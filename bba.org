@@ -494,7 +494,7 @@ log-format.
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20150703.359")
+        (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20160218.41")
         (require 'flycheck)
         (add-hook 'after-init-hook #'global-flycheck-mode)
 
