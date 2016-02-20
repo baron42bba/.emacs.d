@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "keyfreq" "keyfreq.el" (21908 14229 0 0))
+;;;### (autoloads nil "keyfreq" "keyfreq.el" (22215 7928 0 0))
 ;;; Generated autoloads from keyfreq.el
 
 (defvar keyfreq-mode nil "\
@@ -37,6 +37,11 @@ Keyfreq Autosave mode automatically saves
 and when emacs is killed.
 
 \(fn &optional ARG)" t nil)
+
+(autoload 'keyfreq-save-now "keyfreq" "\
+Save keyfreq data now.
+
+\(fn)" t nil)
 
 ;;;***
 
