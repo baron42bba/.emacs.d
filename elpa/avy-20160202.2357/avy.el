@@ -1,11 +1,11 @@
-;;; avy.el --- set-based completion -*- lexical-binding: t -*-
+;;; avy.el --- tree-based completion -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015  Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/avy
-;; Package-Version: 20160105.245
-;; Version: 0.3.0
+;; Package-Version: 20160202.2357
+;; Version: 0.4.0
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 ;; Keywords: point, location
 
@@ -160,6 +160,9 @@ When nil, punctuation chars will not be matched.
 (defcustom avy-ignored-modes '(image-mode doc-view-mode pdf-view-mode)
   "List of modes to ignore when searching for candidates.
 Typically, these modes don't use the text representation.")
+
+(defvar avy-ring (make-ring 20)
+  "Hold the window and point history.")
 
 (defvar avy-translate-char-function #'identity
   "Function to translate user input key into another key.
@@ -481,7 +484,12 @@ Set `avy-style' according to COMMMAND as well."
       (forward-sexp)
       (setq str (buffer-substring pt (point)))
       (kill-new str)
-      (message "Copied: %s" str))))
+      (message "Copied: %s" str)))
+  (let ((dat (ring-ref avy-ring 0)))
+    (select-frame-set-input-focus
+     (window-frame (cdr dat)))
+    (select-window (cdr dat))
+    (goto-char (car dat))))
 
 (defun avy-action-kill (pt)
   "Kill sexp at PT."
@@ -641,11 +649,18 @@ COMPOSE-FN is a lambda that concatenates the old string at BEG with STR."
              (ol (make-overlay beg (or end (1+ beg)) (window-buffer wnd)))
              (old-str (if (eq beg eob) "" (avy--old-str beg wnd)))
              (os-line-prefix (get-text-property 0 'line-prefix old-str))
-             (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str)))
+             (os-wrap-prefix (get-text-property 0 'wrap-prefix old-str))
+             other-ol)
         (when os-line-prefix
           (add-text-properties 0 1 `(line-prefix ,os-line-prefix) str))
         (when os-wrap-prefix
           (add-text-properties 0 1 `(wrap-prefix ,os-wrap-prefix) str))
+        (when (setq other-ol (cl-find-if
+                              (lambda (o) (overlay-get o 'goto-address))
+                              (overlays-at beg)))
+          (add-text-properties
+           0 (length old-str)
+           `(face ,(overlay-get other-ol 'face)) old-str))
         (overlay-put ol 'window wnd)
         (overlay-put ol 'category 'avy)
         (overlay-put ol (if (eq beg eob)
@@ -772,7 +787,8 @@ LEAF is normally ((BEG . END) . WND)."
                                 len))
                            lep)))
           (when (and (bound-and-true-p visual-line-mode)
-                     (> len (- end beg)))
+                     (> len (- end beg))
+                     (not (eq lep beg)))
             (setq len (- end beg))
             (let ((old-str (apply #'string (reverse path))))
               (setq str
@@ -1117,47 +1133,51 @@ Otherwise, forward to `goto-line' with ARG."
   "Copy a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
-  (avy-with avy-copy-line
-    (let* ((start (avy--line))
-           (str (buffer-substring-no-properties
-                 start
-                 (save-excursion
-                   (goto-char start)
-                   (move-end-of-line arg)
-                   (point)))))
-      (cond ((eq avy-line-insert-style 'above)
-             (beginning-of-line)
-             (save-excursion
-               (insert str "\n")))
-            ((eq avy-line-insert-style 'below)
-             (end-of-line)
-             (insert "\n" str)
-             (beginning-of-line))
-            (t
-             (user-error "Unexpected `avy-line-insert-style'"))))))
+  (let ((initial-window (selected-window)))
+    (avy-with avy-copy-line
+      (let* ((start (avy--line))
+             (str (buffer-substring-no-properties
+                   start
+                   (save-excursion
+                     (goto-char start)
+                     (move-end-of-line arg)
+                     (point)))))
+        (select-window initial-window)
+        (cond ((eq avy-line-insert-style 'above)
+               (beginning-of-line)
+               (save-excursion
+                 (insert str "\n")))
+              ((eq avy-line-insert-style 'below)
+               (end-of-line)
+               (insert "\n" str)
+               (beginning-of-line))
+              (t
+               (user-error "Unexpected `avy-line-insert-style'")))))))
 
 ;;;###autoload
 (defun avy-move-line (arg)
   "Move a selected line above the current line.
 ARG lines can be used."
   (interactive "p")
-  (avy-with avy-move-line
-    (let ((start (avy--line)))
-      (save-excursion
-        (goto-char start)
-        (kill-whole-line arg))
-      (cond ((eq avy-line-insert-style 'above)
-             (beginning-of-line)
-             (save-excursion
-               (insert
-                (current-kill 0))))
-            ((eq avy-line-insert-style 'below)
-             (end-of-line)
-             (newline)
-             (save-excursion
-               (insert (substring (current-kill 0) 0 -1))))
-            (t
-             (user-error "Unexpected `avy-line-insert-style'"))))))
+  (let ((initial-window (selected-window)))
+    (avy-with avy-move-line
+      (let ((start (avy--line)))
+        (save-excursion
+          (goto-char start)
+          (kill-whole-line arg))
+        (select-window initial-window)
+        (cond ((eq avy-line-insert-style 'above)
+               (beginning-of-line)
+               (save-excursion
+                 (insert
+                  (current-kill 0))))
+              ((eq avy-line-insert-style 'below)
+               (end-of-line)
+               (newline)
+               (save-excursion
+                 (insert (substring (current-kill 0) 0 -1))))
+              (t
+               (user-error "Unexpected `avy-line-insert-style'")))))))
 
 ;;;###autoload
 (defun avy-copy-region (arg)
@@ -1236,7 +1256,9 @@ This function obeys `avy-all-windows' setting."
                 (setq str (concat str (list char)))))
              ;; Highlight
              (when (>= (length str) 1)
-               (let (found)
+               (let ((case-fold-search
+                      (or avy-case-fold-search (string= str (downcase str))))
+                     found)
                  (avy-dowindows current-prefix-arg
                    (dolist (pair (avy--find-visible-regions
                                   (window-start)
@@ -1275,9 +1297,6 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
       (avy--process
        (avy--read-candidates)
        (avy--style-fn avy-style)))))
-
-(defvar avy-ring (make-ring 20)
-  "Hold the window and point history.")
 
 (defun avy-push-mark ()
   "Store the current point and window."
