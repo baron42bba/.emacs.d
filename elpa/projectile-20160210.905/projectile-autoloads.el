@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "projectile" "projectile.el" (21908 14196 0
+;;;### (autoloads nil "projectile" "projectile.el" (22215 5355 0
 ;;;;;;  0))
 ;;; Generated autoloads from projectile.el
 
@@ -158,6 +158,7 @@ Open `dired' at the root of the project.
 Open `vc-dir' at the root of the project.
 
 For git projects `magit-status-internal' is used if available.
+For hg projects `monky-status' is used if available.
 
 \(fn &optional PROJECT-ROOT)" t nil)
 
@@ -196,7 +197,7 @@ See `def-projectile-commander-method' for defining new methods.
 
 \(fn)" t nil)
 
-(defvar projectile-mode-line '(:eval (format " Projectile[%s]" (projectile-project-name))) "\
+(defvar projectile-mode-line '(:eval (if (file-remote-p default-directory) " Projectile" (format " Projectile[%s]" (projectile-project-name)))) "\
 Mode line lighter for Projectile.
 
 The value of this variable is a mode line template as in
