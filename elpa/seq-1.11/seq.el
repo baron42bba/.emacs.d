@@ -4,8 +4,7 @@
 
 ;; Author: Nicolas Petton <nicolas@petton.fr>
 ;; Keywords: sequences
-;; Package-Version: 20150515.214
-;; Version: 1.7
+;; Version: 1.11
 ;; Package: seq
 
 ;; Maintainer: emacs-devel@gnu.org
@@ -165,13 +164,27 @@ If SEQ is empty, return INITIAL-VALUE and FUNCTION is not called."
         (setq acc (funcall function acc elt)))
       acc)))
 
-(defun seq-some-p (pred seq)
-  "Return any element for which (PRED element) is non-nil in SEQ, nil otherwise."
+(defun seq-some (pred seq)
+  "Return the first value for which if (PRED element) is non-nil for in SEQ."
+  (catch 'seq--break
+    (seq-doseq (elt seq)
+      (let ((result (funcall pred elt)))
+        (when result
+          (throw 'seq--break result))))
+    nil))
+
+(defun seq-find (pred seq &optional default)
+  "Return the first element for which (PRED element) is non-nil in SEQ.
+If no element is found, return DEFAULT.
+
+Note that `seq-find' has an ambiguity if the found element is
+identical to DEFAULT, as it cannot be known if an element was
+found or not."
   (catch 'seq--break
     (seq-doseq (elt seq)
       (when (funcall pred elt)
         (throw 'seq--break elt)))
-    nil))
+    default))
 
 (defun seq-every-p (pred seq)
   "Return non-nil if (PRED element) is non-nil for all elements of the sequence SEQ."
@@ -203,19 +216,30 @@ The result is a sequence of the same type as SEQ."
     (let ((result (seq-sort pred (append seq nil))))
       (seq-into result (type-of seq)))))
 
-(defun seq-contains-p (seq elt &optional testfn)
+(defun seq-contains (seq elt &optional testfn)
   "Return the first element in SEQ that equals to ELT.
 Equality is defined by TESTFN if non-nil or by `equal' if nil."
-  (seq-some-p (lambda (e)
+  (seq-some (lambda (e)
                 (funcall (or testfn #'equal) elt e))
               seq))
+
+(defun seq-position (seq elt &optional testfn)
+  "Return the index of the first element in SEQ that is equal to ELT.
+Equality is defined by TESTFN if non-nil or by `equal' if nil."
+  (let ((index 0))
+    (catch 'seq--break
+      (seq-doseq (e seq)
+        (when (funcall (or testfn #'equal) e elt)
+          (throw 'seq--break index))
+        (setq index (1+ index)))
+      nil)))
 
 (defun seq-uniq (seq &optional testfn)
   "Return a list of the elements of SEQ with duplicates removed.
 TESTFN is used to compare elements, or `equal' if TESTFN is nil."
   (let ((result '()))
     (seq-doseq (elt seq)
-      (unless (seq-contains-p result elt testfn)
+      (unless (seq-contains result elt testfn)
         (setq result (cons elt result))))
     (nreverse result)))
 
@@ -273,17 +297,17 @@ negative integer or 0, nil is returned."
   "Return a list of the elements that appear in both SEQ1 and SEQ2.
 Equality is defined by TESTFN if non-nil or by `equal' if nil."
   (seq-reduce (lambda (acc elt)
-                (if (seq-contains-p seq2 elt testfn)
+                (if (seq-contains seq2 elt testfn)
                     (cons elt acc)
                   acc))
               (seq-reverse seq1)
               '()))
 
 (defun seq-difference (seq1 seq2 &optional testfn)
-  "Return a list of th elements that appear in SEQ1 but not in SEQ2.
+  "Return a list of the elements that appear in SEQ1 but not in SEQ2.
 Equality is defined by TESTFN if non-nil or by `equal' if nil."
   (seq-reduce (lambda (acc elt)
-                (if (not (seq-contains-p seq2 elt testfn))
+                (if (not (seq-contains seq2 elt testfn))
                     (cons elt acc)
                   acc))
               (seq-reverse seq1)
@@ -325,6 +349,16 @@ TYPE can be one of the following symbols: vector, string or list."
     (`string (concat seq))
     (`list (append seq nil))
     (t (error "Not a sequence type name: %S" type))))
+
+(defun seq-min (seq)
+  "Return the smallest element of SEQ.
+SEQ must be a sequence of numbers or markers."
+  (apply #'min (seq-into seq 'list)))
+
+(defun seq-max (seq)
+    "Return the largest element of SEQ.
+SEQ must be a sequence of numbers or markers."
+  (apply #'max (seq-into seq 'list)))
 
 (defun seq--drop-list (list n)
   "Return a list from LIST without its first N elements.
@@ -443,7 +477,88 @@ If no element is found, return nil."
 (unless (fboundp 'elisp--font-lock-flush-elisp-buffers)
   ;; In Emacs≥25, (via elisp--font-lock-flush-elisp-buffers and a few others)
   ;; we automatically highlight macros.
-  (add-to-list 'emacs-lisp-mode-hook #'seq--activate-font-lock-keywords))
+  (add-hook 'emacs-lisp-mode-hook #'seq--activate-font-lock-keywords))
+
+;;;; ChangeLog:
+
+;; 2015-10-20  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.11
+;; 
+;; 	* packages/seq/seq.el:
+;; 	* packages/seq/tests/seq-tests.el: Update.
+;; 
+;; 2015-09-18  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.9
+;; 
+;; 	* packages/seq/seq.el: Update to version 1.9.
+;; 	* packages/seq/tests/seq-tests.el: Update to version 1.9.
+;; 
+;; 2015-07-09  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.8
+;; 
+;; 	* packages/seq/seq.el: Update to version 1.8.
+;; 	* packages/seq/tests/seq-tests.el: Update to version 1.8.
+;; 
+;; 2015-05-15  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.7
+;; 
+;; 	* packages/seq/seq.el: Update to version 1.7.
+;; 	* packages/seq/tests/seq-tests.el: Update to version 1.7.
+;; 
+;; 2015-04-27  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	* packages/seq/seq.el: Update seq.el to version 1.5.
+;; 
+;; 2015-04-15  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	seq.el update
+;; 
+;; 	* packages/seq/seq.el: Update seq.el to version 1.4
+;; 	* packages/seq/tests/seq-tests.el: Update seq.el to version 1.4
+;; 
+;; 2015-03-25  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Rephrases a comment in seq.el about the order of the arguments
+;; 
+;; 	* packages/seq/seq.el: Better comment about the order of the arguments
+;; 
+;; 2015-03-09  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.3
+;; 
+;; 	* packages/seq/seq.el: update to version 1.3
+;; 	* packages/seq/tests/seq-tests.el: update to version 1.3
+;; 
+;; 2015-02-11  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.2
+;; 
+;; 	* package/seq/seq.el: Update to version 1.2
+;; 	* packages/seq/tests/seq-tests.el: Update to version 1.2
+;; 
+;; 2015-02-09  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.1.1
+;; 
+;; 	* package/seq/seq.el: Update to version 1.1.1
+;; 	* packages/seq/tests/seq-tests.el: Update to version 1.1.1
+;; 
+;; 2015-02-06  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	Update seq.el to version 1.1
+;; 
+;; 	* packages/seq/seq.el: Update to version 1.1
+;; 	* packages/seq/tests/seq-tests.el: Update to version 1.1
+;; 
+;; 2015-01-14  Nicolas Petton  <nicolas@petton.fr>
+;; 
+;; 	packages/seq: New package
+;; 
+
 
 (provide 'seq)
 ;;; seq.el ends here
