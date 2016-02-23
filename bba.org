@@ -69,6 +69,28 @@ If you are in need enable debugging:
 
 #+END_SRC
 
+* welcome screen
+
+No need for that:
+
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t)
+#+END_SRC
+
+* full screen
+
+Go full screen on OSX in GUI mode:
+
+#+BEGIN_SRC emacs-lisp
+  (when ( and (string-equal system-type "darwin") (display-graphic-p))
+    (set-frame-position nil 0 0)
+    (set-frame-size nil 235 55)
+    )
+
+#+END_SRC
+
+* shell aliases
+
 Some aliases you might want to set in your bash to talk to your Emacs server:
 
 #+BEGIN_SRC sh :tangle no
