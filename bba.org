@@ -257,6 +257,8 @@ For annotated tags prepare message with commit messages since last tag.
 #+BEGIN_SRC emacs-lisp
   (require 'magit)
   (setq magit-last-seen-setup-instructions "1.4.0")
+  (define-key magit-mode-map (kbd "<s-return>") 'ffap)
+
   (add-hook 'git-commit-mode-hook
             (lambda()
               (when (equal "TAG_EDITMSG" (buffer-name))
@@ -553,7 +555,7 @@ Probably the best help to keep track of the not every day used keybindings.
         (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
         (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
         (require 'guide-key)
-        (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-h" "C-x l" "<f9>"))
+        (setq guide-key/guide-key-sequence '("C-x" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>"))
         (setq guide-key/recursive-key-sequence-flag t)
         (setq guide-key/idle-delay 3)
         (guide-key-mode 1)
@@ -2068,6 +2070,7 @@ Some links you might check out:
         (define-key global-map "\C-x\C-b" 'helm-buffers-list)
         (define-key global-map "\C-x\C-k\C-h" 'helm-execute-kmacro)
         (define-key global-map (kbd "C-x r b") 'helm-bookmarks)
+        (define-key global-map (kbd "C-x C-S-f") 'helm-find-files)
         (define-key global-map "\C-cy" 'helm-yas-complete)
         (setq helm-yas-display-key-on-candidate t)
 
