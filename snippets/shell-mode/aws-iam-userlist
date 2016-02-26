@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-iam-userlist
+# key: aws-iam-userlist
+# --
+for user in $(aws --profile=${1:$$(yas-choose-value '("prod" "test"))} iam list-users --query 'Users[*].UserName' --output text); do aws --profile=$1 iam list-access-keys --user-name $user --query \"AccessKeyMetadata[?Status=='Active'].[UserName, AccessKeyId]\" --output text; done $0
