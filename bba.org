@@ -1803,6 +1803,18 @@ Bind shift f3 and shift f4 to previous/next frame.
   (global-set-key (kbd "S-<f4>") 'move-cursor-next-frame)
 #+END_SRC
 
+Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
+
+#+BEGIN_SRC emacs-lisp
+  (defun twist-split ()
+    (interactive)
+    (setq buffer2 (window-buffer (second (window-list))))
+    (if (window-top-child (frame-root-window))
+    (progn (delete-other-windows) (split-window-horizontally))
+    (progn (delete-other-windows) (split-window-vertically)))
+    (set-window-buffer (second (window-list)) buffer2))
+#+END_SRC
+
 * [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
 #+BEGIN_SRC emacs-lisp
       (require 'ipcalc)
