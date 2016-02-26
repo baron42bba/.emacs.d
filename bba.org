@@ -2307,6 +2307,18 @@ we use that as default:
   (global-set-key (kbd "C-M-r") 'isearch-backward)
 #+END_SRC
 
+* Beautifying JSON
+
+#+BEGIN_SRC emacs-lisp
+  (defun beautify-json ()
+  "Use python to prettyprint JSON."
+    (interactive)
+    (let ((b (if mark-active (min (point) (mark)) (point-min)))
+          (e (if mark-active (max (point) (mark)) (point-max))))
+      (shell-command-on-region b e
+       "python -mjson.tool" (current-buffer) t)))
+#+END_SRC
+
 * configure some default values
     [2014-10-02 Thu 00:27]
 
