@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: aws-rds-describe-parameters
+# name: aws-rds-describe-parameters (yank)
 # key: aws-rds-describe-parameters
 # --
 aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} rds describe-db-parameters --db-parameter-group-name ${4:`(yank)`} --query "Parameters[*][ParameterName, ParameterValue]" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

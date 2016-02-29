@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: aws-elb-describe-load-balancer-attributes
+# name: aws-elb-describe-load-balancer-attributes (yank)
 # key: aws-elb-describe-load-balancer-attributes
 # --
 aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} elb describe-load-balancer-attributes --load-balancer-name ${4:`(yank)`} --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
