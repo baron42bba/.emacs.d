@@ -1237,7 +1237,7 @@ html.
   (setq org-src-fontify-natively t)
 #+END_SRC
 
-* cfengine
+* CFEngine
 
 #+BEGIN_SRC emacs-lisp
   ;;   (load-library "cfengine")
@@ -1340,6 +1340,13 @@ for C-c T you can use a file like this one:
   Andreas Gerler <baron@bundesbrandschatzamt.de>
 
   =cut
+#+END_SRC
+
+* Puppet
+[2016-02-29 Mon 16:36]
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.erb$" . rhtml-mode))
 #+END_SRC
 
 * mwheel
