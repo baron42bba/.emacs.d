@@ -77,18 +77,6 @@ No need for that:
   (setq inhibit-startup-screen t)
 #+END_SRC
 
-* full screen
-
-Go full screen on OSX in GUI mode:
-
-#+BEGIN_SRC emacs-lisp
-  (when ( and (string-equal system-type "darwin") (display-graphic-p))
-    (set-frame-position nil 0 0)
-    (set-frame-size nil 235 55)
-    )
-
-#+END_SRC
-
 * shell aliases
 
 Some aliases you might want to set in your bash to talk to your Emacs server:
@@ -482,7 +470,7 @@ snippets for =aws cli= are awesome!
   (define-auto-insert "\\.sh$" ["default-sh.sh" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.pl$" ["default-pl.pl" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.tex$" ["default-tex.tex" ha-autoinsert-yas-expand])
-
+  (define-auto-insert "\\.emacs.d/snippets/[^/]*/" ["default-snippet" ha-autoinsert-yas-expand])
 
 #+END_SRC
 
@@ -510,6 +498,11 @@ From http://emacswiki.org/emacs/Yasnippet
             nil)))
 #+end_src
 
+Default to snippet-mode if we are in a sub directory of snippets:
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
+#+END_SRC
 
 * [[https://github.com/flycheck/flycheck][flycheck]]
 
