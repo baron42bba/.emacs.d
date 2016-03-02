@@ -2218,6 +2218,8 @@ character before any spaces."
   (define-key bba/toggle "s" 'flyspell-mode)
   (define-key bba/toggle "v" 'visual-line-mode)
   (define-key bba/toggle "\S-w" 'which-function-mode)
+
+  (define-key dired-mode-map "/" 'dired-narrow-regexp)
 #+END_SRC
 
 Toggle Whitespace mode on and off.  Whitespace mode causes all hard
