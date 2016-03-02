@@ -11,3 +11,5 @@ archive-contents
 /tramp
 /url/*
 /tldr
+/recentf
+/ido.last
