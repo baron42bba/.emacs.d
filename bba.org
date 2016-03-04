@@ -599,11 +599,15 @@ Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] t
 #+END_SRC
 
 * yaml mode
-#+BEGIN_SRC emacs-lisp
-  ;; load yaml-mode
-  ;; (require 'yaml-mode)
-  ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
+Adjust indentation at work.
+
+#+BEGIN_SRC emacs-lisp
+    ;; load yaml-mode
+    ;; (require 'yaml-mode)
+    ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+  (if (equal "work" (getenv "SYSENV"))
+      (setq yaml-indent-offset 4))
 #+END_SRC
 
 * htmlize
