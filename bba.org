@@ -2364,6 +2364,11 @@ Set grep command options
   (setq grep-command "grep -i -nH -e ")
 #+END_SRC
 
+Give your cursor some context.
+
+#+BEGIN_SRC emacs-lisp
+  (setq scroll-margin 3)
+#+END_SRC
 Confirm quit to avoid hitting C-x C-c by accident.
 
 #+BEGIN_SRC emacs-lisp
