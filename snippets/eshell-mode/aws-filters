@@ -2,4 +2,4 @@
 # name: aws-filters
 # key: awsfil
 # --
---filters "Name=${1:$$(yas-choose-value '("tag:Name" "tag:Type" "instance.group-id" "private-ip-address"))},Values=$2" $0
+--filters "Name=${1:$$(yas-choose-value '("tag:Name" "tag:Project" "tag:Type" "instance.group-id" "private-ip-address"))},Values=$2" $0
