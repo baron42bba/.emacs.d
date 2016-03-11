@@ -2359,6 +2359,32 @@ we use that as default:
   (global-set-key (kbd "C-M-r") 'isearch-backward)
 #+END_SRC
 
+* By indentation
+
+Borrowed from [[https://github.com/Wilfred/.emacs.d][github]]:
+
+[[elisp:(describe-key%20(kbd%20"C-a"))][C-a]] normally moves us to the beginning of the line unconditionally
+with [[elisp:(describe-function%20#'move-beginning-of-line)][move-beginning-of-line]]. This version is more useful, as it moves
+to the first non-whitespace character if we're already at the
+beginning of the line. Repeated use of `C-a' toggles between these two
+positions.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun beginning-of-line-dwim ()
+    "Toggles between moving point to the first non-whitespace character, and
+  the start of the line."
+    (interactive)
+    (let ((start-position (point)))
+      ;; Move to the first non-whitespace character.
+      (back-to-indentation)
+
+      ;; If we haven't moved position, go to start of the line.
+      (when (= (point) start-position)
+        (move-beginning-of-line nil))))
+
+  (global-set-key (kbd "C-a") 'beginning-of-line-dwim)
+#+END_SRC
+
 * Beautifying JSON
 
 #+BEGIN_SRC emacs-lisp
