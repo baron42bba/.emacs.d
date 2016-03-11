@@ -1346,6 +1346,15 @@ for C-c T you can use a file like this one:
   (add-to-list 'auto-mode-alist '("\\.erb$" . rhtml-mode))
 #+END_SRC
 
+* Ruby
+[2016-03-11 Fri 12:18]
+
+Vagrant files are Ruby, so use ruby-mode for them:
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("Vagrantfile" . ruby-mode))
+#+END_SRC
+
 * mwheel
 
 #+BEGIN_SRC emacs-lisp
@@ -2291,7 +2300,8 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "\C-h" 'helm-safari-history)
   (define-key bba/launcher "c" 'helm-calcul-expression)
   (define-key bba/launcher "d" 'ediff-buffers)
-  (define-key bba/launcher "e" 'elfeed)
+  (define-key bba/launcher "e" 'eshell)
+  (define-key bba/launcher "E" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
   (define-key bba/launcher "s" 'shell)
@@ -2537,51 +2547,59 @@ Some nice functions
 
 #+BEGIN_SRC emacs-lisp
 
-    ;;(move-overlay hl-line-overlay
-    ;;            (line-beginning-position) (1+ (line-end-position))
-    ;;            (current-buffer))
+  ;;(move-overlay hl-line-overlay
+  ;;            (line-beginning-position) (1+ (line-end-position))
+  ;;            (current-buffer))
 
-    ;; (set-face-background-pixmap 'default "~/.emacs.d/xemacs-bg.xpm")
-    (set-foreground-color "green")
-    (set-background-color "black")
+  ;; (set-face-background-pixmap 'default "~/.emacs.d/xemacs-bg.xpm")
+  (set-foreground-color "green")
+  (set-background-color "black")
 
-    ;; pos1: goto start of line, start of screen, start of buffer
-    ;; end: goto end of line, end of screen, end of buffer
+  ;; pos1: goto start of line, start of screen, start of buffer
+  ;; end: goto end of line, end of screen, end of buffer
 
-    (global-set-key '[(home)] 'chb-home)
-    (global-set-key '[(end)] 'chb-end)
-    ;;
-    (defun chb-home ()
-    (interactive)
-    (setq zmacs-region-stays t)
-    (if (not (bolp))
-    (beginning-of-line)
-    (if (eq this-command last-command)
-    (cond
-     ((not (= (point) (window-start)))
-      (move-to-window-line 0)
-      (beginning-of-line))
-     (t
-      (goto-char (point-min)))))))
+  (global-set-key '[(home)] 'chb-home)
+  (global-set-key '[(end)] 'chb-end)
+  ;;
+  (defun chb-home ()
+  (interactive)
+  (setq zmacs-region-stays t)
+  (if (not (bolp))
+  (beginning-of-line)
+  (if (eq this-command last-command)
+  (cond
+   ((not (= (point) (window-start)))
+    (move-to-window-line 0)
+    (beginning-of-line))
+   (t
+    (goto-char (point-min)))))))
 
-    (defun chb-end ()
-    (interactive)
-    (setq zmacs-region-stays t)
-    (if (not (eolp))
-    (end-of-line)
-    (if (eq this-command last-command)
-    (cond
-     ((not (= (point) (save-excursion
-                        (move-to-window-line -1)
-                                (end-of-line)
-                                (point))))
-              (move-to-window-line -1)
-              (end-of-line))
-             (t
-              (goto-char (point-max)))))))
+  (defun chb-end ()
+  (interactive)
+  (setq zmacs-region-stays t)
+  (if (not (eolp))
+  (end-of-line)
+  (if (eq this-command last-command)
+  (cond
+   ((not (= (point) (save-excursion
+                      (move-to-window-line -1)
+                              (end-of-line)
+                              (point))))
+            (move-to-window-line -1)
+            (end-of-line))
+           (t
+            (goto-char (point-max)))))))
 
 
 
+
+#+END_SRC
+
+There are a few applications, such as crontab, that require a trailing
+new line. To be safe, always leave a trailing newline.
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default require-final-newline t)
 #+END_SRC
 
 You have to work hard to be lazy.
