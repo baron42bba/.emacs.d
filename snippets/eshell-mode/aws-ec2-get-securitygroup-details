@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-securitygroup-details (yank)
+# key: aws-ec2-get-securitygroup-details
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} ec2 describe-security-groups --group-ids ${4:`(yank)`} $0

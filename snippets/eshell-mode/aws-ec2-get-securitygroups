@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-securitygroups
+# key: aws-ec2-get-securitygroups
+# --
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} ec2 describe-security-groups --query "sort_by(SecurityGroups, &GroupName)[*].[GroupName, GroupId, Description]" --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0
