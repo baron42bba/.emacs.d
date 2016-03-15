@@ -2304,6 +2304,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "E" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
+  (define-key bba/launcher "n" 'neotree)
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "S" 'synonyms)
   (define-key bba/launcher "\C-s" 'helm-swoop)
