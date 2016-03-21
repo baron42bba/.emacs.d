@@ -2271,6 +2271,7 @@ character before any spaces."
   (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "b" 'bba-switch-default-browser)
   (define-key bba/toggle "e" 'eldoc-mode)
+  (define-key bba/toggle "\S-e" 'epoch-view-mode)
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "\S-f" 'follow-mode)
   (define-key bba/toggle "i" 'impatient-mode)
