@@ -2082,7 +2082,9 @@ line or somewhere else.
 #+BEGIN_SRC emacs-lisp
   (defun bba-copy-buffer-name ()
     (interactive)
-    (kill-new (buffer-file-name)))
+    (kill-new (buffer-file-name))
+    (message ( format "stored '%s' in kill-ring" buffer-file-name))
+    )
 #+END_SRC
 
 
@@ -2338,7 +2340,7 @@ function to convert groups of spaces to hard tabs.
   (define-key global-map "\C-c\S-f" (lambda()
                                    (interactive)
                                    (message (buffer-file-name))))
-
+  (define-key global-map (kbd "C-c C-S-f") 'bba-copy-buffer-name)
   (if (<= emacs-major-version 23)
       (progn
         (define-key global-map "\C-cw" (lambda ()
