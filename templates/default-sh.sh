@@ -34,17 +34,17 @@ do
 	    shift # past argument=value
 	    ;;
 	-h|--help)
-	    pod2usage $0
+	    pod2usage \$0
 	    exit
 	    ;;
 	-m|--man)
-	    perldoc $0
+	    perldoc \$0
 	    exit
 	    ;;
 	*)
 	    echo "unknown option $param"
 	    echo
-	    pod2usage $0
+	    pod2usage \$0
 	    exit
 	    ;;
     esac

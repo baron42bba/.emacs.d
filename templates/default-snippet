@@ -1,8 +1,4 @@
 # -*- mode: snippet -*-
-# name: header
-# key: <header
-# --
-# -*- mode: snippet -*-
 # name: ${1:`(insert (buffer-name))`}
 # key: ${2:`(insert (buffer-name))`}
 # --
