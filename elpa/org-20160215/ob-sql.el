@@ -137,7 +137,8 @@ This function is called by `org-babel-execute-src-block'."
 				    (org-babel-process-file-name in-file)
 				    (org-babel-process-file-name out-file)))
 		    ('postgresql (format
-				  "psql --set=\"ON_ERROR_STOP=1\" %s -A -P footer=off -F \"\t\"  %s -f %s -o %s %s"
+				  "%s psql --set=\"ON_ERROR_STOP=1\" %s -A -P footer=off -F \"\t\"  %s -f %s -o %s %s"
+				  (if dbpassword (concat "PGPASSWORD='" dbpassword "'") "")
 				  (if colnames-p "" "-t")
 				  (org-babel-sql-dbstring-postgresql dbhost dbuser database)
 				  (org-babel-process-file-name in-file)
