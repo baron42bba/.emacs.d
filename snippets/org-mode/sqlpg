@@ -1,15 +1,14 @@
 # -*- mode: snippet -*-
-# name: sqlmysql
+# name: sqlpg
 # expand-env: ((yas-indent-line 'fixed))
-# key: sqlmysql
+# key: sqlpg
 # --
 :PROPERTIES:
-:engine: mysql
+:engine: postgresql
 :dbhost: ${1:localhost}
 :dbuser: ${2:user}
 :dbpassword: (concat ${3:bba-db})
-:database: ${4:mysql}
-:cmdline: --protocol=tcp
+:database: ${4:postgres}
 :exports: both
 :END:
 
