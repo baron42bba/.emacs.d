@@ -612,6 +612,8 @@ Adjust indentation at work.
 
 * htmlize
 
+To get syntax highlight for HTML exports:
+
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
@@ -1762,6 +1764,16 @@ Use C-c C-c to run rpmbuild if buffer is spec file.
 
 #+END_SRC
 
+* undo tree
+
+Use undo-tree.
+
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (global-undo-tree-mode))
+
+#+END_SRC
+
 * mode-line menu-bar etc
 
 #+BEGIN_SRC emacs-lisp
@@ -2455,10 +2467,17 @@ Give your cursor some context.
 #+BEGIN_SRC emacs-lisp
   (setq scroll-margin 3)
 #+END_SRC
+
 Confirm quit to avoid hitting C-x C-c by accident.
 
 #+BEGIN_SRC emacs-lisp
   (setq confirm-kill-emacs 'yes-or-no-p)
+#+END_SRC
+
+Confirm suspend to avoid suspending by accident.
+
+#+BEGIN_SRC emacs-lisp
+  (put 'suspend-frame 'disabled t)
 #+END_SRC
 
 Ignore case when completing file names
@@ -2822,8 +2841,10 @@ Some private settings outside this repository are loaded after this configuratio
 Display greetings:
 
 #+BEGIN_SRC emacs-lisp
-  (message "All done, %s!" (user-login-name) )
   (totd)
+  (switch-to-buffer "*Tip of the day*")
+  (delete-other-windows)
+  (message "All done, %s!" (user-login-name) )
 #+END_SRC
 
     [2014-08-27 Wed 11:02]
