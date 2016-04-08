@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: sqlvertica
+# expand-env: ((yas-indent-line 'fixed))
+# key: sqlvertica
+# --
+:PROPERTIES:
+:engine: vertica
+:dbhost: ${1:localhost}
+:dbuser: ${2:user}
+:dbpassword: (concat ${3:bba-db})
+:database: ${4:$2}
+:exports: both
+:END:
+
+(setq $3 "$5")$0
+
+#+BEGIN_SRC sql
+
+#+END_SRC
