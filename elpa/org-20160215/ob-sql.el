@@ -99,6 +99,16 @@ Pass nil to omit that arg."
 	       (when user (concat "-U" user))
 	       (when database (concat "-d" database))))))
 
+(defun org-babel-sql-dbstring-vertica (host port user password database)
+  "Make Vertica command line args for database connection. Pass nil to omit that arg."
+  (combine-and-quote-strings
+   (delq nil
+	 (list (when host     (concat "-h" host))
+	       (when port     (format "-p%d" port))
+	       (when user     (concat "-U" user))
+	       (when password (concat "-w" password))
+	       (when database (concat "-d" database))))))
+
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -144,6 +154,12 @@ This function is called by `org-babel-execute-src-block'."
 				  (org-babel-process-file-name in-file)
 				  (org-babel-process-file-name out-file)
 				  (or cmdline "")))
+		    ('vertica (format "vsql %s -f %s -o %s %s"
+				    (org-babel-sql-dbstring-vertica
+				     dbhost dbport dbuser dbpassword database)
+				    (org-babel-process-file-name in-file)
+				    (org-babel-process-file-name out-file)
+				    (or cmdline "")))
                     (t (error "No support for the %s SQL engine" engine)))))
     (with-temp-file in-file
       (insert
@@ -160,7 +176,8 @@ This function is called by `org-babel-execute-src-block'."
 	(cond
 	  ((or (eq (intern engine) 'mysql)
 	       (eq (intern engine) 'dbi)
-	       (eq (intern engine) 'postgresql))
+	       (eq (intern engine) 'postgresql)
+	       (eq (intern engine) 'vertica))
 	   ;; Add header row delimiter after column-names header in first line
 	   (cond
 	    (colnames-p
