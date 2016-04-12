@@ -27,16 +27,16 @@ $0
 sub main {
 
     my $result = GetOptions (
-			     "help|h"		=> \$params{help},
-			     "verbose|v"        => \$params{verbose},
-			     "man|m"		=> \$params{man}
-			    );
+                             "help|h"           => \\$params{help},
+                             "verbose|v"        => \\$params{verbose},
+                             "man|m"            => \\$params{man}
+                            );
 
     if ( $params{man} ) { pod2usage( -verbose => 2 ); }
 
-    if ( ! ( $server ) || $params{help} )
+    if ( ! ( $params{server} ) || $params{help} )
     {
-	pod2usage(1);
+        pod2usage(1);
     }
 
 

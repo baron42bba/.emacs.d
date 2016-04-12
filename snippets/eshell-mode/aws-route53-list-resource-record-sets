@@ -2,4 +2,4 @@
 # name: aws-route53-list-resource-record-sets (yank)
 # key: aws-route53-list-resource-record-sets
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} route53 list-resource-record-sets --hosted-zone-id ${2:`(yank)`} --query \"ResourceRecordSets[?contains(Name, '$3')].Name\" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} route53 list-resource-record-sets --hosted-zone-id ${2:`(yank)`} --query \"ResourceRecordSets[?contains(Name, '$3')]\" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
