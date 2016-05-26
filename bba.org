@@ -1164,7 +1164,7 @@ taken from http://doc.norang.ca/org-mode.org
         (add-hook 'org-mode-hook
                   (lambda ()
                     (auto-fill-mode)
-                    (flyspell-mode)
+                    (flyspell-mode -1)
                     (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
                     (when (display-graphic-p)
                       (progn
