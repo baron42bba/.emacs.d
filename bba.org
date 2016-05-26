@@ -764,6 +764,16 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 #+END_SRC
 
+** [[https://github.com/stig/ox-jira.el][ox-jira]]
+[2016-05-22 Sun 20:53]
+
+Org-mode export backend for JIRA markup
+
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (require 'ox-jira))
+#+END_SRC
+
 ** Some initial languages we want org-babel to support
 
 #+BEGIN_SRC emacs-lisp
