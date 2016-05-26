@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: lsschemas
+# key: ls-schemas
+# --
+SELECT * FROM schemata;$0

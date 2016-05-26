@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: lsresources
+# key: ls-resources
+# --
+SELECT * FROM RESOURCE_POOLS;$0

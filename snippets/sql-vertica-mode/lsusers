@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: lsusers
+# key: ls-users
+# --
+SELECT * FROM USERS;$0

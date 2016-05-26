@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: lstables
+# key: ls-tables
+# --
+SELECT TABLE_NAME FROM TABLES WHERE TABLE_SCHEMA = '$1';$0
