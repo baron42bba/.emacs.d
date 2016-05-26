@@ -15,6 +15,6 @@
 
 (setq $3 "$5")$0
 
-#+BEGIN_SRC sql
+#+BEGIN_SRC sql-mysql
 
 #+END_SRC

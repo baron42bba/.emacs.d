@@ -504,6 +504,35 @@ Default to snippet-mode if we are in a sub directory of snippets:
   (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
 #+END_SRC
 
+* define some major modes for yasnippets
+[2016-05-25 Wed 10:26]
+
+I use yasnippet for sql a lot.
+Languages differ and I need different templates.
+
+#+BEGIN_SRC emacs-lisp
+  (define-derived-mode sql-oracle-mode sql-mode "OracleSQL"
+    "Major mode for ORACLE SQL"
+    (setq sql-product 'oracle)
+    )
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+    (define-derived-mode sql-vertica-mode sql-mode "VerticaSQL"
+      "Major mode for Vertica"
+      (setq sql-product 'ansi)
+      )
+
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (define-derived-mode sql-mysql-mode sql-mode "MySQL"
+    "Major mode for MySQL"
+    (setq sql-product 'mysql)
+    )
+
+#+END_SRC
+
 * [[https://github.com/flycheck/flycheck][flycheck]]
 
 modified puppet-lint definition to include no-80chars-check and fixed
