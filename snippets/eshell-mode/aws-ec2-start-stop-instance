@@ -2,4 +2,4 @@
 # name: aws-ec2-start-stop-instance (yank)
 # key: ec2-start
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 ${4:$$(yas-choose-value '("start-instances" "stop-instances"))} --instance-ids ${5:`(yank)`} $0
+aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 ${4:$$(yas-choose-value '("start-instances" "stop-instances" "reboot-instances"))} --instance-ids ${5:`(yank)`} $0
