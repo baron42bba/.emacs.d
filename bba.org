@@ -2189,7 +2189,7 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20160217.958")
+                     "~/.emacs.d/elpa/helm-20160530.424")
         (require 'helm)
         (helm-mode 1)
         (global-set-key (kbd "M-y") 'helm-show-kill-ring)
