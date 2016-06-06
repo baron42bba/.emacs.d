@@ -10,7 +10,7 @@ ${2:#+NAME: ${3:`(replace-regexp-in-string "[: ]" "_" (replace-regexp-in-string 
 #+BEGIN_SRC sh ${4::session ${5:client}} :var ${6:HOSTS$(upcase (yas-text))}=$1[,0] :cache ${7:$$(yas-choose-value '("yes" "no"))} :results ${8:$$(yas-choose-value '("verbatim drawer" "table" "list"))}
 $6=($$6)
 
-for INDEX in \`seq 0 1 \$\{#$6[@]\}\`; do
+for INDEX in \$\{!$6[@]\}; do
     echo "----------------------------------------"
     echo \$\{$6[$\{INDEX\}]\}
     echo "----------------------------------------"
