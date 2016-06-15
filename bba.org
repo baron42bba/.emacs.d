@@ -878,16 +878,15 @@ Very useful for repetitive literate devops jobs.
   (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
 
   (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
-
+  (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))
   (if (equal "work" (getenv "SYSENV"))
       (progn
         (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
         (global-set-key (kbd "C-c S-<f6>") '(lambda () (interactive) (find-file "~/workorg/work_archive.org")))
-        (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/workorg/workhours.org")))
         )
     (progn
       (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
-      (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))))
+      ))
 
   (global-set-key (kbd "C-c <f9>") '(lambda () (interactive)
                                       ( if (file-exists-p "~/org/emacs.org")
