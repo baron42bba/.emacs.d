@@ -637,6 +637,10 @@ Adjust indentation at work.
     ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
   (if (equal "work" (getenv "SYSENV"))
       (setq yaml-indent-offset 4))
+  (add-hook 'yaml-mode-hook
+            (lambda()
+              (auto-fill-mode -1)))
+
 #+END_SRC
 
 * htmlize
