@@ -807,6 +807,14 @@ Org-mode export backend for JIRA markup
       (require 'ox-jira))
 #+END_SRC
 
+A little macro to speed things up:
+
+#+BEGIN_SRC emacs-lisp
+  (fset 'bba-org-export-jira-clipboard
+     (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([24 110 115 escape 58 40 115 101 116 113 32 111 114 103 45 101 120 112 111 114 116 45 98 97 98 101 108 45 101 118 97 108 117 97 116 101 32 110 105 108 41 return 3 5 106 106 67108896 14 14 14 23 24 104 escape 119] 0 "%d")) arg)))
+  (define-key org-mode-map "\C-c\S-j" 'bba-org-export-jira-clipboard)
+#+END_SRC
+
 ** Some initial languages we want org-babel to support
 
 #+BEGIN_SRC emacs-lisp
