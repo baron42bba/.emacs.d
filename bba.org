@@ -2764,7 +2764,7 @@ You have to work hard to be lazy.
 
 #+BEGIN_SRC emacs-lisp
   (if (string-equal system-type "darwin")
-   (set-default-font "Monaco 14"))
+   (set-default-font "Menlo 14"))
 #+END_SRC
 
 * dns-mode
