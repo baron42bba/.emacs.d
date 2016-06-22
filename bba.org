@@ -2375,6 +2375,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "E" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
+  (define-key bba/launcher "m" 'bba/multiple-cursors)
   (define-key bba/launcher "n" 'neotree)
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "S" 'synonyms)
@@ -2383,9 +2384,12 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "T" 'twittering-mode)
 
   (define-prefix-command 'bba/keyboard-maestro)
+  (define-prefix-command 'bba/multiple-cursors)
 
   (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssh-to-fqdn-at-point)
 
+  (define-key bba/multiple-cursors "e" 'mc/edit-lines)
+  (define-key bba/multiple-cursors "m" 'mc/mark-all-like-this)
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
