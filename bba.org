@@ -2626,6 +2626,12 @@ Some nice functions
   ;;(paren-activate)
 #+END_SRC
 
+XML indentation
+
+#+BEGIN_SRC emacs-lisp
+  (if (equal "work" (getenv "SYSENV"))
+      (setq nxml-child-indent 4))
+#+END_SRC
 * other stuff
 
 #+BEGIN_SRC emacs-lisp
