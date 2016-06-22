@@ -2928,6 +2928,21 @@ Display greetings:
   (message "All done, %s!" (user-login-name) )
 #+END_SRC
 
+Split and show workhours:
+
+#+BEGIN_SRC emacs-lisp
+  (if (equal "work" (getenv "SYSENV"))
+    (progn (split-window-below)
+           (other-window 1)
+           (find-file "~/org/workhours.org")
+           (beginning-of-buffer)
+           (org-shifttab 3)
+           (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")))
+           (org-beginning-of-line)
+           ))
+
+#+END_SRC
+
     [2014-08-27 Wed 11:02]
 * old config
 
