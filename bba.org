@@ -2445,6 +2445,21 @@ we use that as default:
   (global-set-key (kbd "C-M-r") 'isearch-backward)
 #+END_SRC
 
+Thanks to [[http://ergoemacs.org/emacs/emacs_isearch_by_arrow_keys.html][Xah Lee]] for this:
+
+Here's very convenient keys for isearch.
+
+#+BEGIN_SRC emacs-lisp
+    (define-key isearch-mode-map (kbd "<up>") 'isearch-ring-retreat )
+    (define-key isearch-mode-map (kbd "<down>") 'isearch-ring-advance )
+
+    (define-key isearch-mode-map (kbd "<left>") 'isearch-repeat-backward)
+    (define-key isearch-mode-map (kbd "<right>") 'isearch-repeat-forward)
+
+    (define-key minibuffer-local-isearch-map (kbd "<left>") 'isearch-reverse-exit-minibuffer)
+    (define-key minibuffer-local-isearch-map (kbd "<right>") 'isearch-forward-exit-minibuffer)
+#+END_SRC
+
 * By indentation
 
 Borrowed from [[https://github.com/Wilfred/.emacs.d][github]]:
