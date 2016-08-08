@@ -10,10 +10,11 @@
 :dbpassword: (concat ${3:bba-db})
 :database: ${4:$2}
 :exports: both
+:prologue: "\a"
 :END:
 
 (setq $3 "$5")$0
 
-#+BEGIN_SRC sql-vertica
-
+#+BEGIN_SRC sql
+\a
 #+END_SRC
