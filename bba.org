@@ -33,7 +33,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
     load-path))
 
 
-  (add-to-list 'load-path "~/.emacs/elpa/org-20150629")
+  (add-to-list 'load-path "~/.emacs/elpa/org-20160711")
 
   ;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
   ;; Load the rest of the packages
@@ -2312,6 +2312,7 @@ combine key strokes to access commands even faster.
   (key-chord-define-global "xb" 'ido-switch-buffer)
   (key-chord-define-global "xf" 'ido-find-file)
   (key-chord-define-global "xx" 'helm-M-x)
+  (key-chord-define org-mode-map "TT" 'org-set-tags)
   (if (>= emacs-major-version 24)
       (progn
         ))
@@ -2850,12 +2851,13 @@ not in the public git emacs configuration.
 - regexp-search-ring
 - last-kbd-macro
 - kmacro-ring
+- shell-command-history
 
 all in your history.
 
 #+BEGIN_SRC emacs-lisp
   (savehist-mode 1)
-  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring))
+  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history))
   (setq kmacro-ring-max 42)
   (setq history-delete-duplicates t)
   (if (equal "work" (getenv "SYSENV"))
