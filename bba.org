@@ -1976,6 +1976,31 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 
 #+END_SRC
 
+* toggle fullscreen mode
+[2016-06-22 Wed 14:23]
+
+toggle full screen with super return. display battery status in
+fullscreen mode. disable scroll bar in fullscreen mode.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-toggle-fullscreen()
+    "toggle fullscreen mode"
+    (interactive)
+    (if (equal 'fullboth (frame-parameter nil 'fullscreen))
+        (progn (set-frame-parameter nil 'fullscreen 'maximized)
+               (display-battery-mode -1)
+               (display-time-mode -1)
+               (scroll-bar-mode 1)
+               )
+      (progn (set-frame-parameter nil 'fullscreen 'fullboth)
+             (display-battery-mode 1)
+             (display-time-mode 1)
+             (scroll-bar-mode -1)
+             )
+        )
+    )
+  (global-set-key (kbd "s-<return>") 'bba-toggle-fullscreen)
+#+END_SRC
 * [[http://www.howardism.org/Technical/Emacs/eshell-fun.html][eshell-here]]
 Thanks to Howard Abrams.
 modified because current version lacks function have
