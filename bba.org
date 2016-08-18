@@ -459,6 +459,7 @@ snippets for =aws cli= are awesome!
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
   (yas-global-mode 1)
+  (setq yas-indent-line nil)
   (auto-insert-mode 1)
   (setq auto-insert-directory "~/.emacs.d/templates")
   (define-key global-map "\C-cy" 'yas-insert-snippet)
