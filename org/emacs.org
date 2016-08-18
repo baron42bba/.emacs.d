@@ -1,96 +1,141 @@
 #+STARTUP: showall
 * Shortcuts
 ** commands
-|-------------------+-------------------------------------------------------------------------------------------|
-| Shortcut          | Description                                                                               |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-c F5            | org/notes.org                                                                             |
-| C-c F6            | org/work.org                                                                              |
-| C-c F8            | org/workhours.org                                                                         |
-| C-c F9            | org/emacs.org                                                                             |
-|-------------------+-------------------------------------------------------------------------------------------|
-| F9 c              | calendar                                                                                  |
-| F9 I              | bh/punch-in                                                                               |
-| F9 O              | bh/punch-out                                                                              |
-| F9 t              | bh/insert-inactive-timestamp                                                              |
-| F9 T              | bh/toggle-insert-inactive-timestamp                                                       |
-|-------------------+-------------------------------------------------------------------------------------------|
-| F3                | previous-buffer                                                                           |
-| F4                | next-buffer                                                                               |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-c t f           | toggle auto-fill-mode                                                                     |
-| C-c t i           | toggle impatient-mode                                                                     |
-| C-c t p           | toggle smartparens-mode                                                                   |
-| C-c t s           | toggle flyspell-mode                                                                      |
-| C-c t W           | toggle which-function-mode                                                                |
-| C-c t w           | toggle whitespace-mode                                                                    |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-x l b           | browse-url-at-point                                                                       |
-| C-x l c           | calculator                                                                                |
-| C-x l d           | ediff-buffers                                                                             |
-| C-x l i           | ielm                                                                                      |
-| C-x l s           | shell                                                                                     |
-| C-x l S           | synonyms                                                                                  |
-| C-x l t           | git-timemachine                                                                           |
-|-------------------+-------------------------------------------------------------------------------------------|
-| M-p               | move current line up                                                                      |
-| M-n               | move current line down                                                                    |
-|-------------------+-------------------------------------------------------------------------------------------|
-| F11               | org-clock-goto                                                                            |
-| C-F11             | org-clock-in                                                                              |
-| F12               | org-agenda                                                                                |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-c a             | org-agenda                                                                                |
-| C-c c             | org-capture                                                                               |
-| C-c l             | org-store-link                                                                            |
-| C-c .             | prompt for date and insert timestamp                                                      |
-| C-u C-c .         | like C-c . but insert date and time format                                                |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-u M-!           | shell command and output to current position.                                             |
-| M-\vert           | shell-command-on-region    Execute string COMMAND in inferior shell with region as input. |
-| M-:               | eval expression. for oneliners                                                            |
-| M-^               | joins the current line with the line above it, removing whitespace in the process.        |
-| C-x v =           | runs the command vc-diff for the current file                                             |
-| C-x v g           | vc-annotate                                                                               |
-| C-x 5 0           | close window while in emacs is in deamon mode.                                            |
-|                   | auto-fill-mode and set variable fill-column to 76                                         |
-| C-q               | quoted-insert. Read next input character and insert it. eg insert <tab>                   |
-|-------------------+-------------------------------------------------------------------------------------------|
-| M-{               | move paragraph backward                                                                   |
-| M-}               | move paragraph forward                                                                    |
-| M-C-a             | move function backward                                                                    |
-| M-C-e             | move function forward                                                                     |
-| M-C-u             | backward-up-list Move backward out of one level of parentheses.                           |
-| M-C-k             | kill-sexp. Kill the sexp (balanced expression) following point.                           |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-x ^             | grow window taller                                                                        |
-| C-x {             | shrink window narrower                                                                    |
-| C-x }             | grow window wider                                                                         |
-|-------------------+-------------------------------------------------------------------------------------------|
-| M-$               | check spelling of current word                                                            |
-| M-x ispell-region | check spelling of all words in region                                                     |
-| M-x ispell-buffer | check spelling of entire buffer                                                           |
-| C-c ?             | synonyms                                                                                  |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-c y             | yas/insert-snippet                                                                        |
-| C-c b             | cfe-insert-bundle                                                                         |
-| C-c T             | run ~/bin/cfengine_update_testing.sh                                                      |
-| C-c C-w           | fixup-whitespace                                                                          |
-| C-c C-space       | ace-jump-mode C-u ace-jump-char-mode                                                      |
-| C-c f             | tags-search                                                                               |
-| C-c t             | visit-tags-table                                                                          |
-| C-c M-c           | centered-cursor-mode                                                                      |
-| C-x C-x           | Swap point and mark                                                                       |
-| C-u C-space       | Cycle through mark ring                                                                   |
-|-------------------+-------------------------------------------------------------------------------------------|
-| M-g M-d           | magit-diff-unstaged                                                                       |
-| M-g M-s           | magit-status                                                                              |
-| M-g M-b           | magit-branch-manager                                                                      |
-| M-g b             | magit-blame-mode                                                                          |
-|-------------------+-------------------------------------------------------------------------------------------|
-| C-c C-h P         | cperl-perldoc-at-point                                                                    |
-| C-c w             | woman                                                                                     |
-|-------------------+-------------------------------------------------------------------------------------------|
+|----------------------+-------------------------------------------------------------------------------------------|
+| Shortcut             | Description                                                                               |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-c F5               | org/notes.org                                                                             |
+| C-c F6               | org/work.org                                                                              |
+| C-c F8               | org/workhours.org                                                                         |
+| C-c F9               | org/emacs.org                                                                             |
+|----------------------+-------------------------------------------------------------------------------------------|
+| F9 c                 | calendar                                                                                  |
+| F9 I                 | bh/punch-in                                                                               |
+| F9 O                 | bh/punch-out                                                                              |
+| F9 t                 | bh/insert-inactive-timestamp                                                              |
+| F9 T                 | bh/toggle-insert-inactive-timestamp                                                       |
+|----------------------+-------------------------------------------------------------------------------------------|
+| F3                   | previous-buffer                                                                           |
+| F4                   | next-buffer                                                                               |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-c t f              | toggle auto-fill-mode                                                                     |
+| C-c t i              | toggle impatient-mode                                                                     |
+| C-c t p              | toggle smartparens-mode                                                                   |
+| C-c t s              | toggle flyspell-mode                                                                      |
+| C-c t W              | toggle which-function-mode                                                                |
+| C-c t w              | toggle whitespace-mode                                                                    |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x l b              | browse-url-at-point                                                                       |
+| C-x l c              | calculator                                                                                |
+| C-x l d              | ediff-buffers                                                                             |
+| C-x l i              | ielm                                                                                      |
+| C-x l s              | shell                                                                                     |
+| C-x l S              | synonyms                                                                                  |
+| C-x l t              | git-timemachine                                                                           |
+|----------------------+-------------------------------------------------------------------------------------------|
+| M-p                  | move current line up                                                                      |
+| M-n                  | move current line down                                                                    |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x z                | repeat last command                                                                       |
+|----------------------+-------------------------------------------------------------------------------------------|
+| F11                  | org-clock-goto                                                                            |
+| C-F11                | org-clock-in                                                                              |
+| F12                  | org-agenda                                                                                |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-c a                | org-agenda                                                                                |
+| C-c c                | org-capture                                                                               |
+| C-c l                | org-store-link                                                                            |
+| C-c .                | prompt for date and insert timestamp                                                      |
+| C-u C-c .            | like C-c . but insert date and time format                                                |
+| C-c a a l            | org-agenda log for current week. shows completed tasks.                                   |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-u M-!              | shell command and output to current position.                                             |
+| M-\vert              | shell-command-on-region    Execute string COMMAND in inferior shell with region as input. |
+| M-:                  | eval expression. for oneliners                                                            |
+| M-^                  | joins the current line with the line above it, removing whitespace in the process.        |
+| C-x v =              | runs the command vc-diff for the current file                                             |
+| C-x v g              | vc-annotate                                                                               |
+| C-x 5 0              | close window while in emacs is in deamon mode.                                            |
+|                      | auto-fill-mode and set variable fill-column to 76                                         |
+| C-q                  | quoted-insert. Read next input character and insert it. eg insert <tab>                   |
+|----------------------+-------------------------------------------------------------------------------------------|
+| M-{                  | move paragraph backward                                                                   |
+| M-}                  | move paragraph forward                                                                    |
+| M-C-a                | move function backward                                                                    |
+| M-C-e                | move function forward                                                                     |
+| M-C-u                | backward-up-list Move backward out of one level of parentheses.                           |
+| M-C-k                | kill-sexp. Kill the sexp (balanced expression) following point.                           |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-M →                | move to next sibling                                                                      |
+| C-M ←                | move to previous sibling                                                                  |
+| C-M ↑                | move to parent                                                                            |
+| C-M ↓                | move to first child                                                                       |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x ^                | grow window taller                                                                        |
+| C-x {                | shrink window narrower                                                                    |
+| C-x }                | grow window wider                                                                         |
+|----------------------+-------------------------------------------------------------------------------------------|
+| M-$                  | check spelling of current word                                                            |
+| M-x ispell-region    | check spelling of all words in region                                                     |
+| M-x ispell-buffer    | check spelling of entire buffer                                                           |
+| C-c ?                | synonyms                                                                                  |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-c E                | replace the last s-expression with its evaluated result.                                  |
+| C-c y                | yas/insert-snippet                                                                        |
+| C-c b                | cfe-insert-bundle                                                                         |
+| C-c G                | rgrep                                                                                     |
+| C-c T                | run ~/bin/cfengine_update_testing.sh                                                      |
+| C-c C-w              | fixup-whitespace                                                                          |
+| C-c C-space          | ace-jump-mode C-u ace-jump-char-mode                                                      |
+| C-c f                | tags-search                                                                               |
+| C-c t                | visit-tags-table                                                                          |
+| C-c M-c              | centered-cursor-mode                                                                      |
+| C-x C-x              | Swap point and mark                                                                       |
+| C-u C-space          | Cycle through mark ring                                                                   |
+| C-x RET f            | set-buffer-file-encoding-system (convert dos to unix)                                     |
+|----------------------+-------------------------------------------------------------------------------------------|
+| M-g M-d              | magit-diff-unstaged                                                                       |
+| M-g M-s              | magit-status                                                                              |
+| M-g M-b              | magit-branch-manager                                                                      |
+| M-g b                | magit-blame-mode                                                                          |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-c C-h P            | cperl-perldoc-at-point                                                                    |
+| C-c w                | woman                                                                                     |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x (                | kmacro-start-macro                                                                        |
+| C-x )                | kmacro-end-macro                                                                          |
+| C-g                  | keyboard-quit                                                                             |
+| C-x e                | kmacro-end-and-call-macro                                                                 |
+| C-u C-x C-(          | kmacro-start-macro, allows you to append to the end of the last macro                     |
+| C-x C-k r            | apply-macro-to-region-lines                                                               |
+|                      | helm-execute-kmacro                                                                       |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x C-k C-k          | kmacro-end-or-call-macro-repeat                                                           |
+| C-x C-k C-n          | kmacro-cycle-ring-next                                                                    |
+| C-x C-k C-p          | kmacro-cycle-ring-previous                                                                |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x C-k C-i          | kmacro-insert-counter                                                                     |
+| C-x C-k C-c          | kmacro-set-counter                                                                        |
+| C-x C-k C-a          | kmacro-add-counter                                                                        |
+| C-x C-k C-f          | kmacro-set-format                                                                         |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-x C-k n            | kmacro-name-last-macro                                                                    |
+| C-x C-k b            | kmacro-bind-to-key                                                                        |
+|                      | insert-kbd-macro                                                                          |
+| C-x C-k C-e          | kmacro-edit-macro                                                                         |
+| C-x C-k e NAME <RET> | edit-kbd-macro                                                                            |
+| C-x C-k <SPC>        | kmacro-step-edit-macro                                                                    |
+|----------------------+-------------------------------------------------------------------------------------------|
+| <super>-<enter>      | switch to full screen                                                                     |
+|----------------------+-------------------------------------------------------------------------------------------|
+| C-'                  | sp-rewrap-sexp                                                                            |
+| C-c (                | wrap-with-parens                                                                          |
+| C-c )                | sp-unwrap-sexp                                                                            |
+| C-c [                | wrap-with-brackets                                                                        |
+| C-c ]                | sp-backward-unwrap-sexp                                                                   |
+| C-c {                | wrap-with-braces                                                                          |
+|----------------------+-------------------------------------------------------------------------------------------|
+
 ** orgmode Time reporting
    [2014-06-26 Thu 11:44]
 
@@ -118,14 +163,76 @@ for Emacs]] and other [[http://dl.dropboxusercontent.com/u/3968124/blog.html#sec
 *** C-c l opens link
 *** SHIFT TAB toggles headings / full list
 *** C-c C-s for scheduling tasks and using the agenda
+*** org-transpose-table
+    [2015-05-13 Wed 09:52]
+
+#+BEGIN_SRC org
+  ,#+tblname: transpose-example
+  | 1 | 2 | 3 |
+  | 4 | 5 | 6 |
+
+  ,#+srcname: transpose
+  ,#+begin_src emacs-lisp :var table=transpose-example
+    (apply #'mapcar* #'list table)
+  ,#+end_src
+
+  ,#+resname:
+  | 1 | 4 |
+  | 2 | 5 |
+  | 3 | 6 |
+
+#+END_SRC
+*** org table to lookup hostnames
+[2016-05-17 Tue 14:25]
+
+Have hostnames and need the ip addresses?
+
+| hostname       |            ip |
+|----------------+---------------|
+| www.google.com | 216.58.214.68 |
+#+TBLFM: $2='(shell-command-to-string (concat "return_ip " $1))
+
+bash script for =bin/return_ip=:
+
+#+BEGIN_SRC sh
+  #!/bin/bash
+  nslookup $1 | awk '/Address/&&!/#/ {printf $2}'
+
+#+END_SRC
+
+* helm
+** helm grep recursive
+C-x C-S-f -> helm-find-files
+TAB grep C-u RET
+
 * oneliner
 *** (dotimes (i 254) (insert (format "srv%03d.tracking\tIN\tA\t10.20.224.%d\n" (1+ i) (1+ i))))
+
 * log-keyboard-commands
 M-x mwe:open-command-log-buffer
 M-x mwe:log-keyboard-commands
+
+* modify colors
+place point on something and M-x customize-face will auto-suggest the
+faces used.
+
+* org babel sql
+
+take care of your properties section. It must be right after the
+heading. Not after [2016-03-18 Fri 15:12] or you will get an error
+similar to =let: Wrong type argument: stringp, nil=.
+
 * tramp
 
 C-x C-f /sudo::/etc/fstab
 C-x C-f /sudo::user@server
 
 C-x C-f /sudo:ssh-host:file-on-ssh-host
+C-x C-f /ssh:localhost#4000|ssh:10.2.2.4|ssh:10.5.5.5:/etc/nagiosconfigbuilder.yml
+C-x C-f /ssh:10.2.2.4|sudo:root@10.2.2.4:/etc/hosts
+
+eshell:
+
+=cd /ssh:user@fqdn:~=
+=cd /ssh:ubu12\|sudo:ubu12:/etc/=
+=apt-cache policy > #<buffer apt-policy>=
