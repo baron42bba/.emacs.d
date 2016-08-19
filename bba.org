@@ -1702,6 +1702,24 @@ Combine abbrev with Ispell:
 
 #+END_SRC
 
+* [[https://github.com/steckerhalter/sqlformat.el][sqlformat]]
+[2016-08-19 Fri 16:20]
+
+Provides the sqlformat command, which uses the external Python tool
+sqlformat to format SQL in the current buffer.
+
+Be aware that if the buffer is mixed code/SQL then you need to select
+the SQL so that sqlformat only operates on the region, otherwise it
+acts on the whole buffer.
+
+On OS X you might want to run =sudo port install sqlparse= to have
+=sqlformat= available.
+
+#+BEGIN_SRC emacs-lisp
+  (load-file (expand-file-name "~/.emacs.d/lisp/sqlformat.el"))
+
+#+END_SRC
+
 * remove trailing whitespace
     [2014-09-24 Wed 16:56]
 
