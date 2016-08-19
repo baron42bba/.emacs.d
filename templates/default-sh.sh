@@ -17,40 +17,35 @@
  --man,  -m   to get this man page.
  --verbose, -v be more verbose.
 
+=head1 EXAMPLES
+
+  `(upcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))` -p password
+
+
 =cut
 
 
 # parse parameters
+TEMP=\`getopt -o mhvp --long man,help,verbose,password -n '`(downcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`' -- "$@"\`
 
-for param in "$@"
-do
-    case $param in
-	-k|--keep)
-	    KEEP=1
-	    shift # past argument=value
-	    ;;
-	-v|--verbose)
-	    VERBOSE=1
-	    shift # past argument=value
-	    ;;
-	-h|--help)
-	    pod2usage \$0
-	    exit
-	    ;;
-	-m|--man)
-	    perldoc \$0
-	    exit
-	    ;;
-	*)
-	    echo "unknown option $param"
-	    echo
-	    pod2usage \$0
-	    exit
-	    ;;
+while true; do
+    case "\$1" in
+	-p | --password ) PASSWORD="$2"; shift 2 ;;
+	-h | --help ) pod2usage \$0; exit ;;
+	-m | --man ) perldoc \$0; exit ;;
+	-v | --verbose ) VERBOSE=1; shift ;;
+	* ) break ;;
     esac
 done
 
 EXITCODE=0
+
+if [ -z "${PASSWORD}" ]; then
+    read -s -p "Password: " PASSWORD
+    echo
+fi
+
+if [ -z "${PASSWORD}" ]; then pod2usage $0; exit; fi
 
 $0
 
