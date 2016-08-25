@@ -871,6 +871,32 @@ Very useful for repetitive literate devops jobs.
 
 #+END_SRC
 
+
+** copy previous src block
+[2016-08-25 Thu 23:36]
+
+This is helpful in training sessions.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-copy-org-src-block()
+    "copy last org src block and insert it at point."
+    (interactive)
+    (push-mark)
+    (re-search-backward "\#\\+BEGIN_SRC")
+    (set-mark-command nil)
+    (re-search-forward "\#\\+END_SRC")
+    (forward-line)
+    (beginning-of-line)
+    (kill-ring-save 1 1 1)
+    (set-mark-command '1)
+    (set-mark-command '1)
+    (yank)
+    )
+
+  (define-key org-mode-map "\C-c\S-w" 'bba-copy-org-src-block)
+#+END_SRC
+
+
 ** Define some shortcuts to access major org files.
 
 #+BEGIN_SRC emacs-lisp
