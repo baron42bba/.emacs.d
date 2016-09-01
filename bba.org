@@ -737,6 +737,10 @@ It's worth to use Emacs for org-mode alone.
 [[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] and [[http://www.howardism.org/Technical/Emacs/literate-database.html][Literate Database Work]] are only 2 use cases.
 With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's easy to generate beautiful output.
 
+#+BEGIN_SRC emacs-lisp
+  (require 'ox-md nil t)
+#+END_SRC
+
 ** org-plus-contrib
 
 Some extra functionality from the org package repository.
