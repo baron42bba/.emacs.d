@@ -991,18 +991,19 @@ This is helpful in training sessions.
 
 #+BEGIN_SRC emacs-lisp
 
-    (setq org-link-abbrev-alist '(
-    ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
-    ("cpan" . "http://search.cpan.org/search?query=%s&mode=all")
-    ("google" . "http://www.google.com/search?q=")
-    ("gmap" . "http://maps.google.com/maps?q=%s")
-    ("omap" . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
-    ("bmap" . "http://www.bing.com/maps/default.aspx?q=%s&mkt=en&FORM=HDRSC4")
-    ("wiki" . "http://en.wikipedia.org/wiki/")
-    ("rfc" . "http://tools.ietf.org/rfc/rfc%s.txt")
-    ("ads" . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")
-    ))
-    ;; example: [[bmap:space needle]]
+  (setq org-link-abbrev-alist '(
+  ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
+  ("cpan" . "http://search.cpan.org/search?query=%s&mode=all")
+  ("google" . "http://www.google.com/search?q=")
+  ("gmap" . "http://maps.google.com/maps?q=%s")
+  ("omap" . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+  ("bmap" . "http://www.bing.com/maps/default.aspx?q=%s&mkt=en&FORM=HDRSC4")
+  ("wiki" . "http://en.wikipedia.org/wiki/")
+  ("rfc" . "http://tools.ietf.org/rfc/rfc%s.txt")
+  ("ads" . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")
+  ("vertica" . "https://my.vertica.com/docs/7.2.x/HTML/Content/Search/index.htm?q=%s")
+  ))
+  ;; example: [[bmap:space needle]]
 
 #+END_SRC
 
@@ -1321,6 +1322,7 @@ html.
 
 #+BEGIN_SRC emacs-lisp
   (setq org-hide-emphasis-markers t)
+  (setq org-catch-invisible-edits 'smart)
 #+END_SRC
 
 * CFEngine
