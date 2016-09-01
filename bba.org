@@ -597,6 +597,7 @@ Single pipes interfere with org tables. Just go double.
   (add-hook 'org-mode-hook  'hidepw-mode)
   (setq hidepw-pattern "||\\(.*\\)||")
 #+END_SRC
+
 * latex
 
 Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
