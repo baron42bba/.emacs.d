@@ -803,6 +803,19 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 
 #+END_SRC
 
+** [[https://github.com/stig/ob-applescript.el][ob-applescript]]
+[2016-09-27 Tue 09:34]
+
+This module lets you run AppleScript from AppleScript source code
+blocks with Org Babel.
+
+This package is a direct result of attempting to answer a question on
+this [[http://emacs.stackexchange.com/q/26374/10625][emacs.stackexchange.com thread]].
+
+#+BEGIN_SRC emacs-lisp
+  (require 'ob-applescript)
+#+END_SRC
+
 ** [[https://github.com/stig/ox-jira.el][ox-jira]]
 [2016-05-22 Sun 20:53]
 
