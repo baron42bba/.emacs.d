@@ -2700,6 +2700,22 @@ positions.
        "python -mjson.tool" (current-buffer) t)))
 #+END_SRC
 
+* [[http://irreal.org/blog/?p=5585][kill this buffer]]
+[2016-09-26 Mon 13:22]
+
+Kill the current buffer without asking if there is no prefix.
+
+#+BEGIN_SRC emacs-lisp
+  (defun jcs-kill-a-buffer (askp)
+    (interactive "P")
+    (if askp
+        (kill-buffer (funcall completing-read-function
+                              "Kill buffer: "
+                              (mapcar #'buffer-name (buffer-list))))
+      (kill-this-buffer)))
+
+  (global-set-key (kbd "C-x k") 'jcs-kill-a-buffer)
+#+END_SRC
 * configure some default values
     [2014-10-02 Thu 00:27]
 
