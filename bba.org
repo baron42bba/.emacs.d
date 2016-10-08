@@ -914,6 +914,115 @@ This is helpful in training sessions.
   (define-key org-mode-map "\C-c\S-w" 'bba-copy-org-src-block)
 #+END_SRC
 
+** tmux capture-pane
+[2016-10-08 Sat 13:43]
+
+Recently I had to get screen-shots of a ncurses based tool.
+=script=, =gnu screen= and =iterm2= were not very helpful because
+ncurses repositions the cursor and this information get's lost in
+the log files created with them. [[https://tmux.github.io][tmux]] and [[http://www.andre-simon.de/doku/ansifilter/en/ansifilter.php][ansifilter]] came to the
+rescue.
+
+Of course I wanted the screen-shots in my orgmode files.
+
+To make it short you can run a terminal window in standard 80x24 with
+tmux in it. start your tasks and every time you need a screen-shot run
+=bba-org-tmux-capture-pane= in your org notes file.
+You get a src sh code block with the screen-shot. Additionally save
+the below code snippet as =tmuxhardcopy.sh=. Then you have the ANSI
+color version sitting in your =/tmp/= directory.
+
+Of course you will loose the information of what was selected in your
+ncurses tool. But don't worry: Select the start and end point in that
+line of your screen-shot and call =bba-insert-arrows=. Here is an
+example what you will have finally:
+
+#+BEGIN_SRC sh :tangle no
+   ──────────────────────────────────────────────────────────────────────────────
+
+           ┌──────────────────────────────────────────────────────────┐
+           │ Main Menu                                                │
+           │ ┌──────────────────────────────────────────────────────┐ │
+           │ │        1  View Database Cluster State                │ │
+           │ │  ->    2  Connect to Database                   <-   │ │
+           │ │        3  Start Database                             │ │
+           │ │        4  Stop Database                              │ │
+           │ │        5  Restart Vertica on Host                    │ │
+           │ │        6  Configuration Menu                         │ │
+           │ │        7  Advanced Menu                              │ │
+           │ │        8  Help Using the Administration Tools        │ │
+           │ │        E  Exit                                       │ │
+           │ └──────────────────────────────────────────────────────┘ │
+           ├──────────────────────────────────────────────────────────┤
+           │           <  OK  >      <Cancel>      < Help >           │
+           └──────────────────────────────────────────────────────────┘
+#+END_SRC
+
+Here is the code:
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-org-tmux-capture-pane()
+    "capture pane of tmux window and insert it as org-mode sh src block."
+    (interactive)
+    (insert "#+BEGIN_SRC sh")
+    (newline)
+    (insert (shell-command-to-string "tmux capture-pane -eJp | ansifilter"))
+    (shell-command "tmuxhardcopy.sh")
+    (insert "#+END_SRC")
+    (newline)
+    (previous-line 2)
+    (org-edit-special)
+    (delete-trailing-whitespace)
+    (org-edit-src-exit)
+    (next-line 2)
+    )
+#+END_SRC
+
+To capture the raw output from tmux including the ANSI colors and see
+selections I call this script:
+
+#+NAME: tmuxhardcopy.sh
+#+BEGIN_SRC sh :tangle no
+  #!/bin/sh
+  COUNTER=00
+  FILE=/tmp/tmux.hardcopy
+  /opt/local/bin/tmux capture-pane -eJ
+
+  for i in 0{1..9} {10..99}; do
+      if ! [ -e ${FILE}${i} ]; then
+          COUNTER=${i}
+          break
+      fi
+  done
+
+  /opt/local/bin/tmux save-buffer ${FILE}${COUNTER}
+
+#+END_SRC
+
+
+
+** insert arrow
+[2016-10-07 Fri 12:25]
+
+I am using ansifilter to convert ncurses screenshots to ascii only.
+That way I can include them into org files as documentation.
+The downside of this process: I loose the selections.
+As a replacement you can use this function.
+Select the start and end points where you want to have ascii arrows
+and call this function.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-insert-arrows()
+    "insert ascii arrows at start and end of selection."
+    (interactive)
+    (insert "<-")
+    (delete-char 2)
+    (exchange-point-and-mark)
+    (insert "->")
+    (delete-char 2)
+    (exchange-point-and-mark)
+  )
+#+END_SRC
 
 ** Define some shortcuts to access major org files.
 
