@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: lstables
+# key: ls-tables
+# --
+`(pcase sql-product
+       ('mysql (insert-string "SHOW TABLES LIKE "))
+       ('postgres (insert-string "SELECT * FROM pg_catalog.pg_tables WHERE table_name LIKE "))
+       ('vertica (insert-string "SELECT TABLE_NAME FROM TABLES WHERE TABLE_SCHEMA ="))
+       (- (insert-string "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE "))
+       )`'$1';$0
