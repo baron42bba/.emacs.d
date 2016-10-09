@@ -645,6 +645,14 @@ Adjust indentation at work.
 
 #+END_SRC
 
+* highlight indentation
+[2016-10-09 Sun 17:13]
+
+#+BEGIN_SRC emacs-lisp
+  (load-file (expand-file-name "~/.emacs.d/lisp/highlight-indentation.el"))
+  (set-face-background 'highlight-indentation-face "#e3e3d3")
+  (set-face-background 'highlight-indentation-current-column-face "#c3b3b3")
+#+END_SRC
 * htmlize
 
 To get syntax highlight for HTML exports:
@@ -2542,6 +2550,8 @@ character before any spaces."
   (define-key bba/toggle "\S-e" 'epoch-view-mode)
   (define-key bba/toggle "f" 'auto-fill-mode)
   (define-key bba/toggle "\S-f" 'follow-mode)
+  (define-key bba/toggle "h" 'highlight-indentation-mode)
+  (define-key bba/toggle "\S-h" 'highlight-indentation-current-column-mode)
   (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "r" 'rainbow-delimiters-mode)
