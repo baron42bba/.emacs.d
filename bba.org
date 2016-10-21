@@ -1620,7 +1620,7 @@ You may start it at the end of the config file.
 With this you can do /sudo:ssh-host:file-on-ssh-host
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'tramp-default-proxies-alist '(".*" "\`root\'" "/ssh:%h:"))
+  (add-to-list 'tramp-default-proxies-alist '(nil "\\`root\\'" "/ssh:%h:"))
 #+END_SRC
 
 * [[http://www.twmode.sourceforge.net/][twitter]]
