@@ -2786,6 +2786,28 @@ Had to diff files on 2 different servers. What's better then dired and TRAMP?
                   (define-key dired-mode-map "=" 'mkm/ediff-marked-pair)))
 
 #+END_SRC
+
+* Get keychain password
+[2016-10-21 Fri 13:31]
+
+If I’m on OS X, I can fetch passwords etc. from my Keychain. This is
+much more secure than storing them in configuration on disk:
+
+#+BEGIN_SRC emacs-lisp
+  (defun bw/chomp (str)
+    "Chomp leading and tailing whitespace from `str'."
+    (while (string-match "\\`\n+\\|^\\s-+\\|\\s-+$\\|\n+\\'" str)
+      (setq str (replace-match "" t t str))) str)
+
+  (defun bw/get-keychain-password (account-name)
+    "Get `account-name' keychain password from OS X Keychain"
+    (interactive "sAccount name: ")
+    (when (executable-find "security")
+      (bw/chomp
+       (shell-command-to-string
+        (concat
+         "security find-generic-password -wa "
+         account-name)))))
 #+END_SRC
 
 * configure some default values
@@ -2988,6 +3010,22 @@ XML indentation
 
 
 
+#+END_SRC
+
+Make the window title display the full path of the file I’m currently editing:
+
+#+BEGIN_SRC emacs-lisp
+  (when (display-graphic-p)
+    (setq frame-title-format
+          '((:eval (if (buffer-file-name)
+                       (abbreviate-file-name (buffer-file-name))
+                     "%b")))))
+#+END_SRC
+
+sRGB display fixes
+
+#+BEGIN_SRC emacs-lisp
+(setq ns-use-srgb-colorspace t)
 #+END_SRC
 
 There are a few applications, such as crontab, that require a trailing
