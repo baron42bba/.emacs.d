@@ -2778,7 +2778,14 @@ Had to diff files on 2 different servers. What's better then dired and TRAMP?
                                        (dired-get-filename))) t))))
              (t (error "mark no more than 2 files")))))
 
-  (define-key dired-mode-map "=" 'mkm/ediff-marked-pair)
+
+
+      (add-hook 'dired-mode-hook
+                (lambda ()
+                  ;; The 'ls' executable requires the Gnu version on the Mac
+                  (define-key dired-mode-map "=" 'mkm/ediff-marked-pair)))
+
+#+END_SRC
 #+END_SRC
 
 * configure some default values
@@ -2930,6 +2937,7 @@ XML indentation
   (if (equal "work" (getenv "SYSENV"))
       (setq nxml-child-indent 4))
 #+END_SRC
+
 * other stuff
 
 #+BEGIN_SRC emacs-lisp
