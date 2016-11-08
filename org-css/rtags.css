@@ -1,0 +1,224 @@
+
+* {
+    font-family: "Georgia";
+}
+
+h1, h2, h3, h4, h5, h6,
+h1 span, h2 span, h3 span, h4 span, h5 span, h6 span,
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    font-family: "Arial";
+}
+
+pre, code {
+    font-family: Monaco, "Courier New", Courier;
+}
+
+#text-table-of-contents a {
+    font-family: "Arial";
+}
+
+/* @end */
+
+/* @group Baseline */
+body {
+	font-size: 14px;
+	line-height: 1.5em;
+	padding: 0;
+	margin: 0;
+}
+h1 {
+	margin: 0;
+	font-size: 1.6666666666666667em;
+	line-height: 0.9em;
+	margin-bottom: 0.9em;
+}
+h2 {
+	margin: 0;
+	font-size: 1.5em;
+	line-height: 1em;
+	margin-bottom: 1em;
+}
+h3 {
+	margin: 0;
+	font-size: 1.3333333333333333em;
+	line-height: 1.125em;
+	margin-bottom: 1.125em;
+}
+h4 {
+	margin: 0;
+	font-size: 1.1666666666666667em;
+	line-height: 1.2857142857142858em;
+	margin-bottom: 1.2857142857142858em;
+}
+p, ul, blockquote, pre, td, th, label {
+	margin: 0;
+	font-size: 1em;
+	line-height: 1.5em;
+	margin-bottom: 1.5em;
+}
+p.small, #postamble {
+	margin: 0;
+	font-size: 0.8333333333333334em;
+	line-height: 1.8em;
+	margin-bottom: 1.8em;
+}
+table {
+	border-collapse: collapse;
+	margin-bottom: 1.5em;
+}
+/* @end */
+
+/* @group Layout */
+
+#content {
+	width: 70em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* #header {
+	height: 10em;
+}
+*/
+
+#table-of-contents {
+	width: 15em;
+	float: left;
+	overflow: auto;
+}
+
+/* #main { */
+div.outline-2 {
+        width: 52em;
+	float: right;
+	/* The lines below are useful if the "main" div isn't available and
+	   div.outline-2 has to be used. */
+	position: relative;
+}
+
+#postamble {
+	clear: both;
+	text-align: center;
+}
+
+div.outline-2 pre {
+    width: 40em;
+    overflow: auto;
+}
+
+/* @end */
+
+/* @group Header */
+
+h1.title {
+	margin-top: 10px;
+	text-align: center;
+}
+
+h1.title {
+	font-size: 3em;
+	font-weight: bold;
+
+	margin-bottom: 0.8em;
+}
+
+/* @end */
+
+/* @group Org Keywords */
+
+.todo {
+	color: red;
+}
+
+.done {
+	color: green;
+}
+
+.tag {
+	color: blue;
+	text-transform: lowercase;
+	/* This will be obscured by the surrounding span tag, so blank everything. */
+	background: #fff;
+	border: none;
+	/* position: relative;
+	text-align: right;
+	right: 1em; */
+}
+
+.timestamp {
+}
+
+.timestamp-kwd  {
+	/* keyword associated with a time stamp, like SCHEDULED */
+}
+
+.target {
+	/* target for links */
+}
+
+/* @end */
+
+/* @group Table of Contents */
+
+#table-of-contents h2 {
+	letter-spacing: -0.1em;
+}
+
+#table-of-contents ul,
+#table-of-contents ol {
+    padding-left: 1em;
+}
+
+/* @end */
+
+/* @group Outline Level 2 */
+
+.outline-2 h2 {
+    background: #ffc;
+    border-bottom: 1px solid #ccc;
+}
+
+.outline-2 h2, .outline-2 h3 {
+    letter-spacing: -0.05em;
+}
+
+.outline-2 {
+	padding: 5px;
+	/* margin-bottom: 10px; */
+	/* border-top: 1px solid #ccc; */
+}
+
+/* @end */
+
+td {
+	border: 1px solid #ccc;
+}
+
+
+h1 span, h2 span, h3 span, h4 span, h5 span, h6 span {
+    background-color: #eee;
+    padding: 2px;
+    border: 1px solid #ccc;
+}
+
+.outline-1, .outline-2, .outline-3, .outline-4, .outline-5, .outline-6 {
+    margin-left: 2em;
+}
+
+a {
+    text-decoration: none;
+    color: #57d; /* TODO: Find a better colour for this. */
+}
+
+a:hover {
+    border-bottom: 1px dotted #57d;
+}
+
+#postamble p {
+    margin: 0px;
+}
+
+.footpara { display: inline; }
+
+.footdef { margin-bottom: 3em; font-size: 80%; }
+

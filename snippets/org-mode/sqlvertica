@@ -7,10 +7,11 @@
 :engine: vertica
 :dbhost: ${1:localhost}
 :dbuser: ${2:user}
-:dbpassword: (concat ${3:bba-db})
+:dbpassword: (if (boundp '${3:bba-db})(concat $3))
 :database: ${4:$2}
 :exports: both
 :dbprologue: "\\a"
+:eval: never-export
 :END:
 
 (setq $3 "$5")$0

@@ -1456,6 +1456,83 @@ html.
   (setq org-catch-invisible-edits 'smart)
 #+END_SRC
 
+** underscore in export
+[2016-10-28 Fri 12:08]
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-export-with-sub-superscripts nil)
+#+END_SRC
+
+** css style html export
+[2016-10-28 Fri 12:21]
+
+run =toggle-org-custom-inline-style= in a org buffer associated with a
+file.
+
+#+BEGIN_SRC emacs-lisp
+  ;; put your css files there
+  (defvar org-theme-css-dir "~/.emacs.d/org-css/")
+
+  (defun toggle-org-custom-inline-style ()
+    (interactive)
+    (let ((hook 'org-export-before-parsing-hook)
+          (fun 'set-org-html-style))
+      (if (memq fun (eval hook))
+          (progn
+            (remove-hook hook fun 'buffer-local)
+            (message "Removed %s from %s" (symbol-name fun) (symbol-name hook)))
+        (add-hook hook fun nil 'buffer-local)
+        (message "Added %s to %s" (symbol-name fun) (symbol-name hook)))))
+
+  (defun org-theme ()
+    (interactive)
+    (let* ((cssdir org-theme-css-dir)
+           (css-choices (directory-files cssdir nil ".css$"))
+           (css (completing-read "theme: " css-choices nil t)))
+      (concat cssdir css)))
+
+  (defun set-org-html-style (&optional backend)
+    (interactive)
+    (when (or (null backend) (eq backend 'html))
+      (let ((f (or (and (boundp 'org-theme-css) org-theme-css) (org-theme))))
+        (if (file-exists-p f)
+            (progn
+              (set (make-local-variable 'org-theme-css) f)
+              (set (make-local-variable 'org-html-head)
+                   (with-temp-buffer
+                     (insert "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!--*/\n")
+                     (insert-file-contents f)
+                     (goto-char (point-max))
+                     (insert "\n/*]]>*/-->\n</style>\n")
+                     (buffer-string)))
+              (set (make-local-variable 'org-html-head-include-default-style)
+                   nil)
+              (message "Set custom style from %s" f))
+          (message "Custom header file %s doesnt exist")))))
+#+END_SRC
+
+** additional org settings
+[2016-11-03 Thu 09:36]
+Thanks to [[https://github.com/dakrone/eos/blob/master/eos-org.org][eos-org]].
+
+Special begin/end of line to skip tags and stars
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-special-ctrl-a/e t)
+#+END_SRC
+
+Special keys for killing a headline
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-special-ctrl-k t)
+#+END_SRC
+
+blank lines are removed when exiting the code edit buffer
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-strip-leading-and-trailing-blank-lines t)
+#+END_SRC
+
 * CFEngine
 
 #+BEGIN_SRC emacs-lisp
@@ -2485,7 +2562,7 @@ combine key strokes to access commands even faster.
 
   (require 'key-chord)
   (key-chord-mode 1)
-  (setq key-chord-two-keys-delay 0.16)
+  (setq key-chord-two-keys-delay 0.26)
   (key-chord-define cfengine3-mode-map ";;" "\C-e;")
   (key-chord-define cfengine3-mode-map ",," "\C-e,")
   (key-chord-define prog-mode-map ";;" "\C-e;")
@@ -3042,6 +3119,13 @@ You have to work hard to be lazy.
   (defalias 'tp 'transpose-paragraphs)
 #+END_SRC
 
+Save whatever’s in the current (system) clipboard before
+replacing it with the Emacs’ text.
+https://github.com/dakrone/eos/blob/master/eos.org
+
+#+BEGIN_SRC emacs-lisp
+  (setq save-interprogram-paste-before-kill t)
+#+END_SRC
 * set theme bba1
 
 [[https://emacsfodder.github.io/emacs-theme-editor/][Emacs Theme Editor]] is a nice tool to define your colors.

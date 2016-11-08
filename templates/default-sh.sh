@@ -19,7 +19,7 @@
 
 =head1 EXAMPLES
 
-  `(upcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))` -p password
+  `(downcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))` -p password
 
 
 =cut
@@ -30,7 +30,7 @@ TEMP=\`getopt -o mhvp --long man,help,verbose,password -n '`(downcase (file-name
 
 while true; do
     case "\$1" in
-	-p | --password ) PASSWORD="$2"; shift 2 ;;
+	-p | --password ) PASSWORD="\$2"; shift 2 ;;
 	-h | --help ) pod2usage \$0; exit ;;
 	-m | --man ) perldoc \$0; exit ;;
 	-v | --verbose ) VERBOSE=1; shift ;;
