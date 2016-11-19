@@ -2714,6 +2714,7 @@ function to convert groups of spaces to hard tabs.
   (define-key global-map "\M-g\M-b" 'magit-branch-manager)
   (define-key global-map "\M-gb" 'magit-blame-popup)
   (define-key global-map "\C-cm" 'magit-status)
+  (global-set-key (kbd "C-c s-m") 'magit-list-repositories)
 
   (define-key global-map "\C-c\S-f" (lambda()
                                    (interactive)
