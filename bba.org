@@ -2766,6 +2766,13 @@ Here's very convenient keys for isearch.
     (define-key minibuffer-local-isearch-map (kbd "<right>") 'isearch-forward-exit-minibuffer)
 #+END_SRC
 
+Adjust mouse speed:
+
+#+BEGIN_SRC emacs-lisp
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
+  (setq mouse-wheel-progressive-speed nil)
+#+END_SRC
+
 * By indentation
 
 Borrowed from [[https://github.com/Wilfred/.emacs.d][github]]:
