@@ -209,7 +209,7 @@ Keep track of your important stuff!
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/async-20160108.1249")
+        (add-to-list 'load-path "~/.emacs.d/elpa/async-20161103.1036")
         (require 'async)
         )
     )
@@ -309,7 +309,7 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20160217.1102")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20151216.1315")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20161116.920")
         (require 'smartparens)
         (smartparens-global-mode 1)
         (defmacro def-pairs (pairs)
