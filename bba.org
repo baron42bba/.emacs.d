@@ -1957,6 +1957,18 @@ On OS X you might want to run =sudo port install sqlparse= to have
 
 #+END_SRC
 
+* [[https://github.com/Trevoke/sqlup-mode.el][sqlup]]
+[2016-11-24 Thu 13:31]
+
+Takes care of doing upper-case for keywords.
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/sqlup-mode-20160911.1911")
+  (require 'sqlup-mode)
+  (add-hook 'sql-mode-hook 'sqlup-mode)
+  (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
+#+END_SRC
+
 * remove trailing whitespace
     [2014-09-24 Wed 16:56]
 
