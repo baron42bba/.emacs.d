@@ -2645,6 +2645,7 @@ character before any spaces."
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "r" 'rainbow-delimiters-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
+  (define-key bba/toggle "\S-s" 'smerge-mode)
   (define-key bba/toggle "t" 'toggle-truncate-lines)
   (define-key bba/toggle "v" 'visual-line-mode)
   (define-key bba/toggle "\S-w" 'which-function-mode)
