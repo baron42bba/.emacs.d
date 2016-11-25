@@ -686,7 +686,7 @@ with [[help:avy-goto-line][avy-goto-line]].
   (define-key global-map (kbd "C-c C-@") 'avy-goto-word-1)
   (define-key global-map (kbd "C-c C-SPC") 'avy-goto-word-1)
   (define-key global-map (kbd "M-g g") 'avy-goto-line)
-
+  (define-key global-map (kbd "C-c C-S-SPC") 'avy-goto-char-timer)
 
 #+END_SRC
 
