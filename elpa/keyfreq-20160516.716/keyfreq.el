@@ -1,5 +1,4 @@
 ;;; keyfreq.el --- track command frequencies
-;; Package-Version: 20150924.2005
 ;; -*- coding: utf-8 -*-
 ;;
 ;; Copyright 2009-2010, 2015 by David Capello
@@ -10,6 +9,10 @@
 ;; Author: Ryan Yeske, Michal Nazarewicz (mina86/AT/mina86.com)
 ;; Maintainer: David Capello, Xah lee
 ;; Created: 2006
+;;
+;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Version: 20160516.716
+;;
 ;;
 ;; Keyfreq is free software; you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by
@@ -74,9 +77,12 @@
 ;;
 ;;; Code:
 
-(if (featurep 'cl-lib)
-    (require 'cl-lib)
-  (require 'cl))
+(if (not (featurep 'cl-lib))
+    (progn
+      (require 'cl)
+      ;; fix conflict name
+      (defalias 'cl-reduce 'reduce))
+  (require 'cl-lib))
 ;; (require 'json)?
 
 (defgroup keyfreq nil
@@ -220,7 +226,7 @@ for each entry with three arguments: number of times command was
 called, percentage usage and the command."
   (let* ((sum (car list))
          (max-len
-          (reduce (lambda (a b) (max a (length (symbol-name (car b)))))
+          (cl-reduce (lambda (a b) (max a (length (symbol-name (car b)))))
                   (cdr list)
                   :initial-value 0)))
     (mapconcat

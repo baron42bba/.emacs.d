@@ -1,9 +1,9 @@
 ;;; ox-jira-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil nil ("ox-jira.el") (22337 64108 292221 0))
+;;;### (autoloads nil nil ("ox-jira.el") (22584 24229 0 0))
 
 ;;;***
 

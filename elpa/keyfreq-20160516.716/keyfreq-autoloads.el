@@ -1,14 +1,15 @@
 ;;; keyfreq-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "keyfreq" "keyfreq.el" (22215 7928 0 0))
+;;;### (autoloads nil "keyfreq" "keyfreq.el" (22581 35909 0 0))
 ;;; Generated autoloads from keyfreq.el
 
 (defvar keyfreq-mode nil "\
 Non-nil if Keyfreq mode is enabled.
-See the command `keyfreq-mode' for a description of this minor mode.
+See the `keyfreq-mode' command
+for a description of this minor mode.
 Setting this variable directly does not take effect;
 either customize it (see the info node `Easy Customization')
 or call the function `keyfreq-mode'.")
@@ -24,7 +25,8 @@ various keyfreq-* functions.
 
 (defvar keyfreq-autosave-mode nil "\
 Non-nil if Keyfreq-Autosave mode is enabled.
-See the command `keyfreq-autosave-mode' for a description of this minor mode.
+See the `keyfreq-autosave-mode' command
+for a description of this minor mode.
 Setting this variable directly does not take effect;
 either customize it (see the info node `Easy Customization')
 or call the function `keyfreq-autosave-mode'.")

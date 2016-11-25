@@ -897,7 +897,6 @@ Very useful for repetitive literate devops jobs.
 
 #+END_SRC
 
-
 ** copy previous src block
 [2016-08-25 Thu 23:36]
 
@@ -1006,8 +1005,6 @@ selections I call this script:
   /opt/local/bin/tmux save-buffer ${FILE}${COUNTER}
 
 #+END_SRC
-
-
 
 ** insert arrow
 [2016-10-07 Fri 12:25]
