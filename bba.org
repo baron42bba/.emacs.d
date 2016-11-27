@@ -1939,6 +1939,49 @@ Combine abbrev with Ispell:
 
 #+END_SRC
 
+* sql
+[2016-11-27 Sun 17:56]
+
+thanks to https://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client
+
+#+BEGIN_SRC emacs-lisp
+  (defun my-sql-connect ()
+    (interactive)
+    (require 'my-password "~/.emacs_secrets.el.gpg")
+    (setq sql-product 'vertica)
+
+    (let ((connection (helm-comp-read
+                       "Select server: "
+                       my-sql-servers-alist
+                       )))
+      (sql-connect connection))
+    (sql-rename-buffer)
+    )
+
+#+END_SRC
+
+your =~/.emacs_secrets.el.gpg= might look like:
+
+#+BEGIN_SRC emacs-lisp :tangle never
+  (setq my-sql-servers-alist
+        '("bbaprd" "bbatst"))
+
+  (setq sql-connection-alist
+        '((bbaprd (sql-product 'vertica)
+                  (sql-server "host42.foo.com")
+                  (sql-user "dbadmin")
+                  (sql-password "foo")
+                  (sql-database "smaatoprd"))
+          (bbatst (sql-product 'vertica)
+                  (sql-server "host42.foo.com")
+                  (sql-user "dbadmin")
+                  (sql-password "foo")
+                  (sql-database "bbatst"))
+          ))
+
+  (provide 'my-password)
+#+END_SRC
+
 * [[https://github.com/steckerhalter/sqlformat.el][sqlformat]]
 [2016-08-19 Fri 16:20]
 
@@ -1957,6 +2000,11 @@ On OS X you might want to run =sudo port install sqlparse= to have
 
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'sql-mode-hook
+            (lambda ()
+              (key-chord-define sql-mode-map "FF" 'sqlformat)))
+#+END_SRC
 * [[https://github.com/Trevoke/sqlup-mode.el][sqlup]]
 [2016-11-24 Thu 13:31]
 
