@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: grants_resourcepool
+# key: grares_
+# --
+SELECT grantee, object_name FROM grants WHERE object_type = 'RESOURCEPOOL' ORDER BY grantee LIMIT 50;

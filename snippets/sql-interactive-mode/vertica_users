@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: vertica_users
+# key: vertu_
+# --
+SELECT user_name,resource_pool,default_roles FROM users ORDER BY 1;
