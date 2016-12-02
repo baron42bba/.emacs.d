@@ -3309,23 +3309,22 @@ not in the public git emacs configuration.
 all in your history.
 
 #+BEGIN_SRC emacs-lisp
-  (savehist-mode 1)
   (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history))
   (setq kmacro-ring-max 42)
   (setq history-delete-duplicates t)
   (if (equal "work" (getenv "SYSENV"))
       (if (file-exists-p "~/workorg")
           (setq savehist-file "~/workorg/emacshistory")
-        )
+	)
     (if (file-exists-p "~/org")
-        (setq savehist-file "~/org/emacshistory")
+	(setq savehist-file "~/org/emacshistory")
       )
     (if (file-exists-p savehist-file)
-        (load-file savehist-file)
-        )
+	(load-file savehist-file)
+	)
 
   )
-
+  (savehist-mode 1)
 #+END_SRC
 
 * start ssh in screen session
