@@ -455,16 +455,17 @@ snippets for =aws cli= are awesome!
 =ha-autoinsert-yas-expand= copied from Howard Abrams.
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path
-               "~/.emacs.d/elpa/yasnippet-20161110.1226")
+	       "~/.emacs.d/elpa/yasnippet-20161110.1226")
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas/reload-all)
   (yas-global-mode 1)
   (setq yas-indent-line nil)
   (auto-insert-mode 1)
   (setq auto-insert-directory "~/.emacs.d/templates")
   (define-key global-map "\C-cy" 'yas-insert-snippet)
     (if (>= emacs-major-version 24)
-        (add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
+	(add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
   (defun ha-autoinsert-yas-expand()
     "Replace text in yasnippet template."
     (yas-expand-snippet (buffer-string) (point-min) (point-max)))
