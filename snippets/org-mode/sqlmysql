@@ -4,12 +4,7 @@
 # key: sqlmysql
 # --
 :PROPERTIES:
-:engine: mysql
-:dbhost: ${1:localhost}
-:dbuser: ${2:user}
-:dbpassword: (concat ${3:bba-db})
-:database: ${4:mysql}
-:cmdline: --protocol=tcp
+:header-args:sql: :engine mysql :dbhost ${1:localhost} :dbuser ${2:user} :dbpassword (concat ${3:bba-db}) :database ${4:mysql} :cmdline --protocol=tcp
 :exports: both
 :END:
 

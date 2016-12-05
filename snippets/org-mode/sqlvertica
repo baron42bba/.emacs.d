@@ -4,13 +4,8 @@
 # key: sqlvertica
 # --
 :PROPERTIES:
-:engine: vertica
-:dbhost: ${1:localhost}
-:dbuser: ${2:user}
-:dbpassword: (if (boundp '${3:bba-db})(concat $3))
-:database: ${4:$2}
+:header-args:sql: :engine: vertica :dbhost: ${1:localhost} :dbuser: ${2:user} :dbpassword: (if (boundp '${3:bba-db})(concat $3)) :database: ${4:$2}
 :exports: both
-:dbprologue: "\\a"
 :eval: never-export
 :END:
 

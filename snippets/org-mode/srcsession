@@ -5,6 +5,6 @@
 # --
 Create a session for Emacs:
 
-#+BEGIN_SRC sh :session ${1:client} :results silent
+#+BEGIN_SRC shell :session ${1:client} :results silent
 ssh $0
 #+END_SRC

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: current_epoch
+# key: epo_
+# --
+SELECT current_epoch, ahm_epoch, last_good_epoch FROM v_monitor.system;

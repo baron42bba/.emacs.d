@@ -2,4 +2,4 @@
 # name: vertica_users
 # key: vertu_
 # --
-SELECT user_name,resource_pool,default_roles FROM users ORDER BY 1;
+SELECT user_name,resource_pool,default_roles FROM v_catalog.users ORDER BY 1;

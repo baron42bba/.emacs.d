@@ -458,6 +458,10 @@ snippets for =aws cli= are awesome!
 	       "~/.emacs.d/elpa/yasnippet-20161110.1226")
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+
+  (if (equal "work" (getenv "SYSENV"))
+      (add-to-list 'yas-snippet-dirs "~/workorg/snippets"))
+
   (yas/reload-all)
   (yas-global-mode 1)
   (setq yas-indent-line nil)
@@ -504,6 +508,12 @@ Default to snippet-mode if we are in a sub directory of snippets:
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
+#+END_SRC
+
+We use lisp in our snippets. So suppress warnings for that:
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
 #+END_SRC
 
 * define some major modes for yasnippets

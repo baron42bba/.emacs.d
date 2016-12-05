@@ -7,7 +7,7 @@
 - $0
 
 ${2:#+NAME: ${3:`(replace-regexp-in-string "[: ]" "_" (replace-regexp-in-string "[][]" "" (replace-regexp-in-string ".*/" "" (org-display-outline-path nil t "/" t))))`-src}}
-#+BEGIN_SRC sh ${4::session ${5:client}} :var ${6:HOSTS$(upcase (yas-text))}=$1 :cache ${7:$$(yas-choose-value '("yes" "no"))} :results ${8:$$(yas-choose-value '("verbatim drawer" "table" "list"))}
+#+BEGIN_SRC shell ${4::session ${5:client}} :var ${6:HOSTS$(upcase (yas-text))}=$1 :cache ${7:$$(yas-choose-value '("yes" "no"))} :results ${8:$$(yas-choose-value '("verbatim drawer" "table" "list"))}
   for i in \$\{$6\}; do
     echo "----------------------------------------"
     echo \$\{i\}

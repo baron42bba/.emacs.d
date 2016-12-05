@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: nodes
+# key: nodes_
+# --
+SELECT * FROM nodes;
