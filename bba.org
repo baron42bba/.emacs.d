@@ -1770,6 +1770,28 @@ To send e-mail messages by SMTP, the following is necessary.
 
 #+END_SRC
 
+Here is an example for sending e-mail via gmail:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (setq
+  send-mail-function 'smtpmail-send-it
+  message-send-mail-function 'smtpmail-send-it
+  user-mail-address "foo@gmail.com"
+  smtpmail-starttls-credentials '(("smtp.gmail.com" "587" nil nil))
+  smtpmail-auth-credentials (expand-file-name "~/.authinfo.gpg")
+  smtpmail-default-smtp-server "smtp.gmail.com"
+  smtpmail-smtp-server "smtp.gmail.com"
+  smtpmail-smtp-service 587
+  smtpmail-debug-info t
+  starttls-extra-arguments nil
+  starttls-gnutls-program "/opt/local/bin/gnutls-cli"
+  starttls-extra-arguments nil
+  starttls-use-gnutls t
+  )
+  (load-library "smtpmail")
+
+#+END_SRC
+
 If you want to use POP to receive e-mail messages, the followings are
 necessary.
 
