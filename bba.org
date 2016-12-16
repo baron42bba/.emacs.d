@@ -1601,6 +1601,11 @@ blank lines are removed when exiting the code edit buffer
   (setq org-src-strip-leading-and-trailing-blank-lines t)
 #+END_SRC
 
+Return on a link breaks the link? Just follow it.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-return-follows-link t)
+#+END_SRC
 * CFEngine
 
 #+BEGIN_SRC emacs-lisp
