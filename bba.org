@@ -2734,6 +2734,26 @@ combine key strokes to access commands even faster.
 
 #+END_SRC
 
+* keyfreq
+[2016-11-23 Wed 13:33]
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/keyfreq-20160516.716")
+  (require 'keyfreq)
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1)
+#+END_SRC
+
+* no-rsi
+[2016-12-06 Tue 10:35]
+
+
+
+#+BEGIN_SRC emacs-lisp
+  (setq type-break-keystroke-threshold '(3600 . 18000))
+  (type-break-mode t)
+#+END_SRC
+
 * aliases
 
 #+BEGIN_SRC emacs-lisp
