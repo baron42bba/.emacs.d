@@ -864,7 +864,8 @@ We are lazy and want to speed up things:
 #+END_SRC
 
 Besides the clipboard we want also an org file in =/tmp/= to attach to
-the jira ticket:
+the jira ticket. Of course some boiler plate for the poor souls who
+never heard of orgmode.
 
 
 #+BEGIN_SRC emacs-lisp
@@ -872,6 +873,14 @@ the jira ticket:
   "export current narrowed view to file in tmp and open a finder window on OS-X."
   (interactive)
   (beginning-of-buffer)
+  (insert "# This file is just plain text called orgmode")
+  (newline)
+  (insert "# https://en.wikipedia.org/wiki/Org-mode")
+  (newline)
+  (insert "# You can open it in any text editor or file reader.")
+  (newline)
+  (insert "# You might want to use Emacs for best experience.")
+  (newline)
   (if (re-search-forward "jira:" nil t 1)
   (if (org-in-regexp org-bracket-link-regexp 1)
       (let ((remove (list (match-beginning 0) (match-end 0)))
@@ -883,7 +892,23 @@ the jira ticket:
     (deactivate-mark)
 	(if (string-equal system-type "darwin")(shell-command "open /tmp/"))
 	)))
+  (beginning-of-buffer)
+  (kill-line 4)
   )
+#+END_SRC
+
+** bba-ox-clip-formatted-copy
+[2016-12-13 Tue 15:29]
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-ox-clip-formatted-copy()
+    "wrapper for ox-clip-formatted-copy to disable org-export-babel-evaluate."
+    (interactive)
+    (let ((org-export-babel-evaluate nil))
+      (ox-clip-formatted-copy (mark) (point)))
+    )
+
+  (define-key org-mode-map "\M-\S-w" 'bba-ox-clip-formatted-copy)
 #+END_SRC
 
 ** Some initial languages we want org-babel to support
