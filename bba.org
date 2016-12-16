@@ -985,6 +985,8 @@ This is helpful in training sessions.
     (set-mark-command '1)
     (set-mark-command '1)
     (yank)
+    (re-search-backward "\#\\+BEGIN_SRC")
+    (forward-line)
     )
 
   (define-key org-mode-map "\C-c\S-w" 'bba-copy-org-src-block)
