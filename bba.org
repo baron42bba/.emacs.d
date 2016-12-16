@@ -2717,7 +2717,7 @@ combine key strokes to access commands even faster.
 
   (require 'key-chord)
   (key-chord-mode 1)
-  (setq key-chord-two-keys-delay 0.26)
+  (setq key-chord-two-keys-delay 0.42)
   (key-chord-define cfengine3-mode-map ";;" "\C-e;")
   (key-chord-define cfengine3-mode-map ",," "\C-e,")
   (key-chord-define prog-mode-map ";;" "\C-e;")
