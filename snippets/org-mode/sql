@@ -2,6 +2,6 @@
 # name: sql
 # key: sql_
 # --
-#+begin_src sql $0
+#+BEGIN_SRC sql $0
 
-#+end_src
+#+END_SRC
