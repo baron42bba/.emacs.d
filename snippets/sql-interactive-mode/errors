@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: errors
+# key: errors_
+# --
+SELECT DISTINCT error_level, message FROM error_messages $0WHERE message ILIKE 'Vertica suggests%';

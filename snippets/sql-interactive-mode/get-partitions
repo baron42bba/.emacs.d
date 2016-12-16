@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: get-partitions
+# key: get-part
+# --
+SELECT * FROM v_monitor.partitions WHERE table_schema = '$1' AND projection_name LIKE '%$2%';$0

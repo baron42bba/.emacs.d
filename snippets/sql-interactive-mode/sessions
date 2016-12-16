@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: sessions
+# key: sess_
+# --
+SELECT * FROM sessions;$0

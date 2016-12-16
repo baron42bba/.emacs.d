@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: storage-containers
+# key: storage-containers
+# --
+SELECT s.node_name,
+       p.table_schema,
+       s.projection_name,
+       count(DISTINCT s.storage_oid) storage_container_count,
+       count(DISTINCT partition_key) partition_count,
+       count(r.rosid) ros_file_count
+FROM storage_containers s
+LEFT OUTER JOIN partitions p ON s.storage_oid = p.ros_id
+JOIN vs_ros r ON r.delid = s.storage_oid
+GROUP BY 1,
+         2,
+         3
+ORDER BY 4 DESC LIMIT 50;$0

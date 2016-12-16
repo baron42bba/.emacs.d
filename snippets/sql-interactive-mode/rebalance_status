@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: rebalance_status
+# key: rebalance_status_
+# --
+SELECT rebalance_method rebalance_method,
+       status,
+       count(*) AS COUNT
+FROM
+  (SELECT rebalance_method,
+          CASE
+	      WHEN (separated_percent = 100
+                    AND transferred_percent = 100) THEN 'Completed'
+	      WHEN (separated_percent <> 0
+                    AND separated_percent <> 100)
+                   OR (transferred_percent <> 0
+		       AND transferred_percent <> 100) THEN 'In Progress'
+	      ELSE 'Queued'
+          END AS status
+   FROM rebalance_projection_status
+   WHERE is_latest) AS tab
+GROUP BY 1,
+         2
+ORDER BY 1,
+         2;$0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: resource-pool-move
+# key: rpmv
+# --
+SELECT * FROM resource_pool_move ORDER BY move_timestamp DESC LIMIT 40;$0
