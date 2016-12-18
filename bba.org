@@ -2993,6 +2993,31 @@ positions.
        "python -mjson.tool" (current-buffer) t)))
 #+END_SRC
 
+* [[http://kitchingroup.cheme.cmu.edu/blog/2015/06/29/Getting-Emacs-to-read-to-me/][words-speak]]
+[2016-12-18 Sun 15:11]
+
+#+BEGIN_SRC emacs-lisp
+  (defvar words-voice "Vicki"
+    "Mac voice to use for speaking.")
+
+  (defun words-speak (&optional text)
+    "Speak word at point or region. Mac only."
+    (interactive)
+    (require 'json)
+    (unless text
+      (setq text (if (use-region-p)
+                     (buffer-substring
+                      (region-beginning) (region-end))
+                   (thing-at-point 'word))))
+    ;; escape some special applescript chars
+    (setq text (replace-regexp-in-string "\\\\" "\\\\\\\\" text))
+    (setq text (replace-regexp-in-string "\"" "\\\\\"" text))
+    (do-applescript
+     (format
+      "say \"%s\" using \"%s\""
+      text
+      words-voice)))
+#+END_SRC
 * [[http://irreal.org/blog/?p=5585][kill this buffer]]
 [2016-09-26 Mon 13:22]
 
