@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pagerduty-clocktable
+# key: pagerduty_
+# --
+$0#+BEGIN: clocktable :maxlevel 2 :narrow 80 :scope agenda-with-archives :tstart "${1:`(org-read-date nil nil "-1mon")`}" :tend "${2:`(org-read-date nil nil "today")`}" :tags "PAGERDUTY" :fileskip0 :formula :link %
+#+END:
