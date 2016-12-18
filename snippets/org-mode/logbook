@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: logbook
+# key: logbook_
+# --
+:LOGBOOK:
+${1:`(yank)`}
+:END:$0
