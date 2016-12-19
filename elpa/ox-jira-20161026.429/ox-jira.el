@@ -92,7 +92,7 @@
     (table-cell . ox-jira-table-cell)
     (table-row . ox-jira-table-row)
     (target . (lambda (&rest args) (ox-jira--not-implemented 'target)))
-    (timestamp . (lambda (&rest args) (ox-jira--not-implemented 'timestamp)))
+    (timestamp . ox-jira-timestamp)
     (underline . ox-jira-underline)
     (verbatim . ox-jira-verbatim)
     (verse-block . (lambda (&rest args) (ox-jira--not-implemented 'verse-block))))
@@ -156,6 +156,12 @@ Assume BACKEND is `jira'."
 CONTENTS is the text with bold markup. INFO is a plist holding
 contextual information."
   (format "*%s*" contents))
+
+(defun ox-jira-timestamp (timestamp contents info)
+  "Transcode BOLD from Org to JIRA.
+CONTENTS is the text with bold markup. INFO is a plist holding
+contextual information."
+  (format "{color:red}%s{color}" (replace-regexp-in-string "[][]" "*" (org-ascii-plain-text (org-timestamp-translate timestamp) info))))
 
 (defun ox-jira-code (code _contents info)
   "Transcode a CODE object from Org to JIRA.
