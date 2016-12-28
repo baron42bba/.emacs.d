@@ -4,7 +4,7 @@
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
 ;; URL: https://github.com/jkitchin/scimax/ox-clip.el
-;; Package-Version: 20161012.1107
+;; Package-Version: 20161106.823
 ;; Version: 0.2
 ;; Keywords: org-mode
 ;; Package-Requires: ((org "8.2") (htmlize "0"))
@@ -57,7 +57,7 @@
   (format "python %s"
 	  (expand-file-name
 	   "html-clip-w32.py"
-	   (file-name-directory (or load-file-name (buffer-file-name)))))
+	   (file-name-directory (or load-file-name (locate-library "ox-clip")))))
   "Absolute path to html-clip-w32.py."
   :group 'ox-clip)
 

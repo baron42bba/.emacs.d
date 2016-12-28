@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "ox-clip" "ox-clip.el" (22563 3827 0 0))
+;;;### (autoloads nil "ox-clip" "ox-clip.el" (22627 36399 0 0))
 ;;; Generated autoloads from ox-clip.el
 
 (autoload 'ox-clip-formatted-copy "ox-clip" "\
