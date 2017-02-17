@@ -337,6 +337,10 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
         (define-key smartparens-mode-map (kbd "C-c )") 'sp-unwrap-sexp)
         (define-key smartparens-mode-map (kbd "C-c [") 'wrap-with-brackets)
         (define-key smartparens-mode-map (kbd "C-c {") 'wrap-with-braces)
+        (define-key smartparens-mode-map (kbd "<C-S-kp-4>") 'sp-beginning-of-sexp)
+        (define-key smartparens-mode-map (kbd "<C-S-kp-6>") 'sp-end-of-sexp)
+        (define-key smartparens-mode-map (kbd "<C-S-kp-8>") 'sp-up-sexp)
+        (define-key smartparens-mode-map (kbd "<C-S-kp-2>") 'sp-down-sexp)
         ))
 #+END_SRC
 
@@ -2807,6 +2811,8 @@ character before any spaces."
   (define-key bba/toggle "\S-f" 'follow-mode)
   (define-key bba/toggle "h" 'highlight-indentation-mode)
   (define-key bba/toggle "\S-h" 'highlight-indentation-current-column-mode)
+  (define-key bba/toggle "\C-h" 'hl-line-mode)
+  (define-key bba/toggle "\M-h" 'highlight-symbol-mode)
   (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "r" 'rainbow-delimiters-mode)
@@ -2821,8 +2827,8 @@ character before any spaces."
 
 duplicate previous line
 
-#+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "s-d") "\C-a\C- \C-n\M-w\C-y")
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (global-set-key (kbd "s-d") "\C-p\C-a\C- \C-n\M-w\C-y")
 #+END_SRC
 
 Toggle Whitespace mode on and off.  Whitespace mode causes all hard
@@ -2860,6 +2866,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "E" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
+  (define-key bba/launcher "l" 'magit-log-buffer-file)
   (define-key bba/launcher "m" 'bba/multiple-cursors)
   (define-key bba/launcher "n" 'neotree)
   (define-key bba/launcher "s" 'shell)
