@@ -951,6 +951,44 @@ never heard of orgmode.
 
 #+END_SRC
 
+** open current directory in finder
+[2017-01-09 Mon 15:18]
+
+Sometimes you need a file finder in the current buffers directory.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-open-file-dir-finder ()
+    "Open the directory of the current file in finder."
+    (interactive)
+    (if (string-equal system-type "darwin")
+	(shell-command (concat "open " (file-name-directory (buffer-file-name))))
+      )
+    )
+
+#+END_SRC
+
+** open current directory in iterm screen
+[2017-02-14 Tue 12:24]
+
+Open current buffers directory in gnu screen in iterm.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-open-file-dir-screen ()
+    "Open the directory of the current file in iterm screen via keyboard maestro."
+    (interactive)
+    (if (string-equal system-type "darwin")
+	(progn
+	  (if (null buffer-file-name)
+	      (kill-new default-directory)
+	      (kill-new (file-name-directory (buffer-file-name))))
+	  (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-cd-to-clipboard\"'")
+	  )
+      )
+    )
+
+
+
+#+END_SRC
 ** Find next and previous =#+BEGIN_SRC sh= block.
 Very useful for repetitive literate devops jobs.
 <C-c> <S-n> then <C-c><C-c> and so on.
@@ -2927,6 +2965,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "l" 'magit-log-buffer-file)
   (define-key bba/launcher "m" 'bba/multiple-cursors)
   (define-key bba/launcher "n" 'neotree)
+  (define-key bba/launcher "o" 'bba-open-file-dir-finder)
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "S" 'synonyms)
   (define-key bba/launcher "\C-s" 'helm-swoop)
@@ -2937,6 +2976,7 @@ function to convert groups of spaces to hard tabs.
   (define-prefix-command 'bba/multiple-cursors)
 
   (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssh-to-fqdn-at-point)
+  (define-key bba/keyboard-maestro "c" 'bba-open-file-dir-screen)
 
   (define-key bba/multiple-cursors "e" 'mc/edit-lines)
   (define-key bba/multiple-cursors "m" 'mc/mark-all-like-this)
