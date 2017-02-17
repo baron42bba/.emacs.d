@@ -33,7 +33,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
     load-path))
 
 
-  (add-to-list 'load-path "~/.emacs/elpa/org-20160711")
+  (add-to-list 'load-path "~/.emacs/elpa/org-20170210")
 
   ;; (add-to-list 'load-path "~/elisp/org-mode/contrib/lisp")
   ;; Load the rest of the packages
@@ -62,7 +62,7 @@ If you are in need enable debugging:
 
 * run in servermode
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'server)
   (unless (server-running-p)
     (server-start))
@@ -73,7 +73,7 @@ If you are in need enable debugging:
 
 No need for that:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq inhibit-startup-screen t)
 #+END_SRC
 
@@ -93,7 +93,7 @@ Some aliases you might want to set in your bash to talk to your Emacs server:
 If running standalone on OSX we need to get some environment variables
 from bash.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setenv "EDITOR" "emacsclient")
 
   (if (string-equal system-type "darwin")
@@ -149,13 +149,13 @@ from bash.
 
 We don't need a =$PAGER= in Emacs:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
      (setenv "PAGER" "cat")
 #+END_SRC
 
 Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right?
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (defalias 'e 'find-file)
     (defalias 'ff 'find-file)
     (defalias 'emacs 'find-file)
@@ -163,7 +163,7 @@ Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]],
 
 Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll’:
 
-  #+BEGIN_SRC elisp
+  #+BEGIN_SRC elisp :tangle yes
     (add-hook 'eshell-mode-hook
               (lambda ()
                 ;; The 'ls' executable requires the Gnu version on the Mac
@@ -175,7 +175,7 @@ Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll
 
 What about =gd= to call the Diff command?
 
-   #+BEGIN_SRC elisp
+   #+BEGIN_SRC elisp :tangle yes
      (defalias 'gd 'magit-diff-unstaged)
      (defalias 'gds 'magit-diff-staged)
    #+END_SRC
@@ -185,7 +185,7 @@ What about =gd= to call the Diff command?
 I like to commit my notes in my org and workorg folders after a days work.
 Keep track of your important stuff!
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   ;; define function to shutdown emacs server instance
   (defun server-shutdown ()
@@ -206,7 +206,7 @@ Keep track of your important stuff!
 #+END_SRC
 
 * async
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/async-20161103.1036")
@@ -217,7 +217,7 @@ Keep track of your important stuff!
 
 * [[http://www.emacswiki.org/emacs/ELPA][ELPA]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa")
@@ -242,7 +242,7 @@ Keep track of your important stuff!
 
 For annotated tags prepare message with commit messages since last tag.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'magit)
   (setq magit-last-seen-setup-instructions "1.4.0")
   (define-key magit-mode-map (kbd "<s-return>") 'ffap)
@@ -267,7 +267,7 @@ For annotated tags prepare message with commit messages since last tag.
 
 focus on the important stuff.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/focus-20160111.522")
@@ -278,7 +278,7 @@ focus on the important stuff.
 
 * fullframe
 open ibuffer and magit-status in fullframe mode.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (if (>= emacs-major-version 24)
         (progn
           (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20160209.2318")
@@ -294,7 +294,7 @@ open ibuffer and magit-status in fullframe mode.
 
 Get undo for your window layout.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (winner-mode 1))
 #+END_SRC
@@ -305,7 +305,7 @@ Enable smart parens in all modes.
 See [[https://github.com/toctan/smartparens][Smartparens on github]].
 Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-pairs]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20160217.1102")
@@ -350,7 +350,7 @@ Highlight delimiters such as parentheses, brackets or braces according
 to their depth.
 But we use it only in graphical mode as text mode lacks color depth.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (when (display-graphic-p)
         (add-to-list 'load-path "~/.emacs.d/elpa/rainbow-delimiters-20150320.17")
@@ -375,7 +375,7 @@ search the web on your fingertips. C-c /.
 |---+-------------|
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (if (>= emacs-major-version 24)
         (progn
           (require 'engine-mode)
@@ -438,7 +438,7 @@ search the web on your fingertips. C-c /.
 * expand-region
     [2015-04-02 Thu 10:32]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20150525.205")
@@ -457,7 +457,8 @@ snippets. Some help for Perl and even for org-mode.
 Thought about using snippets for shell-mode and eshell-mode?
 snippets for =aws cli= are awesome!
 =ha-autoinsert-yas-expand= copied from Howard Abrams.
-#+BEGIN_SRC emacs-lisp
+
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path
 	       "~/.emacs.d/elpa/yasnippet-20161110.1226")
   (require 'yasnippet)
@@ -484,7 +485,7 @@ snippets for =aws cli= are awesome!
 #+END_SRC
 
 From http://emacswiki.org/emacs/Yasnippet
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
     (if (>= emacs-major-version 24)
         (defun yas-shk-helm-prompt (prompt choices &optional display-fn)
           "Use helm to select a snippet. Put this into `yas/prompt-functions.'"
@@ -509,13 +510,13 @@ From http://emacswiki.org/emacs/Yasnippet
 
 Default to snippet-mode if we are in a sub directory of snippets:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
 #+END_SRC
 
 We use lisp in our snippets. So suppress warnings for that:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
 #+END_SRC
 
@@ -525,14 +526,14 @@ We use lisp in our snippets. So suppress warnings for that:
 I use yasnippet for sql a lot.
 Languages differ and I need different templates.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (define-derived-mode sql-oracle-mode sql-mode "OracleSQL"
     "Major mode for ORACLE SQL"
     (setq sql-product 'oracle)
     )
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (define-derived-mode sql-vertica-mode sql-mode "VerticaSQL"
       "Major mode for Vertica"
       (setq sql-product 'ansi)
@@ -540,7 +541,7 @@ Languages differ and I need different templates.
 
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (define-derived-mode sql-mysql-mode sql-mode "MySQL"
     "Major mode for MySQL"
     (setq sql-product 'mysql)
@@ -553,7 +554,7 @@ Languages differ and I need different templates.
 modified puppet-lint definition to include no-80chars-check and fixed
 log-format.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20160218.41")
@@ -606,7 +607,7 @@ Probably the best help to keep track of the not every day used keybindings.
 Hide passwords on the screen from shoulder surfing.
 Single pipes interfere with org tables. Just go double.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (load-file (expand-file-name "~/.emacs.d/lisp/hidepw.el"))
   (add-hook 'org-mode-hook  'hidepw-mode)
   (setq hidepw-pattern "||\\(.*\\)||")
@@ -616,7 +617,7 @@ Single pipes interfere with org tables. Just go double.
 
 Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
@@ -633,7 +634,7 @@ Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] t
 
 * thesaurus
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   ;; The file names are absolute, not relative, locations
   ;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
   (setq synonyms-file        "~/.emacs.d/mthesaur.txt")
@@ -647,7 +648,7 @@ Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] t
 
 Adjust indentation at work.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     ;; load yaml-mode
     ;; (require 'yaml-mode)
     ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
@@ -662,7 +663,7 @@ Adjust indentation at work.
 * highlight indentation
 [2016-10-09 Sun 17:13]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (load-file (expand-file-name "~/.emacs.d/lisp/highlight-indentation.el"))
   (set-face-background 'highlight-indentation-face "#e3e3d3")
   (set-face-background 'highlight-indentation-current-column-face "#c3b3b3")
@@ -671,7 +672,7 @@ Adjust indentation at work.
 
 To get syntax highlight for HTML exports:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (require 'htmlize )
@@ -683,7 +684,7 @@ To get syntax highlight for HTML exports:
 
 * vc-git
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'vc-git)
     (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
 
@@ -694,7 +695,7 @@ To get syntax highlight for HTML exports:
 Replaced the deprecated [[https://github.com/winterTTr/ace-jump-mode][ace-jump-mode]] with [[help:avy-goto-char][avy-goto-char]] and [[help:goto-line][goto-line]]
 with [[help:avy-goto-line][avy-goto-line]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path "~/.emacs.d/elpa/avy-20160202.2357")
   (require 'avy)
   (define-key global-map (kbd "C-c C-@") 'avy-goto-word-1)
@@ -718,7 +719,7 @@ with [[help:avy-goto-line][avy-goto-line]].
 
 I still like ido-find-file.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (ido-mode t)
   (setq ido-enable-prefix nil
         ido-enable-flex-matching t
@@ -742,7 +743,7 @@ I still like ido-find-file.
 
 * visual-regexp
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (require 'visual-regexp)
@@ -760,7 +761,7 @@ It's worth to use Emacs for org-mode alone.
 [[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] and [[http://www.howardism.org/Technical/Emacs/literate-database.html][Literate Database Work]] are only 2 use cases.
 With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's easy to generate beautiful output.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'ox-md nil t)
 #+END_SRC
 
@@ -768,7 +769,7 @@ With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's e
 
 Some extra functionality from the org package repository.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
     (if (>= emacs-major-version 24)
         (progn
           (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20150831" t)
@@ -793,7 +794,7 @@ javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(l
 #+END_SRC
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'org-protocol)
 
   (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
@@ -834,7 +835,7 @@ blocks with Org Babel.
 This package is a direct result of attempting to answer a question on
 this [[http://emacs.stackexchange.com/q/26374/10625][emacs.stackexchange.com thread]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'ob-applescript)
 #+END_SRC
 
@@ -843,14 +844,14 @@ this [[http://emacs.stackexchange.com/q/26374/10625][emacs.stackexchange.com thr
 
 Org-mode export backend for JIRA markup
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (require 'ox-jira))
 #+END_SRC
 
 We are lazy and want to speed up things:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-org-export-jira-clipboard()
     "narrow to org subtree and store content in jira format in clipboard."
     (interactive)
@@ -871,7 +872,7 @@ the jira ticket. Of course some boiler plate for the poor souls who
 never heard of orgmode.
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-export-jira-org()
   "export current narrowed view to file in tmp and open a finder window on OS-X."
   (interactive)
@@ -903,7 +904,7 @@ never heard of orgmode.
 ** bba-ox-clip-formatted-copy
 [2016-12-13 Tue 15:29]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-ox-clip-formatted-copy()
     "wrapper for ox-clip-formatted-copy to disable org-export-babel-evaluate."
     (interactive)
@@ -916,12 +917,11 @@ never heard of orgmode.
 
 ** Some initial languages we want org-babel to support
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(
-     (sh . t)
      (shell . t)
      (python . t)
      (R . t)
@@ -955,7 +955,7 @@ never heard of orgmode.
 Very useful for repetitive literate devops jobs.
 <C-c> <S-n> then <C-c><C-c> and so on.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'org-mode-hook
             (lambda ()
 
@@ -975,7 +975,7 @@ Very useful for repetitive literate devops jobs.
 
 This is helpful in training sessions.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-copy-org-src-block()
     "copy last org src block and insert it at point."
     (interactive)
@@ -1042,7 +1042,7 @@ example what you will have finally:
 
 Here is the code:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-org-tmux-capture-pane()
     "capture pane of tmux window and insert it as org-mode sh src block."
     (interactive)
@@ -1091,7 +1091,7 @@ As a replacement you can use this function.
 Select the start and end points where you want to have ascii arrows
 and call this function.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-insert-arrows()
     "insert ascii arrows at start and end of selection."
     (interactive)
@@ -1106,7 +1106,7 @@ and call this function.
 
 ** Define some shortcuts to access major org files.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
 
   (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
@@ -1132,7 +1132,7 @@ and call this function.
 
 ** Tag tasks with GTD contexts
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
                (setq org-tag-alist '(("@work" . ?b)
                                      ("@home" . ?h)
                                      ("@errands" . ?e)
@@ -1144,7 +1144,7 @@ and call this function.
 
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   ;; (setq org-clock-persist 'history)
   (org-clock-persistence-insinuate)
@@ -1192,7 +1192,7 @@ and call this function.
 
 ** Define some handy link abbreviations
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   (setq org-link-abbrev-alist '(
   ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
@@ -1213,7 +1213,7 @@ and call this function.
 ** Some clock stuff.
 taken from http://doc.norang.ca/org-mode.org
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
 
     ;;
@@ -1462,7 +1462,7 @@ to embed videos, they give you the entire iframe HTML code to use, but
 this wouldn’t really be Emacs if we couldn’t make things just a little
 bit easier.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defvar yt-iframe-format
     ;; You may want to change your width and height.
     (concat "<iframe width=\"440\""
@@ -1500,7 +1500,8 @@ exported to other formats as well.
 Use =C-c M= to send a multipart email with .org as text and exported
 html.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-file "~/.emacs.d/elpa/org-plus-contrib-20150831/org-mime.el")
   (add-hook 'org-mode-hook
             (lambda()
               (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
@@ -1508,7 +1509,7 @@ html.
 
 ** org-ellipsis
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (when (display-graphic-p)
     (setq org-ellipsis " ↴↴↴")
     )
@@ -1517,13 +1518,13 @@ html.
 
 ** fontify
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-src-fontify-natively t)
 #+END_SRC
 
 ** hide emphasis-markers
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-hide-emphasis-markers t)
   (setq org-catch-invisible-edits 'smart)
 #+END_SRC
@@ -1531,7 +1532,7 @@ html.
 ** underscore in export
 [2016-10-28 Fri 12:08]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-export-with-sub-superscripts nil)
 #+END_SRC
 
@@ -1541,7 +1542,7 @@ html.
 run =toggle-org-custom-inline-style= in a org buffer associated with a
 file.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   ;; put your css files there
   (defvar org-theme-css-dir "~/.emacs.d/org-css/")
 
@@ -1589,30 +1590,30 @@ Thanks to [[https://github.com/dakrone/eos/blob/master/eos-org.org][eos-org]].
 
 Special begin/end of line to skip tags and stars
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-special-ctrl-a/e t)
 #+END_SRC
 
 Special keys for killing a headline
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-special-ctrl-k t)
 #+END_SRC
 
 blank lines are removed when exiting the code edit buffer
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-src-strip-leading-and-trailing-blank-lines t)
 #+END_SRC
 
 Return on a link breaks the link? Just follow it.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-return-follows-link t)
 #+END_SRC
 * CFEngine
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   ;;   (load-library "cfengine")
      (load-file (expand-file-name "~/.emacs.d/lisp/cfengine.el"))
      (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
@@ -1718,7 +1719,7 @@ for C-c T you can use a file like this one:
 * Puppet
 [2016-02-29 Mon 16:36]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'auto-mode-alist '("\\.erb$" . rhtml-mode))
 #+END_SRC
 
@@ -1727,13 +1728,30 @@ for C-c T you can use a file like this one:
 
 Vagrant files are Ruby, so use ruby-mode for them:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'auto-mode-alist '("Vagrantfile" . ruby-mode))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-ruby-lint()
+  (interactive)
+  "check current buffer via ruby"
+  (let* ((buffer-file-name (or (buffer-file-name) ""))
+           (filename (or (file-remote-p buffer-file-name 'localname)
+			 buffer-file-name))
+	   (command (concat "ruby -c "
+				 (shell-quote-argument filename)))
+	   )
+      (compilation-start (concat "ruby -c "
+				 (shell-quote-argument filename))
+			 nil
+			 (lambda (_) (format "*Ruby Validate: %s*" command))
+			 ))
+  )
+#+END_SRC
 * mwheel
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (load-library "mwheel")
   (mwheel-install)
 
@@ -1745,7 +1763,7 @@ Vagrant files are Ruby, so use ruby-mode for them:
 Display an Emacs tip of the day.
 You may start it at the end of the config file.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 (defun totd ()
   (interactive)
   (random t) ;; seed with time-of-day
@@ -1765,7 +1783,7 @@ You may start it at the end of the config file.
 
 * TRAMP
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (load-library "tramp")
   (add-to-list 'tramp-remote-path "~/bin")
   (setq default-tramp-method "sshx")
@@ -1773,13 +1791,19 @@ You may start it at the end of the config file.
 
 With this you can do /sudo:ssh-host:file-on-ssh-host
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'tramp-default-proxies-alist '(nil "\\`root\\'" "/ssh:%h:"))
 #+END_SRC
 
+Use our default socket files
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (if (file-accessible-directory-p "~/.ssh/sockets")
+  (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath=~/.ssh/sockets/ssh.%%C -o ControlPersist=600"))
+#+END_SRC
 * [[http://www.twmode.sourceforge.net/][twitter]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20160207.156")
   (require 'twittering-mode)
   (cond
@@ -1798,7 +1822,7 @@ With this you can do /sudo:ssh-host:file-on-ssh-host
 
 * [[http://www.mew.org][mew]] email
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :eval no :tangle no
   (autoload 'mew "mew" nil t)
   (autoload 'mew-send "mew" nil t)
 
@@ -1902,7 +1926,7 @@ necessary.
 #+END_SRC
 
 * elfeed
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-20150608.13027")
@@ -1914,20 +1938,20 @@ necessary.
 
 * [[http://www.emacswiki.org/emacs/MalyonMode][Mylon]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'malyon)
 #+END_SRC
 
 * TemplateToolkit
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
 
 #+END_SRC
 
 * EPG/GPG
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   ;; Do not use gpg agent when runing in terminal
   (defadvice epg--start (around advice-epg-disable-agent activate)
     (let ((agent (getenv "GPG_AGENT_INFO")))
@@ -1950,9 +1974,43 @@ necessary.
 
 #+END_SRC
 
+list who can decrypt a file:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-epa-list-packets ()
+    "List who can decrypt the current file"
+    (interactive)
+    (let ((bba-epa-filename (buffer-file-name)))
+      (setq bba-epa-packets-buffer (generate-new-buffer "*Packets*"))
+      (set-buffer bba-epa-packets-buffer)
+      (insert (shell-command-to-string (concat "gpg --list-packets " bba-epa-filename))
+      ;; (epg--start context "--list-packets ")
+      )
+   ))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (defun bba-epa-list-packets ()
+    "List who can decrypt the current file"
+    (interactive)
+    (require 'epa)
+    (require 'epg)
+    (let ((bba-epa-filename (buffer-file-name))
+	  (bba-epa-packets-buffer (generate-new-buffer "*Packets*"))
+	  (context (epg-make-context epa-protocol))
+	  (epg-context-output-file context)
+      )
+      (set-buffer bba-epa-packets-buffer)
+      ;; (setf (epg-context-output-file context))
+      (epg--start context (list "--list-packets" bba-epa-filename))
+      (epg-wait-for-completion context)
+      (epg-read-output context)
+   ))
+#+END_SRC
+
 * Perl
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'cperl-mode)
   (fset 'perl-mode 'cperl-mode)
 
@@ -1964,7 +2022,7 @@ necessary.
 
 * auto-completion
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20160107.8")
   (require 'auto-complete-config)
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/elpa/auto-complete-20160107.8")
@@ -1980,7 +2038,7 @@ necessary.
 
 Watching [[https://www.youtube.com/watch?v%3DFtieBc3KptU][Emacs For Writers]] by [[https://github.com/incandescentman][Jay Dixit]] I had to configure abbreviations.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq abbrev-file-name "~/org/abbrev_defs")
   (if (file-exists-p abbrev-file-name)
       (quietly-read-abbrev-file))
@@ -1993,7 +2051,7 @@ Combine abbrev with Ispell:
 
 [[http://endlessparentheses.com/ispell-and-abbrev-the-perfect-auto-correct.html][Ispell and Abbrev, the Perfect Auto-Correct]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (global-set-key (kbd "M-$") #'endless/ispell-word-then-abbrev)
 
   (defun endless/simple-get-word ()
@@ -2035,7 +2093,7 @@ Combine abbrev with Ispell:
 #+END_SRC
 
 * syntax-highlighting
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (font-lock-mode)
   (global-font-lock-mode 1)
 
@@ -2097,12 +2155,12 @@ acts on the whole buffer.
 On OS X you might want to run =sudo port install sqlparse= to have
 =sqlformat= available.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (load-file (expand-file-name "~/.emacs.d/lisp/sqlformat.el"))
 
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook 'sql-mode-hook
             (lambda ()
               (key-chord-define sql-mode-map "FF" 'sqlformat)))
@@ -2112,7 +2170,7 @@ On OS X you might want to run =sudo port install sqlparse= to have
 
 Takes care of doing upper-case for keywords.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path "~/.emacs.d/elpa/sqlup-mode-20160911.1911")
   (require 'sqlup-mode)
   (add-hook 'sql-mode-hook 'sqlup-mode)
@@ -2133,7 +2191,7 @@ like these:
     # End:
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (eval-after-load "cfengine3-mode"
     '(add-hook 'cfengine3-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
@@ -2216,7 +2274,7 @@ like these:
 
 Use C-c C-c to run rpmbuild if buffer is spec file.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-build-rpm ()
   "Do rpmbuild -ba, with the current buffers filename."
   (interactive)
@@ -2242,7 +2300,7 @@ Use C-c C-c to run rpmbuild if buffer is spec file.
 
 Use undo-tree.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (global-undo-tree-mode))
 
@@ -2250,7 +2308,7 @@ Use undo-tree.
 
 * mode-line menu-bar etc
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (column-number-mode t)
   (line-number-mode t)
   (setq display-time-24hr-format t)
@@ -2275,7 +2333,7 @@ Keeps track of your writing.
 Includes [[http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests#Flesch_Reading_Ease][Flesch Reading Ease]] and [[http://en.wikipedia.org/wiki/Flesch–Kincaid_readability_test#Flesch.E2.80.93Kincaid_Grade_Level][Flesch Grade Level]].
 With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode-el-and-writing-more-clearly/][Sacha Chua]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (if (>= emacs-major-version 24)
         (progn
           (require 'artbollocks-mode)
@@ -2321,7 +2379,7 @@ With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode
 Bind f3 and f4 to previous/next pane.
 Bind shift f3 and shift f4 to previous/next frame.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun move-cursor-next-pane ()
     "Move cursor to the next pane."
     (interactive)
@@ -2350,7 +2408,7 @@ Bind shift f3 and shift f4 to previous/next frame.
 
 Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun twist-split ()
     (interactive)
     (setq buffer2 (window-buffer (second (window-list))))
@@ -2361,14 +2419,14 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 #+END_SRC
 
 * [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
       (require 'ipcalc)
 
 #+END_SRC
 
 * [[http://www.emacswiki.org/emacs/RecentFiles][RecentFiles]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (require 'recentf)
   (recentf-mode 1)
   (setq recentf-max-saved-items 200
@@ -2378,7 +2436,7 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 #+END_SRC
 
 * insert-date function
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun insert-date ()
   "Insert the current date"
   (interactive)
@@ -2400,7 +2458,7 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 toggle full screen with super return. display battery status in
 fullscreen mode. disable scroll bar in fullscreen mode.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-toggle-fullscreen()
     "toggle fullscreen mode"
     (interactive)
@@ -2426,7 +2484,7 @@ window-total-height.
 
 Bound to =C-X l !=
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun eshell-here ()
     "Opens up a new shell in the directory associated with the
   current buffer's file. The eshell is renamed to match that
@@ -2494,7 +2552,7 @@ Bound to =C-X l !=
 
 Use =C-c E= to evaluate and replace the last s-expression.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba/eval-last-sexp-replace ()
     "replace the last s-expression with its evaluated result"
     (interactive)
@@ -2506,7 +2564,7 @@ Use =C-c E= to evaluate and replace the last s-expression.
 #+END_SRC
 
 * goto-match-paren
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
       (defun goto-match-paren (arg)
         "Go to the matching parenthesis if on parenthesis, otherwise insert %.
       vi style of % jumping to matching brace."
@@ -2521,7 +2579,7 @@ Use =C-c E= to evaluate and replace the last s-expression.
 * safe hash bang files executable
 safe files with #! in first line as user executable.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-hook `after-save-hook
             #'(lambda ()
                 (if (not
@@ -2557,7 +2615,7 @@ safe files with #! in first line as user executable.
 
 =M-p= and =M-n= to move current line up or down.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba/move-line (n)
     "Move the current line up or down by N lines."
     (interactive "p")
@@ -2590,7 +2648,7 @@ safe files with #! in first line as user executable.
 Sometimes you need the filename of your current buffer on the command
 line or somewhere else.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-copy-buffer-name ()
     (interactive)
     (kill-new (buffer-file-name))
@@ -2604,7 +2662,7 @@ line or somewhere else.
 Configure [[https://github.com/leoliu/ggtags][ggtags]] and [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]] to use [[https://www.gnu.org/software/global/][GNU Global]].
 If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20151214.1344" t)
@@ -2639,7 +2697,7 @@ Some links you might check out:
   Stack Exchange]]
 - [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path
@@ -2685,7 +2743,7 @@ Some links you might check out:
 
 * helm-descbinds
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20160108.1947")
@@ -2699,7 +2757,7 @@ Some links you might check out:
 
 switch default browser between eww and default.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-switch-default-browser ()
       "switch between default browser and eww"
     (interactive)
@@ -2716,7 +2774,7 @@ switch default browser between eww and default.
 
 combine key strokes to access commands even faster.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20151209.104")
 
   (require 'key-chord)
@@ -2741,7 +2799,7 @@ combine key strokes to access commands even faster.
 * keyfreq
 [2016-11-23 Wed 13:33]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path "~/.emacs.d/elpa/keyfreq-20160516.716")
   (require 'keyfreq)
   (keyfreq-mode 1)
@@ -2753,14 +2811,14 @@ combine key strokes to access commands even faster.
 
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq type-break-keystroke-threshold '(3600 . 18000))
   (type-break-mode t)
 #+END_SRC
 
 * aliases
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defalias 'ts 'transpose-sentences)
   (defalias 'tp 'transpose-paragraphs)
   (defalias 'om 'org-mode)
@@ -2772,7 +2830,7 @@ combine key strokes to access commands even faster.
 
 Thanks to Marcin Borkowski for this code snippet.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 (defun smart-self-insert-punctuation (count)
   "If COUNT=1 and the point is after a space, insert the relevant
 character before any spaces."
@@ -2789,7 +2847,7 @@ character before any spaces."
 #+END_SRC
 
 * key bindings
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
@@ -2837,7 +2895,7 @@ characters in a different color.  There is also an untabify function
 to convert hard tabs to the appropriate number of spaces, and a tabify
 function to convert groups of spaces to hard tabs.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (define-key bba/toggle "w" 'whitespace-mode)
 
   (setq whitespace-display-mappings
@@ -2849,7 +2907,7 @@ function to convert groups of spaces to hard tabs.
           ))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
 
   (define-prefix-command 'bba/launcher)
@@ -2933,7 +2991,7 @@ function to convert groups of spaces to hard tabs.
 =isearch-forward-regexp= is much more useful than =isearch-forward= so
 we use that as default:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (global-set-key (kbd "C-s") 'isearch-forward-regexp)
   (global-set-key (kbd "C-r") 'isearch-backward-regexp)
   (global-set-key (kbd "C-M-s") 'isearch-forward)
@@ -2944,7 +3002,7 @@ Thanks to [[http://ergoemacs.org/emacs/emacs_isearch_by_arrow_keys.html][Xah Lee
 
 Here's very convenient keys for isearch.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (define-key isearch-mode-map (kbd "<up>") 'isearch-ring-retreat )
     (define-key isearch-mode-map (kbd "<down>") 'isearch-ring-advance )
 
@@ -2957,7 +3015,7 @@ Here's very convenient keys for isearch.
 
 Adjust mouse speed:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
   (setq mouse-wheel-progressive-speed nil)
 #+END_SRC
@@ -2990,7 +3048,7 @@ positions.
 
 * Beautifying JSON
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun beautify-json ()
   "Use python to prettyprint JSON."
     (interactive)
@@ -3003,7 +3061,7 @@ positions.
 * [[http://kitchingroup.cheme.cmu.edu/blog/2015/06/29/Getting-Emacs-to-read-to-me/][words-speak]]
 [2016-12-18 Sun 15:11]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defvar words-voice "Vicki"
     "Mac voice to use for speaking.")
 
@@ -3030,7 +3088,7 @@ positions.
 
 Kill the current buffer without asking if there is no prefix.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun jcs-kill-a-buffer (askp)
     (interactive "P")
     (if askp
@@ -3047,7 +3105,7 @@ Kill the current buffer without asking if there is no prefix.
 
 Had to diff files on 2 different servers. What's better then dired and TRAMP?
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun mkm/ediff-marked-pair ()
      "Run ediff-files on a pair of files marked in dired buffer"
      (interactive)
@@ -3092,7 +3150,7 @@ Had to diff files on 2 different servers. What's better then dired and TRAMP?
 If I’m on OS X, I can fetch passwords etc. from my Keychain. This is
 much more secure than storing them in configuration on disk:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bw/chomp (str)
     "Chomp leading and tailing whitespace from `str'."
     (while (string-match "\\`\n+\\|^\\s-+\\|\\s-+$\\|\n+\\'" str)
@@ -3114,121 +3172,121 @@ much more secure than storing them in configuration on disk:
 
 Specify printing format
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq ps-paper-type 'a4)
 #+END_SRC
 
 compilation output
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq compilation-scroll-output 'first-error)
 #+END_SRC
 
 Set ispell dictionary
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
    (setq ispell-dictionary "english")
 #+END_SRC
 
 Set shell for M-| command
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq shell-file-name "/bin/bash")
 #+END_SRC
 
 Set Shell used by TeX
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq tex-shell-file-name "/bin/bash")
 #+END_SRC
 
 Set grep command options
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq grep-command "grep -i -nH -e ")
 #+END_SRC
 
 Give your cursor some context.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq scroll-margin 3)
 #+END_SRC
 
 Confirm quit to avoid hitting C-x C-c by accident.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq confirm-kill-emacs 'yes-or-no-p)
 #+END_SRC
 
 Confirm suspend to avoid suspending by accident.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (put 'suspend-frame 'disabled t)
 #+END_SRC
 
 Ignore case when completing file names
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq read-file-name-completion-ignore-case t)
 #+END_SRC
 
 Highlight parenthesis pairs
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (show-paren-mode 1)
 #+END_SRC
 
 Blinking parenthesis
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq blink-matching-paren-distance nil)
 #+END_SRC
 
 Highlight text between parens
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq show-paren-style 'expression)
 #+END_SRC
 
 Use buffer name as frame title
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq frame-title-format "%b - emacs")
 #+END_SRC
 
 Completion in mini-buffer
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (icomplete-mode t)
 #+END_SRC
 
 Stack minibuffers
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq enable-recursive-minibuffers t)
 #+END_SRC
 
 Make dired human readable
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq dired-listing-switches "-alh")
 #+END_SRC
 
 Guess copy target. If split window use others current directory.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq dired-dwim-target t)
 #+END_SRC
 
 Dired isn't very colourful by default, but `dired+' has helpful
 highlighting.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq diredp-hide-details-initially-flag nil)
   (require 'dired+)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq ediff-split-window-function 'split-window-horizontally)
 #+END_SRC
 
@@ -3240,28 +3298,28 @@ set your mailserver settings outside of this file.
   (setq smtpmail-smtp-service "25")
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq send-mail-function 'smtpmail-send-it)
 
 #+END_SRC
 
 Some nice functions
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   ;;(blink-matching-paren 1)
   ;;(paren-activate)
 #+END_SRC
 
 XML indentation
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (equal "work" (getenv "SYSENV"))
       (setq nxml-child-indent 4))
 #+END_SRC
 
 * other stuff
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   ;;(move-overlay hl-line-overlay
   ;;            (line-beginning-position) (1+ (line-end-position))
@@ -3313,7 +3371,7 @@ XML indentation
 
 Make the window title display the full path of the file I’m currently editing:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (when (display-graphic-p)
     (setq frame-title-format
           '((:eval (if (buffer-file-name)
@@ -3323,20 +3381,20 @@ Make the window title display the full path of the file I’m currently editing:
 
 sRGB display fixes
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 (setq ns-use-srgb-colorspace t)
 #+END_SRC
 
 There are a few applications, such as crontab, that require a trailing
 new line. To be safe, always leave a trailing newline.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq-default require-final-newline t)
 #+END_SRC
 
 You have to work hard to be lazy.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defalias 'ts 'transpose-sentences)
   (defalias 'tp 'transpose-paragraphs)
 #+END_SRC
@@ -3345,14 +3403,14 @@ Save whatever’s in the current (system) clipboard before
 replacing it with the Emacs’ text.
 https://github.com/dakrone/eos/blob/master/eos.org
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq save-interprogram-paste-before-kill t)
 #+END_SRC
 * set theme bba1
 
 [[https://emacsfodder.github.io/emacs-theme-editor/][Emacs Theme Editor]] is a nice tool to define your colors.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
    (deftheme bba1 "DOCSTRING for bba1")
      (custom-theme-set-faces 'bba1
       '(default ((t (:foreground "#07e30d" :background "#282828" ))))
@@ -3407,7 +3465,7 @@ https://github.com/dakrone/eos/blob/master/eos.org
 * load custom file
     [2014-10-02 Thu 00:37]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
     (setq custom-file
           (expand-file-name "custom.el"
                             (expand-file-name ".emacs.d" "~")))
@@ -3418,7 +3476,7 @@ https://github.com/dakrone/eos/blob/master/eos.org
 
 * Set default font on Mac
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (string-equal system-type "darwin")
    (set-default-font "Menlo 14"))
 #+END_SRC
@@ -3428,7 +3486,7 @@ https://github.com/dakrone/eos/blob/master/eos.org
 If you edit zone files via TRAMP you might want to activate them via
 =rndc reload=. =C-c C-r= just does that for you.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun dns-rndc ()
   "Do rndc reload of current buffers filename."
   (interactive)
@@ -3464,7 +3522,7 @@ not in the public git emacs configuration.
 
 all in your history.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history))
   (setq kmacro-ring-max 42)
   (setq history-delete-duplicates t)
@@ -3489,7 +3547,7 @@ all in your history.
 This one uses Keyboard Maestro to launch a ssh in a screen session in iTerm2.
 Assumption clipboard is a dns name.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-screen-start-ssh-to-clipboard (&optional arg)
   "Use a macro in Keyboard Maestro to ssh into a system in iterm screen session."
   (interactive)
@@ -3512,7 +3570,7 @@ Assumption clipboard is a dns name.
 
 Use aws command line tool via Emacs.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-aws-desc-instances ( profile name)
     "query aws to get informations for running instances."
     (interactive "sProfile: \nsName: ")
@@ -3528,7 +3586,7 @@ Use aws command line tool via Emacs.
 * thing-at-point-fqdn
 [2016-02-12 Fri 14:13]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun fqdn-bounds-of-fqdn-at-point ()
        "Return the start and end points of an fqdn at the current point.
      The result is a paired list of character positions for an fqdn
@@ -3548,7 +3606,7 @@ Use aws command line tool via Emacs.
 
 Amazon instance ID at point.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun instanceid-bounds-of-instanceid-at-point ()
        "Return the start and end points of an Amazon instance ID at the current point.
      The result is a paired list of character positions for an fqdn
@@ -3568,7 +3626,7 @@ Amazon instance ID at point.
 
 Some private settings outside this repository are loaded after this configuration.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (file-exists-p "~/.emacs_post.el")
   (load-file "~/.emacs_post.el"))
 #+END_SRC
@@ -3577,7 +3635,7 @@ Some private settings outside this repository are loaded after this configuratio
 
 Display greetings:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (totd)
   (switch-to-buffer "*Tip of the day*")
   (delete-other-windows)
@@ -3586,7 +3644,7 @@ Display greetings:
 
 Split and show workhours:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (equal "work" (getenv "SYSENV"))
     (progn (split-window-below)
            (other-window 1)
