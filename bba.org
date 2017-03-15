@@ -110,6 +110,9 @@ from bash.
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $EMAIL")))
               (setenv "EMAIL" path)
               )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $ORGANIZATION")))
+              (setenv "ORGANIZATION" path)
+              )
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $PYTHONPATH")))
               (setenv "PYTHONPATH" path)
               )
@@ -3362,6 +3365,12 @@ XML indentation
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (equal "work" (getenv "SYSENV"))
       (setq nxml-child-indent 4))
+#+END_SRC
+
+update copyrights
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'before-save-hook 'copyright-update)
 #+END_SRC
 
 * other stuff
