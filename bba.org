@@ -3302,6 +3302,37 @@ much more secure than storing them in configuration on disk:
          account-name)))))
 #+END_SRC
 
+* [[http://emacs.stackexchange.com/questions/3925/hide-list-of-minor-modes-in-mode-line][hide minor modes]]
+[2017-01-30 Mon 16:28]
+
+We don't need all minor modes listed in the modeline.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defvar hidden-minor-modes ; example, write your own list of hidden
+    '(abbrev-mode            ; minor modes
+      auto-fill-function
+      auto-complete-mode
+      inf-haskell-mode
+      haskell-indent-mode
+      haskell-doc-mode
+      smooth-scroll-mode
+      hidepw-mode
+      helm-mode
+      undo-tree-mode
+      guide-key-mode
+      artbollocks-mode
+      ))
+
+  (defun purge-minor-modes ()
+    (interactive)
+    (dolist (x hidden-minor-modes nil)
+      (let ((trg (cdr (assoc x minor-mode-alist))))
+	(when trg
+	  (setcar trg "")))))
+
+  (add-hook 'after-change-major-mode-hook 'purge-minor-modes)
+#+END_SRC
+
 * configure some default values
     [2014-10-02 Thu 00:27]
 
