@@ -1024,6 +1024,23 @@ Very useful for repetitive literate devops jobs.
 This is helpful in training sessions.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-copy-and-yank-org-src-block()
+    "copy last org src block and insert it at point."
+    (interactive)
+    (push-mark)
+    (re-search-backward "\#\\+BEGIN_SRC")
+    (set-mark-command nil)
+    (re-search-forward "\#\\+END_SRC")
+    (forward-line)
+    (beginning-of-line)
+    (kill-ring-save 1 1 1)
+    (set-mark-command '1)
+    (set-mark-command '1)
+    (insert (pop kill-ring))
+    (re-search-backward "\#\\+BEGIN_SRC")
+    (forward-line)
+    )
+
   (defun bba-copy-org-src-block()
     "copy last org src block and insert it at point."
     (interactive)
@@ -1036,12 +1053,13 @@ This is helpful in training sessions.
     (kill-ring-save 1 1 1)
     (set-mark-command '1)
     (set-mark-command '1)
-    (yank)
-    (re-search-backward "\#\\+BEGIN_SRC")
-    (forward-line)
     )
 
-  (define-key org-mode-map "\C-c\S-w" 'bba-copy-org-src-block)
+  (define-key org-mode-map "\C-c\S-w" 'bba-copy-and-yank-org-src-block)
+  (define-key org-mode-map (kbd "C-c s-w") 'bba-copy-org-src-block)
+
+#+END_SRC
+
 #+END_SRC
 
 ** tmux capture-pane
