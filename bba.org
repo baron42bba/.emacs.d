@@ -3792,8 +3792,14 @@ Split and show workhours:
            (find-file "~/org/workhours.org")
            (beginning-of-buffer)
            (org-shifttab 3)
-           (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")))
-           (org-beginning-of-line)
+	   (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
+	       (org-beginning-of-line)
+	     (progn
+	       (beginning-of-buffer)
+	       (org-next-visible-heading '1)
+	       (org-meta-return)
+	       (insert (format-time-string "%Y-%m"))
+	       ))
            ))
 
 #+END_SRC
