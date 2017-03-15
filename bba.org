@@ -2676,6 +2676,49 @@ safe files with #! in first line as user executable.
 
 #+END_SRC
 
+* Move Cursor to Beginning of Line/Paragraph
+[2017-03-02 Thu 13:46]
+
+Thanks to [[http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html][Xah Lee]]:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun xah-beginning-of-line-or-block ()
+    "Move cursor to beginning of line, or beginning of current or previous text block.
+
+  • When called first time, move cursor to beginning of line.
+  • When called again, move cursor to beginning of paragraph.
+  • When called again, move cursor to beginning of previous paragraph.
+
+  URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html'
+  Version 2017-01-17"
+    (interactive)
+    (if (or (equal (point) (line-beginning-position))
+            (equal last-command this-command ))
+	(if (re-search-backward "\n[\t\n ]*\n+" nil "NOERROR")
+            (skip-chars-backward "\n\t ")
+          (goto-char (point-min)))
+      (beginning-of-line)))
+
+
+  (defun xah-end-of-line-or-block ()
+    "Move cursor to end of line, or end of current or next text block.
+
+  • When called first time, move cursor to end of line.
+  • When called again, move cursor to end of paragraph.
+  • When called again, move cursor to end of next paragraph.
+
+  URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html'
+  Version 2017-01-17"
+    (interactive)
+    (if (or (equal (point) (line-end-position))
+            (equal last-command this-command ))
+	(re-search-forward "\n[\t\n ]*\n+" nil "NOERROR" )
+      (end-of-line)))
+
+  (global-set-key (kbd "s-a") 'xah-beginning-of-line-or-block)
+  (global-set-key (kbd "s-e") 'xah-end-of-line-or-block)
+#+END_SRC
+
 * move lines
     [2014-11-11 Tue 12:24]
 
