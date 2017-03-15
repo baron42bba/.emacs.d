@@ -2765,6 +2765,29 @@ line or somewhere else.
     )
 #+END_SRC
 
+* remove element from kill-ring
+[2017-02-15 Wed 11:59]
+
+sometimes you have credentials or other secret stuff in your kill-ring.
+savehist is nice but you don't want to store it in the history.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-rm-kill-ring ()
+  "remove current element from kill-ring."
+  (interactive)
+  (progn (pop kill-ring) nil)
+  (message  "removed item from kill-ring")
+  )
+
+  (defun bba-yank-rm-kill-ring ()
+  "yank and then remove element from kill ring"
+  (interactive)
+  (insert (pop kill-ring))
+  )
+  (define-key global-map (kbd "s-y") 'bba-yank-rm-kill-ring)
+  (define-key global-map (kbd "s-Y") 'bba-rm-kill-ring)
+
+#+END_SRC
 
 * ggtags
 
