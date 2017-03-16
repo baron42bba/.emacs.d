@@ -463,7 +463,7 @@ snippets for =aws cli= are awesome!
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path
-	       "~/.emacs.d/elpa/yasnippet-20161110.1226")
+	       "~/.emacs.d/elpa/yasnippet-20170310.1724")
   (require 'yasnippet)
 
   (if (equal "work" (getenv "SYSENV"))
@@ -472,6 +472,7 @@ snippets for =aws cli= are awesome!
   (yas/reload-all)
   (yas-global-mode 1)
   (setq yas-indent-line nil)
+  (setq yas-triggers-in-field t)
   (auto-insert-mode 1)
   (setq auto-insert-directory "~/.emacs.d/templates")
   (define-key global-map "\C-cy" 'yas-insert-snippet)
