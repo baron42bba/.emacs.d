@@ -2786,9 +2786,11 @@ Thanks to [[http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line
           (if current-prefix-arg
               (message "Buffer text copied")
             (message "Text copied"))))
-      (end-of-line)
-      (forward-char)
-      ))
+      (if (not (use-region-p))
+	  (progn
+	    (end-of-line)
+	    (forward-char))
+      )))
 
   (define-key global-map (kbd "M-w") 'xah-copy-line-or-region)
 #+END_SRC
