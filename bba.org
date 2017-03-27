@@ -2823,6 +2823,54 @@ Thanks to [[http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line
   (define-key global-map (kbd "M-w") 'xah-copy-line-or-region)
 #+END_SRC
 
+* [[http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html][Xah Lee Move cursor to Bracket]]
+[2017-03-27 Mon 22:41]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defvar xah-brackets nil "string of left/right brackets pairs.")
+  (setq xah-brackets "()[]{}<>（）［］｛｝⦅⦆〚〛⦃⦄“”‘’‹›«»「」〈〉《》【】〔〕⦗⦘『』〖〗〘〙｢｣⟦⟧⟨⟩⟪⟫⟮⟯⟬⟭⌈⌉⌊⌋⦇⦈⦉⦊❛❜❝❞❨❩❪❫❴❵❬❭❮❯❰❱❲❳〈〉⦑⦒⧼⧽﹙﹚﹛﹜﹝﹞⁽⁾₍₎⦋⦌⦍⦎⦏⦐⁅⁆⸢⸣⸤⸥⟅⟆⦓⦔⦕⦖⸦⸧⸨⸩｟｠⧘⧙⧚⧛⸜⸝⸌⸍⸂⸃⸄⸅⸉⸊᚛᚜༺༻༼༽⏜⏝⎴⎵⏞⏟⏠⏡﹁﹂﹃﹄︹︺︻︼︗︘︿﹀︽︾﹇﹈︷︸")
+
+  (defvar xah-left-brackets '("(" "{" "[" "<" "〔" "【" "〖" "〈" "《" "「" "『" "“" "‘" "‹" "«" )
+    "List of left bracket chars.")
+  (progn
+  ;; make xah-left-brackets based on xah-brackets
+    (setq xah-left-brackets '())
+    (dotimes (-x (- (length xah-brackets) 1))
+      (when (= (% -x 2) 0)
+	(push (char-to-string (elt xah-brackets -x))
+              xah-left-brackets)))
+    (setq xah-left-brackets (reverse xah-left-brackets)))
+
+  (defvar xah-right-brackets '(")" "]" "}" ">" "〕" "】" "〗" "〉" "》" "」" "』" "”" "’" "›" "»")
+    "list of right bracket chars.")
+  (progn
+    (setq xah-right-brackets '())
+    (dotimes (-x (- (length xah-brackets) 1))
+      (when (= (% -x 2) 1)
+	(push (char-to-string (elt xah-brackets -x))
+              xah-right-brackets)))
+    (setq xah-right-brackets (reverse xah-right-brackets)))
+
+  (defun xah-backward-left-bracket ()
+    "Move cursor to the previous occurrence of left bracket.
+  The list of brackets to jump to is defined by `xah-left-brackets'.
+  URL `http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html'
+  Version 2015-10-01"
+    (interactive)
+    (search-backward-regexp (regexp-opt xah-left-brackets) nil t))
+
+  (defun xah-forward-right-bracket ()
+    "Move cursor to the next occurrence of right bracket.
+  The list of brackets to jump to is defined by `xah-right-brackets'.
+  URL `http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html'
+  Version 2015-10-01"
+    (interactive)
+    (re-search-forward (regexp-opt xah-right-brackets) nil t))
+
+  (define-key global-map (kbd "s-,") 'xah-backward-left-bracket)
+  (define-key global-map (kbd "s-.") 'xah-forward-right-bracket)
+#+END_SRC
+
 * copy buffer file name to kill ring
 
 Sometimes you need the filename of your current buffer on the command
