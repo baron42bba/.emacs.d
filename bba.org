@@ -1602,6 +1602,13 @@ html.
               (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
 #+END_SRC
 
+** org-bullets
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-file "~/.emacs.d/lisp/org-bullets.el")
+  (require 'org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+END_SRC
+
 ** org-ellipsis
 
 #+BEGIN_SRC emacs-lisp :tangle yes
