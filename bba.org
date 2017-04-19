@@ -593,6 +593,17 @@ log-format.
         ))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq puppet-lint-command
+	(concat
+	 "puppet-lint --with-context "
+	 "--no-80chars-check "
+	 "--no-puppet_url_without_modules-check "
+	 "--fail-on-warnings "
+	 "--log-format \"%{path}:%{line}: %{kind}: %{message} (%{check})\""
+	 )
+	)
+#+END_SRC
 * [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 Probably the best help to keep track of the not every day used keybindings.
