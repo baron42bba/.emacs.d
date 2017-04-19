@@ -567,11 +567,10 @@ log-format.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20160218.41")
-        (require 'flycheck)
-        (add-hook 'after-init-hook #'global-flycheck-mode)
-
-        (flycheck-define-checker puppet-lint
+	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20160218.41")
+	(require 'flycheck)
+	(add-hook 'after-init-hook #'global-flycheck-mode)
+	(flycheck-define-checker puppet-lint
           "A Puppet DSL style checker using puppet-lint.
 
   See URL `http://puppet-lint.com/'."
@@ -590,7 +589,7 @@ log-format.
           ;; Since we check the original file, we can only use this syntax checker if
           ;; the buffer is actually linked to a file, and if it is not modified.
           :predicate flycheck-buffer-saved-p)
-        ))
+	))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -608,7 +607,7 @@ log-format.
 
 Probably the best help to keep track of the not every day used keybindings.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
@@ -810,14 +809,14 @@ Some extra functionality from the org package repository.
 Run these commands to make org-protocol work in gnome:
 
 #+BEGIN_SRC sh :eval no :tangle no
-gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/command '/usr/bin/emacsclient %s' --type String
-gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/enabled --type Boolean true
+  gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/command '/usr/bin/emacsclient %s' --type String
+  gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/enabled --type Boolean true
 #+END_SRC
 
 this is how your firefox bookmark must look like:
 
 #+BEGIN_SRC :eval no :tangle no
-javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
+  javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
 #+END_SRC
 
 
@@ -1087,7 +1086,7 @@ This is helpful in training sessions.
     )
 
   (defun bba-copy-org-src-block()
-    "copy last org src block and insert it at point."
+    "copy last org src block. Can be around point, too."
     (interactive)
     (push-mark)
     (re-search-backward "\#\\+BEGIN_SRC")
@@ -1729,6 +1728,18 @@ Return on a link breaks the link? Just follow it.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-return-follows-link t)
 #+END_SRC
+
+use emacs as default. Otherwise executables without extension get
+executed instead of opened.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-file-apps '((auto-mode . emacs)
+			("\\.mm\\'" . default)
+			("\\.x?html?\\'" . default)
+			("\\.pdf\\'" . default)
+			( t . emacs)))
+#+END_SRC
+
 * CFEngine
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2555,11 +2566,15 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 
 * insert-date function
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun insert-date ()
+  (defun bba-insert-date ()
   "Insert the current date"
   (interactive)
   (insert-string (format-time-string "%B %e, %Y")))
-  (defun insert-timestamp ()
+  (defun bba-insert-timestamp ()
+  "Insert the current timestamp"
+  (interactive)
+  (insert-string (format-time-string "%Y%m%d-%H%M")))
+  (defun bba-insert-name-timestamp ()
   "Insert the current timestamp"
   (interactive)
   (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
@@ -3060,7 +3075,7 @@ combine key strokes to access commands even faster.
   (key-chord-define prog-mode-map ";;" "\C-e;")
   (key-chord-define prog-mode-map ",," "\C-e,")
   (key-chord-define-global "uu" 'undo)
-  (key-chord-define-global "xb" 'ido-switch-buffer)
+  (key-chord-define-global "xb" 'helm-mini)
   (key-chord-define-global "xf" 'ido-find-file)
   (key-chord-define-global "xx" 'helm-M-x)
   (key-chord-define org-mode-map "TT" 'org-set-tags)
@@ -3138,6 +3153,7 @@ character before any spaces."
   (define-key bba/toggle "\S-a" 'abbrev-mode)
   (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "b" 'bba-switch-default-browser)
+  (define-key bba/toggle "c" 'rainbow-mode)
   (define-key bba/toggle "e" 'eldoc-mode)
   (define-key bba/toggle "\S-e" 'epoch-view-mode)
   (define-key bba/toggle "f" 'auto-fill-mode)
@@ -3748,12 +3764,12 @@ https://github.com/dakrone/eos/blob/master/eos.org
 
   (if (display-graphic-p)
       (progn
-        (custom-set-faces
-         '(org-block-begin-line ((t (:background "#29759c" :foreground "#84cbef"))) t)
-         '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
-         '(org-block-background ((t (:background "#FFFFFF"))))
-         )
-        (let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
+	(custom-set-faces
+	 '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef"))) t)
+	 '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
+	 '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef"))))
+	 )
+	(let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
                                      ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
                                      ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
                                      ((x-list-fonts "Verdana")         '(:font "Verdana"))
