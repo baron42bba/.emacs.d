@@ -676,7 +676,8 @@ Adjust indentation at work.
       (setq yaml-indent-offset 4))
   (add-hook 'yaml-mode-hook
             (lambda()
-              (auto-fill-mode -1)))
+              (auto-fill-mode -1)
+	    (setq bba-keep-whitespaces 1)))
 
 #+END_SRC
 
