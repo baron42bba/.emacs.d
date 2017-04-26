@@ -1015,6 +1015,7 @@ Open current buffers directory in gnu screen in iterm.
 
 
 #+END_SRC
+
 ** Find next and previous =#+BEGIN_SRC sh= block.
 Very useful for repetitive literate devops jobs.
 <C-c> <S-n> then <C-c><C-c> and so on.
@@ -1699,6 +1700,16 @@ file.
                    nil)
               (message "Set custom style from %s" f))
           (message "Custom header file %s doesnt exist")))))
+#+END_SRC
+
+** org-sticky-header
+[2017-04-26 Wed 13:09]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20170422.2135" t)
+  (add-hook 'org-mode-hook
+	      (lambda ()(org-sticky-header-mode 1))
+	    )
 #+END_SRC
 
 ** additional org settings
