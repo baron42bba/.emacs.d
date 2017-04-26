@@ -2,4 +2,4 @@
 # name: aws-route53-list-hosted-zones
 # key: r53-ls
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} route53 list-hosted-zones --query 'HostedZones[].[Id, Name]' --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} route53 list-hosted-zones --query 'HostedZones[].[Id, Name]' --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

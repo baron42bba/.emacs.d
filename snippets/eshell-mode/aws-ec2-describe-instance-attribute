@@ -2,4 +2,4 @@
 # name: aws-ec2-describe-instance-attribute (yank)
 # key: ec2-attribute
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-instance-attribute --instance-id ${4:`(yank)`} --attribute ${5:$$(yas-choose-value '("instanceType" "kernel" "ramdisk" "userData" "disableApiTermination" "instanceInitiatedShutdownBehavior" "rootDeviceName" "blockDeviceMapping" "productCodes" "sourceDestCheck" "groupSet" "ebsOptimized" "sriovNetSupport"))} $0
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-instance-attribute --instance-id ${4:`(yank)`} --attribute ${5:$$(yas-choose-value '("instanceType" "kernel" "ramdisk" "userData" "disableApiTermination" "instanceInitiatedShutdownBehavior" "rootDeviceName" "blockDeviceMapping" "productCodes" "sourceDestCheck" "groupSet" "ebsOptimized" "sriovNetSupport"))} $0

@@ -2,4 +2,4 @@
 # name: aws-autoscaling-update-auto-scaling-group-min-max
 # key: aws-autoscaling-update-auto-scaling-group-min-max
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} autoscaling update-auto-scaling-group --auto-scaling-group-name ${4:`(yank)`} --min-size $5 --max-size $6 $0
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} autoscaling update-auto-scaling-group --auto-scaling-group-name ${4:`(yank)`} --min-size $5 --max-size $6 $0

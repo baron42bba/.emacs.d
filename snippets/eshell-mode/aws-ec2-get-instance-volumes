@@ -2,4 +2,4 @@
 # name: aws-ec2-get-instance-volumes
 # key: ec2-vol
 # --
-aws --profile=${1:$$(yas-choose-value '("prod" "test"))} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} ec2 describe-instances --query "Reservations[].Instances[].[join(\`,\`,Tags[?Key==\`Name\`].Value),join(' ', BlockDeviceMappings[].Ebs.VolumeId)]" --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} ec2 describe-instances --query "Reservations[].Instances[].[join(\`,\`,Tags[?Key==\`Name\`].Value),join(' ', BlockDeviceMappings[].Ebs.VolumeId)]" --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0
