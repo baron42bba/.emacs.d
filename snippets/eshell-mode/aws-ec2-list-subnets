@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-list-subnets
+# key: sub-ls
+# --
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-subnets --query "sort_by(sort_by(Subnets[].{VpcId:VpcId, SubnetId:SubnetId, State:State, AvailabilityZone:AvailabilityZone, CidrBlock:CidrBlock, AvailableIpAddressCount:AvailableIpAddressCount Tags:to_string(Tags[].[Key, Value])}, &SubnetId), &VpcId)" --output ${4:$$(yas-choose-value '("table" "text" "json"))} $0

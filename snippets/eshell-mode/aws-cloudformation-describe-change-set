@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-describe-change-set
+# key: cloud-descchange
+# --
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} cloudformation describe-change-set --stack-name ${4:`(yank)`} --change-set-name $5 --output ${6:$$(yas-choose-value '("text" "table" "json"))} $0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-delete-snapshot (yank)
+# key: snap-del
+# --
+# aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} ec2 delete-snapshot --snapshot-id ${4:`(yank)`} --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
