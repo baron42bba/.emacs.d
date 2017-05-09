@@ -2956,10 +2956,14 @@ line or somewhere else.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-copy-buffer-name ()
+    "copy buffer name to kill-ring. if `universal-argument` is called first, copy only filename to kill-ring."
     (interactive)
-    (kill-new (buffer-file-name))
-    (message ( format "stored '%s' in kill-ring" buffer-file-name))
-    )
+    (let* ((bba-buffer-name (if current-prefix-arg (file-name-nondirectory (buffer-file-name))
+			      (buffer-file-name)
+			      )))
+      (kill-new bba-buffer-name)
+    (message ( format "stored '%s' in kill-ring" bba-buffer-name))
+    ))
 #+END_SRC
 
 * remove element from kill-ring
