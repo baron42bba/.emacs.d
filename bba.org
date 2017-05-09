@@ -154,6 +154,28 @@ from bash.
       )
 #+END_SRC
 
+* move files to trash on osx
+[2017-02-10 Fri 15:12]
+
+If trash is missing you might want to run
+
+=sudo port install trash=
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (if (string-equal system-type "darwin")
+  (if (file-exists-p "/opt/local/bin/trash")
+      (progn
+	(defun system-move-file-to-trash (file)
+      "Use osx port trash to move files to trash"
+      (call-process "trash" nil nil nil file)
+	)
+      )
+  )
+  )
+#+END_SRC
+
+With trash you can recover files to it's original location.
+
 * eshell and shell environment
 
 We don't need a =$PAGER= in Emacs:
