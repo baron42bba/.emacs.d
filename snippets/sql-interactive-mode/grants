@@ -2,4 +2,4 @@
 # name: grants
 # key: grants_
 # --
-SELECT grantee, object_name FROM v_catalog.grants WHERE object_type = '${1:$$(yas-choose-value '("RESOURCEPOOL" "ROLE" "SCHEMA" "TABLE" "STORAGELOCATION"))}' ORDER BY grantee $0LIMIT 50;
+SELECT grantee, object_name, privileges_description FROM v_catalog.grants WHERE object_type = '${1:$$(yas-choose-value '("RESOURCEPOOL" "ROLE" "SCHEMA" "TABLE" "VIEW" "STORAGELOCATION"))}' ORDER BY grantee $0LIMIT 50;

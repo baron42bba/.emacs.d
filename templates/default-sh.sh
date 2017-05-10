@@ -13,8 +13,8 @@
 
   `(upcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`
 
- --help, -h   for help
- --man,  -m   to get this man page.
+ --help, -h    for help
+ --man,  -m    to get this man page.
  --verbose, -v be more verbose.
 
 =head1 EXAMPLES
@@ -26,7 +26,11 @@
 
 
 # parse parameters
-TEMP=\`getopt -o mhvp --long man,help,verbose,password -n '`(downcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`' -- "$@"\`
+TEMP=\`getopt -o mhvp: --long man,help,verbose,password: -n '`(downcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`' -- "$@"\`
+
+if [ $? != 0 ]; then echo "Wrong parameters..." >&2; exit 1; fi
+
+eval set -- "$TEMP"
 
 while true; do
     case "\$1" in

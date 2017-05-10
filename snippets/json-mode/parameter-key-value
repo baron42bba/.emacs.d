@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: parameter-key-value
+# key: pmk_
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+{
+ "ParameterKey": "$1",
+ "ParameterValue": "$2"
+},$0

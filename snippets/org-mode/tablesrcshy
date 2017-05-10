@@ -4,7 +4,7 @@
 # If you want to reference the output in other src blocks you need a name.
 # --
 ${2:#+NAME: ${3:`(replace-regexp-in-string "[: \"]" "_" (replace-regexp-in-string "[][]" "" (replace-regexp-in-string ".*/" "" (org-display-outline-path nil t "/"  t))))`-src}}
-#+BEGIN_SRC shell ${4::session ${5:client}} :var ${6:HOSTS$(upcase (yas-text))}=${1:`(yank)`}[,${7:0}] :cache ${8:$$(yas-choose-value '("yes" "no"))} ${9::res}
+#+BEGIN_SRC sh ${4::session ${5:client}} :var ${6:HOSTS$(upcase (yas-text))}=${1:`(yank)`}[,${7:0}] :cache ${8:$$(yas-choose-value '("yes" "no"))} ${9::res}
 $6=($$6)
 
 for INDEX in \$\{!$6[@]\}; do
