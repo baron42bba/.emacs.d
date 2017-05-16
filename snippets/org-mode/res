@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: res
+# key: res_
+# --
+#+RESULTS:
+:RESULTS:
+$0
+:END:
