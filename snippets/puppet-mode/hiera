@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: hiera
+# key: hiera_
+# --
+$$1 = hiera('${2:`(insert-string (file-name-nondirectory (replace-regexp-in-string "/[^/]*/$" "" (file-name-directory (buffer-file-name)))))`}::${3:$1}', ${4:undef})$0
