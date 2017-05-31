@@ -2650,6 +2650,22 @@ fullscreen mode. disable scroll bar in fullscreen mode.
     )
   (global-set-key (kbd "s-<return>") 'bba-toggle-fullscreen)
 #+END_SRC
+
+* generate passwords
+[2017-05-31 Wed 16:33]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-insert-pw(v2)
+  "insert password"
+  (interactive "P")
+  (if v2
+      (insert (shell-command-to-string "password2.pl"))
+    (insert (shell-command-to-string "password.pl"))
+    )
+  )
+  (define-key global-map (kbd "s-p") 'bba-insert-pw)
+#+END_SRC
+
 * [[http://www.howardism.org/Technical/Emacs/eshell-fun.html][eshell-here]]
 Thanks to Howard Abrams.
 modified because current version lacks function have
