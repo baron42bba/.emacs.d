@@ -3234,6 +3234,33 @@ character before any spaces."
   (define-key dired-mode-map "/" 'dired-narrow-regexp)
 #+END_SRC
 
+easy access to secrets.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (define-prefix-command 'bba/pw)
+  (define-key global-map "\C-xp" bba/pw)
+  (define-key bba/pw "p" '(lambda () "awsprod" (interactive)(bba-pw-lookup "0DA39906-79C8-4468-AB0A-C72DB613C529")))
+  (define-key bba/pw "t" '(lambda () "awstest" (interactive)(bba-pw-lookup "D0518F8B-C724-45B8-8D85-C568DCDD5913")))
+  (define-key bba/pw "c" '(lambda () "awscn" (interactive)(bba-pw-lookup "53D5B091-0295-42BA-9D91-4A36055E554B")))
+
+
+  (defun bba-pw-lookup (id)
+    "lookup org id and grab hide-pw entry"
+    (interactive)
+    (org-id-goto id)
+    (if (invisible-p (point-at-eol))
+	(org-cycle))
+    (if (re-search-forward "^||")
+	(progn
+	  (set-mark-command nil)
+	  (org-end-of-line)
+	  (backward-char 2)
+	  (kill-ring-save 1 1 1)
+	  (org-previous-visible-heading 1)
+	  (org-end-of-line)
+	  (org-beginning-of-line))))
+#+END_SRC
+
 duplicate previous line
 
 #+BEGIN_SRC emacs-lisp :tangle yes
