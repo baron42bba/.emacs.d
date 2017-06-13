@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-cloudtrail-lookup-events
+# key: cloudtrail-ls
+# --
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}}  cloudtrail lookup-events --max-items ${4:100} --lookup-attributes AttributeKey=${5:$$(yas-choose-value '("ResourceType,AttributeValue=AWS::EC2::Instance" "ResourceName,AttributeValue="))}$6 --output ${7:$$(yas-choose-value '("text" "table" "json"))} $0
