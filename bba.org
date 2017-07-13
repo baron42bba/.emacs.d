@@ -2261,6 +2261,15 @@ Combine abbrev with Ispell:
 
 #+END_SRC
 
+* [[https://www.emacswiki.org/emacs/stripes.el][stripes]]
+[2017-07-11 Tue 15:17]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-file (expand-file-name "~/.emacs.d/lisp/stripes.el"))
+  (custom-set-faces
+   '(stripes-face ((t :background "gray0"))))
+
+#+END_SRC
 * syntax-highlighting
 #+BEGIN_SRC emacs-lisp :tangle yes
   (font-lock-mode)
@@ -3226,6 +3235,7 @@ character before any spaces."
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "r" 'rainbow-delimiters-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
+  (define-key bba/toggle (kbd "s-s") 'stripes-mode)
   (define-key bba/toggle "\S-s" 'smerge-mode)
   (define-key bba/toggle "t" 'toggle-truncate-lines)
   (define-key bba/toggle "v" 'visual-line-mode)
