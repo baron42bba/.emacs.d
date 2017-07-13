@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-list-vpcs
+# key: vpc-ls
+# --
+aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-vpcs --query "sort_by(Vpcs[].{VpcId:VpcId, State:State, AvailabilityZone:AvailabilityZone, CidrBlock:CidrBlock, AvailableIpAddressCount:AvailableIpAddressCount Tags:to_string(Tags[].[Key, Value])}, &VpcId)" --output ${4:$$(yas-choose-value '("table" "text" "json"))} $0
