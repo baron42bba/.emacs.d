@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: vertica-cp-table
+# key: cp-table
+# --
+TRUNCATE TABLE $1.$2;
+COPY $1.$2 FROM VERTICA $3.$1.$2 DIRECT;
