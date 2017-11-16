@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "demo-it" "demo-it.el" (22560 30366 0 0))
+;;;### (autoloads nil "demo-it" "demo-it.el" (23042 4566 0 0))
 ;;; Generated autoloads from demo-it.el
 
 (autoload 'demo-it-start "demo-it" "\
@@ -26,8 +26,8 @@ keywords, like `:advanced-mode' and `:variable-width'.
 
 ;;;***
 
-;;;### (autoloads nil "demo-it-present" "demo-it-present.el" (22560
-;;;;;;  30366 0 0))
+;;;### (autoloads nil "demo-it-present" "demo-it-present.el" (23042
+;;;;;;  4566 0 0))
 ;;; Generated autoloads from demo-it-present.el
 
 (autoload 'demo-it-single-presentation "demo-it-present" "\
@@ -39,7 +39,7 @@ full-screen presentation. SIZE is the text scaling size, and STYLE is the presen
 ;;;***
 
 ;;;### (autoloads nil nil ("demo-it-custom.el" "demo-it-extras.el"
-;;;;;;  "demo-it-pkg.el") (22560 30366 0 0))
+;;;;;;  "demo-it-pkg.el") (23042 4566 0 0))
 
 ;;;***
 
