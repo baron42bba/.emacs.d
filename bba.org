@@ -3130,6 +3130,7 @@ Some links you might check out:
 	(define-key global-map (kbd "C-x r b") 'helm-bookmarks)
 	(define-key global-map (kbd "C-x C-S-f") 'helm-find-files)
 	(define-key global-map "\C-cy" 'helm-yas-complete)
+      (define-key org-mode-map "\C-ci" 'helm-org-in-buffer-headings)
 	(setq helm-yas-display-key-on-candidate t)
 	(setq helm-buffer-max-length nil)
 
@@ -3264,6 +3265,7 @@ character before any spaces."
 #+END_SRC
 
 * key bindings
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
@@ -3325,16 +3327,16 @@ easy access to secrets.
     (interactive)
     (org-id-goto id)
     (if (invisible-p (point-at-eol))
-	(org-cycle))
+        (org-cycle))
     (if (re-search-forward "^||")
-	(progn
-	  (set-mark-command nil)
-	  (org-end-of-line)
-	  (backward-char 2)
-	  (kill-ring-save 1 1 1)
-	  (org-previous-visible-heading 1)
-	  (org-end-of-line)
-	  (org-beginning-of-line))))
+        (progn
+          (set-mark-command nil)
+          (org-end-of-line)
+          (backward-char 2)
+          (kill-ring-save 1 1 1)
+          (org-previous-visible-heading 1)
+          (org-end-of-line)
+          (org-beginning-of-line))))
 #+END_SRC
 
 duplicate previous line
@@ -3511,7 +3513,7 @@ positions.
     (let ((b (if mark-active (min (point) (mark)) (point-min)))
           (e (if mark-active (max (point) (mark)) (point-max))))
       (shell-command-on-region b e
-       "python -mjson.tool" (current-buffer) t)))
+       "python2.7 -mjson.tool" (current-buffer) t)))
 #+END_SRC
 
 * [[http://kitchingroup.cheme.cmu.edu/blog/2015/06/29/Getting-Emacs-to-read-to-me/][words-speak]]
@@ -3548,7 +3550,7 @@ Kill the current buffer without asking if there is no prefix.
   (defun jcs-kill-a-buffer (askp)
     (interactive "P")
     (if askp
-        (kill-buffer (funcall completing-read-function
+	(kill-buffer (funcall completing-read-function
                               "Kill buffer: "
                               (mapcar #'buffer-name (buffer-list))))
       (kill-this-buffer)))
@@ -3898,6 +3900,18 @@ https://github.com/dakrone/eos/blob/master/eos.org
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq save-interprogram-paste-before-kill t)
+#+END_SRC
+
+* [[http://editorconfig.org/][editorconfig]]
+[2017-01-06 Fri 14:27]
+
+Set default indentation, end of line, trailing whitespaces etc for the
+whole team. No matter what editor gets used.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (if (equal "work" (getenv "SYSENV"))
+      (editorconfig-mode '1))
+
 #+END_SRC
 * set theme bba1
 
