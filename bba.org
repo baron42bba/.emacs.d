@@ -1793,6 +1793,17 @@ Return on a link breaks the link? Just follow it.
   (setq org-return-follows-link t)
 #+END_SRC
 
+Smart yanking: https://www.gnu.org/software/emacs/manual/html_node/org/Structure-editing.html
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-yank-adjusted-subtree t)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-tags-column -102)
+
+#+END_SRC
+
 use emacs as default. Otherwise executables without extension get
 executed instead of opened.
 
