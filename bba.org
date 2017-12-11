@@ -2846,6 +2846,24 @@ safe files with #! in first line as user executable.
 
 #+END_SRC
 
+* fill-or-unfill paragraph
+[2017-06-09 Fri 12:25]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-fill-or-unfill ()
+    "Like `fill-paragraph', but unfill if used twice."
+    (interactive)
+    (let ((fill-column
+           (if (eq last-command 'bba-fill-or-unfill)
+               (progn (setq this-command nil)
+                      (point-max))
+             fill-column)))
+      (call-interactively 'fill-paragraph)))
+
+  (global-set-key [remap fill-paragraph]
+                  'bba-fill-or-unfill)
+#+END_SRC
+
 * Move Cursor to Beginning of Line/Paragraph
 [2017-03-02 Thu 13:46]
 
