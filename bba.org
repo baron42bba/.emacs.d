@@ -2669,6 +2669,8 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
   "Insert name and emailaddress of current systemuser."
   (interactive)
   (insert-string (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+  (define-key global-map (kbd "s-n") 'bba-insert-name)
+
 
 #+END_SRC
 
@@ -3265,12 +3267,18 @@ character before any spaces."
 #+BEGIN_SRC emacs-lisp :tangle yes
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
+  (define-key global-map (kbd "s-r") 'repeat)
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
 
   (define-key global-map "\C-c\S-t" 'visit-tags-table)
   (define-key global-map "\C-cf" 'tags-search)
 
+  (define-key global-map (kbd "s-b") 'clone-indirect-buffer)
+
   (define-key global-map (kbd "C-c M-s") 'string-edit-at-point)
+
+  (define-key global-map "\C-cp" 'org-mark-ring-push)
+  (define-key global-map "\C-cn" 'org-mark-ring-goto)
 
   (define-prefix-command 'bba/toggle)
   (define-key global-map "\C-ct" 'bba/toggle)
@@ -3308,6 +3316,8 @@ easy access to secrets.
   (define-key bba/pw "p" '(lambda () "awsprod" (interactive)(bba-pw-lookup "0DA39906-79C8-4468-AB0A-C72DB613C529")))
   (define-key bba/pw "t" '(lambda () "awstest" (interactive)(bba-pw-lookup "D0518F8B-C724-45B8-8D85-C568DCDD5913")))
   (define-key bba/pw "c" '(lambda () "awscn" (interactive)(bba-pw-lookup "53D5B091-0295-42BA-9D91-4A36055E554B")))
+  (define-key bba/pw "s" '(lambda () "sys" (interactive)(bba-pw-lookup "FABC2AFA-E966-4AC3-AEEB-2883DE790DE4")))
+  (define-key bba/pw "i" '(lambda () "it" (interactive)(bba-pw-lookup "83752B2C-5DE4-4B2F-A306-B191348A2E26")))
 
 
   (defun bba-pw-lookup (id)
