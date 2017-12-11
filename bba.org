@@ -2532,7 +2532,10 @@ Use undo-tree.
     )
 
   (if window-system
-      (tool-bar-mode -1)
+      (progn
+	(tool-bar-mode -1)
+	(scroll-bar-mode -1)
+	)
   )
 
   (setq initial-scratch-message "") ;; Uh, I know what Scratch is for
@@ -2683,7 +2686,7 @@ fullscreen mode. disable scroll bar in fullscreen mode.
         (progn (set-frame-parameter nil 'fullscreen 'maximized)
                (display-battery-mode -1)
                (display-time-mode -1)
-               (scroll-bar-mode 1)
+               (scroll-bar-mode -1)
                )
       (progn (set-frame-parameter nil 'fullscreen 'fullboth)
              (display-battery-mode 1)
