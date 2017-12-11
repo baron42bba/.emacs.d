@@ -964,6 +964,30 @@ never heard of orgmode.
   (define-key org-mode-map "\M-\S-w" 'bba-ox-clip-formatted-copy)
 #+END_SRC
 
+** bba-create-ticket-tmp-dir
+[2017-07-28 Fri 13:07]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-create-ticket-tmp-dir()
+    "create directory for the current ticket in tmp."
+    (interactive)
+    (org-narrow-to-subtree)
+    (let ((beg (point)))
+      (beginning-of-buffer)
+      (if (re-search-forward "jira:" nil t 1)
+	  (if (org-in-regexp org-bracket-link-regexp 1)
+	      (let ((remove (list (match-beginning 0) (match-end 0)))
+		    (description (last (split-string (if (match-end 3)
+							 (match-string-no-properties 3)
+						       (match-string-no-properties 1)) ":"))))
+		(unless (file-exists-p (concat "~/tmp/" (downcase (car description))))
+				       (mkdir (concat "~/tmp/" (downcase (car description))))
+			))))
+      (goto-char beg)
+      )
+    (widen)
+  )
+#+END_SRC
 ** Some initial languages we want org-babel to support
 
 #+BEGIN_SRC emacs-lisp :tangle yes
