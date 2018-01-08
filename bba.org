@@ -491,7 +491,7 @@ snippets for =aws cli= are awesome!
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path
-	       "~/.emacs.d/elpa/yasnippet-20170310.1724")
+               "~/.emacs.d/elpa/yasnippet-20180102.1824")
   (require 'yasnippet)
 
   (if (equal "work" (getenv "SYSENV"))
@@ -505,7 +505,7 @@ snippets for =aws cli= are awesome!
   (setq auto-insert-directory "~/.emacs.d/templates")
   (define-key global-map "\C-cy" 'yas-insert-snippet)
     (if (>= emacs-major-version 24)
-	(add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
+        (add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
   (defun ha-autoinsert-yas-expand()
     "Replace text in yasnippet template."
     (yas-expand-snippet (buffer-string) (point-min) (point-max)))
