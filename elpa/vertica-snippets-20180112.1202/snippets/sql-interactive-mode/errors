@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
 # name: errors
 # key: errors_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT DISTINCT error_level, message FROM error_messages $0WHERE message ILIKE 'Vertica suggests%';

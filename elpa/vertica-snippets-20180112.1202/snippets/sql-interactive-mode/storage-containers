@@ -1,6 +1,8 @@
 # -*- mode: snippet -*-
 # name: storage-containers
 # key: storage-containers
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT s.node_name,
        p.table_schema,

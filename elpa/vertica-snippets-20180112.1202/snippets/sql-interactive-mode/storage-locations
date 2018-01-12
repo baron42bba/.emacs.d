@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: storage-locations
+# key: storage-locations
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT * FROM v_catalog.grants gra, storage_locations loc WHERE gra.object_id = loc.location_id;$0

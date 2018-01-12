@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
 # name: vertica_users
 # key: vertu_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT user_name,resource_pool,default_roles FROM v_catalog.users ORDER BY 1;

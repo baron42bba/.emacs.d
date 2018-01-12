@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
 # name: user_sessions
 # key: ussess_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT session_id, transaction_start FROM sessions WHERE user_name = '$1' ORDER BY 2 desc;$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: show nodes
+# key: nodes_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT * FROM nodes;

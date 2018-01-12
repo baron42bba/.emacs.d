@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
 # name: sessions
 # key: sess_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT * FROM sessions;$0

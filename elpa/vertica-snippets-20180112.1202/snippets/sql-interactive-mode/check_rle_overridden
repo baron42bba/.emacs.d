@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: check_rle_overridden
+# key: rle_check_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+select
+       qe.user_name,
+       count(*)
+from
+            v_monitor.query_events   qe
+       join v_monitor.query_requests qr
+         on qr.transaction_id        = qe.transaction_id
+        and qr.statement_id          = qe.statement_id
+where
+       qr.request_type                        = 'QUERY'
+  and  qe.event_type                          = 'RLE_OVERRIDDEN'
+  and  to_char(event_timestamp, 'YYYY-MM-DD') = '${1:`(format-time-string "%Y-%m-%d")`}'
+group by
+       1
+;

@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
 # name: resources
 # key: res_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT * FROM ${1:$$(yas-choose-value '("resource_pool_status" "resource_pool_move" "resource_rejections" "resource_rejection_details ORDER BY 1"))};$0

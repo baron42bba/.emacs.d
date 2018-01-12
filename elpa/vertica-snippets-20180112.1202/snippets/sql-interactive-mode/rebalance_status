@@ -1,6 +1,8 @@
 # -*- mode: snippet -*-
 # name: rebalance_status
 # key: rebalance_status_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
 # --
 SELECT rebalance_method rebalance_method,
        status,
