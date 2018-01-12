@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-autoscaling-describe-auto-scaling-groups
-# key: aws-autoscaling-describe-auto-scaling-groups
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[].{Name: AutoScalingGroupName, Desired: DesiredCapacity,Min: MinSize, Max: MaxSize}' --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

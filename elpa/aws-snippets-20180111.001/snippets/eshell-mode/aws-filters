@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: aws-filters
+# key: awsfil
+# --
+--filters "Name=${1:$$(yas-choose-value '("tag:Name" "tag:Project" "tag:Type" "tag:Cluster" "instance.group-id" "ip-address" "private-ip-address" "network-interface.subnet-id" "description"))},Values=$2" $0
