@@ -113,6 +113,9 @@ from bash.
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $ORGANIZATION")))
               (setenv "ORGANIZATION" path)
               )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $GOPATH")))
+              (setenv "GOPATH" path)
+              )
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $PYTHONPATH")))
               (setenv "PYTHONPATH" path)
               )
@@ -509,6 +512,7 @@ snippets for =aws cli= are awesome!
   (defun ha-autoinsert-yas-expand()
     "Replace text in yasnippet template."
     (yas-expand-snippet (buffer-string) (point-min) (point-max)))
+  (define-auto-insert "\\.go$" ["default-go.go" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.sh$" ["default-sh.sh" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.pl$" ["default-pl.pl" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.tex$" ["default-tex.tex" ha-autoinsert-yas-expand])
