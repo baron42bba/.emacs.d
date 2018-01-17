@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-rds-describe-db-instances
+# key: rds-ls
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} rds describe-db-instances --query "DBInstances[*].[DBInstanceIdentifier,DbiResourceId, Endpoint.Address]" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

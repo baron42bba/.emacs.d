@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-ec2-describe-instance-status (yank)
-# key: aws-ec2-describe-instance-status
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} ec2 describe-instance-status --instance-ids ${4:`(yank)`} $0

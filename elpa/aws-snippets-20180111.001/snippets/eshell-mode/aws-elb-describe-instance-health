@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-elb-describe-instance-health (yank)
+# key: aws-elb-describe-instance-health
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} elb describe-instance-health --load-balancer-name ${4:`(yank)`} --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

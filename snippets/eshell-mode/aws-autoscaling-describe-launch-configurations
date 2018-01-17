@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-autoscaling-describe-launch-configurations
-# key: aws-autoscaling-describe-launch-configurations
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} autoscaling describe-launch-configurations --query 'reverse(sort_by(LaunchConfigurations &CreatedTime)[*].[LaunchConfigurationName, CreatedTime])' --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

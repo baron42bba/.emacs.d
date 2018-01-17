@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-create-change-set
+# key: cloud-createchange
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} \
+${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} \
+cloudformation create-change-set \
+${4:--capabilities CAPABILITY_NAMED_IAM} \
+--stack-name '$5' \
+--change-set-name '$6' \
+--description '$7' \
+--parameters ${8:file://} \
+${9:--change-set-type=${10:$$(yas-choose-value '("CREATE" "UPDATE"))}}$0

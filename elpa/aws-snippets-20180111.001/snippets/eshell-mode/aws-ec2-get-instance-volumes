@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-instance-volumes
+# key: ec2-vol
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} ec2 describe-instances --query "Reservations[].Instances[].[join(\`,\`,Tags[?Key==\`Name\`].Value),join(' ', BlockDeviceMappings[].Ebs.VolumeId)]" --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

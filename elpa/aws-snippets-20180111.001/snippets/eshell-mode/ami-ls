@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
 # name: ami-ls
 # key: ami-ls
+# group: aws
 # --
 aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 describe-images --owners \$`(if (string-equal major-mode "eshell-mode")(message "{")(message "("))` aws --profile=$1  ec2 describe-security-groups --group-names 'Default' --query 'SecurityGroups[0].OwnerId' --output text `(if (string-equal major-mode "eshell-mode")(message "}")(message ")"))` --query "reverse(sort_by(Images, &CreationDate)[].{CreationDate:CreationDate,Name:Name,ImageId:ImageId,Public:Public,Description:Description})" --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

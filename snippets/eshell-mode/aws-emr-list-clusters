@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-emr-list-clusters
-# key: emr-ls
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} --region=${2:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)} emr list-clusters --active --query 'Clusters[*].{ID: Id, NAME: Name}' --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

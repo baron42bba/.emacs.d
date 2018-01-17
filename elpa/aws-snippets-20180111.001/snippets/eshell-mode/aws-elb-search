@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: aws-elb-search
+# key: aws-elb-search
+# group: aws
+# --
+for REGION in `(mapconcat 'identity aws-snippets-regions " ")`; do
+    for BALANCER in \`aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} --region=\${REGION} elb describe-load-balancers --query "reverse(sort_by(LoadBalancerDescriptions, &CreatedTime)[].[LoadBalancerName])" --output text\`; do
+        aws --profile=$1 --region=\${REGION} elb describe-load-balancers --load-balancer-name \${BALANCER} --output text | awk "{print \\"\${REGION}:\${BALANCER}:\\"\\\$0}"
+    done
+done $0

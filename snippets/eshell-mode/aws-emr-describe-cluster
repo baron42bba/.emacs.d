@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-emr-describe-cluster (yank)
-# key: aws-emr-describe-cluster
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} --region=${2:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)} emr describe-cluster --cluster-id ${3: `(yank)`} --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

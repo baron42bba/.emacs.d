@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-describe-stack-events
+# key: cloud-events-ls
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} cloudformation describe-stack-events --stack-name ${4:`(yank)`} --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: aws-region-loop
+# key: aws-region-loop
+# group: aws
+# --
+for REGION in `(mapconcat 'identity aws-snippets-regions " ")`; do
+$0
+done

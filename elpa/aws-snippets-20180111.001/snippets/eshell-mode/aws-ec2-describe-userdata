@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-describe-userdata (yank)
+# key: ec2-userdata
+# group: aws
+# --
+(base64-decode-string (shell-command-to-string "aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 describe-instance-attribute --instance-id ${4:`(yank)`} --attribute userData --query 'UserData.Value' --output text"))$0

@@ -61,10 +61,37 @@
   :group 'aws-snippets
   )
 
+(defconst aws-snippets--default-filters
+  '("tag:Name" "tag:Project" "tag:Type" "tag:Cluster" "instance.group-id" "ip-address" "private-ip-address" "network-interface.subnet-id" "description" ))
+
+(defcustom aws-snippets-filters aws-snippets--default-filters
+  "List of AWS filters for selections."
+  :type '(choice (string :tag "Filter")
+                 (repeat :tag "List of Filters"
+                         (string :tag "Filter")))
+  :set #'(lambda (symbol new)
+           (let ((old (and (boundp symbol)
+                           (symbol-value symbol))))
+             (set-default symbol new)
+             ))
+  :group 'aws-snippets
+  )
+
+
+
+(defconst aws-snippets--ec2-list-instances-query
+  '"Reservations[].Instances[].[join(\`,\`,Tags[?Key==\`Name\`].Value),join(\`,\`,Tags[?Key==\`Schedule\`].Value),InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime]")
+
+(defcustom aws-snippets-ec2-list-instances-query aws-snippets--ec2-list-instances-query
+  "Query string used for ec2 describe-instances."
+  :group 'aws-snippets
+  :type 'string
+  )
 ;;;###autoload
 (defun aws-snippets-initialize ()
+  "Initialize package."
   (let ((snip-dir (expand-file-name "snippets" aws-snippets-dir)))
-    (add-to-list 'yas-snippet-dirs snip-dir t)
+    (when (boundp 'yas-snippet-dirs)(add-to-list 'yas-snippet-dirs snip-dir t))
     (yas-load-directory snip-dir)))
 
 ;;;###autoload

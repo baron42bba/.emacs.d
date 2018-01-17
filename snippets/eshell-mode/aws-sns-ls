@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-sns-ls
-# key: sns-ls
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value bba-aws-regions)}} sns list-topics --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

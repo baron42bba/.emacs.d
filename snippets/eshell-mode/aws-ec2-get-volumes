@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-ec2-get-volumes
-# key: ebs-ls
-# --
-aws --profile=${1:$$(yas-choose-value bba-aws-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)}} ec2 describe-volumes --query 'Volumes[].[VolumeId,State,SnapshotId,join(\`,\`,Tags[?Key==\`Name\`].Value)]' --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

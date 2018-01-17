@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-region-loop
-# key: aws-region-loop
-# --
-for REGION in `(insert-string (mapconcat 'identity bba-aws-regions " "))`; do
-$0
-done

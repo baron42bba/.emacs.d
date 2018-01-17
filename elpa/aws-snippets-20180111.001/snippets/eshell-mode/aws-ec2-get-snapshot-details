@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-snapshot-details (yank)
+# key: snap-det
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} ec2 describe-snapshots --snapshot-id ${4:`(yank)`} --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: aws-regions
-# key: awsreg
-# --
---region=${1:$$(yas-choose-value "\$\{REGION\}" bba-aws-regions)} $0
