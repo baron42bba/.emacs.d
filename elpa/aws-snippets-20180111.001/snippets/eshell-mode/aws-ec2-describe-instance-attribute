@@ -3,4 +3,4 @@
 # key: ec2-attribute
 # group: aws
 # --
-aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 describe-instance-attribute --instance-id ${4:`(yank)`} --attribute ${5:$$(yas-choose-value '("instanceType" "kernel" "ramdisk" "userData" "disableApiTermination" "instanceInitiatedShutdownBehavior" "rootDeviceName" "blockDeviceMapping" "productCodes" "sourceDestCheck" "groupSet" "ebsOptimized" "sriovNetSupport"))} $0
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 describe-instance-attribute --instance-id ${4:`(current-kill 0)`} --attribute ${5:$$(yas-choose-value '("instanceType" "kernel" "ramdisk" "userData" "disableApiTermination" "instanceInitiatedShutdownBehavior" "rootDeviceName" "blockDeviceMapping" "productCodes" "sourceDestCheck" "groupSet" "ebsOptimized" "sriovNetSupport"))} $0

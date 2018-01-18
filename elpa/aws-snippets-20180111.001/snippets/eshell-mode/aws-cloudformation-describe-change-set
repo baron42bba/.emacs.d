@@ -3,4 +3,4 @@
 # key: cloud-descchange
 # group: aws
 # --
-aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} cloudformation describe-change-set --stack-name ${4:`(yank)`} --change-set-name $5 --output ${6:$$(yas-choose-value '("text" "table" "json"))} $0
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} cloudformation describe-change-set --stack-name ${4:`(current-kill 0)`} --change-set-name $5 --output ${6:$$(yas-choose-value '("text" "table" "json"))} $0

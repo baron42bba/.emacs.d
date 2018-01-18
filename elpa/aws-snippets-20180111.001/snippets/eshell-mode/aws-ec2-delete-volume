@@ -3,4 +3,4 @@
 # key: ebs-del
 # group: aws
 # --
-# aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} ec2 delete-volume --volume-id ${4:`(yank)`} $0
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} ec2 delete-volume --volume-id ${4:`(current-kill 0)`} $0

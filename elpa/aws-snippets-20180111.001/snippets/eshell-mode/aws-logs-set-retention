@@ -3,4 +3,4 @@
 # key: logs-set-ret
 # group: aws
 # --
-aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} logs put-retention-policy --log-group-name ${4:`(yank)`} --retention-in-days ${5:$$(yas-choose-value '( "60" "1" "3" "5" "7" "14" "30" "90" "120" "150" "180" "365" "400" "545" "731" "1827" "3653"))} $0
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} logs put-retention-policy --log-group-name ${4:`(current-kill 0)`} --retention-in-days ${5:$$(yas-choose-value '( "60" "1" "3" "5" "7" "14" "30" "90" "120" "150" "180" "365" "400" "545" "731" "1827" "3653"))} $0

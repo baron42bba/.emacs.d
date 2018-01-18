@@ -3,4 +3,4 @@
 # key: ec2-console
 # group: aws
 # --
-aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 get-console-output --output text --instance-id ${4:`(yank)`} >#<buffer *$4-console-output*> $0
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 get-console-output --output text --instance-id ${4:`(current-kill 0)`} >#<buffer *$4-console-output*> $0

@@ -3,4 +3,4 @@
 # key: aws-rds-describe-parameters
 # group: aws
 # --
-aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} rds describe-db-parameters --db-parameter-group-name ${4:`(yank)`} --query "Parameters[*][ParameterName, ParameterValue]" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} rds describe-db-parameters --db-parameter-group-name ${4:`(current-kill 0)`} --query "Parameters[*][ParameterName, ParameterValue]" --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0
