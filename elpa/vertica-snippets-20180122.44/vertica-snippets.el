@@ -1,4 +1,4 @@
-;;; vertica-snippets.el --- Yasnippets for AWS
+;;; vertica-snippets.el --- Yasnippets for Vertica
 
 ;; Copyright (C) 2018 Andreas Gerler
 ;; keywords: convenience,snippets
