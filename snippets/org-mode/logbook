@@ -3,5 +3,5 @@
 # key: logbook_
 # --
 :LOGBOOK:
-${1:`(yank)`}
+${1:`(current-kill 0)`}
 :END:$0

@@ -3,4 +3,4 @@
 # key: :res
 # add results parameter to src block
 # --
-:results ${1:$$(yas-choose-value '("verbatim drawer" "table" "list" "silent" "value code :wrap SRC sql" "value code :wrap SRC json"))} $0
+:results ${1:$$(yas-choose-value '("verbatim drawer" "table" "list" "silent" "value code :wrap SRC sql" "value code :wrap SRC json" "value code :wrap SRC fundamental"))} $0

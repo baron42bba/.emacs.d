@@ -1,7 +1,7 @@
 # name: header
-# key: header
+# key: header_
 # --
-# == Class: ${1:name}
+# == Class: ${1:`(file-name-nondirectory (replace-regexp-in-string "/[^/]*/$" "" (file-name-directory (buffer-file-name))))`}
 #
 # ${2:description}
 #
@@ -11,7 +11,7 @@
 #
 # == Authors
 #
-# `(insert-timestamp)`
+# `(or (and (boundp 'user-full-name) user-full-name) (user-full-name))(message " <") (getenv "EMAIL") (message">")`
 #
 # === Copyright
 #

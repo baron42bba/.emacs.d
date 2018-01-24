@@ -1,11 +1,12 @@
 # -*- mode: snippet -*-
 # name: filecontent
 # key: filecontent
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
 # --
 file { "$1":
-  ensure => file,
-  owner => ${2:root},
-  group => ${3:$2},
-  mode => '${4:0600}',
+  ensure  => file,
+  owner   => ${2:root},
+  group   => ${3:$2},
+  mode    => '${4:0600}',
   content => template('$5')$0
 }
