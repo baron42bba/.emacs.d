@@ -1,4 +1,4 @@
-# -*- org-export-babel-evaluate: nil;  -*-
+# -*- org-export-use-babel: nil;  -*-
 #+SETUPFILE: ~/git/github/org-html-themes/setup/theme-bigblow-local.setup
 #+STARTUP: showall
 #+TITLE: bba emacs configuration
@@ -198,13 +198,14 @@ Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]],
 Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll’:
 
   #+BEGIN_SRC elisp :tangle yes
+    (require 'em-alias)
     (add-hook 'eshell-mode-hook
               (lambda ()
                 ;; The 'ls' executable requires the Gnu version on the Mac
                 (let ((ls (if (file-exists-p "/opt/local/bin/gls")
                               "/opt/local/bin/gls"
                             "/bin/ls")))
-                  (eshell/alias "ll" (concat ls " -AlohG --color=always")))))
+                  (add-to-list 'eshell-command-aliases-list (list "ll" (concat ls " -AlohG --color=always") )))))
   #+END_SRC
 
 What about =gd= to call the Diff command?
@@ -287,9 +288,9 @@ For annotated tags prepare message with commit messages since last tag.
                 (progn
                   (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" ))
                   (newline)
-                  (beginning-of-buffer)
+                  (goto-char (point-min))
                   (newline)
-                  (beginning-of-buffer)
+                  (goto-char (point-min))
                   )
                 )
               )
@@ -312,13 +313,13 @@ focus on the important stuff.
 
 * fullframe
 open ibuffer and magit-status in fullframe mode.
-#+BEGIN_SRC emacs-lisp :tangle yes
-    (if (>= emacs-major-version 24)
+#+BEGIN_SRC emacs-lisp :tangle no
+    (if (>= emacs-major-version 25)
         (progn
           (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20160209.2318")
           (require 'fullframe)
           (fullframe magit-status magit-mode-quit-window)
-          (fullframe ibuffer ibuffer-quit)
+          (fullframe ibuffer)
           )
       )
 #+END_SRC
@@ -500,7 +501,7 @@ snippets for =aws cli= are awesome!
   (if (equal "work" (getenv "SYSENV"))
       (add-to-list 'yas-snippet-dirs "~/workorg/snippets"))
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-  (yas/reload-all)
+  (yas-reload-all)
   (yas-global-mode 1)
   (setq yas-indent-line nil)
   (setq yas-triggers-in-field t)
@@ -550,12 +551,6 @@ Default to snippet-mode if we are in a sub directory of snippets:
   (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
 #+END_SRC
 
-We use lisp in our snippets. So suppress warnings for that:
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
-#+END_SRC
-
 * define some major modes for yasnippets
 [2016-05-25 Wed 10:26]
 
@@ -586,6 +581,12 @@ Languages differ and I need different templates.
 #+END_SRC
 
 * [[https://github.com/flycheck/flycheck][flycheck]]
+
+To get puppet-lint:
+
+#+BEGIN_SRC sh :tangle never
+  gem install puppet-lint
+#+END_SRC
 
 modified puppet-lint definition to include no-80chars-check and fixed
 log-format.
@@ -628,6 +629,10 @@ log-format.
 	 "--log-format \"%{path}:%{line}: %{kind}: %{message} (%{check})\""
 	 )
 	)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq flycheck-json-python-json-executable "python2.7")
 #+END_SRC
 * [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
@@ -695,15 +700,16 @@ Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] t
 Adjust indentation at work.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-    ;; load yaml-mode
-    ;; (require 'yaml-mode)
-    ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+   ;; load yaml-mode
+   ;; (require 'yaml-mode)
+   ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+  (defvar bba-keep-whitespaces)
   (if (equal "work" (getenv "SYSENV"))
       (setq yaml-indent-offset 4))
   (add-hook 'yaml-mode-hook
             (lambda()
               (auto-fill-mode -1)
-	    (setq bba-keep-whitespaces 1)))
+            (setq bba-keep-whitespaces 1)))
 
 #+END_SRC
 
@@ -910,11 +916,16 @@ We are lazy and want to speed up things:
     (interactive)
     (org-narrow-to-subtree)
     (bba-export-jira-org)
-    (let ((org-export-babel-evaluate nil))
+    (let ((org-export-use-babel nil))
       (ox-jira-export-as-jira))
     (delete-region (point) (progn (forward-line 1)(point)))
-    (mark-whole-buffer)
+    (push-mark (point))
+    (push-mark (point-max) nil t)
+    (goto-char (point-min))
     (kill-ring-save 1 1 1)
+    (other-window -1)
+    (widen)
+    (other-window 1)
     )
 
   (define-key org-mode-map "\C-c\S-j" 'bba-org-export-jira-clipboard)
@@ -927,31 +938,33 @@ never heard of orgmode.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-export-jira-org()
-  "export current narrowed view to file in tmp and open a finder window on OS-X."
-  (interactive)
-  (beginning-of-buffer)
-  (insert "# This file is just plain text called orgmode")
-  (newline)
-  (insert "# https://en.wikipedia.org/wiki/Org-mode")
-  (newline)
-  (insert "# You can open it in any text editor or file reader.")
-  (newline)
-  (insert "# You might want to use Emacs for best experience.")
-  (newline)
-  (if (re-search-forward "jira:" nil t 1)
-  (if (org-in-regexp org-bracket-link-regexp 1)
-      (let ((remove (list (match-beginning 0) (match-end 0)))
-	    (description (last (split-string (if (match-end 3)
-							    (match-string-no-properties 3)
-					       (match-string-no-properties 1)) ":"))))
-	(mark-whole-buffer)
-	(write-region (mark) (point) (concat "/tmp/" (car description) ".org") nil nil )
-    (deactivate-mark)
-	(if (string-equal system-type "darwin")(shell-command "open /tmp/"))
-	)))
-  (beginning-of-buffer)
-  (kill-line 4)
-  )
+    "export current narrowed view to file in tmp and open a finder window on OS-X."
+    (interactive)
+    (goto-char (point-min))
+    (insert "# This file is just plain text called orgmode")
+    (newline)
+    (insert "# https://en.wikipedia.org/wiki/Org-mode")
+    (newline)
+    (insert "# You can open it in any text editor or file reader.")
+    (newline)
+    (insert "# You might want to use Emacs for best experience.")
+    (newline)
+    (if (re-search-forward "jira:" nil t 1)
+        (if (org-in-regexp org-bracket-link-regexp 1)
+            (let ((remove (list (match-beginning 0) (match-end 0)))
+                  (description (last (split-string (if (match-end 3)
+                                                       (match-string-no-properties 3)
+                                                     (match-string-no-properties 1)) ":"))))
+              (push-mark (point))
+              (push-mark (point-max) nil t)
+              (goto-char (point-min))
+              (write-region (mark) (point) (concat "/tmp/" (car description) ".org") nil nil )
+              (deactivate-mark)
+              (if (string-equal system-type "darwin")(shell-command "open /tmp/"))
+              )))
+    (goto-char (point-min))
+    (kill-line 4)
+    )
 #+END_SRC
 
 ** bba-ox-clip-formatted-copy
@@ -959,9 +972,9 @@ never heard of orgmode.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-ox-clip-formatted-copy()
-    "wrapper for ox-clip-formatted-copy to disable org-export-babel-evaluate."
+    "wrapper for ox-clip-formatted-copy to disable org-export-use-babel."
     (interactive)
-    (let ((org-export-babel-evaluate nil))
+    (let ((org-export-use-babel nil))
       (ox-clip-formatted-copy (mark) (point)))
     )
 
@@ -972,25 +985,29 @@ never heard of orgmode.
 [2017-07-28 Fri 13:07]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun bba-create-ticket-tmp-dir()
-    "create directory for the current ticket in tmp."
+  (defun bba-create-ticket-tmp-dir-open-dir-screen()
+    "Create directory for the current ticket in tmp if not exist.
+  Open the directory of the current ticket in iterm screen via keyboard maestro."
     (interactive)
     (org-narrow-to-subtree)
     (let ((beg (point)))
-      (beginning-of-buffer)
+      (goto-char (point-min))
       (if (re-search-forward "jira:" nil t 1)
-	  (if (org-in-regexp org-bracket-link-regexp 1)
-	      (let ((remove (list (match-beginning 0) (match-end 0)))
-		    (description (last (split-string (if (match-end 3)
-							 (match-string-no-properties 3)
-						       (match-string-no-properties 1)) ":"))))
-		(unless (file-exists-p (concat "~/tmp/" (downcase (car description))))
-				       (mkdir (concat "~/tmp/" (downcase (car description))))
-			))))
+          (if (org-in-regexp org-bracket-link-regexp 1)
+              (let ((remove (list (match-beginning 0) (match-end 0)))
+                    (description (last (split-string (if (match-end 3)
+                                                         (match-string-no-properties 3)
+                                                       (match-string-no-properties 1)) ":"))))
+                (unless (file-exists-p (concat "~/tmp/" (downcase (car description))))
+                                       (mkdir (concat "~/tmp/" (downcase (car description))))
+                                       )
+                (kill-new (concat "~/tmp/" (downcase (car description))))
+                )))
       (goto-char beg)
       )
     (widen)
-  )
+    (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-cd-to-clipboard\"'")
+    )
 #+END_SRC
 ** Some initial languages we want org-babel to support
 
@@ -1097,48 +1114,48 @@ This is helpful in training sessions.
   If region is active copy only the src begin and src end lines."
     (interactive)
     (if (use-region-p)
-	(progn
-	  (let (-p1 -p2 srclength)
-	    (setq -p1 (region-beginning) -p2 (region-end))
-	    (setq mark-active nil)
-	    (re-search-backward "\#\\+BEGIN_SRC")
-        (previous-line)
+        (progn
+          (let (-p1 -p2 srclength)
+            (setq -p1 (region-beginning) -p2 (region-end))
+            (setq mark-active nil)
+            (re-search-backward "\#\\+BEGIN_SRC")
+        (forward-line -1)
         (if  (not (looking-at "\#"))(forward-line))
-	    (set-mark-command nil)
-	    (forward-line)
-	    (beginning-of-line)
-	    (kill-ring-save 1 1 1)
-	    (goto-char -p1)
-	    (set-mark-command nil)
-	    (insert (pop kill-ring))
-	    (setq srclength (- (region-end) (region-beginning)))
-	    (setq mark-active nil)
-	    (re-search-backward "\#\\+END_SRC")
-	    (set-mark-command nil)
-	    (forward-line)
-	    (beginning-of-line)
-	    (kill-ring-save 1 1 1)
-	    (kill-append "\n" nil)
-	    (goto-char (+ -p2 srclength))
-	    (insert (pop kill-ring))
-	    )
-	  )
+            (set-mark-command nil)
+            (forward-line)
+            (beginning-of-line)
+            (kill-ring-save 1 1 1)
+            (goto-char -p1)
+            (set-mark-command nil)
+            (insert (pop kill-ring))
+            (setq srclength (- (region-end) (region-beginning)))
+            (setq mark-active nil)
+            (re-search-backward "\#\\+END_SRC")
+            (set-mark-command nil)
+            (forward-line)
+            (beginning-of-line)
+            (kill-ring-save 1 1 1)
+            (kill-append "\n" nil)
+            (goto-char (+ -p2 srclength))
+            (insert (pop kill-ring))
+            )
+          )
       (progn
-	(push-mark)
-	(re-search-backward "\#\\+BEGIN_SRC")
-    (previous-line)
+        (push-mark)
+        (re-search-backward "\#\\+BEGIN_SRC")
+    (forward-line -1)
     (if  (not (looking-at "\#"))(forward-line))
-	(set-mark-command nil)
-	(re-search-forward "\#\\+END_SRC")
-	(forward-line)
-	(beginning-of-line)
-	(kill-ring-save 1 1 1)
-	(set-mark-command '1)
-	(set-mark-command '1)
-	(insert (pop kill-ring))
-	(re-search-backward "\#\\+BEGIN_SRC")
-	(forward-line)
-	))
+        (set-mark-command nil)
+        (re-search-forward "\#\\+END_SRC")
+        (forward-line)
+        (beginning-of-line)
+        (kill-ring-save 1 1 1)
+        (set-mark-command '1)
+        (set-mark-command '1)
+        (insert (pop kill-ring))
+        (re-search-backward "\#\\+BEGIN_SRC")
+        (forward-line)
+        ))
     )
 
   (defun bba-copy-org-src-block()
@@ -1221,11 +1238,11 @@ Here is the code:
     (shell-command "tmuxhardcopy.sh")
     (insert "#+END_SRC")
     (newline)
-    (previous-line 2)
+    (forward-line -2)
     (org-edit-special)
     (delete-trailing-whitespace)
     (org-edit-src-exit)
-    (next-line 2)
+    (forward-line 2)
     )
 #+END_SRC
 
@@ -1411,9 +1428,25 @@ taken from http://doc.norang.ca/org-mode.org
     (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
     ;; Include current clocking task in clock reports
     (setq org-clock-report-include-clocking-task t)
-    (setq org-time-clocksum-format
+    (setq org-duration-format
           '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
     (setq bh/keep-clock-running nil)
+
+  (defun bh/is-project-p ()
+    "Any task with a todo keyword subtask"
+    (save-restriction
+      (widen)
+      (let ((has-subtask)
+            (subtree-end (save-excursion (org-end-of-subtree t)))
+            (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+        (save-excursion
+          (forward-line 1)
+          (while (and (not has-subtask)
+                      (< (point) subtree-end)
+                      (re-search-forward "^\*+ " subtree-end t))
+            (when (member (org-get-todo-state) org-todo-keywords-1)
+              (setq has-subtask t))))
+        (and is-a-task has-subtask))))
 
     (defun bh/clock-in-to-next (kw)
       "Switch a task from TODO to NEXT when clocking in.
@@ -1631,7 +1664,7 @@ to embed videos, they give you the entire iframe HTML code to use, but
 this wouldn’t really be Emacs if we couldn’t make things just a little
 bit easier.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle never
   (defvar yt-iframe-format
     ;; You may want to change your width and height.
     (concat "<iframe width=\"440\""
@@ -1721,6 +1754,7 @@ file.
 #+BEGIN_SRC emacs-lisp :tangle yes
   ;; put your css files there
   (defvar org-theme-css-dir "~/.emacs.d/org-css/")
+  (defvar org-theme-css)
 
   (defun toggle-org-custom-inline-style ()
     (interactive)
@@ -1757,7 +1791,7 @@ file.
               (set (make-local-variable 'org-html-head-include-default-style)
                    nil)
               (message "Set custom style from %s" f))
-          (message "Custom header file %s doesnt exist")))))
+          (message "Custom header file %s doesnt exist" f)))))
 #+END_SRC
 
 ** org-sticky-header
@@ -1837,7 +1871,7 @@ executed instead of opened.
      (defun load-git-cfengine ()
        "Load config and tags file of git cfengine repo"
      (interactive) (visit-tags-table "~/.cfengine_tags")
-     (interactive) (find-file "~/.cfagent/inputs/config.cf")
+     (find-file "~/.cfagent/inputs/config.cf")
      )
 
      ;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
@@ -2162,13 +2196,14 @@ necessary.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   ;; Do not use gpg agent when runing in terminal
+  (if (>= emacs-major-version 25)
   (defadvice epg--start (around advice-epg-disable-agent activate)
     (let ((agent (getenv "GPG_AGENT_INFO")))
       (when (not (display-graphic-p))
         (setenv "GPG_AGENT_INFO" nil))
       ad-do-it
       (when (not (display-graphic-p))
-        (setenv "GPG_AGENT_INFO" agent))))
+        (setenv "GPG_AGENT_INFO" agent)))))
 
   ;; (defadvice epg--start (around advice-epg-disable-agent disable)
   ;;   "Don't allow epg--start to use gpg-agent in plain text terminals."
@@ -2189,8 +2224,8 @@ list who can decrypt a file:
   (defun bba-epa-list-packets ()
     "List who can decrypt the current file"
     (interactive)
-    (let ((bba-epa-filename (buffer-file-name)))
-      (setq bba-epa-packets-buffer (generate-new-buffer "*Packets*"))
+    (let ((bba-epa-filename (buffer-file-name))
+      (bba-epa-packets-buffer (generate-new-buffer "*Packets*")))
       (set-buffer bba-epa-packets-buffer)
       (insert (shell-command-to-string (concat "gpg --list-packets " bba-epa-filename))
       ;; (epg--start context "--list-packets ")
@@ -2251,7 +2286,8 @@ Watching [[https://www.youtube.com/watch?v%3DFtieBc3KptU][Emacs For Writers]] by
   (setq abbrev-file-name "~/org/abbrev_defs")
   (if (file-exists-p abbrev-file-name)
       (quietly-read-abbrev-file))
-  (setq default-abbrev-mode t)
+  (set-default 'abbrev-mode t)
+  (abbrev-mode )
   (setq save-abbrevs 'silently)
 #+END_SRC
 
@@ -2322,12 +2358,14 @@ Combine abbrev with Ispell:
 
 thanks to https://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client
 
-#+BEGIN_SRC emacs-lisp
+have a look in [[file:/Applications/Emacs.app/Contents/Resources/lisp/progmodes/sql.el.gz::(let%20((connect-set%20(assoc-string%20connection%20sql-connection-alist%20t)))][sql.el]] and extract the sql-product and set it before
+starting sql-connect.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun my-sql-connect ()
     (interactive)
     (require 'my-password "~/.emacs_secrets.el.gpg")
     (setq sql-product 'vertica)
-
     (let ((connection (helm-comp-read
                        "Select server: "
                        my-sql-servers-alist
@@ -2555,7 +2593,7 @@ Includes [[http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests
 With modifications by [[http://sachachua.com/blog/2011/12/emacs-artbollocks-mode-el-and-writing-more-clearly/][Sacha Chua]].
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-    (if (>= emacs-major-version 24)
+    (if (>= emacs-major-version 25)
         (progn
           (require 'artbollocks-mode)
           ;; Avoid these phrases
@@ -2661,19 +2699,19 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
   (defun bba-insert-date ()
   "Insert the current date"
   (interactive)
-  (insert-string (format-time-string "%B %e, %Y")))
+  (insert (format-time-string "%B %e, %Y")))
   (defun bba-insert-timestamp ()
   "Insert the current timestamp"
   (interactive)
-  (insert-string (format-time-string "%Y%m%d-%H%M")))
+  (insert (format-time-string "%Y%m%d-%H%M")))
   (defun bba-insert-name-timestamp ()
   "Insert the current timestamp"
   (interactive)
-  (insert-string (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+  (insert (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
   (defun bba-insert-name ()
   "Insert name and emailaddress of current systemuser."
   (interactive)
-  (insert-string (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+  (insert (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
   (define-key global-map (kbd "s-n") 'bba-insert-name)
 
 
@@ -3294,6 +3332,7 @@ character before any spaces."
   (define-key bba/toggle "a" 'artbollocks-mode)
   (define-key bba/toggle "b" 'bba-switch-default-browser)
   (define-key bba/toggle "c" 'rainbow-mode)
+  (define-key bba/toggle "\S-c" 'bba-toggle-copyright-update)
   (define-key bba/toggle "e" 'eldoc-mode)
   (define-key bba/toggle "\S-e" 'epoch-view-mode)
   (define-key bba/toggle "f" 'auto-fill-mode)
@@ -3400,6 +3439,7 @@ function to convert groups of spaces to hard tabs.
 
   (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssh-to-fqdn-at-point)
   (define-key bba/keyboard-maestro "c" 'bba-open-file-dir-screen)
+  (define-key bba/keyboard-maestro "C" 'bba-create-ticket-tmp-dir-open-dir-screen)
 
   (define-key bba/multiple-cursors "e" 'mc/edit-lines)
   (define-key bba/multiple-cursors "m" 'mc/mark-all-like-this)
@@ -3814,7 +3854,19 @@ XML indentation
 update copyrights
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'before-save-hook 'copyright-update)
+  (defvar bba-copyright-update 't)
+  (defun bba-toggle-copyright-update()
+    "switch copyright-update on save on or off."
+    (interactive)
+    (if (bound-and-true-p bba-copyright-update)
+        (setq bba-copyright-update nil)
+      (setq bba-copyright-update t))
+    (message "copyright-update is %s" bba-copyright-update)
+    )
+  (add-hook 'before-save-hook (lambda()
+                                     (if (bound-and-true-p 'bba-copyright-update)
+                                         (copyright-update))))
+#+END_SRC
 #+END_SRC
 
 * other stuff
@@ -3836,27 +3888,25 @@ update copyrights
   (global-set-key '[(end)] 'chb-end)
   ;;
   (defun chb-home ()
-  (interactive)
-  (setq zmacs-region-stays t)
-  (if (not (bolp))
-  (beginning-of-line)
-  (if (eq this-command last-command)
-  (cond
-   ((not (= (point) (window-start)))
-    (move-to-window-line 0)
-    (beginning-of-line))
-   (t
-    (goto-char (point-min)))))))
+    (interactive)
+    (if (not (bolp))
+        (beginning-of-line)
+      (if (eq this-command last-command)
+          (cond
+           ((not (= (point) (window-start)))
+            (move-to-window-line 0)
+            (beginning-of-line))
+           (t
+            (goto-char (point-min)))))))
 
   (defun chb-end ()
-  (interactive)
-  (setq zmacs-region-stays t)
-  (if (not (eolp))
-  (end-of-line)
-  (if (eq this-command last-command)
-  (cond
-   ((not (= (point) (save-excursion
-                      (move-to-window-line -1)
+    (interactive)
+    (if (not (eolp))
+        (end-of-line)
+      (if (eq this-command last-command)
+          (cond
+           ((not (= (point) (save-excursion
+                              (move-to-window-line -1)
                               (end-of-line)
                               (point))))
             (move-to-window-line -1)
@@ -3949,7 +3999,12 @@ whole team. No matter what editor gets used.
 	(custom-set-faces
 	 '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef"))) t)
 	 '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
-	 '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef"))))
+	 '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313"))))
+	 ;; '(show-paren-match ((t (:distant-foreground "#29759c":background "#84cbef" ))))
+	 ;;'(show-paren-match ((t (:inverse-video t))))
+       '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
+       '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
+	 ;; '(show-paren-match ((t (:unterline (:color "#b8bb26" :style wave)))))
 	 )
 	(let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
                                      ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
@@ -3969,8 +4024,11 @@ whole team. No matter what editor gets used.
                                   `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.25))))
                                   `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.4))))
                                   `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.6))))
-                                  `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil))))))
-    ))
+                                  `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil)))))
+	  (custom-set-variables
+	    '(ansi-color-names-vector
+	      ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"]))
+	  )))
 
 #+END_SRC
 
@@ -3990,7 +4048,7 @@ whole team. No matter what editor gets used.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (string-equal system-type "darwin")
-   (set-default-font "Menlo 14"))
+   (set-frame-font "Menlo 12"))
 #+END_SRC
 
 * dns-mode
@@ -4011,10 +4069,11 @@ If you edit zone files via TRAMP you might want to activate them via
 
   )
 
-  (add-hook 'dns-mode-hook
-    (lambda ()
-      (define-key dns-mode-map "\C-c\C-r" 'dns-rndc)
-      ))
+  (eval-after-load 'dns-mode
+    (add-hook 'dns-mode-hook
+             (lambda ()
+               (define-key dns-mode-map "\C-c\C-r" 'dns-rndc)
+               )))
 
 #+END_SRC
 
@@ -4089,7 +4148,7 @@ Use aws command line tool via Emacs.
     (switch-to-buffer (concat "*aws-" profile "-" name "*"))
     (org-mode)
     (message "querying aws for %s in profile %s" name profile)
-    (insert-string (shell-command-to-string (concat "aws ec2 describe-instances --profile " profile " --filters \"Name=tag-key,Values=Name,Name=tag-value,Values=" name "*\" --query \"Reservations[].Instances[?State.Name=='running'].[InstanceId, PublicDnsName]\" --output table")))
+    (insert (shell-command-to-string (concat "aws ec2 describe-instances --profile " profile " --filters \"Name=tag-key,Values=Name,Name=tag-value,Values=" name "*\" --query \"Reservations[].Instances[?State.Name=='running'].[InstanceId, PublicDnsName]\" --output table")))
     (message "done.")
   )
 
@@ -4161,12 +4220,12 @@ Split and show workhours:
     (progn (split-window-below)
            (other-window 1)
            (find-file "~/org/workhours.org")
-           (beginning-of-buffer)
+           (goto-char (point-min))
            (org-shifttab 3)
 	   (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
 	       (org-beginning-of-line)
 	     (progn
-	       (beginning-of-buffer)
+	       (goto-char (point-min))
 	       (org-next-visible-heading '1)
 	       (org-meta-return)
 	       (insert (format-time-string "%Y-%m"))
