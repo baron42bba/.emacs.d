@@ -967,6 +967,104 @@ never heard of orgmode.
     )
 #+END_SRC
 
+** ox-publish
+[2018-01-24 Wed 20:29]
+
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (require 'ox-html)
+    (require 'ox-publish)
+    (require 'ox-rss)
+    (require 'htmlize)
+  #+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-mode-websrc-directory (concat (getenv "HOME") "/git/website"))
+  (setq org-mode-publishing-directory (concat (getenv "HOME") "/Sites/"))
+
+  (setq org-publish-project-alist
+        `(("all"
+           :components ("blog-content" "blog-static" "blog-rss"))
+
+          ("blog-content"
+           :base-directory       ,org-mode-websrc-directory
+           :base-extension       "org"
+           :publishing-directory ,org-mode-publishing-directory
+           :recursive            t
+           :publishing-function  org-html-publish-to-html
+  ;         :preparation-function org-mode-blog-prepare
+           :export-with-tags     nil
+           :headline-levels      4
+           :auto-preamble        t
+           :auto-postamble       nil
+           :auto-sitemap         t
+           :sitemap-title        "Bundesbrandschatzamt"
+           :section-numbers      nil
+           :table-of-contents    nil
+           :with-toc             nil
+           :with-author          nil
+           :with-creator         nil
+           :with-tags            t
+           :with-smart-quotes    t
+
+           :html-doctype         "html5"
+           :html-html5-fancy     t
+           :html-preamble        org-mode-blog-preamble
+           :html-postamble       org-mode-blog-postamble
+           :html-head  "<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+              <link href='http://fonts.googleapis.com/css?family=Source+Serif+Pro:400,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+              <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
+              <link rel=\"stylesheet\" href=\"/~baron/css/styles.css\" type=\"text/css\"/>\n"
+           :html-head-extra "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>
+              <script src=\"/~baron/js/magic.js\"></script>
+              <link rel=\"icon\" href=\"/~baron/img/dragon.svg\">
+              <link rel=\"shortcut icon\" href=\"~baron/img/dragon-head.png\">
+              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
+           :html-head-include-default-style nil
+           )
+
+          ("blog-static"
+           :base-directory       ,org-mode-websrc-directory
+           :base-extension       "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|svg"
+           :publishing-directory ,org-mode-publishing-directory
+           :recursive            t
+           :publishing-function  org-publish-attachment
+           )
+
+          ("blog-rss"
+           :base-directory        ,org-mode-websrc-directory
+           :base-extension        "org"
+           :rss-image-url         "http://www.bundesbrandschatzamt.de/~baron/img/dragon-head.png"
+           :publishing-directory  ,org-mode-publishing-directory
+           :publishing-function   (org-rss-publish-to-rss)
+           :html-link-home        "http://www.bundesbrandschatzamt.de/~baron/"
+           :html-link-use-abs-url t
+           :with-toc              nil
+           :exclude               ".*"
+           :include               ("index.org"))))
+
+  (defun org-mode-blog-preamble (options)
+    "The function that creates the preamble top section for the blog.
+  OPTIONS contains the property list from the org-mode export."
+    (let ((base-directory (plist-get options :base-directory)))
+      (org-babel-with-temp-filebuffer (expand-file-name "top-bar.html" base-directory) (buffer-string))))
+
+  (defun org-mode-blog-postamble (options)
+    "The function that creates the postamble, or bottom section for the blog.
+  OPTIONS contains the property list from the org-mode export."
+    (let ((base-directory (plist-get options :base-directory)))
+      (org-babel-with-temp-filebuffer (expand-file-name "bottom.html" base-directory) (buffer-string))))
+
+  (defun org-mode-blog-prepare ()
+    "`index.org' should always be exported so touch the file before publishing."
+    (let* ((base-directory (plist-get project-plist :base-directory))
+           (buffer (find-file-noselect (expand-file-name "index.org" base-directory) t)))
+      (with-current-buffer buffer
+        (set-buffer-modified-p t)
+        (save-buffer 0))
+      (kill-buffer buffer)))
+#+END_SRC
+
+
 ** bba-ox-clip-formatted-copy
 [2016-12-13 Tue 15:29]
 
