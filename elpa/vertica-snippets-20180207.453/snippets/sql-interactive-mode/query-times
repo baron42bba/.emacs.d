@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: query-times
+# key: qt_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT DISTINCT theday,
+                user_name,
+                (min_dat / 1000) AS min_sec,
+                (max_dat / 1000) AS max_sec,
+                (avg_dat / 1000) AS avg_sec,
+                (median_dat / 1000) AS median_sec,
+                query_cnt
+FROM
+  (SELECT date(end_timestamp::TIMESTAMP) AS theday,
+          user_name,
+          min(request_duration_ms) over(partition BY date(end_timestamp::TIMESTAMP), user_name) min_dat,
+          max(request_duration_ms) over(partition BY date(end_timestamp::TIMESTAMP), user_name) max_dat,
+          avg(request_duration_ms) over(partition BY date(end_timestamp::TIMESTAMP), user_name) avg_dat,
+          median(request_duration_ms) over(partition BY date(end_timestamp::TIMESTAMP), user_name) median_dat,
+          count(*) over(partition BY date(end_timestamp::TIMESTAMP), user_name) AS query_cnt
+   FROM query_requests
+   WHERE is_executing IS FALSE
+   AND request ILIKE '%table%'
+   AND NOT (request LIKE 'SELECT * FROM columns%'
+         OR request LIKE '%query_requests%') ) my_alias
+ORDER BY 1, 2 DESC;
