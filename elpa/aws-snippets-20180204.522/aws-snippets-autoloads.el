@@ -3,12 +3,12 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "aws-snippets" "aws-snippets.el" (23126 10835
-;;;;;;  780604 640000))
+;;;### (autoloads nil "aws-snippets" "aws-snippets.el" (23162 61523
+;;;;;;  523006 699000))
 ;;; Generated autoloads from aws-snippets.el
 
 (autoload 'aws-snippets-initialize "aws-snippets" "\
-
+Initialize package.
 
 \(fn)" nil nil)
 
@@ -16,8 +16,8 @@
 
 ;;;***
 
-;;;### (autoloads nil nil ("aws-snippets-pkg.el") (23126 10835 781783
-;;;;;;  534000))
+;;;### (autoloads nil nil ("aws-snippets-pkg.el") (23162 61523 430867
+;;;;;;  76000))
 
 ;;;***
 
