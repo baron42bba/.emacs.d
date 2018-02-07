@@ -3962,7 +3962,7 @@ update copyrights
     (message "copyright-update is %s" bba-copyright-update)
     )
   (add-hook 'before-save-hook (lambda()
-                                     (if (bound-and-true-p 'bba-copyright-update)
+                                     (if (bound-and-true-p bba-copyright-update)
                                          (copyright-update))))
 #+END_SRC
 #+END_SRC
