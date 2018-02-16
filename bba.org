@@ -978,8 +978,8 @@ never heard of orgmode.
   #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-mode-websrc-directory (concat (getenv "HOME") "/git/website"))
-  (setq org-mode-publishing-directory (concat (getenv "HOME") "/Sites/"))
+  (setq org-mode-websrc-directory (concat (getenv "HOME") "/git/website/org"))
+  (setq org-mode-publishing-directory (concat (getenv "HOME") "/git/website/html/"))
 
   (setq org-publish-project-alist
         `(("all"
