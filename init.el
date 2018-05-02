@@ -9,4 +9,5 @@
 (require 'ob-core)
 (require 'ob-tangle)
 (require 'ob-sql)
+(require 'ob-async)
 (org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))

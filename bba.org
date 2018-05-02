@@ -43,6 +43,7 @@ To be precise, this is what's in the first part of my =~/.emacs.d/init.el= (what
   (require 'org)
   (require 'ob-tangle)
   (require 'ob-sql)
+  (require 'ob-async)
   (org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))
 
 #+END_SRC
