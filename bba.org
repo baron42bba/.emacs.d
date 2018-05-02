@@ -1123,6 +1123,7 @@ never heard of orgmode.
      (octave . t)
      (sqlite . t)
      (perl . t)
+     (sql . t)
      ))
 
   ;;(setq org-html-preamble nil
