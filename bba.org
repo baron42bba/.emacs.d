@@ -2596,61 +2596,46 @@ like these:
                                                     (lambda()
                                                       (unless (boundp 'bba-keep-whitespaces)
                                                         (save-excursion
-                                                          (delete-trailing-whitespace)))
-                                                      )
-                                                    )
-                                  )
-               ))
+                                                          (delete-trailing-whitespace))))))))
 
   (eval-after-load "dns-mode"
     '(add-hook 'dns-mode-hook (lambda() (add-hook 'write-contents-functions
                                                   (lambda()
                                                     (save-excursion
-                                                      (delete-trailing-whitespace)))
-                                                  )
-                                )
-               ))
+                                                      (delete-trailing-whitespace)))))))
 
   (eval-after-load "js-mode"
     '(add-hook 'js-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
                                                      (save-excursion
-                                                       (delete-trailing-whitespace)))
-                                                   )
-                                 )
-               ))
+                                                       (delete-trailing-whitespace)))))))
+
+  (eval-after-load "json-mode"
+    '(add-hook 'json-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                   (lambda()
+                                                     (unless (boundp 'bba-keep-whitespaces)
+                                                      (save-excursion
+                                                        (delete-trailing-whitespace))))))))
 
   (eval-after-load "org-mode"
     '(add-hook 'org-mode-hook (lambda() (add-hook 'write-contents-functions
                                                   (lambda()
                                                     (unless (boundp 'bba-keep-whitespaces)
                                                       (save-excursion
-                                                        (delete-trailing-whitespace)))))
-                                )
-               ))
-
+                                                        (delete-trailing-whitespace))))))))
   (eval-after-load "puppet-mode"
     '(add-hook 'puppet-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
                                                       (unless (boundp 'bba-keep-whitespaces)
                                                         (save-excursion
-                                                          (delete-trailing-whitespace)))
-                                                      )
-                                                   )
-                                 )
-               ))
+                                                          (delete-trailing-whitespace))))))))
 
   (eval-after-load "text-mode"
     '(add-hook 'text-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
                                                      (unless (boundp 'bba-keep-whitespaces)
                                                        (save-excursion
-                                                         (delete-trailing-whitespace)))
-                                                     )
-                                                   )
-                                 )
-               ))
-
+                                                         (delete-trailing-whitespace))))))))
 
 
 
