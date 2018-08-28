@@ -3582,6 +3582,7 @@ function to convert groups of spaces to hard tabs.
 
   (define-key bba/multiple-cursors "e" 'mc/edit-lines)
   (define-key bba/multiple-cursors "m" 'mc/mark-all-like-this)
+  (define-key bba/multiple-cursors "n" 'mc/mark-next-like-this)
   (global-unset-key (kbd "M-<down-mouse-1>"))
   (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
