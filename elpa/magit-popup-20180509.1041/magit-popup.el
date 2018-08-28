@@ -1,6 +1,6 @@
 ;;; magit-popup.el --- Define prefix-infix-suffix command combos  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2010-2017  The Magit Project Contributors
+;; Copyright (C) 2010-2018  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file which
 ;; lists all contributors.  If not, see http://magit.vc/authors.
@@ -487,10 +487,13 @@ usually specified in that order):
   `SHORTNAME-arguments'.  This is usually done by calling the
   function `SHORTNAME-arguments'.
 
-  Members of VALUE may also be strings, assuming the first member
-  is also a string.  Instead of just one action section with the
-  heading \"Actions\", multiple sections are then inserted into
-  the popup buffer, using these strings as headings.
+  Members of VALUE may also be strings and functions, assuming
+  the first member is a string or function.  In that case the
+  members are split into sections and these special elements are
+  used as headings.  If such an element is a function then it is
+  called with no arguments and must return either a string, which
+  is used as the heading, or nil, in which case the section is
+  not inserted.
 
   Members of VALUE may also be nil.  This should only be used
   together with `:max-action-columns' and allows having gaps in
@@ -523,10 +526,26 @@ usually specified in that order):
   is a list whose members have the form (KEY DESC SWITCH), see
   `magit-define-popup-switch' for details.
 
+  Members of VALUE may also be strings and functions, assuming
+  the first member is a string or function.  In that case the
+  members are split into sections and these special elements are
+  used as headings.  If such an element is a function then it is
+  called with no arguments and must return either a string, which
+  is used as the heading, or nil, in which case the section is
+  not inserted.
+
 `:options'
   The popup arguments which take a value, as in \"--opt=OPTVAL\".
   VALUE is a list whose members have the form (KEY DESC OPTION
   READER), see `magit-define-popup-option' for details.
+
+  Members of VALUE may also be strings and functions, assuming
+  the first member is a string or function.  In that case the
+  members are split into sections and these special elements are
+  used as headings.  If such an element is a function then it is
+  called with no arguments and must return either a string, which
+  is used as the heading, or nil, in which case the section is
+  not inserted.
 
 `:default-arguments'
   The default arguments, a list of switches (which are then
@@ -538,6 +557,20 @@ usually specified in that order):
   Git variables which can be set from the popup.  VALUE is a list
   whose members have the form (KEY DESC COMMAND FORMATTER), see
   `magit-define-popup-variable' for details.
+
+  Members of VALUE may also be strings and functions, assuming
+  the first member is a string or function.  In that case the
+  members are split into sections and these special elements are
+  used as headings.  If such an element is a function then it is
+  called with no arguments and must return either a string, which
+  is used as the heading, or nil, in which case the section is
+  not inserted.
+
+  Members of VALUE may also be actions as described above for
+  `:actions'.
+
+  VALUE may also be a function that returns a list as describe
+  above.
 
 `:sequence-predicate'
   When this function returns non-nil, then the popup uses
@@ -1196,13 +1229,6 @@ of events shared by all popups and before point is adjusted.")
                                     (button-type-get type 'property)))))
            (maxcols (button-type-get type 'maxcols))
            (pred (magit-popup-get :sequence-predicate)))
-      (if (and pred (funcall pred))
-          (setq maxcols nil)
-        (cl-typecase maxcols
-          (keyword (setq maxcols (magit-popup-get maxcols)))
-          (symbol  (setq maxcols (symbol-value maxcols)))))
-      (when (functionp maxcols)
-        (setq maxcols (funcall maxcols heading)))
       (when items
         (if (functionp heading)
             (when (setq heading (funcall heading))
@@ -1212,6 +1238,13 @@ of events shared by all popups and before point is adjusted.")
           (insert (propertize heading 'face 'magit-popup-heading))
           (unless (string-match "\n$" heading)
             (insert "\n")))
+        (if (and pred (funcall pred))
+            (setq maxcols nil)
+          (cl-typecase maxcols
+            (keyword (setq maxcols (magit-popup-get maxcols)))
+            (symbol  (setq maxcols (symbol-value maxcols)))))
+        (when (functionp maxcols)
+          (setq maxcols (funcall maxcols heading)))
         (when heading
           (let ((colwidth
                  (+ (apply 'max (mapcar (lambda (e) (length (car e))) items))
@@ -1263,26 +1296,29 @@ of events shared by all popups and before point is adjusted.")
           'type type 'event (magit-popup-event-key ev))))
 
 (defun magit-popup-format-action-button (type ev)
-  (let* ((dsc (magit-popup-event-dsc ev))
+  (let* ((cmd (magit-popup-event-fun ev))
+         (dsc (magit-popup-event-dsc ev))
          (fun (and (functionp dsc) dsc)))
-    (when fun
-      (setq dsc
-            (-when-let (branch (funcall fun))
-              (if (text-property-not-all 0 (length branch) 'face nil branch)
-                  branch
-                (magit-branch-set-face branch)))))
-    (when dsc
-      (list (format-spec
-             (button-type-get type 'format)
-             `((?k . ,(propertize (magit-popup-event-keydsc ev)
-                                  'face 'magit-popup-key))
-               (?d . ,dsc)
-               (?D . ,(if (and (not fun)
-                               (eq (magit-popup-event-fun ev)
-                                   (magit-popup-get :default-action)))
-                          (propertize dsc 'face 'bold)
-                        dsc))))
-            'type type 'event (magit-popup-event-key ev)))))
+    (unless (and disabled-command-function
+                 (symbolp cmd)
+                 (get cmd 'disabled))
+      (when fun
+        (setq dsc
+              (-when-let (branch (funcall fun))
+                (if (text-property-not-all 0 (length branch) 'face nil branch)
+                    branch
+                  (magit-branch-set-face branch)))))
+      (when dsc
+        (list (format-spec
+               (button-type-get type 'format)
+               `((?k . ,(propertize (magit-popup-event-keydsc ev)
+                                    'face 'magit-popup-key))
+                 (?d . ,dsc)
+                 (?D . ,(if (and (not fun)
+                                 (eq cmd (magit-popup-get :default-action)))
+                            (propertize dsc 'face 'bold)
+                          dsc))))
+              'type type 'event (magit-popup-event-key ev))))))
 
 (defun magit-popup-insert-command-section (type spec)
   (magit-popup-insert-section
@@ -1322,6 +1358,7 @@ of events shared by all popups and before point is adjusted.")
 
 (font-lock-add-keywords 'emacs-lisp-mode magit-popup-font-lock-keywords)
 
+;;; _
 (provide 'magit-popup)
 ;; Local Variables:
 ;; indent-tabs-mode: nil
