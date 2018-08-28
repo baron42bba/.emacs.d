@@ -968,6 +968,19 @@ never heard of orgmode.
     )
 #+END_SRC
 
+** ox-reveal
+[2017-11-06 Mon 23:26]
+
+Get reveal.js as well:
+
+#+BEGIN_SRC sh :tangle never
+  git clone https://github.com/hakimel/reveal.js/
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'ox-reveal)
+#+END_SRC
+
 ** ox-publish
 [2018-01-24 Wed 20:29]
 
