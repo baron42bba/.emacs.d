@@ -496,7 +496,7 @@ snippets for =aws cli= are awesome!
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (add-to-list 'load-path
-               "~/.emacs.d/elpa/yasnippet-20180102.1824")
+               "~/.emacs.d/elpa/yasnippet-20180204.1613")
   (require 'yasnippet)
 
   (if (equal "work" (getenv "SYSENV"))
