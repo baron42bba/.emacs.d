@@ -1968,6 +1968,23 @@ executed instead of opened.
 			( t . emacs)))
 #+END_SRC
 
+* goto-address-mode
+[2018-08-28 Tue 20:34]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (eval-after-load "prog-mode"
+    '(progn
+       (add-hook 'prog-mode-hook 'goto-address-prog-mode)
+       (define-key prog-mode-map "\C-c\C-o" 'goto-address-at-point)))
+  (eval-after-load "eshell-mode"
+    '(progn
+       (add-hook 'eshell-mode 'goto-address-mode)
+       (define-key eshell-mode-map "\C-c\C-o" 'goto-address-at-point)))
+  (eval-after-load "shell-mode"
+    '(progn
+       (add-hook 'shell-mode 'goto-address-mode)
+       (define-key shell-mode-map "\C-c\C-o" 'goto-address-at-point)))
+#+END_SRC
 * CFEngine
 
 #+BEGIN_SRC emacs-lisp :tangle yes
