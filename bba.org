@@ -2826,26 +2826,33 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
 #+END_SRC
 
 * insert-date function
+
 #+BEGIN_SRC emacs-lisp :tangle yes
   (defun bba-insert-date ()
   "Insert the current date"
   (interactive)
   (insert (format-time-string "%B %e, %Y")))
+
   (defun bba-insert-timestamp ()
   "Insert the current timestamp"
   (interactive)
   (insert (format-time-string "%Y%m%d-%H%M")))
+
   (defun bba-insert-name-timestamp ()
   "Insert the current timestamp"
   (interactive)
   (insert (format-time-string "%a %b %e %Y") " " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
+
   (defun bba-insert-name ()
   "Insert name and emailaddress of current systemuser."
   (interactive)
   (insert (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">" ))
   (define-key global-map (kbd "s-n") 'bba-insert-name)
 
-
+  (defun bba-insert-changelog-signature ()
+    "Insert name and timestamp in changelog format."
+    (interactive)
+    (insert " -- " (or (and (boundp 'user-full-name) user-full-name) (user-full-name))" <" (getenv "EMAIL") ">  " (format-time-string "%a, %d %b %Y %H:%M:%S %z")))
 #+END_SRC
 
 * toggle fullscreen mode
