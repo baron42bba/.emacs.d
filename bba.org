@@ -3576,6 +3576,7 @@ function to convert groups of spaces to hard tabs.
   (define-prefix-command 'bba/multiple-cursors)
 
   (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssh-to-fqdn-at-point)
+  (define-key bba/keyboard-maestro "\C-s" 'bba-splunk-search)
   (define-key bba/keyboard-maestro "c" 'bba-open-file-dir-screen)
   (define-key bba/keyboard-maestro "C" 'bba-create-ticket-tmp-dir-open-dir-screen)
 
