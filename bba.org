@@ -965,6 +965,7 @@ never heard of orgmode.
                   (description (last (split-string (if (match-end 3)
                                                        (match-string-no-properties 3)
                                                      (match-string-no-properties 1)) ":"))))
+              (org-open-at-point)
               (push-mark (point))
               (push-mark (point-max) nil t)
               (goto-char (point-min))
