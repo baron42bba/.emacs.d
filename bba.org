@@ -977,6 +977,27 @@ never heard of orgmode.
     )
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-open-jira()
+  "open current ticket."
+  (interactive)
+  (let ((oldpoint (point-marker)))
+  (org-narrow-to-subtree)
+  (goto-char (point-min))
+  (if (re-search-forward "jira:" nil t 1)
+      (org-open-at-point)
+    (progn (widen)
+            (outline-up-heading 1 t)
+            (bba-open-jira)
+  ))
+  (widen)
+  (goto-char oldpoint)
+  )
+  )
+
+  (define-key org-mode-map "\C-xl\S-j" 'bba-open-jira)
+#+END_SRC
+
 ** ox-reveal
 [2017-11-06 Mon 23:26]
 
