@@ -1,6 +1,7 @@
 /bba.el
 /bookmarks
 *.elc
+/.mc-lists.el
 archive-contents
 /ac-comphist.dat
 /elpa/archives/*
