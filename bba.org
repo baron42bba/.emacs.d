@@ -1465,6 +1465,7 @@ and call this function.
       (progn
         (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
         (global-set-key (kbd "C-c S-<f6>") '(lambda () (interactive) (find-file "~/workorg/work_archive.org")))
+        (global-set-key (kbd "C-c C-<f6>") '(lambda () (interactive) (org-id-goto "0C6EAD45-9046-4A56-96C3-3B378A444263")))
         )
     (progn
       (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
@@ -3535,6 +3536,7 @@ easy access to secrets.
   (define-key bba/pw "t" '(lambda () "awstest" (interactive)(bba-pw-lookup "D0518F8B-C724-45B8-8D85-C568DCDD5913")))
   (define-key bba/pw "c" '(lambda () "awscn" (interactive)(bba-pw-lookup "53D5B091-0295-42BA-9D91-4A36055E554B")))
   (define-key bba/pw "s" '(lambda () "sys" (interactive)(bba-pw-lookup "FABC2AFA-E966-4AC3-AEEB-2883DE790DE4")))
+  (define-key bba/pw "S" '(lambda () "ssh" (interactive)(bba-pw-lookup "BF852AE1-57B7-4C7F-BE02-F73095D4CD52")))
   (define-key bba/pw "i" '(lambda () "it" (interactive)(bba-pw-lookup "83752B2C-5DE4-4B2F-A306-B191348A2E26")))
 
 
