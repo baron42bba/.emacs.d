@@ -1151,6 +1151,24 @@ Get reveal.js as well:
     (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-cd-to-clipboard\"'")
     )
 #+END_SRC
+** search notes
+[2018-02-09 Fri 10:57]
+
+Your notes are more useful if you can easily search them!
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun snw ()
+    "Search work notes."
+    (interactive)
+    (lgrep (read-string "search for regex:") "work*.org" "~/workorg"))
+
+  (defun sn ()
+    "Search notes."
+    (interactive)
+    (lgrep (read-string "search for regex:") "notes.org" "~/org"))
+
+#+END_SRC
+
 ** Some initial languages we want org-babel to support
 
 #+BEGIN_SRC emacs-lisp :tangle yes
