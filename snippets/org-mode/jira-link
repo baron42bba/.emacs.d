@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: jira-link
+# key: jlink_
+# --
+[${2:link title}|${1:url}]

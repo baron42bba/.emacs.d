@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: parameter
+# key: pm_
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"$1": {
+  "Description": "$2",
+  "Type": "${3:$$(yas-choose-value '("String" "Number" "List" "CommaDelimitedList"))}",
+  "Default": "$4"
+},$0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: eval-never
+# key: :en
+# --
+:eval never

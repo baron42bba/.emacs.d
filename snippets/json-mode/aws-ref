@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ref
+# key: ref_
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+{"Ref": "$1"}$0
