@@ -5,7 +5,7 @@
 ;; Author: Tomohiro Matsuyama <m2ym.pub@gmail.com>
 ;; URL: https://github.com/auto-complete/auto-complete
 ;; Keywords: completion, convenience
-;; Version: 1.5.0
+;; Version: 1.5.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@
 
 
 
-(defconst ac-version "1.5.0"
+(defconst ac-version "1.5.1"
   "Version of auto-complete in string format.
 Use `version-to-list' to get version component.")
 
@@ -199,12 +199,14 @@ Use `version-to-list' to get version component.")
 (defcustom ac-modes
   '(emacs-lisp-mode lisp-mode lisp-interaction-mode
     slime-repl-mode
-    c-mode cc-mode c++-mode go-mode
+    nim-mode c-mode cc-mode c++-mode objc-mode swift-mode go-mode
     java-mode malabar-mode clojure-mode clojurescript-mode  scala-mode
     scheme-mode
     ocaml-mode tuareg-mode coq-mode haskell-mode agda-mode agda2-mode
     perl-mode cperl-mode python-mode ruby-mode lua-mode tcl-mode
-    ecmascript-mode javascript-mode js-mode js2-mode php-mode css-mode scss-mode less-css-mode
+    ecmascript-mode javascript-mode js-mode js-jsx-mode js2-mode js2-jsx-mode
+    coffee-mode php-mode css-mode scss-mode less-css-mode
+    elixir-mode
     makefile-mode sh-mode fortran-mode f90-mode ada-mode
     xml-mode sgml-mode web-mode
     ts-mode
@@ -699,13 +701,12 @@ If there is no common part, this will be nil.")
 
 (defun ac-prefix-default ()
   "Same as `ac-prefix-symbol' but ignore a number prefix."
-  (let ((start (ac-prefix-symbol)))
-    (when start
-      (cl-loop with end = (point)
-            for pos from start below end
-            for c = (char-after pos)
-            if (not (and (<= ?0 c) (<= c ?9)))
-            return start))))
+  (let ((start (ac-prefix-symbol))
+        (case-fold-search t))
+    (when (and start
+             (not (string-match-p "\\`\\(?:0[xbo][0-9a-f]+\\|[0-9]+\\)"
+                                (buffer-substring-no-properties start (point)))))
+      start)))
 
 (defun ac-prefix-symbol ()
   "Default prefix definition function."
