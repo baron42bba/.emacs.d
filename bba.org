@@ -3299,7 +3299,7 @@ If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20151214.1344" t)
         (require 'ggtags)
-        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20160202.503" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20170116.529" t)
         (require 'helm-gtags)
         (add-hook 'puppet-mode-hook
                   (lambda()
@@ -3333,7 +3333,7 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
 	(add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20160530.424")
+                     "~/.emacs.d/elpa/helm-20181029.623")
 	(require 'helm)
 	(helm-mode 1)
 	(global-set-key (kbd "M-y") 'helm-show-kill-ring)
@@ -3380,7 +3380,7 @@ Some links you might check out:
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20160108.1947")
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20180429.1456")
         (require 'helm-descbinds)
         (define-key global-map (kbd "C-h b") 'helm-descbinds)
         )
