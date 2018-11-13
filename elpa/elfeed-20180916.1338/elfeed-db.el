@@ -66,16 +66,23 @@
 (defvar elfeed-db-index nil
   "Collection of all entries sorted by date, part of `elfeed-db'.")
 
-(defvar elfeed-db-version "0.0.2"
+(defvar elfeed-db-version
+  ;; If records are avaiable (Emacs 26), use the newer database format
+  (if (functionp 'record)
+      4
+    "0.0.3")
   "The database version this version of Elfeed expects to use.")
 
 (defvar elfeed-new-entry-hook ()
-  "Functions in this list are called with the new entry as its
-argument. This is a chance to add cutoms tags to new entries.")
+  "Functions in this list are called with the new entry as its argument.
+This is a chance to add custom tags to new entries.")
 
 (defvar elfeed-db-update-hook ()
   "Functions in this list are called with no arguments any time
 the :last-update time is updated.")
+
+(defvar elfeed-db-unload-hook ()
+  "Hook to run immediately after `elfeed-db-unload'.")
 
 ;; Data model:
 
@@ -91,11 +98,13 @@ the :last-update time is updated.")
   "Merge B into A, preserving A's tags. Return true if an actual
 update occurred, not counting content."
   (setf (elfeed-entry-tags b) (elfeed-entry-tags a)
-        (elfeed-entry-content a) (elfeed-entry-content b)
-        (elfeed-entry-meta b) (elfeed-entry-meta a))
+        (elfeed-entry-content a) (elfeed-entry-content b))
+  (cl-loop for (key value) on (elfeed-entry-meta b) by #'cddr
+           do (setf (elfeed-entry-meta a)
+                    (plist-put (elfeed-entry-meta a) key value)))
   (not
    (zerop
-    (cl-loop for i from 0 below (length a)
+    (cl-loop for i from 1 below (1- (length a))
              for part-a = (aref a i)
              for part-b = (aref b i)
              count (not (equal part-a part-b))
@@ -126,7 +135,7 @@ update occurred, not counting content."
 
 (defun elfeed-db-set-update-time ()
   "Update the database last-update time."
-  (plist-put elfeed-db :last-update (float-time))
+  (setf elfeed-db (plist-put elfeed-db :last-update (float-time)))
   (run-hooks 'elfeed-db-update-hook))
 
 (defun elfeed-db-add (entries)
@@ -164,24 +173,40 @@ update occurred, not counting content."
 
 (defun elfeed-normalize-tags (tags &rest more-tags)
   "Return the normalized tag list for TAGS."
-  (let ((all (copy-sequence (apply #'append tags more-tags))))
-    (cl-remove-duplicates (cl-sort all #'string< :key #'symbol-name))))
+  (let ((all (apply #'append tags (nconc more-tags (list ())))))
+    (cl-delete-duplicates (cl-sort all #'string< :key #'symbol-name))))
 
-(defun elfeed-tag (entry &rest tags)
+(defun elfeed-tag-1 (entry &rest tags)
   "Add TAGS to ENTRY."
   (let ((current (elfeed-entry-tags entry)))
     (setf (elfeed-entry-tags entry)
           (elfeed-normalize-tags (append tags current)))))
 
-(defun elfeed-untag (entry &rest tags)
+(defun elfeed-untag-1 (entry &rest tags)
   "Remove TAGS from ENTRY."
   (setf (elfeed-entry-tags entry)
         (cl-loop for tag in (elfeed-entry-tags entry)
-                 unless (member tag tags) collect tag)))
+                 unless (memq tag tags) collect tag)))
+
+(defun elfeed-tag (entry-or-entry-list &rest tags)
+  "Add TAGS to ENTRY-OR-ENTRY-LIST and run `elfeed-tag-hooks'."
+  (let* ((entries (if (elfeed-entry-p entry-or-entry-list)
+                      (list entry-or-entry-list)
+                    entry-or-entry-list)))
+    (run-hook-with-args 'elfeed-tag-hooks entries tags)
+    (cl-loop for entry in entries do (apply #'elfeed-tag-1 entry tags))))
+
+(defun elfeed-untag (entry-or-entry-list &rest tags)
+  "Remove TAGS from ENTRY-OR-ENTRY-LIST and run `elfeed-untag-hooks'."
+  (let* ((entries (if (elfeed-entry-p entry-or-entry-list)
+                      (list entry-or-entry-list)
+                    entry-or-entry-list)))
+    (run-hook-with-args 'elfeed-untag-hooks entries tags)
+    (cl-loop for entry in entries do (apply #'elfeed-untag-1 entry tags))))
 
 (defun elfeed-tagged-p (tag entry)
   "Return true if ENTRY is tagged by TAG."
-  (member tag (elfeed-entry-tags entry)))
+  (memq tag (elfeed-entry-tags entry)))
 
 (defun elfeed-db-last-update ()
   "Return the last database update time in (`float-time') seconds."
@@ -246,7 +271,7 @@ The FEED-OR-ID may be a feed struct or a feed ID (url)."
 (defun elfeed-db-save ()
   "Write the database index to the filesystem."
   (elfeed-db-ensure)
-  (plist-put elfeed-db :version elfeed-db-version)
+  (setf elfeed-db (plist-put elfeed-db :version elfeed-db-version))
   (mkdir elfeed-db-directory t)
   (let ((coding-system-for-write 'utf-8))
     (with-temp-file (expand-file-name "index" elfeed-db-directory)
@@ -254,47 +279,141 @@ The FEED-OR-ID may be a feed struct or a feed ID (url)."
             (print-level nil)
             (print-length nil)
             (print-circle nil))
+        (princ (format ";;; Elfeed Database Index (version %s)\n\n"
+                       elfeed-db-version))
+        (when (eql elfeed-db-version 4)
+          ;; Put empty dummy index in front
+          (princ ";; Dummy index for backwards compatablity:\n")
+          (prin1 (elfeed-db--dummy))
+          (princ "\n\n;; Real index:\n"))
         (prin1 elfeed-db)
         :success))))
 
-(defun elfeed-db-upgrade ()
-  "Upgrade the database from a previous format.
-This function increases the size of the structs in the database."
-  (cl-loop with feed-size = (length (elfeed-feed--create))
-           for feed hash-values in elfeed-db-feeds
-           using (hash-key id)
-           unless (elfeed-feed-p feed)
-           do (setf (gethash id elfeed-db-feeds)
-                    (elfeed-resize-vector feed feed-size)))
-  (cl-loop with entry-size = (length (elfeed-entry--create))
-           for entry hash-values in elfeed-db-entries
-           using (hash-key id)
-           unless (elfeed-entry-p entry)
-           do (setf (gethash id elfeed-db-entries)
-                    (elfeed-resize-vector entry entry-size)))
-  (plist-put elfeed-db :version elfeed-db-version)
-  elfeed-db-version)
+(defun elfeed-db-save-safe ()
+  "Run `elfeed-db-save' without triggering any errors, for use as a safe hook."
+  (ignore-errors (elfeed-db-save)))
+
+(defun elfeed-db-upgrade (db)
+  "Upgrade the database from a previous format."
+  (if (not (vectorp (plist-get db :index)))
+      db  ; Database is already in record format
+    (let* ((new-db (elfeed-db--empty))
+           ;; Dynamically bind for other functions
+           (elfeed-db-feeds (plist-get new-db :feeds))
+           (elfeed-db-entries (plist-get new-db :entries))
+           (elfeed-db-index (plist-get new-db :index)))
+      ;; Fix up feeds
+      (cl-loop with table = (plist-get new-db :feeds)
+               for feed hash-values of (plist-get db :feeds)
+               for id = (aref feed 1)
+               for fixed = (elfeed-feed--create
+                            :id id
+                            :url (aref feed 2)
+                            :title (aref feed 3)
+                            :author (aref feed 4)
+                            :meta (aref feed 5))
+               do (setf (gethash id table) fixed))
+      ;; Fix up entries
+      (cl-loop with table = (plist-get new-db :entries)
+               with index = (plist-get new-db :index)
+               for entry hash-values of (plist-get db :entries)
+               for id = (aref entry 1)
+               for content = (aref entry 5)
+               for fixed = (elfeed-entry--create
+                            :id id
+                            :title (aref entry 2)
+                            :link (aref entry 3)
+                            :date (aref entry 4)
+                            :content (if (vectorp content)
+                                         (elfeed-ref--create
+                                          :id (aref content 1))
+                                       content)
+                            :content-type (aref entry 6)
+                            :enclosures (aref entry 7)
+                            :tags (aref entry 8)
+                            :feed-id (aref entry 9)
+                            :meta (aref entry 10))
+               do (setf (gethash id table) fixed)
+               do (avl-tree-enter index id))
+      (plist-put new-db :last-update (plist-get db :last-update)))))
+
+(defun elfeed-db--empty ()
+  "Create an empty database object."
+  `(:version ,elfeed-db-version
+    :feeds ,(make-hash-table :test 'equal)
+    :entries ,(make-hash-table :test 'equal)
+    ;; Compiler may warn about this (bug#15327):
+    :index ,(avl-tree-create #'elfeed-db-compare)))
+
+(defun elfeed-db--dummy ()
+  "Create an empty dummy database for Emacs 25 and earlier."
+  (list :version "0.0.3"
+        :feeds #s(hash-table size 65
+                             test equal
+                             rehash-size 1.5
+                             rehash-threshold 0.8
+                             data ())
+        :entries #s(hash-table size 65
+                               test equal
+                               rehash-size 1.5
+                               rehash-threshold 0.8
+                               data ())
+        :index [cl-struct-avl-tree- [nil nil nil 0] elfeed-db-compare]))
+
+;; To cope with the incompatible struct changes in Emacs 26, Elfeed
+;; uses version 4 of the database format when run under Emacs 26. This
+;; version saves a dummy, empty index in front of the real database. A
+;; user going from Emacs 26 to Emacs 25 will quietly load an empty
+;; index since it's unreasonable to downgrade (would require rewriting
+;; the Emacs reader from scratch).
 
 (defun elfeed-db-load ()
   "Load the database index from the filesystem."
-  (let ((index (expand-file-name "index" elfeed-db-directory)))
+  (let ((index (expand-file-name "index" elfeed-db-directory))
+        (enable-local-variables nil)) ; don't set local variables from index!
     (if (not (file-exists-p index))
-        (let ((db (setf elfeed-db (list :version elfeed-db-version))))
-          (plist-put db :feeds (make-hash-table :test 'equal))
-          (plist-put db :entries (make-hash-table :test 'equal))
-          ;; Compiler will warn about this (bug#15327):
-          (plist-put db :index (avl-tree-create #'elfeed-db-compare)))
-      (with-current-buffer (find-file-noselect index)
-        (goto-char (point-min))
-        (setf elfeed-db (read (current-buffer)))
-        (kill-buffer)))
+        (setf elfeed-db (elfeed-db--empty))
+      ;; Override the default value for major-mode. There is no
+      ;; preventing find-file-noselect from starting the default major
+      ;; mode while also having it handle buffer conversion. Some
+      ;; major modes crash Emacs when enabled in large buffers (e.g.
+      ;; org-mode). This includes the Elfeed index, so we must not let
+      ;; this happen.
+      (cl-letf (((default-value 'major-mode) 'fundamental-mode))
+        (with-current-buffer (find-file-noselect index :nowarn)
+          (goto-char (point-min))
+          (if (eql elfeed-db-version 4)
+              ;; May need to skip over dummy database
+              (let ((db-1 (read (current-buffer)))
+                    (db-2 (ignore-errors (read (current-buffer)))))
+                (setf elfeed-db (or db-2 db-1)))
+            ;; Just load first database
+            (setf elfeed-db (read (current-buffer))))
+          (kill-buffer))))
+    ;; Perform an upgrade if necessary and possible
+    (unless (equal (plist-get elfeed-db :version) elfeed-db-version)
+      (ignore-errors
+        (copy-file index (concat index ".backup")))
+      (message "Upgrading Elfeed index for Emacs 26 ...")
+      (setf elfeed-db (elfeed-db-upgrade elfeed-db))
+      (message "Elfeed index upgrade complete."))
     (setf elfeed-db-feeds (plist-get elfeed-db :feeds)
           elfeed-db-entries (plist-get elfeed-db :entries)
           elfeed-db-index (plist-get elfeed-db :index)
           ;; Internal function use required for security!
-          (avl-tree--cmpfun elfeed-db-index) #'elfeed-db-compare)
-    (when (version< (or (plist-get elfeed-db :version) "0") elfeed-db-version)
-      (elfeed-db-upgrade))))
+          (avl-tree--cmpfun elfeed-db-index) #'elfeed-db-compare)))
+
+(defun elfeed-db-unload ()
+  "Unload the database so that it can be operated on externally.
+
+Runs `elfeed-db-unload-hook' after unloading the database."
+  (interactive)
+  (elfeed-db-save)
+  (setf elfeed-db nil
+        elfeed-db-feeds nil
+        elfeed-db-entries nil
+        elfeed-db-index nil)
+  (run-hooks 'elfeed-db-unload-hook))
 
 (defun elfeed-db-ensure ()
   "Ensure that the database has been loaded."
@@ -394,7 +513,8 @@ This function increases the size of the structs in the database."
       ref
     (let ((index (and (hash-table-p elfeed-ref-archive)
                       (gethash (elfeed-ref-id ref) elfeed-ref-archive)))
-          (archive-file (elfeed-ref-archive-filename ".gz")))
+          (archive-file (elfeed-ref-archive-filename ".gz"))
+          (coding-system-for-read 'utf-8))
       (if (and index (file-exists-p archive-file))
           (progn
             (when (null elfeed-ref-cache)
@@ -450,8 +570,8 @@ This function increases the size of the structs in the database."
              elfeed-db-feeds)))
 
 (defun elfeed-db-gc (&optional stats-p)
-  "Clean up unused content from the content database. If STATS is
-true, return the space cleared in bytes."
+  "Clean up unused content from the content database.
+If STATS is true, return the space cleared in bytes."
   (elfeed-db-gc-empty-feeds)
   (let* ((data (expand-file-name "data" elfeed-db-directory))
          (dirs (directory-files data t "^[0-9a-z]\\{2\\}$"))
@@ -519,7 +639,7 @@ gzip-compressed files, so the gzip program must be in your PATH."
 
 (unless noninteractive
   (add-hook 'kill-emacs-hook #'elfeed-db-gc-safe :append)
-  (add-hook 'kill-emacs-hook #'elfeed-db-save))
+  (add-hook 'kill-emacs-hook #'elfeed-db-save-safe))
 
 (provide 'elfeed-db)
 

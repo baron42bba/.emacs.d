@@ -9,6 +9,8 @@
 (require 'url-parse)
 (require 'browse-url)
 (require 'message) ; faces
+
+(require 'elfeed)
 (require 'elfeed-db)
 (require 'elfeed-lib)
 (require 'elfeed-search)
@@ -16,10 +18,28 @@
 (defcustom elfeed-show-truncate-long-urls t
   "When non-nil, use an ellipsis to shorten very long displayed URLs."
   :group 'elfeed
-  :type 'bool)
+  :type 'boolean)
+
+(defcustom elfeed-show-entry-author t
+  "When non-nil, show the entry's author (if it's in the entry's metadata)."
+  :group 'elfeed
+  :type 'boolean)
 
 (defvar elfeed-show-entry nil
   "The entry being displayed in this buffer.")
+
+(defvar elfeed-show-entry-switch #'switch-to-buffer
+  "Function to call to display and switch to the feed entry buffer.
+Defaults to `switch-to-buffer'.")
+
+(defvar elfeed-show-entry-delete #'elfeed-kill-buffer
+  "Function called when quitting from the elfeed-entry
+buffer. Does not take any arguments.
+
+Defaults to `elfeed-kill-buffer'.")
+
+(defvar elfeed-show-refresh-function #'elfeed-show-refresh--mail-style
+  "Function called to refresh the `*elfeed-entry*' buffer.")
 
 (defvar elfeed-show-mode-map
   (let ((map (make-sparse-keymap)))
@@ -42,7 +62,9 @@
       (define-key map [tab] 'shr-next-link)
       (define-key map "\e\t" 'shr-previous-link)
       (define-key map [backtab] 'shr-previous-link)
-      (define-key map [mouse-2] 'shr-browse-url)))
+      (define-key map [mouse-2] 'shr-browse-url)
+      (define-key map "A" 'elfeed-show-add-enclosure-to-playlist)
+      (define-key map "P" 'elfeed-show-play-enclosure)))
   "Keymap for `elfeed-show-mode'.")
 
 (defun elfeed-show-mode ()
@@ -56,7 +78,7 @@
         buffer-read-only t)
   (buffer-disable-undo)
   (make-local-variable 'elfeed-show-entry)
-  (run-hooks 'elfeed-show-mode-hook))
+  (run-mode-hooks 'elfeed-show-mode-hook))
 
 (defun elfeed-insert-html (html &optional base-url)
   "Converted HTML markup to a propertized string."
@@ -64,7 +86,8 @@
    (if (elfeed-libxml-supported-p)
        (with-temp-buffer
          ;; insert <base> to work around libxml-parse-html-region bug
-         (insert (format "<base href=\"%s\">" base-url))
+         (when base-url
+           (insert (format "<base href=\"%s\">" base-url)))
          (insert html)
          (libxml-parse-html-region (point-min) (point-max) base-url))
      '(i () "Elfeed: libxml2 functionality is unavailable"))))
@@ -87,12 +110,13 @@
     (setf (url-target obj) nil)
     (url-recreate-url obj)))
 
-(defun elfeed-show-refresh ()
-  "Update the buffer to match the selected entry."
+(defun elfeed-show-refresh--mail-style ()
+  "Update the buffer to match the selected entry, using a mail-style."
   (interactive)
   (let* ((inhibit-read-only t)
          (title (elfeed-entry-title elfeed-show-entry))
          (date (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
+         (author (elfeed-meta elfeed-show-entry :author))
          (link (elfeed-entry-link elfeed-show-entry))
          (tags (elfeed-entry-tags elfeed-show-entry))
          (tagsstr (mapconcat #'symbol-name tags ", "))
@@ -105,6 +129,9 @@
     (erase-buffer)
     (insert (format (propertize "Title: %s\n" 'face 'message-header-name)
                     (propertize title 'face 'message-header-subject)))
+    (when (and author elfeed-show-entry-author)
+      (insert (format (propertize "Author: %s\n" 'face 'message-header-name)
+                      (propertize author 'face 'message-header-to))) )
     (insert (format (propertize "Date: %s\n" 'face 'message-header-name)
                     (propertize nicedate 'face 'message-header-other)))
     (insert (format (propertize "Feed: %s\n" 'face 'message-header-name)
@@ -127,26 +154,31 @@
       (insert (propertize "(empty)\n" 'face 'italic)))
     (goto-char (point-min))))
 
+(defun elfeed-show-refresh ()
+  "Update the buffer to match the selected entry."
+  (interactive)
+  (call-interactively elfeed-show-refresh-function))
+
 (defun elfeed-show-entry (entry)
   "Display ENTRY in the current buffer."
-  (let ((title (elfeed-entry-title entry)))
-    (switch-to-buffer (get-buffer-create (format "*elfeed %s*" title)))
-    (unless (eq major-mode 'elfeed-show-mode)
-      (elfeed-show-mode))
-    (setq elfeed-show-entry entry)
-    (elfeed-show-refresh)))
+  (let ((buff (get-buffer-create "*elfeed-entry*")))
+    (with-current-buffer buff
+      (elfeed-show-mode)
+      (setq elfeed-show-entry entry)
+      (elfeed-show-refresh))
+    (funcall elfeed-show-entry-switch buff)))
 
 (defun elfeed-show-next ()
   "Show the next item in the elfeed-search buffer."
   (interactive)
-  (elfeed-kill-buffer)
+  (funcall elfeed-show-entry-delete)
   (with-current-buffer (elfeed-search-buffer)
     (call-interactively #'elfeed-search-show-entry)))
 
 (defun elfeed-show-prev ()
   "Show the previous item in the elfeed-search buffer."
   (interactive)
-  (elfeed-kill-buffer)
+  (funcall elfeed-show-entry-delete)
   (with-current-buffer (elfeed-search-buffer)
     (forward-line -2)
     (call-interactively #'elfeed-search-show-entry)))
@@ -158,13 +190,17 @@
   (elfeed)
   (elfeed-search-live-filter))
 
-(defun elfeed-show-visit ()
-  "Visit the current entry in the browser."
-  (interactive)
+(defun elfeed-show-visit (&optional use-generic-p)
+  "Visit the current entry in your browser using `browse-url'.
+If there is a prefix argument, visit the current entry in the
+browser defined by `browse-url-generic-program'."
+  (interactive "P")
   (let ((link (elfeed-entry-link elfeed-show-entry)))
     (when link
       (message "Sent to browser: %s" link)
-      (browse-url link))))
+      (if use-generic-p
+          (browse-url-generic link)
+        (browse-url link)))))
 
 (defun elfeed-show-yank ()
   "Copy the current entry link URL to the clipboard."
@@ -172,7 +208,10 @@
   (let ((link (elfeed-entry-link elfeed-show-entry)))
     (when link
       (kill-new link)
-      (x-set-selection 'PRIMARY link)
+      (if (fboundp 'gui-set-selection)
+          (gui-set-selection 'PRIMARY link)
+        (with-no-warnings
+          (x-set-selection 'PRIMARY link)))
       (message "Yanked: %s" link))))
 
 (defun elfeed-show-tag (&rest tags)
@@ -213,15 +252,19 @@ directory and saves all attachments in the chosen directory."
   :type 'boolean
   :group 'elfeed)
 
+(defvar elfeed-show-enclosure-filename-function
+  #'elfeed-show-enclosure-filename-remote
+  "Function called to generate the filename for an enclosure.")
+
 (defun elfeed--download-enclosure (url path)
   "Download asynchronously the enclosure from URL to PATH."
-  (if (fboundp 'async-start)
-      ;; If async is available, don't hang emacs !
-      (async-start
-       (lambda ()
-         (url-copy-file url path t))
-       (lambda (_)
-         (message (format "%s downloaded" url))))
+  (if (require 'async nil :noerror)
+      (with-no-warnings
+        (async-start
+         (lambda ()
+           (url-copy-file url path t))
+         (lambda (_)
+           (message (format "%s downloaded" url)))))
     (url-copy-file url path t)))
 
 (defun elfeed--get-enclosure-num (prompt entry &optional multi)
@@ -260,6 +303,13 @@ corresponding string."
     (if (file-directory-p fpath)
         fpath)))
 
+(defun elfeed-show-enclosure-filename-remote (_entry url-enclosure)
+  "Returns the remote filename as local filename for an enclosure."
+  (file-name-nondirectory
+   (url-unhex-string
+    (car (url-path-and-query (url-generic-parse-url
+                              url-enclosure))))))
+
 (defun elfeed-show-save-enclosure-single (&optional entry enclosure-index)
   "Save enclosure number ENCLOSURE-INDEX from ENTRY.
 If ENTRY is nil use the elfeed-show-entry variable.
@@ -272,10 +322,9 @@ If ENCLOSURE-INDEX is nil ask for the enclosure number."
                                "Enclosure to save" entry)))
          (url-enclosure (car (elt (elfeed-entry-enclosures entry)
                                   (- enclosure-index 1))))
-         (fname (file-name-nondirectory
-                 (url-unhex-string
-                  (car (url-path-and-query (url-generic-parse-url
-                                            url-enclosure))))))
+         (fname
+          (funcall elfeed-show-enclosure-filename-function
+                   entry url-enclosure))
          (retry t)
          (fpath))
     (while retry
@@ -306,10 +355,9 @@ enclosures, but as this is the default, you may not need it."
           (dolist (enclosure-index attachnums)
             (let* ((url-enclosure
                     (aref (elfeed-entry-enclosures entry) enclosure-index))
-                   (fname (file-name-nondirectory
-                           (url-unhex-string
-                            (car (url-path-and-query
-                                  (url-generic-parse-url url-enclosure))))))
+                   (fname
+                    (funcall elfeed-show-enclosure-filename-function
+                             entry url-enclosure))
                    (retry t))
               (while retry
                 (setf fpath (expand-file-name (concat attachdir fname) path)
@@ -328,6 +376,46 @@ offer to save a range of enclosures."
   (if multi
       (elfeed-show-save-enclosure-multi)
     (elfeed-show-save-enclosure-single)))
+
+(defun elfeed-show-play-enclosure (&optional entry enclosure-index)
+  "Play enclosure number ENCLOSURE-INDEX from ENTRY using emms.
+If ENTRY is nil use the elfeed-show-entry variable.
+If ENCLOSURE-INDEX is nil ask for the enclosure number."
+  (interactive)
+  (require 'emms) ;; optional
+  (let* ((entry (or entry elfeed-show-entry))
+         (enclosure-index (or enclosure-index
+                              (elfeed--get-enclosure-num
+                               "Enclosure to play" entry)))
+         (url-enclosure (car (elt (elfeed-entry-enclosures entry)
+                                  (- enclosure-index 1)))))
+    (with-no-warnings ;; due to lazy (require)
+      (with-current-emms-playlist
+       (let ((old-pos (point-max)))
+         (emms-add-url url-enclosure)
+         (goto-char old-pos)
+         ;; if we're sitting on a group name, move forward
+         (unless (emms-playlist-track-at (point))
+           (emms-playlist-next))
+         (emms-playlist-select (point)))
+       ;; FIXME: is there a better way of doing this?
+       (emms-stop)
+       (emms-start)))))
+
+(defun elfeed-show-add-enclosure-to-playlist (&optional entry enclosure-index)
+  "Play enclosure number ENCLOSURE-INDEX from ENTRY using emms.
+If ENTRY is nil use the elfeed-show-entry variable.
+If ENCLOSURE-INDEX is nil ask for the enclosure number."
+  (interactive)
+  (require 'emms) ;; optional
+  (let* ((entry (or entry elfeed-show-entry))
+         (enclosure-index (or enclosure-index
+                              (elfeed--get-enclosure-num
+                               "Enclosure to add" entry)))
+         (url-enclosure (car (elt (elfeed-entry-enclosures entry)
+                                  (- enclosure-index 1)))))
+    (with-no-warnings ;; due to lazy (require )
+      (emms-add-url url-enclosure))))
 
 (provide 'elfeed-show)
 

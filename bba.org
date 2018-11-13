@@ -2353,8 +2353,8 @@ necessary.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-20150608.13027")
-        (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-org-20150412.145")
+        (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-20180916.1338")
+        (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-org-20181015.1100")
         (require 'elfeed-org)
         (elfeed-org)
         (setq rmh-elfeed-org-files (list "~/org/elfeed.org"))))

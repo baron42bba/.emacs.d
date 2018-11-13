@@ -9,9 +9,11 @@
 
 ;;; Code:
 
+(require 'xml)
 (require 'cl-lib)
 (require 'time-date)
 (require 'url-parse)
+(require 'url-util)
 
 (defun elfeed-expose (function &rest args)
   "Return an interactive version of FUNCTION, 'exposing' it to the user."
@@ -85,10 +87,19 @@ Examples: 2015-02-22, 2015-02, 20150222"
           (when (and (>= year 1900) (< year 2200))
             (float-time (encode-time 0 0 0 day month year t))))))))
 
-(defun elfeed-float-time (&optional date)
-  "Like `float-time' but accept anything reasonable for DATE,
-defaulting to the current time if DATE could not be parsed. Date
-is allowed to be relative to now (`elfeed-time-duration')."
+(defun elfeed-new-date-for-entry (old-date new-date)
+  "Decide entry date, given an existing date (nil for new) and a new date.
+Existing entries' dates are unchanged if the new date is not
+parseable. New entries with unparseable dates default to the
+current time."
+  (or (elfeed-float-time new-date)
+      old-date
+      (float-time)))
+
+(defun elfeed-float-time (date)
+  "Like `float-time' but accept anything reasonable for DATE.
+Defaults to nil if DATE could not be parsed. Date is allowed to
+be relative to now (`elfeed-time-duration')."
   (cl-typecase date
     (string
      (let ((iso-8601 (elfeed-parse-simple-iso-8601 date)))
@@ -98,31 +109,49 @@ is allowed to be relative to now (`elfeed-time-duration')."
            (if duration
                (- (float-time) duration)
              (let ((time (ignore-errors (date-to-time date))))
-               (if (equal time '(14445 17280)) ; date-to-time silently failed
-                   (float-time)
+               ;; check if date-to-time failed, silently or otherwise
+               (unless (or (null time) (equal time '(14445 17280)))
                  (float-time time))))))))
     (integer date)
-    (list (float-time date))
-    (otherwise (float-time))))
+    (otherwise nil)))
 
-(defun elfeed-xml-parse-region (&optional beg end buffer parse-dtd parse-ns)
+(defun elfeed-xml-parse-region (&optional beg end buffer parse-dtd _parse-ns)
   "Decode (if needed) and parse XML file. Uses coding system from
 XML encoding declaration."
-  (let ((coding-system nil))
-    (progn
-      (unless beg (setq beg (point-min)))
-      (unless end (setq end (point-max)))
-      (goto-char beg)
-      (if (re-search-forward
-           "<\\?xml.*?encoding=[\"']\\([^\"']+\\)[\"'].*?\\?>" nil t)
-          (setq coding-system
-                (ignore-errors (check-coding-system
-                                (intern (downcase (match-string 1)))))))
-      (when coding-system
-        (setq end (+ beg
-                     (decode-coding-region beg end coding-system))))
-      (goto-char beg)))
-  (xml-parse-region beg end buffer parse-dtd parse-ns))
+  (unless beg (setq beg (point-min)))
+  (unless end (setq end (point-max)))
+  (setf (point) beg)
+  (when (re-search-forward
+         "<\\?xml.*?encoding=[\"']\\([^\"']+\\)[\"'].*?\\?>" nil t)
+    (let ((coding-system (intern-soft (downcase (match-string 1)))))
+      (when (ignore-errors (check-coding-system coding-system))
+        (let ((mark-beg (make-marker))
+              (mark-end (make-marker)))
+          ;; Region changes with encoding, so use markers to track it.
+          (set-marker mark-beg beg)
+          (set-marker mark-end end)
+          (set-buffer-multibyte t)
+          (recode-region mark-beg mark-end coding-system 'raw-text)
+          (setf beg (marker-position mark-beg)
+                end (marker-position mark-end))))))
+  (let ((xml-default-ns ()))
+    (xml-parse-region beg end buffer parse-dtd 'symbol-qnames)))
+
+(defun elfeed-xml-unparse (element)
+  "Inverse of `elfeed-xml-parse-region', writing XML to the buffer."
+  (cl-destructuring-bind (tag attrs . body) element
+    (insert (format "<%s" tag))
+    (dolist (attr attrs)
+      (cl-destructuring-bind (key . value) attr
+        (insert (format " %s='%s'" key (xml-escape-string value)))))
+    (if (null body)
+        (insert "/>")
+      (insert ">")
+      (dolist (sub body)
+        (if (stringp sub)
+            (insert (xml-escape-string sub))
+          (elfeed-xml-unparse sub)))
+      (insert (format "</%s>" tag)))))
 
 (defun elfeed-directory-empty-p (dir)
   "Return non-nil if DIR is empty."
@@ -207,13 +236,25 @@ On systems running X, it will try to use the PRIMARY selection
 first, then fall back onto the standard clipboard like other
 systems."
   (elfeed-strip-properties
-   (or (and (fboundp 'x-get-selection-value)
-            (funcall 'x-get-selection-value))
+   (or (and (fboundp 'x-get-selection)
+            (funcall 'x-get-selection))
        (and (functionp interprogram-paste-function)
             (funcall interprogram-paste-function))
        (and (fboundp 'w32-get-clipboard-data)
             (funcall 'w32-get-clipboard-data))
        (current-kill 0 :non-destructively))))
+
+(defun elfeed-get-link-at-point ()
+  "Try to a link at point and return its URL."
+  (or (get-text-property (point) 'shr-url)
+      (and (fboundp 'eww-current-url)
+           (funcall 'eww-current-url))
+      (get-text-property (point) :nt-link)))
+
+(defun elfeed-get-url-at-point ()
+  "Try to get a plain URL at point."
+  (or (url-get-url-at-point)
+      (thing-at-point 'url)))
 
 (defun elfeed-move-to-first-empty-line ()
   "Place point after first blank line, for use with `url-retrieve'.
@@ -252,6 +293,73 @@ This includes expanding e.g. 3-5 into 3,4,5.  If the letter
                     beg (1+ beg))))
         ;; else just a number
         (push (string-to-number elem) list)))))
+
+(defun elfeed-remove-dot-segments (input)
+  "Relative URL algorithm as described in RFC 3986 §5.2.4."
+  (cl-loop
+   with output = ""
+   for s = input
+   then (cond
+         ((string-match-p "^\\.\\./" s)
+          (substring s 3))
+         ((string-match-p "^\\./" s)
+          (substring s 2))
+         ((string-match-p "^/\\./" s)
+          (substring s 2))
+         ((string-match-p "^/\\.$" s) "/")
+         ((string-match-p "^/\\.\\./" s)
+          (setf output (replace-regexp-in-string "/?[^/]*$" "" output))
+          (substring s 3))
+         ((string-match-p "^/\\.\\.$" s)
+          (setf output (replace-regexp-in-string "/?[^/]*$" "" output))
+          "/")
+         ((string-match-p "^\\.\\.?$" s)
+          "")
+         ((string-match "^/?[^/]*" s)
+          (setf output (concat output (match-string 0 s)))
+          (replace-regexp-in-string "^/?[^/]*" "" s)))
+   until (zerop (length s))
+   finally return output))
+
+(defun elfeed-update-location (old-url new-url)
+  "Return full URL for maybe-relative NEW-URL based on full OLD-URL."
+  (if (null new-url)
+      old-url
+    (let ((old (url-generic-parse-url old-url))
+          (new (url-generic-parse-url new-url)))
+      (cond
+       ;; Is new URL absolute already?
+       ((url-type new) new-url)
+       ;; Empty is a special case (clear fragment)
+       ((equal new-url "")
+        (setf (url-target old) nil)
+        (url-recreate-url old))
+       ;; Does it start with //? Append the old protocol.
+       ((url-fullness new) (concat (url-type old) ":" new-url))
+       ;; Is it a relative path?
+       ((not (string-match-p "^/" new-url))
+        (let* ((old-dir (or (file-name-directory (url-filename old)) "/"))
+               (concat (concat old-dir new-url))
+               (new-file (elfeed-remove-dot-segments concat)))
+          (setf (url-filename old) nil
+                (url-target old) nil
+                (url-attributes old) nil
+                (url-filename old) new-file)
+          (url-recreate-url old)))
+       ;; Replace the relative part.
+       ((progn
+          (setf (url-filename old) (elfeed-remove-dot-segments new-url)
+                (url-target old) nil
+                (url-attributes old) nil)
+          (url-recreate-url old)))))))
+
+(defun elfeed-url-to-namespace (url)
+  "Compute an ID namespace from URL."
+  (let* ((urlobj (url-generic-parse-url url))
+         (host (url-host urlobj)))
+    (if (= 0 (length host))
+        url
+      host)))
 
 (provide 'elfeed-lib)
 
