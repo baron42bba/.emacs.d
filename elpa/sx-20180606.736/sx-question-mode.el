@@ -1,6 +1,6 @@
 ;;; sx-question-mode.el --- major-mode for displaying questions  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014  Artur Malabarba
+;; Copyright (C) 2014-2018  Artur Malabarba
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 
@@ -53,11 +53,11 @@ Common values for this variable are `pop-to-buffer' and `switch-to-buffer'."
 
 (defun sx-question-mode--get-window ()
   "Return a window displaying a question, or nil."
-  (car-safe
-   (cl-member-if
-    (lambda (x) (with-selected-window x
-             (derived-mode-p 'sx-question-mode)))
-    (window-list nil 'never nil))))
+  (get-window-with-predicate
+   (lambda (win)
+     (with-selected-window win
+       (derived-mode-p 'sx-question-mode)))
+   'never))
 
 (defun sx-question-mode--display (data &optional window)
   "Display question given by DATA on WINDOW.
@@ -243,6 +243,7 @@ on the current buffer use
 \\{sx-question-mode}"
   (setq header-line-format sx-question-mode--header-line)
   (setq mode-line-format sx-question-mode--mode-line)
+  (buffer-disable-undo (current-buffer))
   (set (make-local-variable 'nobreak-char-display) nil)
   ;; Determine how to close this window.
   (unless (window-parameter nil 'quit-restore)

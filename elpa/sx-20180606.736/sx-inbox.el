@@ -1,6 +1,6 @@
 ;;; sx-inbox.el --- base inbox logic                 -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014  Artur Malabarba
+;; Copyright (C) 2014-2018  Artur Malabarba
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 
@@ -55,6 +55,12 @@
   "`fill-column' used in `sx-inbox-mode'."
   :type 'integer
   :group 'sx)
+
+(defface sx-inbox-item-type
+  '((t :inherit font-lock-keyword-face))  "")
+
+(defface sx-inbox-item-type-unread
+  '((t :inherit font-lock-keyword-face :weight bold)) "")
 
 (defun sx-inbox-get (&optional notifications page keywords)
   "Get an array of inbox items for the current user.
@@ -159,23 +165,24 @@ is an alist containing the elements:
                 (replace-regexp-in-string
                  "_" " " (or .item_type .notification_type)))
                (cond (.answer_id " on Answer at:")
-                     (.question_id " on:")))
-       'face 'font-lock-keyword-face)
+                     (.question_id " on:")
+                     (t ":")))
+       'face (if .is_unread 'sx-inbox-item-type-unread 'sx-inbox-item-type))
       (list
        (concat (sx-time-since .creation_date)
                sx-question-list-ago-string)
        'face 'sx-question-list-date)
       (list
-       (propertize
-        " " 'display
-        (concat "\n  " (propertize .title 'face 'sx-question-list-date) "\n"
+       (propertize " " 'display
+        (concat "  " (propertize (or .title "") 'face 'sx-question-list-date) "\n"
+              (when .body
                 (let ((col fill-column))
                   (with-temp-buffer
                     (setq fill-column col)
-                    (insert "  " .body)
+                    (insert "   " .body)
                     (fill-region (point-min) (point-max))
                     (buffer-string))))
-        'face 'default))))))
+              "\n" ) 'face (if .is_unread 'bold 'default) ))))))
 
 
 ;;; Entry commands

@@ -1,6 +1,6 @@
 ;;; sx-interaction.el --- voting, commenting, and other interaction  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014  Artur Malabarba
+;; Copyright (C) 2014-2018  Artur Malabarba
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 
@@ -188,7 +188,8 @@ If DATA is a question, also mark it as read."
         (sx-question--mark-read data)
         (sx--maybe-update-display)))))
 
-(defun sx-open-link (link)
+;;;###autoload
+(defun sx-open-link (link &optional _)
   "Visit element given by LINK inside Emacs.
 Element can be a question, answer, or comment."
   (interactive
@@ -215,8 +216,27 @@ Element can be a question, answer, or comment."
            (sx-display-question
             (sx-question-get-question .site_par .id) 'focus))
           (t (error "Don't know how to open this link, please file a bug report: %s"
-               link)
+                    link)
              nil))))))
+
+;;;###autoload
+(defun sx-org-get-link ()
+  "Add a link to this post to Org's memory."
+  (when (memq major-mode '(sx-question-mode sx-question-list-mode))
+    (sx-assoc-let (sx--data-here)
+      (when .link
+        (org-store-link-props :type 'http
+                              :link .link
+                              :description .title)))))
+
+(eval-after-load "org"
+  '(cond
+    ((fboundp 'org-link-set-parameters)
+     (org-link-set-parameters
+      "sx" :store #'sx-org-get-link))
+    ((boundp 'org-store-link-functions)
+     (add-to-list 'org-store-link-functions
+                  #'sx-org-get-link))))
 
 
 ;;; Displaying

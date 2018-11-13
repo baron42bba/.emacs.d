@@ -1,6 +1,6 @@
 ;;; sx.el --- StackExchange client. Ask and answer questions on Stack Overflow, Super User, and the likes  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014  Sean Allred
+;; Copyright (C) 2014-2018  Sean Allred
 
 ;; Author: Sean Allred <code@seanallred.com>
 ;; URL: https://github.com/vermiculus/sx.el/
@@ -48,7 +48,9 @@
 (defun sx-bug-report ()
   "File a bug report about the `sx' package."
   (interactive)
-  (browse-url "https://github.com/vermiculus/sx.el/issues/new"))
+  (if (featurep 'magithub)
+      (magithub-issue-new (magithub-repo "vermiculus/sx.el"))
+    (browse-url "https://github.com/vermiculus/sx.el/issues/new")))
 
 
 ;;; Site
@@ -392,7 +394,7 @@ Return the result of BODY."
   "Use FORMAT-STRING to format the values in ALIST.
 ALIST is a list with elements of the form (CHAR . STRING).
 The value is a copy of FORMAT-STRING, but with certain constructs
-replaced by text as given by ALIST.  
+replaced by text as given by ALIST.
 
 The construct is a `%' character followed by any other character.
 The replacement is the STRING corresponding to CHAR in ALIST.  In

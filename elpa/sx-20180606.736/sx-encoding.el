@@ -1,6 +1,6 @@
 ;;; sx-encoding.el --- encoding                      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014  Sean Allred
+;; Copyright (C) 2014-2018  Sean Allred
 
 ;; Author: Sean Allred <code@seanallred.com>
 
@@ -152,8 +152,10 @@ numbers identifying the gzip file format.
 
 See URL `http://www.gzip.org/zlib/rfc-gzip.html'."
   ;; Credit: http://emacs.stackexchange.com/a/2978
-  (equal (substring (string-as-unibyte data) 0 2)
-         (unibyte-string 31 139)))
+  (let ((unidata (string-as-unibyte data)))
+    (when (<= 2 (length unidata))
+      (equal (substring unidata 0 2)
+             (unibyte-string 31 139)))))
 
 (defun sx-encoding-gzipped-buffer-p (buffer)
   "Check if BUFFER is gzip-compressed.
