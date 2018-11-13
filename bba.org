@@ -317,10 +317,9 @@ open ibuffer and magit-status in fullframe mode.
 #+BEGIN_SRC emacs-lisp :tangle no
     (if (>= emacs-major-version 25)
         (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20160209.2318")
+          (add-to-list 'load-path "~/.emacs.d/elpa/fullframe-20170816.1003")
           (require 'fullframe)
           (fullframe magit-status magit-mode-quit-window)
-          (fullframe ibuffer)
           )
       )
 #+END_SRC
