@@ -46,7 +46,7 @@
 
 (defun org-chef-all-recipes-extract-ingredients (dom)
   "Get the ingredients for a recipe from an allrecipes DOM."
-  (mapcar 'dom-text (dom-elements dom 'itemprop "^ingredients$")))
+  (mapcar #'(lambda (n) (string-trim (dom-text n))) (dom-elements dom 'itemprop "^recipeIngredient$")))
 
 
 (defun org-chef-all-recipes-extract-servings (dom)
@@ -71,7 +71,7 @@
 
 (defun org-chef-all-recipes-extract-directions (dom)
   "Get the directions for a recipe from an allrecipes DOM."
-  (org-chef-remove-empty-strings (mapcar 'dom-text (dom-by-class dom  "^recipe-directions__list--item$"))))
+  (org-chef-remove-empty-strings (mapcar #'(lambda (n) (string-trim (dom-text n))) (dom-by-class dom  "^recipe-directions__list--item$"))))
 
 
 (defun org-chef-all-recipes-fetch (url)

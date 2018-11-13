@@ -47,7 +47,13 @@
 (require 'org-chef-martha-stewart)
 (require 'org-chef-budget-bytes)
 (require 'org-chef-cultures-for-health)
+(require 'org-chef-marmiton)
 (require 'org-chef-serious-eats)
+(require 'org-chef-reluctant-gourmet)
+(require 'org-chef-chef-koch)
+(require 'org-chef-steamy-kitchen)
+(require 'org-chef-nytimes)
+(require 'org-chef-wordpress)
 
 
 (defun org-chef-recipe-insert-org (recipe)
@@ -80,13 +86,14 @@
                     (org-chef-recipe-insert-org recipe)
                     (buffer-string)))
 
+
 (defun org-chef-match-url (BASE URL)
   "Match URL against a BASE url."
   (not (null (string-match-p (regexp-quote BASE) URL))))
 
 
-(defun org-chef-fetch-recipe (URL)
-  "Look up a recipe at a URL."
+(defun org-chef-fetch-recipe-specific-url (URL)
+  "Look up a recipe based on a specific URL."
   (cond
    ((org-chef-match-url "allrecipes.com" URL) (org-chef-all-recipes-fetch URL))
    ((org-chef-match-url "geniuskitchen.com" URL) (org-chef-genius-kitchen-fetch URL))
@@ -94,14 +101,27 @@
    ((org-chef-match-url "marthastewart.com" URL) (org-chef-martha-stewart-fetch URL))
    ((org-chef-match-url "budgetbytes.com" URL) (org-chef-budget-bytes-fetch URL))
    ((org-chef-match-url "culturesforhealth.com" URL) (org-chef-cultures-for-health-fetch URL))
-   ((org-chef-match-url "seriouseats.com" URL) (org-chef-serious-eats-fetch URL))))
+   ((org-chef-match-url "marmiton.org" URL) (org-chef-marmiton-fetch URL))
+   ((org-chef-match-url "seriouseats.com" URL) (org-chef-serious-eats-fetch URL))
+   ((org-chef-match-url "reluctantgourmet.com" URL) (org-chef-reluctant-gourmet-fetch URL))
+   ((org-chef-match-url "chefkoch.de" URL) (org-chef-chef-koch-fetch URL))
+   ((org-chef-match-url "steamykitchen.com" URL) (org-chef-steamy-kitchen-fetch URL))
+   ((org-chef-match-url "nytimes.com" URL) (org-chef-nytimes-fetch URL))
+   (t nil)))
 
 
-(defun org-chef-insert-recipe ()
+(defun org-chef-fetch-recipe (URL)
+  "Look up a recipe at a URL."
+  (let ((fetched-recipe (org-chef-fetch-recipe-specific-url URL)))
+    (if fetched-recipe
+        fetched-recipe
+      (org-chef-wordpress-fetch URL))))
+
+
+(defun org-chef-insert-recipe (URL)
   "Prompt for a recipe URL, and then insert the recipe at point."
-  (interactive)
-  (let ((URL (read-string "Recipe URL: ")))
-    (org-chef-recipe-insert-org (org-chef-fetch-recipe (read-string "Recipe URL: ")))))
+  (interactive "sRecipe URL: ")
+  (org-chef-recipe-insert-org (org-chef-fetch-recipe URL)))
 
 
 (defun org-chef-get-recipe-from-url ()
