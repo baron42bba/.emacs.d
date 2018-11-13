@@ -1,11 +1,11 @@
-;;; ox-clip.el --- Cross-platform Formatted copy commands for org-mode
+;;; ox-clip.el --- Cross-platform formatted copying for org-mode
 
 ;; Copyright(C) 2016 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
-;; URL: https://github.com/jkitchin/scimax/ox-clip.el
-;; Package-Version: 20161106.823
-;; Version: 0.2
+;; URL: https://github.com/jkitchin/ox-clip/ox-clip.el
+;; Package-Version: 20180306.340
+;; Version: 0.3
 ;; Keywords: org-mode
 ;; Package-Requires: ((org "8.2") (htmlize "0"))
 
@@ -27,7 +27,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 ;;; Commentary:
-;; 
+;;
 ;; This module copies selected regions in org-mode as formatted text on the
 ;; clipboard that can be pasted into other applications. When not in org-mode,
 ;; the htmlize library is used instead.
@@ -39,10 +39,17 @@
 
 ;; Mac OSX needs textutils and pbcopy, which should be part of the base install.
 
-;; Linux needs a relatively modern xclip. https://github.com/astrand/xclip
+;; Linux needs a relatively modern xclip, preferrably a version of at least
+;; 0.12. https://github.com/astrand/xclip
 
-;; There is one command: `ox-clip-formatted-copy' that should work across
-;; Windows, Mac and Linux.
+;; The main command is `ox-clip-formatted-copy' that should work across
+;; Windows, Mac and Linux. By default, it copies as html.
+;;
+;; Note: Images/equations may not copy well in html. Use `ox-clip-image-to-clipboard' to
+;; copy the image or latex equation at point to the clipboard as an image. The
+;; default latex scale is too small for me, so the default size for this is set
+;; to 3 in `ox-clip-default-latex-scale'. This overrides the settings in
+;; `org-format-latex-options'.
 
 (require 'htmlize)
 
@@ -72,7 +79,6 @@
   "xclip -verbose -i /tmp/ox-clip-org.html -t text/html -selection clipboard"
   "Command to copy formatted text on linux."
   :group 'ox-clip)
-
 
 (defvar ox-clip-w32-py "#!/usr/bin/env python
 # Adapted from http://code.activestate.com/recipes/474121-getting-html-from-the-windows-clipboard/
@@ -338,7 +344,7 @@ def DumpHtml():
         print(\"GetHtml()=>>>%s<<<END\" % cb.GetHtml())
         print(\"GetSource()=>>>%s<<<END\" % cb.GetSource())
 
-        
+
 if __name__ == '__main__':
     import sys
     data = sys.stdin.read()
@@ -346,10 +352,19 @@ if __name__ == '__main__':
 "
   "Windows Python Script for copying formatted text.")
 
+(defcustom ox-clip-default-latex-scale 3
+  "Default scale to use in `org-format-latex-options' when
+  creating preview images for copying."
+  :group 'ox-clip)
+
 ;; Create the windows python script if needed.
 (when (and (eq system-type 'windows-nt)
-	   (not (file-exists-p ox-clip-w32-cmd)))
-  (with-temp-file "html-clip-w32.py"
+	   (not (file-exists-p (expand-file-name
+				"html-clip-w32.py"
+				(file-name-directory (or load-file-name (locate-library "ox-clip")))))))
+  (with-temp-file (expand-file-name
+		   "html-clip-w32.py"
+		   (file-name-directory (or load-file-name (locate-library "ox-clip"))))
     (insert ox-clip-w32-py)))
 
 
@@ -361,52 +376,113 @@ R1 and R2 define the selected region."
   (copy-region-as-kill r1 r2)
   (if (equal major-mode 'org-mode)
       (save-window-excursion
-	(let* ((buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
-	       (html (with-current-buffer buf (buffer-string))))
-	  (cond
-	   ((eq system-type 'windows-nt)
-	    (with-current-buffer buf
-	      (shell-command-on-region
-	       (point-min)
-	       (point-max)
-	       ox-clip-w32-cmd)))
-	   ((eq system-type 'darwin)
-	    (with-current-buffer buf
-	      (shell-command-on-region
-	       (point-min)
-	       (point-max)
-	       ox-clip-osx-cmd)))
-	   ((eq system-type 'gnu/linux)
-	    ;; For some reason shell-command on region does not work with xclip.
-	    (with-temp-file "/tmp/ox-clip-org.html"
-	      (insert (with-current-buffer buf (buffer-string))))
-	    (apply
-	     'start-process "ox-clip" "*ox-clip*"
-	     (split-string ox-clip-linux-cmd " ")))) 
-	  (kill-buffer buf)))
+        (let* ((org-html-with-latex 'dvipng)
+	       (buf (org-export-to-buffer 'html "*Formatted Copy*" nil nil t t))
+               (html (with-current-buffer buf (buffer-string))))
+          (cond
+           ((eq system-type 'windows-nt)
+            (with-current-buffer buf
+              (shell-command-on-region
+               (point-min)
+               (point-max)
+               ox-clip-w32-cmd)))
+           ((eq system-type 'darwin)
+            (with-current-buffer buf
+              (shell-command-on-region
+               (point-min)
+               (point-max)
+               ox-clip-osx-cmd)))
+           ((eq system-type 'gnu/linux)
+            ;; For some reason shell-command on region does not work with xclip.
+            (with-temp-file "/tmp/ox-clip-org.html"
+              (insert (with-current-buffer buf (buffer-string))))
+            (apply
+             'start-process "ox-clip" "*ox-clip*"
+             (split-string ox-clip-linux-cmd " "))))
+          (kill-buffer buf)))
     ;; Use htmlize when not in org-mode.
     (let ((html (htmlize-region-for-paste r1 r2)))
       (cond
        ((eq system-type 'windows-nt)
-	(with-temp-buffer
-	  (insert html)
-	  (shell-command-on-region
-	   (point-min)
-	   (point-max)
-	   ox-clip-w32-cmd)))
+        (with-temp-buffer
+          (insert html)
+          (shell-command-on-region
+           (point-min)
+           (point-max)
+           ox-clip-w32-cmd)))
        ((eq system-type 'darwin)
-	(with-temp-buffer
-	  (insert html)
-	  (shell-command-on-region
-	   (point-min)
-	   (point-max)
-	   ox-clip-osx-cmd)))
+        (with-temp-buffer
+          (insert html)
+          (shell-command-on-region
+           (point-min)
+           (point-max)
+           ox-clip-osx-cmd)))
        ((eq system-type 'gnu/linux)
-	(with-temp-file "/tmp/ox-clip-org.html"
-	  (insert html))
-	(apply
-	 'start-process "ox-clip" "*ox-clip*"
-	 (split-string ox-clip-linux-cmd " ")))))))
+        (with-temp-file "/tmp/ox-clip-org.html"
+          (insert html))
+        (apply
+         'start-process "ox-clip" "*ox-clip*"
+         (split-string ox-clip-linux-cmd " ")))))))
+
+
+;; * copy images / latex fragments to the clipboard
+;;;###autoload
+(defun ox-clip-image-to-clipboard (&optional scale)
+  "Copy the image file or latex fragment at point to the clipboard as an image.
+SCALE is a numerical
+prefix (default=`ox-clip-default-latex-scale') that determines
+the size of the latex image. It has no effect on other kinds of
+images. Currently only works on Linux."
+  (interactive "P")
+  (let* ((el (org-element-context))
+	 (image-file (cond
+		      ;; on a latex fragment
+		      ((eq 'latex-fragment (org-element-type el))
+		       (when (ov-at) (org-toggle-latex-fragment))
+
+		       ;; should be no image, so we rebuild one
+		       (let ((current-scale (plist-get org-format-latex-options :scale))
+			     ov display file relfile)
+			 (plist-put org-format-latex-options :scale
+				    (or scale ox-clip-default-latex-scale))
+			 (org-toggle-latex-fragment)
+			 (plist-put org-format-latex-options :scale current-scale)
+
+			 (setq ov (ov-at)
+			       display (overlay-get ov 'display)
+			       file (plist-get (cdr display) :file))
+			 (file-relative-name file)))
+		      ;; At a link of an image
+		      ((and (eq 'link (org-element-type el))
+			    (string= "file" (org-element-property :type el))
+			    (string-match (cdr (assoc "file" org-html-inline-image-rules))
+					  (org-element-property :path el)))
+		       (file-relative-name (org-element-property :path el)))
+		      ;; at an overlay with a display that is an image
+		      ((and (ov-at)
+			    (overlay-get (ov-at) 'display)
+			    (plist-get (cdr (overlay-get (ov-at) 'display)) :file)
+			    (string-match (cdr (assoc "file" org-html-inline-image-rules))
+					  (plist-get (cdr (overlay-get (ov-at) 'display))
+						     :file)))
+		       (file-relative-name (plist-get (cdr (overlay-get (ov-at) 'display))
+						      :file)))
+		      ;; not sure what else we can do here.
+		      (t
+		       nil))))
+    (when image-file
+      (cond
+       ((eq system-type 'windows-nt)
+	(message "Not supported yet."))
+       ((eq system-type 'darwin)
+	(do-applescript
+	 (format "set the clipboard to POSIX file \"%s\"" (expand-file-name image-file))))
+       ((eq system-type 'gnu/linux)
+	(call-process-shell-command
+	 (format "xclip -selection clipboard -t image/%s -i %s"
+		 (file-name-extension image-file)
+		 image-file)))))
+    (message "Copied %s" image-file)))
 
 (provide 'ox-clip)
 
