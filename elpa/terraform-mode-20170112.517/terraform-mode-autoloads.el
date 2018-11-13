@@ -1,10 +1,13 @@
 ;;; terraform-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "terraform-mode" "terraform-mode.el" (22473
-;;;;;;  28701 0 0))
+;;;### (autoloads nil "terraform-mode" "terraform-mode.el" (0 0 0
+;;;;;;  0))
 ;;; Generated autoloads from terraform-mode.el
 
 (autoload 'terraform-mode "terraform-mode" "\
@@ -14,11 +17,14 @@ Major mode for editing terraform configuration file
 
 (add-to-list 'auto-mode-alist '("\\.tf\\(vars\\)?\\'" . terraform-mode))
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "terraform-mode" '("terraform-")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; terraform-mode-autoloads.el ends here
