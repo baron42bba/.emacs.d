@@ -1856,7 +1856,7 @@ Use =C-c M= to send a multipart email with .org as text and exported
 html.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (load-file "~/.emacs.d/elpa/org-mime-20170218.501/org-mime.el")
+  (load-file "~/.emacs.d/elpa/org-mime-20181023.2314/org-mime.el")
   (add-hook 'org-mode-hook
             (lambda()
               (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
