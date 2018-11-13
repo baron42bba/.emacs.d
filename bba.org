@@ -3286,7 +3286,7 @@ If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20151214.1344" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20181031.1803" t)
         (require 'ggtags)
         (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20170116.529" t)
         (require 'helm-gtags)
@@ -3398,7 +3398,7 @@ switch default browser between eww and default.
 combine key strokes to access commands even faster.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20151209.104")
+  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20160227.1238")
 
   (require 'key-chord)
   (key-chord-mode 1)
