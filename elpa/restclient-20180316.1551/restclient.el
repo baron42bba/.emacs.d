@@ -6,7 +6,7 @@
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
 ;; Keywords: http
-;; Package-Version: 20160414.1524
+;; Package-Version: 20180316.1551
 
 ;; This file is not part of GNU Emacs.
 ;; This file is public domain software. Do what you want.
@@ -21,6 +21,7 @@
 ;;
 (require 'url)
 (require 'json)
+(require 'outline)
 
 (defgroup restclient nil
   "An interactive HTTP client for Emacs."
@@ -45,6 +46,19 @@
   "Inhibit restclient from sending cookies implicitly."
   :group 'restclient
   :type 'boolean)
+
+(defcustom restclient-content-type-modes '(("text/xml" . xml-mode)
+                                           ("text/plain" . text-mode)
+                                           ("application/xml" . xml-mode)
+                                           ("application/json" . js-mode)
+                                           ("image/png" . image-mode)
+                                           ("image/jpeg" . image-mode)
+                                           ("image/jpg" . image-mode)
+                                           ("image/gif" . image-mode)
+                                           ("text/html" . html-mode))
+  "An association list mapping content types to buffer modes"
+  :group 'restclient
+  :type '(alist :key-type string :value-type symbol))
 
 (defgroup restclient-faces nil
   "Faces used in Restclient Mode"
@@ -107,10 +121,13 @@
 (defvar restclient-request-time-end nil)
 
 (defvar restclient-response-loaded-hook nil
-  "Hook run after response buffer created and data loaded.")
+  "Hook run after response buffer is formatted.")
 
 (defvar restclient-http-do-hook nil
   "Hook to run before making request.")
+
+(defvar restclient-response-received-hook nil
+  "Hook run after data is loaded into response buffer.")
 
 (defcustom restclient-vars-max-passes 10
   "Maximum number of recursive variable references. This is to prevent hanging if two variables reference each other directly or indirectly."
@@ -132,10 +149,10 @@
   "^\\(:[^: \n]+\\)$")
 
 (defconst restclient-var-regexp
-  (concat "^\\(:[^: ]+\\)[ \t]*\\(:?\\)=[ \t]*\\(<<[ \t]*\n\\(\\(.*\n\\)*?\\)" restclient-comment-separator "\\|\\([^<].*\\)$\\)"))
+  (concat "^\\(:[^:= ]+\\)[ \t]*\\(:?\\)=[ \t]*\\(<<[ \t]*\n\\(\\(.*\n\\)*?\\)" restclient-comment-separator "\\|\\([^<].*\\)$\\)"))
 
 (defconst restclient-svar-regexp
-  "^\\(:[^: ]+\\)[ \t]*=[ \t]*\\(.+?\\)$")
+  "^\\(:[^:= ]+\\)[ \t]*=[ \t]*\\(.+?\\)$")
 
 (defconst restclient-evar-regexp
   "^\\(:[^: ]+\\)[ \t]*:=[ \t]*\\(.+?\\)$")
@@ -144,7 +161,7 @@
   "^\\(:[^: ]+\\)[ \t]*:?=[ \t]*\\(<<\\)[ \t]*$")
 
 (defconst restclient-file-regexp
-  "^\\s-*<[ \t]*\\(.*\\)")
+  "^<[ \t]*\\([^<>\n\r]+\\)[ \t]*$")
 
 (defconst restclient-content-type-regexp
   "^Content-[Tt]ype: \\(\\w+\\)/\\(?:[^\\+\r\n]*\\+\\)*\\([^;\r\n]+\\)")
@@ -155,13 +172,12 @@
 ;; and password.
 (defadvice url-http-handle-authentication (around restclient-fix)
   (if restclient-within-call
-      (setq success t ad-return-value t)
+      (setq ad-return-value t)
     ad-do-it))
 (ad-activate 'url-http-handle-authentication)
 
 (defadvice url-cache-extract (around restclient-fix-2)
-  (if restclient-within-call
-      (setq success t)
+  (unless restclient-within-call
     ad-do-it))
 (ad-activate 'url-cache-extract)
 
@@ -182,7 +198,7 @@
   "Send ENTITY and HEADERS to URL as a METHOD request."
   (if restclient-log-request
       (message "HTTP %s %s Headers:[%s] Body:[%s]" method url headers entity))
-  (let ((url-request-method method)
+  (let ((url-request-method (encode-coding-string method 'us-ascii))
         (url-request-extra-headers '())
         (url-request-data (encode-coding-string entity 'utf-8)))
 
@@ -197,9 +213,10 @@
                                      ("accept" . url-mime-accept-string)))))
 
         (if mapped
-            (set (cdr mapped) (cdr header))
-          (setq url-request-extra-headers (cons header url-request-extra-headers)))
-        ))
+            (set (cdr mapped) (encode-coding-string (cdr header) 'us-ascii))
+          (let* ((hkey (encode-coding-string (car header) 'us-ascii))
+                 (hvalue (encode-coding-string (cdr header) 'us-ascii)))
+            (setq url-request-extra-headers (cons (cons hkey hvalue) url-request-extra-headers))))))
 
     (setq restclient-within-call t)
     (setq restclient-request-time-start (current-time))
@@ -220,14 +237,7 @@
                                                     (match-string-no-properties 1)
                                                     "/"
                                                     (match-string-no-properties 2))
-                                                   '(("text/xml" . xml-mode)
-                                                     ("application/xml" . xml-mode)
-                                                     ("application/json" . js-mode)
-                                                     ("image/png" . image-mode)
-                                                     ("image/jpeg" . image-mode)
-                                                     ("image/jpg" . image-mode)
-                                                     ("image/gif" . image-mode)
-                                                     ("text/html" . html-mode))))))
+                                                   restclient-content-type-modes))))
                         (forward-line)) 0)))
       (setq end-of-headers (point))
       (while (and (looking-at restclient-empty-line-regexp)
@@ -273,9 +283,8 @@
           (let ((hstart (point)))
             (insert method " " url "\n" headers)
             (insert (format "Request duration: %fs\n" (float-time (time-subtract restclient-request-time-end restclient-request-time-start))))
-            (unless (eq guessed-mode 'image-mode)
-              (comment-region hstart (point))
-              (indent-region hstart (point)))))))))
+            (unless (member guessed-mode '(image-mode text-mode))
+              (comment-region hstart (point)))))))))
 
 (defun restclient-prettify-json-unicode ()
   (save-excursion
@@ -296,6 +305,7 @@ The buffer contains the raw HTTP response sent by the server."
                             (current-buffer)
                             bufname
                             restclient-same-buffer-response)
+        (run-hooks 'restclient-response-received-hook)
         (unless raw
           (restclient-prettify-response method url))
         (buffer-enable-undo)
@@ -306,9 +316,9 @@ The buffer contains the raw HTTP response sent by the server."
 
 (defun restclient-decode-response (raw-http-response-buffer target-buffer-name same-name)
   "Decode the HTTP response using the charset (encoding) specified in the Content-Type header. If no charset is specified, default to UTF-8."
-  (let* ((charset-regexp "Content-Type.*charset=\\([-A-Za-z0-9]+\\)")
+  (let* ((charset-regexp "^Content-Type.*charset=\\([-A-Za-z0-9]+\\)")
          (image? (save-excursion
-                   (search-forward-regexp "Content-Type.*[Ii]mage" nil t)))
+                   (search-forward-regexp "^Content-Type.*[Ii]mage" nil t)))
          (encoding (if (save-excursion
                          (search-forward-regexp charset-regexp nil t))
                        (intern (downcase (match-string 1)))
@@ -356,7 +366,8 @@ The buffer contains the raw HTTP response sent by the server."
   (save-excursion
     (if (re-search-forward restclient-comment-start-regexp (point-max) t)
         (max (- (point-at-bol) 1) 1)
-      (point-max))))
+      (progn (goto-char (point-max))
+             (if (looking-at "^$") (- (point) 1) (point))))))
 
 (defun restclient-replace-all-in-string (replacements string)
   (if replacements
@@ -369,7 +380,7 @@ The buffer contains the raw HTTP response sent by the server."
                                                   (lambda (key)
                                                     (setq continue t)
                                                     (cdr (assoc key replacements)))
-                                                  current nil t)))
+                                                  current t t)))
         current)
     string))
 
@@ -413,10 +424,10 @@ The buffer contains the raw HTTP response sent by the server."
     (buffer-string)))
 
 (defun restclient-parse-body (entity vars)
-  (if (string-match restclient-file-regexp entity)
+  (if (= 0 (or (string-match restclient-file-regexp entity) 1))
       (restclient-read-file (match-string 1 entity))
     (restclient-replace-all-in-string vars entity)))
-  
+
 (defun restclient-http-parse-current-and-do (func &rest args)
   (save-excursion
     (goto-char (restclient-current-min))
@@ -444,11 +455,20 @@ The buffer contains the raw HTTP response sent by the server."
   (interactive)
   (restclient-http-parse-current-and-do
    '(lambda (method url headers entity)
-      (kill-new (format "curl -i %s -X%s '%s' %s"
-                        (mapconcat (lambda (header) (format "-H '%s: %s'" (car header) (cdr header))) headers " ")
-                        method url
-                        (if (> (string-width entity) 0)
-                            (format "-d '%s'" entity) "")))
+      (let ((header-args
+             (apply 'append
+                    (mapcar (lambda (header)
+                              (list "-H" (format "%s: %s" (car header) (cdr header))))
+                            headers))))
+        (kill-new (concat "curl "
+                          (mapconcat 'shell-quote-argument
+                                     (append '("-i")
+                                             header-args
+                                             (list (concat "-X" method))
+                                             (list url)
+                                             (when (> (string-width entity) 0)
+                                               (list "-d" entity)))
+                                     " "))))
       (message "curl command copied to clipboard."))))
 
 ;;;###autoload
@@ -507,6 +527,38 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
   (backward-char 1)
   (setq deactivate-mark nil))
 
+(defun restclient-narrow-to-current ()
+  "Narrow to region of current request"
+  (interactive)
+  (narrow-to-region (restclient-current-min) (restclient-current-max)))
+
+(defun restclient-toggle-body-visibility ()
+  (interactive)
+  ;; If we are not on the HTTP call line, don't do anything
+  (let ((at-header (save-excursion
+                     (beginning-of-line)
+                     (looking-at restclient-method-url-regexp))))
+    (when at-header
+      (save-excursion
+        (end-of-line)
+        ;; If the overlays at this point have 'invisible set, toggling
+        ;; must make the region visible. Else it must hide the region
+        
+        ;; This part of code is from org-hide-block-toggle method of
+        ;; Org mode
+        (let ((overlays (overlays-at (point))))
+          (if (memq t (mapcar
+                       (lambda (o)
+                         (eq (overlay-get o 'invisible) 'outline))
+                       overlays))
+              (outline-flag-region (point) (restclient-current-max) nil)
+            (outline-flag-region (point) (restclient-current-max) t)))) t)))
+
+(defun restclient-toggle-body-visibility-or-indent ()
+  (interactive)
+  (unless (restclient-toggle-body-visibility)
+    (indent-for-tab-command)))
+
 (defconst restclient-mode-keywords
   (list (list restclient-method-url-regexp '(1 'restclient-method-face) '(2 'restclient-url-face))
         (list restclient-svar-regexp '(1 'restclient-variable-name-face) '(2 'restclient-variable-string-face))
@@ -523,21 +575,42 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
     (modify-syntax-entry ?\n ">#" table)
     table))
 
+(defvar restclient-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c") 'restclient-http-send-current)
+    (define-key map (kbd "C-c C-r") 'restclient-http-send-current-raw)
+    (define-key map (kbd "C-c C-v") 'restclient-http-send-current-stay-in-window)
+    (define-key map (kbd "C-c C-n") 'restclient-jump-next)
+    (define-key map (kbd "C-c C-p") 'restclient-jump-prev)
+    (define-key map (kbd "C-c C-.") 'restclient-mark-current)
+    (define-key map (kbd "C-c C-u") 'restclient-copy-curl-command)
+    (define-key map (kbd "C-c n n") 'restclient-narrow-to-current)
+    map)
+  "Keymap for restclient-mode.")
+
+(define-minor-mode restclient-outline-mode
+  "Minor mode to allow show/hide of request bodies by TAB."
+      :init-value nil
+      :lighter nil
+      :keymap '(("\t" . restclient-toggle-body-visibility-or-indent)
+                ("\C-c\C-a" . restclient-toggle-body-visibility-or-indent))
+      :group 'restclient)
+
 ;;;###autoload
 (define-derived-mode restclient-mode fundamental-mode "REST Client"
   "Turn on restclient mode."
-  (local-set-key (kbd "C-c C-c") 'restclient-http-send-current)
-  (local-set-key (kbd "C-c C-r") 'restclient-http-send-current-raw)
-  (local-set-key (kbd "C-c C-v") 'restclient-http-send-current-stay-in-window)
-  (local-set-key (kbd "C-c C-n") 'restclient-jump-next)
-  (local-set-key (kbd "C-c C-p") 'restclient-jump-prev)
-  (local-set-key (kbd "C-c C-.") 'restclient-mark-current)
-  (local-set-key (kbd "C-c C-u") 'restclient-copy-curl-command)
   (set (make-local-variable 'comment-start) "# ")
   (set (make-local-variable 'comment-start-skip) "# *")
   (set (make-local-variable 'comment-column) 48)
 
-  (set (make-local-variable 'font-lock-defaults) '(restclient-mode-keywords)))
+  (set (make-local-variable 'font-lock-defaults) '(restclient-mode-keywords))
+  ;; We use outline-mode's method outline-flag-region to hide/show the
+  ;; body. As a part of it, it sets 'invisibility text property to
+  ;; 'outline. To get ellipsis, we need 'outline to be in
+  ;; buffer-invisibility-spec
+  (add-to-invisibility-spec '(outline . t)))
+
+(add-hook 'restclient-mode-hook 'restclient-outline-mode)
 
 (provide 'restclient)
 
