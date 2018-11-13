@@ -1,9 +1,12 @@
 ;;; cl-lib-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "cl-lib" "cl-lib.el" (21970 60779 0 0))
+;;;### (autoloads nil "cl-lib" "cl-lib.el" (0 0 0 0))
 ;;; Generated autoloads from cl-lib.el
  (let ((d (file-name-directory #$)))
   (when (member d load-path)
@@ -15,5 +18,6 @@
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; cl-lib-autoloads.el ends here
