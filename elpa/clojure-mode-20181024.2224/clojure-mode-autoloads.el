@@ -1,10 +1,12 @@
 ;;; clojure-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "clojure-mode" "clojure-mode.el" (22692 30285
-;;;;;;  0 0))
+;;;### (autoloads nil "clojure-mode" "clojure-mode.el" (0 0 0 0))
 ;;; Generated autoloads from clojure-mode.el
 
 (autoload 'clojure-mode "clojure-mode" "\
@@ -32,13 +34,17 @@ Thread by one more level an existing threading macro.
 
 (autoload 'clojure-thread-first-all "clojure-mode" "\
 Fully thread the form at point using ->.
-When BUT-LAST is passed the last expression is not threaded.
+
+When BUT-LAST is non-nil, the last expression is not threaded.
+Default value is `clojure-thread-all-but-last'.
 
 \(fn BUT-LAST)" t nil)
 
 (autoload 'clojure-thread-last-all "clojure-mode" "\
 Fully thread the form at point using ->>.
-When BUT-LAST is passed the last expression is not threaded.
+
+When BUT-LAST is non-nil, the last expression is not threaded.
+Default value is `clojure-thread-all-but-last'.
 
 \(fn BUT-LAST)" t nil)
 
@@ -87,7 +93,8 @@ Change a surrounding when to when-not, or vice-versa.
 
 (autoload 'clojure-let-backward-slurp-sexp "clojure-mode" "\
 Slurp the s-expression before the let form into the let form.
-With a numberic prefix argument slurp the previous N s-expression into the let form.
+With a numberic prefix argument slurp the previous N s-expression
+into the let form.
 
 \(fn &optional N)" t nil)
 
@@ -122,22 +129,15 @@ Major mode for editing ClojureC code.
 
 \(fn)" t nil)
 
-(autoload 'clojurex-mode "clojure-mode" "\
-Major mode for editing ClojureX code.
-
-\\{clojurex-mode-map}
-
-\(fn)" t nil)
-
 (add-to-list 'auto-mode-alist '("\\.\\(clj\\|dtm\\|edn\\)\\'" . clojure-mode))
 
 (add-to-list 'auto-mode-alist '("\\.cljc\\'" . clojurec-mode))
 
-(add-to-list 'auto-mode-alist '("\\.cljx\\'" . clojurex-mode))
-
 (add-to-list 'auto-mode-alist '("\\.cljs\\'" . clojurescript-mode))
 
 (add-to-list 'auto-mode-alist '("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "clojure-mode" '("clojure" "add-custom-clojure-indents" "define-clojure-indent" "put-clojure-indent")))
 
 ;;;***
 
@@ -145,5 +145,6 @@ Major mode for editing ClojureX code.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; clojure-mode-autoloads.el ends here

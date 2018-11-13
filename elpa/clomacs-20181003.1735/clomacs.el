@@ -1,13 +1,13 @@
 ;;; clomacs.el --- Simplifies Emacs Lisp interaction with Clojure. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013-2017 Kostafey <kostafey@gmail.com>
+;; Copyright (C) 2013-2018 Kostafey <kostafey@gmail.com>
 
 ;; Author: Kostafey <kostafey@gmail.com>
 ;; URL: https://github.com/clojure-emacs/clomacs
-;; Package-Version: 20170128.850
+;; Package-Version: 20181003.1735
 ;; Keywords: clojure, interaction
-;; Version: 0.0.2
-;; Package-Requires: ((emacs "24.3") (cider "0.11") (s "1.10.0"))
+;; Version: 0.0.3
+;; Package-Requires: ((emacs "24.3") (cider "0.18.0") (s "1.12.0") (simple-httpd "1.4.6"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -28,49 +28,79 @@
 
 ;; `clomacs-defun' - core Clojure to Elisp function wrapper.
 ;;
+;; Elisp to Clojure calls helper functions:
+;; `clomacs-create-httpd-start' - package-specific httpd connection setup.
+;; `clomacs-create-httpd-stop' - package-specific httpd connection stop.
+;;
 ;; See README.md for detailed description.
 
 
 (require 'cl-lib)
+(require 'net-utils)
 (require 'cider)
 (require 's)
+(require 'simple-httpd)
 
 (defvar clomacs-verify-nrepl-on-call t)
 (defvar clomacs-autoload-nrepl-on-call t)
 
-(defun clomacs-search-connection (repl-buffer-project-name)
+(defcustom clomacs-httpd-default-port 8080
+  "Http port to listen for requests from Clojure side."
+  :group 'clomacs
+  :type 'integer)
+
+(defcustom clomacs-httpd-port-scan-limit 100
+  "Available Http ports scan range limit."
+  :group 'clomacs
+  :type 'integer)
+
+(defcustom clomacs-print-length 100000
+  "Value for *print-length* set during `clomacs-defun' macros evaluation.
+Restricts list length passed from Clojure to Emacs lisp.
+Set `nil' for unlimited list length."
+  :group 'clomacs
+  :type 'integer)
+
+(defcustom clomacs-restore-print-length nil
+  "When t restore *print-length* acording to `cider-repl-print-length' value.
+After any `clomacs-defun' wraped funtion call, restore *print-length*.
+Can be useful for debugging purpose to run `clomacs-defun' functions and
+Clojure code directly in the same REPL."
+  :group 'clomacs
+  :type 'boolean)
+
+(defun cloamcs-get-dir (repl-info)
+  (if repl-info
+      (file-name-nondirectory
+       (car (split-string repl-info ":")))))
+
+(defun clomacs-search-connection (project-name)
   "Search nREPL connection buffer.
 E.g. if you want to find \"*cider-repl clomacs-20160419.258*\" you shold pass
 REPL-BUFFER-PROJECT-NAME \"clomacs\"."
-  (cl-reduce
-   (lambda (x y) (or x y))
-   (mapcar
-    (lambda (x)
-      (let ((this-repl
-             (s-chop-suffix
-              "*"
-              (cadr (split-string (buffer-name (car cider-connections)) " ")))))
-        (if (and
-             (>= (length this-repl)
-                 (length repl-buffer-project-name))
-             (string= repl-buffer-project-name
-                     (substring this-repl
-                                0
-                                (length repl-buffer-project-name))))
-            x)))
-    cider-connections)))
+  (if project-name
+      (let ((result nil))
+        (maphash
+         (lambda (k v)
+           (let ((current-project-dir (cloamcs-get-dir (cdr k))))
+             (if (and current-project-dir
+                      (or (s-contains? project-name current-project-dir)
+                          (s-contains? project-name (buffer-name (cadr v)))))
+                 (setq result (cadr v)))))
+         sesman-sessions-hashmap)
+        result)
+    (cider-current-connection)))
 
 (defun clomacs-get-connection (&optional library)
   "Return buffer with nREPL process related to LIBRARY.
 If LIBRARY is nil, attempts to use \"clomacs\", \"localhost\" or
 any current connection.
 If can't find any nREPL process return nil."
-  (if (> (length cider-connections) 0)
-      (if library
-          (clomacs-search-connection library)
-        (or (clomacs-search-connection "clomacs")
-            (clomacs-search-connection "localhost")
-            (cider-current-connection)))))
+  (if library
+      (clomacs-search-connection library)
+    (or (clomacs-search-connection "clomacs")
+        (clomacs-search-connection "localhost")
+        (cider-current-repl))))
 
 (defun clomacs-get-session (connection)
   "Return current session for this CONNECTION."
@@ -92,8 +122,8 @@ If can't find any nREPL process return nil."
     ;; simple run lein
     (if lib-buff
         (with-current-buffer lib-buff
-          (cider-jack-in))
-      (cider-jack-in))
+          (cider-jack-in nil))
+      (cider-jack-in nil))
     (message starting-msg)
     (if sync
         (let ((old-cider-repl-pop cider-repl-pop-to-buffer-on-connect))
@@ -117,6 +147,22 @@ If can't find any nREPL process return nil."
       (substring raw-string 1 (1- (length raw-string)))
     raw-string))
 
+(defun clomacs-clean-result-string (return-string)
+  (if (stringp return-string)
+      (condition-case nil
+          (s-replace-all '(("\\\\" . "\\")
+                           ("\\\"" . "\"")
+                           ("\\n"  . "\n")
+                           ("\\t"  . "\t"))
+                         return-string)
+        (error return-string))
+    return-string))
+
+(defun clomacs-string-to-boolean (s)
+  (not (or (not s)
+           (equal s "nil")
+           (equal s "false"))))
+
 (defun clomacs-format-result (raw-string return-type)
   "Format Elisp representation of Clojure evaluation result."
   (cl-assert return-type)
@@ -124,25 +170,26 @@ If can't find any nREPL process return nil."
       (let ((return-string (clomacs-strip-string raw-string)))
         (cond
          ((functionp return-type) (funcall return-type raw-string))
-         ((eq return-type :string) return-string)
+         ((eq return-type :string) (clomacs-clean-result-string return-string))
          ((eq return-type :int) (string-to-number return-string))
          ((eq return-type :number) (string-to-number return-string))
+         ((eq return-type :boolean) (clomacs-string-to-boolean return-string))
          ((eq return-type :list) (read raw-string))
          ((eq return-type :char) (string-to-char return-string))
          ((eq return-type :vector) (string-to-vector return-string))))))
 
 (declare clomacs-format-arg)
 
-(defun clomacs-plist-p (object)
-  "Return t if OBJECT is a plist, otherwise, return nil."
+(defun clomacs-alist-p (object)
+  "Return t if OBJECT is a alist, otherwise, return nil."
   (when (and (listp object)
              (car object)
              (listp (car object))
              (not (listp (cdr (car object)))))
     t))
 
-(defun clomacs-plist-to-map (lst)
-  "Build string representation of Clojure map from Elisp plist LST."
+(defun clomacs-alist-to-map (lst)
+  "Build string representation of Clojure map from Elisp alist LST."
   (let ((tail (car (last lst))))
    (concat
     "{"
@@ -162,7 +209,7 @@ If can't find any nREPL process return nil."
    ((numberp a) (number-to-string a))
    ((stringp a) (clomacs-add-quotes a))
    ((booleanp a) (if a "true" "false"))
-   ((clomacs-plist-p a) (clomacs-plist-to-map a))
+   ((clomacs-alist-p a) (clomacs-alist-to-map a))
    ((and (listp a) (equal (car a) 'quote))
     (concat "'" (clomacs-force-symbol-name
                  (cadr a))))
@@ -244,7 +291,10 @@ Handle errors. Handle difference between CIDER versions."
        type))))
 
 (defun clomacs-add-quotes (str)
-  (concat "\"" str "\""))
+  (format "%S"
+          (progn
+            (set-text-properties 0 (length str) nil str)
+            str)))
 
 (cl-defun clomacs-prepare-vars (cl-entity-name
                                 &key
@@ -261,10 +311,12 @@ Handle errors. Handle difference between CIDER versions."
                      (clomacs-force-symbol-name return-type)))
   (let* ((doc (clomacs-get-doc doc cl-entity-name))
          (cl-entity-name-str (clomacs-force-symbol-name cl-entity-name))
-         (namespace-str (clomacs-force-symbol-name namespace))
          (ns-slash-pos (string-match "/" cl-entity-name-str))
          (implicit-ns (if ns-slash-pos
                           (substring cl-entity-name-str 0 ns-slash-pos)))
+         (namespace-str (if namespace
+                            (clomacs-force-symbol-name namespace)
+                          implicit-ns))
          (cl-entity-full-name (if (and namespace (not implicit-ns))
                                   (concat namespace-str "/" cl-entity-name-str)
                                 cl-entity-name-str)))
@@ -309,18 +361,27 @@ or it may be a custom function (:string by default)."
                             (call-type :sync)
                             (callback nil)
                             (doc nil)
+                            (interactive nil)
                             (return-type :string)
                             (return-value :value)
                             lib-name
-                            namespace)
+                            namespace
+                            (httpd-starter nil))
   "Wrap CL-FUNC-NAME, evaluated on clojure side by EL-FUNC-NAME.
 CALL-TYPE - call Clojure side :sync or :async.
 CALLBACK - callback function for :async CALL-TYPE case.
 DOC - optional elisp function docstring (when nil it constructed from
 underlying clojure entity docstring if possible).
+INTERACTIVE - when defined and is a boolean `t` mark function (interactive),
+if not boolean - insert interactive value into the function beginning as is.
 RETURN-TYPE possible values are listed in the CLOMACS-POSSIBLE-RETURN-TYPES,
 or it may be a custom function (:string by default).
-RETURN-VALUE may be :value or :stdout (:value by default)."
+RETURN-VALUE may be :value or :stdout (:value by default).
+LIB-NAME - Elisp library name used in end-user .emacs config by `require'.
+HTTPD-STARTER - in the case Clojure side code needs to call Elisp side code,
+http-server should be started to pass http requests from Clojure REPL
+to Emacs. This parameter is Elisp function to do it. Such function can
+be created by `clomacs-create-httpd-start' macro."
   (cl-multiple-value-bind
       (doc namespace-str cl-entity-full-name)
       (clomacs-prepare-vars cl-func-name
@@ -328,7 +389,14 @@ RETURN-VALUE may be :value or :stdout (:value by default)."
                             :namespace namespace)
     `(defun ,el-func-name (&rest attributes)
        ,doc
+       ,(if interactive
+            (if (booleanp interactive)
+                '(interactive)
+              interactive))
        (clomacs-ensure-nrepl-run ,lib-name)
+       (when (and (functionp ,httpd-starter)
+                  (not (process-status "httpd")))
+         (funcall ,httpd-starter))
        (let* ((attrs ""))
          (dolist (a attributes)
            (setq attrs (concat attrs " "
@@ -336,9 +404,15 @@ RETURN-VALUE may be :value or :stdout (:value by default)."
          (let* ((connection (clomacs-get-connection ,lib-name))
                 (request (concat
                           (if ',namespace
-                              (concat "(require '" ',namespace-str ") ") "")
-                          "(" ',cl-entity-full-name attrs ")")))
+                              (format  "(require '%s) " ',namespace-str) "")
+                          (format
+                           "(do (set! *print-length* %s)
+                              (%s %s))"
+                           ,(number-to-string clomacs-print-length)
+                           ',cl-entity-full-name
+                           attrs))))
            (if (equal ,call-type :async)
+               ;; async
                (nrepl-request:eval
                 request
                 (lambda (result)
@@ -347,13 +421,19 @@ RETURN-VALUE may be :value or :stdout (:value by default)."
                                         result
                                         ,return-value ',return-type ',namespace)))
                         (if el-result
-                            (,callback el-result)))))
+                            (,callback el-result))
+                        (if clomacs-restore-print-length
+                            (cider-repl-set-config)))))
                 connection)
-             (clomacs-get-result
-              (nrepl-sync-request:eval
-               request
-               connection)
-              ,return-value ',return-type ',namespace)))))))
+             ;; sync
+             (let ((el-result (clomacs-get-result
+                               (nrepl-sync-request:eval
+                                request
+                                connection)
+                               ,return-value ',return-type ',namespace)))
+               (if clomacs-restore-print-length
+                   (cider-repl-set-config))
+               el-result)))))))
 
 (defun clomacs-load-file (file-path)
   "Sync and straightforward load clojure file."
@@ -365,6 +445,112 @@ RETURN-VALUE may be :value or :stdout (:value by default)."
        (buffer-string))
      connection
      session)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Emacs http server
+
+(defun clomacs-eval-elisp (string)
+  "Evaluate elisp code stored in a STRING."
+  (eval (car (read-from-string string))))
+
+(defservlet* execute text/plain (elisp)
+  (let ((result (clomacs-eval-elisp elisp)))
+    (if result
+        (insert (format "%s" result)))))
+
+(defun clomacs-get-httpd-port ()
+  "Search available port for httpd process."
+  (let ((netstat-ouptut (shell-command-to-string
+                         (concat netstat-program " -an")))
+        (value)
+        (i 0))
+    (while (not value)
+      (let ((port (+ clomacs-httpd-default-port i)))
+        (setq i (+ i 1))
+        (if (> i clomacs-httpd-port-scan-limit)
+            (error (format "All ports from %d to %d are busy."
+                           clomacs-httpd-default-port
+                           port)))
+        (if (not (s-contains? (number-to-string port) netstat-ouptut))
+            (setq value port))))
+    value))
+
+(cl-defmacro clomacs-create-httpd-start (func-name
+                                         &key
+                                         lib-prefix
+                                         lib-name)
+  "Create lib-specific function FUNC-NAME, aimed to start Emacs httpd process.
+LIB-PREFIX - Custom Elisp library name prefix.
+LIB-NAME - Elisp library name used in end-user .emacs config by `require'.
+The result function FUNC-NAME can be used as `clomacs-defun'
+`:httpd-starter' parameter."
+  (let ((lib-require
+         (make-symbol (concat lib-prefix "-require")))
+        (lib-set-emacs-connection
+         (make-symbol (concat lib-prefix "-set-emacs-connection"))))
+    `(progn
+       (clomacs-defun ,lib-require
+                      clojure.core/require
+                      :lib-name ,lib-name)
+       (clomacs-defun ,lib-set-emacs-connection
+                      clomacs/set-emacs-connection
+                      :lib-name ,lib-name)
+       (defun ,func-name ()
+         "Start Emacs http server and set host and port on Clojure side."
+         (let ((httpd-port (clomacs-get-httpd-port)))
+           (,lib-require `'clomacs)
+           (,lib-set-emacs-connection "localhost" httpd-port)
+           (httpd-start))))))
+
+(cl-defmacro clomacs-create-httpd-stop (func-name
+                                        &key
+                                        lib-prefix
+                                        lib-name)
+  "Create lib-specific function FUNC-NAME, aimed to stop Emacs httpd process.
+LIB-PREFIX - Custom Elisp library name prefix.
+LIB-NAME - Elisp library name used in end-user .emacs config by `require'."
+  (let ((lib-require
+         (make-symbol (concat lib-prefix "-require")))
+        (lib-close-emacs-connection
+         (make-symbol (concat lib-prefix "-close-emacs-connection"))))
+    `(progn
+       (clomacs-defun ,lib-require
+                      clojure.core/require
+                      :lib-name ,lib-name)
+       (clomacs-defun ,lib-close-emacs-connection
+                      clomacs/close-emacs-connection
+                      :lib-name ,lib-name)
+       (defun ,func-name ()
+         "Stop Emacs http server and reset host and port on Clojure side."
+         (when (clomacs-get-connection ,lib-name)
+           (,lib-require `'clomacs)
+           (,lib-close-emacs-connection))
+         (httpd-stop)))))
+
+(clomacs-defun clomacs-require
+               clojure.core/require)
+
+(clomacs-defun clomacs-set-emacs-connection
+               clomacs/set-emacs-connection)
+
+(clomacs-defun clomacs-get-emacs-connection
+               clomacs/get-emacs-connection)
+
+(clomacs-defun clomacs-close-emacs-connection
+               clomacs/close-emacs-connection)
+
+(defun clomacs-httpd-start ()
+  "Start Emacs http server and set host and port on Clojure side."
+  (let ((httpd-port (clomacs-get-httpd-port)))
+    (clomacs-require `'clomacs)
+    (clomacs-set-emacs-connection "localhost" httpd-port)
+    (httpd-start)))
+
+(defun clomacs-httpd-stop ()
+  "Stop Emacs http server and reset host and port on Clojure side."
+  (clomacs-require `'clomacs)
+  (clomacs-close-emacs-connection)
+  (httpd-stop))
 
 (provide 'clomacs)
 
