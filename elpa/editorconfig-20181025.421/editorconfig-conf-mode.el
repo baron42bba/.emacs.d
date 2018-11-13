@@ -46,6 +46,7 @@
          '("charset"
            "end_of_line"
            "file_type_emacs"
+           "file_type_ext"
            "indent_size"
            "indent_style"
            "insert_final_newline"
@@ -54,7 +55,8 @@
            "tab_width"
            "trim_trailing_whitespace"))
         (key-value-list
-         '("true"
+         '("unset"
+           "true"
            "false"
            "lf"
            "cr"
@@ -87,7 +89,7 @@
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist
-             '("/\\.editorconfig\\'" . editorconfig-conf-mode))
+             '("\\.editorconfig\\'" . editorconfig-conf-mode))
 
 (provide 'editorconfig-conf-mode)
 

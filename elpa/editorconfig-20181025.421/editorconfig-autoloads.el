@@ -1,10 +1,12 @@
 ;;; editorconfig-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "editorconfig" "editorconfig.el" (23086 39336
-;;;;;;  391577 194000))
+;;;### (autoloads nil "editorconfig" "editorconfig.el" (0 0 0 0))
 ;;; Generated autoloads from editorconfig.el
 
 (autoload 'editorconfig-find-current-editorconfig "editorconfig" "\
@@ -42,10 +44,12 @@ mode is not listed in `editorconfig-exclude-modes'.
 
 \(fn &optional ARG)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "editorconfig" '("editorcon")))
+
 ;;;***
 
 ;;;### (autoloads nil "editorconfig-conf-mode" "editorconfig-conf-mode.el"
-;;;;;;  (23086 39336 387461 476000))
+;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from editorconfig-conf-mode.el
 
 (autoload 'editorconfig-conf-mode "editorconfig-conf-mode" "\
@@ -53,12 +57,14 @@ Major mode for editing .editorconfig files.
 
 \(fn)" t nil)
 
-(add-to-list 'auto-mode-alist '("/\\.editorconfig\\'" . editorconfig-conf-mode))
+(add-to-list 'auto-mode-alist '("\\.editorconfig\\'" . editorconfig-conf-mode))
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "editorconfig-conf-mode" '("editorconfig-conf-mode-syntax-table")))
 
 ;;;***
 
 ;;;### (autoloads nil "editorconfig-core" "editorconfig-core.el"
-;;;;;;  (23086 39336 386085 8000))
+;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from editorconfig-core.el
 
 (autoload 'editorconfig-core-get-nearest-editorconfig "editorconfig-core" "\
@@ -88,14 +94,24 @@ hash object instead.
 
 \(fn &optional FILE CONFNAME CONFVERSION)" nil nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "editorconfig-core" '("editorconfig-core-")))
+
+;;;***
+
+;;;### (autoloads nil "editorconfig-core-handle" "editorconfig-core-handle.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from editorconfig-core-handle.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "editorconfig-core-handle" '("editorconfig-core-handle")))
+
 ;;;***
 
 ;;;### (autoloads nil "editorconfig-fnmatch" "editorconfig-fnmatch.el"
-;;;;;;  (23086 39336 384577 646000))
+;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from editorconfig-fnmatch.el
 
 (autoload 'editorconfig-fnmatch-p "editorconfig-fnmatch" "\
-Test whether NAME match PATTERN.
+Test whether STRING match PATTERN.
 
 Matching ignores case if `case-fold-search' is non-nil.
 
@@ -110,12 +126,13 @@ be used:
 {s1,s2,s3}  Matches any of the strings given (separated by commas)
 {min..max}  Matches any number between min and max
 
-\(fn NAME PATTERN)" nil nil)
+\(fn STRING PATTERN)" nil nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "editorconfig-fnmatch" '("editorconfig-fnmatch-")))
 
 ;;;***
 
-;;;### (autoloads nil nil ("editorconfig-core-handle.el" "editorconfig-pkg.el")
-;;;;;;  (23086 39336 393112 626000))
+;;;### (autoloads nil nil ("editorconfig-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -123,5 +140,6 @@ be used:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; editorconfig-autoloads.el ends here
