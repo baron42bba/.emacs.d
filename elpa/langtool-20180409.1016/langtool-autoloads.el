@@ -1,9 +1,12 @@
 ;;; langtool-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "langtool" "langtool.el" (22215 7967 0 0))
+;;;### (autoloads nil "langtool" "langtool.el" (0 0 0 0))
 ;;; Generated autoloads from langtool.el
 
 (defalias 'langtool-check 'langtool-check-buffer)
@@ -18,9 +21,11 @@ Restrict to selection when region is activated.
 \(fn &optional LANG)" t nil)
 
 (autoload 'langtool-switch-default-language "langtool" "\
-Switch `langtool-read-lang-name' to LANG
+Switch `langtool-default-language' to LANG
 
 \(fn LANG)" t nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "langtool" '("langtool-")))
 
 ;;;***
 
@@ -28,5 +33,6 @@ Switch `langtool-read-lang-name' to LANG
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; langtool-autoloads.el ends here
