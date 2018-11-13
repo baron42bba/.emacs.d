@@ -11,7 +11,7 @@
 ;; Created: 2006
 ;;
 ;; Package-Requires: ((cl-lib "0.5"))
-;; Package-Version: 20160516.716
+;; Package-Version: 20160516.1416
 ;;
 ;;
 ;; Keyfreq is free software; you can redistribute it and/or modify it

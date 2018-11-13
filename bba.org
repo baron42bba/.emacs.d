@@ -3421,7 +3421,7 @@ combine key strokes to access commands even faster.
 [2016-11-23 Wed 13:33]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'load-path "~/.emacs.d/elpa/keyfreq-20160516.716")
+  (add-to-list 'load-path "~/.emacs.d/elpa/keyfreq-20160516.1416")
   (require 'keyfreq)
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1)

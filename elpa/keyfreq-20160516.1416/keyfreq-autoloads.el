@@ -1,9 +1,12 @@
 ;;; keyfreq-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "keyfreq" "keyfreq.el" (22581 35909 0 0))
+;;;### (autoloads nil "keyfreq" "keyfreq.el" (0 0 0 0))
 ;;; Generated autoloads from keyfreq.el
 
 (defvar keyfreq-mode nil "\
@@ -45,11 +48,14 @@ Save keyfreq data now.
 
 \(fn)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "keyfreq" '("keyfreq-")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; keyfreq-autoloads.el ends here
