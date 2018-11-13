@@ -4,7 +4,7 @@
 
 ;; Author: Tomohiro Matsuyama <m2ym.pub@gmail.com>
 ;; Keywords: lisp
-;; Package-Version: 20151222.1339
+;; Package-Version: 20160709.1429
 ;; Version: 0.5.3
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -180,7 +180,7 @@ buffer."
   :prefix "popup-")
 
 (defface popup-face
-  '((t (:background "lightgray" :foreground "black")))
+  '((t (:inherit default :background "lightgray" :foreground "black")))
   "Face for popup."
   :group 'popup)
 
@@ -869,7 +869,7 @@ Pages up through POPUP."
 ;;; Popup Incremental Search
 
 (defface popup-isearch-match
-  '((t (:background "sky blue")))
+  '((t (:inherit default :background "sky blue")))
   "Popup isearch match face."
   :group 'popup)
 
@@ -883,6 +883,7 @@ Pages up through POPUP."
     (define-key map [left]      'popup-isearch-close)
     (define-key map "\C-h"      'popup-isearch-delete)
     (define-key map (kbd "DEL") 'popup-isearch-delete)
+    (define-key map (kbd "C-y") 'popup-isearch-yank)
     map))
 
 (defvar popup-menu-show-quick-help-function 'popup-menu-show-quick-help
@@ -991,6 +992,9 @@ HELP-DELAY is a delay of displaying helps."
                ((eq binding 'popup-isearch-delete)
                 (if (> (length pattern) 0)
                     (setq pattern (substring pattern 0 (1- (length pattern))))))
+               ((eq binding 'popup-isearch-yank)
+                (popup-isearch-update popup filter (car kill-ring) callback)
+                (cl-return nil))
                (t
                 (setq unread-command-events
                       (append (listify-key-sequence key) unread-command-events))
@@ -1101,7 +1105,7 @@ PROMPT is a prompt string when reading events during event loop."
   :group 'popup)
 
 (defface popup-menu-selection-face
-  '((t (:background "steelblue" :foreground "white")))
+  '((t (:inherit default :background "steelblue" :foreground "white")))
   "Face for popup menu selection."
   :group 'popup)
 
@@ -1251,7 +1255,7 @@ PROMPT is a prompt string when reading events during event loop."
         (popup-menu-show-help menu))
        ((eq binding 'popup-isearch)
         (popup-isearch menu
-                       :filter 'isearch-filter
+                       :filter isearch-filter
                        :cursor-color isearch-cursor-color
                        :keymap isearch-keymap
                        :callback isearch-callback
