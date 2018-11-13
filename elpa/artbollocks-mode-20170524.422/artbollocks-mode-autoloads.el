@@ -2,9 +2,12 @@
 ;;
 ;;; Code:
 
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads (artbollocks-mode) "artbollocks-mode" "artbollocks-mode.el"
-;;;;;;  (21823 48772 0 0))
+;;;### (autoloads nil "artbollocks-mode" "artbollocks-mode.el" (0
+;;;;;;  0 0 0))
 ;;; Generated autoloads from artbollocks-mode.el
 
 (autoload 'artbollocks-mode "artbollocks-mode" "\
@@ -12,14 +15,10 @@ Highlight passive voice, weasel words and artbollocks jargon in text, and provid
 
 \(fn &optional ARG)" t nil)
 
-;;;***
-
-;;;### (autoloads nil nil ("artbollocks-mode-pkg.el") (21823 48772
-;;;;;;  360275 0))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "artbollocks-mode" '("artbollocks-" "interactive-optional-region")))
 
 ;;;***
 
-(provide 'artbollocks-mode-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

@@ -5,7 +5,7 @@
 ;;
 ;; Author: Rob Myers <rob@robmyers.org>, Sacha Chua <sacha@sachachua.com>
 ;; URL: https://github.com/sachac/artbollocks-mode
-;; Package-Version: 20141212.1332
+;; Package-Version: 20170524.422
 ;; Version: 1.1.2
 ;;
 ;; Based on fic-mode.el
@@ -102,7 +102,7 @@
 
 (defface artbollocks-face
   '((t (:foreground "Purple" :background "White")))
-  "The face for weasel-words words"
+  "The face for jargon words"
   :group 'artbollocks-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -134,9 +134,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun artbollocks-search-for-keyword (regex limit)
-  "Match REGEX in buffer until LIMIT."
+  "Match REGEX in buffer until LIMIT.
+Search is case-insensitive."
   (let (match-data-to-set
-	found)
+        found
+        (case-fold-search t))
     (save-match-data
       (while (and (null match-data-to-set)
 		  (re-search-forward regex limit t))
@@ -250,7 +252,8 @@ entire buffer, subject to narrowing."
 
 (defun artbollocks-flesch-reading-ease (&optional start end)
   (let ((words (float (artbollocks-count-words start end)))
-        (sentences (float (artbollocks-count-sentences start end))))
+        (sentences (float (artbollocks-count-sentences start end)))
+        (syllables (float (artbollocks-count-syllables start end))))
     (if (and (> sentences 0) (> words 0))
         (- 206.834
            (* 1.015 (/ words sentences))
