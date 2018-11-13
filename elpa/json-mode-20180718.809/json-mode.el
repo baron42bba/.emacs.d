@@ -4,7 +4,7 @@
 
 ;; Author: Josh Johnston
 ;; URL: https://github.com/joshwnj/json-mode
-;; Package-Version: 20170418.1900
+;; Package-Version: 20180718.809
 ;; Version: 1.6.0
 ;; Package-Requires: ((json-reformat "0.0.5") (json-snatcher "1.0.0"))
 
@@ -62,7 +62,11 @@ Return the new `auto-mode-alist' entry"
     new-entry))
 
 ;;;###autoload
-(defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc")
+(defcustom json-mode-auto-mode-list '(
+                                      ".babelrc"
+                                      ".bowerrc"
+                                      "composer.lock"
+                                      )
   "List of filename as string to pass for the JSON entry of
 `auto-mode-alist'.
 
@@ -122,26 +126,18 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;;;###autoload
 (defun json-mode-show-path ()
+  "Print the path to the node at point to the minibuffer, and yank to the kill ring."
   (interactive)
-  (let ((temp-name "*json-path*"))
-    (with-output-to-temp-buffer temp-name (jsons-print-path))
-
-    (let ((temp-window (get-buffer-window temp-name)))
-      ;; delete the window if we have one,
-      ;; so we can recreate it in the correct position
-      (if temp-window
-          (delete-window temp-window))
-
-      ;; always put the temp window below the json window
-      (set-window-buffer (if (fboundp 'split-window-below)
-			         (split-window-below)
-			     (split-window-vertically)) temp-name))
-    (other-window 1)
-    (minimize-window)
-    (other-window -1)
-    ))
+  (message (jsons-print-path)))
 
 (define-key json-mode-map (kbd "C-c C-p") 'json-mode-show-path)
+
+;;;###autoload
+(defun json-mode-kill-path ()
+  (interactive)
+    (kill-new (jsons-print-path)))
+
+(define-key json-mode-map (kbd "C-c P") 'json-mode-kill-path)
 
 ;;;###autoload
 (defun json-mode-beautify ()
@@ -155,6 +151,72 @@ This function calls `json-mode--update-auto-mode' to change the
 
 (define-key json-mode-map (kbd "C-c C-f") 'json-mode-beautify)
 
+(defun json-toggle-boolean ()
+  "If point is on `true' or `false', toggle it."
+  (interactive)
+  (unless (nth 8 (syntax-ppss)) ; inside a keyword, string or comment
+    (let* ((bounds (bounds-of-thing-at-point 'symbol))
+           (string (and bounds (buffer-substring-no-properties (car bounds) (cdr bounds))))
+           (pt (point)))
+      (when (and bounds (member string '("true" "false")))
+        (delete-region (car bounds) (cdr bounds))
+        (cond
+         ((string= "true" string)
+          (insert "false")
+          (goto-char (if (= pt (cdr bounds)) (1+ pt) pt)))
+         (t
+          (insert "true")
+          (goto-char (if (= pt (cdr bounds)) (1- pt) pt))))))))
+
+(define-key json-mode-map (kbd "C-c C-t") 'json-toggle-boolean)
+
+(defun json-nullify-sexp ()
+  "Replace the sexp at point with `null'."
+  (interactive)
+  (let ((syntax (syntax-ppss)) symbol)
+    (cond
+     ((nth 4 syntax) nil)               ; inside a comment
+     ((nth 3 syntax)                    ; inside a string
+      (goto-char (nth 8 syntax))
+      (when (save-excursion (forward-sexp) (skip-chars-forward "[:space:]") (eq (char-after) ?:))
+        ;; sexp is an object key, so we nullify the entire object
+        (goto-char (nth 1 syntax)))
+      (kill-sexp)
+      (insert "null"))
+     ((setq symbol (bounds-of-thing-at-point 'symbol))
+      (cond
+       ((looking-at-p "null"))
+       ((save-excursion (skip-chars-backward "[0-9.]") (looking-at json-mode-number-re))
+        (kill-region (match-beginning 0) (match-end 0))
+        (insert "null"))
+       (t (kill-region (car symbol) (cdr symbol)) (insert "null"))))
+     ((< 0 (nth 0 syntax))
+      (goto-char (nth 1 syntax))
+      (kill-sexp)
+      (insert "null"))
+     (t nil))))
+
+(define-key json-mode-map (kbd "C-c C-k") 'json-nullify-sexp)
+
+(defun json-increment-number-at-point (&optional delta)
+  "Add DELTA to the number at point; DELTA defaults to 1."
+  (interactive)
+  (when (save-excursion (skip-chars-backward "[0-9.]") (looking-at json-mode-number-re))
+    (let ((num (+ (or delta 1)
+                  (string-to-number (buffer-substring-no-properties (match-beginning 0) (match-end 0)))))
+          (pt (point)))
+      (delete-region (match-beginning 0) (match-end 0))
+      (insert (number-to-string num))
+      (goto-char pt))))
+
+(define-key json-mode-map (kbd "C-c C-i") 'json-increment-number-at-point)
+
+(defun json-decrement-number-at-point ()
+  "Decrement the number at point."
+  (interactive)
+  (json-increment-number-at-point -1))
+
+(define-key json-mode-map (kbd "C-c C-d") 'json-decrement-number-at-point)
 
 (provide 'json-mode)
 ;;; json-mode.el ends here
