@@ -1,9 +1,12 @@
 ;;; gnuplot-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "gnuplot" "gnuplot.el" (22842 31129 0 0))
+;;;### (autoloads nil "gnuplot" "gnuplot.el" (0 0 0 0))
 ;;; Generated autoloads from gnuplot.el
 
 (autoload 'gnuplot-mode "gnuplot" "\
@@ -80,10 +83,26 @@ Run an inferior Gnuplot process.
 
 \(fn)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "gnuplot" '("gnuplot-")))
+
 ;;;***
 
-;;;### (autoloads nil nil ("gnuplot-context.el" "gnuplot-gui.el"
-;;;;;;  "gnuplot-pkg.el") (22842 31129 0 0))
+;;;### (autoloads nil "gnuplot-context" "gnuplot-context.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from gnuplot-context.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "gnuplot-context" '("gnuplot-")))
+
+;;;***
+
+;;;### (autoloads nil "gnuplot-gui" "gnuplot-gui.el" (0 0 0 0))
+;;; Generated autoloads from gnuplot-gui.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "gnuplot-gui" '("gnuplot-")))
+
+;;;***
+
+;;;### (autoloads nil nil ("gnuplot-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -91,5 +110,6 @@ Run an inferior Gnuplot process.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; gnuplot-autoloads.el ends here
