@@ -1,10 +1,10 @@
 ;;; org-tree-slide.el --- A presentation tool for org-mode
 ;;
-;; Copyright (C) 2011-2015 Takaaki ISHIKAWA
+;; Copyright (C) 2011-2017 Takaaki ISHIKAWA
 ;;
 ;; Author: Takaaki ISHIKAWA <takaxp at ieee dot org>
-;; Version: 2.8.4
-;; Package-Version: 20151222.2347
+;; Version: 2.8.8
+;; Package-Version: 20180906.949
 ;; Maintainer: Takaaki ISHIKAWA <takaxp at ieee dot org>
 ;; Twitter: @takaxp
 ;; Repository: https://github.com/takaxp/org-tree-slide
@@ -14,6 +14,7 @@
 ;;             Eric S Fraga
 ;;             Eike Kettner
 ;;             Stefano BENNATI
+;;             Matus Goljer
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -44,9 +45,9 @@
 ;;    3. Open an org-mode file
 ;;    4. Toggle org-tree-slide-mode (M-x org-tree-slide-mode)
 ;;       then Slideshow will start and you can find "TSlide" in mode line.
-;;    5. <left>/<right> will move between slides
+;;    5. `C-<'/`C->' will move between slides
 ;;    6. `C-x s c' will show CONTENT of the org buffer
-;;       Select a heading and type <right>, then Slideshow will start again.
+;;       Select a heading and type `C-<', then Slideshow will start again.
 ;;    7. Toggle org-tree-slide-mode again to exit this minor mode
 ;;
 ;; Recommended minimum settings:
@@ -69,6 +70,7 @@
 ;; Note:
 ;;    - Make sure key maps below when you introduce this elisp.
 ;;    - Customize variables, M-x customize-group ENT org-tree-slide ENT
+;;    - see also moom.el (https://github.com/takaxp/moom) to control Emacs frame
 
 ;;; Code:
 
@@ -76,7 +78,7 @@
 (require 'org-timer)
 ;;(require 'org-clock)			; org-clock-in, -out, -clocking-p
 
-(defconst org-tree-slide "2.8.4"
+(defconst org-tree-slide "2.8.8"
   "The version number of the org-tree-slide.el")
 
 (defgroup org-tree-slide nil
@@ -179,6 +181,11 @@
     map)
   "The keymap for `org-tree-slide'.")
 
+(defface org-tree-slide-heading-level-1-init
+  '((t (:inherit outline-1)))
+  "Level 1."
+  :group 'org-tree-slide)
+
 (defface org-tree-slide-heading-level-2-init
   '((t (:inherit outline-2)))
   "Level 2."
@@ -189,6 +196,16 @@
   "Level 3."
   :group 'org-tree-slide)
 
+(defface org-tree-slide-heading-level-4-init
+  '((t (:inherit outline-4)))
+  "Level 4."
+  :group 'org-tree-slide)
+
+(defface org-tree-slide-heading-level-1
+  '((t (:inherit outline-1 :height 1.5 :bold t)))
+  "Level 1."
+  :group 'org-tree-slide)
+
 (defface org-tree-slide-heading-level-2
   '((t (:inherit outline-2 :height 1.4 :bold t)))
   "Level 2."
@@ -197,6 +214,11 @@
 (defface org-tree-slide-heading-level-3
   '((t (:inherit outline-3 :height 1.3 :bold t)))
   "Level 3."
+  :group 'org-tree-slide)
+
+(defface org-tree-slide-heading-level-4
+  '((t (:inherit outline-4 :height 1.2 :bold t)))
+  "Level 4."
   :group 'org-tree-slide)
 
 (defvar org-tree-slide-mode nil)
@@ -223,6 +245,8 @@
   "A hook run before moving to the next slide")
 (defvar org-tree-slide-before-move-previous-hook nil
   "A hook run before moving to the previous slide")
+(defvar org-tree-slide-before-content-view-hook nil
+  "A hook run before showing the content")
 
 ;;;###autoload
 (define-minor-mode org-tree-slide-mode
@@ -234,7 +258,7 @@ Usage:
     (global-set-key (kbd \"S-<f8>\") 'org-tree-slide-skip-done-toggle)
   - Open an org file
   - Type <f8> to start org-tree-slide-mode
-  - Type <left>/<right> to move between trees
+  - Type C-< / C-> to move between trees
   - To exit this minor mode, just type <f8> again.
 
 Profiles:
@@ -298,6 +322,7 @@ Profiles:
    the slide view mode is active."
   (interactive)
   (when (org-tree-slide--active-p)
+    (run-hooks 'org-tree-slide-before-content-view-hook)
     (org-tree-slide--hide-slide-header)
     (org-tree-slide--move-to-the-first-heading)
     (org-overview)
@@ -398,7 +423,8 @@ Profiles:
   (interactive)
   (setq org-tree-slide-skip-done (not org-tree-slide-skip-done))
   (setq org-tree-slide--previous-line -1) ; to update modeline intentionally
-  (org-tree-slide--show-slide-header)
+  (when org-tree-slide-header
+    (org-tree-slide--show-slide-header))
   (if org-tree-slide-skip-done
       (message "TODO Pursuit: ON") (message "TODO Pursuit: OFF")))
 
@@ -645,11 +671,13 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
         (t nil)))
 
 (defun org-tree-slide--slide-in (blank-lines)
-  (while (< 2 blank-lines)
-    (org-tree-slide--set-slide-header blank-lines)
-    (sit-for org-tree-slide-slide-in-waiting)
-    (org-tree-slide--hide-slide-header)
-    (setq blank-lines (1- blank-lines))))
+  (let ((min-line -1))
+    (when org-tree-slide-header
+      (setq min-line 2))
+    (while (< min-line blank-lines)
+      (org-tree-slide--set-slide-header blank-lines)
+      (sit-for org-tree-slide-slide-in-waiting)
+      (setq blank-lines (1- blank-lines)))))
 
 (defvar org-tree-slide-title nil
   "If you have `#+TITLE:' line in your org buffer, it wil be used as a title
@@ -663,6 +691,20 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
 (defvar org-tree-slide-author nil
   "If you have `#+AUTHOR:' line in your org buffer, it will be used as
    a name of the slide author.")
+
+(defcustom org-tree-slide-breadcrumbs " > "
+  "Display breadcrumbs in the slide header.
+
+If non-nil, it should be a string used as a delimiter used to
+concat the headers."
+  :type '(choice (const :tag "Don't display breadcrumbs" nil)
+                 (string :tag "Delimiter"))
+  :group 'org-tree-slide)
+
+(defcustom org-tree-slide-breadcrumbs-hide-todo-state t
+  "If non-nil, hide TODO states in the breadcrumbs."
+  :type 'boolean
+  :group 'org-tree-slide)
 
 (defun org-tree-slide--apply-local-header-to-slide-header ()
   (save-excursion
@@ -690,6 +732,20 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
     (t (:bold t :foreground "black" :background "white")))
   "Face for org-tree-slide--header-overlay")
 
+(defun org-tree-slide--get-parents (&optional delim)
+  "Get parent headlines and concat them with DELIM."
+  (setq delim (or delim " > "))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let ((parents nil))
+        (while (org-up-heading-safe)
+          (push (org-get-heading
+                 'no-tags
+                 org-tree-slide-breadcrumbs-hide-todo-state)
+                parents))
+        (mapconcat 'identity parents delim)))))
+
 (defun org-tree-slide--set-slide-header (blank-lines)
   (org-tree-slide--hide-slide-header)
   (setq org-tree-slide--header-overlay
@@ -708,6 +764,9 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
                              (concat org-tree-slide-author "  "))
                            (when org-tree-slide-email
                              (concat "<" org-tree-slide-email ">"))
+                           (when org-tree-slide-breadcrumbs
+                             (concat "\n" (org-tree-slide--get-parents
+                                           org-tree-slide-breadcrumbs)))
                            (org-tree-slide--get-blank-lines blank-lines)))
     (overlay-put org-tree-slide--header-overlay 'display
                  (org-tree-slide--get-blank-lines blank-lines))))
@@ -720,8 +779,7 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
     breaks))
 
 (defun org-tree-slide--show-slide-header ()
-  (org-tree-slide--set-slide-header 2)
-  (forward-char 1))
+  (org-tree-slide--set-slide-header 2))
 
 (defun org-tree-slide--hide-slide-header ()
   (when org-tree-slide--header-overlay
@@ -742,12 +800,16 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
   (unless org-tree-slide-never-touch-face
     (cond (status
            (custom-set-faces
+            '(org-level-1 ((t (:inherit org-tree-slide-heading-level-1))))
             '(org-level-2 ((t (:inherit org-tree-slide-heading-level-2))))
-            '(org-level-3 ((t (:inherit org-tree-slide-heading-level-3))))))
+            '(org-level-3 ((t (:inherit org-tree-slide-heading-level-3))))
+            '(org-level-4 ((t (:inherit org-tree-slide-heading-level-4))))))
           (t
            (custom-set-faces
+            '(org-level-1 ((t (:inherit org-tree-slide-heading-level-1-init))))
             '(org-level-2 ((t (:inherit org-tree-slide-heading-level-2-init))))
-            '(org-level-3 ((t (:inherit org-tree-slide-heading-level-3-init)))))
+            '(org-level-3 ((t (:inherit org-tree-slide-heading-level-3-init))))
+            '(org-level-4 ((t (:inherit org-tree-slide-heading-level-4-init)))))
            ))))
 
 (defun org-tree-slide--count-slide (&optional pos)
@@ -816,14 +878,16 @@ This is displayed by default if `org-tree-slide-modeline-display' is `nil'.")
         nil))))
 
 (defun org-tree-slide--last-heading-position ()
-  "Return the position of the last heading. If the position does not exist in the buffer, then return nil."
+  "Return the position of the last heading.
+   If the position does not exist in the buffer, then return nil."
   (save-excursion
     (save-restriction
       (goto-char (buffer-size))
       (org-tree-slide--beginning-of-tree))))
 
 (defun org-tree-slide--beginning-of-tree ()
-  "Return beginning point of the line, or t. If the position does not exist in the buffer, then return nil."
+  "Return beginning point of the line, or t.
+   If the position does not exist in the buffer, then return nil."
   (beginning-of-line)
   (if (and (not (org-tree-slide--heading-skip-p)) ;if the header has to be skipped
            (org-at-heading-p))

@@ -1,10 +1,13 @@
 ;;; org-tree-slide-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "org-tree-slide" "org-tree-slide.el" (22173
-;;;;;;  59637 0 0))
+;;;### (autoloads nil "org-tree-slide" "org-tree-slide.el" (0 0 0
+;;;;;;  0))
 ;;; Generated autoloads from org-tree-slide.el
 
 (autoload 'org-tree-slide-mode "org-tree-slide" "\
@@ -16,7 +19,7 @@ Usage:
     (global-set-key (kbd \"S-<f8>\") 'org-tree-slide-skip-done-toggle)
   - Open an org file
   - Type <f8> to start org-tree-slide-mode
-  - Type <left>/<right> to move between trees
+  - Type C-< / C-> to move between trees
   - To exit this minor mode, just type <f8> again.
 
 Profiles:
@@ -127,11 +130,14 @@ Toggle show COMMENT item or not
 
 \(fn)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-tree-slide" '("org-tree-slide")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; org-tree-slide-autoloads.el ends here
