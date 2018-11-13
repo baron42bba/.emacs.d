@@ -1,3 +1,32 @@
+2017-05-04  Nicolas Petton  <nicolas@petton.fr>
+
+	Update seq.el to 2.20
+
+2016-12-16  Nicolas Petton  <nicolas@petton.fr>
+
+	Backport the latest changes to seq.el from Emacs master
+
+	* packages/seq/seq-24.el:
+	* packages/seq/seq-25.el (seq-into): Do not convert the sequence if not
+	needed.
+	* packages/seq/tests/seq-tests.el: Add a regression test.
+
+2016-12-15  Nicolas Petton  <nicolas@petton.fr>
+
+	Backport seq-mapn fix from Emacs master
+
+	* packages/seq/seq-24.el (seq-mapn):
+	* packages/seq/seq-25.el (seq-mapn): Fix for circular lists.
+	* packages/seq/tests/seq-tests.el: Add a regression test.
+
+2016-11-16  Nicolas Petton  <nicolas@petton.fr>
+
+	Do not use map.el in seq-tests.el
+
+	* packages/seq/tests/seq-tests.el: Do not use map.el.  map.el was 
+	introduced in Emacs 25.1, but seq.el is also available in GNU ELPA for 
+	Emacs 24.5.
+
 2016-10-25  Nicolas Petton  <nicolas@petton.fr>
 
 	Fix seq-random-elt docstring

@@ -219,6 +219,12 @@ Equality is defined by TESTFN if non-nil or by `equal' if nil."
                 (funcall (or testfn #'equal) elt e))
               sequence))
 
+(defun seq-set-equal-p (sequence1 sequence2 &optional testfn)
+  "Return non-nil if SEQUENCE1 and SEQUENCE2 contain the same elements, regardless of order.
+Equality is defined by TESTFN if non-nil or by `equal' if nil."
+  (and (seq-every-p (lambda (item1) (seq-contains sequence2 item1 testfn)) sequence1)
+       (seq-every-p (lambda (item2) (seq-contains sequence1 item2 testfn)) sequence2)))
+
 (defun seq-position (sequence elt &optional testfn)
   "Return the index of the first element in SEQUENCE that is equal to ELT.
 Equality is defined by TESTFN if non-nil or by `equal' if nil."
@@ -286,7 +292,8 @@ Return a list of the results.
 
 \(fn FUNCTION SEQS...)"
   (let ((result nil)
-        (seqs (seq-map (lambda (s) (seq-into s 'list))
+        (seqs (seq-map (lambda (s)
+                         (seq-into s 'list))
                        (cons sequence seqs))))
     (while (not (memq nil seqs))
       (push (apply function (seq-map #'car seqs)) result)
@@ -356,9 +363,9 @@ See also the function `nreverse', which is used more often."
   "Convert the sequence SEQUENCE into a sequence of type TYPE.
 TYPE can be one of the following symbols: vector, string or list."
   (pcase type
-    (`vector (vconcat sequence))
-    (`string (concat sequence))
-    (`list (append sequence nil))
+    (`vector (seq--into-vector sequence))
+    (`string (seq--into-string sequence))
+    (`list (seq--into-list sequence))
     (_ (error "Not a sequence type name: %S" type))))
 
 (defun seq-min (sequence)
@@ -461,6 +468,24 @@ If no element is found, return nil."
 (defalias 'seq-each #'seq-do)
 (defalias 'seq-map #'mapcar)
 (defalias 'seqp #'sequencep)
+
+(defun seq--into-list (sequence)
+  "Concatenate the elements of SEQUENCE into a list."
+  (if (listp sequence)
+      sequence
+    (append sequence nil)))
+
+(defun seq--into-vector (sequence)
+  "Concatenate the elements of SEQUENCE into a vector."
+  (if (vectorp sequence)
+      sequence
+    (vconcat sequence)))
+
+(defun seq--into-string (sequence)
+  "Concatenate the elements of SEQUENCE into a string."
+  (if (stringp sequence)
+      sequence
+    (concat sequence)))
 
 (unless (fboundp 'elisp--font-lock-flush-elisp-buffers)
   ;; In Emacs≥25, (via elisp--font-lock-flush-elisp-buffers and a few others)

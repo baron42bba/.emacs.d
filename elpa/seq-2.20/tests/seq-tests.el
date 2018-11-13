@@ -352,19 +352,31 @@ Evaluate BODY for each created sequence.
 
 (ert-deftest test-seq-random-elt-take-all ()
   (let ((seq '(a b c d e))
-        (count '()))
-    (should (= 0 (map-length count)))
+        (elts '()))
+    (should (= 0 (length elts)))
     (dotimes (_ 1000)
       (let ((random-elt (seq-random-elt seq)))
-        (map-put count
-                 random-elt
-                 (map-elt count random-elt 0))))
-    (should (= 5 (map-length count)))))
+        (add-to-list 'elts
+                     random-elt)))
+    (should (= 5 (length elts)))))
 
 (ert-deftest test-seq-random-elt-signal-on-empty ()
   (should-error (seq-random-elt nil))
   (should-error (seq-random-elt []))
   (should-error (seq-random-elt "")))
+
+(ert-deftest test-seq-mapn-circular-lists ()
+  (let ((l1 '#1=(1 . #1#)))
+    (should (equal (seq-mapn #'+ '(3 4 5 7) l1)
+                   '(4 5 6 8)))))
+
+(ert-deftest test-seq-into-and-identity ()
+  (let ((lst '(1 2 3))
+        (vec [1 2 3])
+        (str "foo bar"))
+    (should (eq (seq-into lst 'list) lst))
+    (should (eq (seq-into vec 'vector) vec))
+    (should (eq (seq-into str 'string) str))))
 
 (provide 'seq-tests)
 ;;; seq-tests.el ends here

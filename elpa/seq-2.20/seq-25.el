@@ -171,7 +171,8 @@ Return a list of the results.
 
 \(fn FUNCTION SEQUENCES...)"
   (let ((result nil)
-        (sequences (seq-map (lambda (s) (seq-into s 'list))
+        (sequences (seq-map (lambda (s)
+                              (seq-into s 'list))
                             (cons sequence sequences))))
     (while (not (memq nil sequences))
       (push (apply function (seq-map #'car sequences)) result)
@@ -265,9 +266,9 @@ of sequence."
 TYPE can be one of the following symbols: vector, string or
 list."
   (pcase type
-    (`vector (vconcat sequence))
-    (`string (concat sequence))
-    (`list (append sequence nil))
+    (`vector (seq--into-vector sequence))
+    (`string (seq--into-string sequence))
+    (`list (seq--into-list sequence))
     (_ (error "Not a sequence type name: %S" type))))
 
 (cl-defgeneric seq-filter (pred sequence)
@@ -344,6 +345,12 @@ Equality is defined by TESTFN if non-nil or by `equal' if nil."
   (seq-some (lambda (e)
               (funcall (or testfn #'equal) elt e))
             sequence))
+
+(cl-defgeneric seq-set-equal-p (sequence1 sequence2 &optional testfn)
+  "Return non-nil if SEQUENCE1 and SEQUENCE2 contain the same elements, regardless of order.
+Equality is defined by TESTFN if non-nil or by `equal' if nil."
+  (and (seq-every-p (lambda (item1) (seq-contains sequence2 item1 testfn)) sequence1)
+       (seq-every-p (lambda (item2) (seq-contains sequence1 item2 testfn)) sequence2)))
 
 (cl-defgeneric seq-position (sequence elt &optional testfn)
   "Return the index of the first element in SEQUENCE that is equal to ELT.
@@ -461,6 +468,24 @@ SEQUENCE must be a sequence of numbers or markers."
   (null list))
 
 
+(defun seq--into-list (sequence)
+  "Concatenate the elements of SEQUENCE into a list."
+  (if (listp sequence)
+      sequence
+    (append sequence nil)))
+
+(defun seq--into-vector (sequence)
+  "Concatenate the elements of SEQUENCE into a vector."
+  (if (vectorp sequence)
+      sequence
+    (vconcat sequence)))
+
+(defun seq--into-string (sequence)
+  "Concatenate the elements of SEQUENCE into a string."
+  (if (stringp sequence)
+      sequence
+    (concat sequence)))
+
 (defun seq--make-pcase-bindings (args)
   "Return a list of bindings of the variables in ARGS to the elements of a sequence."
   (let ((bindings '())
