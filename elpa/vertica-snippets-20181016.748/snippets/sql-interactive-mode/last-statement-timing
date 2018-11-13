@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: last-statement-timing
+# key: lst_
+# group: vertica
+# --
+SELECT last_statement,
+       last_statement_duration_us / 1000000.0 last_statement_duration_seconds
+FROM current_session;
