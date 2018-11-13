@@ -547,6 +547,9 @@ the next version of Mew.")
     ("^\\(Message-Id\\|Posted\\|In-Reply-To\\|References\\|Precedence\\):$" nil)
     ("^DomainKey-Signature:$" nil)
     ("^DKIM-Signature:$" nil)
+    ("^ARC-" nil)
+    ("^Received-SPF:$" nil)
+    ("^Autocrypt:$" nil)
     ("^Authentication-Results:$"
      mew-authentication-results
      mew-face-header-important

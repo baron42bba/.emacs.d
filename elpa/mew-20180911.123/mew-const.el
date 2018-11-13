@@ -83,6 +83,10 @@
 (defconst mew-x-mew-uidl:  "X-Mew-Uidl:")
 (defconst mew-x-mew-ref:   "X-Mew-Ref:")
 
+(defconst mew-x-gm-msgid:  "X-GM-MSGID:")
+(defconst mew-x-gm-thrid:  "X-GM-THRID:")
+(defconst mew-x-gm-labels: "X-GM-LABELS:")
+
 (defconst mew-keywords: "Keywords:")
 (defconst mew-body:	"Body:")
 
@@ -164,11 +168,7 @@
   (+ (length [key beg end pri]) (length mew-mime-fields)))
 
 (defconst mew-x-mailer
-  (format "%s on Emacs %s / Mule %s"
-	  mew-version
-	  (when (string-match "^\\([.0-9]+\\)\\.[0-9]+$" emacs-version)
-	    (match-string 1 emacs-version))
-	  mule-version)
+  (format "%s on Emacs %d.%d" mew-version emacs-major-version emacs-minor-version)
   "*A value inserted into X-Mailer: field in Draft mode if *non-nil*.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

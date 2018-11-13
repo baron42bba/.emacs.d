@@ -35,6 +35,8 @@ insert no extra text.")
 (defvar mew-ssl-minor-ver nil)
 
 (defvar mew-ssl-libwrap nil)
+(defvar mew-ssl-unixlike nil
+  "Set to t when stunnel supports \"foreground\" option.")
 
 (defconst mew-ssl-process-exec-cnt 3)
 
@@ -104,13 +106,16 @@ insert no extra text.")
     (let ((file (mew-make-temp-name)))
       (with-temp-buffer
 	(insert "client=yes\n")
-	(insert "pid=\n")
+	(if mew-ssl-unixlike
+	    (insert "pid=\n"))
 	(insert (format "verify=%d\n" (mew-ssl-verify-level case)))
-	(insert "foreground=yes\n")
+	(if mew-ssl-unixlike
+	    (insert "foreground=yes\n"))
 	(insert "debug=debug\n")
 	(if (and mew-ssl-libwrap (or (>= mew-ssl-ver 5) (>= mew-ssl-minor-ver 45)))
 	    (insert "libwrap=no\n"))
-	(if (or (>= mew-ssl-ver 5) (>= mew-ssl-minor-ver 22))
+	(if (and (or (>= mew-ssl-ver 5) (>= mew-ssl-minor-ver 22))
+		 mew-ssl-unixlike)
 	    (insert "syslog=no\n"))
 	(insert "CApath=" (expand-file-name (mew-ssl-cert-directory case)) "\n")
 	(if mew-prog-ssl-arg
@@ -118,7 +123,7 @@ insert no extra text.")
 	(insert (format "[%d]\n" localport))
 	(insert (format "accept=%s:%d\n" mew-ssl-localhost localport))
 	(insert (format "connect=%s:%d\n" server remoteport))
-	(if tls (insert (format "protocol=%s\nsslVersion=TLSv1\n" tls)))
+	(if tls (insert (format "protocol=%s\n" tls)))
 	(mew-frwlet mew-cs-dummy mew-cs-text-for-write
 	  ;; NEVER use call-process-region for privacy reasons
 	  (write-region (point-min) (point-max) file nil 'no-msg))
@@ -241,7 +246,7 @@ A local port number can be obtained the process name after ':'. "
       (mew-ssl-set-string pnm string)
       (setq string (concat prev-str string))
       (cond
-       ((string-match "Negotiated \\|opened with SSL" string)
+       ((string-match "Negotiated \\| ciphersuite:\\|opened with SSL" string)
 	(mew-ssl-set-status pnm t))
        ((string-match "Failed to initialize" string)
 	(mew-ssl-set-status pnm t)) ;; xxx
@@ -267,7 +272,7 @@ A local port number can be obtained the process name after ':'. "
   (if (not (mew-which-exec mew-prog-ssl))
       (setq mew-ssl-ver nil)
     (with-temp-buffer
-      (call-process mew-prog-ssl nil t nil "-version")
+      (call-process mew-prog-ssl nil t nil "-help")
       (goto-char (point-min))
       (re-search-forward "^stunnel " nil t 1)
       (if (looking-at "\\([45]\\)\\.\\([0-9]+\\)")
@@ -276,13 +281,15 @@ A local port number can be obtained the process name after ':'. "
 	    (setq mew-ssl-minor-ver (string-to-number (mew-match-string 2))))
 	(setq mew-ssl-ver 3))
       (when (re-search-forward "LIBWRAP" nil t)
-	(setq mew-ssl-libwrap t)))))
+	(setq mew-ssl-libwrap t))
+      (when (re-search-forward "foreground" nil t)
+	(setq mew-ssl-unixlike t)))))
 
 (provide 'mew-ssl)
 
 ;;; Copyright Notice:
 
-;; Copyright (C) 2002-2015 Mew developing team.
+;; Copyright (C) 2002-2018 Mew developing team.
 ;; All rights reserved.
 
 ;; Redistribution and use in source and binary forms, with or without

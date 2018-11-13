@@ -155,6 +155,7 @@
     ("iso-2022-cn-ext"   iso-2022-cn-ext)
     ("gbk"               gbk)
     ("gb2312"            cn-gb-2312) ;; should be before cn-gb
+    ("gb18030"           gb18030)
     ("cn-gb"             cn-gb-2312)
     ("hz-gb-2312"        hz-gb-2312)
     ("big5"              chinese-big5)
@@ -275,6 +276,7 @@
   (setq buffer-file-coding-system write))
 
 (defmacro mew-plet (&rest body)
+  (declare (debug (&rest form)))
   `(let ((coding-system-for-read  'binary)
 	 (coding-system-for-write 'binary))
      ,@body))
@@ -287,6 +289,7 @@
 (put 'mew-piolet 'lisp-indent-function 2)
 
 (defmacro mew-flet (&rest body)
+  (declare (debug (&rest form)))
   `(let ((coding-system-for-read  'binary)
 	 (coding-system-for-write 'binary)
 	 (format-alist nil)
@@ -305,6 +308,7 @@
 (put 'mew-frwlet 'lisp-indent-function 2)
 
 (defmacro mew-alet (&rest body)
+  (declare (debug (&rest form)))
   `(let ((default-file-name-coding-system nil)
 	 (file-name-coding-system nil))
      ,@body))
