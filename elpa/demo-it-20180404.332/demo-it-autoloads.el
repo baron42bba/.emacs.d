@@ -1,9 +1,12 @@
 ;;; demo-it-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "demo-it" "demo-it.el" (23042 4566 0 0))
+;;;### (autoloads nil "demo-it" "demo-it.el" (0 0 0 0))
 ;;; Generated autoloads from demo-it.el
 
 (autoload 'demo-it-start "demo-it" "\
@@ -24,10 +27,28 @@ keywords, like `:advanced-mode' and `:variable-width'.
 
 \(fn &rest FORMS)" nil t)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "demo-it" '("demo-it-")))
+
 ;;;***
 
-;;;### (autoloads nil "demo-it-present" "demo-it-present.el" (23042
-;;;;;;  4566 0 0))
+;;;### (autoloads nil "demo-it-custom" "demo-it-custom.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from demo-it-custom.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "demo-it-custom" '("demo-it--")))
+
+;;;***
+
+;;;### (autoloads nil "demo-it-extras" "demo-it-extras.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from demo-it-extras.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "demo-it-extras" '("demo-it-")))
+
+;;;***
+
+;;;### (autoloads nil "demo-it-present" "demo-it-present.el" (0 0
+;;;;;;  0 0))
 ;;; Generated autoloads from demo-it-present.el
 
 (autoload 'demo-it-single-presentation "demo-it-present" "\
@@ -36,10 +57,11 @@ full-screen presentation. SIZE is the text scaling size, and STYLE is the presen
 
 \(fn FILE &optional SIZE STYLE SECTION)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "demo-it-present" '("demo-it-")))
+
 ;;;***
 
-;;;### (autoloads nil nil ("demo-it-custom.el" "demo-it-extras.el"
-;;;;;;  "demo-it-pkg.el") (23042 4566 0 0))
+;;;### (autoloads nil nil ("demo-it-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -47,5 +69,6 @@ full-screen presentation. SIZE is the text scaling size, and STYLE is the presen
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; demo-it-autoloads.el ends here
