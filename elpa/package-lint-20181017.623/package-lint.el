@@ -5,7 +5,6 @@
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;;         Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/purcell/package-lint
-;; Package-Version: 20171201.1903
 ;; Keywords: lisp
 ;; Version: 0
 ;; Package-Requires: ((cl-lib "0.5") (emacs "24"))
@@ -138,6 +137,7 @@ This is bound dynamically while the checks run.")
           define-alternative
           define-error
           display-monitor-attributes-list
+          eieio-object-class
           file-acl
           file-extended-attributes
           fill-single-char-nobreak-p
@@ -147,6 +147,7 @@ This is bound dynamically while the checks run.")
           group-real-gid
           hash-table-keys
           hash-table-values
+          line-pixel-height
           macrop
           remove-function
           set-file-acl
@@ -164,6 +165,7 @@ This is bound dynamically while the checks run.")
           window-bottom-divider-width
           window-header-line-height
           window-mode-line-height
+          window-pixel-height
           window-right-divider-width
           window-scroll-bar-width
           window-text-pixel-size
@@ -232,7 +234,8 @@ This is bound dynamically while the checks run.")
     "org-babel-execute:"
     "org-babel-prep-session:"
     "org-babel-variable-assignments:"
-    "org-babel-default-header-args:"))
+    "org-babel-default-header-args:"
+    "pcomplete/"))
   "A regexp matching whitelisted non-standard symbol prefixes.")
 
 (defun package-lint--check-all ()
@@ -438,6 +441,20 @@ the form (PACKAGE-NAME PACKAGE-VERSION LINE-NO LINE-BEGINNING-OFFSET)."
           (format "Expected (package-name \"version-num\"), but found %S." entry)))))
     valid-deps))
 
+(defun package-lint--check-package-installable (archive-entry package-version line-no offset)
+  "Check that ARCHIVE-ENTRY is installable from a configured package archive.
+
+Check that package described by ARCHIVE-ENTRY can be installed at
+required version PACKAGE-VERSION.  If not, raise an error for
+LINE-NO at OFFSET."
+  (let* ((package-name (car archive-entry))
+         (best-version (package-lint--highest-installable-version-of package-name)))
+    (when (version-list-< best-version package-version)
+      (package-lint--error
+       line-no offset 'warning
+       (format "Version dependency for %s appears too high: try %s" package-name
+               (package-version-join best-version))))))
+
 (defun package-lint--check-packages-installable (valid-deps)
   "Check that all VALID-DEPS are available for installation."
   (pcase-dolist (`(,package-name ,package-version ,line-no ,offset) valid-deps)
@@ -449,12 +466,7 @@ the form (PACKAGE-NAME PACKAGE-VERSION LINE-NO LINE-BEGINNING-OFFSET)."
       ;; Not 'emacs
       (let ((archive-entry (assq package-name package-archive-contents)))
         (if archive-entry
-            (let ((best-version (package-lint--lowest-installable-version-of package-name)))
-              (when (version-list-< best-version package-version)
-                (package-lint--error
-                 line-no offset 'warning
-                 (format "Version dependency for %s appears too high: try %s" package-name
-                         (package-version-join best-version)))))
+            (package-lint--check-package-installable archive-entry package-version line-no offset)
           (package-lint--error
            line-no offset 'error
            (format "Package %S is not installable." package-name)))))))
@@ -783,12 +795,12 @@ Lines consisting only of whitespace or empty comments are considered empty."
                     (= 0 (forward-line))))
         (eobp)))))
 
-(defun package-lint--lowest-installable-version-of (package)
-  "Return the lowest version of PACKAGE available for installation."
+(defun package-lint--highest-installable-version-of (package)
+  "Return the highest version of PACKAGE available for installation."
   (let ((descriptors (cdr (assq package package-archive-contents))))
     (if (fboundp 'package-desc-version)
         (car (sort (mapcar 'package-desc-version descriptors)
-                   #'version-list-<))
+                   (lambda (v1 v2) (not (version-list-< v1 v2)))))
       (aref descriptors 0))))
 
 (defun package-lint--goto-header (header-name)
@@ -879,7 +891,7 @@ Prefix is returned without any `-mode' suffix."
 (defun package-lint--check-objects-by-regexp (regexp function)
   "Check all objects with the literal printed form matching REGEXP.
 
-The objects are parsed with `read'. The FUNCTION is passed the
+The objects are parsed with `read'.  The FUNCTION is passed the
 read object, with the point at the beginning of the match.
 
 S-expressions in comments or comments, partial s-expressions, or
@@ -916,18 +928,20 @@ Current buffer is used if none is specified."
   (interactive)
   (let ((errs (package-lint-buffer))
         (buf "*Package-Lint*"))
-    (with-current-buffer (get-buffer-create buf)
-      (let ((buffer-read-only nil))
-        (erase-buffer)
-        (cond
-         ((null errs) (insert "No issues found."))
-         ((null (cdr errs)) (insert "1 issue found:\n\n"))
-         (t (insert (format "%d issues found:\n\n" (length errs)))))
-        (pcase-dolist (`(,line ,col ,type ,message) errs)
-          (insert (format "%d:%d: %s: %s\n" line col type message))))
-      (special-mode)
-      (view-mode 1))
-    (display-buffer buf)))
+    (if (null errs)
+        (message "No issues found")
+      (with-current-buffer (get-buffer-create buf)
+        (let ((buffer-read-only nil))
+          (erase-buffer)
+          (cond
+           ((null errs) (insert "No issues found."))
+           ((null (cdr errs)) (insert "1 issue found:\n\n"))
+           (t (insert (format "%d issues found:\n\n" (length errs)))))
+          (pcase-dolist (`(,line ,col ,type ,message) errs)
+            (insert (format "%d:%d: %s: %s\n" line col type message))))
+        (special-mode)
+        (view-mode 1))
+      (display-buffer buf))))
 
 ;;;###autoload
 (defun package-lint-batch-and-exit ()

@@ -1,10 +1,12 @@
 ;;; package-lint-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "package-lint" "package-lint.el" (23128 33859
-;;;;;;  526835 285000))
+;;;### (autoloads nil "package-lint" "package-lint.el" (0 0 0 0))
 ;;; Generated autoloads from package-lint.el
 
 (autoload 'package-lint-buffer "package-lint" "\
@@ -39,11 +41,31 @@ Return non-nil if the current buffer appears to be intended as a package.
 
 \(fn)" nil nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "package-lint" '("package-lint--")))
+
+;;;***
+
+;;;### (autoloads nil "package-lint-flymake" "package-lint-flymake.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from package-lint-flymake.el
+
+(autoload 'package-lint-setup-flymake "package-lint-flymake" "\
+Setup package-lint integration with Flymake.
+
+\(fn)" nil nil)
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "package-lint-flymake" '("package-lint-")))
+
+;;;***
+
+;;;### (autoloads nil nil ("package-lint-pkg.el") (0 0 0 0))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; package-lint-autoloads.el ends here
