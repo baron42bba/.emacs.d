@@ -4,9 +4,9 @@
 
 ;; Author: Aldric Giacomoni <trevoke@gmail.com>
 ;; URL: https://github.com/trevoke/sqlup-mode.el
-;; Package-Version: 20160911.1911
+;; Package-Version: 20170610.1537
 ;; Created: Jun 25 2014
-;; Version: 0.7.0
+;; Version: 0.8.0
 ;; Keywords: sql, tools, redis, upcase
 
 ;;; License:
@@ -39,9 +39,11 @@
 ;; * '
 ;;
 ;; This package also provides a function to capitalize SQL keywords inside a
-;; region - always available, no need to activate the minor mode to use it:
+;; region as well as the whole bufer - always available, no need to activate 
+;; the minor mode to use it:
 ;;
 ;; M-x sqlup-capitalize-keywords-in-region
+;; M-x sqlup-capitalize-keywords-in-buffer
 ;;
 ;; It is not bound to a keybinding. Here is an example of how you could do it:
 ;;
@@ -69,7 +71,6 @@
 (require 'sql)
 
 
-;;; Customizable variables
 (defcustom sqlup-blacklist
   '()
   "List of words which should never be upcased
@@ -80,12 +81,12 @@ strings not regexes."
   :group 'sqlup)
 
 
-;;; Internal variables
 (defconst sqlup-trigger-characters
   (mapcar 'string-to-char '(";"
                             " "
                             "("
                             ","
+                            "\n"
                             "'"))
   "When the user types one of these characters,
 this mode's logic will be evaluated.")
@@ -114,41 +115,18 @@ figures out what is and isn't a keyword.")
   "Add buffer-local hook to handle this mode's logic"
   (set (make-local-variable 'sqlup-work-buffer) nil)
   (set (make-local-variable 'sqlup-local-keywords) nil)
-  (add-hook 'post-command-hook 'sqlup-capitalize-as-you-type nil t))
+  (add-hook 'post-self-insert-hook 'sqlup-capitalize-as-you-type nil t))
 
 (defun sqlup-disable-keyword-capitalization ()
   "Remove buffer-local hook to handle this mode's logic"
-  (kill-buffer (sqlup-work-buffer))
-  (remove-hook 'post-command-hook 'sqlup-capitalize-as-you-type t))
+  (if sqlup-work-buffer (kill-buffer sqlup-work-buffer))
+  (remove-hook 'post-self-insert-hook 'sqlup-capitalize-as-you-type t))
 
 (defun sqlup-capitalize-as-you-type ()
   "If the user typed a trigger key, check if we should capitalize
 the previous word."
-  (if (sqlup-should-do-work-p)
+  (if (member last-command-event sqlup-trigger-characters)
       (save-excursion (sqlup-maybe-capitalize-symbol -1))))
-
-(defun sqlup-should-do-work-p ()
-  "Checks whether the user pressed one of the trigger keys.
-Other than <RET>, characters are in variable sqlup-trigger-characters."
-  (and (sqlup-not-just-initialized-p)
-       (or (sqlup-user-pressed-return-p)
-           (and (sqlup-user-is-typing-p)
-                (sqlup-trigger-self-insert-character-p)))))
-
-(defun sqlup-not-just-initialized-p ()
-  (not (eq this-command 'sqlup-mode)))
-
-(defun sqlup-user-pressed-return-p ()
-  (and (< 0 (length (this-command-keys-vector)))
-       (or (equal 13 last-command-event)
-           (equal 10 last-command-event))))
-
-(defun sqlup-user-is-typing-p ()
-  (eq this-command #'self-insert-command))
-
-(defun sqlup-trigger-self-insert-character-p ()
-  (let ((sqlup-current-char last-command-event))
-    (member sqlup-current-char sqlup-trigger-characters)))
 
 (defun sqlup-maybe-capitalize-symbol (direction)
   "DIRECTION is either 1 for forward or -1 for backward"
@@ -213,6 +191,12 @@ the given DIALECT of SQL."
     (while (< (point) end-pos)
       (sqlup-maybe-capitalize-symbol 1))))
 
+(defun sqlup-capitalize-keywords-in-buffer ()
+  "Call this function in a buffer to capitalize the SQL keywords therein."
+  (interactive)
+  (save-excursion
+    (sqlup-capitalize-keywords-in-region (point-min) (point-max))))
+
 (defun sqlup-keywords-regexps ()
   (or sqlup-local-keywords
       (set (make-local-variable 'sqlup-local-keywords)
@@ -241,8 +225,11 @@ ANSI SQL keywords."
   (and (boundp 'sql-mode-font-lock-keywords) sql-mode-font-lock-keywords))
 
 (defun sqlup-work-buffer ()
-  "Returns and/or creates an indirect buffer based on current buffer and set
-its major mode to sql-mode"
+  "Determines in which buffer sqlup will look to find what it needs and returns it. It can return the current buffer or create and return an indirect buffer based on current buffer and set its major mode to sql-mode."
+  (cond ((sqlup-within-sql-buffer-p) (current-buffer))
+        (t (sqlup-indirect-buffer))))
+
+(defun sqlup-indirect-buffer ()
   (or sqlup-work-buffer
       (set (make-local-variable 'sqlup-work-buffer)
            (with-current-buffer (clone-indirect-buffer
@@ -269,6 +256,12 @@ sqlup-mode enabled."
 the sql product. We need to advice sql-set-product since sql-mode does not
 provide any hook that runs after changing the product"
   (setq sqlup-local-keywords nil))
+
+(defadvice comint-send-input (before sqlup-capitalize-sent-input activate)
+  "Capitalize any sql keywords before point when sending input in
+  interactive sql"
+  (when sqlup-mode
+    (save-excursion (sqlup-maybe-capitalize-symbol -1))))
 
 (provide 'sqlup-mode)
 ;;; sqlup-mode.el ends here

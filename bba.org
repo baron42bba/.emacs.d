@@ -2608,7 +2608,7 @@ On OS X you might want to run =sudo port install sqlparse= to have
 Takes care of doing upper-case for keywords.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'load-path "~/.emacs.d/elpa/sqlup-mode-20160911.1911")
+  (add-to-list 'load-path "~/.emacs.d/elpa/sqlup-mode-20170610.1537")
   (require 'sqlup-mode)
   (add-hook 'sql-mode-hook 'sqlup-mode)
   (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
