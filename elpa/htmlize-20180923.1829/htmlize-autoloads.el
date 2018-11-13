@@ -2,10 +2,11 @@
 ;;
 ;;; Code:
 
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads (htmlize-many-files-dired htmlize-many-files htmlize-file
-;;;;;;  htmlize-region htmlize-buffer) "htmlize" "htmlize.el" (21595
-;;;;;;  16733 0 0))
+;;;### (autoloads nil "htmlize" "htmlize.el" (0 0 0 0))
 ;;; Generated autoloads from htmlize.el
 
 (autoload 'htmlize-buffer "htmlize" "\
@@ -68,14 +69,10 @@ HTMLize dired-marked files.
 
 \(fn ARG &optional TARGET-DIRECTORY)" t nil)
 
-;;;***
-
-;;;### (autoloads nil nil ("htmlize-pkg.el") (21595 16733 247946
-;;;;;;  0))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "htmlize" '("htmlize-")))
 
 ;;;***
 
-(provide 'htmlize-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
