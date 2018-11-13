@@ -1,10 +1,13 @@
 ;;; impatient-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "impatient-mode" "impatient-mode.el" (21908
-;;;;;;  14231 0 0))
+;;;### (autoloads nil "impatient-mode" "impatient-mode.el" (0 0 0
+;;;;;;  0))
 ;;; Generated autoloads from impatient-mode.el
 
 (autoload 'impatient-mode "impatient-mode" "\
@@ -12,10 +15,11 @@ Serves the buffer live over HTTP.
 
 \(fn &optional ARG)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "impatient-mode" '("httpd/imp" "imp")))
+
 ;;;***
 
-;;;### (autoloads nil nil ("impatient-mode-pkg.el") (21908 14231
-;;;;;;  202947 0))
+;;;### (autoloads nil nil ("impatient-mode-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -23,5 +27,6 @@ Serves the buffer live over HTTP.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; impatient-mode-autoloads.el ends here
