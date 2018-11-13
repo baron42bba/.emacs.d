@@ -5,7 +5,7 @@
 ;;       Daniel Hackney
 
 ;; Version: 1.3
-;; Package-Version: 20141024.732
+;; Package-Version: 20141024.1432
 
 ;; This file is not part of Emacs
 
