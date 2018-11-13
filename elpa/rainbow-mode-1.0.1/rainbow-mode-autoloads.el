@@ -1,10 +1,12 @@
 ;;; rainbow-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "rainbow-mode" "rainbow-mode.el" (22216 26216
-;;;;;;  0 0))
+;;;### (autoloads nil "rainbow-mode" "rainbow-mode.el" (0 0 0 0))
 ;;; Generated autoloads from rainbow-mode.el
 
 (autoload 'rainbow-mode "rainbow-mode" "\
@@ -13,10 +15,7 @@ This will fontify with colors the string like \"#aabbcc\" or \"blue\".
 
 \(fn &optional ARG)" t nil)
 
-;;;***
-
-;;;### (autoloads nil nil ("rainbow-mode-pkg.el") (22216 26216 901245
-;;;;;;  0))
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "rainbow-mode" '("rainbow-")))
 
 ;;;***
 
@@ -24,5 +23,6 @@ This will fontify with colors the string like \"#aabbcc\" or \"blue\".
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; rainbow-mode-autoloads.el ends here

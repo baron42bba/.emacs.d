@@ -389,7 +389,7 @@ But we use it only in graphical mode as text mode lacks color depth.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (when (display-graphic-p)
-        (add-to-list 'load-path "~/.emacs.d/elpa/rainbow-delimiters-20150320.17")
+        (add-to-list 'load-path "~/.emacs.d/elpa/rainbow-delimiters-20170929.1132")
         ))
 
 
