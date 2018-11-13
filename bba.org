@@ -3412,9 +3412,7 @@ combine key strokes to access commands even faster.
   (key-chord-define-global "xf" 'ido-find-file)
   (key-chord-define-global "xx" 'helm-M-x)
   (key-chord-define org-mode-map "TT" 'org-set-tags)
-  (if (>= emacs-major-version 24)
-      (progn
-        ))
+
 
 
 #+END_SRC
