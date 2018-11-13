@@ -344,13 +344,13 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20160217.1102")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20180726.1213")
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20181028.1005")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20180910.1856")
         (require 'smartparens)
         (smartparens-global-mode 1)
         (defmacro def-pairs (pairs)
           `(progn
-             ,@(loop for (key . val) in pairs
+             ,@(cl-loop for (key . val) in pairs
                      collect
                      `(defun ,(read (concat
                                      "wrap-with-"

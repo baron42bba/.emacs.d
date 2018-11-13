@@ -1,4 +1,4 @@
-;;; smartparens-python.el --- Additional configuration for Python based modes.
+;;; smartparens-python.el --- Additional configuration for Python based modes.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015-2016 Matus Goljer
 
@@ -53,40 +53,34 @@
 (--each '(python-mode inferior-python-mode)
   (add-to-list 'sp-sexp-suffix (list it 'regexp "")))
 
-(defun sp-python-in-string-p (id action context)
-  "Return non-nil if point is in a string, taking
-care not to be confused by an unclosed ' that's just been typed."
-  (and (eq context 'string)
-       (save-excursion
-         (backward-char 1)
-         (nth 3 (syntax-ppss)))))
+(sp-with-modes 'python-mode
+  (sp-local-pair "'" "'" :unless '(sp-in-comment-p sp-in-string-quotes-p) :post-handlers '(:add sp-python-fix-tripple-quotes))
+  (sp-local-pair "\"" "\"" :post-handlers '(:add sp-python-fix-tripple-quotes))
+  (sp-local-pair "'''" "'''")
+  (sp-local-pair "\\'" "\\'")
+  (sp-local-pair "\"\"\"" "\"\"\""))
 
-(sp-local-pair 'python-mode
-               "'" "'"
-               :unless '(sp-in-comment-p sp-python-in-string-p))
+(defun sp-python-fix-tripple-quotes (id action _context)
+  "Properly rewrap tripple quote pairs.
 
-(sp-local-pair 'python-mode
-               "(" nil
-               :pre-handlers '(sp-python-pre-slurp-handler))
-
-(sp-local-pair 'python-mode
-               "[" nil
-               :pre-handlers '(sp-python-pre-slurp-handler))
-
-(defun sp-python-pre-slurp-handler (id action context)
-  (when (eq action 'slurp-forward)
-    ;; If there was no space before, we shouldn't add on.
-    ;; ok = enclosing, next-thing one being slurped into
-    ;; (variables let-bound in `sp-forward-slurp-sexp').
-    (save-excursion
-      (when (and (= (sp-get ok :end) (sp-get next-thing :beg))
-                 (equal (sp-get ok :op) (sp-get next-thing :op)))
-        (goto-char (sp-get ok :end))
-        (when (looking-back " ")
-          (delete-char -1))))))
+When the user rewraps a tripple quote pair to the other pair
+type (i.e. ''' to \") we check if the old pair was a
+tripple-quote pair and if so add two pairs to beg/end of the
+newly formed pair (which was a single-quote \"...\" pair)."
+  (when (eq action 'rewrap-sexp)
+    (let ((old (plist-get sp-handler-context :parent)))
+      (when (or (and (equal old "'''") (equal id "\""))
+                (and (equal old "\"\"\"") (equal id "'")))
+        (save-excursion
+          (sp-get sp-last-wrapped-region
+            (goto-char :end-in)
+            (insert (make-string 2 (aref id 0)))
+            (goto-char :beg)
+            (insert (make-string 2 (aref id 0)))))))))
 
 (defadvice python-indent-dedent-line-backspace
     (around sp-backward-delete-char-advice activate)
+  "Fix indend."
   (if smartparens-strict-mode
       (cl-letf (((symbol-function 'delete-backward-char)
                  (lambda (arg &optional killp)

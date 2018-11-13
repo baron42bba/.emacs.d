@@ -1,4 +1,4 @@
-;;; smartparens-config.el --- Default configuration for smartparens package
+;;; smartparens-config.el --- Default configuration for smartparens package  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2016 Matus Goljer
 
@@ -45,51 +45,50 @@
 
 (require 'smartparens)
 
-;; do not autoinsert ' pair if the point is preceeded by word.  This
-;; will handle the situation when ' is used as a contraction symbol in
-;; natural language.  Nil for second argument means to keep the
-;; original definition of closing pair.
-(sp-pair "'" nil :unless '(sp-point-after-word-p))
-
-(defun sp-lisp-invalid-hyperlink-p (_1 action _2)
+(defun sp-lisp-invalid-hyperlink-p (_id action _context)
+  "Test if there is an invalid hyperlink in a Lisp docstring.
+ID, ACTION, CONTEXT."
   (when (eq action 'navigate)
     ;; Ignore errors due to us being at the start or end of the
     ;; buffer.
     (ignore-errors
-      (or (and (looking-at "\\sw\\|\\s_")
-               (save-excursion
-                 (backward-char 2)
-                 (looking-at "\\sw\\|\\s_")))
-          (and (save-excursion
-                 (backward-char 1)
-                 (looking-at "\\sw\\|\\s_"))
-               (save-excursion
-                 (forward-char 1)
-                 (looking-at "\\sw\\|\\s_")))))))
+      (or
+       ;; foo'|bar
+       (and (looking-at "\\sw\\|\\s_")
+            ;; do not consider punctuation
+            (not (looking-at "[?.,;!]"))
+            (save-excursion
+              (backward-char 2)
+              (looking-at "\\sw\\|\\s_")))
+       ;; foo|'bar
+       (and (save-excursion
+              (backward-char 1)
+              (looking-at "\\sw\\|\\s_"))
+            (save-excursion
+              (forward-char 1)
+              (looking-at "\\sw\\|\\s_")
+              ;; do not consider punctuation
+              (not (looking-at "[?.,;!]"))))))))
 
 ;; emacs is lisp hacking enviroment, so we set up some most common
 ;; lisp modes too
 (sp-with-modes sp-lisp-modes
   ;; disable ', it's the quote character!
-  (sp-local-pair "'" nil :actions nil)
+  (sp-local-pair "'" nil :actions nil))
+
+(sp-with-modes (-difference sp-lisp-modes sp-clojure-modes)
   ;; also only use the pseudo-quote inside strings where it serve as
   ;; hyperlink.
   (sp-local-pair "`" "'"
                  :when '(sp-in-string-p
                          sp-in-comment-p)
                  :unless '(sp-lisp-invalid-hyperlink-p)
-                 :skip-match (lambda (ms mb me)
+                 :skip-match (lambda (ms _mb _me)
                                (cond
                                 ((equal ms "'")
                                  (or (sp-lisp-invalid-hyperlink-p "`" 'navigate '_)
                                      (not (sp-point-in-string-or-comment))))
                                 (t (not (sp-point-in-string-or-comment)))))))
-
-;; <rant>Unfortunately emacs devs in their glorious wisdom decided to
-;; make @ no longer have prefix syntax, it is now a symbol... because
-;; apparently its use in symbols is so frequent.  Anyway, since we
-;; can't really change that, let's use a regexp based solution</rant>
-(add-to-list 'sp-sexp-prefix (list 'emacs-lisp-mode 'regexp "\\(?:,@\\|[',`]\\)"))
 
 ;; TODO: this should only be active in docstring, otherwise we want
 ;; the regexp completion \\{\\}.  To handle this feature, we must
@@ -102,21 +101,31 @@
 ;; automatically.  If you want to call sp-local-pair outside this
 ;; macro, you MUST supply the major mode argument.
 
+(eval-after-load 'clojure-mode             '(require 'smartparens-clojure))
+(eval-after-load 'crystal-mode             '(require 'smartparens-crystal))
+(eval-after-load 'elixir-mode              '(require 'smartparens-elixir))
+(eval-after-load 'enh-ruby-mode            '(require 'smartparens-ruby))
+(eval-after-load 'ess                      '(require 'smartparens-ess))
+(eval-after-load 'haskell-interactive-mode '(require 'smartparens-haskell))
+(eval-after-load 'haskell-mode             '(require 'smartparens-haskell))
 (--each sp--html-modes
-  (eval-after-load (symbol-name it) '(require 'smartparens-html)))
-(eval-after-load "latex"         '(require 'smartparens-latex))
-(eval-after-load "tex-mode"      '(require 'smartparens-latex))
-(eval-after-load "lua-mode"      '(require 'smartparens-lua))
-(eval-after-load "ruby-mode"     '(require 'smartparens-ruby))
-(eval-after-load "enh-ruby-mode" '(require 'smartparens-ruby))
-(eval-after-load "rust-mode"     '(require 'smartparens-rust))
-(eval-after-load "haskell-mode"     '(require 'smartparens-haskell))
-(eval-after-load "haskell-interactive-mode"     '(require 'smartparens-haskell))
-(--each '("python-mode" "python")
-  (eval-after-load it '(require 'smartparens-python)))
-(eval-after-load "scala-mode" '(require 'smartparens-scala))
-(eval-after-load "racket-mode" '(require 'smartparens-racket))
-
+  (eval-after-load it                      '(require 'smartparens-html)))
+(eval-after-load 'latex                    '(require 'smartparens-latex))
+(eval-after-load 'lua-mode                 '(require 'smartparens-lua))
+(eval-after-load 'markdown-mode            '(require 'smartparens-markdown))
+(--each '(python-mode python)
+  (eval-after-load it                      '(require 'smartparens-python)))
+(eval-after-load 'org                      '(require 'smartparens-org))
+(eval-after-load 'racket-mode              '(require 'smartparens-racket))
+(eval-after-load 'ruby-mode                '(require 'smartparens-ruby))
+(eval-after-load 'rust-mode                '(require 'smartparens-rust))
+(eval-after-load 'scala-mode               '(require 'smartparens-scala))
+(eval-after-load 'tex-mode                 '(require 'smartparens-latex))
+(eval-after-load 'text-mode                '(require 'smartparens-text))
+(eval-after-load 'tuareg                   '(require 'smartparens-ml))
+(eval-after-load 'fsharp-mode              '(require 'smartparens-ml))
+(--each '(js js2-mode)
+  (eval-after-load it                      '(require 'smartparens-javascript)))
 (provide 'smartparens-config)
 
 ;;; smartparens-config.el ends here
