@@ -1,14 +1,18 @@
 ;;; guide-key-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "guide-key" "guide-key.el" (21908 14266 0 0))
+;;;### (autoloads nil "guide-key" "guide-key.el" (0 0 0 0))
 ;;; Generated autoloads from guide-key.el
 
 (defvar guide-key-mode nil "\
 Non-nil if Guide-Key mode is enabled.
-See the command `guide-key-mode' for a description of this minor mode.
+See the `guide-key-mode' command
+for a description of this minor mode.
 Setting this variable directly does not take effect;
 either customize it (see the info node `Easy Customization')
 or call the function `guide-key-mode'.")
@@ -25,11 +29,14 @@ positive, otherwise disable.
 
 \(fn &optional ARG)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "guide-key" '("guide-key/")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; guide-key-autoloads.el ends here

@@ -641,8 +641,8 @@ Probably the best help to keep track of the not every day used keybindings.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.600")
-        (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150107.2235")
+        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.1300")
+        (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150108.635")
         (require 'guide-key)
         (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>"))
         (setq guide-key/recursive-key-sequence-flag t)
