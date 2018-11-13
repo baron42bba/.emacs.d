@@ -6,6 +6,13 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
+;;;### (autoloads nil "buck" "buck.el" (0 0 0 0))
+;;; Generated autoloads from buck.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "buck" '("buck-default-host")))
+
+;;;***
+
 ;;;### (autoloads nil "ghub" "ghub.el" (0 0 0 0))
 ;;; Generated autoloads from ghub.el
 
@@ -42,6 +49,13 @@ and call `auth-source-forget+'.
 
 ;;;***
 
+;;;### (autoloads nil "ghub-graphql" "ghub-graphql.el" (0 0 0 0))
+;;; Generated autoloads from ghub-graphql.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ghub-graphql" '("ghub-")))
+
+;;;***
+
 ;;;### (autoloads nil "glab" "glab.el" (0 0 0 0))
 ;;; Generated autoloads from glab.el
 
@@ -49,8 +63,21 @@ and call `auth-source-forget+'.
 
 ;;;***
 
-;;;### (autoloads nil nil ("ghub-graphql.el" "ghub-pkg.el") (0 0
-;;;;;;  0 0))
+;;;### (autoloads nil "gogs" "gogs.el" (0 0 0 0))
+;;; Generated autoloads from gogs.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "gogs" '("gogs-default-host")))
+
+;;;***
+
+;;;### (autoloads nil "gtea" "gtea.el" (0 0 0 0))
+;;; Generated autoloads from gtea.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "gtea" '("gtea-default-host")))
+
+;;;***
+
+;;;### (autoloads nil nil ("ghub-pkg.el") (0 0 0 0))
 
 ;;;***
 

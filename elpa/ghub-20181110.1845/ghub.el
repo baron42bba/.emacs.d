@@ -1,11 +1,10 @@
-;;; ghub.el --- minuscule client library for the Github API  -*- lexical-binding: t -*-
+;;; ghub.el --- minuscule client libraries for Git forge APIs  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016-2018  Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Homepage: https://github.com/magit/ghub
 ;; Keywords: tools
-;; Package-Requires: ((emacs "24.4") (let-alist "1.0.5"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -23,22 +22,30 @@
 
 ;;; Commentary:
 
-;; Ghub is a library that provides basic support for using the Github API
-;; from Emacs packages.  It abstracts access to API resources using only
-;; a handful of functions that are not resource-specific.
+;; Ghub provides basic support for using the APIs of various Git forges
+;; from Emacs packages.  Originally it only supported the Github REST
+;; API, but now it also supports the Github GraphQL API as well as the
+;; REST APIs of Gitlab, Gitea, Gogs and Bitbucket.
 
-;; Ghub handles the creation, storage and use of access tokens using a
-;; setup wizard to make it easier for users to get started and to reduce
-;; the support burden imposed on package maintainers.  It also comes with
-;; a comprehensive manual to address the cases when things don't just
-;; work as expected or in case you don't want to use the wizard.
+;; Ghub abstracts access to API resources using only a handful of basic
+;; functions such as `ghub-get'.  These are convenience wrappers around
+;; `ghub-request'.  Additional forge-specific wrappers like `glab-put',
+;; `gtea-put', `gogs-post' and `buck-delete' are also available.  Ghub
+;; does not provide any resource-specific functions, with the exception
+;; of `FORGE-repository-id'.
+
+;; When accessing Github, then Ghub handles the creation and storage of
+;; access tokens using a setup wizard to make it easier for users to get
+;; started.  The tokens for other forges have to be created manually.
 
 ;; Ghub is intentionally limited to only provide these two essential
 ;; features — basic request functions and guided setup — to avoid being
 ;; too opinionated, which would hinder wide adoption.  It is assumed that
 ;; wide adoption would make life easier for users and maintainers alike,
-;; because then all packages that talk to the Github API could be
-;; configured the same way.
+;; because then all packages that talk to forge APIs could be configured
+;; the same way.
+
+;; Please consult the manual (info "ghub") for more information.
 
 ;;; Code:
 
@@ -50,7 +57,8 @@
 (require 'url-auth)
 (require 'url-http)
 
-(eval-when-compile (require 'subr-x))
+(eval-when-compile
+  (require 'subr-x))
 
 (defvar url-callback-arguments)
 (defvar url-http-end-of-headers)
@@ -94,6 +102,7 @@ used instead.")
                (:constructor ghub--make-req)
                (:copier nil))
   (url        nil :read-only nil)
+  (forge      nil :read-only t)
   (silent     nil :read-only t)
   (method     nil :read-only t)
   (headers    nil :read-only t)
@@ -327,6 +336,7 @@ Both callbacks are called with four arguments.
     :url (url-generic-parse-url
           (concat "https://" host resource
                   (and query (concat "?" (ghub--url-encode-params query)))))
+    :forge forge
     :silent silent
     ;; Encode in case caller used (symbol-name 'GET). #35
     :method     (encode-coding-string method 'utf-8)
@@ -350,11 +360,11 @@ already completed.  If there is no next page, then return nil.
 
 Callbacks are called with four arguments (see `ghub-request').
 The forth argument is a `ghub--req' struct, intended to be passed
-to this function.  A callbacks may use the struct's `extra' slot
+to this function.  A callback may use the struct's `extra' slot
 to pass additional information to the callback that will be
 called after the next request has finished.  Use the function
 `ghub-req-extra' to get and set the value of this slot."
-  (and (assq 'next (ghub-response-link-relations))
+  (and (assq 'next (ghub-response-link-relations req))
        (or (ghub--retrieve nil req) t)))
 
 (cl-defun ghub-wait (resource &optional duration &key username auth host)
@@ -385,16 +395,41 @@ See `ghub-request' for information about the other arguments."
                 (cl-incf total wait))
             (sit-for (setq total 2))))))))
 
-(defun ghub-response-link-relations (&optional headers)
+(defun ghub-response-link-relations (req &optional headers payload)
   "Return an alist of link relations in HEADERS.
-If optional HEADERS is nil, then return those
-in `ghub-response-headers'."
-  (let ((rels (cdr (assoc "Link" (or headers ghub-response-headers)))))
-    (and rels (mapcar (lambda (elt)
-                        (pcase-let ((`(,url ,rel) (split-string elt "; ")))
-                          (cons (intern (substring rel 5 -1))
-                                (substring url 1 -1))))
-                      (split-string rels ", ")))))
+If optional HEADERS is nil, then return those that were
+previously stored in the variable `ghub-response-headers'.
+
+When accessing a Bitbucket instance then the link relations
+are in PAYLOAD instead of HEADERS, making their API merely
+RESTish and forcing this function to append those relations
+to the value of `ghub-response-headers', for later use when
+this function is called with nil for PAYLOAD."
+  (if (eq (ghub--req-forge req) 'bitbucket)
+      (if payload
+          (let* ((page (cl-mapcan (lambda (key)
+                                    (when-let ((elt (assq key payload)))
+                                      (list elt)))
+                                  '(size page pagelen next previous)))
+                 (headers (cons (cons 'link-alist page) headers)))
+            (if (and req (or (ghub--req-callback req)
+                             (ghub--req-errorback req)))
+                (setq-local ghub-response-headers headers)
+              (setq-default ghub-response-headers headers))
+            page)
+        (cdr (assq 'link-alist ghub-response-headers)))
+  (when-let ((rels (cdr (assoc "Link" (or headers ghub-response-headers)))))
+    (mapcar (lambda (elt)
+              (pcase-let ((`(,url ,rel) (split-string elt "; ")))
+                (cons (intern (substring rel 5 -1))
+                      (substring url 1 -1))))
+            (split-string rels ", ")))))
+
+(cl-defun ghub-repository-id (owner name &key username auth host forge)
+  "Return the id of the specified repository."
+  (let ((fn (intern (format "%s-repository-id" (or forge 'ghub)))))
+    (funcall (if (eq fn 'ghub-repository-id) 'ghub--repository-id fn)
+             owner name :username username :auth auth :host host)))
 
 ;;;; Internal
 
@@ -433,14 +468,13 @@ in `ghub-response-headers'."
                  (headers    (ghub--handle-response-headers status req))
                  (payload    (ghub--handle-response-payload req))
                  (payload    (ghub--handle-response-error status payload req))
-                 (value      (nconc (ghub--req-value req) payload))
+                 (value      (ghub--handle-response-value payload req))
                  (next       (cdr (assq 'next (ghub-response-link-relations
-                                               headers)))))
+                                               req headers payload)))))
             (when (numberp unpaginate)
               (cl-decf unpaginate))
             (setf (ghub--req-url req)
                   (url-generic-parse-url next))
-            (setf (ghub--req-value req) value)
             (setf (ghub--req-unpaginate req) unpaginate)
             (or (and next
                      unpaginate
@@ -500,6 +534,14 @@ in `ghub-response-headers'."
                             payload)))
           (signal 'ghub-error data))
       (signal symb data))))
+
+(defun ghub--handle-response-value (payload req)
+  (setf (ghub--req-value req)
+        (nconc (ghub--req-value req)
+               (if-let ((nested (and (eq (ghub--req-forge req) 'bitbucket)
+                                     (assq 'values payload))))
+                   (cdr nested)
+                 payload))))
 
 (defun ghub--handle-response-payload (req)
   (funcall (or (ghub--req-reader req)
@@ -634,22 +676,24 @@ and call `auth-source-forget+'."
       (setq username (ghub--username host forge)))
     (lambda ()
       (if (eq auth 'basic)
-          (if (eq forge 'gitlab)
-              (error "Gitlab does not support basic authentication")
-            (cons (cons "Authorization" (ghub--basic-auth host username))
-                  headers))
+          (cons (cons "Authorization" (ghub--basic-auth host username))
+                headers)
         (cons (ghub--auth host auth username forge) headers)))))
 
 (defun ghub--auth (host auth &optional username forge)
   (unless username
     (setq username (ghub--username host)))
   (if (eq auth 'basic)
-      (if (eq forge 'gitlab)
-          (error "Gitlab does not support basic authentication")
-        (cons "Authorization" (ghub--basic-auth host username)))
-    (cons (if (eq forge 'gitlab)
-              "Private-Token"
-            "Authorization")
+      (cl-ecase forge
+        ((nil github gitea gogs bitbucket)
+         (cons "Authorization" (ghub--basic-auth host username)))
+        (gitlab
+         (error "Gitlab does not support basic authentication")))
+    (cons (cl-ecase forge
+            ((nil github gitea gogs bitbucket)
+             "Authorization")
+            (gitlab
+             "Private-Token"))
           (concat
            (and (not (eq forge 'gitlab)) "token ")
            (encode-coding-string
@@ -702,27 +746,57 @@ and call `auth-source-forget+'."
                 ;; end for Emacs releases before 26.1.  See #24, #64.
                 (auth-source-forget (list :host host :user user :max 1))
                 (and (not nocreate)
-                     (if (eq forge 'gitlab)
-                         (error
-                          (concat
-                           "Required Gitlab token does not exist.  See "
-                           "https://magit.vc/manual/ghub/Gitlab-Support.html "
-                           "for instructions."))
-                       (ghub--confirm-create-token host username package)))))))
+                     (cl-ecase forge
+                       ((nil github)
+                        (ghub--confirm-create-token host username package))
+                       ((gitlab gitea gogs bitbucket)
+                        (error "Required %s token (%S for %S) does not exist.
+See https://magit.vc/manual/ghub/Support-for-Other-Forges.html for instructions."
+                               (capitalize (symbol-name forge))
+                               user host))))))))
     (if (functionp token) (funcall token) token)))
 
 (defun ghub--host (&optional forge)
-  (if (eq forge 'gitlab)
-      (or (ignore-errors (car (process-lines "git" "config" "gitlab.host")))
-          (bound-and-true-p glab-default-host))
-    (or (ignore-errors (car (process-lines "git" "config" "github.host")))
-        ghub-default-host)))
+  (cl-ecase forge
+    ((nil github)
+     (or (ignore-errors (car (process-lines "git" "config" "github.host")))
+         ghub-default-host))
+    (gitlab
+     (or (ignore-errors (car (process-lines "git" "config" "gitlab.host")))
+         (bound-and-true-p glab-default-host)))
+    (gitea
+     (or (ignore-errors (car (process-lines "git" "config" "gitea.host")))
+         (bound-and-true-p gtea-default-host)))
+    (gogs
+     (or (ignore-errors (car (process-lines "git" "config" "gogs.host")))
+         (bound-and-true-p gogs-default-host)))
+    (bitbucket
+     (or (ignore-errors (car (process-lines "git" "config" "bitbucket.host")))
+         (bound-and-true-p buck-default-host)))))
 
 (defun ghub--username (host &optional forge)
-  (let ((var (cond ((string-prefix-p "api.github.com" host) "github.user")
-                   ((string-prefix-p "gitlab.com/api" host) "gitlab.user")
-                   ((eq forge 'gitlab)     (format "gitlab.%s.user" host))
-                   (t                      (format "github.%s.user" host)))))
+  (let ((var
+         (cl-ecase forge
+           ((nil github)
+            (if (equal host ghub-default-host)
+                "github.user"
+              (format "github.%s.user" host)))
+           (gitlab
+            (if (equal host "gitlab.com/api/v4")
+                "gitlab.user"
+              (format "gitlab.%s.user" host)))
+           (bitbucket
+            (if (equal host "api.bitbucket.org/2.0")
+                "bitbucket.user"
+              (format "bitbucket.%s.user" host)))
+           (gitea
+            (when (zerop (call-process "git" nil nil nil "config" "gitea.host"))
+              (error "gitea.host is set but always ignored"))
+            (format "gitea.%s.user" host))
+           (gogs
+            (when (zerop (call-process "git" nil nil nil "config" "gogs.host"))
+              (error "gogs.host is set but always ignored"))
+            (format "gogs.%s.user"  host)))))
     (condition-case nil
         (car (process-lines "git" "config" var))
       (error
@@ -783,15 +857,36 @@ WARNING: The token will be stored unencrypted in %S.
          If you don't want that, you have to abort and customize
          the `auth-sources' option.\n" (car auth-sources))
               ""))))
-        (progn
-          (when (ghub--get-token-id host username package)
-            (if (yes-or-no-p
-                 (format
-                  "A token named %S\nalready exists on Github.  Replace it?"
-                  ident))
-                (ghub--delete-token host username package)
-              (user-error "Abort")))
-          (ghub-create-token host username package scopes))
+        (condition-case ghub--create-token-error
+            ;; Naively attempt to create the token since the user told us to
+            (ghub-create-token host username package scopes)
+          ;; The API _may_ respond with the fact that a token of the name
+          ;; we wanted already exists. At this point we're out of luck. We
+          ;; don't have a token (otherwise why would we be here?) and, if
+          ;; the user is using SMS 2FA, we have no way of telling GitHub
+          ;; to send a new 2FA code to the user other than sending a POST
+          ;; to /authorizations which is ugly.
+          ;;
+          ;; If they are not using SMS 2FA then we could try to delete the
+          ;; existing token (which will require them to hand us another
+          ;; OTP for the delete request) and then call create again,
+          ;; possibly requiring _another_ OTP if they don't do things fast
+          ;; enough, but this is only because non-SMS 2FA doesn't require
+          ;; any action on GitHub's part.
+          ;;
+          ;; GitHub does hand us a header that indicates what type of 2FA
+          ;; is in use, but it's not currently available in this location
+          ;; and would make the following code which is already quite
+          ;; complicated even more complicated. So in the interest of
+          ;; simplicity it's better to error out here and ask the user to
+          ;; take action. This situation should almost never arise anyway.
+          (ghub-http-error
+           (if (string-equal (let-alist (nth 3 ghub--create-token-error)
+                               (car .errors.code))
+                             "already_exists")
+               (error "\
+A token named %S already exists on Github. \
+Please visit https://github.com/settings/tokens and delete it." ident))))
       (user-error "Abort"))))
 
 (defun ghub--get-token-id (host username package)
