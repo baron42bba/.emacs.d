@@ -1,0 +1,2 @@
+;;; -*- no-byte-compile: t -*-
+(define-package "org-sticky-header" "20170423.435" "Show off-screen Org heading at top of window" '((emacs "24.4") (org "8.3.5")) :commit "aae8dbc7f3b33c4dd35dc38d83791d7c23757060" :keywords '("hypermedia" "outlines" "org") :authors '(("Adam Porter" . "adam@alphapapa.net")) :maintainer '("Adam Porter" . "adam@alphapapa.net") :url "http://github.com/alphapapa/org-sticky-header")
