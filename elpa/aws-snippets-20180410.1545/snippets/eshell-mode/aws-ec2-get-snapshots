@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-get-snapshots
+# key: snap-ls
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} ec2 describe-snapshots --query '`(print aws-snippets-ec2-get-snapshots-query)`' --output ${4:$$(yas-choose-value '("text" "table" "json"))} $0

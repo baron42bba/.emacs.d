@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-describe-instance-status (yank)
+# key: aws-ec2-describe-instance-status
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 describe-instance-status --instance-ids ${4:`(current-kill 0)`} $0

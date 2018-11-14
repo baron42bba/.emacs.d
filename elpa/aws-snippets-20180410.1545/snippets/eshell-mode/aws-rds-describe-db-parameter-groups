@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-rds-describe-db-parameter-groups
+# key: aws-rds-describe-db-parameter-groups
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} rds describe-db-parameter-groups --output ${5:$$(yas-choose-value '("text" "table" "json"))} $0

@@ -1,0 +1,2 @@
+;;; -*- no-byte-compile: t -*-
+(define-package "ob-async" "20180816.1553" "Asynchronous org-babel src block execution" '((async "1.9") (org "9.0.1") (emacs "24.4") (dash "2.14.1")) :commit "2470490e6efb3f8efde1702f7986f6e31cc1ab6c" :keywords '("tools") :authors '(("Andrew Stahlman" . "andrewstahlman@gmail.com")) :maintainer '("Andrew Stahlman" . "andrewstahlman@gmail.com") :url "https://github.com/astahlman/ob-async")

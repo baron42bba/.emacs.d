@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-validate-template
+# key: cloud-val-temp
+# group: aws
+# --
+aws --profile=test --region=us-east-1 cloudformation validate-template --template-body file://${1:`(current-kill 0)`} --output ${2:$$(yas-choose-value '("text" "table" "json"))} $0

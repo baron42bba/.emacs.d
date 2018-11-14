@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-start-stop-instance (yank)
+# key: ec2-start
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}} ec2 ${4:$$(yas-choose-value '("start-instances" "stop-instances" "reboot-instances"))} --instance-ids ${5:`(current-kill 0)`} $0

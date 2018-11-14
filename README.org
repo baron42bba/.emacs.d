@@ -1,0 +1,203 @@
+
+* Keybindings
+
+Just a few Keybindings to make your life easier.
+
+| key                     | command           |
+|-------------------------+-------------------|
+| <ctrl>-c m              | magit-status      |
+| <ctrl>-c <ctrl>-<space> | jump to word      |
+| <META>-g g              | goto line         |
+| <ctrl>-<f10>            | open config file. |
+
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (define-key global-map "\C-cm" 'magit-status)
+  (define-key global-map (kbd "C-c C-SPC") 'avy-goto-word-1)
+  (define-key global-map (kbd "M-g g") 'avy-goto-line)
+  (global-set-key (kbd "C-c <f10>") '(lambda() (interactive) (find-file "~/.emacs.d/README.org")))
+  (global-set-key (kbd "C-s") 'isearch-forward-regexp)
+  (global-set-key (kbd "C-r") 'isearch-backward-regexp)
+  (global-set-key (kbd "C-M-s") 'isearch-forward)
+  (global-set-key (kbd "C-M-r") 'isearch-backward)
+
+#+END_SRC
+
+* guide-key
+
+This helps you to remember keybindings.
+Just start typing and wait a second or two.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'guide-key)
+  (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>"))
+  (setq guide-key/recursive-key-sequence-flag t)
+  (setq guide-key/idle-delay 3)
+  (guide-key-mode 1)
+#+END_SRC
+
+* [[http://editorconfig.org/][editorconfig]]
+[2017-01-06 Fri 14:27]
+
+Set default indentation, end of line, trailing whitespaces etc for the
+whole team. No matter what editor gets used.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (editorconfig-mode '1)
+
+#+END_SRC
+
+* helm
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'helm)
+  (helm-mode 1)
+  (setq helm-mini-defaults-sources '(helm-source-buffers-list
+				     helm-source-recentf
+				     helm-source-bookmarks
+				     helm-source-buffer-not-found))
+  (define-key global-map "\C-xb" 'helm-mini)
+  (global-set-key "\C-cr" 'helm-recentf)
+  (define-key global-map "\C-x\C-k\C-h" 'helm-execute-kmacro)
+  (define-key global-map (kbd "C-x C-f") 'helm-find-files)
+  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
+#+END_SRC
+
+* [[http://www.emacswiki.org/emacs/RecentFiles][RecentFiles]]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'recentf)
+  (recentf-mode 1)
+  (setq recentf-max-saved-items 200
+	recentf-max-menu-items 142)
+  (global-set-key "\C-cr" 'recentf-open-files)
+#+END_SRC
+
+* smartparens-mode
+
+Enable smart parens in all modes.
+See [[https://github.com/toctan/smartparens][Smartparens on github]].
+Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-pairs]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'smartparens)
+  (smartparens-global-mode 1)
+  (defmacro def-pairs (pairs)
+    `(progn
+       ,@(cl-loop for (key . val) in pairs
+		  collect
+		  `(defun ,(read (concat
+				  "wrap-with-"
+				  (prin1-to-string key)
+				  "s"))
+		       (&optional arg)
+		     (interactive "p")
+		     (sp-wrap-with-pair ,val)))))
+
+  (def-pairs ((paren        . "(")
+	      (bracket      . "[")
+	      (brace        . "{")
+	      (single-quote . "'")
+	      (double-quote . "\"")
+	      (back-quote   . "`")))
+
+  (define-key smartparens-mode-map (kbd "C-'") 'sp-rewrap-sexp)
+  (define-key smartparens-mode-map (kbd "C-c (") 'wrap-with-parens)
+  (define-key smartparens-mode-map (kbd "C-c ]") 'sp-backward-unwrap-sexp)
+  (define-key smartparens-mode-map (kbd "C-c )") 'sp-unwrap-sexp)
+  (define-key smartparens-mode-map (kbd "C-c [") 'wrap-with-brackets)
+  (define-key smartparens-mode-map (kbd "C-c {") 'wrap-with-braces)
+  (define-key smartparens-mode-map (kbd "<C-S-kp-4>") 'sp-beginning-of-sexp)
+  (define-key smartparens-mode-map (kbd "<C-S-kp-6>") 'sp-end-of-sexp)
+  (define-key smartparens-mode-map (kbd "<C-S-kp-8>") 'sp-up-sexp)
+  (define-key smartparens-mode-map (kbd "<C-S-kp-2>") 'sp-down-sexp)
+  (show-paren-mode 1)
+  (setq show-paren-style 'expression)
+  (setq blink-matching-paren-distance nil)
+#+END_SRC
+
+* goto-match-paren
+#+BEGIN_SRC emacs-lisp :tangle yes
+      (defun goto-match-paren (arg)
+        "Go to the matching parenthesis if on parenthesis, otherwise insert %.
+      vi style of % jumping to matching brace."
+        (interactive "p")
+        (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+              ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+              (t (self-insert-command (or arg 1)))))
+      (global-set-key "%" 'goto-match-paren)
+
+#+END_SRC
+
+* save hash bang files executable
+save files with #! in first line as user executable.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook `after-save-hook
+            #'(lambda ()
+                (if (not
+                     (or
+                      (string-match ".htm" buffer-file-name)
+                      (string-match ".org" buffer-file-name))
+                     )
+                    (check-parens))
+
+                (and (save-excursion
+                       (save-restriction
+                         (widen)
+                         (goto-char (point-min))
+                         (save-match-data
+                           (looking-at "^#!"))))
+                     (if (file-remote-p buffer-file-name)
+                         (progn
+                           (not (file-executable-p buffer-file-name))
+                           (shell-command (concat "chmod u+x " (file-name-nondirectory buffer-file-name)))
+                           (message
+                            (concat "Saved as script via tramp: " buffer-file-name))
+                           )
+                       (progn
+                         (not (file-executable-p buffer-file-name))
+                         (shell-command (concat "chmod u+x " buffer-file-name))
+                         (message
+                          (concat "Saved as script: " buffer-file-name)))))))
+
+#+END_SRC
+
+* save history
+    [2015-04-05 Sun 12:57]
+
+Write a history of your emacs into your org git repository.
+You have it available on every system and it's still private at it's
+not in the public git emacs configuration.
+
+- kill ring
+- search ring
+- regexp-search-ring
+- last-kbd-macro
+- kmacro-ring
+- shell-command-history
+
+all in your history.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history))
+  (setq kmacro-ring-max 42)
+  (setq history-delete-duplicates t)
+  (setq savehist-file "~/.emacshistory")
+  (if (file-exists-p savehist-file)
+      (load-file savehist-file))
+  (savehist-mode 1)
+#+END_SRC
+
+Confirm quit to avoid hitting C-x C-c by accident.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq confirm-kill-emacs 'yes-or-no-p)
+#+END_SRC
+
+* syntax-highlighting
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (font-lock-mode)
+  (global-font-lock-mode 1)
+
+#+END_SRC

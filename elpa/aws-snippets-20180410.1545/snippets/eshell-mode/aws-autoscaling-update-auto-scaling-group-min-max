@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-autoscaling-update-auto-scaling-group-min-max
+# key: aws-autoscaling-update-auto-scaling-group-min-max
+# group: aws
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value "\$\{REGION\}" aws-snippets-regions)}} autoscaling update-auto-scaling-group --auto-scaling-group-name ${4:`(current-kill 0)`} --min-size $5 --max-size $6 $0

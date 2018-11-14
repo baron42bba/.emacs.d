@@ -1,0 +1,15 @@
+/README.el
+/bookmarks
+*.elc
+archive-contents
+/ac-comphist.dat
+/elpa/archives/*
+/eshell/*
+/history
+/mthesaur.txt.cache
+/org-clock-save.el*
+/tramp
+/url/*
+/tldr
+/recentf
+/ido.last

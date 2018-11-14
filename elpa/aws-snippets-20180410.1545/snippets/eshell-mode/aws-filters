@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-filters
+# key: awsfil
+# group: aws
+# --
+--filters "Name=${1:$$(yas-choose-value aws-snippets-filters)},Values=$2" $0
