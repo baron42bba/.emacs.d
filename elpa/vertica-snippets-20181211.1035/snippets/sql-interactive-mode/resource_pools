@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: resource_pools
+# key: pools_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT * FROM resource_pools;$0

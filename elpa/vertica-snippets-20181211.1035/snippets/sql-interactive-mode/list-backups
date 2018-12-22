@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: list-backups
+# key: ls_backups
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT * FROM v_monitor.database_backups ORDER BY 1 DESC;$0
