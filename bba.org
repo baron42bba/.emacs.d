@@ -299,6 +299,13 @@ For annotated tags prepare message with commit messages since last tag.
 
 #+END_SRC
 
+Display open TODO items in magit-status.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'magit-todos)
+  (magit-todos-mode)
+#+END_SRC
+
 * [[https://github.com/larstvei/Focus][focus]]
 
 focus on the important stuff.
