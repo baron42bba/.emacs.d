@@ -4329,6 +4329,33 @@ Use aws command line tool via Emacs.
 
 #+END_SRC
 
+Check a AWS Cloudformation template with [[https://github.com/stelligent/cfn_nag][cfn_nag]]:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-aws-cfn-nag-scan()
+    "Check buffer with cfn_nag_scan."
+    (interactive)
+    (shell-command (concat "cfn_nag_scan --input-path " buffer-file-name)))
+  (define-key json-mode-map (kbd "C-c C-n") 'bba-aws-cfn-nag-scan)
+#+END_SRC
+
+Check a AWS Cloudformation template with [[https://github.com/awslabs/cfn-python-lint][cfn-lint]]:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-aws-cfn-lint()
+    "Check buffer with cfn_lint."
+    (interactive)
+    (shell-command (concat "cfn-lint " buffer-file-name)))
+  (define-key json-mode-map (kbd "C-c C-l") 'bba-aws-cfn-lint)
+#+END_SRC
+
+
+* terraform
+[2016-09-02 Fri 14:57]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
+#+END_SRC
 * thing-at-point-fqdn
 [2016-02-12 Fri 14:13]
 
