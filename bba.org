@@ -245,7 +245,7 @@ Keep track of your important stuff!
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/async-20180527.1730")
+        (add-to-list 'load-path "~/.emacs.d/elpa/async-20181224.454")
         (require 'async)
         )
     )
