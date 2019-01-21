@@ -24,4 +24,4 @@ FROM
    AND request ILIKE '%table%'
    AND NOT (request LIKE 'SELECT * FROM columns%'
          OR request LIKE '%query_requests%') ) my_alias
-ORDER BY 1, 2 DESC;
+ORDER BY 1 DESC, 2;
