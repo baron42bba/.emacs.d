@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-customresource
+# key: cloudformation-customresource
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:customResource}:
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0",
+    Properties:
+        ServiceToken: "$2"
+        $0

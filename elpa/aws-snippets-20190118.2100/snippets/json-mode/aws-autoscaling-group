@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: aws-autoscaling-group
+# key: autoscaling-group
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:-}" : {
+    "Type" : "AWS::AutoScaling::AutoScalingGroup",
+    "Properties" : {
+        "AvailabilityZones" : [${2:"--"}],
+        "LaunchConfigurationName" : ${3:"--"},
+        "MaxSize" : "${4:--}",
+        "MinSize" : "${5:--}",
+        "Tags" : [ {"Key" : "Name",
+                    "Value" : "${6:"--"}",
+                    "PropagateAtLaunch" : "True"}
+                ]
+    }
+}$0

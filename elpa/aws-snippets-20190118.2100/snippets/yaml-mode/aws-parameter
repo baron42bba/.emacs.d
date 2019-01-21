@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: aws-parameter
+# key: parameter
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:paramName}:
+    Description: ${2:-}
+    Type: ${3:$$(yas-choose-value '("String" "Number" "CommaDelimitedList"))}
+    Default: ${4:-}
+$0

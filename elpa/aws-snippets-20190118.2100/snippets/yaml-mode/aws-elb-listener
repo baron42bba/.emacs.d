@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: aws-elb-listener
+# key: elb-listener
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+InstancePort: ${1:-}
+InstanceProtocol: ${2:$$(yas-choose-value '("HTTP" "HTTPS" "TCP" "SSL"))}
+LoadBalancerPort: ${3:$1}
+Protocol: ${4:$$(yas-choose-value '("HTTP" "HTTPS" "TCP" "SSL"))}

@@ -1,0 +1,28 @@
+# -*- mode: snippet -*-
+# name: aws-launch-config
+# key: launch-config
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:launchConfigName}": {
+    "Type" : "AWS::AutoScaling::LaunchConfiguration",
+    "Properties" : {
+        "IamInstanceProfile" : ${2:"--"},
+        "ImageId" : ${3:"--"},
+        "InstanceMonitoring" : ${4:"--"},
+        "InstanceType" : "${5:--}",
+        "KeyName" : ${6:"--"},
+        "SecurityGroups" : [ ${7:"--"} ],
+        "UserData" : {
+            "Fn::Base64":
+                {   "Fn::Join": [
+                        "",
+                        [
+                            "#!/bin/bash -ex",
+                            "${8:-}"
+                        ]
+                    ]
+                }
+        }
+    }
+}$0

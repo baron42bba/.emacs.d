@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: aws-join
+# key: join
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+!Join [ "$1",[ ${2:"prefix"}, ${3:"suffix"} ] ]$0

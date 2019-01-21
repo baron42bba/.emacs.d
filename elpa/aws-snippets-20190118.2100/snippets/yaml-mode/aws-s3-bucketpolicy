@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-s3-bucketpolicy
+# key: s3-bucketpolicy
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:s3BucketPolicy}:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+        Bucket : $2
+        PolicyDocument:
+            - $0
+

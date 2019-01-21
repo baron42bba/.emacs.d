@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-map
+# key: map
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:mapName}:
+    ${2:selector}:
+        ${3:key}: ${4:val}
+    ${5:selector}:
+        ${6:key}: ${7:val}
+$0

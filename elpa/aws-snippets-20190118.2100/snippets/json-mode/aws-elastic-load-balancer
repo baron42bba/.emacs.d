@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: aws-elastic-load-balancer
+# key: elastic-load-balancer
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:-}": {
+   "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+   "Properties": {
+      "AvailabilityZones" : [ "${2:-}" ],
+      "Listeners" : [ ${3:-} ],
+      "Tags": [
+            {
+              "Key": "${4:-}",
+              "Value": "${5:-}"
+            }
+      ]
+   }
+}$0

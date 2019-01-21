@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-route53-healthcheck
+# key: route53-healthcheck
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:route53HealthCheck}": {
+  "Type": "AWS::Route53::HealthCheck",
+  "Properties": {
+    "HealthCheckConfig": { $2 },
+    "HealthCheckTags": [ $3 ]
+  }
+}$0

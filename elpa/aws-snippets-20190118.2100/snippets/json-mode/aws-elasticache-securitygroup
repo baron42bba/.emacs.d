@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-elasticache-securitygroup
+# key: elasticache-securitygroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:elasticacheSecurityGroup}": {
+  "Type": "AWS::ElastiCache::SecurityGroup",
+  "Properties":
+  {
+    "Description": "$2"
+  }
+}$0

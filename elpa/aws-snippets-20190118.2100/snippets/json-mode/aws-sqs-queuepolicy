@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-sqs-queuepolicy
+# key: sqs-queuepolicy
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:sqsQueuePolicy}": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+      "PolicyDocument": {$2},
+      "Queues": [ $3 ]
+   }
+}$0

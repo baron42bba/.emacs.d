@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-eip-vpc
+# key: eip-vpc
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:eipName}:
+    Type: AWS::EC2::EIP
+    Properties:
+    Domain: "vpc",
+    InstanceId: ${2:"--"}
+

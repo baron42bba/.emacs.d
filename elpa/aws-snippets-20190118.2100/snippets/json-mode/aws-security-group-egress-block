@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: aws-security-group-egress-block
+# key: security-group-egress-block
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"SecurityGroupEgress" : [
+  ${1:--insert rules--}
+]$0

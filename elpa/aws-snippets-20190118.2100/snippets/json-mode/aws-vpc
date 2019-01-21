@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-vpc
+# key: vpc
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:name}": {
+  "Type": "AWS::EC2::VPC",
+  "Properties": {
+    "CidrBlock": ${2:"----/--"},
+    "Tags": [${3:-}]
+  }
+}$0

@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: aws-redshift-clusterparametergroup
+# key: redshift-clusterparametergroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:redshiftClusterParameterGroup}": {
+  "Type": "AWS::Redshift::ClusterParameterGroup",
+  "Properties": {
+    "Description": "$2",
+    "ParameterGroupFamily": "$3",
+    "Parameters": [ $4 ]
+  }
+}$0

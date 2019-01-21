@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: aws-internet-gateway
+# key: internet-gateway
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:igwName}:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+        Tags:
+            tag$0
+AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+        VpcId: ${3:"--"}
+        InternetGatewayId: { "Ref": "$1" }
+
+

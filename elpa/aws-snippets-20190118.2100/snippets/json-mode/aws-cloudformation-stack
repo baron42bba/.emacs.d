@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-stack
+# key: cloudformation-stack
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:cloudFormationStack}": {
+ "Type": "AWS::CloudFormation::Stack",
+ "Properties": {
+    "NotificationARNs": [ "$2" ],
+    "Parameters": { $3 },
+    "TemplateURL": "$4",
+    "TimeoutInMinutes": "$5"
+ }
+}$0

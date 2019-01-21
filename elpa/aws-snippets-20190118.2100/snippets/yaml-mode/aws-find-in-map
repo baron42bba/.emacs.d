@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: aws-find-in-map
+# key: find-in-map
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+!FindInMap
+    - ${1:map}
+    - ${2:selector}
+    - ${3:value}
+$0

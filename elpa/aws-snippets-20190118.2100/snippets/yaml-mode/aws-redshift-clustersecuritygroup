@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: aws-redshift-clustersecuritygroup
+# key: redshift-clustersecuritygroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:redshiftClusterSecurityGroup}:
+    Type: AWS::Redshift::ClusterSecurityGroup
+    Properties:
+    Description": $0
+

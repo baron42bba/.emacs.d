@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: aws-start
+# key: start
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ${1}
+
+Metadata:
+
+Parameters:
+
+Mappings:
+
+Conditions:
+
+Resources:
+
+Outputs:
+$0

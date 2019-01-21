@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: aws-availability-zone
+# key: availability-zone
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+!Join: ["",[ Ref: AWS::Region,"${1:a}" ] ]$0

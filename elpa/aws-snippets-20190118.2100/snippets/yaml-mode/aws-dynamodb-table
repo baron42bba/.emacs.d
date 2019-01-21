@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: aws-dynamodb-table
+# key: dynamodb-table
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:dynamodbTable}:
+    Type: AWS::DynamoDB::Table
+    Properties:
+        AttributeDefinitions:
+            - $2
+        GlobalSecondaryIndexes:
+            - $3
+        KeySchema:
+            - $4
+        LocalSecondaryIndexes:
+            - $5
+        ProvisionedThroughput: $6
+        TableName: $0
+

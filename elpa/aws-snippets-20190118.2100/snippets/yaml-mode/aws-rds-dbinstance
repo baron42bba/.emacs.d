@@ -1,0 +1,43 @@
+# -*- mode: snippet -*-
+# name: aws-rds-dbinstance
+# key: rds-dbinstance
+# group: cloudformation
+# --
+${1:rdsDBInstance}:
+    Type: AWS::RDS::DBInstance
+    Properties:
+        AllocatedStorage: ${2}
+        DBInstanceClass: ${3}
+        AllowMajorVersionUpgrade: ${4:$$(yas-choose-value '("true" "false"))}
+        AutoMinorVersionUpgrade: ${5:$$(yas-choose-value '("true" "false"))}
+        AvailabilityZone: $6
+        BackupRetentionPeriod: $7
+        CharacterSetName: $8
+        DBInstanceIdentifier: $9
+        DBName: $10
+        DBParameterGroupName: $11
+        DBSecurityGroups:
+            - $12
+        DBSnapshotIdentifier: $13
+        DBSubnetGroupName: $14
+        Engine: $15
+        EngineVersion: $16
+        Iops: $17
+        KmsKeyId: $18
+        LicenseModel: $19
+        MasterUsername: $20
+        MasterUserPassword: $21
+        MultiAZ: ${22:$$(yas-choose-value '("true" "false"))}
+        OptionGroupName: $23
+        Port: $24
+        PreferredBackupWindow: $25
+        PreferredMaintenanceWindow: $26
+        PubliclyAccessible: ${27:$$(yas-choose-value '("true" "false"))}
+        SourceDBInstanceIdentifier: $28
+        StorageEncrypted: ${29:$$(yas-choose-value '("true" "false"))}
+        StorageType: $30
+        Tags:
+            tag$0
+        VPCSecurityGroups:
+            $32
+

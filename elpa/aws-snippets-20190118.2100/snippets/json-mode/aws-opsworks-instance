@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: aws-opsworks-instance
+# key: opsworks-instance
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:opsworksInstance}": {
+  "Type": "AWS::OpsWorks::Instance",
+  "Properties": {
+    "InstanceType": "$2",
+    "LayerIds":  [ "$3" ],
+    "StackId": "$4",
+    "AmiId": "$5",
+    "Architecture": "$6",
+    "AutoScalingType": "$7",
+    "AvailabilityZone": "$8",
+    "InstallUpdatesOnBoot": "${9:$$(yas-choose-value '("true" "false"))}",
+    "Os": "$10",
+    "RootDeviceType": "$11",
+    "SshKeyName": "$12",
+    "SubnetId": "$13",
+    "TimeBasedAutoScaling": { $14 }
+  }
+}$0

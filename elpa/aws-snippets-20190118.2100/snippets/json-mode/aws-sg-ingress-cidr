@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: aws-sg-ingress-cidr
+# key: security-group-ingress
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+{ "IpProtocol" : "${1:$$(yas-choose-value '("tcp" "udp" "ip"))}", "FromPort" : "${2:-}", "ToPort" : "${3:-}", "CidrIp" : "${4:-}" }$0

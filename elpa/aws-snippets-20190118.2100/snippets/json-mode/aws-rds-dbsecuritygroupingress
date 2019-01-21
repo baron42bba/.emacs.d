@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-rds-dbsecuritygroupingress
+# key: rds-dbsecuritygroupingress
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+{
+   "CIDRIP": "$1",
+   "DBSecurityGroupName": "$2",
+   "EC2SecurityGroupId": "$3",
+   "EC2SecurityGroupName": "$4",
+   "EC2SecurityGroupOwnerId": "$5"
+}$0

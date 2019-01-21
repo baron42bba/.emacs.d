@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: aws-sqs-queue
+# key: sqs-queue
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:sqsQueue}:
+    Type: AWS::SQS::Queue
+    Properties:
+        DelaySeconds: $2
+        MaximumMessageSize: $3
+        MessageRetentionPeriod: $4
+        QueueName: $5
+        ReceiveMessageWaitTimeSeconds: $6
+        RedrivePolicy:
+            - $7
+        VisibilityTimeout: $0

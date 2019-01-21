@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: aws-elastic-load-balancer-vpc-internal
+# key: elastic-load-balancer-vpc-internal
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:-}:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+        Listeners:
+            - ${2:-}
+        Scheme: "internal"
+        SecurityGroups:
+            - ${3:-}
+        Subnets:
+            - ${4:-}
+        Tags:
+            tag$0

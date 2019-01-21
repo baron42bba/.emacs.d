@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: aws-s3-bucket
+# key: s3-bucket
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:s3Bucket}": {
+        "Type": "AWS::S3::Bucket",
+        "Properties": {
+                "AccessControl": "${2:$$(yas-choose-value '("true" "false" "Private" "PublicRead" "PublicReadWrite" "AuthenticatedRead" "LogDeliveryWrite" "BucketOwnerRead" "BucketOwnerFullControl"))}",
+                "BucketName": "$3",
+                "CorsConfiguration": {$4},
+                "LifecycleConfiguration": {$5},
+                "NotificationConfiguration": {$6},
+                "VersioningConfiguration": {$7},
+                "WebsiteConfiguration": {$8},
+                "Tags": [$9]
+        }
+}$0

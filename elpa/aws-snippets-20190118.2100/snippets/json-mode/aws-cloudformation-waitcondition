@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-waitcondition
+# key: cloudformation-waitcondition
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:waitCondition}": {
+   "Type": "AWS::CloudFormation::WaitCondition",
+   "Properties": {
+      "Count": "$2",
+      "Handle": "$3",
+      "Timeout": "$4"
+   }
+}$0

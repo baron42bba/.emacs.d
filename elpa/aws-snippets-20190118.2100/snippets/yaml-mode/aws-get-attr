@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: aws-get-attr
+# key: get-attr
+# group: cloudformation
+# --
+!GetAtt [ ${1:logicalNameOfResource}, ${2:attributeName} ]$0

@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-elasticbeanstalk-application
+# key: elasticbeanstalk-application
+# group: cloudformation
+# --
+"${1:elasticbeanstalkApplication}": {
+   "Type": "AWS::ElasticBeanstalk::Application",
+   "Properties": {
+      "ApplicationName": "$2",
+      "Description": "$3"
+   }
+}$0

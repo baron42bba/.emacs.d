@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-route53-hostedzone
+# key: route53-hostedzone
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+$1:
+    Type: AWS::Route53::HostedZone
+    Properties:
+        Name: $2
+        VPCs: $3
+        HostedZoneConfig: $4
+        HostedZoneTags:
+            - $5
+$0

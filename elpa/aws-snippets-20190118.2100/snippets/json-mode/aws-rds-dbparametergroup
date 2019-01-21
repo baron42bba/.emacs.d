@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-rds-dbparametergroup
+# key: rds-dbparametergroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:rdsDBParameterGroup}": {
+   "Type": "AWS::RDS::DBParameterGroup",
+   "Properties": {
+      "Description": "$2",
+      "Family": "$3",
+      "Parameters": {$4},
+      "Tags": [ $5 ]
+   }
+}$0

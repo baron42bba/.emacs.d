@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: aws-cloudtrail
+# key: cloudtrail
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:cloudTrail}": {
+  "Type": "AWS::CloudTrail::Trail",
+  "Properties": {
+    "S3BucketName": "$2",
+    "IncludeGlobalServiceEvents": "${3:$$(yas-choose-value '("true" "false")}",
+    "IsLogging": "${4:$$(yas-choose-value '("true" "false"))}",
+    "S3KeyPrefix": "$5",
+    "SnsTopicName": "$6"
+  }
+}$0

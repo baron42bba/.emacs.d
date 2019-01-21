@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-iam-instanceprofile
+# key: iam-instanceprofile
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:iamInstanceProfile}:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+        Path: ${2:/}
+        Roles:
+            - $0
+

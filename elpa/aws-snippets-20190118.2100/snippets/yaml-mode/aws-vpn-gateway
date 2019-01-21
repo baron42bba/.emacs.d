@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: aws-vpn-gateway
+# key: vpn-gateway
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:vgwName}:
+    Type: AWS::EC2::VPNGateway
+    Properties:
+        Type: ipsec.1
+        Tags:
+${2:AttachVpnGateway}:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+        VpcId: ${3:"--"}
+        VpnGatewayId:
+            Ref: $1
+$0

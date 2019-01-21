@@ -1,6 +1,6 @@
 ;;; aws-snippets.el --- Yasnippets for AWS
 
-;; Copyright (C) 2018 Andreas Gerler
+;; Copyright (C) 2018, 2019 Andreas Gerler
 ;; keywords: snippets
 ;; Version: 0.1.0
 ;; Package-Requires: ((yasnippet "0.8.0"))
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; A collection of yasnippet snippets to be used with AWS CLI
+;; A collection of yasnippet snippets to be used with AWS CLI as well as JSON for CloudFormation
 
 ;;; Code:
 

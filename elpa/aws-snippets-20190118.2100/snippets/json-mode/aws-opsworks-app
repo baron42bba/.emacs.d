@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: aws-opsworks-app
+# key: opsworks-app
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:opsworksApp}": {
+  "Type": "AWS::OpsWorks::App",
+  "Properties": {
+  	"Name": "$2",
+    "StackId": "$3",
+    "Type": "$4",
+    "AppSource": { $5 },
+    "Attributes": { $6:$7 },
+    "Description": "$8",
+    "Domains":  [ "$9" ],
+    "EnableSsl": "${10:$$(yas-choose-value '("true" "false"))}",
+    "Shortname": "$11",
+    "SslConfiguration": { $12 }
+  }
+}$0

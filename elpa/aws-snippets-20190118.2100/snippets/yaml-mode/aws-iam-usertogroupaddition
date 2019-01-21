@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-iam-usertogroupaddition
+# key: iam-usertogroupaddition
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:iamUserToGroupAddition}:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+        GroupName: $2
+        Users:
+            - $0
+

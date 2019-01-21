@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-opsworks-elasticloadbalancerattachment
+# key: opsworks-elasticloadbalancerattachment
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:opsworksElasticLoadBalancerAttachment}": {
+  "Type": "AWS::OpsWorks::ElasticLoadBalancerAttachment",
+  "Properties": {
+    "ElasticLoadBalancerName": "$2",
+    "LayerId": "$3"
+  }
+}$0

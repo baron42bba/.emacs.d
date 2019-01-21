@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-elasticache-subnetgroup
+# key: elasticache-subnetgroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:elasticacheSubnetGroup}": {
+    "Type": "AWS::ElastiCache::SubnetGroup",
+    "Properties": {
+        "Description": "$2",
+        "SubnetIds": [ "$3" ]
+    }
+}$0

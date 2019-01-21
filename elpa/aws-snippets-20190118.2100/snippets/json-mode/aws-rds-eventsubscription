@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: aws-rds-eventsubscription
+# key: rds-eventsubscription
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:rdsEventSubscription}": {
+  "Type": "AWS::RDS::EventSubscription",
+  "Properties": {
+    "Enabled": "${2:$$(yas-choose-value '("true" "false"))}",
+    "EventCategories": [ "$3" ],
+    "SnsTopicArn": "$4",
+    "SourceIds": [ "$5" ],
+    "SourceType ": "$6"
+  }
+}$0
