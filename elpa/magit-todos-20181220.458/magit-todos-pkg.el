@@ -1,2 +1,0 @@
-;;; -*- no-byte-compile: t -*-
-(define-package "magit-todos" "20181220.458" "Show source file TODOs in Magit" '((emacs "25.2") (async "1.9.2") (dash "2.13.0") (f "0.17.2") (hl-todo "1.9.0") (magit "2.13.0") (pcre2el "1.8") (s "1.12.0")) :commit "4383f95ea434b41131313eadffe77c2fe8369c5d" :keywords '("magit" "vc") :authors '(("Adam Porter" . "adam@alphapapa.net")) :maintainer '("Adam Porter" . "adam@alphapapa.net") :url "http://github.com/alphapapa/magit-todos")
