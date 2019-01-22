@@ -1,2 +1,0 @@
-;;; -*- no-byte-compile: t -*-
-(define-package "twittering-mode" "20180917.328" "Major mode for Twitter" 'nil :commit "ad7de82cf4b72fc166970d85849e2a9a9ae5a979" :keywords '("twitter" "web") :authors '(("Tadashi MATSUO" . "tad@mymail.twin.ne.jp") ("Y. Hayamizu" . "y.hayamizu@gmail.com") ("Tsuyoshi CHO" . "Tsuyoshi.CHO+develop@Gmail.com") ("Alberto Garcia" . "agarcia@igalia.com") ("Xavier Maillard" . "xavier@maillard.im")) :maintainer '("Tadashi MATSUO" . "tad@mymail.twin.ne.jp") :url "http://twmode.sf.net/")

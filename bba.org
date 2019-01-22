@@ -2242,7 +2242,7 @@ Use our default socket files
 * [[http://www.twmode.sourceforge.net/][twitter]]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20180917.328")
+  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20181121.1402")
   (require 'twittering-mode)
   (cond
    ((string-equal system-type "gnu/linux")
