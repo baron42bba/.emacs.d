@@ -1,4 +1,4 @@
-(define-package "org-chef" "20181105.2035" "Cookbook and recipe management with org-mode."
+(define-package "org-chef" "20181202.2221" "Cookbook and recipe management with org-mode."
   '((org "0")
     (emacs "24"))
   :keywords

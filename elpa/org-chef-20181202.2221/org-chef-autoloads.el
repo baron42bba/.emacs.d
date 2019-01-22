@@ -85,6 +85,14 @@
 
 ;;;***
 
+;;;### (autoloads nil "org-chef-saveur" "org-chef-saveur.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from org-chef-saveur.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-chef-saveur" '("org-chef-saveur-")))
+
+;;;***
+
 ;;;### (autoloads nil "org-chef-serious-eats" "org-chef-serious-eats.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from org-chef-serious-eats.el
