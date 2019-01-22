@@ -1,4 +1,4 @@
-(define-package "ejc-sql" "20181111.2343" "Emacs SQL client uses Clojure JDBC."
+(define-package "ejc-sql" "20190121.1043" "Emacs SQL client uses Clojure JDBC."
   '((emacs "25.1")
     (clomacs "0.0.3")
     (dash "2.12.1")

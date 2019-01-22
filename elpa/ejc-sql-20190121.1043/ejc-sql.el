@@ -1,6 +1,6 @@
 ;;; ejc-sql.el --- Emacs SQL client uses Clojure JDBC. -*- lexical-binding: t -*-
 
-;;; Copyright © 2012-2018 - Kostafey <kostafey@gmail.com>
+;;; Copyright © 2012-2019 - Kostafey <kostafey@gmail.com>
 
 ;; Author: Kostafey <kostafey@gmail.com>
 ;; URL: https://github.com/kostafey/ejc-sql
@@ -80,6 +80,13 @@
   "The time in seconds to wait for the database connection validation."
   :group 'ejc-sql
   :type 'integer)
+
+(defcustom ejc-org-mode-show-results t
+  "When t show SQL query results of `org-mode' code snippet in the same buffer.
+An expected behaviour for `org-mode' users. Disable popup window with SQL
+results. When nil, otherwise, provide `ejc-sql' users expected behaviour."
+  :group 'ejc-sql
+  :type 'boolean)
 
 (defvar ejc-sql-mode-keymap (make-keymap) "ejc-sql-mode keymap.")
 (define-key ejc-sql-mode-keymap (kbd "C-c C-c") 'ejc-eval-user-sql-at-point)
@@ -261,7 +268,7 @@ For more details about parameters see `get-connection' function in jdbc.clj:
                         (cons :subname subname)
                         (cons :user user)
                         (cons :password password)
-                        (cons :classpath classpath)
+                        (cons :classpath (file-truename classpath))
                         (cons :separator separator)
                         (cons :classname classname)))
                  new-connection))
@@ -274,18 +281,19 @@ For more details about parameters see `get-connection' function in jdbc.clj:
          ejc-connections))
 
 (defvar ejc-product-assoc
-  '((sqlserver . ms)))
+  '((sqlserver . ms)
+    (oracle:sid . oracle)))
 
 (defun ejc-configure-sql-buffer (product-name)
-  (unless (org-src-edit-buffer-p)
+  (unless (or (derived-mode-p 'org-mode) (org-src-edit-buffer-p))
     (sql-mode))
   (sql-set-product (or (cdr (assoc-string product-name ejc-product-assoc))
                        (car (assoc-string product-name sql-product-alist))
                        "ansi"))
   (auto-complete-mode t)
   (auto-fill-mode t)
-  (ejc-sql-mode)
-  (ejc-sql-mode t))
+  (unless (derived-mode-p 'org-mode)
+    (ejc-sql-mode t)))
 
 (defun ejc-load-conn-statistics ()
   "Load connection usage statistics to `ejc-conn-statistics' var."
@@ -312,6 +320,60 @@ For more details about parameters see `get-connection' function in jdbc.clj:
     (prin1 ejc-conn-statistics (current-buffer))
     (insert ")")))
 
+(defun ejc-set-mode-name (connection-name)
+  "Show CONNECTION-NAME as part of `mode-name' in `mode-line'."
+  (setq mode-name (format "%s->[%s]"
+                          (car (split-string mode-name "->\\[.+\\]"))
+                          connection-name)))
+
+(defun ejc-add-connection (product-name connection-name db)
+  "Add ejc connection information to current buffer.
+Prepare buffer to operate as `ejc-sql-mode' buffer."
+  (ejc-configure-sql-buffer product-name)
+  (setq-local ejc-connection-name connection-name)
+  (setq-local ejc-db db)
+  (ejc-set-mode-name connection-name))
+
+(defun ejc-get-result-file-path ()
+  (or ejc-result-file-path
+      (setq ejc-result-file-path
+            (ejc--get-result-file-path))))
+
+(defun ejc-eval-org-snippet (body params)
+  "Used to eval SQL code in `org-mode' code snippets."
+  (let* ((beg (save-excursion
+                (goto-char (nth 5 (org-babel-get-src-block-info)))
+                (end-of-line)
+                (right-char 1)
+                (point)))
+         (end (save-excursion
+                (goto-char beg)
+                (+ beg (length body) (skip-chars-forward "\t ")))))
+    (ejc-eval-user-sql-at-point
+     :beg beg
+     :end end
+     :sync ejc-org-mode-show-results
+     :display-result (not ejc-org-mode-show-results))
+    (if ejc-org-mode-show-results
+        (with-temp-buffer
+          (insert-file-contents (ejc-get-result-file-path))
+          (buffer-string)))))
+
+(defun ejc-get-product-name (db)
+  (or (alist-get :subprotocol db)
+      (alist-get :dbtype db)))
+
+(defun ejc-org-edit-special (orig-fun &rest args)
+  (if (and (equal "sql" (car (org-babel-get-src-block-info)))
+           (boundp 'ejc-db) ejc-db
+           (boundp 'ejc-connection-name) ejc-connection-name)
+      (let* ((db ejc-db)
+             (connection-name ejc-connection-name)
+             (product-name (ejc-get-product-name db)))
+        (apply orig-fun args)
+        (ejc-add-connection product-name connection-name db))
+    (apply orig-fun args)))
+
 ;;;###autoload
 (defun ejc-connect (connection-name)
   "Connect to selected db."
@@ -325,17 +387,20 @@ For more details about parameters see `get-connection' function in jdbc.clj:
                 (> (or (lax-plist-get conn-statistics c1) 0)
                    (or (lax-plist-get conn-statistics c2) 0)))
               conn-list)))))
-  (let ((db (cdr (ejc-find-connection connection-name))))
+  (let* ((db (cdr (ejc-find-connection connection-name)))
+         (product-name (ejc-get-product-name db)))
     (ejc-update-conn-statistics connection-name)
-    (ejc-configure-sql-buffer (or (alist-get :subprotocol db)
-                                  (alist-get :dbtype db)))
+    (ejc-configure-sql-buffer product-name)
+    (when (derived-mode-p 'org-mode)
+      (defalias 'org-babel-execute:sql 'ejc-eval-org-snippet)
+      (advice-add 'org-edit-special :around #'ejc-org-edit-special))
     (setq-local ejc-connection-name connection-name)
     (setq-local ejc-db db)
     (message "Connection started...")
     (ejc-connect-to-db db)
     (when (ejc-validate-connection :db ejc-db
                                    :timeout ejc-connection-validate-timeout)
-      (setq mode-name (format "%s->[%s]" mode-name connection-name))
+      (ejc-set-mode-name connection-name)
       (message "Connected."))))
 
 ;;;###autoload
@@ -396,8 +461,14 @@ any SQL buffer to connect to exact database, as always. "
   (unless (ejc-buffer-connected-p)
     (error "Run M-x ejc-connect first!")))
 
-(cl-defun ejc-eval-sql-and-log (db sql
-                                   &key start-time rows-limit append sync)
+(cl-defun ejc-eval-sql-and-log (db
+                                sql
+                                &key
+                                start-time
+                                rows-limit
+                                append
+                                sync
+                                display-result)
   (when sql
     (spinner-start 'rotating-line)
     (setq ejc-current-buffer-query (current-buffer))
@@ -408,7 +479,8 @@ any SQL buffer to connect to exact database, as always. "
        :start-time start-time
        :rows-limit rows-limit
        :append append
-       :sync sync))))
+       :sync sync
+       :display-result display-result))))
 
 (defun ejc-message-query-done (start-time result)
   (message
@@ -421,11 +493,21 @@ any SQL buffer to connect to exact database, as always. "
                        (current-time))
    (float-time (time-since start-time))))
 
-(cl-defun ejc-complete-query (result-file-path &key start-time result)
-  (setq ejc-result-file-path result-file-path)
+(defun ejc-spinner-stop ()
+  "Stop spinner indicating current running query."
   (with-current-buffer ejc-current-buffer-query
-    (spinner-stop))
-  (ejc-show-last-result nil :result-file-path ejc-result-file-path)
+    (spinner-stop)))
+
+(cl-defun ejc-complete-query (result-file-path
+                              &key
+                              start-time
+                              result
+                              display-result)
+  (if result-file-path
+      (setq ejc-result-file-path result-file-path))
+  (ejc-spinner-stop)
+  (if display-result
+      (ejc-show-last-result))
   (if (and start-time result)
       (ejc-message-query-done start-time result))
   nil)
@@ -437,8 +519,7 @@ Unsafe for INSERT/UPDATE/CREATE/ALTER queries."
   (if (and (clomacs-get-connection "ejc-sql")
            (ejc--is-query-running-p))
       (let ((start-time (ejc--cancel-query)))
-        (with-current-buffer ejc-current-buffer-query
-          (spinner-stop))
+        (ejc-spinner-stop)
         (ejc-message-query-done start-time :terminated))
     (keyboard-quit)))
 
@@ -485,14 +566,15 @@ Unsafe for INSERT/UPDATE/CREATE/ALTER queries."
         (ejc-select-db-meta-script ejc-db :view
                                    :entity-name entity-name))))))
 
-(cl-defun ejc-eval-user-sql (sql &key rows-limit sync)
+(cl-defun ejc-eval-user-sql (sql &key rows-limit sync display-result)
   "Evaluate SQL by user: reload and show query results buffer, update log."
   (message "Processing SQL query...")
   (ejc-eval-sql-and-log  ejc-db
                          sql
                          :rows-limit rows-limit
                          :start-time (current-time)
-                         :sync sync))
+                         :sync sync
+                         :display-result display-result))
 
 (defun ejc-eval-user-sql-region (beg end)
   "Evaluate SQL bounded by the selection area."
@@ -501,13 +583,20 @@ Unsafe for INSERT/UPDATE/CREATE/ALTER queries."
   (let ((sql (buffer-substring beg end)))
     (ejc-eval-user-sql sql)))
 
-(cl-defun ejc-eval-user-sql-at-point (&key sync)
+(cl-defun ejc-eval-user-sql-at-point (&key
+                                      sync
+                                      beg
+                                      end
+                                      (display-result t))
   "Evaluate SQL bounded by the `ejc-sql-separator' or/and buffer
 boundaries."
   (interactive)
   (ejc-check-connection)
-  (ejc-flash-this-sql)
-  (ejc-eval-user-sql (ejc-get-sql-at-point) :sync sync))
+  (ejc-flash-this-sql :beg beg
+                      :end end)
+  (ejc-eval-user-sql (ejc-get-sql-at-point :beg beg :end end)
+                     :sync sync
+                     :display-result display-result))
 
 (defun ejc-show-tables-list ()
   "Output tables list."
@@ -515,7 +604,8 @@ boundaries."
   (ejc-check-connection)
   (ejc-eval-user-sql
    (ejc-select-db-meta-script ejc-db :all-tables)
-   :rows-limit 0))
+   :rows-limit 0
+   :display-result t))
 
 (defun ejc-show-user-types-list (&optional owner)
   "Output user types list."
@@ -563,24 +653,17 @@ If this buffer is not exists or it was killed - create buffer via
       ejc-results-buffer
     (ejc-create-output-buffer)))
 
-(cl-defun ejc-show-last-result
-    (&optional result
-               &key
-               (result-file-path ejc-result-file-path))
+(cl-defun ejc-show-last-result (&optional result)
   "Popup buffer with last SQL execution result output."
   (interactive)
   (let ((output-buffer (ejc-get-output-buffer))
         (old-split split-width-threshold))
     (set-buffer output-buffer)
-    (if (or result result-file-path)
-        (progn
-          (read-only-mode -1)
-          (erase-buffer)
-          (if (and result (not result-file-path))
-              ;; result only
-              (insert result)
-            ;; result-file-path only
-            (insert-file-contents result-file-path))))
+    (read-only-mode -1)
+    (erase-buffer)
+    (if result
+        (insert result)
+      (insert-file-contents (ejc-get-result-file-path)))
     (read-only-mode 1)
     (beginning-of-buffer)
     (setq split-width-threshold nil)
@@ -606,6 +689,14 @@ Buffer can be saved to file with `ejc-temp-editor-file' path."
   (interactive)
   (find-file-read-only (ejc-get-log-file-path))
   (end-of-buffer))
+
+;;;###autoload
+(defun ejc-version ()
+  "Get the ejc-sql version as string."
+  (interactive)
+  (if (require 'pkg-info nil t)
+      (message "ejc-sql %s" (pkg-info-version-info 'ejc-sql))
+    (error "Cannot determine version without package pkg-info")))
 
 (provide 'ejc-sql)
 

@@ -23,11 +23,9 @@
 (require 'clomacs)
 
 (clomacs-create-httpd-start ejc-httpd-start
-                            :lib-prefix "ejc"
                             :lib-name "ejc-sql")
 
 (clomacs-create-httpd-stop ejc-httpd-stop
-                           :lib-prefix "ejc"
                            :lib-name "ejc-sql")
 
 (clomacs-defun ejc-sql-set-db
@@ -98,6 +96,11 @@
                ejc-sql.connect/get-table-meta
                :lib-name "ejc-sql"
                :namespace ejc-sql.connect)
+
+(clomacs-defun ejc--get-result-file-path
+               get-result-file-path
+               :lib-name "ejc-sql"
+               :namespace ejc-sql.output)
 
 (clomacs-defun ejc-print
                clojure.core/print

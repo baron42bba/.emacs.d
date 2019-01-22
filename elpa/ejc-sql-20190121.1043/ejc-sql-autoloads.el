@@ -64,6 +64,13 @@ something#
 
 ;;;***
 
+;;;### (autoloads nil "ejc-flx" "ejc-flx.el" (0 0 0 0))
+;;; Generated autoloads from ejc-flx.el
+
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ejc-flx" '("ejc-")))
+
+;;;***
+
 ;;;### (autoloads nil "ejc-format" "ejc-format.el" (0 0 0 0))
 ;;; Generated autoloads from ejc-format.el
 
@@ -119,6 +126,11 @@ You can `cd` to your ejc-sql project folder (typically
 Then run in Emacs `ejc-connect-existing-repl', type HOST and PORT
 from your `lein run` console output. Finally, use `ejc-connect' from
 any SQL buffer to connect to exact database, as always. 
+
+\(fn)" t nil)
+
+(autoload 'ejc-version "ejc-sql" "\
+Get the ejc-sql version as string.
 
 \(fn)" t nil)
 
