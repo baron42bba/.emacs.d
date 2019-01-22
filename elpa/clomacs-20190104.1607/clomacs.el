@@ -1,10 +1,10 @@
 ;;; clomacs.el --- Simplifies Emacs Lisp interaction with Clojure. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013-2018 Kostafey <kostafey@gmail.com>
+;; Copyright (C) 2013-2019 Kostafey <kostafey@gmail.com>
 
 ;; Author: Kostafey <kostafey@gmail.com>
 ;; URL: https://github.com/clojure-emacs/clomacs
-;; Package-Version: 20181003.1735
+;; Package-Version: 20190104.1607
 ;; Keywords: clojure, interaction
 ;; Version: 0.0.3
 ;; Package-Requires: ((emacs "24.3") (cider "0.18.0") (s "1.12.0") (simple-httpd "1.4.6"))
@@ -107,7 +107,7 @@ If can't find any nREPL process return nil."
   (assert connection)
   (with-current-buffer
     (set-buffer connection)
-    (cider-current-session)))
+    (cider-nrepl-eval-session)))
 
 (defun clomacs-launch-nrepl (library &optional sync)
   (let* ((starting-msg (format
@@ -272,19 +272,14 @@ CL-ENTITY-TYPE - \"value\" or \"function\""
          (concat "CIDER is not launched!"))))))
 
 (defun clomacs-get-result (result value type namespace)
-  "Parse result of clojure code evaluation from CIDER.
-Handle errors. Handle difference between CIDER versions."
-  (let ((val-new (cond
-                  ((equal value :value) "value")
-                  ((equal value :stdout) "out"))))
-    (if (or (plist-get result :stderr)
-            (nrepl-dict-get result "err"))
-        (error (or (plist-get result :stderr)
-                   (nrepl-dict-get result "err")))
+  "Parse result of clojure code evaluation from CIDER."
+  (if (nrepl-dict-get result "err")
+      (error (nrepl-dict-get result "err"))
+    (let ((val-new (cond
+                    ((equal value :value) "value")
+                    ((equal value :stdout) "out"))))
       (clomacs-format-result
-       (let ((essence-result (or
-                              (plist-get result value)
-                              (nrepl-dict-get result val-new))))
+       (let ((essence-result (nrepl-dict-get result val-new)))
          (if (and namespace (equal value :value))
              (substring essence-result 3)
            essence-result))
@@ -385,7 +380,8 @@ be created by `clomacs-create-httpd-start' macro."
   (cl-multiple-value-bind
       (doc namespace-str cl-entity-full-name)
       (clomacs-prepare-vars cl-func-name
-                            :doc doc
+                            ;; handle case when docstring made by (concat ...)
+                            :doc (if (stringp doc) doc (eval doc))
                             :namespace namespace)
     `(defun ,el-func-name (&rest attributes)
        ,doc
@@ -453,10 +449,17 @@ be created by `clomacs-create-httpd-start' macro."
   "Evaluate elisp code stored in a STRING."
   (eval (car (read-from-string string))))
 
-(defservlet* execute text/plain (elisp)
-  (let ((result (clomacs-eval-elisp elisp)))
-    (if result
-        (insert (format "%s" result)))))
+(defservlet* execute text/plain (fname elisp)
+  (condition-case err
+      (let ((result (clomacs-eval-elisp elisp)))
+        (if result
+            (insert (format "%s" result))))
+    (error
+     (message
+      "%s\n  in wrapped Clojure->Elisp function: %s\n  elisp: %s"
+      (error-message-string err)
+      fname
+      elisp))))
 
 (defun clomacs-get-httpd-port ()
   "Search available port for httpd process."
@@ -475,57 +478,45 @@ be created by `clomacs-create-httpd-start' macro."
             (setq value port))))
     value))
 
-(cl-defmacro clomacs-create-httpd-start (func-name
-                                         &key
-                                         lib-prefix
-                                         lib-name)
+(cl-defmacro clomacs-create-httpd-start (func-name &key lib-name)
   "Create lib-specific function FUNC-NAME, aimed to start Emacs httpd process.
-LIB-PREFIX - Custom Elisp library name prefix.
 LIB-NAME - Elisp library name used in end-user .emacs config by `require'.
 The result function FUNC-NAME can be used as `clomacs-defun'
 `:httpd-starter' parameter."
-  (let ((lib-require
-         (make-symbol (concat lib-prefix "-require")))
-        (lib-set-emacs-connection
-         (make-symbol (concat lib-prefix "-set-emacs-connection"))))
-    `(progn
-       (clomacs-defun ,lib-require
-                      clojure.core/require
-                      :lib-name ,lib-name)
-       (clomacs-defun ,lib-set-emacs-connection
-                      clomacs/set-emacs-connection
-                      :lib-name ,lib-name)
-       (defun ,func-name ()
-         "Start Emacs http server and set host and port on Clojure side."
-         (let ((httpd-port (clomacs-get-httpd-port)))
-           (,lib-require `'clomacs)
-           (,lib-set-emacs-connection "localhost" httpd-port)
-           (httpd-start))))))
+  `(defun ,func-name ()
+     "Start Emacs http server and set host and port on Clojure side."
+     (let ((httpd-port (clomacs-get-httpd-port))
+           (lib-require (clomacs-defun ,(make-symbol
+                                         (concat lib-name "-require"))
+                                       clojure.core/require
+                                       :lib-name ,lib-name))
+           (set-connection (clomacs-defun ,(make-symbol
+                                            (concat lib-name
+                                                    "-set-connection"))
+                                          clomacs/set-emacs-connection
+                                          :lib-name ,lib-name)))
+       (funcall lib-require `'clomacs)
+       (funcall set-connection "localhost" httpd-port)
+       (httpd-start))))
 
-(cl-defmacro clomacs-create-httpd-stop (func-name
-                                        &key
-                                        lib-prefix
-                                        lib-name)
+(cl-defmacro clomacs-create-httpd-stop (func-name &key lib-name)
   "Create lib-specific function FUNC-NAME, aimed to stop Emacs httpd process.
-LIB-PREFIX - Custom Elisp library name prefix.
 LIB-NAME - Elisp library name used in end-user .emacs config by `require'."
-  (let ((lib-require
-         (make-symbol (concat lib-prefix "-require")))
-        (lib-close-emacs-connection
-         (make-symbol (concat lib-prefix "-close-emacs-connection"))))
-    `(progn
-       (clomacs-defun ,lib-require
-                      clojure.core/require
-                      :lib-name ,lib-name)
-       (clomacs-defun ,lib-close-emacs-connection
-                      clomacs/close-emacs-connection
-                      :lib-name ,lib-name)
-       (defun ,func-name ()
-         "Stop Emacs http server and reset host and port on Clojure side."
-         (when (clomacs-get-connection ,lib-name)
-           (,lib-require `'clomacs)
-           (,lib-close-emacs-connection))
-         (httpd-stop)))))
+  `(defun ,func-name ()
+     "Stop Emacs http server and reset host and port on Clojure side."
+     (let ((lib-require (clomacs-defun ,(make-symbol
+                                         (concat lib-name "-require"))
+                                       clojure.core/require
+                                       :lib-name ,lib-name))
+           (close-connection (clomacs-defun ,(make-symbol
+                                              (concat lib-name
+                                                      "-close-connection"))
+                                            clomacs/close-emacs-connection
+                                            :lib-name ,lib-name)))
+       (when (clomacs-get-connection ,lib-name)
+         (funcall lib-require `'clomacs)
+         (funcall close-connection))
+       (httpd-stop))))
 
 (clomacs-defun clomacs-require
                clojure.core/require)
