@@ -4,7 +4,7 @@
 
 ;; Author: Ankur Dave <ankurdave@gmail.com>
 ;; Url: https://github.com/ankurdave/color-identifiers-mode
-;; Package-Version: 20181011.2114
+;; Package-Version: 20181120.1951
 ;; Created: 24 Jan 2014
 ;; Version: 1.1
 ;; Keywords: faces, languages
@@ -44,6 +44,9 @@
 
 (defgroup color-identifiers nil "Color identifiers based on their names."
   :group 'faces)
+
+(defvar color-identifiers:timer nil
+  "Timer for running `color-identifiers:refresh'.")
 
 ;;;###autoload
 (define-minor-mode color-identifiers-mode
@@ -571,9 +574,6 @@ For Emacs Lisp support within color-identifiers-mode."
 
 
 ;;; PACKAGE INTERNALS ==========================================================
-
-(defvar color-identifiers:timer nil
-  "Timer for running `color-identifiers:refresh'.")
 
 (defvar color-identifiers:colors nil
   "List of generated hex colors for internal use.")
