@@ -2,7 +2,7 @@
 
 ;; Author: Harry R. Schwartz <hello@harryrschwartz.com>
 ;; Version: 2.1.0
-;; Package-Version: 20180401.1646
+;; Package-Version: 20181222.2027
 ;; URL: https://github.com/hrs/engine-mode
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -123,7 +123,7 @@ Defaults to `nil' which means to go with `browse-url-browser-function'."
 
 (defun engine/bind-key (engine-name keybinding)
   (when keybinding
-    `(define-key engine-mode-prefixed-map ,keybinding
+    `(define-key engine-mode-prefixed-map (kbd ,keybinding)
        (quote ,(engine/function-name engine-name)))))
 
 ;;;###autoload

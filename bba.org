@@ -412,6 +412,7 @@ search the web on your fingertips. C-c /.
 | g | google      |
 | G | github      |
 | m | google maps |
+| p | puppet      |
 | v | vertica     |
 | w | wikipedia   |
 | y | youtube     |
@@ -424,8 +425,13 @@ search the web on your fingertips. C-c /.
         (require 'engine-mode)
 
         (defengine amazon
-          "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias%3Daps&filed-keywords=%s"
+          "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias=aps&filed-keywords=%s"
           :keybinding "a"
+          )
+
+        (defengine aws
+          "https://docs.aws.amazon.com/search/doc-search.html?searchPath=documentation-guide&searchQuery=%s"
+          :keybinding "A"
           )
 
         (defengine bing
@@ -462,10 +468,16 @@ search the web on your fingertips. C-c /.
           :keybinding "m"
           )
 
+        (defengine puppet
+          "https://puppet.com/search/docs?keys=%s"
+          :keybinding "p"
+          )
+
         (defengine vertica
-          "https://www.vertica.com/docs/9.1.x/HTML/Content/Search/index.htm?q=%s&page=1&searchIDx=9_1_0-live"
+          "https://www.vertica.com/docs/9.2.x/HTML/Content/Search/index.htm?q=%s&page=1&searchIDx=9_2_0-live"
           :keybinding "v"
           )
+
         (defengine wikipedia
           "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
           :browser 'eww-browse-url
