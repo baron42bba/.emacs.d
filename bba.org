@@ -3298,7 +3298,7 @@ If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20181031.1803" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20181221.238" t)
         (require 'ggtags)
         (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20170116.529" t)
         (require 'helm-gtags)
