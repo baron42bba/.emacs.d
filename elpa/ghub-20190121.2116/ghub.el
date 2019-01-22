@@ -1,6 +1,6 @@
 ;;; ghub.el --- minuscule client libraries for Git forge APIs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2016-2018  Jonas Bernoulli
+;; Copyright (C) 2016-2019  Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Homepage: https://github.com/magit/ghub
@@ -218,7 +218,7 @@ Like calling `ghub-request' (which see) with \"DELETE\" as METHOD."
                                callback errorback value extra)
   "Make a request for RESOURCE and return the response body.
 
-Also place the response header in `ghub-response-headers'.
+Also place the response headers in `ghub-response-headers'.
 
 METHOD is the HTTP method, given as a string.
 RESOURCE is the resource to access, given as a string beginning
@@ -295,10 +295,13 @@ If FORGE is `gitlab', then connect to Gitlab.com or, depending
 
 If CALLBACK and/or ERRORBACK is non-nil, then make one or more
   asynchronous requests and call CALLBACK or ERRORBACK when
-  finished.  If an error occurred, then call ERRORBACK, or if
-  that is nil, then CALLBACK.  When no error occurred then call
-  CALLBACK.  When making asynchronous requests, then no errors
-  are signaled, regardless of the value of NOERROR.
+  finished.  If no error occurred, then call CALLBACK, unless
+  that is nil.
+
+  If an error occurred, then call ERRORBACK, or if that is nil,
+  then CALLBACK.  ERRORBACK can also be t, in which case an error
+  is signaled instead.  NOERROR is ignored for all asynchronous
+  requests.
 
 Both callbacks are called with four arguments.
   1. For CALLBACK, the combined value of the retrieved pages.
@@ -425,11 +428,18 @@ this function is called with nil for PAYLOAD."
                       (substring url 1 -1))))
             (split-string rels ", ")))))
 
-(cl-defun ghub-repository-id (owner name &key username auth host forge)
-  "Return the id of the specified repository."
+(cl-defun ghub-repository-id (owner name &key username auth host forge noerror)
+  "Return the id of the specified repository.
+Signal an error if the id cannot be determined."
   (let ((fn (intern (format "%s-repository-id" (or forge 'ghub)))))
-    (funcall (if (eq fn 'ghub-repository-id) 'ghub--repository-id fn)
-             owner name :username username :auth auth :host host)))
+    (or (funcall (if (eq fn 'ghub-repository-id) 'ghub--repository-id fn)
+                 owner name :username username :auth auth :host host)
+        (and (not noerror)
+             (error "Repository %S does not exist on %S.\n%s%S?"
+                    (concat owner "/" name)
+                    (or host (ghub--host host))
+                    "Maybe it was renamed and you have to update "
+                    "remote.<remote>.url")))))
 
 ;;;; Internal
 
@@ -469,6 +479,7 @@ this function is called with nil for PAYLOAD."
                  (payload    (ghub--handle-response-payload req))
                  (payload    (ghub--handle-response-error status payload req))
                  (value      (ghub--handle-response-value payload req))
+                 (prev       (ghub--req-url req))
                  (next       (cdr (assq 'next (ghub-response-link-relations
                                                req headers payload)))))
             (when (numberp unpaginate)
@@ -485,7 +496,11 @@ this function is called with nil for PAYLOAD."
                       (errorback (ghub--req-errorback req))
                       (err       (plist-get status :error)))
                   (cond ((and err errorback)
-                         (funcall errorback err headers status req))
+                         (setf (ghub--req-url req) prev)
+                         (funcall (if (eq errorback t)
+                                      'ghub--errorback
+                                    errorback)
+                                  err headers status req))
                         (callback
                          (funcall callback value headers status req))
                         (t value))))))
@@ -496,14 +511,28 @@ this function is called with nil for PAYLOAD."
   (goto-char (point-min))
   (forward-line 1)
   (let (headers)
+    (when (memq url-http-end-of-headers '(nil 0))
+      (setq url-debug t)
+      (let ((print-escape-newlines nil))
+        (error "BUG: missing headers
+  See https://github.com/magit/ghub/issues/81.
+  headers: %S
+  status: %S
+  buffer: %S
+  buffer-string:
+  %S
+  --- end of buffer-string ---"
+               url-http-end-of-headers
+               status
+               (current-buffer)
+               (buffer-substring-no-properties
+                (point-min) (point-max)))))
     (while (re-search-forward "^\\([^:]*\\): \\(.+\\)"
                               url-http-end-of-headers t)
       (push (cons (match-string 1)
                   (match-string 2))
             headers))
     (setq headers (nreverse headers))
-    (unless url-http-end-of-headers
-      (error "BUG: missing headers %s" (plist-get status :error)))
     (goto-char (1+ url-http-end-of-headers))
     (if (and req (or (ghub--req-callback req)
                      (ghub--req-errorback req)))
@@ -520,10 +549,10 @@ this function is called with nil for PAYLOAD."
                 payload
               (setcdr (last err) (list payload))
               nil)
-          (ghub--signal-error err payload))
+          (ghub--signal-error err payload req))
       payload)))
 
-(defun ghub--signal-error (err &optional payload)
+(defun ghub--signal-error (err &optional payload req)
   (pcase-let ((`(,symb . ,data) err))
     (if (eq symb 'error)
         (if (eq (car-safe data) 'http)
@@ -531,9 +560,13 @@ this function is called with nil for PAYLOAD."
                     (let ((code (car (cdr-safe data))))
                       (list code
                             (nth 2 (assq code url-http-codes))
+                            (and req (url-filename (ghub--req-url req)))
                             payload)))
           (signal 'ghub-error data))
       (signal symb data))))
+
+(defun ghub--errorback (err _headers _status req)
+  (ghub--signal-error err (nth 3 err) req))
 
 (defun ghub--handle-response-value (payload req)
   (setf (ghub--req-value req)
@@ -633,7 +666,9 @@ SCOPES are the scopes the token is given access to."
       ;; If the Auth-Source cache contains the information that there
       ;; is no value, then setting the value does not invalidate that
       ;; now incorrect information.
-      (auth-source-forget (list :host host :user user))
+      ;; The (:max 1) is needed and has to be placed at the
+      ;; end for Emacs releases before 26.1.  #24 #64 #72
+      (auth-source-forget (list :host host :user user :max 1))
       token)))
 
 ;;;###autoload
@@ -717,7 +752,8 @@ and call `auth-source-forget+'."
     (if (assoc "X-GitHub-OTP" (ghub--handle-response-headers nil nil))
         (progn
           (setq url-http-extra-headers
-                `(("Content-Type" . "application/json")
+                `(("Pragma" . "no-cache")
+                  ("Content-Type" . "application/json")
                   ("X-GitHub-OTP" . ,(ghub--read-2fa-code))
                   ;; Without "Content-Type" and "Authorization".
                   ;; The latter gets re-added from the return value.
@@ -743,7 +779,7 @@ and call `auth-source-forget+'."
                 ;; fixing so we want to keep trying by invalidating that
                 ;; information.
                 ;; The (:max 1) is needed and has to be placed at the
-                ;; end for Emacs releases before 26.1.  See #24, #64.
+                ;; end for Emacs releases before 26.1.  #24 #64 #72
                 (auth-source-forget (list :host host :user user :max 1))
                 (and (not nocreate)
                      (cl-ecase forge
@@ -838,8 +874,9 @@ See https://magit.vc/manual/ghub/Support-for-Other-Forges.html for instructions.
   Store on Github as:\n    %S
   Store locally according to option `auth-sources':\n    %S
 %s
-If in doubt, then abort and first view the section of the Ghub
-documentation called \"Manually Creating and Storing a Token\".
+If in doubt, then abort and first view the section of
+the Ghub documentation called \"Interactively Creating
+and Storing a Token\".
 
 Otherwise confirm and then provide your Github username and
 password at the next two prompts.  Depending on the backend
@@ -857,7 +894,7 @@ WARNING: The token will be stored unencrypted in %S.
          If you don't want that, you have to abort and customize
          the `auth-sources' option.\n" (car auth-sources))
               ""))))
-        (condition-case ghub--create-token-error
+        (condition-case err
             ;; Naively attempt to create the token since the user told us to
             (ghub-create-token host username package scopes)
           ;; The API _may_ respond with the fact that a token of the name
@@ -881,12 +918,11 @@ WARNING: The token will be stored unencrypted in %S.
           ;; simplicity it's better to error out here and ask the user to
           ;; take action. This situation should almost never arise anyway.
           (ghub-http-error
-           (if (string-equal (let-alist (nth 3 ghub--create-token-error)
-                               (car .errors.code))
-                             "already_exists")
-               (error "\
-A token named %S already exists on Github. \
-Please visit https://github.com/settings/tokens and delete it." ident))))
+           (if (equal (alist-get 'code (car (alist-get 'errors (nth 4 err))))
+                      "already_exists")
+               (error "A token named %S already exists on Github.
+Please visit https://github.com/settings/tokens and delete it." ident)
+             (signal (car err) (cdr err)))))
       (user-error "Abort"))))
 
 (defun ghub--get-token-id (host username package)
