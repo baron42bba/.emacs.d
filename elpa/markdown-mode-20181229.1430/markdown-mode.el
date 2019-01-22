@@ -7,7 +7,7 @@
 ;; Maintainer: Jason R. Blevins <jblevins@xbeta.org>
 ;; Created: May 24, 2007
 ;; Version: 2.4-dev
-;; Package-Version: 20181029.140
+;; Package-Version: 20181229.1430
 ;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
 ;; Keywords: Markdown, GitHub Flavored Markdown, itex
 ;; URL: https://jblevins.org/projects/markdown-mode/
@@ -8450,6 +8450,33 @@ or \\[markdown-toggle-inline-images]."
   (mapc #'delete-overlay markdown-inline-image-overlays)
   (setq markdown-inline-image-overlays nil))
 
+(defcustom markdown-display-remote-images nil
+  "If non-nil, download and display remote images.
+See also `markdown-inline-image-overlays'.
+
+Only image URLs specified with a protocol listed in
+`markdown-remote-image-protocols' are displayed."
+  :group 'markdown
+  :type 'boolean)
+
+(defcustom markdown-remote-image-protocols '("https")
+  "List of protocols to use to download remote images.
+See also `markdown-display-remote-images'."
+  :group 'markdown
+  :type '(repeat string))
+
+(defvar markdown--remote-image-cache
+  (make-hash-table :test 'equal)
+  "A map from URLs to image paths.")
+
+(defun markdown--get-remote-image (url)
+  "Retrieve the image path for a given URL."
+  (or (gethash url markdown--remote-image-cache)
+      (let ((dl-path (make-temp-file "markdown-mode--image")))
+        (require 'url)
+        (url-copy-file url dl-path t)
+        (puthash url dl-path markdown--remote-image-cache))))
+
 (defun markdown-display-inline-images ()
   "Add inline image overlays to image links in the buffer.
 This can be toggled with `markdown-toggle-inline-images'
@@ -8467,24 +8494,29 @@ or \\[markdown-toggle-inline-images]."
               (end (match-end 0))
               (file (match-string-no-properties 6)))
           (when (and imagep
-                     (not (zerop (length file)))
-		     (file-exists-p file))
-            (let* ((abspath (if (file-name-absolute-p file)
-                                file
-                              (concat default-directory file)))
-                   (image
-                    (if (and markdown-max-image-size
-                             (image-type-available-p 'imagemagick))
-                        (create-image
-                         abspath 'imagemagick nil
-                         :max-width (car markdown-max-image-size)
-                         :max-height (cdr markdown-max-image-size))
-                      (create-image abspath))))
-              (when image
-                (let ((ov (make-overlay start end)))
-                  (overlay-put ov 'display image)
-                  (overlay-put ov 'face 'default)
-                  (push ov markdown-inline-image-overlays))))))))))
+                     (not (zerop (length file))))
+            (unless (file-exists-p file)
+              (when (and markdown-display-remote-images
+                         (member (downcase (url-type (url-generic-parse-url file)))
+                                 markdown-remote-image-protocols))
+                (setq file (markdown--get-remote-image file))))
+            (when (file-exists-p file)
+              (let* ((abspath (if (file-name-absolute-p file)
+                                  file
+                                (concat default-directory file)))
+                     (image
+                      (if (and markdown-max-image-size
+                               (image-type-available-p 'imagemagick))
+                          (create-image
+                           abspath 'imagemagick nil
+                           :max-width (car markdown-max-image-size)
+                           :max-height (cdr markdown-max-image-size))
+                        (create-image abspath))))
+                (when image
+                  (let ((ov (make-overlay start end)))
+                    (overlay-put ov 'display image)
+                    (overlay-put ov 'face 'default)
+                    (push ov markdown-inline-image-overlays)))))))))))
 
 (defun markdown-toggle-inline-images ()
   "Toggle inline image overlays in the buffer."
@@ -8820,7 +8852,8 @@ This function assumes point is on a table."
     (while (and (not (bobp))
                 (markdown-table-at-point-p))
       (forward-line -1))
-    (unless (eobp)
+    (unless (or (eobp)
+                (markdown-table-at-point-p))
       (forward-line 1))
     (point)))
 
@@ -9352,48 +9385,36 @@ spaces, or alternatively a TAB should be used as the separator."
     (goto-char begin)
     (markdown-table-align)))
 
-(defun markdown-insert-table ()
-  "Insert a new table."
+(defun markdown-insert-table (&optional rows columns align)
+  "Insert an empty pipe table.
+Optional arguments ROWS, COLUMNS, and ALIGN specify number of
+rows and columns and the column alignment."
   (interactive)
-  (let ((table-column (string-to-number (read-string "column size: ")))
-        (table-row (string-to-number (read-string "row size: ")))
-        (align-type (read-string "align type (left, right, center (default)): "))
-        (content "")
-        (align-counter 1)
-        (align "|")
-        (header-counter 1)
-        (header "|")
-        (row-counter 1)
-        (column-counter 1))
-
-    (cond ((equal align-type "left") (setq content ":---"))
-          ((equal align-type "right") (setq content "---:"))
-          ((equal align-type "center") (setq content "---"))
-          (t (setq content "---")))
-
-    (while (<= align-counter table-column)
-      (setq align (concat align content "|"))
-      (setq align-counter (1+ align-counter)))
-    (setq align (concat align "\n"))
-
-    (while (<= header-counter table-column)
-      (setq header (concat header (read-string (concat "header " (number-to-string header-counter) ": ")) "|"))
-      (setq header-counter (1+ header-counter)))
-    (setq header (concat header "\n"))
-
-    (insert header)
-    (insert align)
-
-    (while (<= row-counter table-row)
-      (setq column-counter 1)
-      (while (<= column-counter (1+ table-column))
-        (insert "|")
-        (setq column-counter (1+ column-counter)))
-      (if (< row-counter table-row)
-          (insert "\n"))
-      (setq row-counter (1+ row-counter)))
-  (markdown-table-align)
-  ))
+  (let* ((rows (or rows (string-to-number (read-string "Row size: "))))
+         (columns (or columns (string-to-number (read-string "Column size: "))))
+         (align (or align (read-string "Alignment ([l]eft, [r]ight, [c]enter, or RET for default): ")))
+         (align (cond ((equal align "l") ":--")
+                      ((equal align "r") "--:")
+                      ((equal align "c") ":-:")
+                      (t "---")))
+         (pos (point))
+         (indent (make-string (current-column) ?\ ))
+         (line (concat
+                (apply 'concat indent "|"
+                       (make-list columns "   |")) "\n"))
+         (hline (apply 'concat indent "|"
+                       (make-list columns (concat align "|")))))
+    (if (string-match
+         "^[ \t]*$" (buffer-substring-no-properties
+                     (point-at-bol) (point)))
+        (beginning-of-line 1)
+      (newline))
+    (dotimes (_ rows) (insert line))
+    (goto-char pos)
+    (if (> rows 1)
+        (progn
+          (end-of-line 1) (insert (concat "\n" hline)) (goto-char pos)))
+    (markdown-table-forward-cell)))
 
 
 ;;; ElDoc Support
