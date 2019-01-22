@@ -1134,7 +1134,8 @@ argument is used, then save the revision at its tip to the
 
 When the region is active, then save that to the `kill-ring',
 like `kill-ring-save' would, instead of behaving as described
-above.
+above.  If a prefix argument is used and the region is within a
+hunk, strip the outer diff marker column.
 
 \(fn)" t nil)
 
