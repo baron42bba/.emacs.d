@@ -21,7 +21,6 @@
 
   `(downcase (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))` -p password
 
-
 =cut
 
 
@@ -44,18 +43,17 @@ done
 
 EXITCODE=0
 
-if [ -z "${PASSWORD}" ]; then
+if [ -z "\${PASSWORD}" ]; then
     read -s -p "Password: " PASSWORD
     echo
 fi
 
-if [ -z "${PASSWORD}" ]; then pod2usage $0; exit; fi
+if [ -z "\${PASSWORD}" ]; then pod2usage \$0; exit; fi
 
 $0
 
 :<<=cut
 =head1 AUTHOR
-
 
 `(user-full-name)` <`user-mail-address`>
 
