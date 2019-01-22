@@ -6,7 +6,7 @@
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
 ;; Keywords: http
-;; Package-Version: 20180316.1551
+;; Package-Version: 20190122.942
 
 ;; This file is not part of GNU Emacs.
 ;; This file is public domain software. Do what you want.
@@ -237,7 +237,8 @@
                                                     (match-string-no-properties 1)
                                                     "/"
                                                     (match-string-no-properties 2))
-                                                   restclient-content-type-modes))))
+                                                   restclient-content-type-modes
+                                                   t))))
                         (forward-line)) 0)))
       (setq end-of-headers (point))
       (while (and (looking-at restclient-empty-line-regexp)
