@@ -5,6 +5,7 @@
 # -*- mode: snippet -*-
 # name: ${1:`(print (buffer-name))`}
 # key: ${2:`(print (buffer-name))`}
-${3:# group: $4
-}# --
+${3:# group: $4}
+${5:# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))}
+# --
 $0
