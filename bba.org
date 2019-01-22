@@ -307,8 +307,17 @@ Display open TODO items in magit-status.
 #+END_SRC
 
 * [[https://github.com/larstvei/Focus][focus]]
+do a stash, pull, pop.
+in the end use magit-stash.
 
 focus on the important stuff.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-pull ()
+    "Do git stash, pull, pop"
+    (interactive)
+    (shell-command "git stash; git pull; git stash pop")
+    )
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
