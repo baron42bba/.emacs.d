@@ -237,6 +237,12 @@ You probably don't need to use this unless you know what you are doing."
   :group 'helm-grep
   :type 'string)
 
+(defcustom helm-grep-input-idle-delay 0.6
+  "Same as `helm-input-idle-delay' but for grep commands.
+It have a higher value than `helm-input-idle-delay' to avoid
+flickering when updating."
+  :group 'helm-grep
+  :type 'integer)
 
 ;;; Faces
 ;;
@@ -287,6 +293,7 @@ Have no effect when grep backend use \"--color=\"."
     (define-key map (kbd "C-c o")    'helm-grep-run-other-window-action)
     (define-key map (kbd "C-c C-o")  'helm-grep-run-other-frame-action)
     (define-key map (kbd "C-x C-s")  'helm-grep-run-save-buffer)
+    (define-key map (kbd "DEL")      'helm-delete-backward-no-update)
     (when helm-grep-use-ioccur-style-keys
       (define-key map (kbd "<right>")  'helm-execute-persistent-action)
       (define-key map (kbd "<left>")  'helm-grep-run-default-action))
@@ -298,6 +305,7 @@ Have no effect when grep backend use \"--color=\"."
     (set-keymap-parent map helm-map)
     (define-key map (kbd "M-<down>") 'helm-goto-next-file)
     (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
+    (define-key map (kbd "DEL")      'helm-delete-backward-no-update)
     map)
   "Keymap used in pdfgrep.")
 
@@ -1105,6 +1113,7 @@ in recurse, and ignore EXTS, search being made recursively on files matching
      'helm-grep-in-recurse recurse
      'helm-grep-use-zgrep (eq backend 'zgrep)
      'helm-grep-default-command com
+     'helm-input-idle-delay helm-grep-input-idle-delay
      'default-directory helm-ff-default-directory) ;; [1]
     ;; Setup the source.
     (set source (helm-make-source src-name 'helm-grep-class
@@ -1228,7 +1237,7 @@ in recurse, and ignore EXTS, search being made recursively on files matching
                                (> (- (setq end (match-end 0))
                                      (setq beg (match-beginning 0))) 0))
                      (helm-add-face-text-properties beg end 'helm-grep-match))
-                   do (goto-char (point-min))) 
+                   do (goto-char (point-min)))
           (buffer-string))
       (error nil))))
 
@@ -1551,6 +1560,7 @@ if available with current AG version."
                                  name (abbreviate-file-name directory)))
           :candidates-process
           (lambda () (helm-grep-ag-init directory type))))
+  (helm-set-local-variable 'helm-input-idle-delay helm-grep-input-idle-delay)
   (helm :sources 'helm-source-grep-ag
         :keymap helm-grep-map
         :history 'helm-grep-ag-history

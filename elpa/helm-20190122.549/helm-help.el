@@ -243,10 +243,17 @@ The tree is reinitialized each time you browse a new tree with
 
 It behaves differently depending on `helm-selection' (current candidate in helm-buffer):
 
-- candidate basename is \".\"   => Open it in dired.
+- candidate basename is \".\" => Open it in dired.
 - candidate is a directory    => Expand it.
 - candidate is a file         => Open it.
-- marked candidates (1+)      => Open them with default action.
+
+If you have marked candidates and you press RET on a directory,
+helm will navigate to this directory, if you want to exit with
+RET with default action with these marked candidates, press RET
+on a second time while you are on the root of this directory
+e.g. \"/home/you/dir/.\" or press RET on any file which is not a
+directory.  You can also exit with default action at any moment
+with `f1'.
 
 Note that when copying, renaming, etc. from `helm-find-files' the
 destination file is selected with `helm-read-file-name'.
@@ -377,7 +384,7 @@ Same but the cache is refreshed.
 
 **** You can start a recursive search with \"locate\" or \"find\"
 
-See \"Note\" in the [[Recusive completion on subdirectories][section on subdirectories]].
+See \"Note\" in the [[Recursive completion on subdirectories][section on subdirectories]].
 
 Using \"locate\", you can enable the local database with a prefix argument. If the
 local database doesn't already exists, you will be prompted for its creation.
@@ -422,6 +429,7 @@ On insertion (not on completion, i.e. there is nothing at point):
 - `\\[helm-ff-run-complete-fn-at-point]': insert absolute file name.
 - `\\[universal-argument] \\[helm-ff-run-complete-fn-at-point]': insert abbreviated file name.
 - `\\[universal-argument] \\[universal-argument] \\[helm-ff-run-complete-fn-at-point]': insert relative file name.
+- `\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[helm-ff-run-complete-fn-at-point]': insert basename.
 
 On completion:
 
@@ -504,7 +512,7 @@ are available as`%u', `%d' and `%c' respectively.
 
 ***** Recursively rename all files with \".JPG\" extension to \".jpg\"
 
-Use the `helm-file-globstar' feature described in [[Using wildcard to select multiple files][recursive globbing]]
+Use the `helm-file-globstar' feature described in [[Use the wildcard to select multiple files][recursive globbing]]
 by entering \"**.JPG\" at the end of the Helm-find-files pattern, then hit
 \\<helm-map>\\[helm-ff-query-replace-on-filenames]: First \"JPG\", then \"jpg\"
 and hit `RET'.
@@ -603,7 +611,7 @@ the current directory.  As such, using \"\\#\" to serial-rename files only makes
 sense for files inside the same directory.  It even keeps renaming files
 with an incremental number in the next directories.
 
-*** Serial-rename
+*** Serial renaming
 
 You can use the serial-rename actions to rename, copy or symlink marked files to
 a specific directory or in the current directory with all the files numbered
@@ -752,7 +760,7 @@ For this you can use `helm-list-dir-external' as value
 for `helm-list-directory-function'.
 
 See `helm-list-directory-function' documentation for more infos.
- 
+
 **** Completing host
 
 As soon as you enter the first \":\" after method e.g =/scp:= you will
@@ -949,13 +957,13 @@ with trash-list until you log in as root.
   (let ((name (if helm-alive-p
                   (assoc-default 'name (helm-get-current-source))
                 "generic")))
-    (format 
+    (format
      "* Helm `%s' read file name completion
 
 This is `%s' read file name completion that have been \"helmized\"
 because you have enabled [[Helm mode][helm-mode]]'.
 Don't confuse this with `helm-find-files' which is a native helm command,
-see [[Helm functions vs helmized emacs functions]].
+see [[Helm functions vs helmized Emacs functions]].
 
 ** Tips
 
@@ -1145,7 +1153,7 @@ M-x helm-popup-tip-mode.
 
 The command \\<helm-grep-map>\\[helm-grep-run-other-window-action] allow you to open file
 in other window horizontally or vertically if a prefix arg is supplied.
- 
+
 *** Performance over TRAMP
 
 Grepping works but it is badly supported as TRAMP doesn't support multiple

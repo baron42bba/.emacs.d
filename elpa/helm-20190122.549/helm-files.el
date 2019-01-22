@@ -631,7 +631,7 @@ Don't set it directly, use instead `helm-ff-auto-update-initial-value'.")
                       (if (eq helm-ff-delete-files-function
                               'helm-delete-marked-files-async)
                           " async" "")))
-   'helm-delete-marked-files
+   'helm-ff-delete-files
    "Touch File(s) `M-T'" 'helm-ff-touch-files
    "Copy file(s) `M-C, C-u to follow'" 'helm-find-files-copy
    "Rename file(s) `M-R, C-u to follow'" 'helm-find-files-rename
@@ -1468,11 +1468,9 @@ This doesn't replace inside the files, only modify filenames."
 See `helm-ff-RET' for details.
 If MUST-MATCH is specified exit with
 `helm-confirm-and-exit-minibuffer' which handle must-match mechanism."
-  (let* ((cands (helm-marked-candidates))
-         (sel   (car cands)))
+  (let ((sel   (helm-get-selection)))
     (cl-assert sel nil "Trying to exit with no candidates")
-    (if (and (not (cdr cands))
-             (file-directory-p sel)
+    (if (and (file-directory-p sel)
              (not (string= "." (helm-basename sel))))
         (helm-execute-persistent-action)
       (if must-match
@@ -1486,10 +1484,10 @@ Behave differently depending of `helm-selection':
 
 - candidate basename is \".\" => open it in dired.
 - candidate is a directory    => expand it.
-- candidate is a file         => open it.
-- marked candidates (1+)      => open them with default action."
+- candidate is a file         => open it."
   (interactive)
   (helm-ff-RET-1))
+(put 'helm-ff-RET 'helm-only t)
 
 (defun helm-ff-RET-must-match ()
   "Same as `helm-ff-RET' but used in must-match map."
@@ -2394,6 +2392,22 @@ purpose."
           ((and dir-p helm-ff-auto-update-flag)
            (helm-ff-directory-files path))
           (t (append (unless (or require-match
+                                 ;; Check here if path is an existing
+                                 ;; file before adding it to
+                                 ;; candidates, it was previously done
+                                 ;; in the sort function but this
+                                 ;; create a bug with remote files
+                                 ;; when path is at the same time a
+                                 ;; pattern matching a candidate and a
+                                 ;; real candidate e.g. ack and
+                                 ;; ack-grep in /usr/bin. This is due
+                                 ;; presumably to a latency more
+                                 ;; important with remote files which
+                                 ;; lead to a confusion with the
+                                 ;; pattern matching one candidate and
+                                 ;; the real candidate which is same
+                                 ;; as pattern.
+                                 (file-exists-p path)
                                  ;; When `helm-ff-auto-update-flag' has been
                                  ;; disabled, whe don't want PATH to be added on top
                                  ;; if it is a directory.
@@ -2765,27 +2779,23 @@ Return candidates prefixed with basename of INPUT first."
           (string-match "\\`\\$" input)
           (null candidates))
       candidates
-      (let* ((c1        (car candidates))
-             (cand1real (if (consp c1) (cdr c1) c1))
-             (cand1     (unless (file-exists-p cand1real) c1))
-             (rest-cand (if cand1 (cdr candidates) candidates))
-             (memo-src  (make-hash-table :test 'equal))
-             (all (sort rest-cand
-                        (lambda (s1 s2)
-                            (let* ((score (lambda (str)
-                                            (helm-ff-score-candidate-for-pattern
-                                             str (helm-basename input))))
-                                   (bn1 (helm-basename (if (consp s1) (cdr s1) s1)))
-                                   (bn2 (helm-basename (if (consp s2) (cdr s2) s2)))
-                                   (sc1 (or (gethash bn1 memo-src)
-                                            (puthash bn1 (funcall score bn1) memo-src)))
-                                   (sc2 (or (gethash bn2 memo-src)
-                                            (puthash bn2 (funcall score bn2) memo-src))))
-                              (cond ((= sc1 sc2)
-                                     (< (string-width bn1)
-                                        (string-width bn2)))
-                                    ((> sc1 sc2))))))))
-        (if cand1 (cons cand1 all) all))))
+    (let* ((memo-src  (make-hash-table :test 'equal))
+           (all (sort candidates
+                      (lambda (s1 s2)
+                        (let* ((score (lambda (str)
+                                        (helm-ff-score-candidate-for-pattern
+                                         str (helm-basename input))))
+                               (bn1 (helm-basename (if (consp s1) (cdr s1) s1)))
+                               (bn2 (helm-basename (if (consp s2) (cdr s2) s2)))
+                               (sc1 (or (gethash bn1 memo-src)
+                                        (puthash bn1 (funcall score bn1) memo-src)))
+                               (sc2 (or (gethash bn2 memo-src)
+                                        (puthash bn2 (funcall score bn2) memo-src))))
+                          (cond ((= sc1 sc2)
+                                 (< (string-width bn1)
+                                    (string-width bn2)))
+                                ((> sc1 sc2))))))))
+      all)))
 
 (defun helm-ff-sort-candidates (candidates _source)
   "Sort function for `helm-source-find-files'.
@@ -3213,13 +3223,14 @@ If a prefix arg is given or `helm-follow-mode' is on open file."
           ;; A symlink file, expand to it's true name. (first hit)
           ((and (file-symlink-p candidate) (not current-prefix-arg) (not follow))
            (cons (lambda (_candidate)
-                   (funcall insert-in-minibuffer (file-truename candidate)))
+                   (funcall insert-in-minibuffer (file-truename candidate))
+                   (helm-check-minibuffer-input)) ; Force update.
                  'never-split))
           ;; A regular file, expand it, (first hit)
           ((and (>= num-lines-buf 3) (not current-prefix-arg) (not follow))
            (cons (lambda (_candidate)
-                   (setq helm-pattern "")       ; Force update.
-                   (funcall insert-in-minibuffer new-pattern))
+                   (funcall insert-in-minibuffer new-pattern)
+                   (helm-check-minibuffer-input)) ; Force update.
                  'never-split))
           ;; An image file and it is the second hit on C-j,
           ;; show the file in `image-dired'.
@@ -3410,11 +3421,11 @@ prefix arg, one prefix arg or two prefix arg."
                  (abbreviate-file-name candidate))
                 (t (file-relative-name candidate)))
         (delete-region beg end))
-    (cond ((equal helm-current-prefix-arg '(4))
-           (abbreviate-file-name candidate))
-          ((equal helm-current-prefix-arg '(16))
-           (file-relative-name candidate))
-          (t candidate))))
+    (helm-acase helm-current-prefix-arg
+      ('(4)  (abbreviate-file-name candidate))
+      ('(16) (file-relative-name candidate))
+      ('(64) (helm-basename candidate))
+      (t candidate))))
 
 (cl-defun helm-find-files-history (arg &key (comp-read t))
   "The `helm-find-files' history.
@@ -3588,7 +3599,7 @@ is helm-source-find-files."
         ;; "/", e.g. at a beginning of a patch (first bug) and make
         ;; `file-remote-p' returning an error (second bug), so in such
         ;; case returns the region itself instead of the region
-        ;; corrupted by ffap. 
+        ;; corrupted by ffap.
         (if (and str ffap) str ffap)))))
 
 (defun helm-find-files-input (file-at-pt thing-at-pt)

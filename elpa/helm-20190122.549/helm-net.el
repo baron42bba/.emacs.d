@@ -175,7 +175,7 @@ Can be \"-new-tab\" (default) or \"-new-window\"."
 (defun helm-net--url-retrieve-sync (request parser)
   (if helm-net-prefer-curl
       (with-temp-buffer
-        (call-process "curl" nil t nil request)
+        (call-process "curl" nil t nil request "-L")
         (funcall parser))
       (with-current-buffer (url-retrieve-synchronously request)
         (funcall parser))))
@@ -352,7 +352,7 @@ Follows any redirections from Wikipedia, and stores results in
           (when (or (string-match "</table>\\(\n<div.*?</div>\\)?\n<p>" result)
                     ;; otherwise just find the first paragraph
                     (string-match "<p>" result))
-            ;; remove cruft and do a simple formatting 
+            ;; remove cruft and do a simple formatting
             (replace-regexp-in-string
              "Cite error: .*" ""
              (replace-regexp-in-string
