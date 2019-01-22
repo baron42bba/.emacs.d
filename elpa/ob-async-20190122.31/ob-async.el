@@ -5,7 +5,7 @@
 ;; Author: Andrew Stahlman <andrewstahlman@gmail.com>
 ;; Created: 10 Feb 2017
 ;; Version: 0.1
-;; Package-Version: 20190115.137
+;; Package-Version: 20190122.31
 
 ;; Keywords: tools
 ;; Homepage: https://github.com/astahlman/ob-async
@@ -94,6 +94,9 @@ block."
               (or org-babel-current-src-block-location
                   (nth 5 info)
                   (org-babel-where-is-src-block-head)))
+             (src-block-marker (save-excursion
+                                 (goto-char org-babel-current-src-block-location)
+                                 (point-marker)))
              (info (if info (copy-tree info) (org-babel-get-src-block-info))))
         ;; Merge PARAMS with INFO before considering source block
         ;; evaluation since both could disagree.
@@ -163,14 +166,7 @@ block."
                         (with-current-buffer ,(current-buffer)
                           (let ((default-directory ,default-directory))
                             (save-excursion
-                              (goto-char (point-min))
-                              (re-search-forward ,placeholder)
-                              (org-backward-element)
-                              (let ((result-block (split-string (thing-at-point 'line t))))
-                                ;; If block has name, search by name
-                                (-if-let (block-name (nth 1 result-block))
-                                    (org-babel-goto-named-src-block block-name)
-                                  (org-backward-element)))
+                              (goto-char ,src-block-marker)
                               (let ((file (cdr (assq :file ',params))))
                                 ;; If non-empty result and :file then write to :file.
                                 (when file
