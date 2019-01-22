@@ -5,7 +5,7 @@
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
-;; Package-Version: 20170309.1129
+;; Package-Version: 20181114.1723
 ;; Created: 14th February 2014
 ;; Package-requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
@@ -175,7 +175,8 @@ when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are tr
 (defun dired-narrow--restore ()
   "Restore the invisible files of the current buffer."
   (let ((inhibit-read-only t))
-    (remove-text-properties (point-min) (point-max) '(invisible))
+    (remove-list-of-text-properties (point-min) (point-max)
+                                    '(invisible :dired-narrow))
     (when (fboundp 'dired-insert-set-properties)
       (dired-insert-set-properties (point-min) (point-max)))))
 
@@ -264,7 +265,11 @@ read from minibuffer."
 ;; Interactive
 
 (defun dired-narrow--regexp-filter (filter)
-  (re-search-forward filter (line-end-position) t))
+  (condition-case nil
+      (string-match-p filter (dired-utils-get-filename 'no-dir))
+    ;; Return t if your regexp is incomplete/has errors, thus
+    ;; filtering nothing until you fix the regexp.
+    (invalid-regexp t)))
 
 ;;;###autoload
 (defun dired-narrow-regexp ()
