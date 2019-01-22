@@ -3,7 +3,7 @@
 ;; Copyright (C) 2015 Free Software Foundation, Inc.
 
 ;; Author: Artur Malabarba <emacs@endlessparentheses.com>
-;; Version: 1.3.1
+;; Version: 1.7.3
 ;; URL: https://github.com/Malabarba/spinner.el
 ;; Keywords: processes mode-line
 
@@ -123,6 +123,17 @@
 Each car is a symbol identifying the spinner, and each cdr is a
 vector, the spinner itself.")
 
+(defun spinner-make-progress-bar (width &optional char)
+  "Return a vector of strings of the given WIDTH.
+The vector is a valid spinner type and is similar to the
+`progress-bar' spinner, except without the sorrounding brackets.
+CHAR is the character to use for the moving bar (defaults to =)."
+  (let ((whole-string (concat (make-string (1- width) ?\s)
+                              (make-string 4 (or char ?=))
+                              (make-string width ?\s))))
+    (apply #'vector (mapcar (lambda (n) (substring whole-string n (+ n width)))
+                            (number-sequence (+ width 3) 0 -1)))))
+
 (defvar spinner-current nil
   "Spinner curently being displayed on the `mode-line-process'.")
 (make-variable-buffer-local 'spinner-current)
@@ -147,7 +158,7 @@ below).
 If TYPE is nil, the frames of this spinner are given by the first
 element of `spinner-types'.
 If TYPE is a symbol, it specifies an element of `spinner-types'.
-If TYPE is 'random, use a random element of `spinner-types'.
+If TYPE is `random', use a random element of `spinner-types'.
 If TYPE is a list, it should be a list of symbols, and a random
 one is chosen as the spinner type.
 If TYPE is a vector, it should be a vector of strings and these
@@ -168,19 +179,20 @@ own spinner animations."
 (defstruct (spinner
             (:copier nil)
             (:conc-name spinner--)
-            (:constructor make-spinner (&optional type buffer-local fps)))
+            (:constructor make-spinner (&optional type buffer-local frames-per-second delay-before-start)))
   (frames (spinner--type-to-frames type))
   (counter 0)
-  (fps spinner-frames-per-second)
-  (timer (timer-create) :read-only)
+  (fps (or frames-per-second spinner-frames-per-second))
+  (timer (timer-create))
   (active-p nil)
   (buffer (when buffer-local
             (if (bufferp buffer-local)
                 buffer-local
-              (current-buffer)))))
+              (current-buffer))))
+  (delay (or delay-before-start 0)))
 
 ;;;###autoload
-(defun spinner-create (&optional type buffer-local fps)
+(defun spinner-create (&optional type buffer-local fps delay)
   "Create a spinner of the given TYPE.
 The possible TYPEs are described in `spinner--type-to-frames'.
 
@@ -195,8 +207,13 @@ When started, in order to function properly, the spinner runs a
 timer which periodically calls `force-mode-line-update' in the
 curent buffer.  If BUFFER-LOCAL was set at creation time, then
 `force-mode-line-update' is called in that buffer instead.  When
-the spinner is stopped, the timer is deactivated."
-  (make-spinner type buffer-local fps))
+the spinner is stopped, the timer is deactivated.
+
+DELAY, if given, is the number of seconds to wait after starting
+the spinner before actually displaying it. It is safe to cancel
+the spinner before this time, in which case it won't display at
+all."
+  (make-spinner type buffer-local fps delay))
 
 (defun spinner-print (spinner)
   "Return a string of the current frame of SPINNER.
@@ -204,8 +221,9 @@ If SPINNER is nil, just return nil.
 Designed to be used in the mode-line with:
     (:eval (spinner-print some-spinner))"
   (when (and spinner (spinner--active-p spinner))
-    (elt (spinner--frames spinner)
-         (spinner--counter spinner))))
+    (let ((frame (spinner--counter spinner)))
+      (when (>= frame 0)
+        (elt (spinner--frames spinner) frame)))))
 
 (defun spinner--timer-function (spinner)
   "Function called to update SPINNER.
@@ -216,7 +234,9 @@ stop the SPINNER's timer."
             (and buffer (not (buffer-live-p buffer))))
         (spinner-stop spinner)
       ;; Increment
-      (callf (lambda (x) (% (1+ x) (length (spinner--frames spinner))))
+      (callf (lambda (x) (if (< x 0)
+                        (1+ x)
+                      (% (1+ x) (length (spinner--frames spinner)))))
           (spinner--counter spinner))
       ;; Update mode-line.
       (if (buffer-live-p buffer)
@@ -225,15 +245,19 @@ stop the SPINNER's timer."
         (force-mode-line-update)))))
 
 (defun spinner--start-timer (spinner)
-  "Start a SPINNER's timer at FPS frames per second."
+  "Start a SPINNER's timer."
   (let ((old-timer (spinner--timer spinner)))
     (when (timerp old-timer)
       (cancel-timer old-timer))
 
     (setf (spinner--active-p spinner) t)
+
+    (unless (ignore-errors (> (spinner--fps spinner) 0))
+      (error "A spinner's FPS must be a positive number"))
+    (setf (spinner--counter spinner) (round (- (* (or (spinner--delay spinner) 0)
+                                           (spinner--fps spinner)))))
     ;; Create timer.
-    (let* ((repeat (/ 1.0 (or (spinner--fps spinner)
-                              spinner-frames-per-second)))
+    (let* ((repeat (/ 1.0 (spinner--fps spinner)))
            (time (timer-next-integral-multiple-of-time (current-time) repeat))
            ;; Create the timer as a lex variable so it can cancel itself.
            (timer (spinner--timer spinner)))
@@ -246,12 +270,12 @@ stop the SPINNER's timer."
 
 ;;; The main functions
 ;;;###autoload
-(defun spinner-start (&optional type-or-object fps)
+(defun spinner-start (&optional type-or-object fps delay)
   "Start a mode-line spinner of given TYPE-OR-OBJECT.
 If TYPE-OR-OBJECT is an object created with `make-spinner',
 simply activate it.  This method is designed for minor modes, so
 they can use the spinner as part of their lighter by doing:
-    '(:eval (spinner-print THE-SPINNER))
+    \\='(:eval (spinner-print THE-SPINNER))
 To stop this spinner, call `spinner-stop' on it.
 
 If TYPE-OR-OBJECT is anything else, a buffer-local spinner is
@@ -265,13 +289,16 @@ anywhere to stop this spinner.  You can also call `spinner-stop'
 in the same buffer where the spinner was created.
 
 FPS, if given, is the number of desired frames per second.
-Default is `spinner-frames-per-second'."
+Default is `spinner-frames-per-second'.
+
+DELAY, if given, is the number of seconds to wait until actually
+displaying the spinner. It is safe to cancel the spinner before
+this time, in which case it won't display at all."
   (unless (spinner-p type-or-object)
     ;; Choose type.
     (if (spinner-p spinner-current)
-        (setf (spinner--frames spinner-current)
-              (spinner--type-to-frames type-or-object))
-      (setq spinner-current (make-spinner type-or-object (current-buffer) fps)))
+        (setf (spinner--frames spinner-current) (spinner--type-to-frames type-or-object))
+      (setq spinner-current (make-spinner type-or-object (current-buffer) fps delay)))
     (setq type-or-object spinner-current)
     ;; Maybe add to mode-line.
     (unless (memq 'spinner--mode-line-construct mode-line-process)
@@ -281,6 +308,7 @@ Default is `spinner-frames-per-second'."
 
   ;; Create timer.
   (when fps (setf (spinner--fps type-or-object) fps))
+  (when delay (setf (spinner--delay type-or-object) delay))
   (spinner--start-timer type-or-object))
 
 (defun spinner-start-print (spinner)
@@ -290,15 +318,50 @@ Default is `spinner-frames-per-second'."
   (spinner-print spinner))
 
 (defun spinner-stop (&optional spinner)
-  "Stop the current buffer's spinner."
-  (let* ((spinner (or spinner spinner-current))
-         (timer (spinner--timer spinner)))
-    (when (timerp timer)
-      (cancel-timer timer))
-    (setf (spinner--active-p spinner) nil)))
+  "Stop SPINNER, defaulting to the current buffer's spinner.
+It is always safe to call this function, even if there is no
+active spinner."
+  (let ((spinner (or spinner spinner-current)))
+    (when (spinner-p spinner)
+      (let ((timer (spinner--timer spinner)))
+        (when (timerp timer)
+          (cancel-timer timer)))
+      (setf (spinner--active-p spinner) nil)
+      (force-mode-line-update))))
 
 ;;;; ChangeLog:
 
+;; 2016-11-17  Artur Malabarba  <bruce.connor.am@gmail.com>
+;; 
+;; 	Merge commit '0637791f005f747532b4439439a81c3415961377'
+;; 
+;; 2016-07-11  Paul Eggert	 <eggert@cs.ucla.edu>
+;; 
+;; 	Fix some quoting problems in doc strings
+;; 
+;; 	Most of these are minor issues involving, e.g., quoting `like this' 
+;; 	instead of 'like this'.	 A few involve escaping ` and ' with a preceding
+;; 	\= when the characters should not be turned into curved single quotes.
+;; 
+;; 2016-04-01  Artur Malabarba  <bruce.connor.am@gmail.com>
+;; 
+;; 	Remove reference to thread-last
+;; 
+;; 2016-02-08  Artur Malabarba  <bruce.connor.am@gmail.com>
+;; 
+;; 	Spinner version 1.7
+;; 
+;; 	Offer a spinner-make-progress-bar function. Make spinner-stop never
+;; 	signal. Allow floating-point delays.
+;; 
+;; 2016-02-07  Artur Malabarba  <bruce.connor.am@gmail.com>
+;; 
+;; 	Update the mode-line after spinner-stop
+;; 
+;; 2015-08-11  Artur Malabarba  <bruce.connor.am@gmail.com>
+;; 
+;; 	Merge commit '8d8c459d7757cf5774f11be9147d7a54f5f9bbd7'
+;; 
 ;; 2015-05-02  Artur Malabarba  <bruce.connor.am@gmail.com>
 ;; 
 ;; 	* spinner: Rename constructor.
