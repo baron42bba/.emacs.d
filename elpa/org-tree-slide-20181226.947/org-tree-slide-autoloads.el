@@ -59,18 +59,28 @@ Start slideshow with setting a count down timer.
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-without-init-play "org-tree-slide" "\
-Start slideshow without the init play. Just enter org-tree-slide-mode.
+Start slideshow without the init play.  Just enter \"org-tree-slide-mode\".
 
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-content "org-tree-slide" "\
-Change the display for viewing content of the org file during
-   the slide view mode is active.
+Change the display for viewing content of the org file during the slide view mode is active.
+
+\(fn)" t nil)
+
+(autoload 'org-tree-slide-move-next-tree "org-tree-slide" "\
+Display the next slide.
+
+\(fn)" t nil)
+
+(autoload 'org-tree-slide-move-previous-tree "org-tree-slide" "\
+Display the previous slide.
 
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-simple-profile "org-tree-slide" "\
 Set variables for simple use.
+
   `org-tree-slide-header'            => nil
   `org-tree-slide-slide-in-effect'   => nil
   `org-tree-slide-heading-emphasis'  => nil
@@ -83,6 +93,7 @@ Set variables for simple use.
 
 (autoload 'org-tree-slide-presentation-profile "org-tree-slide" "\
 Set variables for presentation use.
+
   `org-tree-slide-header'            => t
   `org-tree-slide-slide-in-effect'   => t
   `org-tree-slide-heading-emphasis'  => nil
@@ -95,6 +106,7 @@ Set variables for presentation use.
 
 (autoload 'org-tree-slide-narrowing-control-profile "org-tree-slide" "\
 Set variables for TODO pursuit with narrowing.
+
   `org-tree-slide-header'            => nil
   `org-tree-slide-slide-in-effect'   => nil
   `org-tree-slide-heading-emphasis'  => nil
@@ -106,27 +118,27 @@ Set variables for TODO pursuit with narrowing.
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-display-header-toggle "org-tree-slide" "\
-Toggle displaying the slide header
+Toggle displaying the slide header.
 
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-slide-in-effect-toggle "org-tree-slide" "\
-Toggle using slide-in effect
+Toggle using slide-in effect.
 
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-heading-emphasis-toggle "org-tree-slide" "\
-Toggle applying emphasis to heading
+Toggle applying emphasis to heading.
 
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-skip-done-toggle "org-tree-slide" "\
-Toggle show TODO item only or not
+Toggle show TODO item only or not.
 
 \(fn)" t nil)
 
 (autoload 'org-tree-slide-skip-comments-toggle "org-tree-slide" "\
-Toggle show COMMENT item or not
+Toggle show COMMENT item or not.
 
 \(fn)" t nil)
 
