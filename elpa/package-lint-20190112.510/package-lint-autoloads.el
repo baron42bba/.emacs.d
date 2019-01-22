@@ -45,23 +45,6 @@ Return non-nil if the current buffer appears to be intended as a package.
 
 ;;;***
 
-;;;### (autoloads nil "package-lint-flymake" "package-lint-flymake.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from package-lint-flymake.el
-
-(autoload 'package-lint-setup-flymake "package-lint-flymake" "\
-Setup package-lint integration with Flymake.
-
-\(fn)" nil nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "package-lint-flymake" '("package-lint-")))
-
-;;;***
-
-;;;### (autoloads nil nil ("package-lint-pkg.el") (0 0 0 0))
-
-;;;***
-
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

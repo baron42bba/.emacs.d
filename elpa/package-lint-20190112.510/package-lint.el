@@ -5,6 +5,7 @@
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;;         Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/purcell/package-lint
+;; Package-Version: 20190112.510
 ;; Keywords: lisp
 ;; Version: 0
 ;; Package-Requires: ((cl-lib "0.5") (emacs "24"))
@@ -263,6 +264,9 @@ This is bound dynamically while the checks run.")
             (when desc
               (package-lint--check-package-summary desc)
               (package-lint--check-provide-form desc)))
+          (package-lint--check-no-use-of-cl)
+          (package-lint--check-no-use-of-cl-lib-sublibraries)
+          (package-lint--check-eval-after-load)
           (let ((deps (package-lint--check-dependency-list)))
             (package-lint--check-lexical-binding-requires-emacs-24 deps)
             (package-lint--check-libraries-available-in-emacs deps)
@@ -533,6 +537,36 @@ REGEXP is (concat RX-START REGEXP* RX-END) for each REGEXP*."
                            (mapconcat #'number-to-string added-in-version ".")
                            sym)))))))))))
 
+(defun package-lint--check-eval-after-load ()
+  "Warn about use of `eval-after-load' and co."
+  (save-excursion
+    (save-match-data
+      (goto-char (point-min))
+      (when (re-search-forward "(\\s-*?\\(\\(?:with-\\)?eval-after-load\\)\\_>" nil t)
+        (package-lint--error-at-point
+         'warning
+         (format "`%s' is for use in configurations, and should rarely be used in packages." (match-string 1)))))))
+
+(defun package-lint--check-no-use-of-cl ()
+  "Warn about use of deprecated `cl' library."
+  (save-excursion
+    (save-match-data
+      (goto-char (point-min))
+      (when (re-search-forward "(\\s-*?require\\s-*?'cl\\_>" nil t)
+        (package-lint--error-at-point
+         'warning
+         "Replace deprecated `cl' with `cl-lib'.  The `cl-libify' package can help with this.")))))
+
+(defun package-lint--check-no-use-of-cl-lib-sublibraries ()
+  "Warn about use of `cl-macs', `cl-seq' etc."
+  (save-excursion
+    (save-match-data
+      (goto-char (point-min))
+      (when (re-search-forward "(\\s-*?require\\s-*?'cl-\\(?:macs\\|seq\\)\\_>" nil t)
+        (package-lint--error-at-point
+         'warning
+         "This file is not in the `cl-lib' ELPA compatibility package: require `cl-lib' instead.")))))
+
 (defun package-lint--check-libraries-available-in-emacs (valid-deps)
   "Warn about use of libraries that are not available in the Emacs version in VALID-DEPS."
   (package-lint--check-version-regexp-list
@@ -648,11 +682,11 @@ DESC is a struct as returned by `package-buffer-info'."
        1 1
        'warning
        "Package should have a non-empty summary."))
-     ((> (length summary) 50)
+     ((> (length summary) 60)
       (package-lint--error
        1 1
        'warning
-       "The package summary is too long. It should be at most 50 characters.")))
+       "The package summary is too long. It should be at most 60 characters.")))
     (when (save-match-data
             (let ((case-fold-search t))
               (and (string-match "[^.]\\<emacs\\>" summary)
@@ -688,6 +722,25 @@ DESC is a struct as returned by `package-buffer-info'."
            (format "`%s' contains a non-standard separator `%s', use hyphens instead (see Elisp Coding Conventions)."
                    name (substring-no-properties name match-pos (1+ match-pos)))))))))
 
+(defun package-lint--valid-definition-name-p (name prefix-re position)
+  "Return non-nil if NAME denotes a valid definition name.
+
+Valid definition names are:
+
+- a NAME starting with PREFIX-RE, a regular expression
+  representing the current package prefix,
+
+- a NAME matching `package-lint--sane-prefixes', or
+
+- a NAME whose POSITION in the buffer denotes a global definition."
+  (or (string-match-p prefix-re name)
+      (string-match-p package-lint--sane-prefixes name)
+      (progn
+        (goto-char position)
+        (looking-at-p (rx (*? space) "(" (*? space)
+                          (or "defadvice" "cl-defmethod")
+                          symbol-end)))))
+
 (defun package-lint--check-defs-prefix (definitions)
   "Verify that symbol DEFINITIONS start with package prefix."
   (let ((prefix (package-lint--get-package-prefix)))
@@ -702,11 +755,7 @@ DESC is a struct as returned by `package-buffer-info'."
                                  (seq "-" (* any) "-mode"))
                              string-end))))))
         (pcase-dolist (`(,name . ,position) definitions)
-          (unless (or (string-match-p prefix-re name)
-                      (string-match-p package-lint--sane-prefixes name)
-                      (progn
-                        (goto-char position)
-                        (looking-at-p (rx (*? space) "(" (*? space) "defadvice" symbol-end))))
+          (unless (package-lint--valid-definition-name-p name prefix-re position)
             (let ((line-no (line-number-at-pos position)))
               (package-lint--error
                line-no 1 'error
@@ -720,12 +769,17 @@ DESC is a struct as returned by `package-buffer-info'."
 
 (defun package-lint--check-globalized-minor-mode (def)
   "Offer up concerns about the global minor mode definition DEF."
-  (let ((feature (intern (package-lint--provided-feature))))
-    (unless (cl-search `(:require ',feature) def :test #'equal)
+  (let ((feature (intern (package-lint--provided-feature)))
+        (autoloaded (save-excursion
+                      (forward-line -1)
+                      (beginning-of-line)
+                      (looking-at ";;;###autoload"))))
+    (unless (or autoloaded
+                (cl-search `(:require ',feature) def :test #'equal))
       (package-lint--error-at-point
        'error
        (format
-        "Global minor modes must `:require' their defining file (i.e. \":require '%s\"), to support the customization variable of the same name." feature)))))
+        "Global minor modes should be autoloaded or, rarely, `:require' their defining file (i.e. \":require '%s\"), to support the customization variable of the same name." feature)))))
 
 (defun package-lint--check-defgroup (def)
   "Offer up concerns about the customization group definition DEF."
