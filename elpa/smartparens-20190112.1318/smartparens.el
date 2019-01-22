@@ -5828,7 +5828,7 @@ Examples: (prefix arg in comment)
 
   (foo bar| baz)   -> (|foo bar baz) ;; 2
 
-  (|(foo bar) baz) -> ((|foo bar) baz)"
+  ((|foo bar) baz) -> (|(foo bar) baz)"
   (interactive "^p")
   (setq arg (or arg 1))
   (if (< arg 0)
@@ -6521,7 +6521,7 @@ Examples:
 
  (1 2 3 4 5| 6)    -> (1 2 3 | 6) ;; -2
 
- (1 2 3 4| 5 6)    -> (|5 6)      ;; - \\[universal-argument]
+ (1 2 3 4| 5 6)    -> (|5 6)      ;; \\[negative-argument] \\[universal-argument]
 
  (1 2 |   )        -> (1 2|)      ;; \\[universal-argument], kill useless whitespace
 
