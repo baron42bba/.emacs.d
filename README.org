@@ -1,4 +1,34 @@
 
+* Welcome
+[2019-01-29 Tue 18:18]
+
+This configuration comes with only a few add-ons to make your life as
+a beginner much more fun.
+You can use menues if you want.
+If you can't remember keybindings just start with
+<ctrl>-c or <ctrl>-x and wait a moment or two. A window will pop up
+and tell you what you might want to press next.
+
+Most important: Don't think of Emacs as a strange, old editor.
+Emacs is a virtual machine. A LISP Engine to be exactly.
+What does that mean?
+There a hundreds of applications available you can run within that machine.
+To give you an idea visit http://melpa.org
+Every package listed there can be easily installed.
+
+You have command line utilities with tons of parameters,
+bash-completion is not enough for you?
+Well, just start a shell in Emacs. aws cli is one of those tools and
+here you have aws-snippets pre-installed bringing you some relief.
+
+You need something for note-taking? Orgmode is there for you.
+
+<ctrl>-<f10> opens this config file.
+<ctrl>-<f9> opens org/emacs.org with some tips and tricks.
+
+And don't forget: It's all text. You can easily extend it with your
+own tips and tricks.
+
 * set your environment
 [2019-01-29 Tue 10:46]
 
@@ -119,12 +149,10 @@ duplicate previous line
   (define-key bba/launcher "e" 'eshell)
   (define-key bba/launcher "E" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
-  (define-key bba/launcher "k" 'bba/keyboard-maestro)
   (define-key bba/launcher "l" 'magit-log-buffer-file)
   (define-key bba/launcher "s" 'shell)
   (define-key bba/launcher "\C-s" 'helm-swoop)
 
-  (global-unset-key (kbd "M-<down-mouse-1>"))
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
   (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
@@ -156,6 +184,9 @@ duplicate previous line
   (define-key global-map (kbd "C-+") 'text-scale-increase)
   (define-key global-map (kbd "C--") 'text-scale-decrease)
 
+  (define-prefix-command 'bba/toggle)
+  (define-key global-map "\C-ct" 'bba/toggle)
+  (define-key bba/toggle "\S-s" 'smerge-mode)
 
 
 #+END_SRC
@@ -168,6 +199,24 @@ we use that as default:
   (global-set-key (kbd "C-r") 'isearch-backward-regexp)
   (global-set-key (kbd "C-M-s") 'isearch-forward)
   (global-set-key (kbd "C-M-r") 'isearch-backward)
+#+END_SRC
+
+Toggle Whitespace mode on and off.  Whitespace mode causes all hard
+tabs to be highlighted.  You can also configure it to highlight space
+characters in a different color.  There is also an untabify function
+to convert hard tabs to the appropriate number of spaces, and a tabify
+function to convert groups of spaces to hard tabs.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (define-key bba/toggle "w" 'whitespace-mode)
+
+  (setq whitespace-display-mappings
+         ;; all numbers are Unicode codepoint in decimal. try (insert-char 182 ) to see it
+        '(
+          (space-mark 32 [183] [46]) ; 32 SPACE, 183 MIDDLE DOT 「·」, 46 FULL STOP 「.」
+          (newline-mark 10 [182 10]) ; 10 LINE FEED
+          (tab-mark 9 [9655 9] [92 9]) ; 9 TAB, 9655 WHITE RIGHT-POINTING TRIANGLE 「▷」
+          ))
 #+END_SRC
 
 * guide-key
