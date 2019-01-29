@@ -1,0 +1,28 @@
+# -*- mode: snippet -*-
+# name: aws-opsworks-stack
+# key: opsworks-stack
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:opsworksStack}": {
+  "Type": "AWS::OpsWorks::Stack",
+  "Properties": {
+    "DefaultInstanceProfileArn": "$2",
+    "Name": "$3",
+    "ServiceRoleArn": "$4",
+    "Attributes": { "$5":"$6" },
+    "ChefConfiguration": { $7 },
+    "ConfigurationManager": { $8 },
+    "CustomCookbooksSource": { $9 },
+    "CustomJson": { $10 },
+    "DefaultAvailabilityZone": "$11",
+    "DefaultOs": "$12",
+    "DefaultRootDeviceType": "$13",
+    "DefaultSshKeyName": "$14",
+    "DefaultSubnetId": "$15",
+    "HostnameTheme": "$16",
+    "UseCustomCookbooks": "${17:$$(yas-choose-value '("true" "false"))}",
+    "UseOpsworksSecurityGroups": "${18:$$(yas-choose-value '("true" "false"))}",
+    "VpcId": "$19"
+  }
+}$0

@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-authentication
+# key: cloudformation-authentication
+# group: cloudformation
+# --
+"AWS::CloudFormation::Authentication": {
+  "${1:AccessCreds}": {
+    "type": "$2",
+    "buckets": [ "$3" ],
+    "roleName": "$4",
+    "accessKeyId": "$5",
+    "secretKey": "$6",
+    "uris": [ "$7" ],
+    "username": "$8",
+    "password": "$9"
+  }
+}$0

@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-kinesis-stream
+# key: kinesis-stream
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:kinesisStream}": {
+   "Type": "AWS::Kinesis::Stream",
+   "Properties": {
+      "ShardCount": "$2"
+   }
+}$0

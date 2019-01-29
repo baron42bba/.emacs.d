@@ -1,0 +1,35 @@
+# -*- mode: snippet -*-
+# name: aws-redshift-cluster
+# key: redshift-cluster
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:redshiftCluster}": {
+  "Type": "AWS::Redshift::Cluster",
+  "Properties": {
+    "AllowVersionUpgrade": "${2:$$(yas-choose-value '("true" "false"))}",
+    "AutomatedSnapshotRetentionPeriod": "$3",
+    "AvailabilityZone": "$4",
+    "ClusterParameterGroupName": "$5",
+    "ClusterSecurityGroups": [ "$6" ],
+    "ClusterSubnetGroupName": "$7",
+    "ClusterType": "$8",
+    "ClusterVersion": "$9",
+    "DBName": "$10",
+    "ElasticIp": "$11",
+    "Encrypted": "${12:$$(yas-choose-value '("true" "false"))}",
+    "HsmClientCertificateIdentifier": "$13",
+    "HsmConfigurationIdentifier": "$14",
+    "MasterUsername": "$15",
+    "MasterUserPassword": "$16",
+    "NodeType": "$17",
+    "NumberOfNodes": "$18",
+    "OwnerAccount": "$19",
+    "Port": "$20",
+    "PreferredMaintenanceWindow": "$21",
+    "PubliclyAccessible": "${22:$$(yas-choose-value '("true" "false"))}",
+    "SnapshotClusterIdentifier": "$23",
+    "SnapshotIdentifier": "$24",
+    "VpcSecurityGroupIds": [ "$25" ]
+  }
+}$0

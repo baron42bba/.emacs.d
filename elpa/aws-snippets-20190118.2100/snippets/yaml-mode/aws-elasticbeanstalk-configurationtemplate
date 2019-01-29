@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: aws-elasticbeanstalk-configurationtemplate
+# key: elasticbeanstalk-configurationtemplate
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:elasticbeanstalkConfigurationTemplate}:
+    Type: AWS::ElasticBeanstalk::ConfigurationTemplate
+    Properties:
+        ApplicationName: $2
+        Description: $3
+        EnvironmentId: $4
+        OptionSettings:
+            - $5
+        SolutionStackName: $6
+        SourceConfiguration: $0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: aws-ref
+# key: ref
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+{ "Ref": "${1:logicalName}" }$0

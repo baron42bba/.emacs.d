@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-route-table
+# key: route-table
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:routeTableName}:
+    Type: AWS::EC2::RouteTable
+    Properties:
+    VpcId: ${2:"--"}
+    Tags:
+        - ${3:"--"}
+$0

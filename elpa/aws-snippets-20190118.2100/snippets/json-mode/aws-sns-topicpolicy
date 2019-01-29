@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: aws-sns-topicpolicy
+# key: sns-topicpolicy
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:snsTopicPolicy}": {
+  "Type": "AWS::SNS::TopicPolicy",
+  "Properties":
+    {
+      "PolicyDocument": {$2},
+      "Topics": [ {$3} ]
+    }
+}$0

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-sns-topic
+# key: sns-topic
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:snsTopic}:
+    Type: AWS::SNS::Topic
+    Properties:
+        DisplayName: $2
+        Subscription:
+            $3
+        TopicName: $0

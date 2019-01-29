@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-route-table-assoc
+# key: route-table-assoc
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:routeTableAssocName"}:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+        SubnetId: ${2:"--"},
+        RouteTableId: ${3:"--"}
+$0

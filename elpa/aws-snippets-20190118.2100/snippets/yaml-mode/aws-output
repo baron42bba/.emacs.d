@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-output
+# key: output
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:name}:
+    Value: ${2:Value to return}
+    Description: ${3:Information about the value}
+    Export:
+        Name: ${4:Value to export}
+$0

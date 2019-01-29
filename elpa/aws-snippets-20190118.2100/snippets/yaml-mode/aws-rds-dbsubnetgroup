@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-rds-dbsubnetgroup
+# key: rds-dbsubnetgroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:rdsDBSubnetGroup}:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+        DBSubnetGroupDescription: $2
+        SubnetIds:
+            $3
+        Tags:
+            tag$0
+

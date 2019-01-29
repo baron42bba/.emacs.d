@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: aws-security-group
+# key: security-group
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:secGroupName}:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+      GroupDescription: ${2:-}
+      SecurityGroupIngress:
+          - ${3:--insert rules--}
+      VpcId: ${4:ref-to-vpc}
+      Tags:
+          $0
+

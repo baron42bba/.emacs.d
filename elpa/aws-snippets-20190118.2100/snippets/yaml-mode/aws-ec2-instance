@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: aws-ec2-instance
+# key: ec2-instance
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:-}:
+    Type: AWS::EC2::Instance
+    Properties:
+        KeyName: ${2:-},
+        DisableApiTermination: ${3:$$(yas-choose-value '("true" "false"))}
+        ImageId: { ${4:-} }
+        InstanceType: ${5:-}
+        Monitoring: ${6:$$(yas-choose-value '("true" "false"))}
+        SecurityGroupIds:
+            - ${7:-}
+        Tags:
+            - Key: ${8:-}
+              Value: ${9:-}
+        UserData:
+            Fn::Base64:
+                !Join:
+                    - ""
+                    - "#!/bin/bash -ex"
+                    - "${10:-}"
+$0

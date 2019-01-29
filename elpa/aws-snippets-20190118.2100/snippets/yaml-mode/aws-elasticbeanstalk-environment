@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: aws-elasticbeanstalk-environment
+# key: elasticbeanstalk-environment
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:elasticbeanstalkEnvironment}:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+        ApplicationName: $2
+        CNAMEPrefix: $3
+        Description: $4
+        EnvironmentName: $5
+        OptionSettings:
+            - $6
+        SolutionStackName: $7
+        TemplateName: $8
+        Tier: $9
+        VersionLabel: $0
+

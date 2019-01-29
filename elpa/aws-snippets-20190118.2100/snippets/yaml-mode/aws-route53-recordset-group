@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-route53-recordset-group
+# key: route53-recordset-group
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:route53RSGroup}:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+        HostedZoneId: $2
+        HostedZoneName: $3
+        RecordSets:
+            - {$4}
+        Comment: $5
+$0

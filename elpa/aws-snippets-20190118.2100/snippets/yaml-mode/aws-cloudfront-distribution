@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: aws-cloudfront-distribution
+# key: cloudfront-distribution
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:cloudfrontDistribution}:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+        DistributionConfig: $0
+

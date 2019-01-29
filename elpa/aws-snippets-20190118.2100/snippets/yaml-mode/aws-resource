@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: aws-resource
+# key: resource
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:resourceName}:
+    Description: ${2:-}
+    Type: ${3:-}
+    Properties: ${4:-}
+$0

@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-elasticache-securitygroupingress
+# key: elasticache-securitygroupingress
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:elasticacheSecurityGroupIngress}": {
+  "Type": "AWS::ElastiCache::SecurityGroupIngress",
+  "Properties":
+  {
+    "CacheSecurityGroupName": "$2",
+    "EC2SecurityGroupName": "$3",
+    "EC2SecurityGroupOwnerId": "$4"
+  }
+}$0

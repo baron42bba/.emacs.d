@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: aws-opsworks-layer
+# key: opsworks-layer
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:opsworksLayer}": {
+  "Type": "AWS::OpsWorks::Layer",
+  "Properties": {
+  	"AutoAssignElasticIps": "${2:$$(yas-choose-value '("true" "false"))}",
+    "AutoAssignPublicIps": "${3:$$(yas-choose-value '("true" "false"))}",
+    "EnableAutoHealing": "${4:$$(yas-choose-value '("true" "false"))}",
+    "Name": "$5",
+    "Shortname": "$6",
+    "StackId": "$7",
+    "Type": "$8",
+    "Attributes": { "$9":"$10" },
+    "CustomInstanceProfileArn": "$11",
+    "CustomRecipes": $12,
+    "CustomSecurityGroupIds":  [ "$13" ],
+    "InstallUpdatesOnBoot": "${14:$$(yas-choose-value '("true" "false"))}",
+    "LoadBasedAutoScaling": { $15 },
+    "Packages": [ "$16" ],
+    "VolumeConfigurations": [ $17 ]
+  }
+}$0

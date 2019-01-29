@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: aws-iam-user
+# key: iam-user
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:iamUser}:
+   Type: AWS::IAM::User
+   Properties:
+       Path: ${2:/}
+       Groups:
+           - $3
+       LoginProfile:
+           Password: "$4"
+       Policies:
+           - $0
+

@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: aws-iam-role
+# key: iam-role
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:iamRole}": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+      "AssumeRolePolicyDocument": { $2 },
+      "Path": "$3",
+      "Policies": [ $4 ]
+   }
+}$0

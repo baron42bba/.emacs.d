@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: aws-elasticache-parametergroup
+# key: elasticache-parametergroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:elastiicacheParameterGroup}": {
+   "Type": "AWS::ElastiCache::ParameterGroup",
+   "Properties": {
+      "CacheParameterGroupFamily": "$2",
+      "Description": "$3",
+      "Properties": { "$4": "$5" }
+   }
+}$0

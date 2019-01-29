@@ -1,0 +1,25 @@
+# -*- mode: snippet -*-
+# name: aws-cloudformation-init
+# key: cloudformation-init
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"AWS::CloudFormation::Init": {
+  "config": {
+    "packages": {
+    $0
+    },
+    "groups": {
+    },
+    "users": {
+    },
+    "sources": {
+    },
+    "files": {
+    },
+    "commands": {
+    },
+    "services": {
+    }
+  }
+}$0

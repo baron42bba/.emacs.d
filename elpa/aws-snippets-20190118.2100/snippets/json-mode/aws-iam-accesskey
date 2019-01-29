@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: aws-iam-accesskey
+# key: iam-accesskey
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:iamAccessKey}": {
+   "Type": "AWS::IAM::AccessKey",
+   "Properties": {
+      "Status": "$2",
+      "UserName": "$3",
+      "Serial": "$4"
+   }
+}$0

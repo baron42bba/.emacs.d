@@ -5,6 +5,7 @@
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 
 (setq org-use-extra-keys t)
+(require 'org-tempo)
 (require 'ob-core)
 (require 'ob-core)
 (require 'ob-tangle)

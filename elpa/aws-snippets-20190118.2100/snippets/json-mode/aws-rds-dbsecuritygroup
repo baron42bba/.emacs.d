@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-rds-dbsecuritygroup
+# key: rds-dbsecuritygroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:rdsDBSecurityGroup}": {
+   "Type": "AWS::RDS::DBSecurityGroup",
+   "Properties": {
+      "EC2VpcId": { $2 },
+      "DBSecurityGroupIngress": [ $3 ],
+      "GroupDescription": "$4",
+      "Tags": [ $5 ]
+   }
+}$0

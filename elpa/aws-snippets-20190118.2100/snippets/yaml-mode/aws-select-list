@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: aws-select-list
+# key: select-list
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+!Select: [ ${1:$$(yas-choose-value '("0" "1" "etc"))}, {"Ref": "${2:list_name}"} ] }$0

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-iam-group
+# key: iam-group
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:iamGroup}": {
+   "Type": "AWS::IAM::Group",
+   "Properties": {
+      "Path": "$2",
+      "Policies": [ "$3" ]
+   }
+}$0

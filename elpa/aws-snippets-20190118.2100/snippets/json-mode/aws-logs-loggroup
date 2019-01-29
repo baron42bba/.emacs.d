@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: aws-logs-loggroup
+# key: logs-loggroup
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+"${1:logLogGroup}": {
+  "Type": "AWS::Logs::LogGroup",
+  "Properties": {
+    "RetentionInDays": "${2}"
+  }
+}

@@ -1,0 +1,29 @@
+# -*- mode: snippet -*-
+# name: aws-cloudwatch-alarm
+# key: cloudwatch-alarm
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:cloudWatchAlarm}:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+        MetricName: $2
+        Namespace: $3
+        ComparisonOperator: $4
+        EvaluationPeriods: $5
+        Period: $6
+        Statistic: $7
+        Threshold: $8
+        ActionsEnabled: ${9:$$(yas-choose-value '("true" "false"))}
+        AlarmActions:
+            - $10
+        AlarmDescription: $11
+        AlarmName: $12
+        Dimensions:
+            - $13
+        InsufficientDataActions:
+            - $14
+        OKActions:
+            - $15
+        Unit: $0
+

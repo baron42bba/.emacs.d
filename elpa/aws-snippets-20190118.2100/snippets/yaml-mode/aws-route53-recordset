@@ -1,0 +1,25 @@
+# -*- mode: snippet -*-
+# name: aws-route53-recordset
+# key: route53-recordset
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:route53RS}:
+    Type: AWS::Route53::RecordSet
+    Properties:
+        Name: $2
+        Type: ${3:$$(yas-choose-value '("A" "AAAA" "CNAME" "MX" "NS" "PTR" "SOA" "SPF" "SRV" "TXT"))}
+        AliasTarget: $4
+        Comment: $5
+        Failover: $6
+        GeoLocation: $7
+        HealthCheckId: $8
+        HostedZoneId: $9
+        HostedZoneName: $10
+        Region: $11
+        ResourceRecords:
+            - $12
+        SetIdentifier: $13
+        TTL: $14
+        Weight: $15
+$0

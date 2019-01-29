@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: aws-subnet
+# key: subnet
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+${1:subnetName}:
+    Type: AWS::EC2::Subnet
+    Properties:
+    AvailabilityZone: ${2:"-"}
+    VpcId: ${3:"-"}
+    CidrBlock: ${4:"-"}
+    Tags:
+        tag$0
+
