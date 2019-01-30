@@ -23,8 +23,16 @@ here you have aws-snippets pre-installed bringing you some relief.
 
 You need something for note-taking? Orgmode is there for you.
 
-<ctrl>-<f10> opens this config file.
-<ctrl>-<f9> opens org/emacs.org with some tips and tricks.
+|--------------+----------------------------------------------------------------------------------|
+| Key          | description                                                                      |
+|--------------+----------------------------------------------------------------------------------|
+| <ctrl>-<f6>  | opens ~/workorg/work.org                                                         |
+| <ctrl>-<f5>  | opens ~/org/notes.org                                                            |
+| <ctrl>-<f9>  | opens ~/org/emacs.org with some tips and tricks.                                 |
+|              | If that's not present it defaults to org/emacs.org in this configuration folder. |
+| <ctrl>-<f10> | opens this config file.                                                          |
+|--------------+----------------------------------------------------------------------------------|
+
 
 And don't forget: It's all text. You can easily extend it with your
 own tips and tricks.
@@ -37,6 +45,27 @@ If you decide to compile [[http://www.emacs.org][Emacs]] from sources:
 #+BEGIN_SRC sh :eval never
   ./configure --prefix=/home/user/.emacs26.1 --with-dbus --with-gif --with-jpeg --with-png --with-rsvg --with-tiff --with-xft --with-xpm --with-x-toolkit=gtk
   make && make install
+#+END_SRC
+
+I recommend you create yourself those directories:
+
+#+BEGIN_SRC sh :eval never
+  mkdir ~/org/
+  mkdir ~/workorg/
+#+END_SRC
+
+To make your life easier and edit files remotely you should align
+Emacs and ssh.
+Within Emacs see the TRAMP configuration below.
+For ssh please add those lines to your ssh/.confg:
+
+#+NAME: .ssh/config
+#+BEGIN_SRC conf :eval never
+  Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/ssh.%C
+    ControlPersist 600
+
 #+END_SRC
 
 You should configure a few environment variables on your system.
@@ -521,6 +550,27 @@ Confirm quit to avoid hitting C-x C-c by accident.
   (font-lock-mode)
   (global-font-lock-mode 1)
 
+#+END_SRC
+
+* TRAMP
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-library "tramp")
+  (add-to-list 'tramp-remote-path "~/bin")
+  (setq default-tramp-method "sshx")
+#+END_SRC
+
+With this you can do /sudo:ssh-host:file-on-ssh-host
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-to-list 'tramp-default-proxies-alist '(nil "\\`root\\'" "/ssh:%h:"))
+#+END_SRC
+
+Use our default socket files
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (if (file-accessible-directory-p "~/.ssh/sockets")
+  (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath=~/.ssh/sockets/ssh.%%C -o ControlPersist=600"))
 #+END_SRC
 
 * colors
