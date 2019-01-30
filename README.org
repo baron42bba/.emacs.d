@@ -176,7 +176,6 @@ duplicate previous line
   (define-key bba/launcher "c" 'helm-calcul-expression)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'eshell)
-  (define-key bba/launcher "E" 'elfeed)
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "l" 'magit-log-buffer-file)
   (define-key bba/launcher "s" 'shell)
@@ -634,6 +633,52 @@ Use our default socket files
                 ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"]))
             )))
 #+END_SRC
+
+* window management
+    [2014-09-24 Wed 13:03]
+
+Bind f3 and f4 to previous/next pane.
+Bind shift f3 and shift f4 to previous/next frame.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun move-cursor-next-pane ()
+    "Move cursor to the next pane."
+    (interactive)
+    (other-window 1))
+
+  (defun move-cursor-previous-pane ()
+    "Move cursor to the previous pane."
+    (interactive)
+    (other-window -1))
+
+  (defun move-cursor-next-frame ()
+    "Move cursor to the next frame."
+    (interactive)
+    (other-frame 1))
+
+  (defun move-cursor-previous-frame ()
+    "Move cursor to the previous frame."
+    (interactive)
+    (other-frame -1))
+
+  (global-set-key (kbd "<f3>") 'move-cursor-previous-pane)
+  (global-set-key (kbd "S-<f3>") 'move-cursor-previous-frame)
+  (global-set-key (kbd "<f4>") 'move-cursor-next-pane)
+  (global-set-key (kbd "S-<f4>") 'move-cursor-next-frame)
+#+END_SRC
+
+Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun twist-split ()
+    (interactive)
+    (setq buffer2 (window-buffer (second (window-list))))
+    (if (window-top-child (frame-root-window))
+    (progn (delete-other-windows) (split-window-horizontally))
+    (progn (delete-other-windows) (split-window-vertically)))
+    (set-window-buffer (second (window-list)) buffer2))
+#+END_SRC
+
 * yasnippet
 [2019-01-29 Tue 13:59]
 
