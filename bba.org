@@ -475,7 +475,7 @@ search the web on your fingertips. C-c /.
           )
 
         (defengine vertica
-          "https://www.vertica.com/docs/9.2.x/HTML/Content/Search/index.htm?q=%s&page=1&searchIDx=9_2_0-live"
+          "https://www.vertica.com/docs/9.2.x/HTML/Content/Search/search.php?zoom_query=%s"
           :keybinding "v"
           )
 
