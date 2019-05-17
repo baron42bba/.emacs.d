@@ -304,6 +304,9 @@ Display open TODO items in magit-status.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (require 'magit-todos)
   (magit-todos-mode)
+  (setq magit-todos-keywords-list
+        (append '("BUGBUG")
+                magit-todos-keywords-list))
 #+END_SRC
 
 do a stash, pull, pop.
@@ -318,6 +321,8 @@ in the end use magit-stash.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'magit-gitflow)
+  (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
 #+END_SRC
 
 * fullframe
