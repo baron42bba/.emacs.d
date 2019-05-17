@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: aws-securitygroup-rule
+# key: sg-rule
+# group: cloudformation
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+{
+"Description": "$1",
+"IpProtocol": "${2:$$(yas-choose-value '("tcp" "udp" "icmp" "-1"))}",
+"FromPort": $3,
+"ToPort": $4,
+"${5:$$(yas-choose-value '("SourceSecurityGroupId" "DestinationSecurityGroupId" "CidrIp" "CidrIpv6" "DestinationPrefixListId"))}": "$6"
+}$0

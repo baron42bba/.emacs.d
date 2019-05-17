@@ -7,10 +7,11 @@
 ${1:secGroupName}:
   Type: AWS::EC2::SecurityGroup
   Properties:
-      GroupDescription: ${2:-}
+      GroupName: ${2:-}
+      GroupDescription: ${3:-}
       SecurityGroupIngress:
-          - ${3:--insert rules--}
-      VpcId: ${4:ref-to-vpc}
+          - ${4:--insert rules--}
+      VpcId: ${5:ref-to-vpc}
       Tags:
           $0
 

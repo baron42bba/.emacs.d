@@ -6,12 +6,13 @@
 # --
 "${1:secGroupName}" : {
   "Type" : "AWS::EC2::SecurityGroup",
-  "Properties" : {
-    "GroupDescription" : "${2:-}",
-    "SecurityGroupIngress" : [
-      ${3:--insert rules--}
+  "Properties": {
+    "GroupName": "${2:-}",
+    "GroupDescription": "${3:-}",
+    "SecurityGroupIngress": [
+      ${4:--insert rules--}
     ],
-    "VpcId" : ${4:ref-to-vpc},
-    "Tags" :  [ ${5:insert tag} ]
+    "VpcId": ${5:ref-to-vpc},
+    "Tags": [ ${6:insert tag} ]
   }
 }$0
