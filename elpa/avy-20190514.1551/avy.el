@@ -1,11 +1,11 @@
 ;;; avy.el --- Jump to arbitrary positions in visible text and select text quickly. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015  Free Software Foundation, Inc.
+;; Copyright (C) 2015-2019  Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/avy
-;; Package-Version: 20190122.1420
-;; Version: 0.4.0
+;; Package-Version: 20190514.1551
+;; Version: 0.5.0
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 ;; Keywords: point, location
 
@@ -457,11 +457,27 @@ KEYS is the path from the root of `avy-tree' to LEAF."
           ((memq char '(27 ?\C-g))
            ;; exit silently
            (throw 'done 'exit))
+          ((eq char ??)
+           (avy-show-dispatch-help)
+           (throw 'done 'restart))
           ((mouse-event-p char)
            (signal 'user-error (list "Mouse event not handled" char)))
           (t
            (message "No such candidate: %s, hit `C-g' to quit."
                     (if (characterp char) (string char) char))))))
+
+(defun avy-show-dispatch-help ()
+  "Display action shortucts in echo area."
+  (let ((len (length "avy-action-")))
+    (message "%s" (mapconcat
+                   (lambda (x)
+                     (format "%s: %s"
+                             (propertize
+                              (char-to-string (car x))
+                              'face 'aw-key-face)
+                             (substring (symbol-name (cdr x)) len)))
+                   avy-dispatch-alist
+                   " "))))
 
 (defvar avy-handler-function 'avy-handler-default
   "A function to call for a bad `read-key' in `avy-read'.")
@@ -733,6 +749,11 @@ Set `avy-style' according to COMMMAND as well."
 
 (declare-function flyspell-correct-word-before-point "flyspell")
 
+(defcustom avy-flyspell-correct-function #'flyspell-correct-word-before-point
+  "Function called to correct word by `avy-action-ispell' when
+`flyspell-mode' is enabled."
+  :type 'function)
+
 (defun avy-action-ispell (pt)
   "Auto correct word at PT."
   (save-excursion
@@ -743,7 +764,7 @@ Set `avy-style' according to COMMMAND as well."
         (line-beginning-position)
         (line-end-position)))
       ((bound-and-true-p flyspell-mode)
-       (flyspell-correct-word-before-point))
+       (funcall avy-flyspell-correct-function))
       ((looking-at-p "\\b")
        (ispell-word))
       (t
@@ -765,7 +786,7 @@ Set `avy-style' according to COMMMAND as well."
         (select-frame-set-input-focus frame))
       (select-window window))))
 
-(defun avy--process-1 (candidates overlay-fn)
+(defun avy--process-1 (candidates overlay-fn &optional cleanup-fn)
   (let ((len (length candidates)))
     (cond ((= len 0)
            nil)
@@ -785,7 +806,7 @@ Set `avy-style' according to COMMMAND as well."
                         (t
                          (avy-read (avy-tree candidates avy-keys)
                                    overlay-fn
-                                   #'avy--remove-leading-chars))))
+                                   (or cleanup-fn #'avy--remove-leading-chars)))))
              (avy--done))))))
 
 (defvar avy-last-candidates nil
@@ -822,10 +843,13 @@ Set `avy-style' according to COMMMAND as well."
      (when (< pos (1- (length lst)))
        (goto-char (caar (nth (1+ pos) lst)))))))
 
-(defun avy--process (candidates &optional overlay-fn)
+(defun avy-process (candidates &optional overlay-fn cleanup-fn)
   "Select one of CANDIDATES using `avy-read'.
-Use OVERLAY-FN to visualize the decision overlay."
+Use OVERLAY-FN to visualize the decision overlay.
+CLEANUP-FN should take no arguments and remove the effects of
+multiple OVERLAY-FN invocations."
   (setq overlay-fn (or overlay-fn (avy--style-fn avy-style)))
+  (setq cleanup-fn (or cleanup-fn #'avy--remove-leading-chars))
   (unless (and (consp (car candidates))
                (windowp (cdar candidates)))
     (setq candidates
@@ -833,13 +857,13 @@ Use OVERLAY-FN to visualize the decision overlay."
                   candidates)))
   (setq avy-last-candidates (copy-sequence candidates))
   (let ((original-cands (copy-sequence candidates))
-        (res (avy--process-1 candidates overlay-fn)))
+        (res (avy--process-1 candidates overlay-fn cleanup-fn)))
     (cond
       ((null res)
        (message "zero candidates")
        t)
       ((eq res 'restart)
-       (avy--process original-cands overlay-fn))
+       (avy-process original-cands overlay-fn cleanup-fn))
       ;; ignore exit from `avy-handler-function'
       ((eq res 'exit))
       (t
@@ -848,7 +872,11 @@ Use OVERLAY-FN to visualize the decision overlay."
        (funcall (or avy-action 'avy-action-goto)
                 (if (consp res)
                     (car res)
-                  res))))))
+                  res))
+       res))))
+
+(define-obsolete-function-alias 'avy--process 'avy-process
+  "0.4.0")
 
 (defvar avy--overlays-back nil
   "Hold overlays for when `avy-background' is t.")
@@ -1072,7 +1100,7 @@ LEAF is normally ((BEG . END) . WND)."
          (wnd (cdr leaf))
          end)
     (dotimes (i len)
-      (set-text-properties (- len i 1) (- len i)
+      (set-text-properties i (1+ i)
                            `(face ,(nth i avy-lead-faces))
                            str))
     (when (eq avy-style 'de-bruijn)
@@ -1201,17 +1229,32 @@ exist."
     (ignore #'ignore)
     (t (error "Unexpected style %S" style))))
 
-(defun avy--generic-jump (regex window-flip &optional beg end)
+(cl-defun avy-jump (regex &key window-flip beg end action pred)
   "Jump to REGEX.
 The window scope is determined by `avy-all-windows'.
 When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
-STYLE determines the leading char overlay style.
-BEG and END narrow the scope where candidates are searched."
+BEG and END narrow the scope where candidates are searched.
+ACTION is a function that takes point position as an argument.
+When PRED is non-nil, it's a filter for matching point positions."
+  (setq avy-action (or action avy-action))
   (let ((avy-all-windows
          (if window-flip
              (not avy-all-windows)
            avy-all-windows)))
-    (avy--process
+    (avy-process
+     (avy--regex-candidates regex beg end pred))))
+
+(defun avy--generic-jump (regex window-flip &optional beg end)
+  "Jump to REGEX.
+The window scope is determined by `avy-all-windows'.
+When WINDOW-FLIP is non-nil, do the opposite of `avy-all-windows'.
+BEG and END narrow the scope where candidates are searched."
+  (declare (obsolete avy-jump "0.4.0"))
+  (let ((avy-all-windows
+         (if window-flip
+             (not avy-all-windows)
+           avy-all-windows)))
+    (avy-process
      (avy--regex-candidates regex beg end))))
 
 ;;* Commands
@@ -1222,22 +1265,21 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-char
-    (avy--generic-jump
+    (avy-jump
      (if (= 13 char)
          "\n"
        (regexp-quote (string char)))
-     arg)))
+     :window-flip arg)))
 
 ;;;###autoload
 (defun avy-goto-char-in-line (char)
   "Jump to the currently visible CHAR in the current line."
   (interactive (list (read-char "char: " t)))
   (avy-with avy-goto-char
-    (avy--generic-jump
+    (avy-jump
      (regexp-quote (string char))
-     avy-all-windows
-     (line-beginning-position)
-     (line-end-position))))
+     :beg (line-beginning-position)
+     :end (line-end-position))))
 
 ;;;###autoload
 (defun avy-goto-char-2 (char1 char2 &optional arg beg end)
@@ -1254,10 +1296,11 @@ BEG and END narrow the scope where candidates are searched."
   (when (eq char2 ?)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
-    (avy--generic-jump
+    (avy-jump
      (regexp-quote (string char1 char2))
-     arg
-     beg end)))
+     :window-flip arg
+     :beg beg
+     :end end)))
 
 ;;;###autoload
 (defun avy-goto-char-2-above (char1 char2 &optional arg)
@@ -1295,7 +1338,7 @@ When ARG is non-nil, do the opposite of `avy-all-windows'."
   (interactive)
   (avy-with avy-isearch
     (let ((avy-background nil))
-      (avy--process
+      (avy-process
        (avy--regex-candidates (if isearch-regexp
                                   isearch-string
                                 (regexp-quote isearch-string))))
@@ -1309,7 +1352,10 @@ When ARG is non-nil, do the opposite of `avy-all-windows'.
 BEG and END narrow the scope where candidates are searched."
   (interactive "P")
   (avy-with avy-goto-word-0
-    (avy--generic-jump avy-goto-word-0-regexp arg beg end)))
+    (avy-jump avy-goto-word-0-regexp
+              :window-flip arg
+              :beg beg
+              :end end)))
 
 (defun avy-goto-word-0-above (arg)
   "Jump to a word start between window start and point.
@@ -1349,7 +1395,10 @@ When SYMBOL is non-nil, jump to symbol start instead of word start."
                          (concat
                           (if symbol "\\_<" "\\b")
                           str)))))
-      (avy--generic-jump regex arg beg end))))
+      (avy-jump regex
+                :window-flip arg
+                :beg beg
+                :end end))))
 
 ;;;###autoload
 (defun avy-goto-word-1-above (char &optional arg)
@@ -1455,7 +1504,7 @@ BEG and END narrow the scope where candidates are searched."
                      (not (get-char-property (point) 'invisible))
                      (push (cons (point) (selected-window)) window-cands)))
               (setq candidates (nconc candidates window-cands))))))
-      (avy--process candidates))))
+      (avy-process candidates))))
 
 ;;;###autoload
 (defun avy-goto-subword-1 (char &optional arg)
@@ -1500,8 +1549,8 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
             (narrow-to-region ws (or end (window-end (selected-window) t)))
             (goto-char (point-min))
             (while (< (point) (point-max))
-              (unless (get-char-property
-                       (max (1- (point)) ws) 'invisible)
+              (when (member (get-char-property
+                             (max (1- (point)) ws) 'invisible) '(nil org-link))
                 (push (cons
                        (if (eq avy-style 'post)
                            (line-end-position)
@@ -1614,7 +1663,7 @@ When BOTTOM-UP is non-nil, display avy candidates from top to bottom"
                          (message "Goto line:")
                          'ignore)
                      avy-style)))
-    (avy--process
+    (avy-process
      (avy--line-cands arg beg end bottom-up))))
 
 ;;;###autoload
@@ -1932,11 +1981,10 @@ newline."
 (defun avy--read-candidates (&optional re-builder)
   "Read as many chars as possible and return their occurrences.
 At least one char must be read, and then repeatedly one next char
-may be read if it is entered before `avy-timeout-seconds'.  Any
-key defined in `avy-del-last-char-by' (by default `C-h' and `DEL')
-deletes the last char entered, and `RET' exits with the
-currently read string immediately instead of waiting for another
-char for `avy-timeout-seconds'.
+may be read if it is entered before `avy-timeout-seconds'.  DEL
+deletes the last char entered, and RET exits with the currently
+read string immediately instead of waiting for another char for
+`avy-timeout-seconds'.
 The format of the result is the same as that of `avy--regex-candidates'.
 This function obeys `avy-all-windows' setting.
 RE-BUILDER is a function that takes a string and returns a regex.
@@ -2023,15 +2071,16 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                              (not avy-all-windows)
                            avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process
+      (avy-process
        (avy--read-candidates)))))
 
 (defun avy-push-mark ()
   "Store the current point and window."
-  (ring-insert avy-ring
-               (cons (point) (selected-window)))
-  (unless (region-active-p)
-    (push-mark)))
+  (let ((inhibit-message t))
+    (ring-insert avy-ring
+                 (cons (point) (selected-window)))
+    (unless (region-active-p)
+      (push-mark))))
 
 (defun avy-pop-mark ()
   "Jump back to the last location of `avy-push-mark'."
@@ -2066,9 +2115,8 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
   (let* ((org-reverse-note-order t)
          (marker (save-excursion
                    (avy-with avy-goto-line
-                     (unless (eq 't (avy--generic-jump (rx bol (1+ "*") (1+ space))
-                                                       nil))
-                       ;; `avy--generic-jump' returns t when aborted with C-g.
+                     (unless (eq 't (avy-jump (rx bol (1+ "*") (1+ space))))
+                       ;; `avy-jump' returns t when aborted with C-g.
                        (point-marker)))))
          (filename (buffer-file-name (or (buffer-base-buffer (marker-buffer marker))
                                          (marker-buffer marker))))
@@ -2089,7 +2137,7 @@ The window scope is determined by `avy-all-windows' (ARG negates it)."
                              (not avy-all-windows)
                            avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process
+      (avy-process
        (avy--read-candidates
         (lambda (input)
           (format "^\\*+ .*\\(%s\\)" input))))
