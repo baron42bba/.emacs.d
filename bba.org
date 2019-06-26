@@ -2459,8 +2459,13 @@ list who can decrypt a file:
   (fset 'perl-mode 'cperl-mode)
 
   (eval-after-load "cperl-mode"
-    '(add-hook 'cperl-mode-hook (lambda() (cperl-set-style "GNU"))))
-
+    '(progn
+       (add-hook 'cperl-mode-hook (lambda() ((cperl-set-style "K&R"))))
+       (setq cperl-close-paren-offset -4)
+       (setq cperl-continued-statement-offset 4)
+       (setq cperl-indent-level 4)
+       (setq cperl-indent-parens-as-block t)
+       (setq cperl-tab-always-indent t)))
 
 #+END_SRC
 
