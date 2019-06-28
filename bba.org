@@ -2637,6 +2637,13 @@ Takes care of doing upper-case for keywords.
   (add-hook 'sql-mode-hook 'sqlup-mode)
   (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
 #+END_SRC
+* [[https://github.com/alex-hhh/emacs-sql-indent][sql-indent]]
+[2019-06-28 Fri 12:34]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'sql-indent)
+  (add-hook 'sql-mode-hook 'sqlind-minor-mode)
+#+END_SRC
 
 * remove trailing whitespace
     [2014-09-24 Wed 16:56]
