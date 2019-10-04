@@ -1265,6 +1265,20 @@ Sometimes you need a file finder in the current buffers directory.
 
 #+END_SRC
 
+** open current file via osx open
+[2017-06-07 Wed 13:50]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-open-file-system ()
+    "Open the current file via osx open."
+    (interactive)
+    (if (string-equal system-type "darwin")
+	(shell-command (concat "open " (buffer-file-name)))
+      )
+    )
+
+#+END_SRC
+
 ** open current directory in iterm screen
 [2017-02-14 Tue 12:24]
 
