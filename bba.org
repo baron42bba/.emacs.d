@@ -483,7 +483,7 @@ search the web on your fingertips. C-c /.
           )
 
         (defengine vertica
-          "https://www.vertica.com/docs/9.2.x/HTML/Content/Search/search.php?zoom_query=%s"
+          "https://www.vertica.com/docs/latest/HTML/Content/Search/search.php?zoom_query=%s"
           :keybinding "v"
           )
 
