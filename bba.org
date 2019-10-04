@@ -1228,6 +1228,7 @@ Your notes are more useful if you can easily search them!
      (sqlite . t)
      (perl . t)
      (sql . t)
+     (tmux . sh)
      ))
 
   ;;(setq org-html-preamble nil
@@ -1244,7 +1245,7 @@ Your notes are more useful if you can easily search them!
   ;; body-only option ?
 
   ;; (setq html (org-export-as-html 3 nil nil 1))
-
+  (setq org-babel-tmux-location "/opt/local/bin/tmux")
 
 #+END_SRC
 
