@@ -864,7 +864,7 @@ Some extra functionality from the org package repository.
 #+BEGIN_SRC emacs-lisp :tangle yes
     (if (>= emacs-major-version 24)
         (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20190904" t)
+          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20190930" t)
           ))
 
 #+END_SRC
