@@ -277,6 +277,19 @@ Keep track of your important stuff!
     )
 #+END_SRC
 
+* calendar
+[2019-09-30 Mon 10:30]
+
+#+begin_src emacs-lisp :tangle yes
+  (defun calendar-insert-date ()
+    "Capture the date at point, exit the Calendar, insert the date."
+    (interactive)
+    (seq-let (month day year) (save-match-data (calendar-cursor-to-date))
+      (calendar-exit)
+      (insert (format "%d-%02d-%02d" year month day))))
+
+  (define-key calendar-mode-map (kbd "RET") 'calendar-insert-date)
+#+end_src
 * magit
 
 For annotated tags prepare message with commit messages since last tag.
