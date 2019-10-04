@@ -1131,6 +1131,12 @@ Get reveal.js as well:
       (kill-buffer buffer)))
 #+END_SRC
 
+** [[https://github.com/tarsius/ox-texinfo-plus][ox-texinfo+]]
+[2019-01-23 Wed 16:08]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-file (expand-file-name "~/.emacs.d/lisp/ox-texinfo+.el"))
+#+END_SRC
 
 ** bba-ox-clip-formatted-copy
 [2016-12-13 Tue 15:29]
