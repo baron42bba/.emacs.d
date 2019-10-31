@@ -12,7 +12,7 @@
 ;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
 
 ;; Package-Requires: ((emacs "25.1") (dash "20180910") (with-editor "20181103"))
-;; Package-Version: 20190102.107
+;; Package-Version: 20190928.1746
 ;; Keywords: git tools vc
 ;; Homepage: https://github.com/magit/magit
 
@@ -91,7 +91,7 @@
 ;;   C-c C-r  Insert a Reviewed-by header.
 ;;   C-c C-o  Insert a Cc header.
 ;;   C-c C-p  Insert a Reported-by header.
-;;   C-c M-s  Insert a Suggested-by header.
+;;   C-c C-i  Insert a Suggested-by header.
 
 ;; When Git requests a commit message from the user, it does so by
 ;; having her edit a file which initially contains some comments,
@@ -270,7 +270,8 @@ already using it, then you probably shouldn't start doing so."
 
 (defcustom git-commit-known-pseudo-headers
   '("Signed-off-by" "Acked-by" "Modified-by" "Cc"
-    "Suggested-by" "Reported-by" "Tested-by" "Reviewed-by")
+    "Suggested-by" "Reported-by" "Tested-by" "Reviewed-by"
+    "Co-authored-by")
   "A list of Git pseudo headers to be highlighted."
   :group 'git-commit
   :safe (lambda (val) (and (listp val) (-all-p 'stringp val)))
@@ -412,6 +413,8 @@ This is only used if Magit is available."
      :help "Insert a 'Reported-by' header"]
     ["Suggested" git-commit-suggested t
      :help "Insert a 'Suggested-by' header"]
+    ["Co-authored-by" git-commit-co-authored t
+     :help "Insert a 'Co-authored-by' header"]
     "-"
     ["Save" git-commit-save-message t]
     ["Cancel" with-editor-cancel t]
@@ -421,7 +424,7 @@ This is only used if Magit is available."
 
 ;;;###autoload
 (defconst git-commit-filename-regexp "/\\(\
-\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\
+\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\
 \\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")
 
 (eval-after-load 'recentf
@@ -470,26 +473,31 @@ This is only used if Magit is available."
 (when (eq system-type 'windows-nt)
   (add-hook 'find-file-not-found-functions #'git-commit-file-not-found))
 
+(defconst git-commit-usage-message "\
+Type \\[with-editor-finish] to finish, \
+\\[with-editor-cancel] to cancel, and \
+\\[git-commit-prev-message] and \\[git-commit-next-message] \
+to recover older messages")
+
 ;;;###autoload
 (defun git-commit-setup ()
-  ;; Pretend that git-commit-mode is a major-mode,
-  ;; so that directory-local settings can be used.
   (when (fboundp 'magit-toplevel)
     ;; `magit-toplevel' is autoloaded and defined in magit-git.el,
     ;; That library declares this functions without loading
     ;; magit-process.el, which defines it.
     (require 'magit-process nil t))
+  ;; Pretend that git-commit-mode is a major-mode,
+  ;; so that directory-local settings can be used.
   (let ((default-directory
-          (if (or (file-exists-p ".dir-locals.el")
-                  (not (fboundp 'magit-toplevel)))
-              default-directory
-            ;; When $GIT_DIR/.dir-locals.el doesn't exist,
-            ;; fallback to $GIT_WORK_TREE/.dir-locals.el,
-            ;; because the maintainer can use the latter
-            ;; to enforce conventions, while s/he has no
-            ;; control over the former.
-            (and (fboundp 'magit-toplevel) ; silence byte-compiler
-                 (magit-toplevel)))))
+          (or (and (not (file-exists-p ".dir-locals.el"))
+                   ;; When $GIT_DIR/.dir-locals.el doesn't exist,
+                   ;; fallback to $GIT_WORK_TREE/.dir-locals.el,
+                   ;; because the maintainer can use the latter
+                   ;; to enforce conventions, while s/he has no
+                   ;; control over the former.
+                   (fboundp 'magit-toplevel)  ; silence byte-compiler
+                   (magit-toplevel))
+              default-directory)))
     (let ((buffer-file-name nil)         ; trick hack-dir-local-variables
           (major-mode 'git-commit-mode)) ; trick dir-locals-collect-variables
       (hack-dir-local-variables)
@@ -505,7 +513,9 @@ This is only used if Magit is available."
           (git-commit-mode t)
           (with-editor-mode t))
       (normal-mode t)))
+  ;; Show our own message using our hook.
   (setq with-editor-show-usage nil)
+  (setq with-editor-usage-message git-commit-usage-message)
   (unless with-editor-mode
     ;; Maybe already enabled when using `shell-command' or an Emacs shell.
     (with-editor-mode 1))
@@ -540,7 +550,8 @@ This is only used if Magit is available."
     (goto-char (point-min))
     (when (looking-at "\\`\\(\\'\\|\n[^\n]\\)")
       (open-line 1)))
-  (run-hooks 'git-commit-setup-hook)
+  (with-demoted-errors "Error running git-commit-setup-hook: %S"
+    (run-hooks 'git-commit-setup-hook))
   (set-buffer-modified-p nil))
 
 (defun git-commit-run-post-finish-hook (previous)
@@ -567,7 +578,8 @@ Don't use it directly, instead enable `global-git-commit-mode'."
 (put 'git-commit-mode 'permanent-local t)
 
 (defun git-commit-setup-changelog-support ()
-  "Treat ChangeLog entries as paragraphs."
+  "Treat ChangeLog entries as unindented paragraphs."
+  (setq-local fill-indent-according-to-mode t)
   (setq-local paragraph-start (concat paragraph-start "\\|\\*\\|(")))
 
 (defun git-commit-turn-on-auto-fill ()
@@ -728,6 +740,11 @@ With a numeric prefix ARG, go forward ARG comments."
   "Insert a header mentioning the person who suggested the change."
   (interactive (git-commit-read-ident))
   (git-commit-insert-header "Suggested-by" name mail))
+
+(defun git-commit-co-authored-by (name mail)
+  "Insert a header mentioning the person who co-authored the commit."
+  (interactive (git-commit-read-ident))
+  (git-commit-insert-header "Co-authored-by" name mail))
 
 (defun git-commit-self-ident ()
   (list (or (getenv "GIT_AUTHOR_NAME")
