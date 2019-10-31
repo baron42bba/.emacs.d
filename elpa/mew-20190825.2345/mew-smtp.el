@@ -123,6 +123,7 @@
   (let ((msgs (mew-smtp-get-messages pnm))
 	(qfld (mew-smtp-get-qfld pnm))
 	(case (mew-smtp-get-case pnm))
+	(buf (process-buffer pro))
 	msg)
     (if msgs
 	(progn
@@ -134,6 +135,7 @@
 	  (mew-smtp-set-case pnm case) ;; override
 	  (mew-smtp-set-messages pnm msgs)
 	  (set-process-buffer pro (current-buffer))
+	  (mew-remove-buffer buf)
 	  (mew-smtp-set-status pnm "mail-from")
 	  (mew-smtp-command-mail-from pro pnm))
       (mew-smtp-set-status pnm "quit")
@@ -390,6 +392,9 @@
 	(when mew-inherit-submission
 	  (setq family mew-smtp-submission-family)
 	  (setq nowait t))
+	(when (and (stringp port) (string-match "^/" port))
+	  (setq family 'local)
+	  (setq server 'local))
 	(setq pro (make-network-process :name name :buffer buf
 					:host server :service port
 					:family family :nowait nowait))
