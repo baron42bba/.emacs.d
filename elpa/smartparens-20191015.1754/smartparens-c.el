@@ -1,8 +1,8 @@
-;;; smartparens-clojure.el --- Additional configuration for Clojure mode.  -*- lexical-binding: t; -*-
+;;; smartparens-c.el --- Additional configuration for C/C++ mode.  -*- lexical-binding: t; -*-
 ;;
-;; Author: Vitalie Spinu <spinuvit@gmail.com>
+;; Author: Naoya Yamashita <conao3@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Created: 14 July 2016
+;; Created: 23 June 2019
 ;; Keywords: abbrev convenience editing
 ;; URL: https://github.com/Fuco1/smartparens
 ;;
@@ -27,10 +27,10 @@
 ;;
 ;;; Commentary:
 ;;
-;; This file provides some additional configuration for Clojure mode.  To use
-;; it, simply add:
+;; This file provides some additional configuration for C/C++ mode.
+;; To use it, simply add:
 ;;
-;; (require 'smartparens-clojure)
+;; (require 'smartparens-c)
 ;;
 ;; into your configuration.  You can use this in conjunction with the
 ;; default config or your own configuration.
@@ -39,18 +39,14 @@
 
 (require 'smartparens)
 
-(defvar sp-clojure-prefix "\\(?:[@`'#~,_?^]+\\)"
-  "Prefix used in `sp-sepx-prefix' for clojure modes.")
+;; remap electric delete functions to smartparens function
+(define-key smartparens-strict-mode-map [remap c-electric-delete-forward] 'sp-delete-char)
+(define-key smartparens-strict-mode-map [remap c-electric-backspace] 'sp-backward-delete-char)
 
-(dolist (mode '(clojure-mode clojurescript-mode clojurec-mode cider-repl-mode))
-  (add-to-list 'sp-sexp-prefix `(,mode regexp ,sp-clojure-prefix)))
+(sp-with-modes sp-c-modes
+  (sp-local-pair "{" nil :post-handlers '(("||\n[i]" "RET")))
+  (sp-local-pair "/*" "*/" :post-handlers '((" | " "SPC")
+                                            ("* ||\n[i]" "RET"))))
 
-;; Match "`" with "`" in strings and comments
-(sp-with-modes sp-clojure-modes
-  (sp-local-pair "`" "`"
-                 :when '(sp-in-string-p
-                         sp-in-comment-p)
-                 :unless '(sp-lisp-invalid-hyperlink-p)))
-
-(provide 'smartparens-clojure)
-;;; smartparens-clojure.el ends here
+(provide 'smartparens-c)
+;;; smartparens-c.el ends here

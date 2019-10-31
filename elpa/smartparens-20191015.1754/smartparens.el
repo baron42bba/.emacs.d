@@ -610,6 +610,14 @@ Symbol is defined as a chunk of text recognized by
   :type '(repeat symbol)
   :group 'smartparens)
 
+(defcustom sp-c-modes '(
+                        c-mode
+                        c++-mode
+                        )
+  "List of C-related modes."
+  :type '(repeat symbol)
+  :group 'smartparens)
+
 (defcustom sp-no-reindent-after-kill-modes '(
                                              python-mode
                                              coffee-mode
@@ -3260,9 +3268,10 @@ last form; otherwise do nothing."
 ;; why we need each of these.
 (defun sp--save-pre-command-state ()
   "Save some of the buffer state before `pre-command-hook'."
-  (setq sp-point-inside-string (sp-point-in-string))
-  (setq sp-pre-command-point (point))
-  (setq sp-buffer-modified-p (buffer-modified-p)))
+  (when smartparens-mode
+    (setq sp-point-inside-string (sp-point-in-string))
+    (setq sp-pre-command-point (point))
+    (setq sp-buffer-modified-p (buffer-modified-p))))
 
 (add-hook 'pre-command-hook 'sp--save-pre-command-state)
 
@@ -6337,6 +6346,8 @@ The argument INTERACTIVE is for internal use only.
 If called interactively and `sp-navigate-reindent-after-up' is
 enabled for current major-mode, remove the whitespace between end
 of the expression and the last \"thing\" inside the expression.
+This behaviour can be suppressed for syntactic string sexps by
+setting `sp-navigate-reindent-after-up-in-string' to nil.
 
 If `sp-navigate-close-if-unbalanced' is non-nil, close the
 unbalanced expressions automatically.
@@ -7559,9 +7570,9 @@ Examples:
 
 With BACK non-nil, move backwards."
   (if back
-      (while (not (sp-point-in-string))
+      (while (and (not (sp-point-in-string)) (> (point) (point-min)))
         (backward-char))
-    (while (not (sp-point-in-string))
+    (while (and (not (sp-point-in-string)) (< (point) (point-max)))
       (forward-char))))
 
 ;; TODO: in ruby, "foo |if bar" now moves correctly, but there's a
@@ -9304,6 +9315,11 @@ the opening delimiter or before the closing delimiter."
   :type 'boolean
   :group 'show-smartparens)
 
+(defcustom sp-show-pair-match-priority 1000
+  "Priority of matching pair highlighting overlays."
+  :type 'integer
+  :group 'show-smartparens)
+
 (defface sp-show-pair-match-face
   '((t (:inherit show-paren-match)))
   "`show-smartparens-mode' face used for a matching pair."
@@ -9463,9 +9479,9 @@ matching paren in the echo area if not visible on screen."
     (unless (use-region-p)
       (overlay-put omiddle 'face 'sp-show-pair-match-content-face))
     (overlay-put oright 'face 'sp-show-pair-match-face)
-    (overlay-put oleft 'priority 1000)
+    (overlay-put oleft 'priority sp-show-pair-match-priority)
     (overlay-put omiddle 'priority 1000)
-    (overlay-put oright 'priority 1000)
+    (overlay-put oright 'priority sp-show-pair-match-priority)
     (overlay-put oleft 'type 'show-pair)))
 
 (defun sp-show--pair-echo-match (start end olen clen)
