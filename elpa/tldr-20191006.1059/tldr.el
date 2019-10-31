@@ -2,8 +2,8 @@
 
 ;; Author: Ono Hiroko <azazabc123@gmail.com>
 ;; Keywords: tools, docs
-;; Package-Version: 20180122.1112
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Version: 20191006.1059
+;; Package-Requires: ((emacs "24.3") (request "0.3.0"))
 ;; X-URL: https://github.com/kuanyui/tldr.el
 ;; Version: {{VERSION}}
 
@@ -34,6 +34,7 @@
 
 (require 'url)
 (require 'cl-lib)
+(require 'request)
 
 (defgroup tldr nil
   "tldr client for Emacs"
@@ -142,12 +143,29 @@
       (progn
         (if (file-exists-p tldr-directory-path)
             (delete-directory tldr-directory-path 'recursive 'no-trash))
-        (url-copy-file tldr-source-zip-url tldr-saved-zip-path 'overwrite)
-        (shell-command (format "unzip -d %s %s" (file-truename user-emacs-directory) tldr-saved-zip-path))
+        (tldr-request-data tldr-source-zip-url tldr-saved-zip-path)
+        (shell-command-to-string (format "unzip -d %s %s" (file-truename user-emacs-directory) tldr-saved-zip-path))
         (delete-file tldr-saved-zip-path)
-        (shell-command (format "mv '%s' '%s'" (concat (file-truename user-emacs-directory) "tldr-master") tldr-directory-path))
+        (shell-command-to-string (format "mv '%s' '%s'" (concat (file-truename user-emacs-directory) "tldr-master") tldr-directory-path))
         (message "Now tldr docs is updated!"))))
 
+
+(defun tldr-request-data (url file)
+  "Resuest data from URL and save file at the location of FILE."
+  (request
+   url
+   :parser 'buffer-string
+   :success
+   (cl-function (lambda (&key data &allow-other-keys)
+		  (when data
+		    (with-temp-buffer (get-buffer-create "*request data*")
+				      (erase-buffer)
+				      (insert data)
+				      (write-file file)
+				      (kill-buffer "*request data*")))))
+   :error
+   (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+		  (message "Got error: %S" error-thrown)))))
 
 (defun tldr-get-commands-list ()
   "For `completing-read'"
