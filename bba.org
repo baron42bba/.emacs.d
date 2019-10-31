@@ -4402,6 +4402,7 @@ Check a AWS Cloudformation template with [[https://github.com/stelligent/cfn_nag
     "Check buffer with cfn_nag_scan."
     (interactive)
     (shell-command (concat "cfn_nag_scan --input-path " buffer-file-name)))
+  (require 'json-mode)
   (define-key json-mode-map (kbd "C-c C-n") 'bba-aws-cfn-nag-scan)
 #+END_SRC
 
