@@ -551,6 +551,18 @@ search the web on your fingertips. C-c /.
     )
 #+END_SRC
 
+* xah-lookup
+[2017-03-20 Mon 17:46]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/xah-lookup-20181225.1942")
+        (require 'xah-lookup)
+        )
+    (setq xah-lookup-browser-function 'eww)
+    )
+#+END_SRC
 * expand-region
     [2015-04-02 Thu 10:32]
 
