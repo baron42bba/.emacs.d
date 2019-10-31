@@ -6,7 +6,7 @@
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
 ;; Keywords: http
-;; Package-Version: 20190122.942
+;; Package-Version: 20191009.1208
 
 ;; This file is not part of GNU Emacs.
 ;; This file is public domain software. Do what you want.
@@ -187,22 +187,18 @@
     ad-do-it))
 (ad-activate 'url-http-user-agent-string)
 
-(defun restclient-restore-header-variables ()
-  (url-set-mime-charset-string)
-  (setq url-mime-language-string nil)
-  (setq url-mime-encoding-string nil)
-  (setq url-mime-accept-string nil)
-  (setq url-personal-mail-address nil))
-
 (defun restclient-http-do (method url headers entity &rest handle-args)
   "Send ENTITY and HEADERS to URL as a METHOD request."
   (if restclient-log-request
       (message "HTTP %s %s Headers:[%s] Body:[%s]" method url headers entity))
   (let ((url-request-method (encode-coding-string method 'us-ascii))
         (url-request-extra-headers '())
-        (url-request-data (encode-coding-string entity 'utf-8)))
-
-    (restclient-restore-header-variables)
+        (url-request-data (encode-coding-string entity 'utf-8))
+        (url-mime-charset-string (url-mime-charset-string))
+        (url-mime-language-string nil)
+        (url-mime-encoding-string nil)
+        (url-mime-accept-string nil)
+        (url-personal-mail-address nil))
 
     (dolist (header headers)
       (let* ((mapped (assoc-string (downcase (car header))
@@ -275,7 +271,12 @@
               (insert-image (create-image img nil t))))
 
            ((eq guessed-mode 'js-mode)
-            (let ((json-special-chars (remq (assoc ?/ json-special-chars) json-special-chars)))
+            (let ((json-special-chars (remq (assoc ?/ json-special-chars) json-special-chars))
+		  ;; Emacs 27 json.el uses `replace-buffer-contents' for
+		  ;; pretty-printing which is great because it keeps point and
+		  ;; markers intact but can be very slow with huge minimalized
+		  ;; JSON.  We don't need that here.
+		  (json-pretty-print-max-secs 0))
               (ignore-errors (json-pretty-print-buffer)))
             (restclient-prettify-json-unicode)))
 
@@ -300,7 +301,6 @@ The buffer contains the raw HTTP response sent by the server."
   (setq restclient-request-time-end (current-time))
   (if (= (point-min) (point-max))
       (signal (car (plist-get status :error)) (cdr (plist-get status :error)))
-    (restclient-restore-header-variables)
     (when (buffer-live-p (current-buffer))
       (with-current-buffer (restclient-decode-response
                             (current-buffer)
@@ -310,6 +310,7 @@ The buffer contains the raw HTTP response sent by the server."
         (unless raw
           (restclient-prettify-response method url))
         (buffer-enable-undo)
+	(restclient-response-mode)
         (run-hooks 'restclient-response-loaded-hook)
         (if stay-in-window
             (display-buffer (current-buffer) t)
@@ -596,6 +597,15 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
       :keymap '(("\t" . restclient-toggle-body-visibility-or-indent)
                 ("\C-c\C-a" . restclient-toggle-body-visibility-or-indent))
       :group 'restclient)
+
+(define-minor-mode restclient-response-mode
+  "Minor mode to allow additional keybindings in restclient response buffer."
+  :init-value nil
+  :lighter nil
+  :keymap '(("q" . (lambda ()
+		     (interactive)
+		     (quit-window (get-buffer-window (current-buffer))))))
+  :group 'restclient)
 
 ;;;###autoload
 (define-derived-mode restclient-mode fundamental-mode "REST Client"
