@@ -57,6 +57,8 @@
 
 ;;; Code:
 
+(require 'map)
+(require 'seq)
 (require 'subr-x)
 
 (require 'cider-client)
@@ -65,7 +67,7 @@
 
 (define-obsolete-variable-alias 'cider-save-files-on-cider-ns-refresh 'cider-ns-save-files-on-refresh "0.18")
 (defcustom cider-ns-save-files-on-refresh 'prompt
-  "Controls whether to prompt to save Clojure files on `cider-ns-refresh'.
+  "Controls whether to prompt to save files before refreshing.
 If nil, files are not saved.
 If 'prompt, the user is prompted to save files if they have been modified.
 If t, save the files without confirmation."
@@ -74,6 +76,16 @@ If t, save the files without confirmation."
                  (const t :tag "Save the files without confirmation"))
   :group 'cider
   :package-version '(cider . "0.15.0"))
+
+(defcustom cider-ns-save-files-on-refresh-modes '(clojure-mode)
+  "Controls which files might be saved before refreshing.
+If a list of modes, any buffers visiting files on the classpath whose major
+mode is derived from any of the modes might be saved.
+If t, all buffers visiting files on the classpath might be saved."
+  :type '(choice listp
+                 (const t))
+  :group 'cider
+  :package-version '(cider . "0.21.0"))
 
 (defconst cider-ns-refresh-log-buffer "*cider-ns-refresh-log*")
 
@@ -161,19 +173,20 @@ namespace-qualified function of zero arity."
     (when (member "error" status)
       (cider--render-stacktrace-causes error))))
 
-(defun cider-ns-refresh--save-project-buffers ()
-  "Ensure modified project buffers are saved before certain operations.
-Its behavior is controlled by `cider-save-files-on-cider-ns-refresh'."
-  (when-let* ((project-root (clojure-project-dir)))
-    (when cider-save-files-on-cider-ns-refresh
+(defun cider-ns-refresh--save-modified-buffers ()
+  "Ensure any relevant modified buffers are saved before refreshing.
+Its behavior is controlled by `cider-ns-save-files-on-refresh' and
+`cider-ns-save-files-on-refresh-modes'."
+  (when cider-ns-save-files-on-refresh
+    (let ((dirs (seq-filter #'file-directory-p
+                            (cider-classpath-entries))))
       (save-some-buffers
-       (eq cider-save-files-on-cider-ns-refresh t)
+       (not (eq cider-ns-save-files-on-refresh 'prompt))
        (lambda ()
-         (and
-          (derived-mode-p 'clojure-mode)
-          (string-prefix-p project-root
-                           (file-truename default-directory)
-                           (eq system-type 'windows-nt))))))))
+         (and (seq-some #'derived-mode-p cider-ns-save-files-on-refresh-modes)
+              (seq-some (lambda (dir)
+                          (file-in-directory-p buffer-file-name dir))
+                        dirs)))))))
 
 ;;;###autoload
 (defun cider-ns-reload (&optional prompt)
@@ -226,7 +239,7 @@ refresh functions (defined in `cider-ns-refresh-before-fn' and
   (interactive "p")
   (cider-ensure-connected)
   (cider-ensure-op-supported "refresh")
-  (cider-ns-refresh--save-project-buffers)
+  (cider-ns-refresh--save-modified-buffers)
   (let ((clear? (member mode '(clear 16)))
         (refresh-all? (member mode '(refresh-all 4)))
         (inhibit-refresh-fns (member mode '(inhibit-fns -1))))
@@ -245,15 +258,15 @@ refresh functions (defined in `cider-ns-refresh-before-fn' and
           (when clear?
             (cider-nrepl-send-sync-request '("op" "refresh-clear") conn))
           (cider-nrepl-send-request
-           (nconc `("op" ,(if refresh-all? "refresh-all" "refresh"))
-                  (when (cider--pprint-fn)
-                    `("pprint-fn" ,(cider--pprint-fn)))
-                  (when cider-stacktrace-print-options
-                    `("print-options" ,cider-stacktrace-print-options))
-                  (when (and (not inhibit-refresh-fns) cider-ns-refresh-before-fn)
-                    `("before" ,cider-ns-refresh-before-fn))
-                  (when (and (not inhibit-refresh-fns) cider-ns-refresh-after-fn)
-                    `("after" ,cider-ns-refresh-after-fn)))
+           (thread-last
+               (map-merge 'list
+                          `(("op" ,(if refresh-all? "refresh-all" "refresh")))
+                          (cider--nrepl-print-request-map fill-column)
+                          (when (and (not inhibit-refresh-fns) cider-ns-refresh-before-fn)
+                            `(("before" ,cider-ns-refresh-before-fn)))
+                          (when (and (not inhibit-refresh-fns) cider-ns-refresh-after-fn)
+                            `(("after" ,cider-ns-refresh-after-fn))))
+             (seq-mapcat #'identity))
            (lambda (response)
              (cider-ns-refresh--handle-response response log-buffer))
            conn))))))

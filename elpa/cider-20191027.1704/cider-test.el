@@ -28,18 +28,19 @@
 
 ;;; Code:
 
+(require 'button)
+(require 'cl-lib)
+(require 'easymenu)
+(require 'map)
+(require 'seq)
+(require 'subr-x)
+
 (require 'cider-common)
 (require 'cider-client)
 (require 'cider-popup)
 (require 'cider-stacktrace)
-(require 'subr-x)
 (require 'cider-compat)
 (require 'cider-overlays)
-
-(require 'button)
-(require 'cl-lib)
-(require 'easymenu)
-(require 'seq)
 
 ;;; Variables
 
@@ -137,7 +138,7 @@ Add to this list to have CIDER recognize additional test defining macros."
     ;; Duplicates of keys below with C- for convenience
     (define-key map (kbd "C-r") #'cider-test-rerun-failed-tests)
     (define-key map (kbd "C-t") #'cider-test-run-test)
-    (define-key map (kbd "C-g") #'cider-test-rerun-test)
+    (define-key map (kbd "C-a") #'cider-test-rerun-test)
     (define-key map (kbd "C-n") #'cider-test-run-ns-tests)
     (define-key map (kbd "C-s") #'cider-test-run-ns-tests-with-filters)
     (define-key map (kbd "C-l") #'cider-test-run-loaded-tests)
@@ -146,7 +147,7 @@ Add to this list to have CIDER recognize additional test defining macros."
     ;; Single-key bindings defined last for display in menu
     (define-key map (kbd "r")   #'cider-test-rerun-failed-tests)
     (define-key map (kbd "t")   #'cider-test-run-test)
-    (define-key map (kbd "g")   #'cider-test-rerun-test)
+    (define-key map (kbd "a")   #'cider-test-rerun-test)
     (define-key map (kbd "n")   #'cider-test-run-ns-tests)
     (define-key map (kbd "s")   #'cider-test-run-ns-tests-with-filters)
     (define-key map (kbd "l")   #'cider-test-run-loaded-tests)
@@ -278,14 +279,14 @@ prompt and whether to use a new window.  Similar to `cider-find-var'."
   "Display stacktrace for the erring NS VAR test with the assertion INDEX."
   (let (causes)
     (cider-nrepl-send-request
-     (nconc `("op" "test-stacktrace"
-              "ns" ,ns
-              "var" ,var
-              "index" ,index)
-            (when (cider--pprint-fn)
-              `("pprint-fn" ,(cider--pprint-fn)))
-            (when cider-stacktrace-print-options
-              `("print-options" ,cider-stacktrace-print-options)))
+     (thread-last
+         (map-merge 'list
+                    `(("op" "test-stacktrace")
+                      ("ns" ,ns)
+                      ("var" ,var)
+                      ("index" ,index))
+                    (cider--nrepl-print-request-map fill-column))
+       (seq-mapcat #'identity))
      (lambda (response)
        (nrepl-dbind-response response (class status)
          (cond (class  (setq causes (cons response causes)))
@@ -558,7 +559,6 @@ The optional arg TEST denotes an individual test name."
 (defun cider-find-var-file (ns var)
   "Return the buffer visiting the file in which the NS VAR is defined.
 Or nil if not found."
-  (cider-ensure-op-supported "info")
   (when-let* ((info (cider-var-info (concat ns "/" var)))
               (file (nrepl-dict-get info "file")))
     (cider-find-file file)))

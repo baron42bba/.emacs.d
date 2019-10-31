@@ -1,12 +1,9 @@
 ;;; cider-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "cider" "cider.el" (0 0 0 0))
+;;;### (autoloads nil "cider" "cider.el" (23994 46787 338102 379000))
 ;;; Generated autoloads from cider.el
 
 (autoload 'cider-version "cider" "\
@@ -18,7 +15,8 @@ Display CIDER's version.
 (autoload 'cider-jack-in-clj "cider" "\
 Start an nREPL server for the current project and connect to it.
 PARAMS is a plist optionally containing :project-dir and :jack-in-cmd.
-With the prefix argument, prompt for all these parameters.
+With the prefix argument, allow editing of the jack in command; with a
+double prefix prompt for all these parameters.
 
 \(fn PARAMS)" t nil)
 
@@ -26,7 +24,8 @@ With the prefix argument, prompt for all these parameters.
 Start an nREPL server for the current project and connect to it.
 PARAMS is a plist optionally containing :project-dir, :jack-in-cmd and
 :cljs-repl-type (e.g. Node, Figwheel, etc).  With the prefix argument,
-prompt for all these parameters.
+allow editing of the jack in command; with a double prefix prompt for all
+these parameters.
 
 \(fn PARAMS)" t nil)
 
@@ -34,8 +33,9 @@ prompt for all these parameters.
 Start an nREPL server and connect with clj and cljs REPLs.
 PARAMS is a plist optionally containing :project-dir, :jack-in-cmd and
 :cljs-repl-type (e.g. Node, Figwheel, etc).  With the prefix argument,
-prompt for all these parameters.  When SOFT-CLJS-START is non-nil, start
-cljs REPL only when the ClojureScript dependencies are met.
+allow for editing of the jack in command; with a double prefix prompt for
+all these parameters.  When SOFT-CLJS-START is non-nil, start cljs REPL
+only when the ClojureScript dependencies are met.
 
 \(fn &optional PARAMS SOFT-CLJS-START)" t nil)
 
@@ -87,27 +87,26 @@ Start a connection of any type interactively.
 
 (defalias 'cider-jack-in #'cider-jack-in-clj)
 
-(defalias 'cider-jack-in-clojure #'cider-jack-in-clj)
+(define-obsolete-function-alias 'cider-jack-in-clojure 'cider-jack-in-clj "0.22")
 
-(defalias 'cider-jack-in-clojurescript #'cider-jack-in-cljs)
+(define-obsolete-function-alias 'cider-jack-in-clojurescript 'cider-jack-in-cljs "0.22")
 
 (defalias 'cider-connect #'cider-connect-clj)
 
-(defalias 'cider-connect-clojure #'cider-connect-clj)
+(define-obsolete-function-alias 'cider-connect-clojure 'cider-connect-clj "0.22")
 
-(defalias 'cider-connect-clojurescript #'cider-connect-cljs)
+(define-obsolete-function-alias 'cider-connect-clojurescript 'cider-connect-cljs "0.22")
 
-(defalias 'cider-connect-sibling-clojure #'cider-connect-sibling-clj)
+(define-obsolete-function-alias 'cider-connect-sibling-clojure 'cider-connect-sibling-clj "0.22")
 
-(defalias 'cider-connect-sibling-clojurescript #'cider-connect-sibling-cljs)
+(define-obsolete-function-alias 'cider-connect-sibling-clojurescript 'cider-connect-sibling-cljs "0.22")
 
 (with-eval-after-load 'clojure-mode (define-key clojure-mode-map (kbd "C-c M-x") #'cider) (define-key clojure-mode-map (kbd "C-c M-j") #'cider-jack-in-clj) (define-key clojure-mode-map (kbd "C-c M-J") #'cider-jack-in-cljs) (define-key clojure-mode-map (kbd "C-c M-c") #'cider-connect-clj) (define-key clojure-mode-map (kbd "C-c M-C") #'cider-connect-cljs) (define-key clojure-mode-map (kbd "C-c C-x") 'cider-start-map) (define-key clojure-mode-map (kbd "C-c C-s") 'sesman-map) (require 'sesman) (sesman-install-menu clojure-mode-map) (add-hook 'clojure-mode-hook (lambda nil (setq-local sesman-system 'CIDER))))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-apropos" "cider-apropos.el" (0 0 0 0))
+;;;### (autoloads nil "cider-apropos" "cider-apropos.el" (23994 46787
+;;;;;;  362746 719000))
 ;;; Generated autoloads from cider-apropos.el
 
 (autoload 'cider-apropos "cider-apropos" "\
@@ -141,12 +140,10 @@ Shortcut for (cider-apropos-select <query> nil t).
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-apropos" '("cider-" "apropos-special-form")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-browse-ns" "cider-browse-ns.el" (0 0
-;;;;;;  0 0))
+;;;### (autoloads nil "cider-browse-ns" "cider-browse-ns.el" (23994
+;;;;;;  46787 349161 109000))
 ;;; Generated autoloads from cider-browse-ns.el
 
 (autoload 'cider-browse-ns "cider-browse-ns" "\
@@ -159,12 +156,10 @@ List all loaded namespaces in BUFFER.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-browse-ns" '("cider-browse-ns-")))
-
 ;;;***
 
 ;;;### (autoloads nil "cider-browse-spec" "cider-browse-spec.el"
-;;;;;;  (0 0 0 0))
+;;;;;;  (23994 46787 360446 881000))
 ;;; Generated autoloads from cider-browse-spec.el
 
 (autoload 'cider-browse-spec "cider-browse-spec" "\
@@ -180,12 +175,10 @@ No filter applied if the regexp is the empty string.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-browse-spec" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-cheatsheet" "cider-cheatsheet.el" (0
-;;;;;;  0 0 0))
+;;;### (autoloads nil "cider-cheatsheet" "cider-cheatsheet.el" (23994
+;;;;;;  46787 358216 149000))
 ;;; Generated autoloads from cider-cheatsheet.el
 
 (autoload 'cider-cheatsheet "cider-cheatsheet" "\
@@ -195,12 +188,10 @@ When you make it to a Clojure var its doc buffer gets displayed.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-cheatsheet" '("cider-cheatsheet-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-classpath" "cider-classpath.el" (0 0
-;;;;;;  0 0))
+;;;### (autoloads nil "cider-classpath" "cider-classpath.el" (23994
+;;;;;;  46787 340329 115000))
 ;;; Generated autoloads from cider-classpath.el
 
 (autoload 'cider-classpath "cider-classpath" "\
@@ -213,41 +204,39 @@ Open a classpath entry.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-classpath" '("cider-classpath-")))
+;;;***
+
+;;;### (autoloads nil "cider-clojuredocs" "cider-clojuredocs.el"
+;;;;;;  (23994 46787 347024 145000))
+;;; Generated autoloads from cider-clojuredocs.el
+
+(autoload 'cider-clojuredocs-web "cider-clojuredocs" "\
+Open ClojureDocs documentation in the default web browser.
+
+Prompts for the symbol to use, or uses the symbol at point, depending on
+the value of `cider-prompt-for-symbol'.  With prefix arg ARG, does the
+opposite of what that option dictates.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'cider-clojuredocs-refresh-cache "cider-clojuredocs" "\
+Refresh the ClojureDocs cache.
+
+\(fn)" t nil)
+
+(autoload 'cider-clojuredocs "cider-clojuredocs" "\
+Open ClojureDocs documentation in a popup buffer.
+
+Prompts for the symbol to use, or uses the symbol at point, depending on
+the value of `cider-prompt-for-symbol'.  With prefix arg ARG, does the
+opposite of what that option dictates.
+
+\(fn &optional ARG)" t nil)
 
 ;;;***
 
-;;;### (autoloads nil "cider-client" "cider-client.el" (0 0 0 0))
-;;; Generated autoloads from cider-client.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-client" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-common" "cider-common.el" (0 0 0 0))
-;;; Generated autoloads from cider-common.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-common" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-completion" "cider-completion.el" (0
-;;;;;;  0 0 0))
-;;; Generated autoloads from cider-completion.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-completion" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-connection" "cider-connection.el" (0
-;;;;;;  0 0 0))
-;;; Generated autoloads from cider-connection.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-connection" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-debug" "cider-debug.el" (0 0 0 0))
+;;;### (autoloads nil "cider-debug" "cider-debug.el" (23994 46787
+;;;;;;  321717 694000))
 ;;; Generated autoloads from cider-debug.el
 
 (autoload 'cider-debug-defun-at-point "cider-debug" "\
@@ -261,32 +250,10 @@ a number of keys will be prompted to the user.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-debug" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-doc" "cider-doc.el" (0 0 0 0))
-;;; Generated autoloads from cider-doc.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-doc" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-eldoc" "cider-eldoc.el" (0 0 0 0))
-;;; Generated autoloads from cider-eldoc.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-eldoc" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-eval" "cider-eval.el" (0 0 0 0))
-;;; Generated autoloads from cider-eval.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-eval" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-find" "cider-find.el" (0 0 0 0))
+;;;### (autoloads nil "cider-find" "cider-find.el" (23994 46787 352722
+;;;;;;  741000))
 ;;; Generated autoloads from cider-find.el
 
 (autoload 'cider-find-var "cider-find" "\
@@ -348,11 +315,10 @@ thing at point.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-find" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-format" "cider-format.el" (0 0 0 0))
+;;;### (autoloads nil "cider-format" "cider-format.el" (23994 46787
+;;;;;;  317854 377000))
 ;;; Generated autoloads from cider-format.el
 
 (autoload 'cider-format-region "cider-format" "\
@@ -387,38 +353,10 @@ Format the EDN data of the last sexp.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-format" '("cider--format-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-grimoire" "cider-grimoire.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from cider-grimoire.el
-
-(autoload 'cider-grimoire-web "cider-grimoire" "\
-Open grimoire documentation in the default web browser.
-
-Prompts for the symbol to use, or uses the symbol at point, depending on
-the value of `cider-prompt-for-symbol'.  With prefix arg ARG, does the
-opposite of what that option dictates.
-
-\(fn &optional ARG)" t nil)
-
-(autoload 'cider-grimoire "cider-grimoire" "\
-Open grimoire documentation in a popup buffer.
-
-Prompts for the symbol to use, or uses the symbol at point, depending on
-the value of `cider-prompt-for-symbol'.  With prefix arg ARG, does the
-opposite of what that option dictates.
-
-\(fn &optional ARG)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-grimoire" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-inspector" "cider-inspector.el" (0 0
-;;;;;;  0 0))
+;;;### (autoloads nil "cider-inspector" "cider-inspector.el" (23994
+;;;;;;  46787 332162 234000))
 ;;; Generated autoloads from cider-inspector.el
 
 (autoload 'cider-inspect-last-sexp "cider-inspector" "\
@@ -451,12 +389,10 @@ current buffer's namespace.
 
 \(fn EXPR NS)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-inspector" '("cider-")))
-
 ;;;***
 
 ;;;### (autoloads nil "cider-macroexpansion" "cider-macroexpansion.el"
-;;;;;;  (0 0 0 0))
+;;;;;;  (23994 46787 336918 325000))
 ;;; Generated autoloads from cider-macroexpansion.el
 
 (autoload 'cider-macroexpand-1 "cider-macroexpansion" "\
@@ -471,11 +407,10 @@ Invoke \\=`macroexpand-all\\=` on the expression preceding point.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-macroexpansion" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-mode" "cider-mode.el" (0 0 0 0))
+;;;### (autoloads nil "cider-mode" "cider-mode.el" (23994 46787 345945
+;;;;;;  693000))
 ;;; Generated autoloads from cider-mode.el
 
 (defvar cider-mode-line '(:eval (format " cider[%s]" (cider--modeline-info))) "\
@@ -500,11 +435,10 @@ Minor mode for REPL interaction from a Clojure buffer.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-mode" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-ns" "cider-ns.el" (0 0 0 0))
+;;;### (autoloads nil "cider-ns" "cider-ns.el" (23994 46787 351533
+;;;;;;  778000))
 ;;; Generated autoloads from cider-ns.el
 
 (autoload 'cider-ns-reload "cider-ns" "\
@@ -551,26 +485,10 @@ refresh functions (defined in `cider-ns-refresh-before-fn' and
 
 (define-obsolete-function-alias 'cider-refresh 'cider-ns-refresh "0.18")
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-ns" '("cider-ns-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-overlays" "cider-overlays.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from cider-overlays.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-overlays" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-popup" "cider-popup.el" (0 0 0 0))
-;;; Generated autoloads from cider-popup.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-popup" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-profile" "cider-profile.el" (0 0 0 0))
+;;;### (autoloads nil "cider-profile" "cider-profile.el" (23994 46787
+;;;;;;  333278 435000))
 ;;; Generated autoloads from cider-profile.el
 
 (autoload 'cider-profile-samples "cider-profile" "\
@@ -617,19 +535,10 @@ Clear any collected profile data.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-profile" '("cider-profile-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-repl" "cider-repl.el" (0 0 0 0))
-;;; Generated autoloads from cider-repl.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-repl" '("cider-")))
-
 ;;;***
 
 ;;;### (autoloads nil "cider-repl-history" "cider-repl-history.el"
-;;;;;;  (0 0 0 0))
+;;;;;;  (23994 46787 330975 600000))
 ;;; Generated autoloads from cider-repl-history.el
 
 (autoload 'cider-repl-history "cider-repl-history" "\
@@ -637,18 +546,10 @@ Display items in the CIDER command history in another buffer.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-repl-history" '("cider-repl-history-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-resolve" "cider-resolve.el" (0 0 0 0))
-;;; Generated autoloads from cider-resolve.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-resolve" '("cider-resolve-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-scratch" "cider-scratch.el" (0 0 0 0))
+;;;### (autoloads nil "cider-scratch" "cider-scratch.el" (23994 46787
+;;;;;;  323692 59000))
 ;;; Generated autoloads from cider-scratch.el
 
 (autoload 'cider-scratch "cider-scratch" "\
@@ -656,36 +557,25 @@ Go to the scratch buffer named `cider-scratch-buffer-name'.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-scratch" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-selector" "cider-selector.el" (0 0 0
-;;;;;;  0))
+;;;### (autoloads nil "cider-selector" "cider-selector.el" (23994
+;;;;;;  46787 329803 229000))
 ;;; Generated autoloads from cider-selector.el
 
 (autoload 'cider-selector "cider-selector" "\
 Select a new buffer by type, indicated by a single character.
 The user is prompted for a single character indicating the method by
-which to choose a new buffer.  The `?' character describes then
+which to choose a new buffer.  The `?' character describes the
 available methods.  OTHER-WINDOW provides an optional target.
 See `def-cider-selector-method' for defining new methods.
 
 \(fn &optional OTHER-WINDOW)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-selector" '("??" "?c" "?e" "?q" "?r" "?m" "?x" "?p" "?d" "?s" "def-cider-selector-method" "cider-selector-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-stacktrace" "cider-stacktrace.el" (0
-;;;;;;  0 0 0))
-;;; Generated autoloads from cider-stacktrace.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-stacktrace" '("cider-")))
-
-;;;***
-
-;;;### (autoloads nil "cider-test" "cider-test.el" (0 0 0 0))
+;;;### (autoloads nil "cider-test" "cider-test.el" (23994 46787 341379
+;;;;;;  213000))
 ;;; Generated autoloads from cider-test.el
 
 (defvar cider-auto-test-mode nil "\
@@ -707,11 +597,10 @@ nothing if no tests are defined or if the file failed to load.
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-test" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-tracing" "cider-tracing.el" (0 0 0 0))
+;;;### (autoloads nil "cider-tracing" "cider-tracing.el" (23994 46787
+;;;;;;  344834 674000))
 ;;; Generated autoloads from cider-tracing.el
 
 (autoload 'cider-toggle-trace-var "cider-tracing" "\
@@ -728,11 +617,10 @@ Defaults to the current ns.  With prefix arg QUERY, prompts for a ns.
 
 \(fn QUERY)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-tracing" '("cider-")))
-
 ;;;***
 
-;;;### (autoloads nil "cider-util" "cider-util.el" (0 0 0 0))
+;;;### (autoloads nil "cider-util" "cider-util.el" (23994 46787 327338
+;;;;;;  170000))
 ;;; Generated autoloads from cider-util.el
 
 (autoload 'cider-view-manual "cider-util" "\
@@ -740,26 +628,39 @@ View the manual in your default browser.
 
 \(fn)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "cider-util" '("cider-")))
+;;;***
+
+;;;### (autoloads nil "cider-xref" "cider-xref.el" (23994 46787 353930
+;;;;;;  359000))
+;;; Generated autoloads from cider-xref.el
+
+(autoload 'cider-xref-fn-refs "cider-xref" "\
+Show all functions that reference the var matching NS and SYMBOL.
+
+\(fn &optional NS SYMBOL)" t nil)
+
+(autoload 'cider-xref-fn-deps "cider-xref" "\
+Show all functions referenced by the var matching NS and SYMBOL.
+
+\(fn &optional NS SYMBOL)" t nil)
+
+(autoload 'cider-xref-fn-refs-select "cider-xref" "\
+Displays the references for NS and SYMBOL using completing read.
+
+\(fn &optional NS SYMBOL)" t nil)
+
+(autoload 'cider-xref-fn-deps-select "cider-xref" "\
+Displays the function dependencies for  NS and SYMBOL using completing read.
+
+\(fn &optional NS SYMBOL)" t nil)
 
 ;;;***
 
-;;;### (autoloads nil "nrepl-client" "nrepl-client.el" (0 0 0 0))
-;;; Generated autoloads from nrepl-client.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nrepl-client" '("nrepl-" "cider-enlighten-mode")))
-
-;;;***
-
-;;;### (autoloads nil "nrepl-dict" "nrepl-dict.el" (0 0 0 0))
-;;; Generated autoloads from nrepl-dict.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "nrepl-dict" '("nrepl-")))
-
-;;;***
-
-;;;### (autoloads nil nil ("cider-compat.el" "cider-pkg.el") (0 0
-;;;;;;  0 0))
+;;;### (autoloads nil nil ("cider-client.el" "cider-common.el" "cider-compat.el"
+;;;;;;  "cider-completion.el" "cider-connection.el" "cider-doc.el"
+;;;;;;  "cider-eldoc.el" "cider-eval.el" "cider-overlays.el" "cider-pkg.el"
+;;;;;;  "cider-popup.el" "cider-repl.el" "cider-resolve.el" "cider-stacktrace.el"
+;;;;;;  "nrepl-client.el" "nrepl-dict.el") (23994 46787 361626 850000))
 
 ;;;***
 
@@ -767,6 +668,5 @@ View the manual in your default browser.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; cider-autoloads.el ends here

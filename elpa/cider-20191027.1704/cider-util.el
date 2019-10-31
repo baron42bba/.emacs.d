@@ -129,7 +129,8 @@ Ignores the REPL prompt.  If LOOK-BACK is non-nil, move backwards trying to
 find a symbol if there isn't one at point."
   (or (when-let* ((str (thing-at-point 'symbol)))
         (unless (text-property-any 0 (length str) 'field 'cider-repl-prompt str)
-          (substring-no-properties str)))
+          ;; Remove font-locking and trailing . from constructors like Record.
+          (string-remove-suffix "." (substring-no-properties str))))
       (when look-back
         (save-excursion
           (ignore-errors
@@ -404,14 +405,14 @@ plugin or dependency with:
 
 (defvar cider-version)
 
-(defconst cider-manual-url "https://docs.cider.mx/en/%s/"
+(defconst cider-manual-url "https://docs.cider.mx/cider/%s"
   "The URL to CIDER's manual.")
 
 (defun cider--manual-version ()
   "Convert the version to a ReadTheDocs-friendly version."
   (if (string-match-p "-snapshot" cider-version)
-      "latest"
-    "stable"))
+      ""
+    (concat cider-version "/")))
 
 (defun cider-manual-url ()
   "The CIDER manual's url."

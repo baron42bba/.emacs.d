@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'easymenu)
 (require 'seq)
 (require 'cider-eval)
 
@@ -71,11 +72,29 @@ The page size can be also changed interactively within the inspector."
     (define-key map (kbd "M-SPC") #'cider-inspector-prev-page)
     (define-key map (kbd "S-SPC") #'cider-inspector-prev-page)
     (define-key map "s" #'cider-inspector-set-page-size)
+    (define-key map "d" #'cider-inspector-def-current-val)
     (define-key map [tab] #'cider-inspector-next-inspectable-object)
     (define-key map "\C-i" #'cider-inspector-next-inspectable-object)
     (define-key map [(shift tab)] #'cider-inspector-previous-inspectable-object)
     ;; Emacs translates S-TAB to BACKTAB on X.
     (define-key map [backtab] #'cider-inspector-previous-inspectable-object)
+    (easy-menu-define cider-inspector-mode-menu map
+      "Menu for CIDER's inspector."
+      `("CIDER Inspector"
+        ["Inspect" cider-inspector-operate-on-point]
+        ["Pop" cider-inspector-pop]
+        ["Refresh" cider-inspector-refresh]
+        "--"
+        ["Next Inspectable Object" cider-inspector-next-inspectable-object]
+        ["Previous Inspectable Object" cider-inspector-previous-inspectable-object]
+        "--"
+        ["Next Page" cider-inspector-next-page]
+        ["Previous Page" cider-inspector-prev-page]
+        ["Set Page Size" cider-inspector-set-page-size]
+        ["Define Var" cider-inspector-def-current-val]
+        "--"
+        ["Quit" cider-popup-buffer-quit-function]
+        ))
     map))
 
 (define-derived-mode cider-inspector-mode special-mode "Inspector"
@@ -198,6 +217,16 @@ Current page will be reset to zero."
   (when-let* ((value (cider-sync-request:inspect-set-page-size page-size)))
     (cider-inspector--render-value value)))
 
+(defun cider-inspector-def-current-val (var-name ns)
+  "Defines a var with VAR-NAME in current namespace.
+
+Doesn't modify current page."
+  (interactive (list (cider-read-from-minibuffer "Var name: ")
+                     (cider-current-ns)))
+  (setq cider-inspector--current-repl (cider-current-repl))
+  (when-let* ((value (cider-sync-request:inspect-def-current-val ns var-name)))
+    (cider-inspector--render-value value)))
+
 ;; nREPL interactions
 (defun cider-sync-request:inspect-pop ()
   "Move one level up in the inspector stack."
@@ -234,6 +263,14 @@ Current page will be reset to zero."
   "Set the page size in paginated view to PAGE-SIZE."
   (thread-first `("op" "inspect-set-page-size"
                   "page-size" ,page-size)
+    (cider-nrepl-send-sync-request cider-inspector--current-repl)
+    (nrepl-dict-get "value")))
+
+(defun cider-sync-request:inspect-def-current-val (ns var-name)
+  "Defines a var with VAR-NAME in NS with the current inspector value."
+  (thread-first `("op" "inspect-def-current-value"
+                  "ns" ,ns
+                  "var-name" ,var-name)
     (cider-nrepl-send-sync-request cider-inspector--current-repl)
     (nrepl-dict-get "value")))
 
