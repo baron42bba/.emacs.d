@@ -1,14 +1,13 @@
 ;;; package-lint.el --- A linting library for elisp package authors -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014-2017  Steve Purcell, Fanael Linithien
+;; Copyright (C) 2014-2019  Steve Purcell, Fanael Linithien
 
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;;         Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/purcell/package-lint
-;; Package-Version: 20190112.510
 ;; Keywords: lisp
 ;; Version: 0
-;; Package-Requires: ((cl-lib "0.5") (emacs "24"))
+;; Package-Requires: ((cl-lib "0.5") (emacs "24.1") (let-alist "1.0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -41,6 +40,7 @@
 (require 'lisp-mnt)
 (require 'finder)
 (require 'imenu)
+(require 'let-alist)
 
 
 ;;; Compatibility
@@ -62,170 +62,65 @@
   "List of errors and warnings for the current buffer.
 This is bound dynamically while the checks run.")
 
-(defmacro package-lint--match-symbols (&rest symbols)
-  "Return a regexp matching the string names of all given SYMBOLS."
-  (regexp-opt (mapcar #'symbol-name symbols)))
+(defconst package-lint-backport-libraries
+  (list (cons 'cl-lib "\\`cl-")
+        (cons 'cl-generic "\\`cl-\\(?:def\\)?generic")
+        (cons 'cl-print "\\`cl-print")
+        (cons 'map "\\`map-")
+        (cons 'nadvice "\\`advice-")
+        (cons 'seq "\\`seq-")
+        (cons 'let-alist "\\`let-alist"))
+  "A sequence of (FEATURE . SYMBOL-NAME-MATCH) for backport libraries.
+These are libraries that are built into newer Emacsen and also
+published in ELPA for use by older Emacsen.")
 
-(defconst package-lint--libraries-added-alist
-  (list
-   (cons '(24 4)
-         (package-lint--match-symbols
-          nadvice
-          subr-x))
-   (cons '(25 1)
-         (package-lint--match-symbols
-          cl-generic
-          js-jsx-mode
-          map
-          pinentry
-          thunk)))
-  "An alist of library names and when they were added to Emacs.")
+(eval-and-compile
+  (defun package-lint--match-symbols (symbols)
+    "Return a predicate which take a symbol and reports whether it is among `SYMBOLS'."
+    (let ((tbl (make-hash-table)))
+      (dolist (s symbols)
+        (puthash s t tbl))
+      (lambda (v) (gethash v tbl))))
 
-(defconst package-lint--functions-and-macros-added-alist
-  (list
-   (cons '(24)
-         (package-lint--match-symbols
-          bidi-string-mark-left-to-right
-          condition-case-unless-debug
-          current-bidi-paragraph-direction
-          file-selinux-context
-          letrec
-          make-composed-keymap
-          pcase
-          pcase-dolist
-          pcase-let
-          pcase-let*
-          prog-mode
-          read-char-choice
-          run-hook-wrapped
-          server-eval-at
-          set-file-selinux-context
-          special-variable-p
-          string-prefix-p
-          url-queue-retrieve
-          window-body-height
-          window-stage-get
-          window-stage-put
-          window-total-width
-          window-valid-p
-          with-wrapper-hook))
-   (cons '(24 3)
-         (package-lint--match-symbols
-          autoload-do-load
-          autoloadp
-          buffer-narrowed-p
-          defvar-local
-          file-name-base
-          function-get
-          posnp
-          read-only-mode
-          setq-local
-          system-groups
-          system-users
-          tty-top-frame
-          url-encode-url
-          user-error
-          with-temp-buffer-window))
-   (cons '(24 4)
-         (package-lint--match-symbols
-          add-face-text-property
-          add-function
-          advice-add
-          advice-remove
-          cl-tagbody
-          completion-table-merge
-          completion-table-with-cache
-          define-alternative
-          define-error
-          display-monitor-attributes-list
-          eieio-object-class
-          file-acl
-          file-extended-attributes
-          fill-single-char-nobreak-p
-          frame-monitor-attributes
-          get-pos-property
-          group-gid
-          group-real-gid
-          hash-table-keys
-          hash-table-values
-          line-pixel-height
-          macrop
-          remove-function
-          set-file-acl
-          special-form-p
-          string-blank-p
-          string-empty-p
-          string-join
-          string-remove-prefix
-          string-remove-suffix
-          string-reverse
-          string-suffix-p
-          string-trim
-          string-trim-left
-          string-trim-right
-          window-bottom-divider-width
-          window-header-line-height
-          window-mode-line-height
-          window-pixel-height
-          window-right-divider-width
-          window-scroll-bar-width
-          window-text-pixel-size
-          with-eval-after-load
-          zlib-decompress-region))
-   (cons '(25)
-         (package-lint--match-symbols
-          alist-get
-          backward-word-strictly
-          bidi-find-overridden-directionality
-          buffer-substring-with-bidi-context
-          bufferpos-to-filepos
-          char-fold-to-regexp
-          checkdoc-file
-          cl-digit-char-p
-          cl-fresh-line
-          cl-parse-integer
-          default-font-width
-          define-advice
-          define-inline
-          directory-files-recursively
-          directory-name-p
-          file-notify-valid-p
-          filepos-to-bufferpos
-          font-lock-ensure
-          font-lock-flush
-          format-message
-          forward-word-strictly
-          frame-edges
-          frame-geometry
-          frame-scroll-bar-height
-          funcall-interactively
-          function-put
-          horizontal-scroll-bars-available-p
-          if-let
-          macroexpand-1
-          make-process
-          mouse-absolute-pixel-position
-          pcase-defmacro
-          pcase-exhaustive
-          pcase-lambda
-          set-binary-mode
-          set-mouse-absolute-pixel-position
-          string-collate-equalp
-          string-collate-lessp
-          string-greaterp
-          thread-first
-          thread-last
-          toggle-horizontal-scroll-bar
-          when-let
-          window-absolute-pixel-position
-          window-font-height
-          window-font-width
-          window-max-chars-per-line
-          window-preserve-size
-          window-scroll-bar-height
-          with-displayed-buffer-window
-          with-file-modes)))
-  "An alist of function/macro names and when they were added to Emacs.")
+  (let ((stdlib-changes (with-temp-buffer
+                          (insert-file-contents
+                           (expand-file-name "data/stdlib-changes"
+                                             (if load-file-name
+                                                 (file-name-directory load-file-name)
+                                               default-directory)))
+                          (read (current-buffer)))))
+
+    (defconst package-lint--libraries-added-alist
+      (mapcar (lambda (version-data)
+                (let ((version (car version-data))
+                      (added-libraries (let-alist (cdr version-data) .features.added)))
+                  (cons version (package-lint--match-symbols added-libraries))))
+              stdlib-changes)
+      "An alist of library names and when they were added to Emacs.")
+
+    (defconst package-lint--libraries-removed-alist
+      (mapcar (lambda (version-data)
+                (let ((version (car version-data))
+                      (removed-libraries (let-alist (cdr version-data) .features.removed)))
+                  (cons version (package-lint--match-symbols removed-libraries))))
+              stdlib-changes)
+      "An alist of library names and when they were added to Emacs.")
+
+    (defconst package-lint--functions-and-macros-added-alist
+      (mapcar (lambda (version-data)
+                (let ((version (car version-data))
+                      (added-functions (let-alist (cdr version-data) .functions.added)))
+                  (cons version (package-lint--match-symbols added-functions))))
+              stdlib-changes)
+      "An alist of function/macro names and when they were added to Emacs.")
+
+    (defconst package-lint--functions-and-macros-removed-alist
+      (mapcar (lambda (version-data)
+                (let ((version (car version-data))
+                      (removed-functions (let-alist (cdr version-data) .functions.removed)))
+                  (cons version (package-lint--match-symbols removed-functions))))
+              stdlib-changes)
+      "An alist of function/macro names and when they were removed from Emacs.")))
 
 (defconst package-lint--sane-prefixes
   (rx
@@ -259,24 +154,34 @@ This is bound dynamically while the checks run.")
            "(define-global\\(?:ized\\)?-minor-mode\\s-"
            #'package-lint--check-globalized-minor-mode)
           (package-lint--check-objects-by-regexp
+           (concat "(" (regexp-opt '("defalias" "defvaralias")) "\\s-")
+           #'package-lint--check-defalias)
+          (package-lint--check-objects-by-regexp
            "(defgroup\\s-" #'package-lint--check-defgroup)
           (let ((desc (package-lint--check-package-el-can-parse)))
             (when desc
               (package-lint--check-package-summary desc)
-              (package-lint--check-provide-form desc)))
+              (package-lint--check-provide-form desc)
+              (package-lint--check-no-emacs-in-package-name desc)))
           (package-lint--check-no-use-of-cl)
           (package-lint--check-no-use-of-cl-lib-sublibraries)
           (package-lint--check-eval-after-load)
           (let ((deps (package-lint--check-dependency-list)))
             (package-lint--check-lexical-binding-requires-emacs-24 deps)
             (package-lint--check-libraries-available-in-emacs deps)
-            (package-lint--check-macros-functions-available-in-emacs deps))
+            (package-lint--check-libraries-removed-from-emacs)
+            (package-lint--check-macros-functions-available-in-emacs deps)
+            (package-lint--check-macros-functions-removed-from-emacs)
+            (package-lint--check-objects-by-regexp
+             (concat "(" (regexp-opt '("format" "message" "error")) "\\s-")
+             (lambda (def) (package-lint--check-format-string deps def))))
           (package-lint--check-for-literal-emacs-path)
           (package-lint--check-commentary-existence)
           (let ((definitions (package-lint--get-defs)))
             (package-lint--check-autoloads-on-private-functions definitions)
             (package-lint--check-defs-prefix definitions)
-            (package-lint--check-symbol-separators definitions)))))
+            (package-lint--check-symbol-separators definitions))
+          (package-lint--check-lonely-parens))))
     (sort package-lint--errors
           (lambda (a b)
             (pcase-let ((`(,a-line ,a-column ,_ ,a-message) a)
@@ -291,9 +196,21 @@ This is bound dynamically while the checks run.")
   "Construct a datum for error at LINE and COL with TYPE and MESSAGE."
   (push (list line col type message) package-lint--errors))
 
-(defun package-lint--error-at-point (type message)
-  "Construct a datum for error at the point with TYPE and MESSAGE."
-  (package-lint--error (line-number-at-pos) (current-column) type message))
+(defun package-lint--error-at-point (type message &optional pos)
+  "Construct a datum for error at POS with TYPE and MESSAGE.
+POS defaults to `point'."
+  (save-excursion
+    (when pos
+      (goto-char pos))
+    (package-lint--error (line-number-at-pos) (current-column) type message)))
+
+(defun package-lint--error-at-bol (type message)
+  "Construct a datum for error at the beginning of the current line with TYPE and MESSAGE."
+  (package-lint--error (line-number-at-pos) 0 type message))
+
+(defun package-lint--error-at-bob (type message)
+  "Construct a datum for error at the beginning of the buffer with TYPE and MESSAGE."
+  (package-lint--error 1 0 type message))
 
 
 ;;; Checks
@@ -317,17 +234,17 @@ This is bound dynamically while the checks run.")
   "Warn about nonexistent or empty commentary section."
   (let ((start (lm-commentary-start)))
     (if (null start)
-        (package-lint--error
-         1 1 'error
+        (package-lint--error-at-bob
+         'error
          "Package should have a ;;; Commentary section.")
       ;; Skip over the section header.
       (goto-char start)
       (forward-line)
       (when (package-lint--region-empty-p (point) (lm-commentary-end))
-        (goto-char start)
         (package-lint--error-at-point
          'error
-         "Package should have a non-empty ;;; Commentary section.")))))
+         "Package should have a non-empty ;;; Commentary section."
+         start)))))
 
 (defun package-lint--check-autoloads-on-private-functions (definitions)
   "Verify that private functions DEFINITIONS don't have autoload cookies."
@@ -357,12 +274,13 @@ Instead it should use `user-emacs-directory' or `locate-user-emacs-file'."
 (defun package-lint--check-keywords-list ()
   "Verify that package keywords are listed in `finder-known-keywords'."
   (when (package-lint--goto-header "Keywords")
-    (let ((line-no (line-number-at-pos))
-          (keywords (lm-keywords-list)))
-      (unless (cl-some (lambda (keyword) (assoc (intern keyword) finder-known-keywords)) keywords)
-        (package-lint--error
-         line-no 1 'warning
-         (format "You should include standard keywords: see the variable `finder-known-keywords'."))))))
+    (let ((err-pos (match-beginning 2)))
+      (let ((keywords (lm-keywords-list)))
+        (unless (cl-some (lambda (keyword) (assoc (intern keyword) finder-known-keywords)) keywords)
+          (package-lint--error-at-point
+           'warning
+           (format "You should include standard keywords: see the variable `finder-known-keywords'.")
+           err-pos))))))
 
 (defun package-lint--check-url-header ()
   "Verify that the package has an HTTPS or HTTP Homepage/URL header."
@@ -371,13 +289,12 @@ Instead it should use `user-emacs-directory' or `locate-user-emacs-file'."
             (url-start (match-beginning 3)))
         (unless (and (equal (thing-at-point 'url) url)
                      (string-match-p "^https?://" url))
-          (package-lint--error
-           (line-number-at-pos)
-           (1+ (- url-start (line-beginning-position)))
+          (package-lint--error-at-point
            'error
-           "Package URLs should be a single HTTPS or HTTP URL.")))
-    (package-lint--error
-     1 1 'error
+           "Package URLs should be a single HTTPS or HTTP URL."
+           url-start)))
+    (package-lint--error-at-bob
+     'error
      "Package should have a Homepage or URL header.")))
 
 (defun package-lint--check-dependency-list ()
@@ -386,31 +303,30 @@ Return a list of well-formed dependencies, same as
 `package-lint--check-well-formed-dependencies'."
   (when (package-lint--goto-header "Package-Requires")
     (let ((position (match-beginning 3))
-          (line-no (line-number-at-pos))
           (deps (match-string 3)))
       (condition-case err
           (pcase-let ((`(,parsed-deps . ,parse-end-pos) (read-from-string deps)))
             (unless (= parse-end-pos (length deps))
-              (package-lint--error
-               line-no 1 'error
+              (package-lint--error-at-bol
+               'error
                "More than one expression provided."))
-            (let ((deps (package-lint--check-well-formed-dependencies position line-no parsed-deps)))
+            (let ((deps (package-lint--check-well-formed-dependencies position parsed-deps)))
               (package-lint--check-packages-installable deps)
               (package-lint--check-deps-use-non-snapshot-version deps)
               (package-lint--check-deps-do-not-use-zero-versions deps)
               (package-lint--check-do-not-depend-on-cl-lib-1.0 deps)
               deps))
         (error
-         (package-lint--error
-          line-no 1 'error
+         (package-lint--error-at-bol
+          'error
           (format "Couldn't parse \"Package-Requires\" header: %s" (error-message-string err)))
          nil)))))
 
-(defun package-lint--check-well-formed-dependencies (position line-no parsed-deps)
-  "Check that dependencies listed at POSITION on LINE-NO are well-formed.
+(defun package-lint--check-well-formed-dependencies (position parsed-deps)
+  "Check that dependencies listed at POSITION are well-formed.
 These PARSED-DEPS must have the format (name \"version\").
 Return a list of well-formed dependencies, where each element is of
-the form (PACKAGE-NAME PACKAGE-VERSION LINE-NO LINE-BEGINNING-OFFSET)."
+the form (PACKAGE-NAME PACKAGE-VERSION DEP-POSITION)."
   (let (valid-deps)
     (dolist (entry parsed-deps)
       (pcase entry
@@ -419,90 +335,92 @@ the form (PACKAGE-NAME PACKAGE-VERSION LINE-NO LINE-BEGINNING-OFFSET)."
               (guard (stringp package-version)))
          ;; Find the column at which the dependency is declared so we can
          ;; properly report the position of errors.
-         (let ((offset
+         (let ((dep-pos
                 (save-excursion
                   (goto-char position)
-                  (let ((line-start (line-beginning-position))
-                        (pattern
+                  (let ((pattern
                          (format "( *\\(%s\\)\\(?:)\\|[^[:alnum:]_\\-].*?)\\)"
                                  (regexp-quote (symbol-name package-name)))))
                     (if (re-search-forward pattern (line-end-position) t)
-                        (- (1+ (match-beginning 1)) line-start)
-                      1)))))
+                        (match-beginning 1)
+                      position)))))
            (if (ignore-errors (version-to-list package-version))
                (push (list package-name
                            (version-to-list package-version)
-                           line-no
-                           offset)
+                           dep-pos)
                      valid-deps)
-             (package-lint--error
-              line-no offset 'error
+             (package-lint--error-at-point
+              'error
               (format "%S is not a valid version string: see `version-to-list'."
-                      package-version)))))
+                      package-version)
+              dep-pos))))
         (_
-         (package-lint--error
-          line-no 1 'error
+         (package-lint--error-at-bol
+          'error
           (format "Expected (package-name \"version-num\"), but found %S." entry)))))
     valid-deps))
 
-(defun package-lint--check-package-installable (archive-entry package-version line-no offset)
+(defun package-lint--check-package-installable (archive-entry package-version dep-pos)
   "Check that ARCHIVE-ENTRY is installable from a configured package archive.
 
 Check that package described by ARCHIVE-ENTRY can be installed at
-required version PACKAGE-VERSION.  If not, raise an error for
-LINE-NO at OFFSET."
+required version PACKAGE-VERSION.  If not, raise an error for DEP-POS."
   (let* ((package-name (car archive-entry))
          (best-version (package-lint--highest-installable-version-of package-name)))
     (when (version-list-< best-version package-version)
-      (package-lint--error
-       line-no offset 'warning
+      (package-lint--error-at-point
+       'warning
        (format "Version dependency for %s appears too high: try %s" package-name
-               (package-version-join best-version))))))
+               (package-version-join best-version))
+       dep-pos))))
 
 (defun package-lint--check-packages-installable (valid-deps)
   "Check that all VALID-DEPS are available for installation."
-  (pcase-dolist (`(,package-name ,package-version ,line-no ,offset) valid-deps)
+  (pcase-dolist (`(,package-name ,package-version ,dep-pos) valid-deps)
     (if (eq 'emacs package-name)
         (unless (version-list-<= '(24) package-version)
-          (package-lint--error
-           line-no offset 'error
-           "You can only depend on Emacs version 24 or greater: package.el for Emacs 23 does not support the \"emacs\" pseudopackage."))
+          (package-lint--error-at-point
+           'error
+           "You can only depend on Emacs version 24 or greater: package.el for Emacs 23 does not support the \"emacs\" pseudopackage."
+           dep-pos))
       ;; Not 'emacs
       (let ((archive-entry (assq package-name package-archive-contents)))
         (if archive-entry
-            (package-lint--check-package-installable archive-entry package-version line-no offset)
-          (package-lint--error
-           line-no offset 'error
-           (format "Package %S is not installable." package-name)))))))
+            (package-lint--check-package-installable archive-entry package-version dep-pos)
+          (package-lint--error-at-point
+           'error
+           (format "Package %S is not installable." package-name)
+           dep-pos))))))
 
 (defun package-lint--check-deps-use-non-snapshot-version (valid-deps)
   "Warn about any VALID-DEPS on snapshot versions of packages."
-  (pcase-dolist (`(,package-name ,package-version ,line-no ,offset) valid-deps)
+  (pcase-dolist (`(,package-name ,package-version ,dep-pos) valid-deps)
     (unless (version-list-< package-version '(19001201 1))
-      (package-lint--error
-       line-no offset 'warning
+      (package-lint--error-at-point
+       'warning
        (format "Use a non-snapshot version number for dependency on \"%S\" if possible."
-               package-name)))))
+               package-name)
+       dep-pos))))
 
 (defun package-lint--check-deps-do-not-use-zero-versions (valid-deps)
   "Warn about VALID-DEPS on \"0\" versions of packages."
-  (pcase-dolist (`(,package-name ,package-version ,line-no ,offset) valid-deps)
+  (pcase-dolist (`(,package-name ,package-version ,dep-pos) valid-deps)
     (when (equal package-version '(0))
-      (package-lint--error
-       line-no offset 'warning
+      (package-lint--error-at-point
+       'warning
        (format "Use a properly versioned dependency on \"%S\" if possible."
-               package-name)))))
+               package-name)
+       dep-pos))))
 
 (defun package-lint--check-lexical-binding-requires-emacs-24 (valid-deps)
   "Warn about use of `lexical-binding' when Emacs 24 is not among VALID-DEPS."
   (goto-char (point-min))
   (when (package-lint--lexical-binding-declared-in-header-line-p)
-    (let* ((lexbind-line (line-number-at-pos))
-           (lexbind-col (1+ (- (match-beginning 1) (line-beginning-position)))))
-      (unless (assq 'emacs valid-deps)
-        (package-lint--error
-         lexbind-line lexbind-col 'warning
-         "You should depend on (emacs \"24\") if you need lexical-binding.")))))
+    (unless (assq 'emacs valid-deps)
+      (package-lint--error-at-point
+       'warning
+       "You should depend on (emacs \"24\") if you need lexical-binding."
+       (match-beginning 1)))))
 
 (defun package-lint--inside-comment-or-string-p ()
   "Return non-nil if point is inside a comment or string."
@@ -517,75 +435,146 @@ LINE-NO at OFFSET."
             (concat "(fboundp\\s-+'" (regexp-quote sym) "\\_>") (point-min) t)
            (not (package-lint--inside-comment-or-string-p))))))
 
-(defun package-lint--check-version-regexp-list (valid-deps list rx-start rx-end)
-  "Warn about any match of REGEXP when VERSION is not in VALID-DEPS.
-LIST is an alist of (VERSION . REGEXP*).
-REGEXP is (concat RX-START REGEXP* RX-END) for each REGEXP*."
+(defun package-lint--map-regexp-match (regexp callback)
+  "For every match of REGEXP, call CALLBACK with the first match group.
+If callback returns non-nil, the return value - which must be a
+list - will be applied to `package-lint--error-at-point'.  If
+REGEXP doesn't produce a match group 1, then match group
+0 (ie. the whole match string string) will be passed to
+CALLBACK."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward regexp nil t)
+      (let ((sym (or (match-string-no-properties 1)
+                     (match-string-no-properties 0))))
+        (save-excursion
+          (goto-char (or (match-beginning 1)
+                         (match-beginning 0)))
+          (let ((err (funcall callback sym)))
+            (when err
+              ;; Check this as late as possible, just before reporting,
+              ;; because otherwise the checking process is extremely slow,
+              ;; being bottlenecked by `syntax-ppss'.
+              (unless (package-lint--inside-comment-or-string-p)
+                (apply #'package-lint--error-at-point err)))))))))
+
+(defun package-lint--check-version-regexp-list (valid-deps list symbol-regexp type)
+  "Warn if symbols matched by SYMBOL-REGEXP are unavailable in the target Emacs.
+The target Emacs version is taken from VALID-DEPS, which are the
+declared dependencies of this package.  LIST is an alist
+of (VERSION . PRED), where PRED is passed the sym.  TYPE is the
+type of the symbol, either FUNCTION or FEATURE."
   (let ((emacs-version-dep (or (cadr (assq 'emacs valid-deps)) '(0))))
-    (pcase-dolist (`(,added-in-version . ,regexp) list)
+    (pcase-dolist (`(,added-in-version . ,pred) list)
       (when (version-list-< emacs-version-dep added-in-version)
-        (goto-char (point-min))
-        (while (re-search-forward (concat rx-start regexp rx-end) nil t)
-          (unless (package-lint--inside-comment-or-string-p)
-            (let ((sym (match-string-no-properties 1)))
-              (unless (package-lint--seen-fboundp-check-for sym)
-                (save-excursion
-                  (goto-char (match-beginning 1))
-                  (package-lint--error-at-point
-                   'error
-                   (format "You should depend on (emacs \"%s\") if you need `%s'."
-                           (mapconcat #'number-to-string added-in-version ".")
-                           sym)))))))))))
+        (package-lint--map-regexp-match
+         symbol-regexp
+         (lambda (sym)
+           (when (funcall pred (intern sym))
+             (unless (and (eq type 'function) (package-lint--seen-fboundp-check-for sym))
+               (let ((available-backport
+                      (cond
+                       ((eq type 'feature)
+                        (cl-some (lambda (bp)
+                                   (when (string= (car bp) sym)
+                                     (car bp)))
+                                 package-lint-backport-libraries))
+                       ((eq type 'function)
+                        (cl-some (lambda (bp)
+                                   (when (string-match-p (cdr bp) sym)
+                                     (car bp)))
+                                 package-lint-backport-libraries)))))
+                 (unless (and available-backport (assoc available-backport valid-deps))
+                   (list
+                    'error
+                    (format "You should depend on (emacs \"%s\")%s if you need `%s'."
+                            (mapconcat #'number-to-string added-in-version ".")
+                            (if available-backport
+                                (format " or the %s package" available-backport)
+                              "")
+                            sym))))))))))))
 
 (defun package-lint--check-eval-after-load ()
   "Warn about use of `eval-after-load' and co."
-  (save-excursion
-    (save-match-data
-      (goto-char (point-min))
-      (when (re-search-forward "(\\s-*?\\(\\(?:with-\\)?eval-after-load\\)\\_>" nil t)
-        (package-lint--error-at-point
-         'warning
-         (format "`%s' is for use in configurations, and should rarely be used in packages." (match-string 1)))))))
+  (package-lint--map-regexp-match
+   "(\\s-*?\\(\\(?:with-\\)?eval-after-load\\)\\_>"
+   (lambda (match)
+     (list 'warning
+           (format "`%s' is for use in configurations, and should rarely be used in packages." match)))))
 
 (defun package-lint--check-no-use-of-cl ()
   "Warn about use of deprecated `cl' library."
-  (save-excursion
-    (save-match-data
-      (goto-char (point-min))
-      (when (re-search-forward "(\\s-*?require\\s-*?'cl\\_>" nil t)
-        (package-lint--error-at-point
-         'warning
-         "Replace deprecated `cl' with `cl-lib'.  The `cl-libify' package can help with this.")))))
+  (package-lint--map-regexp-match
+   "(\\s-*?require\\s-*?'\\(cl\\)\\_>"
+   (lambda (_)
+     (list
+      'warning
+      "Replace deprecated `cl' with `cl-lib'.  The `cl-libify' package can help with this."))))
 
 (defun package-lint--check-no-use-of-cl-lib-sublibraries ()
   "Warn about use of `cl-macs', `cl-seq' etc."
-  (save-excursion
-    (save-match-data
-      (goto-char (point-min))
-      (when (re-search-forward "(\\s-*?require\\s-*?'cl-\\(?:macs\\|seq\\)\\_>" nil t)
-        (package-lint--error-at-point
-         'warning
-         "This file is not in the `cl-lib' ELPA compatibility package: require `cl-lib' instead.")))))
+  (package-lint--map-regexp-match
+   "(\\s-*?require\\s-*?'\\(cl-macs\\|cl-seq\\)\\_>"
+   (lambda (_)
+     (list
+      'warning
+      "This file is not in the `cl-lib' ELPA compatibility package: require `cl-lib' instead."))))
+
+(defconst package-lint--unconditional-require-regexp
+  ;; Match the ending paren so we can be sure it's a single argument
+  ;; `require'. If there are additional arguments, we don't want to warn,
+  ;; because (require 'foo nil t) indicates an optional dependency and
+  ;; (require 'foo "filename") is very uncommon.
+  "(\\s-*?require\\s-*?'\\_<\\(.*?\\)\\_>\\s-*?)"
+  "Regexp to match unconditional `require' forms.")
 
 (defun package-lint--check-libraries-available-in-emacs (valid-deps)
   "Warn about use of libraries that are not available in the Emacs version in VALID-DEPS."
   (package-lint--check-version-regexp-list
    valid-deps
    package-lint--libraries-added-alist
-   "(\\s-*?require\\s-*?'\\("
-   ;; Match the ending paren so we can be sure it's a single argument
-   ;; `require'. If there are additional arguments, we don't want to warn,
-   ;; because (require 'foo nil t) indicates an optional dependency and
-   ;; (require 'foo "filename") is very uncommon.
-   "\\)\\_>\\s-*?)"))
+   package-lint--unconditional-require-regexp
+   'feature))
+
+(defun package-lint--check-libraries-removed-from-emacs ()
+  "Warn about use of libraries that have been removed from Emacs."
+  (package-lint--map-regexp-match
+   package-lint--unconditional-require-regexp
+   (lambda (sym)
+     (cl-block return
+       (pcase-dolist (`(,removed-in-version . ,pred) package-lint--libraries-removed-alist)
+         (when (funcall pred (intern sym))
+           (cl-return-from return
+             (list
+              'error
+              (format "The `%s' library was removed in Emacs version %s."
+                      sym (mapconcat #'number-to-string removed-in-version "."))))))))))
+
+(defconst package-lint--function-name-regexp
+  "\\(?:#'\\|(\\s-*?\\)\\(.*?\\)\\_>"
+  "Regexp to match function names.")
 
 (defun package-lint--check-macros-functions-available-in-emacs (valid-deps)
   "Warn about use of functions/macros that are not available in the Emacs version in VALID-DEPS."
   (package-lint--check-version-regexp-list
    valid-deps
    package-lint--functions-and-macros-added-alist
-   "(\\s-*?\\("
-   "\\)\\_>"))
+   package-lint--function-name-regexp
+   'function))
+
+(defun package-lint--check-macros-functions-removed-from-emacs ()
+  "Warn about use of functions/macros that have been removed from Emacs."
+  (package-lint--map-regexp-match
+   package-lint--function-name-regexp
+   (lambda (sym)
+     (cl-block return
+       (pcase-dolist (`(,removed-in-version . ,pred) package-lint--functions-and-macros-removed-alist)
+         (when (funcall pred (intern sym))
+           (cl-return-from return
+             (list
+              'error
+              (format "`%s' was removed in Emacs version %s."
+                      sym (mapconcat #'number-to-string removed-in-version "."))))))))))
 
 (defun package-lint--check-lexical-binding-is-on-first-line ()
   "Check that any `lexical-binding' declaration is on the first line of the file."
@@ -617,7 +606,7 @@ REGEXP is (concat RX-START REGEXP* RX-END) for each REGEXP*."
                   (setq lexical-binding-found-at-end
                         hack-local-variables--warned-lexical)))
             (error
-             (package-lint--error 1 1 'error (error-message-string err))
+             (package-lint--error-at-bob 'error (error-message-string err))
              (cl-return-from return nil)))
           (when (or lexical-binding-found-at-end
                     ;; In case this is an Emacs from before `hack-local-variables'
@@ -625,8 +614,8 @@ REGEXP is (concat RX-START REGEXP* RX-END) for each REGEXP*."
                     ;; than the first.
                     (and (cdr (assq 'lexical-binding file-local-variables-alist))
                          (not (package-lint--lexical-binding-declared-in-header-line-p))))
-            (package-lint--error
-             1 1 'error
+            (package-lint--error-at-bob
+             'error
              "`lexical-binding' must be set in the first line.")))))))
 
 (defun package-lint--check-do-not-depend-on-cl-lib-1.0 (valid-deps)
@@ -635,24 +624,24 @@ REGEXP is (concat RX-START REGEXP* RX-END) for each REGEXP*."
     (when cl-lib-dep
       (let ((cl-lib-version (nth 1 cl-lib-dep)))
         (when (version-list-<= '(1) cl-lib-version)
-          (package-lint--error
-           (nth 2 cl-lib-dep) (nth 3 cl-lib-dep) 'error
+          (package-lint--error-at-point
+           'error
            (format "Depend on the latest 0.x version of cl-lib rather than on version \"%S\".
 Alternatively, depend on (emacs \"24.3\") or greater, in which cl-lib is bundled."
-                   cl-lib-version)))))))
+                   cl-lib-version)
+           (nth 2 cl-lib-dep)))))))
 
 (defun package-lint--check-package-version-present ()
   "Check that a valid \"Version\" header is present."
   (let ((version (package-lint--goto-header (rx (? "Package-") "Version"))))
     (if version
         (unless (ignore-errors (version-to-list version))
-          (package-lint--error
-           (line-number-at-pos)
-           (1+ (- (match-beginning 3) (line-beginning-position)))
+          (package-lint--error-at-point
            'warning
-           (format "\"%s\" is not a valid version. MELPA will handle this, but other archives will not." version)))
-      (package-lint--error
-       1 1 'warning
+           (format "\"%s\" is not a valid version. MELPA will handle this, but other archives will not." version)
+           (match-beginning 3)))
+      (package-lint--error-at-bob
+       'warning
        "\"Version:\" or \"Package-Version:\" header is missing. MELPA will handle this, but other archives will not."))))
 
 (defun package-lint--check-package-el-can-parse ()
@@ -666,8 +655,7 @@ If it can, return the read metadata."
           (package-lint--update-or-insert-version "0")
           (package-buffer-info)))
     (error
-     (package-lint--error
-      1 1
+     (package-lint--error-at-bob
       'error
       (format "package.el cannot parse this buffer: %s" (error-message-string err)))
      nil)))
@@ -678,23 +666,27 @@ DESC is a struct as returned by `package-buffer-info'."
   (let ((summary (package-lint--package-desc-summary desc)))
     (cond
      ((string= summary "")
-      (package-lint--error
-       1 1
+      (package-lint--error-at-bob
        'warning
        "Package should have a non-empty summary."))
-     ((> (length summary) 60)
-      (package-lint--error
-       1 1
-       'warning
-       "The package summary is too long. It should be at most 60 characters.")))
-    (when (save-match-data
-            (let ((case-fold-search t))
-              (and (string-match "[^.]\\<emacs\\>" summary)
-                   (not (string-match-p "[[:space:]]+lisp" summary (match-end 0))))))
-      (package-lint--error
-       1 1
-       'warning
-       "Including \"Emacs\" in the package description is usually redundant."))))
+     (t
+      (unless (let ((case-fold-search nil))
+                (string-match-p "^[A-Z0-9]" summary))
+        (package-lint--error-at-bob
+         'warning
+         "The package summary should start with an uppercase letter or a digit."))
+      (when (> (length summary) 60)
+        (package-lint--error-at-bob
+         'warning
+         "The package summary is too long. It should be at most 60 characters."))
+      (when (save-match-data
+              (let ((case-fold-search t))
+                (and (string-match "[^.]\\<emacs\\>" summary)
+                     (not (string-match-p "[[:space:]]+lisp"
+                                          summary (match-end 0))))))
+        (package-lint--error-at-bob
+         'warning
+         "Including \"Emacs\" in the package summary is usually redundant."))))))
 
 (defun package-lint--check-provide-form (desc)
   "Check the provide form for package with descriptor DESC.
@@ -702,10 +694,18 @@ DESC is a struct as returned by `package-buffer-info'."
   (let ((name (package-lint--package-desc-name desc))
         (feature (package-lint--provided-feature)))
     (unless (string-equal (symbol-name name) feature)
-      (package-lint--error
-       1 1
+      (package-lint--error-at-bob
        'error
        (format "There is no (provide '%s) form." name)))))
+
+(defun package-lint--check-no-emacs-in-package-name (desc)
+  "Check that the package name doesn't contain \"emacs\".
+DESC is a struct as returned by `package-buffer-info'."
+  (let ((name (package-lint--package-desc-name desc)))
+    (when (string-match-p "emacs" (symbol-name name))
+      (package-lint--error-at-bob
+       'warning
+       "The word \"emacs\" is redundant in Emacs package names."))))
 
 (defun package-lint--check-symbol-separators (definitions)
   "Check that symbol DEFINITIONS don't contain non-standard separators."
@@ -718,24 +718,26 @@ DESC is a struct as returned by `package-buffer-info'."
                   (/= match-pos (match-beginning 0)))
           (goto-char position)
           (package-lint--error
-           (line-number-at-pos) 1 'error
+           (line-number-at-pos) 0 'error
            (format "`%s' contains a non-standard separator `%s', use hyphens instead (see Elisp Coding Conventions)."
                    name (substring-no-properties name match-pos (1+ match-pos)))))))))
 
-(defun package-lint--valid-definition-name-p (name prefix-re position)
+(defun package-lint--valid-definition-name-p (name prefix &optional position)
   "Return non-nil if NAME denotes a valid definition name.
 
 Valid definition names are:
 
-- a NAME starting with PREFIX-RE, a regular expression
-  representing the current package prefix,
+- a NAME starting with PREFIX, a string representing the current
+  package prefix,
 
 - a NAME matching `package-lint--sane-prefixes', or
 
 - a NAME whose POSITION in the buffer denotes a global definition."
-  (or (string-match-p prefix-re name)
+  (or (string-prefix-p prefix name)
       (string-match-p package-lint--sane-prefixes name)
-      (progn
+      (string-match-p (rx-to-string `(seq string-start (or "define" "defun" "defvar") "-" ,prefix)) name)
+      (string-match-p (rx-to-string  `(seq string-start "global-" ,prefix (or "-mode" (seq "-" (* any) "-mode")) string-end)) name)
+      (when position
         (goto-char position)
         (looking-at-p (rx (*? space) "(" (*? space)
                           (or "defadvice" "cl-defmethod")
@@ -745,22 +747,13 @@ Valid definition names are:
   "Verify that symbol DEFINITIONS start with package prefix."
   (let ((prefix (package-lint--get-package-prefix)))
     (when prefix
-      (let ((prefix-re
-             (rx-to-string
-              `(seq string-start
-                    (or (seq ,prefix (or "-" string-end))
-                        (seq "global-"
-                             ,prefix
-                             (or "-mode"
-                                 (seq "-" (* any) "-mode"))
-                             string-end))))))
-        (pcase-dolist (`(,name . ,position) definitions)
-          (unless (package-lint--valid-definition-name-p name prefix-re position)
-            (let ((line-no (line-number-at-pos position)))
-              (package-lint--error
-               line-no 1 'error
-               (format "\"%s\" doesn't start with package's prefix \"%s\"."
-                       name prefix)))))))))
+      (pcase-dolist (`(,name . ,position) definitions)
+        (unless (package-lint--valid-definition-name-p name prefix position)
+          (package-lint--error-at-point
+           'error
+           (format "\"%s\" doesn't start with package's prefix \"%s\"."
+                   name prefix)
+           position))))))
 
 (defun package-lint--check-minor-mode (def)
   "Offer up concerns about the minor mode definition DEF."
@@ -769,17 +762,19 @@ Valid definition names are:
 
 (defun package-lint--check-globalized-minor-mode (def)
   "Offer up concerns about the global minor mode definition DEF."
-  (let ((feature (intern (package-lint--provided-feature)))
-        (autoloaded (save-excursion
-                      (forward-line -1)
-                      (beginning-of-line)
-                      (looking-at ";;;###autoload"))))
-    (unless (or autoloaded
-                (cl-search `(:require ',feature) def :test #'equal))
-      (package-lint--error-at-point
-       'error
-       (format
-        "Global minor modes should be autoloaded or, rarely, `:require' their defining file (i.e. \":require '%s\"), to support the customization variable of the same name." feature)))))
+  (let ((feature-name (package-lint--provided-feature)))
+    (when feature-name
+      (let ((feature (intern feature-name))
+            (autoloaded (save-excursion
+                          (forward-line -1)
+                          (beginning-of-line)
+                          (looking-at ";;;###autoload"))))
+        (unless (or autoloaded
+                    (cl-search `(:require ',feature) def :test #'equal))
+          (package-lint--error-at-point
+           'error
+           (format
+            "Global minor modes should be autoloaded or, rarely, `:require' their defining file (i.e. \":require '%s\"), to support the customization variable of the same name." feature)))))))
 
 (defun package-lint--check-defgroup (def)
   "Offer up concerns about the customization group definition DEF."
@@ -796,6 +791,49 @@ Valid definition names are:
     (package-lint--error-at-point
      'error
      "Customization groups should specify a parent via `:group'.")))
+
+(defun package-lint--check-defalias (def)
+  "Offer up concerns about the customization group definition DEF."
+  (let ((prefix (package-lint--get-package-prefix)))
+    (when prefix
+      (pcase (cadr def)
+        ((and `(quote ,alias) (guard (symbolp alias)))
+         (unless (package-lint--valid-definition-name-p (symbol-name alias) prefix)
+           (package-lint--error-at-point
+            'error
+            (concat "Aliases should start with the package's prefix \"" prefix "\"."))))))))
+
+(defun package-lint--check-format-string (valid-deps def)
+  "Offer up concerns about the format string used in DEF, depending on VALID-DEPS."
+  (let ((fmt-str (cadr def))
+        (emacs-version-dep (or (cadr (assq 'emacs valid-deps)) '(0))))
+    (when (and (version-list-< emacs-version-dep '(26 1))
+               ;; We give up on trying to warn about format strings that are
+               ;; evaluated at runtime.
+               (stringp fmt-str)
+               ;; The usual regexp strategy for finding unescaped matches
+               ;; requires negative lookbehind:
+               ;;  (?<!%)(?:%%)*[0-9]+\$
+               ;; So instead we make sure the count of escape chars is odd
+               (string-match "\\(%+\\)[0-9]+\\$" fmt-str)
+               (cl-oddp (length (match-string 1 fmt-str))))
+      (package-lint--error-at-point
+       'error
+       "You should depend on (emacs \"26.1\") if you need format field numbers."))))
+
+(defun package-lint--check-lonely-parens ()
+  "Warn about dangling closing parens."
+  (package-lint--map-regexp-match
+   "^\\s-*?\\()\\)"
+   (lambda (_)
+     ;; Allow dangling parentheses if the preceding line ends with a comment, as
+     ;; it's not uncommon even in idiomatic lisp.
+     (when (save-excursion
+             (end-of-line 0)
+             (not (nth 4 (syntax-ppss))))
+       (list 'warning
+             "Closing parens should not be wrapped onto new lines.")))))
+
 
 
 ;;; Helpers
@@ -932,8 +970,10 @@ The returned list is of the form (SYMBOL-NAME . POSITION)."
   "Return the first-provided feature name, as a string, or nil if none."
   (save-excursion
     (goto-char (point-max))
-    (when (re-search-backward (rx "(provide '" (group (1+ (or (syntax word) (syntax symbol))))) nil t)
-      (match-string-no-properties 1))))
+    (cond ((re-search-backward (rx "(provide '" (group (1+ (or (syntax word) (syntax symbol))))) nil t)
+           (match-string-no-properties 1))
+          ((re-search-backward "(provide-me)" nil t)
+           (file-name-sans-extension (file-name-nondirectory buffer-file-name))))))
 
 (defun package-lint--get-package-prefix ()
   "Return package prefix string (i.e. the symbol the package `provide's).
@@ -982,20 +1022,44 @@ Current buffer is used if none is specified."
   (interactive)
   (let ((errs (package-lint-buffer))
         (buf "*Package-Lint*"))
-    (if (null errs)
-        (message "No issues found")
-      (with-current-buffer (get-buffer-create buf)
-        (let ((buffer-read-only nil))
-          (erase-buffer)
-          (cond
-           ((null errs) (insert "No issues found."))
-           ((null (cdr errs)) (insert "1 issue found:\n\n"))
-           (t (insert (format "%d issues found:\n\n" (length errs)))))
-          (pcase-dolist (`(,line ,col ,type ,message) errs)
-            (insert (format "%d:%d: %s: %s\n" line col type message))))
-        (special-mode)
-        (view-mode 1))
-      (display-buffer buf))))
+    (with-current-buffer (get-buffer-create buf)
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (cond
+         ((null errs) (insert "No issues found."))
+         ((null (cdr errs)) (insert "1 issue found:\n\n"))
+         (t (insert (format "%d issues found:\n\n" (length errs)))))
+        (pcase-dolist (`(,line ,col ,type ,message) errs)
+          (insert (format "%d:%d: %s: %s\n" line col type message))))
+      (special-mode)
+      (view-mode 1))
+    (display-buffer buf)))
+
+(defun package-lint-batch-and-exit-1 (filenames)
+  "Internal helper function for `package-lint-batch-and-exit'.
+
+Checks FILENAMES using package-lint.
+
+The main loop is this separate function so it's easier to test."
+  ;; Make sure package.el is initialized so we can query its database.
+  (package-initialize)
+  (let ((success t) (last-directory nil) (text-quoting-style 'grave))
+    (dolist (file filenames success)
+      (let* ((file (expand-file-name file))
+             (file-directory (file-name-directory file))
+             (base (file-name-nondirectory file)))
+        (with-temp-buffer
+          (insert-file-contents file t)
+          (emacs-lisp-mode)
+          (let ((checking-result (package-lint-buffer)))
+            (when checking-result
+              (setq success nil)
+              (unless (equal last-directory file-directory)
+                (setq last-directory file-directory)
+                (message "Entering directory '%s'" file-directory))
+              (pcase-dolist (`(,line ,col ,type ,message) checking-result)
+                (message "%s:%d:%d: %s: %s"
+                         base line col type message)))))))))
 
 ;;;###autoload
 (defun package-lint-batch-and-exit ()
@@ -1006,19 +1070,7 @@ When done, exit Emacs with status 0 if there were no errors nor warnings or 1
 otherwise."
   (unless noninteractive
     (error "`package-lint-batch-and-exit' is to be used only with -batch"))
-  ;; Make sure package.el is initialized so we can query its database.
-  (package-initialize)
-  (let ((success t))
-    (dolist (file command-line-args-left)
-      (with-temp-buffer
-        (insert-file-contents file t)
-        (emacs-lisp-mode)
-        (let ((checking-result (package-lint-buffer)))
-          (when checking-result
-            (setq success nil)
-            (message "In `%s':" file)
-            (pcase-dolist (`(,line ,col ,type ,message) checking-result)
-              (message "  at %d:%d: %s: %s" line col type message))))))
+  (let ((success (package-lint-batch-and-exit-1 command-line-args-left)))
     (kill-emacs (if success 0 1))))
 
 ;;;###autoload
