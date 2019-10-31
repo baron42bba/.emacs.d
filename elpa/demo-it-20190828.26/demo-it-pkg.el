@@ -1,4 +1,4 @@
-(define-package "demo-it" "20180404.332" "Create demonstrations" 'nil :keywords
+(define-package "demo-it" "20190828.26" "Create demonstrations" 'nil :keywords
   '("demonstration" "presentation" "test")
   :authors
   '(("Howard Abrams" . "howard.abrams@gmail.com"))
