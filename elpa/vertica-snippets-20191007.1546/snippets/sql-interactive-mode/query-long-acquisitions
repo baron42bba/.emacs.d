@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: query-long-acquisitions
+# key: query-long-acq
+# group: vertica
+# documentation: https://www.vertica.com/blog/calculate-request-queue-length-quick-tip/?utm_campaign=00164962
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT node_name,
+       request_type,
+       transaction_id,
+       statement_id,
+       pool_name,
+       (acquisition_timestamp - queue_entry_timestamp) request_queue_length
+FROM v_monitor.resource_acquisitions
+WHERE pool_name = 'general'
+AND (acquisition_timestamp - queue_entry_timestamp) > '1 second'
+ORDER BY (acquisition_timestamp - queue_entry_timestamp) DESC;$0

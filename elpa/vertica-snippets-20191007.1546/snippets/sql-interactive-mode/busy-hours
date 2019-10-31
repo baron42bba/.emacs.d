@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: busy-hours
+# key: bh_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# https://www.vertica.com/blog/find-the-busiest-hour-in-the-day-for-i-o/
+# --
+
+SELECT *
+  FROM (SELECT "HOUR", "Total IO (GB)", "Read IO (GB)", "Write IO (GB)"
+          FROM (SELECT MIN(TRUNC(start_time)) start_time,
+                       DATE_TRUNC('hour', start_time) as "HOUR",
+                       (SUM(read_kbytes_per_sec) + SUM(written_kbytes_per_sec)) * 60/1024/1024 as "Total IO (GB)",
+                       SUM(read_kbytes_per_sec) * 60/1024/1024 as "Read IO (GB)",
+                       SUM(written_kbytes_per_sec) * 60/1024/1024 as "Write IO (GB)"
+                  FROM v_monitor.io_usage
+                 GROUP BY 2) foo
+         WHERE start_time >= TRUNC(SYSDATE) - 5 -- LAST 5 DAYS!
+         LIMIT 1 OVER (PARTITION BY start_time ORDER BY start_time, "Total IO (GB)" DESC)) foo2
+ ORDER BY "HOUR" DESC;$0

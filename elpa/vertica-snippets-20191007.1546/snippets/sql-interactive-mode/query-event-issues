@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: query-event-issues
+# key: qei_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# https://www.vertica.com/blog/find-and-fix-issues-from-vertica-query-events/
+# --
+SELECT event_description,
+       suggested_action,
+       COUNT(*)
+  FROM query_events
+ WHERE suggested_action IS NOT NULL
+   AND suggested_action <> 'Informational; No user action is necessary'
+ GROUP BY 1,
+          2
+ ORDER BY 3 DESC;$0

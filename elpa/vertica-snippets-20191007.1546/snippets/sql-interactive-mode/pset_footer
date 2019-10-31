@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: pset_footer
+# key: footer_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+\pset footer 0$0

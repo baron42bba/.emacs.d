@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: licence-history
+# key: lic_history
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# https://www.vertica.com/blog/track-license-usage-over-time/
+# --
+  SELECT * FROM (
+    SELECT TRUNC(audit_start_timestamp)::DATE the_date, usage_percent * 100 AS usage_percent
+      FROM license_audits
+     WHERE audited_data = 'Total'
+     LIMIT 1 OVER (PARTITION BY TRUNC(audit_start_timestamp) ORDER BY audit_start_timestamp DESC)
+  ) foo
+  ORDER BY 1 DESC
+  LIMIT 7;$0

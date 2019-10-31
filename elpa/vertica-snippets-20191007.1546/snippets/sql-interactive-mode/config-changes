@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: config-changes
+# key: config-changes
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# https://www.vertica.com/blog/generate-ddl-for-changed-configuration-parameters/
+# --
+  SELECT DISTINCT ddl
+  FROM (SELECT CASE
+	       WHEN current_level = 'DATABASE' OR (current_level = 'DEFAULT' AND INSTR(allowed_levels, 'DATABASE') > 0) THEN
+															    'SELECT set_config_parameter(''' || parameter || ''', ''' || value || ''');'
+                  WHEN current_level = 'NODE' THEN
+						  'ALTER NODE ' || configuration_changes.node_name || ' SET ' || parameter || ' = ''' || value || ''';'
+               END AS ddl
+          FROM configuration_changes
+		 JOIN configuration_parameters
+		     ON parameter = parameter_name
+         WHERE allowed_levels <> 'SESSION'
+         LIMIT 1 OVER (PARTITION BY configuration_changes.node_name, parameter ORDER BY event_timestamp DESC)) foo
+  ORDER BY 1;$0

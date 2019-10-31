@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: format_numbers
+# key: _fn_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t) 
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+TO_CHAR( $0, '999g999g999g999') AS

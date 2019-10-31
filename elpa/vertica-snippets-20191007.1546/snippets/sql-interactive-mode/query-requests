@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: query-requests
+# key: qr_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT request
+  FROM v_monitor.query_requests
+ WHERE user_name = '$1'
+   AND request_type = '${2:$$(yas-choose-value '("QUERY" "SHOW" "SET" "DDL" "TRUNCATE" "TRANSACTION" "LOAD"))}'
+   AND start_timestamp::DATE = '${3:`(insert (format-time-string "%Y-%m-%d"))`}'
+   AND request_label LIKE '$4'
+ ORDER BY start_timestamp ASC;$0
