@@ -1,12 +1,10 @@
 ;;; projectile-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "projectile" "projectile.el" (0 0 0 0))
+;;;### (autoloads nil "projectile" "projectile.el" (23994 46385 791850
+;;;;;;  957000))
 ;;; Generated autoloads from projectile.el
 
 (autoload 'projectile-version "projectile" "\
@@ -246,6 +244,41 @@ With a prefix arg INVALIDATE-CACHE invalidates the cache first.
 
 \(fn &optional INVALIDATE-CACHE)" t nil)
 
+(autoload 'projectile-find-related-file-other-window "projectile" "\
+Open related file in other window.
+
+\(fn)" t nil)
+
+(autoload 'projectile-find-related-file-other-frame "projectile" "\
+Open related file in other frame.
+
+\(fn)" t nil)
+
+(autoload 'projectile-find-related-file "projectile" "\
+Open related file.
+
+\(fn)" t nil)
+
+(autoload 'projectile-related-files-fn-groups "projectile" "\
+Generate a related-files-fn which relates as KIND for files in each of GROUPS.
+
+\(fn KIND GROUPS)" nil nil)
+
+(autoload 'projectile-related-files-fn-extensions "projectile" "\
+Generate a related-files-fn which relates as KIND for files having EXTENSIONS.
+
+\(fn KIND EXTENSIONS)" nil nil)
+
+(autoload 'projectile-related-files-fn-test-with-prefix "projectile" "\
+Generate a related-files-fn which relates tests and impl for files with EXTENSION based on TEST-PREFIX.
+
+\(fn EXTENSION TEST-PREFIX)" nil nil)
+
+(autoload 'projectile-related-files-fn-test-with-suffix "projectile" "\
+Generate a related-files-fn which relates tests and impl for files with EXTENSION based on TEST-SUFFIX.
+
+\(fn EXTENSION TEST-SUFFIX)" nil nil)
+
 (autoload 'projectile-project-info "projectile" "\
 Display info for current project.
 
@@ -288,9 +321,10 @@ regular expression.
 (autoload 'projectile-ripgrep "projectile" "\
 Run a Ripgrep search with `SEARCH-TERM' at current project root.
 
-SEARCH-TERM is a regexp.
+With an optional prefix argument ARG SEARCH-TERM is interpreted as a
+regular expression.
 
-\(fn SEARCH-TERM)" t nil)
+\(fn SEARCH-TERM &optional ARG)" t nil)
 
 (autoload 'projectile-regenerate-tags "projectile" "\
 Regenerate the project's [e|g]tags.
@@ -502,6 +536,11 @@ Remove the current project from the list of known projects.
 
 \(fn)" t nil)
 
+(autoload 'projectile-add-known-project "projectile" "\
+Add PROJECT-ROOT to the list of known projects.
+
+\(fn PROJECT-ROOT)" t nil)
+
 (autoload 'projectile-ibuffer "projectile" "\
 Open an IBuffer window showing all buffers in the current project.
 
@@ -559,14 +598,11 @@ Otherwise behave as if called interactively.
 
 (define-obsolete-function-alias 'projectile-global-mode 'projectile-mode "1.0")
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "projectile" '("projectile-" "??" "delete-file-projectile-remove-from-cache" "def-projectile-commander-method" "compilation-find-file-projectile-find-compilation-buffer")))
-
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; projectile-autoloads.el ends here
