@@ -6,12 +6,12 @@
 ;; Maintainer: André Riemann <andre.riemann@web.de>
 ;; Created: 2007-09-14
 ;; Keywords: convenience
-;; Package-Version: 20180112.1555
+;; Package-Version: 20190306.1006
 
 ;; URL: https://github.com/andre-r/centered-cursor-mode.el
-;; Compatibility: tested with GNU Emacs 23.0, 24, 26
-;; Version: 0.5.7
-;; Last-Updated: 2018-01-12
+;; Compatibility: tested with GNU Emacs 24, 26, 27
+;; Version: 0.5.11
+;; Last-Updated: 2019-03-06
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,6 +57,16 @@
 ;; - more bugs?
 
 ;;; Change Log:
+;; 2019-03-06 kqr
+;;   * more customisable way to inhibit recentering after a command:
+;;     new defcustom ccm-inhibit-centering-when
+;;   * new ignored command evil-mouse-drag-region
+;; 2019-02-24 Gollum999
+;;   * Fix aggressive centering while dragging mouse (selecting text doesn't scroll)
+;; 2019-02-05 andre-r
+;;   * tip from MATTHIAS Andreas
+;;     - replaced forward-line with next-line in ccm-scroll-up and ccm-scroll-down;
+;;       scrolled too far in visual-line-mode
 ;; 2018-01-12 andre-r
 ;;   * #3: Centering does not take line-height into account
 ;;     - added new function for calculating visible lines
@@ -133,10 +143,11 @@ If you want a different animation speed."
   :type 'number)
 
 (defcustom ccm-ignored-commands '(mouse-drag-region
-								  mouse-set-region
+                                  mouse-set-region
                                   mouse-set-point
                                   widget-button-click
-                                  scroll-bar-toolkit-scroll)
+                                  scroll-bar-toolkit-scroll
+                                  evil-mouse-drag-region)
   "After these commands recentering is ignored.
 This is to prevent unintentional jumping (especially when mouse
 clicking). Following commands (except the ignored ones) will
@@ -145,6 +156,14 @@ jumping to the center."
   :group 'centered-cursor
   :tag "Ignored commands"
   :type '(repeat (symbol :tag "Command")))
+
+(defcustom ccm-inhibit-centering-when '(ccm-ignored-command-p
+                                        ccm-mouse-drag-movement-p)
+  "A list of functions which are allowed to inhibit recentering.
+If any of these return t, recentering is canceled."
+  :group 'centered-cursor
+  :tag "Inhibit centering when"
+  :type '(repeat (symbol :tag "Function")))
 
 ;;;###autoload
 (defun ccm-visible-text-lines ()
@@ -232,6 +251,8 @@ This command exists, because mwheel-scroll caused strange
 behaviour with automatic recentering."
 ;;  (interactive (list last-input-event))
   (interactive "e")
+  (when (region-active-p)
+    (deactivate-mark))
   (let* ((mods (delq 'click (delq 'double (delq 'triple (event-modifiers event)))))
          (amt (assoc mods mouse-wheel-scroll-amount)))
     ;;(message "%S" mods)
@@ -262,7 +283,7 @@ a fixed position the movement appears as page up."
   (interactive "P")
   (let ((amt (or arg (- (ccm-visible-text-lines)
                         next-screen-context-lines))))
-    (forward-line (- amt))))
+    (next-line (- amt))))
 
 (defun ccm-scroll-up (&optional arg)
   "Replaces `scroll-up' to be consistent with `ccm-scroll-down'.
@@ -272,7 +293,7 @@ the movement appears as page up."
   (interactive "P")
   (let ((amt (or arg (- (ccm-visible-text-lines)
                         next-screen-context-lines))))
-    (forward-line amt)))
+    (next-line amt)))
 
 
 (defun ccm-vpos-down (arg)
@@ -315,9 +336,17 @@ the center. Just the variable ccm-vpos is set."
       (setq ccm-vpos (* (eval ccm-vpos-init)
                         ccm-vpos-inverted))))
 
+(defun ccm-ignored-command-p ()
+  "Check if the last command was one listed in CCM-IGNORED-COMMANDS."
+  (member this-command ccm-ignored-commands))
+
+(defun ccm-mouse-drag-movement-p ()
+  "Check if the last input event corresponded to a mouse drag event."
+  (mouse-movement-p last-command-event))
+
 (defun ccm-position-cursor ()
   "Do the actual recentering at the position `ccm-vpos'."
-  (unless (member this-command ccm-ignored-commands)
+  (unless (seq-some #'funcall ccm-inhibit-centering-when)
     (unless ccm-vpos
       (ccm-vpos-recenter))
     (unless (minibufferp (current-buffer))
