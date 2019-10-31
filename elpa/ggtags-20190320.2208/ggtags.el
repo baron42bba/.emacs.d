@@ -1,10 +1,10 @@
 ;;; ggtags.el --- emacs frontend to GNU Global source code tagging system  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013-2018  Free Software Foundation, Inc.
+;; Copyright (C) 2013-2019  Free Software Foundation, Inc.
 
 ;; Author: Leo Liu <sdl.web@gmail.com>
 ;; Version: 0.9.0
-;; Package-Version: 20181221.238
+;; Package-Version: 20190320.2208
 ;; Keywords: tools, convenience
 ;; Created: 2013-01-29
 ;; URL: https://github.com/leoliu/ggtags
@@ -864,9 +864,11 @@ blocking emacs."
                 (default (substring-no-properties default))
                 (t (ggtags-read-tag type t prompt require-match default))))))
 
-(defun ggtags-sort-by-nearness-p ()
+(defun ggtags-sort-by-nearness-p (&optional start-location)
   (and ggtags-sort-by-nearness
-       (ggtags-process-succeed-p "global" "--nearness=." "--help")))
+       (ggtags-process-succeed-p "global" "--nearness=." "--help")
+       (concat "--nearness="
+               (or start-location buffer-file-name default-directory))))
 
 (defun ggtags-global-build-command (cmd &rest args)
   ;; CMD can be definition, reference, symbol, grep, idutils
@@ -878,7 +880,6 @@ blocking emacs."
                                (ggtags-find-project)
                                (ggtags-project-has-color (ggtags-find-project))
                                "--color=always")
-                          (and (ggtags-sort-by-nearness-p) "--nearness=.")
                           (and (ggtags-find-project)
                                (ggtags-project-has-path-style (ggtags-find-project))
                                "--path-style=shorter")
@@ -941,7 +942,11 @@ blocking emacs."
 
 (defun ggtags-find-tag (cmd &rest args)
   (ggtags-check-project)
-  (ggtags-global-start (apply #'ggtags-global-build-command cmd args)))
+  (let ((nearness (ggtags-sort-by-nearness-p
+                   (ggtags-project-relative-file
+                    (or buffer-file-name default-directory)))))
+    (ggtags-global-start
+     (apply #'ggtags-global-build-command cmd nearness args))))
 
 (defun ggtags-include-file ()
   "Calculate the include file based on `ggtags-include-pattern'."
@@ -2038,7 +2043,10 @@ If SYNC is non-nil, synchronously run CMDS and call CALLBACK."
   (let* ((re (cadr (assq 'grep ggtags-global-error-regexp-alist-alist)))
          (current (current-buffer))
          (buffer (get-buffer-create " *ggtags-definition*"))
-         (args (list "--result=grep" "--path-style=absolute" name))
+         ;; `.' works here because ggtags-global-output doesn't set
+         ;; default-directory to project root.
+         (args (delq nil (list (ggtags-sort-by-nearness-p ".")
+                               "--result=grep" "--path-style=absolute" name)))
          ;; Need these bindings so that let-binding
          ;; `ggtags-print-definition-function' can work see
          ;; `ggtags-eldoc-function'.
@@ -2057,11 +2065,8 @@ If SYNC is non-nil, synchronously run CMDS and call CALLBACK."
                    (with-current-buffer current
                      (funcall print-fn (funcall get-fn defs)))))))
     (ggtags-with-current-project
-      (ggtags-global-output
-       buffer
-       (cons (ggtags-program-path "global")
-             (if (ggtags-sort-by-nearness-p) (cons "--nearness=." args) args))
-       show 100))))
+      (ggtags-global-output buffer (cons (ggtags-program-path "global") args)
+                            show 100))))
 
 (defvar ggtags-mode-prefix-map
   (let ((m (make-sparse-keymap)))
