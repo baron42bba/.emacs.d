@@ -4,7 +4,7 @@
 
 ;; Author: Artur Malabarba <emacs@endlessparentheses.com>
 ;; URL: https://github.com/Malabarba/paradox
-;; Version: 2.5.1
+;; Version: 2.5.4
 ;; Keywords: package packages
 ;; Package-Requires: ((emacs "24.4") (seq "1.7") (let-alist "1.0.3") (spinner "1.7.3") (hydra "0.13.2"))
 ;; Prefix: paradox
@@ -39,7 +39,7 @@
 ;; * Shortcuts for package filtering:
 ;;     * <f r> filters by regexp (`occur');
 ;;     * <f u> display only packages with upgrades;
-;;     * <f k> filters by keyword (Emacs 24.4 only).
+;;     * <f k> filters by keyword.
 ;; * `hl-line-mode' enabled by default.
 ;; * Display useful information on the mode-line and cleanup a bunch of
 ;;   useless stuff.
@@ -107,7 +107,7 @@
 (require 'paradox-execute)
 (require 'paradox-menu)
 
-(defconst paradox-version "2.5.1" "Version of the paradox.el package.")
+(defconst paradox-version "2.5.4" "Version of the paradox.el package.")
 (defun paradox-bug-report ()
   "Opens github issues page in a web browser.  Please send any bugs you find.
 Please include your Emacs and paradox versions."
@@ -150,16 +150,16 @@ for packages.
     (paradox-enable)
     (let ((is-25 (fboundp 'package--with-response-buffer)))
       (unless no-fetch
-        (if is-25
-            (add-to-list 'package--downloads-in-progress 'paradox--data)
+        (unless is-25
           (paradox--refresh-remote-data)))
       (package-list-packages no-fetch)
       (unless no-fetch
+        (when is-25
+          (add-to-list 'package--downloads-in-progress 'paradox--data)
+          (paradox--refresh-remote-data))
         (when (stringp paradox-github-token)
           (paradox--refresh-user-starred-list
-           (bound-and-true-p package-menu-async)))
-        (when is-25
-          (paradox--refresh-remote-data))))))
+           (bound-and-true-p package-menu-async)))))))
 
 ;;;###autoload
 (defun paradox-upgrade-packages (&optional no-fetch)
@@ -181,6 +181,7 @@ not prevent downloading the actual packages (obviously)."
     (package-menu-mark-upgrades)
     (paradox-menu-execute 'noquery)))
 
+;;;###autoload
 (defun paradox-enable ()
   "Enable paradox, overriding the default package-menu."
   (interactive)
