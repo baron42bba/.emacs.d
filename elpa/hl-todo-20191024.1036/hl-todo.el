@@ -5,7 +5,9 @@
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Homepage: https://github.com/tarsius/hl-todo
 ;; Keywords: convenience
-;; Package-Version: 20190117.2101
+;; Package-Version: 20191024.1036
+
+;; Package-Requires: ((emacs "25"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -26,26 +28,33 @@
 
 ;; Highlight TODO and similar keywords in comments and strings.
 
-;; You can either turn on `hl-todo-mode' in individual buffers or use
-;; the the global variant `global-hl-todo-mode'.  Note that the option
-;; `hl-todo-activate-in-modes' controls in what buffers the local mode
-;; will be activated if you do the latter.  By default it will only be
-;; activated in buffers whose major-mode derives from `prog-mode'.
+;; You can either explicitly turn on `hl-todo-mode' in certain buffers
+;; or use the the global variant `global-hl-todo-mode', which enables
+;; the local mode based on each buffer's major-mode and the options
+;; `hl-todo-include-modes' and `hl-todo-exclude-modes'.  By default
+;; `hl-todo-mode' is enabled for all buffers whose major-mode derive
+;; from either `prog-mode' or `text-mode', except `org-mode'.
 
 ;; This package also provides commands for moving to the next or
-;; previous keyword and to invoke `occur' with a regexp that matches
-;; all known keywords.  If you want to use these commands, then you
-;; should bind them in `hl-todo-mode-map', e.g.:
+;; previous keyword, to invoke `occur' with a regexp that matches all
+;; known keywords, and to insert a keyword.  If you want to use these
+;; commands, then you should bind them in `hl-todo-mode-map', e.g.:
 ;;
 ;;   (define-key hl-todo-mode-map (kbd "C-c p") 'hl-todo-previous)
 ;;   (define-key hl-todo-mode-map (kbd "C-c n") 'hl-todo-next)
 ;;   (define-key hl-todo-mode-map (kbd "C-c o") 'hl-todo-occur)
+;;   (define-key hl-todo-mode-map (kbd "C-c i") 'hl-todo-insert)
 
 ;; See [[https://www.emacswiki.org/emacs/FixmeMode][this list]] on the Emacswiki for other packages that implement
 ;; the same basic features, but which might also provide additional
 ;; features that you might like, but which I don't deem necessary.
 
 ;;; Code:
+
+(require' cl-lib)
+
+(eval-when-compile
+  (require 'subr-x))
 
 (defgroup hl-todo nil
   "Highlight TODO and similar keywords in comments and strings."
@@ -60,17 +69,28 @@ color specified using the option `hl-todo-keyword-faces' as
 foreground color."
   :group 'hl-todo)
 
-(defcustom hl-todo-activate-in-modes '(prog-mode text-mode)
-  "Major-modes in which `hl-todo-mode' should be activated.
+(define-obsolete-variable-alias 'hl-todo-activate-in-modes
+  'hl-todo-include-modes "hl-todo 3.1.0")
 
-This is used by `global-hl-todo-mode', which activates
-`hl-todo-mode' in all buffers whose major-mode derived from one
-of the modes listed here.
+(defcustom hl-todo-include-modes '(prog-mode text-mode)
+  "Major-modes in which `hl-todo-mode' is activated.
 
-Even though `org-mode' indirectly derives from `text-mode' this
-mode is never activated in `org-mode' buffers because that mode
-provides its own TODO keyword handling."
+This is used by `global-hl-todo-mode', which activates the local
+`hl-todo-mode' in all buffers whose major-mode derive from one
+of the modes listed here, but not from one of the modes listed
+in `hl-todo-exclude-modes'."
   :package-version '(hl-todo . "2.1.0")
+  :group 'hl-todo
+  :type '(repeat function))
+
+(defcustom hl-todo-exclude-modes '(org-mode)
+  "Major-modes in which `hl-todo-mode' is not activated.
+
+This is used by `global-hl-todo-mode', which activates the local
+`hl-todo-mode' in all buffers whose major-mode derived from one
+of the modes listed in `hl-todo-include-modes', but not from one
+of the modes listed here."
+  :package-version '(hl-todo . "3.1.0")
   :group 'hl-todo
   :type '(repeat function))
 
@@ -99,16 +119,46 @@ located inside a string."
     ("HACK"   . "#d0bf8f")
     ("TEMP"   . "#d0bf8f")
     ("FIXME"  . "#cc9393")
-    ("XXX"    . "#cc9393")
-    ("XXXX"   . "#cc9393")
-    ("???"    . "#cc9393"))
-  "Faces used to highlight specific TODO keywords."
-  :package-version '(hl-todo . "2.0.0")
+    ("XXX+"   . "#cc9393"))
+  "An alist mapping keywords to colors/faces used to display them.
+
+Each entry has the form (KEYWORD . COLOR).  KEYWORD is used as
+part of a regular expression.  If (regexp-quote KEYWORD) is not
+equal to KEYWORD, then it is ignored by `hl-todo-insert-keyword'.
+Instead of a color (a string), each COLOR may alternatively be a
+face.
+
+The syntax class of the characters at either end has to be `w'
+\(which means word) in `hl-todo--syntax-table'.  That syntax
+table derives from `text-mode-syntax-table' but uses `w' as the
+class of \"?\".
+
+This package, like most of Emacs, does not use POSIX regexp
+backtracking.  See info node `(elisp)POSIX Regexp' for why that
+matters.  If you have two keywords \"TODO-NOW\" and \"TODO\", then
+they must be specified in that order.  Alternatively you could
+use \"TODO\\(-NOW\\)?\"."
+  :package-version '(hl-todo . "3.0.0")
   :group 'hl-todo
   :type '(repeat (cons (string :tag "Keyword")
                        (choice :tag "Face   "
                                (string :tag "Color")
                                (sexp :tag "Face")))))
+
+(defcustom hl-todo-color-background nil
+  "Whether to emphasize keywords using the background color.
+
+If an entry in `hl-todo-keyword-faces' specifies a face, then the
+respective keyword is displayed using exactly that face.  In that
+case this option is irrelevant.
+
+Otherwise, if an entry specifies only a color, then the `hl-todo'
+face controls the appearance of the respective keyword, except
+for either the foreground or the background color.  This option
+controls which of the two it is."
+  :package-version '(hl-todo . "3.1.0")
+  :group 'hl-todo
+  :type 'boolean)
 
 (defcustom hl-todo-highlight-punctuation ""
   "String of characters to highlight after keywords.
@@ -126,14 +176,26 @@ including alphanumeric characters, cannot be used here."
 (defvar-local hl-todo--regexp nil)
 (defvar-local hl-todo--keywords nil)
 
-(defun hl-todo--setup ()
+(defun hl-todo--regexp ()
+  (or hl-todo--regexp (hl-todo--setup-regexp)))
+
+(defun hl-todo--setup-regexp ()
+  (when-let ((bomb (assoc "???" hl-todo-keyword-faces)))
+    ;; If the user customized this variable before we started to
+    ;; treat the strings as regexps, then the string "???" might
+    ;; still be present.  We have to remove it because it results
+    ;; in the regexp search taking forever.
+    (setq hl-todo-keyword-faces (delete bomb hl-todo-keyword-faces)))
   (setq hl-todo--regexp
         (concat "\\(\\<"
-                (regexp-opt (mapcar #'car hl-todo-keyword-faces) t)
+                "\\(" (mapconcat #'car hl-todo-keyword-faces "\\|") "\\)"
                 "\\>"
                 (and (not (equal hl-todo-highlight-punctuation ""))
                      (concat "[" hl-todo-highlight-punctuation "]*"))
-                "\\)"))
+                "\\)")))
+
+(defun hl-todo--setup ()
+  (hl-todo--setup-regexp)
   (setq hl-todo--keywords
         `(((lambda (bound) (hl-todo--search nil bound))
            (1 (hl-todo--get-face) t t))))
@@ -144,24 +206,34 @@ including alphanumeric characters, cannot be used here."
 (defun hl-todo--search (&optional regexp bound backward)
   (unless regexp
     (setq regexp hl-todo--regexp))
-  (and (let ((case-fold-search nil))
-         (with-syntax-table hl-todo--syntax-table
-           (funcall (if backward #'re-search-backward #'re-search-forward)
-                    regexp bound t)))
-       (or (apply #'derived-mode-p hl-todo-text-modes)
-           (hl-todo--inside-comment-or-string-p)
-           (and (or (not bound)
-                    (funcall (if backward #'< #'>) bound (point)))
-                (hl-todo--search regexp bound backward)))))
+  (cl-block nil
+    (while (let ((case-fold-search nil))
+             (with-syntax-table hl-todo--syntax-table
+               (funcall (if backward #'re-search-backward #'re-search-forward)
+                        regexp bound t)))
+      (cond ((or (apply #'derived-mode-p hl-todo-text-modes)
+                 (hl-todo--inside-comment-or-string-p))
+             (cl-return t))
+            ((and bound (funcall (if backward #'<= #'>=) (point) bound))
+             (cl-return nil))))))
 
 (defun hl-todo--inside-comment-or-string-p ()
   (nth 8 (syntax-ppss)))
 
 (defun hl-todo--get-face ()
-  (let ((face (cdr (assoc (match-string 2) hl-todo-keyword-faces))))
-    (if (stringp face)
-        (list :inherit 'hl-todo :foreground face)
-      face)))
+  (let ((keyword (match-string 2)))
+    (hl-todo--combine-face
+      (cdr (cl-find-if (lambda (elt)
+                         (string-match-p (format "\\`%s\\'" (car elt))
+                                         keyword))
+                       hl-todo-keyword-faces)))))
+
+(defun hl-todo--combine-face (face)
+  (if (stringp face)
+      (list :inherit 'hl-todo
+            (if hl-todo-color-background :background :foreground)
+            face)
+    face))
 
 (defvar hl-todo-mode-map (make-sparse-keymap)
   "Keymap for `hl-todo-mode'.")
@@ -187,8 +259,8 @@ including alphanumeric characters, cannot be used here."
   hl-todo-mode hl-todo--turn-on-mode-if-desired)
 
 (defun hl-todo--turn-on-mode-if-desired ()
-  (when (and (apply #'derived-mode-p hl-todo-activate-in-modes)
-             (not (derived-mode-p 'org-mode)))
+  (when (and (apply #'derived-mode-p hl-todo-include-modes)
+             (not (apply #'derived-mode-p hl-todo-exclude-modes)))
     (hl-todo-mode 1)))
 
 ;;;###autoload
@@ -203,7 +275,7 @@ A negative argument means move backward that many keywords."
                 (not (eobp))
                 (progn
                   (when (let ((case-fold-search nil))
-                          (looking-at hl-todo--regexp))
+                          (looking-at (hl-todo--regexp)))
                     (goto-char (match-end 0)))
                   (or (hl-todo--search)
                       (user-error "No more matches"))))
@@ -220,7 +292,7 @@ A negative argument means move forward that many keywords."
     (while (and (> arg 0)
                 (not (bobp))
                 (let ((start (point)))
-                  (hl-todo--search (concat hl-todo--regexp "\\=") nil t)
+                  (hl-todo--search (concat (hl-todo--regexp) "\\=") nil t)
                   (or (hl-todo--search nil nil t)
                       (progn (goto-char start)
                              (user-error "No more matches")))))
@@ -232,12 +304,14 @@ A negative argument means move forward that many keywords."
   "Use `occur' to find all TODO or similar keywords.
 This actually finds a superset of the highlighted keywords,
 because it uses a regexp instead of a more sophisticated
-matcher."
+matcher.  It also finds occurrences that are not within a
+string or comment."
   (interactive)
-  (occur hl-todo--regexp))
+  (with-syntax-table hl-todo--syntax-table
+    (occur (hl-todo--regexp))))
 
 ;;;###autoload
-(defun hl-todo-insert-keyword (keyword)
+(defun hl-todo-insert (keyword)
   "Insert TODO or similar keyword.
 If point is not inside a string or comment, then insert a new
 comment.  If point is at the end of the line, then insert the
@@ -246,29 +320,33 @@ current line."
   (interactive
    (list (completing-read
           "Insert keyword: "
-          (mapcar (pcase-lambda (`(,keyword . ,face))
-                    (propertize keyword 'face
-                                (if (stringp face)
-                                    (list :inherit 'hl-todo :foreground face)
-                                  face)))
-                  hl-todo-keyword-faces))))
+          (cl-mapcan (pcase-lambda (`(,keyword . ,face))
+                       (and (equal (regexp-quote keyword) keyword)
+                            (list (propertize keyword 'face
+                                              (hl-todo--combine-face face)))))
+                     hl-todo-keyword-faces))))
   (cond
    ((hl-todo--inside-comment-or-string-p)
     (insert (concat (and (not (memq (char-before) '(?\s ?\t))) " ")
                     keyword
                     (and (not (memq (char-after) '(?\s ?\t ?\n))) " "))))
-   ((eolp)
+   ((and (eolp)
+         (not (looking-back "^[\s\t]*" (line-beginning-position) t)))
     (insert (concat (and (not (memq (char-before) '(?\s ?\t))) " ")
                     (format "%s %s " comment-start keyword))))
    (t
     (goto-char (line-beginning-position))
-    (insert (format "%s %s \n"
+    (insert (format "%s %s "
                     (if (derived-mode-p 'lisp-mode 'emacs-lisp-mode)
                         (format "%s%s" comment-start comment-start)
                       comment-start)
                     keyword))
-    (backward-char)
+    (unless (looking-at "[\s\t]*$")
+      (save-excursion (insert "\n")))
     (indent-region (line-beginning-position) (line-end-position)))))
+
+(define-obsolete-function-alias 'hl-todo-insert-keyword
+  'hl-todo-insert "hl-todo 3.0.0")
 
 ;;; _
 (provide 'hl-todo)

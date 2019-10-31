@@ -1,12 +1,10 @@
 ;;; hl-todo-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "hl-todo" "hl-todo.el" (0 0 0 0))
+;;;### (autoloads nil "hl-todo" "hl-todo.el" (23994 46464 812412
+;;;;;;  94000))
 ;;; Generated autoloads from hl-todo.el
 
 (autoload 'hl-todo-mode "hl-todo" "\
@@ -54,11 +52,12 @@ A negative argument means move forward that many keywords.
 Use `occur' to find all TODO or similar keywords.
 This actually finds a superset of the highlighted keywords,
 because it uses a regexp instead of a more sophisticated
-matcher.
+matcher.  It also finds occurrences that are not within a
+string or comment.
 
 \(fn)" t nil)
 
-(autoload 'hl-todo-insert-keyword "hl-todo" "\
+(autoload 'hl-todo-insert "hl-todo" "\
 Insert TODO or similar keyword.
 If point is not inside a string or comment, then insert a new
 comment.  If point is at the end of the line, then insert the
@@ -67,14 +66,11 @@ current line.
 
 \(fn KEYWORD)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "hl-todo" '("hl-todo-")))
-
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; hl-todo-autoloads.el ends here
