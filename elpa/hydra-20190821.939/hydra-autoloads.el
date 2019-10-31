@@ -1,12 +1,9 @@
 ;;; hydra-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "hydra" "hydra.el" (0 0 0 0))
+;;;### (autoloads nil "hydra" "hydra.el" (23994 42600 207958 9000))
 ;;; Generated autoloads from hydra.el
 
 (autoload 'defhydra "hydra" "\
@@ -44,7 +41,7 @@ nil.  If you don't even want the KEY to be printed, set HINT
 explicitly to nil.
 
 The heads inherit their PLIST from BODY-PLIST and are allowed to
-override some keys.  The keys recognized are :exit and :bind.
+override some keys.  The keys recognized are :exit, :bind, and :column.
 :exit can be:
 
 - nil (default): this head will continue the Hydra state.
@@ -53,6 +50,8 @@ override some keys.  The keys recognized are :exit and :bind.
 :bind can be:
 - nil: this head will not be bound in BODY-MAP.
 - a lambda taking KEY and CMD used to bind a head.
+
+:column is a string that sets the column for all subsequent heads.
 
 It is possible to omit both BODY-MAP and BODY-KEY if you don't
 want to bind anything.  In that case, typically you will bind the
@@ -65,33 +64,10 @@ result of `defhydra'.
 
 (function-put 'defhydra 'doc-string-elt '3)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "hydra" '("hydra-" "defhydradio")))
-
 ;;;***
 
-;;;### (autoloads nil "hydra-examples" "hydra-examples.el" (0 0 0
-;;;;;;  0))
-;;; Generated autoloads from hydra-examples.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "hydra-examples" '("hydra-" "org-agenda-cts" "whitespace-mode")))
-
-;;;***
-
-;;;### (autoloads nil "hydra-ox" "hydra-ox.el" (0 0 0 0))
-;;; Generated autoloads from hydra-ox.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "hydra-ox" '("hydra-ox")))
-
-;;;***
-
-;;;### (autoloads nil "lv" "lv.el" (0 0 0 0))
-;;; Generated autoloads from lv.el
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "lv" '("lv-")))
-
-;;;***
-
-;;;### (autoloads nil nil ("hydra-pkg.el") (0 0 0 0))
+;;;### (autoloads nil nil ("hydra-examples.el" "hydra-ox.el" "hydra-pkg.el")
+;;;;;;  (23994 42600 209767 474000))
 
 ;;;***
 
@@ -99,6 +75,5 @@ result of `defhydra'.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; hydra-autoloads.el ends here
