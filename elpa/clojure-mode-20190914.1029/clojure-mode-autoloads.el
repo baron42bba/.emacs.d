@@ -1,12 +1,10 @@
 ;;; clojure-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "clojure-mode" "clojure-mode.el" (0 0 0 0))
+;;;### (autoloads nil "clojure-mode" "clojure-mode.el" (23994 46782
+;;;;;;  961084 674000))
 ;;; Generated autoloads from clojure-mode.el
 
 (autoload 'clojure-mode "clojure-mode" "\
@@ -17,10 +15,10 @@ Major mode for editing Clojure code.
 \(fn)" t nil)
 
 (autoload 'clojure-unwind "clojure-mode" "\
-Unwind thread at point or above point by one level.
-Return nil if there are no more levels to unwind.
+Unwind thread at point or above point by N levels.
+With universal argument \\[universal-argument], fully unwind thread.
 
-\(fn)" t nil)
+\(fn &optional N)" t nil)
 
 (autoload 'clojure-unwind-all "clojure-mode" "\
 Fully unwind thread at point or above point.
@@ -93,14 +91,15 @@ Change a surrounding when to when-not, or vice-versa.
 
 (autoload 'clojure-let-backward-slurp-sexp "clojure-mode" "\
 Slurp the s-expression before the let form into the let form.
-With a numberic prefix argument slurp the previous N s-expression
+With a numeric prefix argument slurp the previous N s-expressions
 into the let form.
 
 \(fn &optional N)" t nil)
 
 (autoload 'clojure-let-forward-slurp-sexp "clojure-mode" "\
 Slurp the next s-expression after the let form into the let form.
-With a numeric prefix argument slurp the next N s-expressions into the let form.
+With a numeric prefix argument slurp the next N s-expressions
+into the let form.
 
 \(fn &optional N)" t nil)
 
@@ -112,6 +111,16 @@ With a numeric prefix argument the let is introduced N lists up.
 
 (autoload 'clojure-move-to-let "clojure-mode" "\
 Move the form at point to a binding in the nearest let.
+
+\(fn)" t nil)
+
+(autoload 'clojure-rename-ns-alias "clojure-mode" "\
+Rename a namespace alias.
+
+\(fn)" t nil)
+
+(autoload 'clojure-add-arity "clojure-mode" "\
+Add an arity to a function.
 
 \(fn)" t nil)
 
@@ -137,14 +146,11 @@ Major mode for editing ClojureC code.
 
 (add-to-list 'auto-mode-alist '("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "clojure-mode" '("clojure" "add-custom-clojure-indents" "define-clojure-indent" "put-clojure-indent")))
-
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; clojure-mode-autoloads.el ends here

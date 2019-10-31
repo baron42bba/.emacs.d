@@ -1,7 +1,7 @@
 ;;; clojure-mode.el --- Major mode for Clojure code -*- lexical-binding: t; -*-
 
-;; Copyright © 2007-2018 Jeffrey Chu, Lennart Staflin, Phil Hagelberg
-;; Copyright © 2013-2018 Bozhidar Batsov, Artur Malabarba
+;; Copyright © 2007-2019 Jeffrey Chu, Lennart Staflin, Phil Hagelberg
+;; Copyright © 2013-2019 Bozhidar Batsov, Artur Malabarba
 ;;
 ;; Authors: Jeffrey Chu <jochu0@gmail.com>
 ;;       Lennart Staflin <lenst@lysator.liu.se>
@@ -9,9 +9,9 @@
 ;;       Bozhidar Batsov <bozhidar@batsov.com>
 ;;       Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/clojure-emacs/clojure-mode
-;; Package-Version: 20190105.1043
+;; Package-Version: 20190914.1029
 ;; Keywords: languages clojure clojurescript lisp
-;; Version: 5.10.0
+;; Version: 5.11.0
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is not part of GNU Emacs.
@@ -82,7 +82,9 @@
   :link '(url-link :tag "GitHub" "https://github.com/clojure-emacs/clojure-mode")
   :link '(emacs-commentary-link :tag "Commentary" "clojure-mode"))
 
-(defconst clojure-mode-version (lm-version)
+(defconst clojure-mode-version
+  (eval-when-compile
+    (lm-version (or load-file-name buffer-file-name)))
   "The current version of `clojure-mode'.")
 
 (defface clojure-keyword-face
@@ -216,8 +218,6 @@ Out-of-the box `clojure-mode' understands lein, boot, gradle,
     (define-key map (kbd "f") #'clojure-thread-first-all)
     (define-key map (kbd "C-l") #'clojure-thread-last-all)
     (define-key map (kbd "l") #'clojure-thread-last-all)
-    (define-key map (kbd "C-a") #'clojure-unwind-all)
-    (define-key map (kbd "a") #'clojure-unwind-all)
     (define-key map (kbd "C-p") #'clojure-cycle-privacy)
     (define-key map (kbd "p") #'clojure-cycle-privacy)
     (define-key map (kbd "C-(") #'clojure-convert-collection-to-list)
@@ -240,10 +240,13 @@ Out-of-the box `clojure-mode' understands lein, boot, gradle,
     (define-key map (kbd "n h") #'clojure-insert-ns-form-at-point)
     (define-key map (kbd "n u") #'clojure-update-ns)
     (define-key map (kbd "n s") #'clojure-sort-ns)
+    (define-key map (kbd "n r") #'clojure-rename-ns-alias)
     (define-key map (kbd "s i") #'clojure-introduce-let)
     (define-key map (kbd "s m") #'clojure-move-to-let)
     (define-key map (kbd "s f") #'clojure-let-forward-slurp-sexp)
     (define-key map (kbd "s b") #'clojure-let-backward-slurp-sexp)
+    (define-key map (kbd "C-a") #'clojure-add-arity)
+    (define-key map (kbd "a") #'clojure-add-arity)
     map)
   "Keymap for Clojure refactoring commands.")
 (fset 'clojure-refactor-map clojure-refactor-map)
@@ -262,11 +265,13 @@ Out-of-the box `clojure-mode' understands lein, boot, gradle,
         ["Cycle if, if-not" clojure-cycle-if]
         ["Cycle when, when-not" clojure-cycle-when]
         ["Cycle not" clojure-cycle-not]
+        ["Add function arity" clojure-add-arity]
         ("ns forms"
          ["Insert ns form at the top" clojure-insert-ns-form]
          ["Insert ns form here" clojure-insert-ns-form-at-point]
          ["Update ns form" clojure-update-ns]
-         ["Sort ns form" clojure-sort-ns])
+         ["Sort ns form" clojure-sort-ns]
+         ["Rename ns alias" clojure-rename-ns-alias])
         ("Convert collection"
          ["Convert to list" clojure-convert-collection-to-list]
          ["Convert to quoted list" clojure-convert-collection-to-quoted-list]
@@ -395,7 +400,7 @@ The command will prompt you to select one of the available sections."
       (let ((section-url (concat clojure-reference-base-url (cdr (assoc section clojure-reference-sections)))))
         (browse-url section-url)))))
 
-(defconst clojure-cheatsheet-url "http://clojure.org/api/cheatsheet"
+(defconst clojure-cheatsheet-url "https://clojure.org/api/cheatsheet"
   "The URL of the official Clojure cheatsheet.")
 
 (defun clojure-view-cheatsheet ()
@@ -470,22 +475,15 @@ ENDP and DELIMITER."
                        t)
                       (= orig-point (match-end 0)))))))))
 
-(declare-function paredit-open-curly "ext:paredit")
-(declare-function paredit-close-curly "ext:paredit")
+(declare-function paredit-open-curly "ext:paredit" t t)
+(declare-function paredit-close-curly "ext:paredit" t t)
 (declare-function paredit-convolute-sexp "ext:paredit")
 
-(defun clojure--replace-let-bindings-and-indent (orig-fun &rest args)
-  "Advise ORIG-FUN to replace let bindings.
-
-Sexps are replace by their bound name if a let form was
-convoluted.
-
-ORIG-FUN should be `paredit-convolute-sexp'.
-
-ARGS are passed to ORIG-FUN, as with all advice."
+(defun clojure--replace-let-bindings-and-indent ()
+  "Replace let bindings and indent."
   (save-excursion
     (backward-sexp)
-    (when (looking-back clojure--let-regexp)
+    (when (looking-back clojure--let-regexp nil)
       (clojure--replace-sexps-with-bindings-and-indent))))
 
 (defun clojure-paredit-setup (&optional keymap)
@@ -553,9 +551,16 @@ replacement for `cljr-expand-let`."
   (clojure-font-lock-setup)
   (add-hook 'paredit-mode-hook #'clojure-paredit-setup)
   ;; `electric-layout-post-self-insert-function' prevents indentation in strings
-  ;; and comments, force indentation in docstrings:
+  ;; and comments, force indentation of non-inlined docstrings:
   (add-hook 'electric-indent-functions
-            (lambda (_char) (if (clojure-in-docstring-p) 'do-indent)))
+            (lambda (_char) (if (and (clojure-in-docstring-p)
+                                     ;; make sure we're not dealing with an inline docstring
+                                     ;; e.g. (def foo "inline docstring" bar)
+                                     (save-excursion
+                                       (beginning-of-line-text)
+                                       (eq (get-text-property (point) 'face)
+                                           'font-lock-doc-face)))
+                                'do-indent)))
   ;; integration with project.el
   (add-hook 'project-find-functions #'clojure-current-project))
 
@@ -786,7 +791,7 @@ any number of matches of `clojure--sym-forbidden-rest-chars'."))
                 "[ \r\n\t]*"
                 ;; Possibly type or metadata
                 "\\(?:#?^\\(?:{[^}]*}\\|\\sw+\\)[ \r\n\t]*\\)*"
-                "\\(\\sw+\\)?")
+                (concat "\\(" clojure--sym-regexp "\\)?"))
        (1 font-lock-keyword-face)
        (2 font-lock-function-name-face nil t))
       ;; (fn name? args ...)
@@ -848,7 +853,8 @@ any number of matches of `clojure--sym-forbidden-rest-chars'."))
          "\\>")
        0 font-lock-builtin-face)
       ;; Dynamic variables - *something* or @*something*
-      ("\\(?:\\<\\|/\\)@?\\(\\*[a-z-]*\\*\\)\\>" 1 font-lock-variable-name-face)
+      (,(concat "\\(?:\\<\\|/\\)@?\\(\\*" clojure--sym-regexp "\\*\\)\\>")
+       1 font-lock-variable-name-face)
       ;; Global constants - nil, true, false
       (,(concat
          "\\<"
@@ -861,8 +867,8 @@ any number of matches of `clojure--sym-forbidden-rest-chars'."))
 
       ;; namespace definitions: (ns foo.bar)
       (,(concat "(\\<ns\\>[ \r\n\t]*"
-                ;; Possibly metadata
-                "\\(?:\\^?{[^}]+}[ \r\n\t]*\\)*"
+                ;; Possibly metadata, shorthand and/or longhand
+                "\\(?:\\^?\\(?:{[^}]+}\\|:[^ \r\n\t]+[ \r\n\t]\\)[ \r\n\t]*\\)*"
                 ;; namespace
                 "\\(" clojure--sym-regexp "\\)")
        (1 font-lock-type-face))
@@ -908,6 +914,10 @@ any number of matches of `clojure--sym-forbidden-rest-chars'."))
       ;; Highlight `code` marks, just like `elisp'.
       (,(rx "`" (group-n 1 (optional "#'")
                          (+ (or (syntax symbol) (syntax word)))) "`")
+       (1 'font-lock-constant-face prepend))
+      ;; Highlight [[var]] comments
+      (,(rx "[[" (group-n 1 (optional "#'")
+                         (+ (or (syntax symbol) (syntax word)))) "]]")
        (1 'font-lock-constant-face prepend))
       ;; Highlight escaped characters in strings.
       (clojure-font-lock-escaped-chars 0 'bold prepend)
@@ -955,7 +965,13 @@ highlighted region)."
                              (setq docelt (1- docelt)))))
                        (and (zerop docelt) (<= (point) startpos)
                             (progn (forward-comment (point-max)) t)
-                            (= (point) (nth 8 state)))))
+                            (= (point) (nth 8 state))))
+                     ;; In a def, at last position is not a docstring
+                     (not (and (string= "def" firstsym)
+                               (save-excursion
+                                 (goto-char startpos)
+                                 (goto-char (+ startpos (length (sexp-at-point)) 2))
+                                 (looking-at "[ \r\n\t]*\)")))))
                 font-lock-doc-face
               font-lock-string-face))))
     font-lock-comment-face))
@@ -1075,7 +1091,7 @@ point) to check."
 (put 'defmacro 'clojure-doc-string-elt 2)
 (put 'definline 'clojure-doc-string-elt 2)
 (put 'defprotocol 'clojure-doc-string-elt 2)
-(put 'deftask 'clojure-doc-string-eld 2) ;; common Boot macro
+(put 'deftask 'clojure-doc-string-elt 2) ;; common Boot macro
 
 ;;; Vertical alignment
 (defcustom clojure-align-forms-automatically nil
@@ -1115,7 +1131,10 @@ will align the values like this:
   :safe #'listp
   :type '(repeat string))
 
-(defcustom clojure-align-cond-forms '("condp" "cond" "cond->" "cond->>" "case" "are")
+(defcustom clojure-align-cond-forms
+  '("condp" "cond" "cond->" "cond->>" "case" "are"
+    "clojure.core/condp" "clojure.core/cond" "clojure.core/cond->"
+    "clojure.core/cond->>" "clojure.core/case" "clojure.test/are")
   "List of strings identifying cond-like forms."
   :package-version '(clojure-mode . "5.1")
   :safe #'listp
@@ -1560,6 +1579,7 @@ work).  To set it from Lisp code, use
   (when-not 1)
   (when-first 1)
   (do 0)
+  (delay 0)
   (future 0)
   (comment 0)
   (doto 1)
@@ -1708,7 +1728,7 @@ are cached in a buffer local variable (`clojure-cached-project-dir')."
 (defun clojure-current-project (&optional dir-name)
   "Return the current project as a cons cell usable by project.el.
 
-Call is delegated down to `clojure-clojure-dir' with
+Call is delegated down to `clojure-project-dir' with
 optional DIR-NAME as argument."
   (let ((project-dir (clojure-project-dir dir-name)))
     (if project-dir
@@ -1878,6 +1898,19 @@ the cached value will be updated automatically."
 (defvar-local clojure-cached-ns nil
   "A buffer ns cache used to speed up ns-related operations.")
 
+(defun clojure--find-ns-in-direction (direction)
+  "Return the nearest namespace in a specific DIRECTION.
+DIRECTION is `forward' or `backward'."
+  (let ((candidate)
+        (fn (if (eq direction 'forward)
+                #'search-forward-regexp
+              #'search-backward-regexp)))
+    (while (and (not candidate)
+                (funcall fn clojure-namespace-name-regex nil t))
+      (unless (or (clojure--in-string-p) (clojure--in-comment-p))
+        (setq candidate (match-string-no-properties 4))))
+    candidate))
+
 (defun clojure-find-ns ()
   "Return the namespace of the current Clojure buffer.
 Return the namespace closest to point and above it.  If there are
@@ -1893,12 +1926,8 @@ The results will be cached if `clojure-cache-ns' is set to t."
                   ;; Move to top-level to avoid searching from inside ns
                   (ignore-errors (while t (up-list nil t t)))
 
-                  ;; The closest ns form above point.
-                  (when (or (re-search-backward clojure-namespace-name-regex nil t)
-                            ;; Or any form at all.
-                            (and (goto-char (point-min))
-                                 (re-search-forward clojure-namespace-name-regex nil t)))
-                    (match-string-no-properties 4))))))
+                  (or (clojure--find-ns-in-direction 'backward)
+                      (clojure--find-ns-in-direction 'forward))))))
       (setq clojure-cached-ns ns)
       ns)))
 
@@ -1948,7 +1977,7 @@ Returns a list pair, e.g. (\"defn\" \"abc\") or (\"deftest\" \"some-test\")."
 \"Non-logical\" sexp are ^metadata and #reader.macros."
   (comment-normalize-vars)
   (comment-forward (point-max))
-  (looking-at-p "\\^\\|#[[:alpha:]]"))
+  (looking-at-p "\\^\\|#:?:?[[:alpha:]]"))
 
 (defun clojure-forward-logical-sexp (&optional n)
   "Move forward N logical sexps.
@@ -2046,9 +2075,8 @@ many times."
         (condition-case nil
             (save-match-data
               (let ((original-position (point))
-                    clojure-comment-start clojure-comment-end)
+                    clojure-comment-end)
                 (beginning-of-defun)
-                (setq clojure-comment-start (point))
                 (end-of-defun)
                 (setq clojure-comment-end (point))
                 (beginning-of-defun)
@@ -2103,8 +2131,7 @@ list of (fn args) to pass to `apply''"
 Point must be between the opening paren and the ->> symbol."
   (forward-sexp)
   (save-excursion
-    (let ((beg (point))
-          (contents (clojure-delete-and-extract-sexp)))
+    (let ((contents (clojure-delete-and-extract-sexp)))
       (when (looking-at " *\n")
         (join-line 'following))
       (clojure--ensure-parens-around-function-names)
@@ -2176,10 +2203,12 @@ before fixing whitespace."
       (delete-trailing-whitespace (car sexp) (cdr sexp)))))
 
 ;;;###autoload
-(defun clojure-unwind ()
-  "Unwind thread at point or above point by one level.
-Return nil if there are no more levels to unwind."
-  (interactive)
+(defun clojure-unwind (&optional n)
+  "Unwind thread at point or above point by N levels.
+With universal argument \\[universal-argument], fully unwind thread."
+  (interactive "P")
+  (setq n (cond ((equal n '(4)) 999)
+                (n) (1)))
   (save-excursion
     (let ((limit (save-excursion
                    (beginning-of-defun)
@@ -2188,23 +2217,24 @@ Return nil if there are no more levels to unwind."
         (when (looking-at "(")
           (forward-char 1)
           (forward-sexp 1)))
-      (search-backward-regexp "([^-]*->" limit)
-      (if (clojure--nothing-more-to-unwind)
-          (progn (clojure--pop-out-of-threading)
-                 (clojure--fix-sexp-whitespace)
-                 nil)
-        (down-list)
-        (prog1 (cond
-                ((looking-at "[^-]*->\\_>")  (clojure--unwind-first))
-                ((looking-at "[^-]*->>\\_>") (clojure--unwind-last)))
-          (clojure--fix-sexp-whitespace 'move-out))
-        t))))
+      (while (> n 0)
+        (search-backward-regexp "([^-]*->" limit)
+        (if (clojure--nothing-more-to-unwind)
+            (progn (clojure--pop-out-of-threading)
+                   (clojure--fix-sexp-whitespace)
+                   (setq n 0)) ;; break out of loop
+          (down-list)
+          (cond
+           ((looking-at "[^-]*->\\_>")  (clojure--unwind-first))
+           ((looking-at "[^-]*->>\\_>") (clojure--unwind-last)))
+          (clojure--fix-sexp-whitespace 'move-out)
+          (setq n (1- n)))))))
 
 ;;;###autoload
 (defun clojure-unwind-all ()
   "Fully unwind thread at point or above point."
   (interactive)
-  (while (clojure-unwind)))
+  (clojure-unwind '(4)))
 
 (defun clojure--remove-superfluous-parens ()
   "Remove extra parens from a form."
@@ -2376,6 +2406,10 @@ See: https://github.com/clojure-emacs/clj-refactor.el/wiki/cljr-cycle-privacy"
   "Check whether the point is currently in a string."
   (nth 3 (syntax-ppss)))
 
+(defun clojure--in-comment-p ()
+  "Check whether the point is currently in a comment."
+  (nth 4 (syntax-ppss)))
+
 (defun clojure--goto-if ()
   "Find the first surrounding if or if-not expression."
   (when (clojure--in-string-p)
@@ -2440,7 +2474,7 @@ See: https://github.com/clojure-emacs/clj-refactor.el/wiki/cljr-cycle-if"
     (condition-case nil
         (backward-up-list)
       (scan-error (user-error "`clojure-cycle-not' must be invoked inside a list")))
-    (if (looking-back "(not ")
+    (if (looking-back "(not " nil)
         (progn
           (delete-char -5)
           (forward-sexp)
@@ -2633,10 +2667,26 @@ lists up."
     (insert sexp)
     (clojure--replace-sexps-with-bindings-and-indent)))
 
+(defun clojure--rename-ns-alias-internal (current-alias new-alias)
+  "Rename a namespace alias CURRENT-ALIAS to NEW-ALIAS."
+  (clojure--find-ns-in-direction 'backward)
+  (let ((rgx (concat ":as +" current-alias))
+        (bound (save-excursion (forward-list 1) (point))))
+    (when (search-forward-regexp rgx bound t)
+      (replace-match (concat ":as " new-alias))
+      (save-excursion
+        (while (re-search-forward (concat current-alias "/") nil t)
+          (when (not (nth 3 (syntax-ppss)))
+            (replace-match (concat new-alias "/")))))
+      (save-excursion
+        (while (re-search-forward (concat "#::" current-alias "{") nil t)
+          (replace-match (concat "#::" new-alias "{"))))
+      (message "Successfully renamed alias '%s' to '%s'" current-alias new-alias))))
+
 ;;;###autoload
 (defun clojure-let-backward-slurp-sexp (&optional n)
   "Slurp the s-expression before the let form into the let form.
-With a numberic prefix argument slurp the previous N s-expression
+With a numeric prefix argument slurp the previous N s-expressions
 into the let form."
   (interactive "p")
   (let ((n (or n 1)))
@@ -2656,10 +2706,11 @@ into the let form."
 ;;;###autoload
 (defun clojure-let-forward-slurp-sexp (&optional n)
   "Slurp the next s-expression after the let form into the let form.
-With a numeric prefix argument slurp the next N s-expressions into the let form."
+With a numeric prefix argument slurp the next N s-expressions
+into the let form."
   (interactive "p")
   (unless n (setq n 1))
-  (dotimes (k n)
+  (dotimes (_ n)
     (save-excursion (clojure--let-forward-slurp-sexp-internal))))
 
 ;;;###autoload
@@ -2674,6 +2725,95 @@ With a numeric prefix argument the let is introduced N lists up."
   "Move the form at point to a binding in the nearest let."
   (interactive)
   (clojure--move-to-let-internal (read-from-minibuffer "Name of bound symbol: ")))
+
+;;;###autoload
+(defun clojure-rename-ns-alias ()
+  "Rename a namespace alias."
+  (interactive)
+  (let ((current-alias (read-from-minibuffer "Current alias: ")))
+    (save-excursion
+      (clojure--find-ns-in-direction 'backward)
+      (let ((rgx (concat ":as +" current-alias))
+            (bound (save-excursion (forward-list 1) (point))))
+        (if (save-excursion (search-forward-regexp rgx bound t))
+            (let ((new-alias (read-from-minibuffer "New alias: ")))
+              (clojure--rename-ns-alias-internal current-alias new-alias))
+          (message "Cannot find namespace alias: '%s'" current-alias))))))
+
+(defun clojure--add-arity-defprotocol-internal ()
+  "Add an arity to a signature inside a defprotocol.
+
+Assumes cursor is at beginning of signature."
+  (re-search-forward "\\[")
+  (save-excursion (insert "] [")))
+
+(defun clojure--add-arity-reify-internal ()
+  "Add an arity to a function inside a reify.
+
+Assumes cursor is at beginning of function."
+  (re-search-forward "\\(\\w+ \\)")
+  (insert "[")
+  (save-excursion (insert "])\n(" (match-string 0))))
+
+(defun clojure--add-arity-internal ()
+  "Add an arity to a function.
+
+Assumes cursor is at beginning of function."
+  (let ((beg-line (what-line))
+        (end (save-excursion (forward-sexp)
+                             (point))))
+    (down-list 2)
+    (when (looking-back "{" 1) ;; skip metadata if present
+      (up-list)
+      (down-list))
+    (cond
+     ((looking-back "(" 1) ;; multi-arity fn
+      (insert "[")
+      (save-excursion (insert "])\n(")))
+     ((looking-back "\\[" 1)  ;; single-arity fn
+      (let* ((same-line (string= beg-line (what-line)))
+             (new-arity-text (concat (when same-line "\n") "([")))
+        (save-excursion
+          (goto-char end)
+          (insert ")"))
+
+        (re-search-backward " +\\[")
+        (replace-match new-arity-text)
+        (save-excursion (insert "])\n([")))))))
+
+;;;###autoload
+(defun clojure-add-arity ()
+  "Add an arity to a function."
+  (interactive)
+  (let ((original-pos (point))
+        (n 0))
+    (while (not (looking-at-p "(\\(defn\\|letfn\\|fn\\|defmacro\\|defmethod\\|defprotocol\\|reify\\|proxy\\)"))
+      (setq n (1+ n))
+      (backward-up-list 1 t))
+    (let ((beg (point))
+          (end-marker (make-marker))
+          (end (save-excursion (forward-sexp)
+                               (point)))
+          (jump-up (lambda (x)
+                     (goto-char original-pos)
+                     (backward-up-list x t))))
+      (set-marker end-marker end)
+      (cond
+       ((looking-at-p "(\\(defn\\|fn\\|defmethod\\|defmacro\\)")
+        (clojure--add-arity-internal))
+       ((looking-at-p "(letfn")
+        (funcall jump-up (- n 2))
+        (clojure--add-arity-internal))
+       ((looking-at-p "(proxy")
+        (funcall jump-up (- n 1))
+        (clojure--add-arity-internal))
+       ((looking-at-p "(defprotocol")
+        (funcall jump-up (- n 1))
+        (clojure--add-arity-defprotocol-internal))
+       ((looking-at-p "(reify")
+        (funcall jump-up (- n 1))
+        (clojure--add-arity-reify-internal)))
+      (indent-region beg end-marker))))
 
 
 ;;; ClojureScript
