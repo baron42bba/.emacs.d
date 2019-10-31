@@ -1,12 +1,9 @@
 ;;; clomacs-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
-(add-to-list 'load-path (directory-file-name
-                         (or (file-name-directory #$) (car load-path))))
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "clomacs" "clomacs.el" (0 0 0 0))
+;;;### (autoloads nil "clomacs" "clomacs.el" (23994 46781 58246 126000))
 ;;; Generated autoloads from clomacs.el
 
 (autoload 'clomacs-def "clomacs" "\
@@ -16,7 +13,7 @@ underlying clojure entity docstring if possible).
 TYPE possible values are listed in the CLOMACS-POSSIBLE-RETURN-TYPES,
 or it may be a custom function (:string by default).
 
-\(fn EL-ENTITY-NAME CL-ENTITY-NAME &key (DOC nil) (TYPE :string) LIB-NAME NAMESPACE)" nil t)
+\(fn EL-ENTITY-NAME CL-ENTITY-NAME &key (DOC nil) (TYPE :string) LIB-NAME NAMESPACE NREPL-READY-CALLBACK (BACKEND :clj))" nil t)
 
 (autoload 'clomacs-defun "clomacs" "\
 Wrap CL-FUNC-NAME, evaluated on clojure side by EL-FUNC-NAME.
@@ -34,10 +31,11 @@ HTTPD-STARTER - in the case Clojure side code needs to call Elisp side code,
 http-server should be started to pass http requests from Clojure REPL
 to Emacs. This parameter is Elisp function to do it. Such function can
 be created by `clomacs-create-httpd-start' macro.
+NREPL-READY-CALLBACK in case of wrapped function called when nREPL not
+started yet, a labmbda with one parameter - the result of wrapped function
+evaluation can be added and executed.
 
-\(fn EL-FUNC-NAME CL-FUNC-NAME &key (CALL-TYPE :sync) (CALLBACK nil) (DOC nil) (INTERACTIVE nil) (RETURN-TYPE :string) (RETURN-VALUE :value) LIB-NAME NAMESPACE (HTTPD-STARTER nil))" nil t)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "clomacs" '("clo" "execute")))
+\(fn EL-FUNC-NAME CL-FUNC-NAME &key (CALL-TYPE :sync) (CALLBACK nil) (DOC nil) (INTERACTIVE nil) (RETURN-TYPE :string) (RETURN-VALUE :value) LIB-NAME NAMESPACE (HTTPD-STARTER nil) NREPL-READY-CALLBACK (BACKEND :clj))" nil t)
 
 ;;;***
 
@@ -45,6 +43,5 @@ be created by `clomacs-create-httpd-start' macro.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; clomacs-autoloads.el ends here

@@ -4,10 +4,10 @@
 
 ;; Author: Kostafey <kostafey@gmail.com>
 ;; URL: https://github.com/clojure-emacs/clomacs
-;; Package-Version: 20190104.1607
+;; Package-Version: 20190925.1509
 ;; Keywords: clojure, interaction
-;; Version: 0.0.3
-;; Package-Requires: ((emacs "24.3") (cider "0.18.0") (s "1.12.0") (simple-httpd "1.4.6"))
+;; Version: 0.0.4
+;; Package-Requires: ((emacs "24.3") (cider "0.22.1") (s "1.12.0") (simple-httpd "1.4.6"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,11 +38,14 @@
 (require 'cl-lib)
 (require 'net-utils)
 (require 'cider)
+(require 'clojure-mode)
 (require 's)
 (require 'simple-httpd)
 
-(defvar clomacs-verify-nrepl-on-call t)
-(defvar clomacs-autoload-nrepl-on-call t)
+(defcustom clomacs-auto-start-nrepl t
+  "When t starts nREPL if Clojure wrapped function is called without nREPL."
+  :group 'clomacs
+  :type 'boolean)
 
 (defcustom clomacs-httpd-default-port 8080
   "Http port to listen for requests from Clojure side."
@@ -60,14 +63,6 @@ Restricts list length passed from Clojure to Emacs lisp.
 Set `nil' for unlimited list length."
   :group 'clomacs
   :type 'integer)
-
-(defcustom clomacs-restore-print-length nil
-  "When t restore *print-length* acording to `cider-repl-print-length' value.
-After any `clomacs-defun' wraped funtion call, restore *print-length*.
-Can be useful for debugging purpose to run `clomacs-defun' functions and
-Clojure code directly in the same REPL."
-  :group 'clomacs
-  :type 'boolean)
 
 (defun cloamcs-get-dir (repl-info)
   (if repl-info
@@ -109,31 +104,82 @@ If can't find any nREPL process return nil."
     (set-buffer connection)
     (cider-nrepl-eval-session)))
 
-(defun clomacs-launch-nrepl (library &optional sync)
+(defun clomacs-jack-in-clj (params wrapped-eval attributes nrepl-ready-callback)
+  "Start an nREPL server for the current project and connect to it.
+PARAMS is a plist optionally containing :project-dir and :jack-in-cmd."
+  (let ((params (thread-first params
+                  (cider--update-project-dir)
+                  (cider--check-existing-session)
+                  (cider--update-jack-in-cmd)))
+        (old-cider-repl-pop cider-repl-pop-to-buffer-on-connect))
+    (setq cider-repl-pop-to-buffer-on-connect nil)
+    (nrepl-start-server-process
+     (plist-get params :project-dir)
+     (plist-get params :jack-in-cmd)
+     (lambda (server-buff)
+       (prog1 (cider-connect-sibling-clj params server-buff)
+         (let ((eval-result (if wrapped-eval
+                                (apply wrapped-eval attributes))))
+           (when nrepl-ready-callback
+             (funcall nrepl-ready-callback eval-result)
+             nil))
+         (setq cider-repl-pop-to-buffer-on-connect old-cider-repl-pop))))))
+
+(defun clomacs-jack-in-cljs (params wrapped-eval attributes nrepl-ready-callback)
+  "Start an nREPL server for the current project and connect to it.
+PARAMS is a plist optionally containing :project-dir, :jack-in-cmd and
+:cljs-repl-type (e.g. Node, Figwheel, etc)."
+  (let ((cider-jack-in-dependencies (append cider-jack-in-dependencies cider-jack-in-cljs-dependencies))
+        (cider-jack-in-lein-plugins (append cider-jack-in-lein-plugins cider-jack-in-cljs-lein-plugins))
+        (cider-jack-in-nrepl-middlewares (append cider-jack-in-nrepl-middlewares cider-jack-in-cljs-nrepl-middlewares))
+        (orig-buffer (current-buffer))
+        ;; cider--update-jack-in-cmd relies indirectly on the above dynamic vars
+        (params (thread-first params
+                  (cider--update-project-dir)
+                  (cider--check-existing-session)
+                  (cider--update-jack-in-cmd)))
+        (old-cider-repl-pop cider-repl-pop-to-buffer-on-connect))
+    (setq cider-repl-pop-to-buffer-on-connect nil)
+    (nrepl-start-server-process
+     (plist-get params :project-dir)
+     (plist-get params :jack-in-cmd)
+     (lambda (server-buff)
+       (prog1 (with-current-buffer orig-buffer
+                (cider-connect-sibling-cljs params server-buff))
+         (let ((eval-result (if wrapped-eval
+                                (apply wrapped-eval attributes))))
+           (when nrepl-ready-callback
+             (funcall nrepl-ready-callback eval-result)
+             nil))
+         (setq cider-repl-pop-to-buffer-on-connect old-cider-repl-pop))))))
+
+(defun clomacs-launch-nrepl (lib-name
+                             wrapped-eval
+                             attributes
+                             nrepl-ready-callback
+                             backend)
   (let* ((starting-msg (format
                         "Starting nREPL server for %s..."
-                        (propertize (or library "current-buffer")
+                        (propertize (or lib-name "current-buffer")
                                     'face 'font-lock-keyword-face)))
-         (lib-file (if library (find-library-name library)))
-         (is-opened (if lib-file (find-buffer-visiting lib-file)))
-         (lib-buff (or is-opened
-                       (if lib-file
-                           (find-file-noselect lib-file)))))
+         (project-dir (if-let* ((lib-file (if lib-name
+                                              (find-library-name lib-name))))
+                          (clojure-project-dir
+                           (file-name-directory lib-file))))
+         (params (if project-dir (list :project-dir project-dir))))
     ;; simple run lein
-    (if lib-buff
-        (with-current-buffer lib-buff
-          (cider-jack-in nil))
-      (cider-jack-in nil))
-    (message starting-msg)
-    (if sync
-        (let ((old-cider-repl-pop cider-repl-pop-to-buffer-on-connect))
-          (setq cider-repl-pop-to-buffer-on-connect nil)
-          (while (not (clomacs-get-connection library))
-            (sleep-for 0.1))
-          (setq cider-repl-pop-to-buffer-on-connect old-cider-repl-pop)
-          (if (and library (not is-opened))
-              (kill-buffer lib-buff))))
-    (message "Started.")))
+    (pcase backend
+      (:clj (clomacs-jack-in-clj params
+                                 wrapped-eval
+                                 attributes
+                                 nrepl-ready-callback))
+      (:cljs (clomacs-jack-in-cljs params
+                                   wrapped-eval
+                                   attributes
+                                   nrepl-ready-callback))
+      (_ (error "Unknown backend %s" backend)))
+    (message starting-msg))
+  nil)
 
 (defun clomacs-return-stringp (raw-string)
   (and
@@ -176,7 +222,8 @@ If can't find any nREPL process return nil."
          ((eq return-type :boolean) (clomacs-string-to-boolean return-string))
          ((eq return-type :list) (read raw-string))
          ((eq return-type :char) (string-to-char return-string))
-         ((eq return-type :vector) (string-to-vector return-string))))))
+         ((eq return-type :vector) (read return-string))
+         ((eq return-type :eval) (eval (read (read raw-string))))))))
 
 (declare clomacs-format-arg)
 
@@ -223,13 +270,15 @@ If can't find any nREPL process return nil."
         :number
         :list
         :char
-        :vector))
+        :vector
+        :eval))
 
 (defun clomacs-highlight-initialize ()
   (font-lock-add-keywords
    'emacs-lisp-mode
    '(("clomacs-defun\\b" . font-lock-keyword-face)
-     ("clomacs-def\\b" . font-lock-keyword-face))))
+     ("clomacs-def\\b" . font-lock-keyword-face)
+     ("clomacs-with-nrepl\\b" . font-lock-keyword-face))))
 
 (defun clomacs-force-symbol-name (some-symbol)
   "Return lisp symbol SOME-SYMBOL as a string at all costs!"
@@ -238,16 +287,7 @@ If can't find any nREPL process return nil."
 
 (eval-after-load "clomacs"
   (lambda ()
-    (clomacs-highlight-initialize)
-
-    ;; Should be last `clomacs-defun'
-    (clomacs-defun clomacs--doc
-                   clojure.repl/doc
-                   :return-value :stdout)
-
-    (defun clomacs-doc (x)
-      (if (clomacs-get-connection)
-          (clomacs--doc x)))))
+    (clomacs-highlight-initialize)))
 
 (defun clomacs-get-doc (doc cl-entity-name)
   "Form the emacs-lisp side entity docstring.
@@ -255,35 +295,68 @@ DOC - user-defined docsting.
 CL-ENTITY-NAME - clojure side entity name.
 CL-ENTITY-TYPE - \"value\" or \"function\""
   (if doc doc
-    (concat "Wrapped clojure entity:"
-            (let ((cl-entity-doc (when (fboundp 'clomacs-doc)
-                                   (clomacs-doc cl-entity-name))))
-              (if cl-entity-doc (concat "\n" cl-entity-doc)
-                (clomacs-force-symbol-name cl-entity-name))))))
+    (format "Wrapped clojure entity: %s%s"
+            cl-entity-name
+            (let ((cl-entity-doc (if (clomacs-get-connection)
+                                     (condition-case _
+                                         (nrepl-dict-get
+                                          (cider-var-info
+                                           (symbol-name cl-entity-name)) "doc")
+                                       (error nil)))))
+              (if cl-entity-doc
+                  (concat "\n" cl-entity-doc)
+                "")))))
 
-(defun clomacs-ensure-nrepl-run (&optional lib-name)
-  "Ensure nrepl is running."
-  (when  clomacs-verify-nrepl-on-call
-    (unless (clomacs-get-connection lib-name)
-      (if clomacs-autoload-nrepl-on-call
-          ;; Raise up the world - sync nrepl launch
-          (clomacs-launch-nrepl lib-name t)
-        (error
-         (concat "CIDER is not launched!"))))))
+(defun clomacs-ensure-nrepl-run (lib-name
+                                 wrapped-eval
+                                 attributes
+                                 nrepl-ready-callback
+                                 backend)
+  "Ensure nREPL is running."
+  (if (clomacs-get-connection lib-name)
+      (if wrapped-eval
+          (apply wrapped-eval attributes))
+    (if clomacs-auto-start-nrepl
+        ;; Raise up the world - nrepl launch
+        (clomacs-launch-nrepl lib-name
+                              wrapped-eval
+                              attributes
+                              nrepl-ready-callback
+                              backend)
+      (error
+       (concat "CIDER is not launched!")))))
+
+(cl-defun clomacs-with-nrepl (lib-name
+                              wrapped-eval
+                              &key params
+                              (backend :clj))
+  "Used to call lambda with multiple Elisp to Clojure wrapped functions.
+LIB-NAME - Elisp library name used in end-user .emacs config by `require'.
+WRAPPED-EVAL is a lambda that can contain any `clomacs-defun' created
+functions. Since nREPL can be not launched yet, this lambda is evaled as
+a callback after nREPL started.
+PARAMS is a list of the values for parameters of preceding lambda."
+  (declare (indent 1))
+  (clomacs-ensure-nrepl-run lib-name wrapped-eval params nil backend))
 
 (defun clomacs-get-result (result value type namespace)
   "Parse result of clojure code evaluation from CIDER."
   (if (nrepl-dict-get result "err")
       (error (nrepl-dict-get result "err"))
-    (let ((val-new (cond
-                    ((equal value :value) "value")
-                    ((equal value :stdout) "out"))))
-      (clomacs-format-result
-       (let ((essence-result (nrepl-dict-get result val-new)))
-         (if (and namespace (equal value :value))
-             (substring essence-result 3)
-           essence-result))
-       type))))
+    (cl-labels ((get-value () (clomacs-format-result
+                               (let ((essence-result
+                                      (nrepl-dict-get result "value")))
+                                 (if (and namespace (equal value :value))
+                                     (substring essence-result 3)
+                                   essence-result))
+                               type))
+                (get-out () (clomacs-format-result
+                             (nrepl-dict-get result "out")
+                             type)))
+      (cond
+       ((equal value :value) (get-value))
+       ((equal value :stdout) (get-out))
+       ((equal value :both) (cons (get-out) (get-value)))))))
 
 (defun clomacs-add-quotes (str)
   (format "%S"
@@ -324,7 +397,9 @@ CL-ENTITY-TYPE - \"value\" or \"function\""
                           (doc nil)
                           (type :string)
                           lib-name
-                          namespace)
+                          namespace
+                          nrepl-ready-callback
+                          (backend :clj))
   "Wrap CL-ENTITY-NAME, evaluated on clojure side by EL-ENTITY-NAME.
 DOC - optional elisp function docstring (when nil it constructed from
 underlying clojure entity docstring if possible).
@@ -336,17 +411,21 @@ or it may be a custom function (:string by default)."
                             :doc doc
                             :namespace namespace)
     `(defvar ,el-entity-name
-       (progn
-         (clomacs-ensure-nrepl-run ,lib-name)
-         (let* ((connection (clomacs-get-connection ,lib-name))
-                (result
-                 (nrepl-sync-request:eval
-                  (concat
-                   (if ',namespace
-                       (concat "(require '" ',namespace-str ") ") "")
-                   ',cl-entity-full-name)
-                  connection)))
-           (clomacs-get-result result :value ',type ',namespace)))
+       (clomacs-ensure-nrepl-run
+          ,lib-name
+          (lambda ()
+            (let* ((connection (clomacs-get-connection ,lib-name))
+                   (result
+                    (nrepl-sync-request:eval
+                     (concat
+                      (if ',namespace
+                          (concat "(require '" ',namespace-str ") ") "")
+                      ',cl-entity-full-name)
+                     connection)))
+              (clomacs-get-result result :value ',type ',namespace)))
+          nil
+          ,nrepl-ready-callback
+          ,backend)
        ,doc)))
 
 ;;;###autoload
@@ -361,7 +440,9 @@ or it may be a custom function (:string by default)."
                             (return-value :value)
                             lib-name
                             namespace
-                            (httpd-starter nil))
+                            (httpd-starter nil)
+                            nrepl-ready-callback
+                            (backend :clj))
   "Wrap CL-FUNC-NAME, evaluated on clojure side by EL-FUNC-NAME.
 CALL-TYPE - call Clojure side :sync or :async.
 CALLBACK - callback function for :async CALL-TYPE case.
@@ -376,7 +457,10 @@ LIB-NAME - Elisp library name used in end-user .emacs config by `require'.
 HTTPD-STARTER - in the case Clojure side code needs to call Elisp side code,
 http-server should be started to pass http requests from Clojure REPL
 to Emacs. This parameter is Elisp function to do it. Such function can
-be created by `clomacs-create-httpd-start' macro."
+be created by `clomacs-create-httpd-start' macro.
+NREPL-READY-CALLBACK in case of wrapped function called when nREPL not
+started yet, a labmbda with one parameter - the result of wrapped function
+evaluation can be added and executed."
   (cl-multiple-value-bind
       (doc namespace-str cl-entity-full-name)
       (clomacs-prepare-vars cl-func-name
@@ -389,47 +473,50 @@ be created by `clomacs-create-httpd-start' macro."
             (if (booleanp interactive)
                 '(interactive)
               interactive))
-       (clomacs-ensure-nrepl-run ,lib-name)
-       (when (and (functionp ,httpd-starter)
-                  (not (process-status "httpd")))
-         (funcall ,httpd-starter))
-       (let* ((attrs ""))
-         (dolist (a attributes)
-           (setq attrs (concat attrs " "
-                               (clomacs-format-arg a))))
-         (let* ((connection (clomacs-get-connection ,lib-name))
-                (request (concat
-                          (if ',namespace
-                              (format  "(require '%s) " ',namespace-str) "")
-                          (format
-                           "(do (set! *print-length* %s)
+       (clomacs-ensure-nrepl-run
+        ,lib-name
+        (lambda (&rest attributes)
+          (when (and (functionp ,httpd-starter)
+                     (not (process-status "httpd")))
+            (funcall ,httpd-starter))
+          (let* ((attrs ""))
+            (dolist (a attributes)
+              (setq attrs (concat attrs " "
+                                  (clomacs-format-arg a))))
+            (let* ((connection (clomacs-get-connection ,lib-name))
+                   (request (concat
+                             (if ',namespace
+                                 (format  "(require '%s) " ',namespace-str) "")
+                             (format
+                              "(do (set! *print-length* %s)
                               (%s %s))"
-                           ,(number-to-string clomacs-print-length)
-                           ',cl-entity-full-name
-                           attrs))))
-           (if (equal ,call-type :async)
-               ;; async
-               (nrepl-request:eval
-                request
-                (lambda (result)
-                  (if ,callback
-                      (let ((el-result (clomacs-get-result
-                                        result
-                                        ,return-value ',return-type ',namespace)))
-                        (if el-result
-                            (,callback el-result))
-                        (if clomacs-restore-print-length
-                            (cider-repl-set-config)))))
-                connection)
-             ;; sync
-             (let ((el-result (clomacs-get-result
-                               (nrepl-sync-request:eval
-                                request
-                                connection)
-                               ,return-value ',return-type ',namespace)))
-               (if clomacs-restore-print-length
-                   (cider-repl-set-config))
-               el-result)))))))
+                              ,(number-to-string clomacs-print-length)
+                              ',cl-entity-full-name
+                              attrs))))
+              (if (equal ,call-type :async)
+                  ;; async
+                  (nrepl-request:eval
+                   request
+                   (lambda (result)
+                     (if ,callback
+                         (let ((el-result (clomacs-get-result
+                                           result
+                                           ,return-value
+                                           ',return-type
+                                           ',namespace)))
+                           (if el-result
+                               (,callback el-result)))))
+                   connection)
+                ;; sync
+                (let ((el-result (clomacs-get-result
+                                  (nrepl-sync-request:eval
+                                   request
+                                   connection)
+                                  ,return-value ',return-type ',namespace)))
+                  el-result)))))
+        attributes
+        ,nrepl-ready-callback
+        ,backend))))
 
 (defun clomacs-load-file (file-path)
   "Sync and straightforward load clojure file."
@@ -449,7 +536,9 @@ be created by `clomacs-create-httpd-start' macro."
   "Evaluate elisp code stored in a STRING."
   (eval (car (read-from-string string))))
 
-(defservlet* execute text/plain (fname elisp)
+(defservlet* execute text/plain (fname elisp debug)
+  (if (equal debug "true")
+      (message "Clojure->Elisp function: %s\n  elisp: %s" fname elisp))
   (condition-case err
       (let ((result (clomacs-eval-elisp elisp)))
         (if result
