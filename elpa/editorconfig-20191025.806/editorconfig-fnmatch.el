@@ -3,9 +3,6 @@
 ;; Copyright (C) 2011-2019 EditorConfig Team
 
 ;; Author: EditorConfig Team <editorconfig@googlegroups.com>
-;; URL: https://github.com/editorconfig/editorconfig-emacs#readme
-;; Version: 0.7.14
-;; Package-Requires: ((emacs "24"))
 
 ;; See
 ;; https://github.com/editorconfig/editorconfig-emacs/graphs/contributors
@@ -170,7 +167,7 @@ translation is found for PATTERN."
              (setq result `(,@result "[^/]*"))))
 
           (??
-           (setq result `(,@result ".")))
+           (setq result `(,@result "[^/]")))
 
           (?\[
            (if in-brackets

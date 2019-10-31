@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2019 EditorConfig Team
 
 ;; Author: EditorConfig Team <editorconfig@googlegroups.com>
-;; Version: 0.7.14
+;; Version: 0.8.1
 ;; URL: https://github.com/editorconfig/editorconfig-emacs#readme
 ;; Package-Requires: ((cl-lib "0.5") (emacs "24"))
 
@@ -160,6 +160,7 @@ overwrite \"indent_style\" property when current `major-mode' is a
   ;; For contributors: Sort modes in alphabetical order
   '((apache-mode apache-indent-level)
     (awk-mode c-basic-offset)
+    (bpftrace-mode c-basic-offset)
     (c++-mode c-basic-offset)
     (c-mode c-basic-offset)
     (cmake-mode cmake-tab-width)
@@ -169,8 +170,16 @@ overwrite \"indent_style\" property when current `major-mode' is a
     (csharp-mode c-basic-offset)
     (css-mode css-indent-offset)
     (emacs-lisp-mode lisp-indent-offset)
+    (enh-ruby-mode enh-ruby-indent-level)
     (erlang-mode erlang-indent-level)
     (ess-mode ess-indent-offset)
+    (f90-mode f90-associate-indent
+              f90-continuation-indent
+              f90-critical-indent
+              f90-do-indent
+              f90-if-indent
+              f90-program-indent
+              f90-type-indent)
     (feature-mode feature-indent-offset
                   feature-indent-level)
     (fsharp-mode fsharp-continuation-offset
@@ -185,6 +194,7 @@ overwrite \"indent_style\" property when current `major-mode' is a
                   haskell-indentation-where-post-offset
                   haskell-indentation-where-pre-offset
                   shm-indent-spaces)
+    (haxor-mode haxor-tab-width)
     (idl-mode c-basic-offset)
     (jade-mode jade-tab-width)
     (java-mode c-basic-offset)
@@ -195,12 +205,15 @@ overwrite \"indent_style\" property when current `major-mode' is a
     (js3-mode js3-indent-level)
     (json-mode js-indent-level)
     (julia-mode julia-indent-offset)
+    (kotlin-mode kotlin-tab-width)
     (latex-mode . editorconfig-set-indentation-latex-mode)
     (lisp-mode lisp-indent-offset)
     (livescript-mode livescript-tab-width)
     (lua-mode lua-indent-level)
     (matlab-mode matlab-indent-level)
+    (mips-mode mips-tab-width)
     (mustache-mode mustache-basic-offset)
+    (nasm-mode nasm-basic-offset)
     (nginx-mode nginx-indent-level)
     (nxml-mode nxml-child-indent (nxml-attribute-indent . 2))
     (objc-mode c-basic-offset)
@@ -218,6 +231,7 @@ overwrite \"indent_style\" property when current `major-mode' is a
     (python-mode . editorconfig-set-indentation-python-mode)
     (ruby-mode ruby-indent-level)
     (rust-mode rust-indent-offset)
+    (rustic-mode rustic-indent-offset)
     (scala-mode scala-indent:step)
     (scss-mode css-indent-offset)
     (sgml-mode sgml-basic-offset)
@@ -225,6 +239,7 @@ overwrite \"indent_style\" property when current `major-mode' is a
     (slim-mode slim-indent-offset)
     (tcl-mode tcl-indent-level
               tcl-continued-indent-level)
+    (terra-mode terra-indent-level)
     (typescript-mode typescript-indent-level)
     (verilog-mode verilog-indent-level
                   verilog-indent-level-behavioral
@@ -305,6 +320,9 @@ Otherwise, use `delete-trailing-whitespace'."
 Set by `editorconfig-apply' and nil if that is not invoked in
 current buffer yet.")
 (make-variable-buffer-local 'editorconfig-properties-hash)
+(put 'editorconfig-properties-hash
+     'permanent-local
+     t)
 
 (defvar editorconfig-lisp-use-default-indent nil
   "Selectively ignore the value of indent_sizefor Lisp files.
@@ -471,6 +489,24 @@ to non-nil when FINAL-NEWLINE is true."
              (> (string-to-number length) 0))
     (setq fill-column (string-to-number length))))
 
+(defvar editorconfig-file-type-emacs-whitelist
+  (append (mapcar 'car
+                  editorconfig-indentation-alist)
+          '(conf-mode))
+  "List of known `major-mode' that can be used for file_type_emacs value.")
+
+;; Emacs<26 does not have provided-mode-derived-p
+(defun editorconfig--provided-mode-derived-p (mode &rest modes)
+  "Non-nil if MODE is derived from one of MODES.
+Uses the `derived-mode-parent' property of the symbol to trace backwards.
+If you just want to check `major-mode', use `derived-mode-p'."
+  (if (fboundp 'provided-mode-derived-p)
+      (apply 'provided-mode-derived-p mode modes)
+    (while (and (not (memq mode modes))
+                (setq mode (get mode 'derived-mode-parent))))
+    mode))
+
+
 (defun editorconfig-set-major-mode-from-name (filetype)
   "Set buffer `major-mode' by FILETYPE.
 
@@ -482,7 +518,12 @@ FILETYPE should be s string like `\"ini\"`, if not nil or empty string."
                                    "-mode")))))
     (when mode
       (if (fboundp mode)
-          (editorconfig-apply-major-mode-safely mode)
+          (if (apply 'editorconfig--provided-mode-derived-p mode
+                     editorconfig-file-type-emacs-whitelist)
+              (editorconfig-apply-major-mode-safely mode)
+            (display-warning :error (format "Major-mode `%S' is not listed in `%S'"
+                                            mode
+                                            'editorconfig-file-type-emacs-whitelist)))
         (display-warning :error (format "Major-mode `%S' not found"
                                         mode))
         nil))))
@@ -663,7 +704,13 @@ To disable EditorConfig in some buffers, modify
   ;; See https://github.com/editorconfig/editorconfig-emacs/issues/141 for why
   ;; not `after-change-major-mode-hook'
   (dolist (hook '(change-major-mode-after-body-hook
-                  read-only-mode-hook))
+                  read-only-mode-hook
+                  ;; Some modes call `kill-all-local-variables' in their init
+                  ;; code, which clears some values set by editorconfig.
+                  ;; For those modes, editorconfig-apply need to be called
+                  ;; explicitly through their hooks.
+                  rpm-spec-mode-hook
+                  ))
     (if editorconfig-mode
         (add-hook hook 'editorconfig-mode-apply)
       (remove-hook hook 'editorconfig-mode-apply))))
@@ -714,6 +761,47 @@ To disable EditorConfig in some buffers, modify
       (untabify (point-min) (point-max)))
   (indent-region (point-min) (point-max)))
 
+
+
+;; (defconst editorconfig--version
+;;   (eval-when-compile
+;;     (require 'lisp-mnt)
+;;     (declare-function lm-version "lisp-mnt" nil)
+;;     (lm-version))
+;;   "EditorConfig version.")
+
+(declare-function find-library-name "find-func" (library))
+(declare-function lm-version "lisp-mnt" nil)
+
+;;;###autoload
+(defun  editorconfig-version (&optional show-version)
+  "Get EditorConfig version as string.
+
+If called interactively or if SHOW-VERSION is non-nil, show the
+version in the echo area and the messages buffer."
+  (interactive (list t))
+  (let* ((version
+          (with-temp-buffer
+            (require 'find-func)
+            (insert-file-contents (find-library-name "editorconfig"))
+            (require 'lisp-mnt)
+            (lm-version)))
+         (pkg
+          (and (require 'package nil t)
+               (cadr (assq 'editorconfig
+                           package-alist))))
+         (pkg-version
+          (and pkg
+               (package-version-join (package-desc-version pkg))))
+         (version-full (if (and pkg-version
+                                (not (string= version
+                                              pkg-version)))
+                           (concat version "-" pkg-version)
+                         version)))
+    (when show-version
+      (message "EditorConfig Emacs v%s"
+               version-full))
+    version-full))
 
 (provide 'editorconfig)
 
