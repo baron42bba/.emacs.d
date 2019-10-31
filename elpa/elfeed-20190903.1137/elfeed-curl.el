@@ -110,6 +110,7 @@ output format."
     (13 . "FTP weird PASV reply.")
     (14 . "FTP weird 227 format.")
     (15 . "FTP can't get host.")
+    (16 . "A problem was detected in the HTTP2 framing layer.")
     (17 . "FTP couldn't set binary.")
     (18 . "Partial file. Only a part of the file was transferred.")
     (19 . "FTP couldn't download/access the given file, the RETR (or similar) command failed.")
@@ -287,6 +288,7 @@ Use `elfeed-curl--narrow' to select a header."
 URL can be a string or a list of URL strings."
   (let* ((args ())
          (capabilities (elfeed-curl-get-capabilities)))
+    (push "--disable" args)
     (when (plist-get capabilities :compression)
       (push "--compressed" args))
     (push "--silent" args)

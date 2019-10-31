@@ -45,26 +45,28 @@ Defaults to `elfeed-kill-buffer'.")
   (let ((map (make-sparse-keymap)))
     (prog1 map
       (suppress-keymap map)
-      (define-key map "d" 'elfeed-show-save-enclosure)
-      (define-key map "q" 'elfeed-kill-buffer)
-      (define-key map "g" 'elfeed-show-refresh)
-      (define-key map "n" 'elfeed-show-next)
-      (define-key map "p" 'elfeed-show-prev)
-      (define-key map "s" 'elfeed-show-new-live-search)
-      (define-key map "b" 'elfeed-show-visit)
-      (define-key map "y" 'elfeed-show-yank)
-      (define-key map "u" (elfeed-expose #'elfeed-show-tag 'unread))
-      (define-key map "+" 'elfeed-show-tag)
-      (define-key map "-" 'elfeed-show-untag)
-      (define-key map (kbd "SPC") 'scroll-up-command)
-      (define-key map (kbd "DEL") 'scroll-down-command)
-      (define-key map "\t" 'shr-next-link)
-      (define-key map [tab] 'shr-next-link)
-      (define-key map "\e\t" 'shr-previous-link)
-      (define-key map [backtab] 'shr-previous-link)
-      (define-key map [mouse-2] 'shr-browse-url)
-      (define-key map "A" 'elfeed-show-add-enclosure-to-playlist)
-      (define-key map "P" 'elfeed-show-play-enclosure)))
+      (define-key map "h" #'describe-mode)
+      (define-key map "d" #'elfeed-show-save-enclosure)
+      (define-key map "q" #'elfeed-kill-buffer)
+      (define-key map "g" #'elfeed-show-refresh)
+      (define-key map "n" #'elfeed-show-next)
+      (define-key map "p" #'elfeed-show-prev)
+      (define-key map "s" #'elfeed-show-new-live-search)
+      (define-key map "b" #'elfeed-show-visit)
+      (define-key map "y" #'elfeed-show-yank)
+      (define-key map "u" #'elfeed-show-tag--unread)
+      (define-key map "+" #'elfeed-show-tag)
+      (define-key map "-" #'elfeed-show-untag)
+      (define-key map "<" #'beginning-of-buffer)
+      (define-key map ">" #'end-of-buffer)
+      (define-key map (kbd "SPC") #'scroll-up-command)
+      (define-key map (kbd "DEL") #'scroll-down-command)
+      (define-key map (kbd "TAB") #'elfeed-show-next-link)
+      (define-key map "\e\t" #'shr-previous-link)
+      (define-key map [backtab] #'shr-previous-link)
+      (define-key map [mouse-2] #'shr-browse-url)
+      (define-key map "A" #'elfeed-show-add-enclosure-to-playlist)
+      (define-key map "P" #'elfeed-show-play-enclosure)))
   "Keymap for `elfeed-show-mode'.")
 
 (defun elfeed-show-mode ()
@@ -79,6 +81,10 @@ Defaults to `elfeed-kill-buffer'.")
   (buffer-disable-undo)
   (make-local-variable 'elfeed-show-entry)
   (run-mode-hooks 'elfeed-show-mode-hook))
+
+(defalias 'elfeed-show-tag--unread
+  (elfeed-expose #'elfeed-show-tag 'unread)
+  "Mark the current entry unread.")
 
 (defun elfeed-insert-html (html &optional base-url)
   "Converted HTML markup to a propertized string."
@@ -110,13 +116,29 @@ Defaults to `elfeed-kill-buffer'.")
     (setf (url-target obj) nil)
     (url-recreate-url obj)))
 
+(defun elfeed--show-format-author (author)
+  "Format author plist for the header."
+  (let ((name (plist-get author :name))
+        (uri (plist-get author :uri))
+        (email (plist-get author :email)))
+    (cond ((and name uri email)
+           (format "%s <%s> (%s)" name email uri))
+          ((and name email)
+           (format "%s <%s>" name email))
+          ((and name uri)
+           (format "%s (%s)" name uri))
+          (name name)
+          (email email)
+          (uri uri)
+          ("[unknown]"))))
+
 (defun elfeed-show-refresh--mail-style ()
   "Update the buffer to match the selected entry, using a mail-style."
   (interactive)
   (let* ((inhibit-read-only t)
          (title (elfeed-entry-title elfeed-show-entry))
          (date (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
-         (author (elfeed-meta elfeed-show-entry :author))
+         (authors (elfeed-meta elfeed-show-entry :authors))
          (link (elfeed-entry-link elfeed-show-entry))
          (tags (elfeed-entry-tags elfeed-show-entry))
          (tagsstr (mapconcat #'symbol-name tags ", "))
@@ -129,9 +151,12 @@ Defaults to `elfeed-kill-buffer'.")
     (erase-buffer)
     (insert (format (propertize "Title: %s\n" 'face 'message-header-name)
                     (propertize title 'face 'message-header-subject)))
-    (when (and author elfeed-show-entry-author)
-      (insert (format (propertize "Author: %s\n" 'face 'message-header-name)
-                      (propertize author 'face 'message-header-to))) )
+    (when elfeed-show-entry-author
+      (dolist (author authors)
+        (let ((formatted (elfeed--show-format-author author)))
+          (insert
+           (format (propertize "Author: %s\n" 'face 'message-header-name)
+                   (propertize formatted 'face 'message-header-to))))))
     (insert (format (propertize "Date: %s\n" 'face 'message-header-name)
                     (propertize nicedate 'face 'message-header-other)))
     (insert (format (propertize "Feed: %s\n" 'face 'message-header-name)
@@ -159,9 +184,25 @@ Defaults to `elfeed-kill-buffer'.")
   (interactive)
   (call-interactively elfeed-show-refresh-function))
 
+(defcustom elfeed-show-unique-buffers nil
+  "When non-nil, every entry buffer gets a unique name.
+This allows for displaying multiple show buffers at the same
+time."
+  :group 'elfeed
+  :type 'boolean)
+
+(defun elfeed-show--buffer-name (entry)
+  "Return the appropriate buffer name for ENTRY.
+The result depends on the value of `elfeed-show-unique-buffers'."
+  (if elfeed-show-unique-buffers
+      (format "*elfeed-entry-<%s %s>*"
+	      (elfeed-entry-title entry)
+	      (format-time-string "%F" (elfeed-entry-date entry)))
+    "*elfeed-entry*"))
+
 (defun elfeed-show-entry (entry)
   "Display ENTRY in the current buffer."
-  (let ((buff (get-buffer-create "*elfeed-entry*")))
+  (let ((buff (get-buffer-create (elfeed-show--buffer-name entry))))
     (with-current-buffer buff
       (elfeed-show-mode)
       (setq elfeed-show-entry entry)
@@ -377,45 +418,40 @@ offer to save a range of enclosures."
       (elfeed-show-save-enclosure-multi)
     (elfeed-show-save-enclosure-single)))
 
-(defun elfeed-show-play-enclosure (&optional entry enclosure-index)
-  "Play enclosure number ENCLOSURE-INDEX from ENTRY using emms.
-If ENTRY is nil use the elfeed-show-entry variable.
-If ENCLOSURE-INDEX is nil ask for the enclosure number."
-  (interactive)
-  (require 'emms) ;; optional
-  (let* ((entry (or entry elfeed-show-entry))
-         (enclosure-index (or enclosure-index
-                              (elfeed--get-enclosure-num
-                               "Enclosure to play" entry)))
-         (url-enclosure (car (elt (elfeed-entry-enclosures entry)
-                                  (- enclosure-index 1)))))
-    (with-no-warnings ;; due to lazy (require)
-      (with-current-emms-playlist
-       (let ((old-pos (point-max)))
-         (emms-add-url url-enclosure)
-         (goto-char old-pos)
-         ;; if we're sitting on a group name, move forward
-         (unless (emms-playlist-track-at (point))
-           (emms-playlist-next))
-         (emms-playlist-select (point)))
-       ;; FIXME: is there a better way of doing this?
-       (emms-stop)
-       (emms-start)))))
+(defun elfeed--enclosure-maybe-prompt-index (entry)
+  "Prompt for an enclosure if there are multiple in ENTRY."
+  (if (= 1 (length (elfeed-entry-enclosures entry)))
+      1
+    (elfeed--get-enclosure-num "Enclosure to play" entry)))
 
-(defun elfeed-show-add-enclosure-to-playlist (&optional entry enclosure-index)
-  "Play enclosure number ENCLOSURE-INDEX from ENTRY using emms.
-If ENTRY is nil use the elfeed-show-entry variable.
-If ENCLOSURE-INDEX is nil ask for the enclosure number."
-  (interactive)
+(defun elfeed-show-play-enclosure (enclosure-index)
+  "Play enclosure number ENCLOSURE-INDEX from current entry using EMMS.
+Prompts for ENCLOSURE-INDEX when called interactively."
+  (interactive (list (elfeed--enclosure-maybe-prompt-index elfeed-show-entry)))
+  (elfeed-show-add-enclosure-to-playlist enclosure-index)
+  (with-no-warnings
+    (with-current-emms-playlist
+      (save-excursion
+        (emms-playlist-last)
+        (emms-playlist-mode-play-current-track)))))
+
+(defun elfeed-show-add-enclosure-to-playlist (enclosure-index)
+  "Add enclosure number ENCLOSURE-INDEX to current EMMS playlist.
+Prompts for ENCLOSURE-INDEX when called interactively."
+
+  (interactive (list (elfeed--enclosure-maybe-prompt-index elfeed-show-entry)))
   (require 'emms) ;; optional
-  (let* ((entry (or entry elfeed-show-entry))
-         (enclosure-index (or enclosure-index
-                              (elfeed--get-enclosure-num
-                               "Enclosure to add" entry)))
-         (url-enclosure (car (elt (elfeed-entry-enclosures entry)
-                                  (- enclosure-index 1)))))
-    (with-no-warnings ;; due to lazy (require )
-      (emms-add-url url-enclosure))))
+  (with-no-warnings ;; due to lazy (require )
+    (emms-add-url   (car (elt (elfeed-entry-enclosures elfeed-show-entry)
+                              (- enclosure-index 1))))))
+
+(defun elfeed-show-next-link ()
+  "Skip to the next link, exclusive of the Link header."
+  (interactive)
+  (let ((properties (text-properties-at (line-beginning-position))))
+    (when (memq 'message-header-name properties)
+      (forward-paragraph))
+    (shr-next-link)))
 
 (provide 'elfeed-show)
 
