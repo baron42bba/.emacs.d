@@ -51,6 +51,7 @@
 
 (require 'auth-source)
 (require 'cl-lib)
+(require 'gnutls)
 (require 'json)
 (require 'let-alist)
 (require 'url)
@@ -94,6 +95,9 @@ at URL `https://github.com/settings/tokens'.")
   "If non-nil, the string used to identify the local machine.
 If this is nil, then the value returned by `system-name' is
 used instead.")
+
+(defvar ghub-insecure-hosts nil
+  "List of hosts that use http instead of https.")
 
 ;;; Request
 ;;;; Object
@@ -337,7 +341,12 @@ Both callbacks are called with four arguments.
    (ghub--encode-payload payload)
    (ghub--make-req
     :url (url-generic-parse-url
-          (concat "https://" host resource
+          (concat (if (member host ghub-insecure-hosts) "http://" "https://")
+                  (if (and (equal resource "/graphql")
+                           (string-suffix-p "/v3" host))
+                      (substring host 0 -3)
+                    host)
+                  resource
                   (and query (concat "?" (ghub--url-encode-params query)))))
     :forge forge
     :silent silent
@@ -431,17 +440,45 @@ this function is called with nil for PAYLOAD."
 (cl-defun ghub-repository-id (owner name &key username auth host forge noerror)
   "Return the id of the specified repository.
 Signal an error if the id cannot be determined."
-  (let ((fn (intern (format "%s-repository-id" (or forge 'ghub)))))
-    (or (funcall (if (eq fn 'ghub-repository-id) 'ghub--repository-id fn)
-                 owner name :username username :auth auth :host host)
+  (let ((fn (cl-case forge
+              ((nil ghub github) 'ghub--repository-id)
+              (gitlab            'glab-repository-id)
+              (gittea            'gtea-repository-id)
+              (gogs              'gogs-repository-id)
+              (bitbucket         'buck-repository-id)
+              (t (intern (format "%s-repository-id" forge))))))
+    (unless (fboundp fn)
+      (error "ghub-repository-id: Forge type/abbreviation `%s' is unknown"
+             forge))
+    (or (funcall fn owner name :username username :auth auth :host host)
         (and (not noerror)
              (error "Repository %S does not exist on %S.\n%s%S?"
                     (concat owner "/" name)
-                    (or host (ghub--host host))
+                    (or host (ghub--host forge))
                     "Maybe it was renamed and you have to update "
                     "remote.<remote>.url")))))
 
 ;;;; Internal
+
+(defvar ghub-use-workaround-for-emacs-bug
+  (and
+   ;; Note: For build sans gnutls, `libgnutls-version' is -1.
+   (>= libgnutls-version 30603)
+   (version<= emacs-version "26.2")
+   'force)
+  "Whether to use a kludge that hopefully works around an Emacs bug.
+
+In Emacs versions before 26.3 there is a bug that causes network
+connections to fail when using TLS1.3.  If this variable is
+non-nil, then Ghub works around that by binding
+`gnutls-algorithm-priority' to \"NORMAL:-VERS-TLS1.3\", unless we
+think it is unnecessary.  If `force' then always use the
+workaround.  Currently the latter is the default except when
+using Emacs 26.3+, or the libgnutls is earlier than 3.6.3 (when
+it introduced TLS1.3).
+
+For more information see https://github.com/magit/ghub/issues/81
+and https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341.")
 
 (cl-defun ghub--retrieve (payload req)
   (let ((url-request-extra-headers
@@ -452,7 +489,16 @@ Signal an error if the id cannot be determined."
         (url-show-status nil)
         (url     (ghub--req-url req))
         (handler (ghub--req-handler req))
-        (silent  (ghub--req-silent req)))
+        (silent  (ghub--req-silent req))
+        (gnutls-algorithm-priority
+         (if (and ghub-use-workaround-for-emacs-bug
+                  (or (eq ghub-use-workaround-for-emacs-bug 'force)
+                      (and (not gnutls-algorithm-priority)
+                           (>= libgnutls-version 30603)
+                           (version<= emacs-version "26.2")
+                           (memq (ghub--req-forge req) '(github nil)))))
+             "NORMAL:-VERS-TLS1.3"
+           gnutls-algorithm-priority)))
     (if (or (ghub--req-callback  req)
             (ghub--req-errorback req))
         (url-retrieve url handler (list req) silent)
@@ -518,15 +564,10 @@ Signal an error if the id cannot be determined."
   See https://github.com/magit/ghub/issues/81.
   headers: %S
   status: %S
-  buffer: %S
-  buffer-string:
-  %S
-  --- end of buffer-string ---"
+  buffer: %S"
                url-http-end-of-headers
                status
-               (current-buffer)
-               (buffer-substring-no-properties
-                (point-min) (point-max)))))
+               (current-buffer))))
     (while (re-search-forward "^\\([^:]*\\): \\(.+\\)"
                               url-http-end-of-headers t)
       (push (cons (match-string 1)
@@ -717,7 +758,7 @@ and call `auth-source-forget+'."
 
 (defun ghub--auth (host auth &optional username forge)
   (unless username
-    (setq username (ghub--username host)))
+    (setq username (ghub--username host forge)))
   (if (eq auth 'basic)
       (cl-ecase forge
         ((nil github gitea gogs bitbucket)
@@ -729,19 +770,32 @@ and call `auth-source-forget+'."
              "Authorization")
             (gitlab
              "Private-Token"))
-          (concat
-           (and (not (eq forge 'gitlab)) "token ")
-           (encode-coding-string
-            (cl-typecase auth
-              (string auth)
-              (null   (ghub--token host username 'ghub nil forge))
-              (symbol (ghub--token host username auth  nil forge))
-              (t (signal 'wrong-type-argument
-                         `((or stringp symbolp) ,auth))))
-            'utf-8)))))
+          (if (eq forge 'bitbucket)
+              ;; For some undocumented reason Bitbucket supports
+              ;; values of the form "token <token>" only for GET
+              ;; requests.  For PUT requests we have to use basic
+              ;; authentication.  Note that the secret is a token
+              ;; (aka "app password"), not the actual password.
+              ;; The documentation fails to mention this little
+              ;; detail.  See #97.
+              (concat "Basic "
+                      (base64-encode-string
+                       (concat username ":"
+                               (ghub--token host username auth nil forge))))
+            (concat
+             (and (not (eq forge 'gitlab)) "token ")
+             (encode-coding-string
+              (cl-typecase auth
+                (string auth)
+                (null   (ghub--token host username 'ghub nil forge))
+                (symbol (ghub--token host username auth  nil forge))
+                (t (signal 'wrong-type-argument
+                           `((or stringp symbolp) ,auth))))
+              'utf-8))))))
 
 (defun ghub--basic-auth (host username)
-  (let ((url (url-generic-parse-url (concat "https://" host))))
+  (let ((url (url-generic-parse-url
+              (if (member host ghub-insecure-hosts) "http://" "https://"))))
     (setf (url-user url) username)
     (url-basic-auth url t)))
 
@@ -792,7 +846,7 @@ See https://magit.vc/manual/ghub/Support-for-Other-Forges.html for instructions.
                                user host))))))))
     (if (functionp token) (funcall token) token)))
 
-(defun ghub--host (&optional forge)
+(cl-defmethod ghub--host (forge)
   (cl-ecase forge
     ((nil github)
      (or (ignore-errors (car (process-lines "git" "config" "github.host")))
@@ -810,7 +864,7 @@ See https://magit.vc/manual/ghub/Support-for-Other-Forges.html for instructions.
      (or (ignore-errors (car (process-lines "git" "config" "bitbucket.host")))
          (bound-and-true-p buck-default-host)))))
 
-(defun ghub--username (host &optional forge)
+(cl-defmethod ghub--username (host &optional forge)
   (let ((var
          (cl-ecase forge
            ((nil github)
@@ -838,10 +892,10 @@ See https://magit.vc/manual/ghub/Support-for-Other-Forges.html for instructions.
       (error
        (let ((user (read-string
                     (format "Git variable `%s' is unset.  Set to: " var))))
-         (or (and user (progn (call-process "git" nil nil nil
-                                            "config" "--global" var user)
-                              user))
-             (user-error "Abort")))))))
+         (if (equal user "")
+             (user-error "The empty string is not a valid username")
+           (call-process "git" nil nil nil "config" "--global" var user)
+           user))))))
 
 (defun ghub--ident (username package)
   (format "%s^%s" username package))
@@ -954,7 +1008,7 @@ Please visit https://github.com/settings/tokens and delete it." ident)
 (defvar ghub--2fa-cache nil)
 
 (defun ghub--read-2fa-code ()
-  (let ((code (read-number "Two-factor authentication code: "
+  (let ((code (read-string "Two-factor authentication code: "
                            (and ghub--2fa-cache
                                 (< (float-time (time-subtract
                                                 (current-time)
@@ -962,7 +1016,7 @@ Please visit https://github.com/settings/tokens and delete it." ident)
                                    25)
                                 (car ghub--2fa-cache)))))
     (setq ghub--2fa-cache (cons code (current-time)))
-    (number-to-string code)))
+    code))
 
 (defun ghub--auth-source-get (keys &rest spec)
   (declare (indent 1))
