@@ -4,7 +4,7 @@
 
 ;; Author: Ankur Dave <ankurdave@gmail.com>
 ;; Url: https://github.com/ankurdave/color-identifiers-mode
-;; Package-Version: 20181120.1951
+;; Package-Version: 20190805.1455
 ;; Created: 24 Jan 2014
 ;; Version: 1.1
 ;; Keywords: faces, languages
@@ -767,7 +767,7 @@ evaluates to true."
                              (and flface-prop (memq flface-prop identifier-faces)))
                            (get-text-property (point) 'color-identifiers:fontified)))
                   (goto-char (next-property-change (point) nil limit))
-                (if (not (and (looking-back identifier-context-re nil)
+                (if (not (and (looking-back identifier-context-re (line-beginning-position))
                               (or (not identifier-exclusion-re) (not (looking-at identifier-exclusion-re)))
                               (looking-at identifier-re)))
                     (progn
