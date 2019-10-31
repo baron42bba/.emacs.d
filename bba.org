@@ -3401,7 +3401,7 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
 	(add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20190122.549")
+                     "~/.emacs.d/elpa/helm-20191031.725")
 	(require 'helm)
 	(helm-mode 1)
 	(global-set-key (kbd "M-y") 'helm-show-kill-ring)
