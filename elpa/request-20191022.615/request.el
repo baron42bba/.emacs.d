@@ -6,9 +6,9 @@
 
 ;; Author: Takafumi Arakaki <aka.tkf at gmail.com>
 ;; URL: https://github.com/tkf/emacs-request
-;; Package-Version: 20181129.1138
+;; Package-Version: 20191022.615
 ;; Package-Requires: ((emacs "24.4"))
-;; Version: 0.3.0
+;; Version: 0.3.2
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -49,6 +49,8 @@
 (require 'cl-lib)
 (require 'url)
 (require 'mail-utils)
+(require 'autorevert)
+
 
 (defgroup request nil
   "Compatible layer for URL request in Emacs."
@@ -124,7 +126,8 @@ See `request-log-level'."
 ;;; Utilities
 
 (defun request--safe-apply (function &rest arguments)
-  (condition-case err
+  "Apply FUNCTION with ARGUMENTS, suppressing any errors."
+  (condition-case nil
       (apply #'apply function arguments)
     ((debug error))))
 
@@ -389,20 +392,14 @@ Example::
 
 (cl-defun request (url &rest settings
                        &key
-                       (type "GET")
                        (params nil)
                        (data nil)
-                       (files nil)
-                       (parser nil)
                        (headers nil)
-                       (success nil)
+                       (encoding 'utf-8)
                        (error nil)
-                       (complete nil)
-                       (timeout request-timeout)
-                       (status-code nil)
                        (sync nil)
                        (response (make-request-response))
-                       (unix-socket nil))
+                       &allow-other-keys)
   "Send request to URL.
 
 Request.el has a single entry point.  It is `request'.
@@ -410,18 +407,19 @@ Request.el has a single entry point.  It is `request'.
 ==================== ========================================================
 Keyword argument      Explanation
 ==================== ========================================================
-TYPE       (string)   type of request to make: POST/GET/PUT/DELETE
-PARAMS      (alist)   set \"?key=val\" part in URL
-DATA (string/alist)   data to be sent to the server
-FILES       (alist)   files to be sent to the server (see below)
-PARSER     (symbol)   a function that reads current buffer and return data
-HEADERS     (alist)   additional headers to send with the request
-SUCCESS  (function)   called on success
-ERROR    (function)   called on error
-COMPLETE (function)   called on both success and error
-TIMEOUT    (number)   timeout in second
-STATUS-CODE (alist)   map status code (int) to callback
-SYNC         (bool)   If `t', wait until request is done.  Default is `nil'.
+TYPE          (string)   type of request to make: POST/GET/PUT/DELETE
+PARAMS         (alist)   set \"?key=val\" part in URL
+DATA    (string/alist)   data to be sent to the server
+FILES          (alist)   files to be sent to the server (see below)
+PARSER        (symbol)   a function that reads current buffer and return data
+HEADERS        (alist)   additional headers to send with the request
+ENCODING      (symbol)   encoding for request body (utf-8 by default)
+SUCCESS     (function)   called on success
+ERROR       (function)   called on error
+COMPLETE    (function)   called on both success and error
+TIMEOUT       (number)   timeout in second
+STATUS-CODE    (alist)   map status code (int) to callback
+SYNC            (bool)   If `t', wait until request is done.  Default is `nil'.
 ==================== ========================================================
 
 
@@ -571,6 +569,7 @@ and requests.request_ (Python).
                       (request--urlencode-alist params))))
   (setq settings (plist-put settings :url url))
   (setq settings (plist-put settings :response response))
+  (setq settings (plist-put settings :encoding encoding))
   (setf (request-response-settings response) settings)
   (setf (request-response-url      response) url)
   (setf (request-response--backend response) request-backend)
@@ -579,11 +578,6 @@ and requests.request_ (Python).
              (request--choose-backend 'request-sync)
            (request--choose-backend 'request))
          url settings)
-  (when timeout
-    (request-log 'debug "Start timer: timeout=%s sec" timeout)
-    (setf (request-response--timer response)
-          (run-at-time timeout nil
-                       #'request-response--timeout-callback response)))
   response)
 
 (defun request--clean-header (response)
@@ -636,12 +630,11 @@ then kill the current buffer."
       (with-current-buffer buffer
         (request-log 'trace
           "(buffer-string) at %S =\n%s" buffer (buffer-string))
-        (when (/= (request-response-status-code response) 204)
+        (unless (equal (request-response-status-code response) 204)
           (goto-char (point-min))
           (setf (request-response-data response) (funcall parser)))))))
 
-(cl-defun request--callback (buffer &key parser success error complete
-                                    timeout status-code response
+(cl-defun request--callback (buffer &key parser success error complete status-code response
                                     &allow-other-keys)
   (request-log 'debug "REQUEST--CALLBACK")
   (request-log 'debug "(buffer-string) =\n%s"
@@ -660,11 +653,19 @@ then kill the current buffer."
        (done-p (request-response-done-p response)))
 
     ;; Parse response header
-    (request--clean-header response)
-    (request--cut-header response)
     ;; Note: Try to do this even `error-thrown' is set.  For example,
     ;; timeout error can occur while downloading response body and
     ;; header is there in that case.
+    (let* ((response-url (request-response-url response))
+           (scheme (and (stringp response-url)
+                        (url-type (url-generic-parse-url response-url))))
+           (curl-file-p (and (stringp scheme)
+                             (not (string-match-p "^http" scheme))
+                             (eq (request-response--backend response) 'curl))))
+      ;; curl does not add a header for say file:///foo/bar
+      (unless curl-file-p
+        (request--clean-header response)
+        (request--cut-header response)))
 
     ;; Parse response body
     (request-log 'debug "error-thrown = %S" error-thrown)
@@ -720,28 +721,21 @@ then kill the current buffer."
   (setf (request-response-error-thrown response)  '(error . ("Timeout")))
   (let* ((buffer (request-response--buffer response))
          (proc (and (buffer-live-p buffer) (get-buffer-process buffer))))
-    (when proc
-      ;; This will call `request--callback':
-      (funcall (request--choose-backend 'terminate-process) proc))
-
-    (cl-symbol-macrolet ((done-p (request-response-done-p response)))
-      (unless done-p
-        ;; This code should never be executed.  However, it occurs
-        ;; sometimes with `url-retrieve' backend.
-        ;; FIXME: In Emacs 24.3.50 or later, this is always executed in
-        ;;        request-get-timeout test.  Find out if it is fine.
-        (request-log 'error "Callback is not called when stopping process! \
-Explicitly calling from timer.")
-        (when (buffer-live-p buffer)
-          (cl-destructuring-bind (&key code &allow-other-keys)
-              (with-current-buffer buffer
-                (goto-char (point-min))
-                (request--parse-response-at-point))
-            (setf (request-response-status-code response) code)))
-        (apply #'request--callback
-               buffer
-               (request-response-settings response))
-        (setq done-p t)))))
+    (if proc
+        ;; This will call `request--callback':
+        (funcall (request--choose-backend 'terminate-process) proc)
+      (cl-symbol-macrolet ((done-p (request-response-done-p response)))
+        (unless done-p
+          (when (buffer-live-p buffer)
+            (cl-destructuring-bind (&key code &allow-other-keys)
+                (with-current-buffer buffer
+                  (goto-char (point-min))
+                  (request--parse-response-at-point))
+              (setf (request-response-status-code response) code)))
+          (apply #'request--callback
+                 buffer
+                 (request-response-settings response))
+          (setq done-p t))))))
 
 (defun request-response--cancel-timer (response)
   (request-log 'debug "REQUEST-RESPONSE--CANCEL-TIMER")
@@ -794,6 +788,7 @@ associated process is exited."
          (buffer (url-retrieve url #'request--url-retrieve-callback
                                (nconc (list :response response) settings)))
          (proc (get-buffer-process buffer)))
+    (request--install-timeout timeout response)
     (setf (request-response--buffer response) buffer)
     (process-put proc :request-response response)
     (request-log 'debug "Start querying: %s" url)
@@ -802,14 +797,13 @@ associated process is exited."
 (cl-defun request--url-retrieve-callback (status &rest settings
                                                  &key response url
                                                  &allow-other-keys)
-  (declare (special url-http-method
-                    url-http-response-status))
   (request-log 'debug "-URL-RETRIEVE-CALLBACK")
   (request-log 'debug "status = %S" status)
-  (request-log 'debug "url-http-method = %s" url-http-method)
-  (request-log 'debug "url-http-response-status = %s" url-http-response-status)
+  (when (featurep 'url-http)
+    (request-log 'debug "url-http-method = %s" url-http-method)
+    (request-log 'debug "url-http-response-status = %s" url-http-response-status)
+    (setf (request-response-status-code response) url-http-response-status))
 
-  (setf (request-response-status-code response) url-http-response-status)
   (let ((redirect (plist-get status :redirect)))
     (when redirect
       (setf (request-response-url response) redirect)))
@@ -863,7 +857,7 @@ associated process is exited."
       ;; Fetch HTTP response code
       (with-current-buffer buffer
         (goto-char (point-min))
-        (cl-destructuring-bind (&key version code)
+        (cl-destructuring-bind (&key code &allow-other-keys)
             (request--parse-response-at-point)
           (setf (request-response-status-code response) code)))
       ;; Parse response body, etc.
@@ -887,6 +881,31 @@ Currently it is used only for testing.")
   (or request--curl-cookie-jar
       (expand-file-name "curl-cookie-jar" request-storage-directory)))
 
+(defvar request--curl-capabilities-cache
+  (make-hash-table :test 'eq :weakness 'key)
+  "Used to avoid invoking curl more than once for version info.  By skeeto/elfeed.")
+
+(defun request--curl-capabilities ()
+  "Return capabilities plist for curl.  By skeeto/elfeed.
+:version     -- cURL's version string
+:compression -- non-nil if --compressed is supported."
+  (let ((cache-value (gethash request-curl request--curl-capabilities-cache)))
+    (if cache-value
+        cache-value
+      (with-temp-buffer
+        (call-process request-curl nil t nil "--version")
+        (let ((version
+               (progn
+                 (setf (point) (point-min))
+                 (when (re-search-forward "[.0-9]+" nil t)
+                   (match-string 0))))
+              (compression
+               (progn
+                 (setf (point) (point-min))
+                 (not (null (re-search-forward "libz\\>" nil t))))))
+          (setf (gethash request-curl request--curl-capabilities-cache)
+                `(:version ,version :compression ,compression)))))))
+
 (defconst request--curl-write-out-template
   (if (eq system-type 'windows-nt)
       "\\n(:num-redirects %{num_redirects} :url-effective %{url_effective})"
@@ -897,21 +916,19 @@ Currently it is used only for testing.")
     (make-directory (file-name-directory (request--curl-cookie-jar)) t)))
 
 (cl-defun request--curl-command
-    (url &key type data headers timeout response files* unix-socket
+    (url &key type data headers response files* unix-socket encoding
          &allow-other-keys
          &aux
          (cookie-jar (convert-standard-filename
                       (expand-file-name (request--curl-cookie-jar)))))
+  "BUG: Simultaneous requests are a known cause of cookie-jar corruption."
   (append
    (list request-curl "--silent" "--include"
          "--location"
-         ;; FIXME: test automatic decompression
-         "--compressed"
-         ;; FIMXE: this way of using cookie might be problem when
-         ;;        running multiple requests.
          "--cookie" cookie-jar "--cookie-jar" cookie-jar
          "--write-out" request--curl-write-out-template)
    request-curl-options
+   (when (plist-get (request--curl-capabilities) :compression) (list "--compressed"))
    (when unix-socket (list "--unix-socket" unix-socket))
    (cl-loop for (name filename path mime-type) in files*
             collect "--form"
@@ -923,12 +940,20 @@ Currently it is used only for testing.")
    (when data
      (let ((tempfile (request--make-temp-file)))
        (push tempfile (request-response--tempfiles response))
-       (let ((file-coding-system-alist nil)
-             (coding-system-for-write 'binary))
+       ;; We dynamic-let the global `buffer-file-coding-system' to `no-conversion'
+       ;; in case the user-configured `encoding' doesn't fly.
+       ;; If we do not dynamic-let the global, `select-safe-coding-system' would
+       ;; plunge us into an undesirable interactive dialogue.
+       (let ((buffer-file-coding-system-orig
+              (default-value 'buffer-file-coding-system))
+             (select-safe-coding-system-accept-default-p
+              (lambda (&rest _) t)))
+         (setf (default-value 'buffer-file-coding-system) 'no-conversion)
          (with-temp-file tempfile
-           (setq buffer-file-coding-system 'binary)
-           (set-buffer-multibyte nil)
-           (insert data)))
+           (setq-local buffer-file-coding-system encoding)
+           (insert data))
+         (setf (default-value 'buffer-file-coding-system)
+               buffer-file-coding-system-orig))
        (list "--data-binary" (concat  "@" (request-untrampify-filename tempfile)))))
    (when type (list "--request" type))
    (cl-loop for (k . v) in headers
@@ -964,17 +989,16 @@ Currently it is used only for testing.")
                    (write-region (point-min) (point-max) tf nil 'silent))
                  (list name filename tf mime-type)))))))
 
+
+(declare-function tramp-get-remote-tmpdir "tramp")
+(declare-function tramp-dissect-file-name "tramp")
+
 (defun request--make-temp-file ()
   "Create a temporary file."
   (if (file-remote-p default-directory)
-      (let ((tramp-temp-name-prefix request-temp-prefix)
-            (vec (tramp-dissect-file-name default-directory)))
-        (tramp-make-tramp-file-name
-         (tramp-file-name-method vec)
-         (tramp-file-name-user vec)
-         (tramp-file-name-host vec)
-         (tramp-make-tramp-temp-file vec)
-         (tramp-file-name-hop vec)))
+      (let ((temporary-file-directory
+	     (tramp-get-remote-tmpdir (tramp-dissect-file-name default-directory))))
+	(make-temp-file request-temp-prefix))
     (make-temp-file request-temp-prefix)))
 
 (defun request--curl-normalize-files (files)
@@ -1004,8 +1028,16 @@ temporary file paths."
                                "Failed delete file %s. Got: %S" f err))))
         files))
 
+(defun request--install-timeout (timeout response)
+  "Out-of-band trigger after TIMEOUT seconds to prevent hangs."
+  (when (numberp timeout)
+    (request-log 'debug "Start timer: timeout=%s sec" timeout)
+    (setf (request-response--timer response)
+          (run-at-time timeout nil
+                       #'request-response--timeout-callback response))))
+
 (cl-defun request--curl (url &rest settings
-                             &key type data files headers timeout response
+                             &key files timeout response encoding semaphore
                              &allow-other-keys)
   "cURL-based request backend.
 
@@ -1026,15 +1058,7 @@ removed from the buffer before it is shown to the parser function.
   (let* (;; Use pipe instead of pty.  Otherwise, curl process hangs.
          (process-connection-type nil)
          ;; Avoid starting program in non-existing directory.
-         (home-directory (if (file-remote-p default-directory)
-                             (let ((vec (tramp-dissect-file-name default-directory)))
-                               (tramp-make-tramp-file-name
-                                (tramp-file-name-method vec)
-                                (tramp-file-name-user vec)
-                                (tramp-file-name-host vec)
-                                "~/"
-                                (tramp-file-name-hop vec)))
-                           "~/"))
+         (home-directory (or (file-remote-p default-directory) "~/"))
          (default-directory (expand-file-name home-directory))
          (buffer (generate-new-buffer " *request curl*"))
          (command (cl-destructuring-bind
@@ -1042,14 +1066,19 @@ removed from the buffer before it is shown to the parser function.
                       (request--curl-normalize-files files)
                     (setf (request-response--tempfiles response) tempfiles)
                     (apply #'request--curl-command url :files* files*
-                           :response response settings)))
-         (proc (apply #'start-file-process "request curl" buffer command)))
+                           :response response :encoding encoding settings)))
+         (proc (apply #'start-process "request curl" buffer command)))
+    (request--install-timeout timeout response)
     (request-log 'debug "Run: %s" (mapconcat 'identity command " "))
     (setf (request-response--buffer response) buffer)
     (process-put proc :request-response response)
-    (set-process-coding-system proc 'binary 'binary)
+    (set-process-coding-system proc encoding encoding)
     (set-process-query-on-exit-flag proc nil)
-    (set-process-sentinel proc #'request--curl-callback)))
+    (set-process-sentinel proc 'request--curl-callback)
+    (when semaphore
+      (set-process-sentinel proc (lambda (&rest args)
+                                   (apply #'request--curl-callback args)
+                                   (apply semaphore args))))))
 
 (defun request--curl-read-and-delete-tail-info ()
   "Read a sexp at the end of buffer and remove it and preceding character.
@@ -1149,8 +1178,7 @@ START-URL is the URL requested."
       (setf (request-response-error-thrown response) (cons 'error event))
       (apply #'request--callback buffer settings))
      ((equal event "finished\n")
-      (cl-destructuring-bind (&key version code num-redirects history error
-                                   url-effective)
+      (cl-destructuring-bind (&key code history error url-effective &allow-other-keys)
           (condition-case err
               (with-current-buffer buffer
                 (request--curl-preprocess))
@@ -1162,19 +1190,46 @@ START-URL is the URL requested."
         (setf (request-response-url          response) url-effective)
         (setf (request-response-history      response) history)
         (setf (request-response-error-thrown response)
-              (or error (when (>= code 400) `(error . (http ,code)))))
+              (or error (and (numberp code) (>= code 400) `(error . (http ,code)))))
         (apply #'request--callback buffer settings))))))
 
+(defun request-auto-revert-notify-rm-watch ()
+  "Backport of M. Engdegard's fix of `auto-revert-notify-rm-watch'."
+  (let ((desc auto-revert-notify-watch-descriptor)
+        (table (if (boundp 'auto-revert--buffers-by-watch-descriptor)
+                   auto-revert--buffers-by-watch-descriptor
+                 auto-revert-notify-watch-descriptor-hash-list)))
+    (when desc
+      (let ((buffers (delq (current-buffer) (gethash desc table))))
+        (if buffers
+            (puthash desc buffers table)
+          (remhash desc table)))
+      (condition-case nil ;; ignore-errors doesn't work for me, sorry
+	(file-notify-rm-watch desc)
+        (error))
+      (remove-hook 'kill-buffer-hook #'auto-revert-notify-rm-watch t)))
+  (setq auto-revert-notify-watch-descriptor nil
+	auto-revert-notify-modified-p nil))
+
 (cl-defun request--curl-sync (url &rest settings &key response &allow-other-keys)
-  ;; To make timeout work, use polling approach rather than using
-  ;; `call-process'.
   (let (finished)
     (prog1 (apply #'request--curl url
-                  :complete (lambda (&rest _) (setq finished t))
+                  :semaphore (lambda (&rest _) (setq finished t))
                   settings)
       (let ((proc (get-buffer-process (request-response--buffer response))))
-        (while (and (not finished) (request--process-live-p proc))
-          (accept-process-output proc))))))
+        (auto-revert-set-timer)
+        (when auto-revert-use-notify (request-auto-revert-notify-rm-watch))
+        (with-local-quit
+          (cl-loop with iter = 0
+                   until (or (>= iter 10) finished)
+                   do (accept-process-output nil 0.3)
+                   unless (request--process-live-p proc)
+                     do (cl-incf iter)
+                   end
+                   finally (when (>= iter 10)
+                             (let ((m "request--curl-sync: semaphore never called"))
+                               (princ (format "%s\n" m) #'external-debugging-output)
+                               (request-log 'error m)))))))))
 
 (defun request--curl-get-cookies (host localpart secure)
   (request--netscape-get-cookies (request--curl-cookie-jar)
@@ -1210,7 +1265,7 @@ START-URL is the URL requested."
                            value))))
 
 (defun request--netscape-filter-cookies (cookies host localpart secure)
-  (cl-loop for (domain flag path secure-1 http-only expiration name value) in cookies
+  (cl-loop for (domain _flag path secure-1 _http-only _expiration name value) in cookies
            when (and (equal domain host)
                      (equal path localpart)
                      (or secure (not secure-1)))
