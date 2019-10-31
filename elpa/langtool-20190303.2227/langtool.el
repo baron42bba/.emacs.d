@@ -2,10 +2,10 @@
 
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
 ;; Keywords: docs
-;; Package-Version: 20180409.1016
+;; Package-Version: 20190303.2227
 ;; URL: https://github.com/mhayashi1120/Emacs-langtool
 ;; Emacs: GNU Emacs 24 or later
-;; Version: 2.0.0
+;; Version: 2.0.3
 ;; Package-Requires: ((cl-lib "0.3"))
 
 ;; This program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@
 ;; ## Install:
 
 ;; Install LanguageTool version 3.0 or later (and java)
-;; http://www.languagetool.org/
+;; https://languagetool.org/
 
 ;; Put this file into load-path'ed directory, and byte compile it if
 ;; desired. And put the following expression into your ~/.emacs.
@@ -745,7 +745,8 @@ Ordinary no need to change this."
    (langtool-language-tool-server-jar
     'http)
    ((or langtool-language-tool-jar
-        langtool-java-classpath)
+        langtool-java-classpath
+        langtool-bin)
     'commandline)
    (t
     (error "There is no valid setting."))))
@@ -898,6 +899,7 @@ Ordinary no need to change this."
       (langtool--apply-checks proc checks))))
 
 (defun langtool-command--process-sentinel (proc event)
+  (langtool--debug "Sentinel" "event: %s" event)
   (unless (process-live-p proc)
     (let ((code (process-exit-status proc))
           (pbuf (process-buffer proc))
@@ -991,6 +993,7 @@ Ordinary no need to change this."
 (defvar langtool-server--process-exit-hook nil)
 
 (defun langtool-server--process-sentinel (proc event)
+  (langtool--debug "Sentinel" "event: %s" event)
   (unless (process-live-p proc)
     (run-hooks 'langtool-server--process-exit-hook)))
 
@@ -999,19 +1002,22 @@ Ordinary no need to change this."
   (unless (and (processp langtool-server--process)
                (eq (process-status langtool-server--process) 'run))
     (setq langtool-server--process nil)
-    (let* ((args '()))
+    (let* ((bin langtool-java-bin)
+           (args '()))
       ;; jar Default setting is "HTTPSServer" .
       ;; This application no need to use SSL since local app.
       ;; http://wiki.languagetool.org/http-server
+      (setq args (append args (list
+                               "-cp" (langtool--process-file-name
+                                      langtool-language-tool-server-jar))))
       (setq args (append args (list "org.languagetool.server.HTTPServer")))
       (setq args (append args langtool-server-user-arguments))
+      (langtool--debug "HTTPServer" "%s: %s" bin args)
       (let* ((buffer (get-buffer-create " *LangtoolHttpServer* "))
              (proc (apply
                     'start-process
                     "LangtoolHttpServer" buffer
-                    langtool-java-bin
-                    "-cp" (langtool--process-file-name
-                           langtool-language-tool-server-jar)
+                    bin
                     args)))
         (langtool-server--rendezvous proc buffer)
         (set-process-sentinel proc 'langtool-server--process-sentinel)
@@ -1096,7 +1102,7 @@ Ordinary no need to change this."
                     ("text" ,text)
                     ,@(and langtool-mother-tongue
                            `(("motherTongue" ,langtool-mother-tongue)))
-                    ("disabled" ,disabled-rules)
+                    ("disabledRules" ,disabled-rules)
                     ))
            query-string)
       (when (and langtool-client-filter-query-function
