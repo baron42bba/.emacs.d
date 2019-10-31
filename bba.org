@@ -874,10 +874,10 @@ With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's e
 
 Some extra functionality from the org package repository.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle no
     (if (>= emacs-major-version 24)
         (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20190930" t)
+          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20191028" t)
           ))
 
 #+END_SRC
@@ -1923,7 +1923,7 @@ Use =C-c M= to send a multipart email with .org as text and exported
 html.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (load-file "~/.emacs.d/elpa/org-mime-20181023.2314/org-mime.el")
+  (load-file "~/.emacs.d/elpa/org-mime-20190805.57/org-mime.el")
   (add-hook 'org-mode-hook
             (lambda()
               (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
@@ -2018,7 +2018,7 @@ file.
 [2017-04-26 Wed 13:09]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20170423.435" t)
+  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20190406.2313" t)
   (add-hook 'org-mode-hook
 	      (lambda ()(org-sticky-header-mode 1))
 	    )
