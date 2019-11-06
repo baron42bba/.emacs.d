@@ -1,0 +1,998 @@
+2019-06-20  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Update version to 1.4
+
+2019-06-08  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Recognize left and right outer join statements #85
+
+	* sql-indent.el (sqlind-find-join-start): new defun to look for join
+	statements, can find "left outer join" statements as well, see #85
+	(sqlind-syntax-in-select, sqlind-refine-syntax): use
+	`sqlind-find-join-start`
+	(sqlind-lineup-joins-to-anchor): only look for the first join keyword,
+	to detect the case where they un on multiple lines
+
+2019-04-18  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Recognize more types of begin transaction statements (fixes #84)
+
+	"begin" follwed by a semicolon, "begin work" and "begin transaction" are 
+	considered statements and not block start delimters.
+
+2019-03-31  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Don't recognize select keywords in comments, fixes #83
+
+	when searching for select keywords for anchors, don't stop inside
+	comments -- this just uses `sqlind-search-backward`, which makes sure
+	that the position that is found is at the same level as the starting
+	position.
+
+	Also fixed a bug in `sqlind-same-level-statement` which missed that the
+	anchor was inside a comment.
+
+2019-03-15  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	recognize elseif in addition to elif #81
+
+2019-03-15  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	don't be confused by drop function or procedure statements #80
+
+2019-03-10  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Apply advices of `checkdoc' (#77)
+
+	* sql-indent.el: spelling and other documentation fixes.
+
+2019-03-10  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Fix `sqlind-comment-end' regexp. (#79)
+
+	* sql-indent.el: Fix the regexp detected by
+	 trawl (https://github.com/mattiase/trawl).
+
+2019-03-01  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	also fix sqlind-end-statement-regexp
+
+2019-03-01  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix regexp bug in `sqlind-good-if-candidate` (fixes #76)
+
+2019-02-20  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Recognize more create keywords (#75)
+
+	
+
+2018-12-13  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Recognize FULL JOIN, UNION ALL and EXCEPT keywords #73 (#74)
+
+	* sql-indent.el (sqlind-select-clauses-regexp): match "UNION ALL" and
+	"EXCEPT" as select clauses.
+	(sqlind-select-join-regexp): match FULL JOIN keywords
+	(sqlind-lineup-joins-to-anchor): use `sqlind-select-join-regexp` to
+	match all join keywords.
+
+2018-12-13  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Recognize `select-join-condition` syntax inside nested statements #70
+	(#71)
+
+	Updated syntax parser to recognize some JOIN condition keywords as
+	`select-join-condition` syntax, even inside nested statements.
+	 Updated some non-related tests (m, pr17 and pr68), as this syntax was
+	not recognized when these tests were written.	 While this change will
+	modify the indentation in such cases, it allows more refined control
+	over the indention.
+	
+	* sql-indent.el (sqlind-join-condition-regexp): keywords that 
+	constitute JOIN conditions
+	(sqlind-syntax-in-select): match `sqlind-join-condition-regexp` when
+	looking for join condition keywords
+	(sqlind-refine-syntax): try to refine a
+	`nested-statement-continuation into a `select-join-condition` if there
+	is a JOIN in the nested statement.
+
+2018-12-11  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	`sqlind-search-backward` finds things at the same nesting level (#68)
+	(#69)
+
+	* sql-indent.el (sqlind-search-backward): use
+	`sqlind-same-level-statement` to check if the position is at the same
+	nesting level as the starting point
+	
+	* (sqlind-same-level-statement): fix to check that the point has the 
+	same nesting, in-comment and in-string status as start.
+
+2018-10-25  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	update version to 1.3
+
+2018-10-23  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Fix up bad detection of $$ delimiters in PostgreSQL dialect (#67)
+
+	this resulted in severe performance degradation for the indent function
+	and bad anchor for the $$ blocks.
+	
+	* sql-indent.el (sqlind-maybe-create-statement): strip off any parens
+	off the function name.
+	(sqlind-maybe-$$-statement): re-wrote the function to avoid calling
+	`sqlind-beginning-of-block` recursively.
+	(sqlind-start-block-regexp): fixup $$ matching
+
+2018-10-09  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	don't recognize "begin transaction" as a block
+
+	"begin transaction;" is a statement, and the code used to confuse the
+	"begin" with a block begin, breaking some indentation.
+
+2018-07-12  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	recognize implicit JOIN clauses (fixes #64) (#65)
+
+	... these are JOIN clauses without an explicit INNER, LEFT, RIGHT, etc.
+
+2018-05-07  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* sql-indent.el: Add `package-requires` for cl-lib
+
+2018-05-06  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	update to version 1.2
+
+2018-02-26  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Recognize MySQL optional clauses, #60 (#61)
+
+	(sqlind-maybe-skip-mysql-create-options): skip over optional clauses
+	between CREATE and the thing being created -- this allows correct
+	identification of the create statement
+	
+	(sqlind-maybe-create-statement): skip over any "if not exist" keywords
+	between the thing being created and its name -- this allows correct
+	identification of the view or table name.
+	
+	(sqlind-refine-syntax): refine SELECT statements inside table
+	declarations, as in "CREATE TABLE AS SELECT..."
+	 also recognize tabs as whitespace syntax in various regexps.
+	 add tests, also update the `if-exists.sql` test as the view name is
+	correctly determined now.
+
+2018-02-13  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* sql-indent.el: Don't require cc-defs.
+
+	(sqlind-indent-comment-start): Use line-end-position.
+	(sqlind-indent-select-column, sqlind-indent-select-table)
+	(sqlind-lineup-to-clause-end): Use eolp.
+
+2018-02-11  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	sql-indent.el: Fix Author: email format
+
+2018-01-30  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Add .elpaignore file
+
+	Files and patterns listed here will be ignored when the ELPA package is 
+	assembled.
+
+2018-01-28  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Fix travis build. (#58)
+
+	See also
+	
+	* https://github.com/travis-ci/travis-ci/issues/9061
+	* https://github.com/flycheck/emacs-travis/issues/13
+
+2018-01-28  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Update sql-indent.el to version 1.1
+
+	Updated / clarified some of the documentation as well
+
+2018-01-06  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	add explanation on how `sqlind-beginning-of-block` works
+
+2018-01-06  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Recognize PostgreSQL $$ quote syntax, #54 (#55)
+
+	Function bodies in PostgreSQL are defined between '$$' markers.	 The
+	code now recognizes these as begin/end statements.  There's a test
+	file,
+	`test-data/pr54.sql`, specifying the cases that are correctly detected. 
+	PostgreSQL support likely needs more work.
+
+2018-01-04  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Fix various typos here and there. (#57)
+
+	
+
+2018-01-04  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Fix typo in sql-indent.org. (#56)
+
+	
+
+2018-01-03  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Updated documentation
+
+	    * Simplified CONTRIBUTING.md -- removed information that is
+	available
+	     elsewhere
+
+	    * Fixed a type in the user manual, `sql-indent.org` specifying the
+	wrong hook
+	     name for the customization
+
+	    * Clarified test naming conventions in `sql-indent-test.el`
+
+2018-01-03  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Correct indentation of column continuation with operators. (#53)
+
+	* Correct indentation of column continuation with operators.
+	 Correct from
+	```sql select my_col || chr(10)
+			|| '-*-' data_type,
+	      x from dual;
+	```
+	 to
+	```sql select my_col || chr(10)
+	   || '-*-' data_type,
+	      x from dual;
+	```
+	
+	* sql-indent.el
+	(sqlind-column-definition-start): find the first column of the 
+	statement.
+	(sqlind-use-anchor-indentation): use the indentation of the anchor 
+	instead of the indentation of the line containing the anchor.
+	(sqlind-adjust-operator): search the column start in 
+	select-column-continuation.
+	
+	* Add test for PR#53.
+	
+	* Simplify code.
+	
+	(sqlind-column-definition-start): avoid unnecessary (unless (while
+	...)).
+	(sqlind-adjust-operator): avoid complex goto-char.
+
+2017-12-16  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Correct the adjustment of indentation for operators in select (#52)
+
+	* Correct the adjustment of indentation for operators in select
+	 With this fix the following statement is propely indented
+	
+	``` sql select mt.myVar
+	   || '-*-' myVarLabel,
+	      myVar2 from   myTable mt;
+	```
+	 instead of
+	
+	``` sql select mt.myVar
+	     || '-*-' myVarLabel,
+	      myVar2 from   myTable mt;
+	```
+	
+	* sql-indent.el: Use sqlind syntax table in adjustments functions.
+	(sqlind-adjust-operator): Use sqlind syntax table.
+	
+	* Add test to pr52
+
+2017-12-16  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Add CONTRIBUTING.md file (#51)
+
+	
+
+2017-12-12  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add new indentation function for select columns. (#50)
+
+	* Add new indentation function for select columns.
+	
+	* sql-indent-left.el: Improve indentation of select columns
+	(sqlind-indent-select-keywords): tweak indentation after DISTINCT, 
+	UNIQUE or TOP keywords.
+	
+	* Add tests for pr50, correct sqlind-indentation-left-offsets-alist.
+	
+	* sql-indent-left.el: correct sqlind-indent-select-keywords
+	(sqlind-indent-select-keywords): avoid error when no keyword found.
+	
+	* sql-indent-test.el: add test for pr50.
+	
+	* Add `sqlind-indent-select-column-alt'.
+	 Clone `sqlind-indent-select-column' into
+	`sqlind-indent-select-column-alt' to allow alignment of select colums
+	with KEYWORDS.
+	
+	* sql-indent-left.el: Change setup to use
+	`sqlind-indent-select-column-alt'
+	(sqlind-indent-select-column-alt): extends
+	`sqlind-indent-select-column'.
+	
+	* Checkdoc style corrections.
+	 sql-indent-left.el: apply chechdoc advices.
+
+2017-12-02  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Update README with instructions on how to install from GNU ELPA
+
+	* README.md: add instructions for installing from GNU ELPA
+
+	* sql-indent.el: reference `sql-indent.org` in the commentary section
+
+2017-11-30  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	Fix up copyrights for GNU ELPA, plus minor tweaks
+
+	* .gitignore: Add -autoloads and -pkg files.
+
+	* sql-indent-test.el, sql-indent-left.el: Fix copyright header.
+
+	* sql-indent.el: Fix copyright header.	Don't require `align`.
+	(sqlind-minor-mode-map): New keymap.
+	(sqlind-minor-mode): Don't modify sql-mode's keymap. Use
+	kill-local-variable.
+
+2017-10-13  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Correct detection of labels in `sqlind-maybe-loop-statement'. (#49)
+
+	Correct detection of labels in `sqlind-maybe-loop-statement'
+
+2017-10-09  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Correct detection of labels in `for` or `while` loops. (#48)
+
+	Correct detection of labels in `for` or `while` loops.
+
+2017-09-21  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Introduce a nested-statement-close syntax
+
+	This is recognized inside a nested statement when the line to be
+	indented starts with a closing bracket.	 This is intended to replace
+	`sqlind-lineup-close-paren-to-open` and
+	`sqlind-lineup-close-paren-to-open-indentation` indentation helpers
+	which had to be added to too many syntactic symbols.
+
+	With the new syntax symbol, using `sqlind-use-anchor-indentation` will
+	lineup hanging close brackets with the start of the statement and
+	`sqlind-use-anchor-indentation` will line them up with the actual
+	opening bracket itself.
+
+2017-09-19  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	new alignment rule for issue #47
+
+2017-09-19  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	fixup refining a nested-statement-continuation (#46)
+
+	when the nested statement continuation had a comment at the start, any
+	select statements inside it were missed.
+
+2017-09-18  Brendan Rocks  <brendan-r@users.noreply.github.com>
+
+	Minor documentation tweaks (#44)
+
+	Fix installation command in documentation and other typos
+	
+	`install-package-from-buffer` makes more linguistic sense, but
+	`package-install-from-buffer`, seems to be the appropriate command
+	(Emacs 25.2)
+	
+
+2017-09-18  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	new indentation helper function and clarified documentation
+
+	added `sqlind-lineup-close-paren-to-open-indentation` function to assist
+	with issue #43
+
+2017-08-19  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Don't be confused by names that contain keywords (#42)
+
+	Don't be confused by names that contain keywords
+	 for example, the "FOR" in "V_SPORT_ZONE_FOR_SESSION" is not a keyword.
+	
+	* Add test cases for PR42
+
+2017-08-19  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix example in documentation
+
+2017-08-09  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Travis build and test support (#41)
+
+	Add Travis CI support to the repository
+
+2017-08-09  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Recognize MsSQL directives and declarations (#40)
+
+2017-08-02  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix detection of select column start and LIMIT keyword #39
+
+	* sql-indent.el (sqlind-column-definition-start): use LIMIT as the 
+	bounds for `sqlind-same-level-statement`, so we search between the start
+	of the SELECT and the current point.
+	(sqlind-select-clauses-regexp): recognize LIMIT as a select clause 
+	keyword.
+
+2017-07-30  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Correct display of lighter when minor-mode is enabled. (#38)
+
+	Add an space before text to avoid it to stick on previous word in
+	modeline.
+
+2017-07-24  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Allow detection of user name in package, procedure or function. (#37)
+
+	* Allow detection of user name in package, procedure or function.
+	 Avoid `mismatched end label for package (1 104)` message whith and sql 
+	of this form:
+	
+	```sql create or replace package my_user.my_wonderfull_package as
+	 function my_amazing_func return number; end my_wonderfull_package;
+	/
+	```
+	
+	* Add tests to PR #37.
+
+2017-07-21  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Try to correct 'bad closing for begin block' message. (#36)
+
+	Detection of for .. loop inside another statement
+	 see "test-data/pr36.sql" for an example.
+
+2017-07-15  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add %type, %rowtype and table prefix in function's return type. (#33)
+
+	* Add %type, %rowtype and table prefix in function's return type.
+	 Allow correct indenting after and function declaration like bellow:
+	 declare
+	 function dummy return my_user.my_table%rowtype;
+	 function dummy2 return my_user.my_table.my_col%type;
+	 var dummy3 number; begin
+	 null; end;
+	
+	* Add tests cases for PR #33.
+
+2017-07-15  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Improve left indentation of case statement. (#34)
+
+	
+
+2017-06-29  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Don't be fooled by "if exists" statements
+
+	"IF" keywords in things like "drop index if exists" statements are no
+	longer considered statement starts.
+
+2017-06-29  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Performance improvements (#31)
+
+	* Establish a limit for syntactic information search
+	 See also issue #26
+	
+	`sqlind-syntax-of-line' will use `sqlind-begining-of-directive' to
+	establish a search limit for the current syntax.  This avoids calling
+	`sqlind-begining-of-directive' repeatedly.
+	 This changes the indentation anchor for toplevel statements when
+	directives are present in the file.  Unit test data updated
+	accordingly.
+	
+	* sql-indent.el (sqlind-search-limit): new variable
+	(sqlind-beginning-of-statement-1): avoid searching before
+	`sqlind-search-limit'
+	(sqlind-beginning-of-statement): use `sqlind-search-limit'
+	(sqlind-maybe-loop-statement): fix mispelling of throw symbol
+	(sqlind-beginning-of-block): limit search to `sqlind-search-limit'
+	(sqlind-syntax-of-line): bind `sqlind-search-limit' to
+	`sqlind-begining-of-directive'
+	
+	* Fix spelling of `sqlind-beginning-of-directive`
+
+2017-06-20  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Performance improvements (#26)
+
+	* sql-indent.el (sqlind-backward-syntactic-ws)
+	(sqlind-forward-syntactic-ws, sqlind-search-backward): rewrite code to
+	avoid catch/throw forms
+	(sqlind-match-string): make it a `defsubst'
+	(sqlind-beginning-of-statement): avoid calling
+	`sqlind-begining-of-directive' when not needed
+	(sqlind-syntax-of-line): avoid unnecessary goto-char calls, and replace
+	`parse-partial-sexp' with `syntax-ppss'
+
+2017-06-15  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Moved most of the README.md contents into sql-indent.org
+
+	... this is the beginning of a sql-ident manual.  The ORG format should
+	make it easier to browse in Emacs, and Github also renders it quite
+	nicely.
+
+2017-06-15  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Avoid infinite loop in `sqlind-syntax-in-case`
+
+	Updated the test case with code that triggered the bug
+
+2017-06-15  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Detect end of exception block correctly (#30)
+
+	
+
+2017-06-13  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	fix anchor point for case statement syntax (#29)
+
+	code that was looking for the "when" keyword was moving the point,
+	resulting in the incorrect anchor point being used for '(in-block case
+	...) syntax. Updated tests to reflect fixed code.
+
+	Also added `sqlind-syntax-keyword` helper function, to be used by
+	indentation functions.
+
+2017-06-13  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix exception being a type as well as a keyword (#28)
+
+	"exception" is both a keyword and a datatype.  Add code to differentiate 
+	between the two.  Only the keyword is a block start.  Updated test files
+	to reflect that.
+
+2017-06-12  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	fix syntax detection in exception blocks and case statements (#28 and
+	#29)
+
+	Exception statements with multiple when clauses are correctly recognized
+	and classified.	 Case statements with multi-lone when clauses are also
+	correctly identified.  Added unit tests for both cases.
+
+	Some refactoring was necessary to allow recursive syntax refinement
+	(`sqlind-refine-syntax`)
+
+2017-06-12  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix incorrect match for end keyword in sqlind-end-statement-regexp
+
+2017-06-08  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix bug with wrong regexp and throw clause
+
+	a wrong "end" keyword regexp would match non-keywords that ended with
+	the string "end", causing problems
+
+	also fixes a misspelling for a throw clause
+
+2017-06-08  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Various minor improvements on left align SQL statments. (#22)
+
+	* Various minor improvements on left align SQL statments.
+	
+	* Update pr17-io-left after updating sql-indent-left setup.
+
+2017-06-03  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Remove execution bits on sql-indent-left.el (#25)
+
+	
+
+2017-06-03  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Recognize assignments as statement starts (#24)
+
+2017-06-01  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Update test for issue #19 to be more comprehensive
+
+2017-06-01  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Merge branch 'master' of github.com:alex-hhh/emacs-sql-indent
+
+2017-06-01  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Update unit test suite to run independent of user settings
+
+	Previously, the test suite depended on whether the tabs are expanded
+	into spaces or not and other user settings.
+
+2017-05-31  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Exclude equals inside strings from alignments. (#20)
+
+	Update align rules to ignore equal signs inside strings (#20)
+
+2017-05-31  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add a rule to align pipes (||). (#21)
+
+	Align rules for string concatenation operators (#21)
+
+2017-05-30  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Correctly recognize the begin block of a package (#19)
+
+2017-05-29  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Correctly detect syntax for cursor statements (fix #19)
+
+	Cursors are correctly detected as beginning of a statement.  Also an
+	optional type for the cursor is recognized correctly.
+
+	Also fixed block navigation for package names (so package end statements
+	are correctly recognized)
+
+	Added tests for the above cases.
+
+2017-05-26  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Identify syntax for CASE expressions in assignment (fixes #18)
+
+	Also added unit tests that shows/tests the types of CASE expressions
+	that can show up in PL/SQL.
+
+2017-05-25  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	use cl-lib instead of cl and provide some helpers
+
+	the cl library is deprecated in Emacs, to be replaced with cl-lib (which
+	has the same functions, but with the "cl-" prefix)
+
+	Also provided some helper functions to access syntactic context,
+	hopefully this will simplify the code somewhat.
+
+2017-05-24  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Fix checkdoc errors in sql-indent.el
+
+2017-05-24  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	moved contents of customize-indentation.md into README.md
+
+2017-05-24  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Recognize syntax of CASE statements which are not nested
+
+	Based on an example in https://github.com/bsvingen/sql-indent/issues/1
+
+	Also added test case for this syntax type.
+
+2017-05-24  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Add test cases for sample indentation mode
+
+	Based on a sample SQL indentation example provided by the SQL mode
+	maintainer.
+
+2017-05-24  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	updated .gitignore
+
+2017-05-23  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Add a test suite for sql-indent
+
+2017-05-23  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Updated installation and customization documentation
+
+2017-05-23  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Fix indentation.
+
+	Previous version didn't work.
+
+2017-05-23  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Compilation error ...
+
+2017-05-23  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Correct indentation of function's declaration in package specs.
+
+	Detect end of function declaration in package spec.
+
+2017-05-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	sqlind-begining-of-directive -- another approach to disambiguate SET
+
+2017-05-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	sqlind-begining-of-directive -- another approach to disambiguate SET
+
+2017-05-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	sqlind-adjust-operator -- fix up string concatenation cases
+
+	The operator correctly determines the position of the left hand operand
+	for the binary operator. For example the code below is indented
+	correctly now:
+
+	```sql select col1, 'abc def'--comment
+		 || 'abc'
+		 || 'def'
+
+	```
+
+2017-05-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Renamed some indentation functions for consistency
+
+	* `sqlind-adjust-and-or-left` renamed to
+	 `sqlind-left-justify-logical-operator`
+
+	* `sqlind-adjust-and-or-right` renamed to
+	 `sqlind-right-justify-logical-operator`
+
+2017-05-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	silence byte compiler warnings
+
+2017-05-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	sqlind-begining-of-directive -- disambiguate Oracle SET keyword
+
+	The SET keyword in Oracle SQLPlus is a directive as well as part of the
+	SQL UPDATE statement.  `sqlind-begining-of-directive' will correctly
+	identify uses of SET which are directives.
+
+2017-05-20  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Start workgin on aligning keywords left or right. (#14)
+
+	Provide sample customization for the SQL indentation engine
+	 Some extra indentation helper functions are also provided and
+	documented.
+
+2017-05-14  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	sqlind-beginning-of-statement-1 -- don't look inside comments, fixes #15
+
+2017-05-14  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Separate indentation of AND, OR into a separate rule.
+
+2017-05-11  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Use default value of indent-line-function when deactivating minor mode.
+
+	As the user could change the value of indent-line-function, we could not
+	reset it to 'indent-relative.
+
+2017-05-11  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Create a `sqlind-minor-mode` to toggle syntactic indentation
+
+	Also updated commentary section with customization starting points.
+
+2017-05-10  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	update alignment rules to handle variable declarations with assignments
+
+	This is further work on pull request #13
+
+2017-05-10  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Merge branch 'master' of github.com:alex-hhh/emacs-sql-indent
+
+2017-05-10  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Merge pull request #13 from PierreTechoueyres/pte/sqlind-align-rules
+
+	Add support for assignment and arrow (=>) in align.
+
+2017-05-10  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	fixup sqlind-lineup-joins-to-anchor
+
+2017-05-10  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Add a handful if indentation helpers
+
+	They are not used directly, but they can be used to construct custom 
+	indentation tables.
+
+2017-05-10  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	classify select columns start start with a comma as select-column
+
+	This helps with indenting SQL statements that use a comma at the start
+	of the column, like this:
+
+		SELECT col1
+		      ,col2
+	       FROM ...
+
+	This is also consistent with how we classify select-table syntaxes
+
+2017-05-09  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add support for assignment and arrow (=>) in align.
+
+	Allow to align some keywords in sql statements. Ex:
+
+	declare
+	 function dummy(p_param_1 in	 varchar2,
+			p_param_2 in out varchar2,
+			p_param_2 out	 varchar2)
+	 return	  boolean;
+	 end dummy;
+
+	  function dummy_2(p_param_1 out varchar2,
+			  p_param_2 out varchar2,
+			  p_param_2 out varchar2)
+	 return	  boolean;
+
+	  function dummy_3(p_param_1	 varchar2,
+			  p_param_2 in	varchar2,
+			  p_param_2 out varchar2)
+	 return	  boolean;
+
+	  var1 boolean	    := true;
+	 var2 number	   := 1;
+	 var42 varchar2(1) := 'Y'; begin
+	 if dummy(p_param_1  => val1,
+		  p_param_10 => val10) then
+	   null;
+	 end if; end;
+	/
+
+2017-05-07  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	install a separate syntax table for syntax parsing
+
+	keep the sql-mode syntax table unchanged, but use a special one during 
+	syntactic parsing.  This is done so that navigation over syntactic
+	elements is simpler for parsing, but stays reasonable while the user
+	edits the file.
+
+	For example, the string "table.column" will be considered one symbol for 
+	indentation purposes, but two symbols for editing (so an M-b will move
+	to the dot)
+
+2017-05-07  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	put our own syntax table into sql-mode
+
+2017-05-07  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	move default indentation offsets in separate constant
+
+	`sqlind-indentation-offsets-alist' is now buffer local and it is simpler
+	to override
+
+2017-05-06  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Merge branch 'master' of github.com:alex-hhh/emacs-sql-indent
+
+2017-05-06  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Add initial align rules for SQL statements
+
+2017-05-05  Alex Harsányi  <alex-hhh@users.noreply.github.com>
+
+	Merge pull request #6 from PierreTechoueyres/pte/add-keywors
+
+	Add new keywords in `sqlind-sqlplus-directive'.
+
+2017-05-05  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	don't move cursor when indenting the line
+
+	previous simplified too much
+
+2017-05-04  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add new keywords in `sqlind-sqlplus-directive'.
+
+	Add Oracle's keywords to start scripts inside a script.
+
+2017-05-04  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Updated README file
+
+2017-05-04  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Use `indent-line-to` in `sqlind-indent-line`
+
+2017-03-23  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Indent nested if statements correctly, fixes #4
+
+	`sqlind-begining-of-block` and `sqlind-begining-of-statement` recognize
+	IF statements and stop at the right point so that syntactic info is
+	created correctly.
+
+2017-03-22  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	fix parsing the "end if" block when an "elsif" is present
+
+2017-01-02  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add new keywords in `sqlind-sqlplus-directive'.
+
+2016-12-30  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	update markdown formatting
+
+2016-12-30  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Added documentation on how to customize indentation
+
+2016-12-28  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Enable lexical-binding.
+
+	Enable lexical-binding and suppress compiler warning about unused
+	variables.
+
+2016-10-07  alex-hhh  <alex-hhh@users.noreply.github.com>
+
+	Merge pull request #1 from PierreTechoueyres/pte/start-with-connect-by
+
+	Add support for connect by/start with.
+
+2016-10-06  Pierre Téchoueyres  <pierre.techoueyres@free.fr>
+
+	Add support for connect by/start with.
+
+	Add support for Oracle SQL start with / connect by. Align them like 
+	group by.
+
+2016-05-21  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	fixup parsing of case clauses
+
+2015-12-23  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	Add comments and headers to make it a proper pakage
+
+	This file can now be installed using package-install and friends.
+
+2015-12-21  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	updated README file
+
+2015-12-21  Alex Harsanyi  <AlexHarsanyi@gmail.com>
+
+	initial revision
+
+2015-12-21  alex-hhh  <alex-hhh@users.noreply.github.com>
+
+	Initial commit
+
