@@ -1884,7 +1884,6 @@ taken from http://doc.norang.ca/org-mode.org
                     (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
                     (when (display-graphic-p)
                       (progn
-                        (org-bullets-mode 1)
                         (rainbow-delimiters-mode))
                       )
                     )
@@ -1979,9 +1978,12 @@ html.
 
 ** org-bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (load-file "~/.emacs.d/lisp/org-bullets.el")
-  (require 'org-bullets)
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (when (display-graphic-p)
+    (load-file "~/.emacs.d/lisp/org-bullets.el")
+    (require 'org-bullets)
+    (add-hook 'org-mode-hook (lambda ()
+                               (progn
+                                 (org-bullets-mode 1)))))
 #+END_SRC
 
 ** org-ellipsis
