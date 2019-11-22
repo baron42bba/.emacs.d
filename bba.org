@@ -2726,6 +2726,7 @@ Takes care of doing upper-case for keywords.
 [2019-06-28 Fri 12:34]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (add-to-list 'load-path "~/.emacs.d/elpa/sql-indent-1.4")
   (require 'sql-indent)
   (add-hook 'sql-mode-hook 'sqlind-minor-mode)
 #+END_SRC
