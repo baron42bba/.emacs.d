@@ -306,10 +306,7 @@ Keep track of your important stuff!
     (progn
       (add-to-list 'load-path "~/.emacs.d/elpa/cl-lib-0.5")
       (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
-      (require 'yaml-mode)
-      )
-
-    )
+      ))
 #+END_SRC
 
 * calendar
@@ -794,8 +791,8 @@ Adjust indentation at work.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
    ;; load yaml-mode
-   ;; (require 'yaml-mode)
-   ;; (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+   (require 'yaml-mode)
+   (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
   (defvar bba-keep-whitespaces)
   (if (equal "work" (getenv "SYSENV"))
       (setq yaml-indent-offset 4))
