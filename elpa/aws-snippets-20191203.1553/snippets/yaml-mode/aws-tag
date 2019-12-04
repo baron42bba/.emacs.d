@@ -5,5 +5,5 @@
 # expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
 # --
 -
-    Key: ${1:-}
+    Key: "${1:-}"
     Value: ${2:"--"}$0

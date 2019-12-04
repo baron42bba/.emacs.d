@@ -2295,7 +2295,7 @@ You may start it at the end of the config file.
   (interactive)
   (random t) ;; seed with time-of-day
   (with-output-to-temp-buffer "*Tip of the day*"
-    (let* ((commands (loop for s being the symbols
+    (let* ((commands (cl-loop for s being the symbols
                            when (commandp s) collect s))
            (command (nth (random (length commands)) commands)))
       (princ
@@ -2328,6 +2328,7 @@ Use our default socket files
   (if (file-accessible-directory-p "~/.ssh/sockets")
   (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='~/.ssh/sockets/ssh.%%C' -o ControlPersist=600"))
 #+END_SRC
+
 * [[http://www.twmode.sourceforge.net/][twitter]]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2544,12 +2545,12 @@ list who can decrypt a file:
 
   (eval-after-load "cperl-mode"
     '(progn
-       (add-hook 'cperl-mode-hook (lambda() ((cperl-set-style "K&R"))))
-       (setq cperl-close-paren-offset -4)
+       (add-hook 'cperl-mode-hook (lambda() (cperl-set-style "K&R")
+     ;;  (setq cperl-close-paren-offset -4)
        (setq cperl-continued-statement-offset 4)
        (setq cperl-indent-level 4)
        (setq cperl-indent-parens-as-block t)
-       (setq cperl-tab-always-indent t)))
+       (setq cperl-tab-always-indent t)))))
 
 #+END_SRC
 

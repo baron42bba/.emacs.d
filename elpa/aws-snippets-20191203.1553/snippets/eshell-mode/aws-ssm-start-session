@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: aws-ssm-start-session
+# key: ssm_
+# group: aws
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+aws --profile=${1:$$(yas-choose-value aws-snippets-profiles)} ${2:--region=${3:$$(yas-choose-value aws-snippets-regions)}}  ssm start-session --target ${4:`(current-kill 0)`} $0
