@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: ros_count
+# key: ro_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT node_name,
+       projection_schema,
+       projection_name,
+       SUM(ros_count) AS ros_count
+  FROM v_monitor.projection_storage
+  GROUP BY node_name,
+         projection_schema,
+         projection_name
+ HAVING SUM(ros_count) > 100
+  ORDER BY ros_count DESC;$0

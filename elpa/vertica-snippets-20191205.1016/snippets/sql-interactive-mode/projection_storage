@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: projection_storage
+# key: ps_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT node_name,
+       projection_schema,
+       projection_name,
+       (SUM(used_bytes)/1024^3)::INT size_in_GB
+  FROM projection_storage
+ WHERE anchor_table_name = '$1'
+ GROUP BY 1,2,3
+ ORDER BY 2,3,1
+ LIMIT 20;$0

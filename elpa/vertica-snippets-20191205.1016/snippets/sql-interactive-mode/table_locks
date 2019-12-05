@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: table_locks
+# key: tl_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT locks.lock_mode,
+       locks.lock_scope,
+       substr(locks.transaction_description, 1, 100) AS "left",
+       locks.request_timestamp,
+       locks.grant_timestamp
+  FROM v_monitor.locks;$0

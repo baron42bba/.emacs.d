@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: resource_pool_status
+# key: rps_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT node_name,
+       pool_name,
+       TO_CHAR( memory_size_kb / 1024, '999g999g999g999') AS memory_size_mb,
+       TO_CHAR( max_memory_size_kb / 1024, '999g999g999g999') AS max_memory_size_mb,
+       TO_CHAR( memory_size_actual_kb / 1024, '999g999g999g999') AS memory_size_actual_mb,
+       planned_concurrency,
+       TO_CHAR( query_budget_kb / 1024 , '999g999g999g999') AS query_budget_mb
+  FROM resource_pool_status
+ WHERE pool_name = '$1'
+ ORDER BY 1,2;$0
