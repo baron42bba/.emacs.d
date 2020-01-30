@@ -2841,7 +2841,8 @@ Use undo-tree.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
-      (global-undo-tree-mode))
+      (global-undo-tree-mode)
+    (setq undo-tree-enable-undo-in-region t))
 
 #+END_SRC
 
