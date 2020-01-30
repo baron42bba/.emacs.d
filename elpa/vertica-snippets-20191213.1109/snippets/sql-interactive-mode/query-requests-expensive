@@ -1,0 +1,41 @@
+# -*- mode: snippet -*-
+# name: query-requests-expensive
+# key: qre_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+#
+# expensive queries, based on threads, memory, duration.
+# Also includes the last transaction_id to find the query.
+# and the range of the times it's ran from and to.
+# targets just JOIN and GROUP BY SPILL events
+#
+# --
+SELECT REGEXP_REPLACE(REGEXP_REPLACE(substr(qr.request, 1, 500), '\d'), '\''[\S\s]?\''', '''?''' ) AS query,
+       MAX(qr.transaction_id) AS last_trans_id,
+       AVG(qr.request_duration_ms)/1000/60 AS avg_duration_mins,
+       AVG(ra.thread_count) AS avg_threads,
+       TO_CHAR(AVG(memory_inuse_kb)/1024, '999,999') AS avg_mem_mb,
+       (SUM(qr.request_duration_ms) * COUNT(1))/1000 AS total_duration_secs,
+       MAX(eee.event_type) AS event_type,
+       TRUNC(MIN(qr.start_timestamp), 'MI') AS first_run,
+       TRUNC(MAX(qr.start_timestamp), 'MI') AS last_run,
+       (SUM(qr.request_duration_ms) * COUNT(1)) * SUM(ra.thread_count) AS total_cost,
+       COUNT(1) AS num_runs
+  FROM v_monitor.query_requests qr
+	 JOIN (SELECT transaction_id, statement_id, event_type
+		 FROM v_internal.dc_execution_engine_events
+		WHERE node_name = (SELECT MIN(node_name)
+				     FROM v_catalog.nodes)
+	 ) eee USING (transaction_id, statement_id)
+	 LEFT JOIN (SELECT transaction_id, statement_id, thread_count, memory_inuse_kb, duration_ms
+		      FROM v_monitor.resource_acquisitions
+		     WHERE node_name = (SELECT MIN(node_name)
+					  FROM v_catalog.nodes)
+	 ) ra USING (transaction_id, statement_id)
+ WHERE start_timestamp::date > CURRENT_DATE() -1
+   AND NOT qr.is_executing
+   AND eee.event_type IN ('GROUP_BY_SPILLED', 'JOIN_SPILLED')
+ GROUP BY 1
+HAVING COUNT(*) > 3
+ ORDER BY total_cost DESC
+ LIMIT 40;$0

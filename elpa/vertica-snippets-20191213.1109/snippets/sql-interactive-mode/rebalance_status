@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: rebalance_status
-# key: rebalance_status_
+# key: rs_
 # group: vertica
 # condition: (if (string-equal sql-product 'vertica)t)
 # --
@@ -18,7 +18,7 @@ FROM
 		       AND transferred_percent <> 100) THEN 'In Progress'
 	      ELSE 'Queued'
           END AS status
-   FROM rebalance_projection_status
+   FROM v_monitor.rebalance_projection_status
    WHERE is_latest) AS tab
 GROUP BY 1,
          2

@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: last-vertica-updates
+# key: lvu_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT time,
+       new_version
+  FROM dc_upgrades
+ LIMIT 1 OVER (PARTITION BY new_version
+               ORDER BY TIME DESC);

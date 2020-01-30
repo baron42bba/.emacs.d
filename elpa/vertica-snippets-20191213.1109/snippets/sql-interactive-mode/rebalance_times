@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: rebalance_times
+# key: rt_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# --
+SELECT dc_rebalanced_projections.node_name, 
+       projection_schema, 
+       projection_name, 
+       start_time, 
+       time -start_time duration
+  FROM v_internal.dc_rebalanced_projections
+ ORDER BY 5 DESC
+ LIMIT 100;$0

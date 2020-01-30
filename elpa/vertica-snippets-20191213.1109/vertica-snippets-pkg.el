@@ -1,4 +1,4 @@
-(define-package "vertica-snippets" "20191205.1016" "Yasnippets for Vertica"
+(define-package "vertica-snippets" "20191213.1109" "Yasnippets for Vertica"
   '((yasnippet "0.6.1"))
   :keywords
   '("convenience" "snippets")

@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: segmentation-islands1
+# key: si1_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+#
+# https://www.vertica.com/blog/beware-segmentation-islands/
+#
+# --
+SELECT REGEXP_REPLACE(SUBSTR(segment_expression, 1, 500), '\w+\.'),
+       COUNT(*) 
+  FROM projections 
+ WHERE projection_name NOT ILIKE '%b1'
+ GROUP BY 1 
+ ORDER BY 2 DESC;$0

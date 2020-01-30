@@ -1,0 +1,30 @@
+# -*- mode: snippet -*-
+# name: segmentation-islands2
+# key: si2_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+#
+# https://www.vertica.com/blog/beware-segmentation-islands/
+#
+# --
+SELECT projection_schema || '.' || p.projection_name, REGEXP_REPLACE(SUBSTR(p.segment_expression, 1, 500), '\w+\.'),
+       pc.projection_column_name
+  FROM projections p
+  JOIN projection_columns pc USING (projection_id)
+ WHERE REGEXP_REPLACE(SUBSTR(p.segment_expression, 1, 500), '\w+\.')
+       IN (SELECT REGEXP_REPLACE(SUBSTR (p.segment_expression, 1, 500), '\w+\.')
+             FROM projections p
+            WHERE p.projection_name NOT ILIKE '%b1'
+              AND is_segmented
+            GROUP BY 1
+	   HAVING COUNT(*) = 1 )
+   AND p.projection_name NOT ILIKE '%b1'
+   AND pc.projection_column_name IN (
+     SELECT hash_expr FROM (SELECT replace(substr(regexp_replace(substr(p.segment_expression, 1, 500), '\w+\.'), 6), ')', '') AS hash_expr, COUNT(*)
+                              FROM projections p
+                             WHERE p.projection_name NOT ILIKE '%b1'
+                               AND is_segmented
+                             GROUP BY 1
+			     ORDER BY 2 DESC
+			     LIMIT 20 ) AS foo )
+ ORDER BY 1, 2, 3;$0
