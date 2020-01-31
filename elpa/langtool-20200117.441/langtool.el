@@ -1,11 +1,13 @@
 ;;; langtool.el --- Grammar check utility using LanguageTool
 
+;; Copyright (C) 2011-2020 Masahiro Hayashi
+
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
 ;; Keywords: docs
-;; Package-Version: 20190303.2227
+;; Package-Version: 20200117.441
 ;; URL: https://github.com/mhayashi1120/Emacs-langtool
 ;; Emacs: GNU Emacs 24 or later
-;; Version: 2.0.3
+;; Version: 2.2.0
 ;; Package-Requires: ((cl-lib "0.3"))
 
 ;; This program is free software; you can redistribute it and/or
@@ -33,31 +35,60 @@
 ;; Put this file into load-path'ed directory, and byte compile it if
 ;; desired. And put the following expression into your ~/.emacs.
 ;;
+;;     (require 'langtool)
+
+;; ## Settings (required):
+;;
+;; langtool.el have 3 types of client.
+
+;; 1. Command line
+;;
+;;  This setting should be set, if you use rest of clients, to get full of
+;;  completion support. And you should be set the variables before load
+;;  this library.
+;;
 ;;     (setq langtool-language-tool-jar "/path/to/languagetool-commandline.jar")
 ;;     (require 'langtool)
 ;;
-;; Alternatively, you can set the classpath where LanguageTool's jars reside:
+;; Alternatively, you can set the classpath where LanguageTool's jars reside
+;; (e.g. ArchLinux):
 ;;
 ;;     (setq langtool-java-classpath
 ;;           "/usr/share/languagetool:/usr/share/java/languagetool/*")
 ;;     (require 'langtool)
 ;;
-;; You can use HTTP server implementation which is now testing.  This
-;; is very fast, but has security risk if there is multiple user on a
-;; same host. You can set both of
-;; `langtool-language-tool-jar' and `langtool-language-tool-server-jar'
-;; the later is prior than the former.
-;; [Recommended] You should set `langtool-language-tool-jar' correctly
-;;    full of completion support like available languages.
+;;
+;; You can set a script that hold java setting (e.g. Gentoo):
+;;
+;;     (setq langtool-bin "/path/to/your/langtool")
+;;     (require 'langtool)
+
+;; 2. HTTP server & client
+;;
+;;  You can use HTTP server implementation. This is very fast after listen server,
+;;  but has security risk if there are multiple user on a same host.
 ;;
 ;;     (setq langtool-language-tool-server-jar "/path/to/languagetool-server.jar")
-
+;;
 ;; You can change HTTP server port number like following.
 ;;
 ;;     (setq langtool-server-user-arguments '("-p" "8082"))
 
-;; These settings are optional:
+;; 3. HTTP client
+;;
+;; If you have running HTTP LanguageTool server instance on any machine:
+;;
+;;     (setq langtool-http-server-host "localhost"
+;;           langtool-http-server-port 8082)
+;;
+;; Now testing although, that running instance is working under HTTPSServer or via
+;; general ssl support (e.g. nginx) following may be working. Again, this is now
+;; testing, so please open issue when the ssl/tls connection is not working.
+;;
+;;     (setq langtool-http-server-stream-type 'tls)
 
+;; ## Optional settings
+;;
 ;; * Key binding if you desired.
 ;;
 ;;     (global-set-key "\C-x4w" 'langtool-check)
@@ -147,7 +178,7 @@
 ;; * check only docstring (emacs-lisp-mode)
 ;;    or using (derived-mode-p 'prog-mode) and only string and comment
 ;; * java encoding <-> elisp encoding (No enough information..)
-;; * change to --json argument to parse. 
+;; * change to --json argument to parse.
 
 ;;; Code:
 
@@ -243,10 +274,31 @@ No need to set this variable when `langtool-java-classpath' is set."
   :type 'file)
 
 (defcustom langtool-language-tool-server-jar nil
-  "LanguageTool server jar file. **This is now TESTING**.
+  "LanguageTool server jar file.
 Very fast, but do not use it if there is unreliable user on a same host."
   :group 'langtool
   :type 'file)
+
+(defcustom langtool-http-server-host nil
+  "Normally should be \"localhost\" . Do not set the untrusted host/network.
+Your post may not be encrypted application layer, so your privacy may be leaked.
+
+Please set `langtool-http-server-port' either.
+"
+  :group 'langtool
+  :type 'string)
+
+(defcustom langtool-http-server-port nil
+  "See `langtool-http-server-host' ."
+  :group 'langtool
+  :type 'number)
+
+(defcustom langtool-http-server-stream-type nil
+  "This is now testing and not enough tested yet. This value is passed to
+`open-network-stream' `:type' argument.
+Valid arguments are same to above except `nil'. This means `plain'."
+  :group 'langtool
+  :type 'symbol)
 
 (defcustom langtool-java-classpath nil
   "Custom classpath to use on special environment. (e.g. Arch Linux)
@@ -466,6 +518,16 @@ Call just before POST with `application/x-www-form-urlencoded'."
       (let* ((start (+ (point-min) offset))
              (end (+ start len)))
         (cons start end)))
+     (context
+      ;; Command-line client have a bug that point to wrong place.
+      (goto-char (point-min))
+      (forward-line (1- line))
+      ;;  1. sketchy move to column that is indicated by LanguageTool.
+      ;;  2. fuzzy match to reported sentence which indicated by ^^^ like string.
+      ;;  3. restrict to the current line
+      (when (< 0 col)
+        (forward-char (1- col)))
+      (langtool--fuzzy-search context len))
      (t
       (goto-char (point-min))
       (forward-line (1- line))
@@ -741,9 +803,13 @@ Ordinary no need to change this."
 ;;
 
 (defun langtool--checker-mode ()
+  ;; NOTE: This priority is order by light weight.
   (cond
+   ((and langtool-http-server-host
+         langtool-http-server-port)
+    'http-client)
    (langtool-language-tool-server-jar
-    'http)
+    'client-server)
    ((or langtool-language-tool-jar
         langtool-java-classpath
         langtool-bin)
@@ -767,9 +833,8 @@ Ordinary no need to change this."
                (langtool--create-overlay version check))
              (nreverse checks))))))))
 
-(defun langtool--lazy-apply-checks (proc checks)
+(defun langtool--lazy-apply-checks (proc version checks)
   (let ((source (process-get proc 'langtool-source-buffer))
-        (version (process-get proc 'langtool-jar-version))
         (begin (process-get proc 'langtool-region-begin))
         (finish (process-get proc 'langtool-region-finish)))
     (when (buffer-live-p source)
@@ -783,7 +848,7 @@ Ordinary no need to change this."
               (langtool--create-overlay version (car checks))
               (run-with-idle-timer
                1 nil 'langtool--lazy-apply-checks
-               proc (cdr checks)))
+               proc version (cdr checks)))
              (t
               (let ((source (process-get proc 'langtool-source-buffer)))
                 (langtool--check-finish source nil))))))))))
@@ -835,6 +900,33 @@ Ordinary no need to change this."
   (when langtool-buffer-process
     (error "Another process is running")))
 
+;; Create utf-8-unix temporary file if need. This coding-system is
+;; troubleless, I think.
+(defun langtool-command--maybe-create-temp-file (&optional begin finish)
+  (let* ((file (buffer-file-name))
+         (cs buffer-file-coding-system)
+         (cs-base (coding-system-base cs))
+         custom-cs)
+    (unless langtool-temp-file
+      (setq langtool-temp-file (langtool--make-temp-file)))
+    ;; create temporary file to pass the text contents to LanguageTool
+    (when (or (null file)
+              (buffer-modified-p)
+              (and begin finish)
+              ;; 1 is dos EOL style, this must convert to unix
+              ;; dos (CR-LF) style EOL may destroy position of marker.
+              (eq (coding-system-eol-type cs) 1)
+              ;; us-ascii is included in utf-8
+              (and (not (coding-system-equal cs-base 'us-ascii))
+                   (not (coding-system-equal cs-base 'utf-8))))
+      (save-restriction
+        (widen)
+        (let ((coding-system-for-write 'utf-8-unix))
+          ;; BEGIN nil means entire buffer
+          (write-region begin finish langtool-temp-file nil 'no-msg))
+        (setq file langtool-temp-file)))
+    file))
+
 (defun langtool-command--invoke-process (file begin finish &optional lang)
   (let ((version (langtool--jar-version)))
     (cl-destructuring-bind (command args)
@@ -843,9 +935,8 @@ Ordinary no need to change this."
       ;; http://wiki.languagetool.org/command-line-options
       (setq args (append
                   args
-                  (list "-c" (langtool--java-coding-system
-                              buffer-file-coding-system)
-                        "-d" (langtool--disabled-rules))))
+                  (list
+                   "-d" (langtool--disabled-rules))))
       (cond
        ((stringp (or lang langtool-default-language))
         (setq args (append args (list "-l" (or lang langtool-default-language)))))
@@ -919,11 +1010,42 @@ Ordinary no need to change this."
         (setq errmsg "Buffer was dead")))
       (langtool--check-finish source errmsg))))
 
+;;;
+;;; Adapter for internal/external server
+;;;
+
+(defvar langtool-adapter--plist nil)
+
+(defun langtool-adapter-ensure-internal (process)
+  (setq langtool-adapter--plist
+        (cons 'internal
+              (list
+               'process process
+               'finalizer `(lambda () (langtool-server-ensure-stop ,process))
+               'host (process-get process 'langtool-server-host)
+               'port (process-get process 'langtool-server-port)))))
+
+(defun langtool-adapter-ensure-external ()
+  (setq langtool-adapter--plist
+        (cons 'external
+              (list
+               'host langtool-http-server-host
+               'port langtool-http-server-port
+               'stream-type langtool-http-server-stream-type))))
+
+(defun langtool-adapter-get (key)
+  (plist-get (cdr langtool-adapter--plist) key))
+
+(defun langtool-adapter-ensure-terminate ()
+  (when langtool-adapter--plist
+    (let ((finalizer (langtool-adapter-get 'finalizer)))
+      (when finalizer
+        (funcall finalizer)))
+    (setq langtool-adapter--plist nil)))
+
 ;;
 ;; LanguageTool HTTP Server <-> Client
 ;;
-
-(defvar langtool-server--process nil)
 
 (defun langtool-server--check-command ()
   (cond
@@ -935,14 +1057,16 @@ Ordinary no need to change this."
   (unless (file-readable-p langtool-language-tool-server-jar)
     (error "languagetool-server jar file is not readable")))
 
-(defun langtool-server-ensure-stop (&optional proc)
-  (setq proc (or proc langtool-server--process))
+(defun langtool-http-client-check-command ()
+  ;; Currently no need to check command. Just HTTP post.
+  )
+
+(defun langtool-server-ensure-stop (proc)
   (when (processp proc)
     (let ((buffer (process-buffer proc)))
       (delete-process proc)
       (when (buffer-live-p buffer)
-        (kill-buffer buffer))))
-  (setq langtool-server--process nil))
+        (kill-buffer buffer)))))
 
 (defun langtool-server--parse-initial-buffer ()
   (save-excursion
@@ -950,12 +1074,11 @@ Ordinary no need to change this."
     (cond
      ((re-search-forward (eval-when-compile
                            (concat
-                            "^"
                             "Starting LanguageTool "
                             "\\([0-9.]+\\)\\(?:-SNAPSHOT\\)? "
                             ".+?"
                             "server on https?://\\([^:]+\\):\\([0-9]+\\)"
-                            "\.\.\."
+                            "\\.\\.\\."
                             "$"))
                          nil t))
      (t
@@ -972,7 +1095,7 @@ Ordinary no need to change this."
       (save-excursion
         (while t
           (goto-char (point-min))
-          (when (re-search-forward "^Server started" nil t)
+          (when (re-search-forward "Server started" nil t)
             (cl-destructuring-bind (version host port)
                 (langtool-server--parse-initial-buffer)
               (when (version< version "4.0")
@@ -981,7 +1104,6 @@ Ordinary no need to change this."
                        version))
               (process-put proc 'langtool-server-host host)
               (process-put proc 'langtool-server-port port)
-              (process-put proc 'langtool-jar-version version)
               (message "%s done." (current-message))
               (throw 'rendezvous t)))
           (unless (eq (process-status proc) 'run)
@@ -999,9 +1121,11 @@ Ordinary no need to change this."
 
 (defun langtool-server--ensure-running ()
   (langtool-server--check-command)
-  (unless (and (processp langtool-server--process)
-               (eq (process-status langtool-server--process) 'run))
-    (setq langtool-server--process nil)
+  (unless (let ((proc (langtool-adapter-get 'process)))
+            (and  (processp proc)
+                  (eq (process-status proc) 'run)))
+    ;; Force terminate previous server process if exists.
+    (langtool-adapter-ensure-terminate)
     (let* ((bin langtool-java-bin)
            (args '()))
       ;; jar Default setting is "HTTPSServer" .
@@ -1021,12 +1145,14 @@ Ordinary no need to change this."
                     args)))
         (langtool-server--rendezvous proc buffer)
         (set-process-sentinel proc 'langtool-server--process-sentinel)
-        (setq langtool-server--process proc))))
-  langtool-server--process)
+        (langtool-adapter-ensure-internal proc)
+        proc))))
 
 (defun langtool-client--parse-response-body/json ()
   (let* ((json (json-read))
-         (matches (cdr (assoc 'matches json)))
+         (matches (cdr (assq 'matches json)))
+         (software (cdr (assq 'software json)))
+         (version (cdr (assq 'version software)))
          checks)
     (cl-loop for match across matches
              do (let* ((offset (cdr (assoc 'offset match)))
@@ -1034,7 +1160,9 @@ Ordinary no need to change this."
                        (rule (cdr (assoc 'rule match)))
                        (rule-id (cdr (assoc 'id rule)))
                        (replacements (cdr (assoc 'replacements match)))
-                       (suggestions (mapcar (lambda (x) (cdr (assoc 'value x))) replacements))
+                       (suggestions (mapcar
+                                     (lambda (x) (cdr (assoc 'value x)))
+                                     replacements))
                        (msg1 (cdr (assoc 'message match)))
                        ;; rest of line. Point the raw message.
                        (msg2 (cdr (assoc 'shortMessage match)))
@@ -1042,6 +1170,7 @@ Ordinary no need to change this."
                         (concat "Rule ID: " rule-id "\n"
                                 msg1 "\n\n"
                                 msg2))
+                       ;; No need this value when json
                        (context nil)
                        line column)
                   (setq checks (cons
@@ -1049,7 +1178,8 @@ Ordinary no need to change this."
                                        msg1 message rule-id context
                                        offset)
                                  checks))))
-    (nreverse checks)))
+    (setq checks (nreverse checks))
+    (list version checks)))
 
 (defun langtool-client--parse-response-body (http-headers)
   (let ((ct (cdr (assoc-string "content-type" http-headers t))))
@@ -1063,22 +1193,26 @@ Ordinary no need to change this."
   (unless (process-live-p proc)
     (let ((pbuf (process-buffer proc))
           (source (process-get proc 'langtool-source-buffer))
-          errmsg checks)
+          errmsg version checks)
       (with-current-buffer pbuf
         (cl-destructuring-bind (status headers body-start)
             (langtool-http--parse-response-header)
           (goto-char body-start)
           (cond
            ((= status 200)
-            (setq checks (langtool-client--parse-response-body headers)))
+            (cl-destructuring-bind (ver result)
+                (langtool-client--parse-response-body headers)
+              (setq checks result)
+              (setq version ver)))
            (t
             (setq errmsg (buffer-substring-no-properties (point) (point-max)))))
           (kill-buffer pbuf)))
+      ;; after cleanup buffer.
       (cond
        (errmsg
         (langtool--check-finish source errmsg))
        (t
-        (langtool--lazy-apply-checks proc checks))))))
+        (langtool--lazy-apply-checks proc version checks))))))
 
 (defun langtool-client--process-filter (proc event)
   (langtool--debug "Filter" "%s" event)
@@ -1086,42 +1220,39 @@ Ordinary no need to change this."
     (goto-char (point-max))
     (insert event)))
 
-(defun langtool-client--make-post-data (file begin finish lang)
-  (let (text)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (setq text (buffer-string)))
-    (let* ((disabled-rules (langtool--disabled-rules))
-           (language (cond
-                      ((stringp (or lang langtool-default-language))
-                       (or lang langtool-default-language))
-                      (t
-                       "auto")))
-           (query `(
-                    ("language" ,language)
-                    ("text" ,text)
-                    ,@(and langtool-mother-tongue
-                           `(("motherTongue" ,langtool-mother-tongue)))
-                    ("disabledRules" ,disabled-rules)
-                    ))
-           query-string)
-      (when (and langtool-client-filter-query-function
-                 (functionp langtool-client-filter-query-function))
-        (setq query (funcall langtool-client-filter-query-function query)))
-      ;; UTF-8 encoding if value is multibyte character
-      (setq query-string (url-build-query-string query))
-      query-string)))
+(defun langtool-client--make-post-data (&optional begin finish lang)
+  (let* ((text (buffer-substring-no-properties (or begin (point-min)) (or finish (point-max))))
+         (disabled-rules (langtool--disabled-rules))
+         (language (cond
+                    ((stringp (or lang langtool-default-language))
+                     (or lang langtool-default-language))
+                    (t
+                     "auto")))
+         (query `(
+                  ("language" ,language)
+                  ("text" ,text)
+                  ,@(and langtool-mother-tongue
+                         `(("motherTongue" ,langtool-mother-tongue)))
+                  ("disabledRules" ,disabled-rules)
+                  ))
+         query-string)
+    (when (and langtool-client-filter-query-function
+               (functionp langtool-client-filter-query-function))
+      (setq query (funcall langtool-client-filter-query-function query)))
+    ;; UTF-8 encoding if value is multibyte character
+    (setq query-string (url-build-query-string query))
+    query-string))
 
-(defun langtool-client--http-post (server data)
-  (let* ((host (process-get server 'langtool-server-host))
-         (port (process-get server 'langtool-server-port))
+(defun langtool-client--http-post (data)
+  (let* ((host (langtool-adapter-get 'host))
+         (port (langtool-adapter-get 'port))
          (buffer (langtool--process-create-client-buffer))
          (url-path "/v2/check")
          (client (let ((coding-system-for-write 'binary)
                        (coding-system-for-read 'utf-8-unix))
                    (open-network-stream
                     "LangtoolHttpClient" buffer host port
-                    :type 'plain))))
+                    :type (or (langtool-adapter-get 'stream-type) 'plain)))))
     (process-send-string
      client
      (concat
@@ -1134,9 +1265,9 @@ Ordinary no need to change this."
     (process-send-eof client)
     client))
 
-(defun langtool-client--invoke-process (file begin finish &optional lang)
-  (let* ((data (langtool-client--make-post-data  file begin finish lang))
-         (proc (langtool-client--http-post langtool-server--process data)))
+(defun langtool-client--invoke-process (&optional begin finish lang)
+  (let* ((data (langtool-client--make-post-data begin finish lang))
+         (proc (langtool-client--http-post data)))
     (set-process-sentinel proc 'langtool-client--process-sentinel)
     (set-process-filter proc 'langtool-client--process-filter)
     (process-put proc 'langtool-source-buffer (current-buffer))
@@ -1148,7 +1279,7 @@ Ordinary no need to change this."
 ;; HTTP or commandline interface caller
 ;;
 
-(defun langtool--invoke-checker-process (file begin finish &optional lang)
+(defun langtool--invoke-checker-process (&optional begin finish lang)
   (when (listp mode-line-process)
     (add-to-list 'mode-line-process '(t langtool-mode-line-message)))
   ;; clear previous check
@@ -1156,27 +1287,37 @@ Ordinary no need to change this."
   (let (proc)
     (cl-ecase (langtool--checker-mode)
       ('commandline
-       (setq proc (langtool-command--invoke-process file begin finish lang)))
-      ('http
+       ;; Ensure adapter is closed. That has been constructed other checker-mode.
+       (langtool-adapter-ensure-terminate)
+       (let ((file (langtool-command--maybe-create-temp-file begin finish)))
+         (setq proc (langtool-command--invoke-process file begin finish lang))))
+      ('client-server
        (langtool-server--ensure-running)
        (setq langtool-mode-line-server-process
              (propertize ":server" 'face compilation-info-face))
        (add-hook 'langtool-server--process-exit-hook
                  (lambda ()
                    (setq langtool-mode-line-server-process nil)))
-       (setq proc (langtool-client--invoke-process file begin finish lang))))
+       (setq proc (langtool-client--invoke-process begin finish lang)))
+      ('http-client
+       (langtool-adapter-ensure-terminate)
+       ;; Construct new adapter each check.
+       ;; Since maybe change customize variable in a Emacs session.
+       (langtool-adapter-ensure-external)
+       (setq proc (langtool-client--invoke-process begin finish lang))))
     (setq langtool-buffer-process proc)
     (setq langtool-mode-line-process
           (propertize ":run" 'face compilation-info-face))
     (setq langtool-mode-line-message
           (list " "
-                "LT"
+                "LT"                    ; LT <= LanguageTool shorthand
                 'langtool-mode-line-server-process
                 'langtool-mode-line-process))))
 
 (defun langtool--cleanup-process ()
   ;; cleanup mode-line
-  (let ((cell (rassoc '(langtool-mode-line-message) mode-line-process)))
+  (let ((cell (and (listp mode-line-process) ; Check type
+                   (rassoc '(langtool-mode-line-message) mode-line-process))))
     (when cell
       (remq cell mode-line-process)))
   (when (and langtool-buffer-process
@@ -1193,65 +1334,10 @@ Ordinary no need to change this."
   (cl-ecase (langtool--checker-mode)
     ('commandline
      (langtool-command--check-command))
-    ('http
-     (langtool-server--check-command))))
-
-;;FIXME
-;; https://docs.oracle.com/javase/6/docs/technotes/guides/intl/encoding.doc.html
-(defun langtool--java-coding-system (coding-system)
-  (let* ((cs (coding-system-base coding-system))
-         (csname (symbol-name cs))
-         (aliases (langtool--coding-system-aliases cs))
-         (names (mapcar 'symbol-name aliases))
-         (case-fold-search nil)
-         tmp)
-    (cond
-     ((string-match "utf-8" csname)
-      "utf8")
-     ((string-match "utf-16" csname)
-      (cond
-       ((memq cs '(utf-16le utf-16-le))
-        "UnicodeLittleUnmarked")
-       ((memq cs '(utf-16be utf-16-be))
-        "UnicodeBigUnmarked")
-       (t
-        "utf-16")))
-     ((or (string-match "euc.*jp" csname)
-          (string-match "japanese-iso-.*8bit" csname))
-      "euc_jp")
-     ((string-match "shift.jis" csname)
-      "sjis")
-     ((string-match "iso.*2022.*jp" csname)
-      "iso2022jp")
-     ((memq cs '(euc-kr euc-corea korean-iso-8bit))
-      "euc_kr")
-     ((setq tmp
-            (cl-loop for x in names
-                     if (string-match "iso-8859-\\([0-9]+\\)" x)
-                     return x))
-      (concat "ISO8859_" (match-string 1 tmp)))
-     ((memq cs '(binary us-ascii raw-text undecided no-conversion))
-      "ascii")
-     ((memq cs '(cyrillic-koi8))
-      "koi8-r")
-     ((memq cs '(gb2312))
-      "euc_cn")
-     ((string-match "\\`\\(cp\\|ibm\\)[0-9]+" csname)
-      (downcase csname))
-     ((setq tmp
-            (cl-loop for x in names
-                     if (string-match "^windows-[0-9]+$" x)
-                     return x))
-      tmp)
-     (t
-      ;; simply guessed as same name.
-      (downcase csname)))))
-
-(defun langtool--coding-system-aliases (coding-system)
-  (if (fboundp 'coding-system-aliases)
-      ;; deceive elint
-      (funcall 'coding-system-aliases coding-system)
-    (coding-system-get coding-system 'alias-coding-systems)))
+    ('client-server
+     (langtool-server--check-command))
+    ('http-client
+     (langtool-http-client-check-command))))
 
 (defun langtool--brief-execute (langtool-args parser)
   (pcase (langtool--basic-command&args)
@@ -1588,31 +1674,12 @@ Restrict to selection when region is activated.
      (list (langtool-read-lang-name))))
   (langtool--check-command)
   ;; probablly ok...
-  (let* ((file (buffer-file-name))
-         (region-p (langtool-region-active-p))
+  (let* ((region-p (langtool-region-active-p))
          (begin (and region-p (region-beginning)))
          (finish (and region-p (region-end))))
     (when region-p
       (deactivate-mark))
-    (unless langtool-temp-file
-      (setq langtool-temp-file (langtool--make-temp-file)))
-    ;; create temporary file to pass the text contents to LanguageTool
-    (when (or (null file)
-              (buffer-modified-p)
-              region-p
-              ;; 1 is dos EOL style, this must convert to unix
-              (eq (coding-system-eol-type buffer-file-coding-system) 1))
-      (save-restriction
-        (widen)
-        (let ((coding-system-for-write
-               ;; convert EOL style to unix (LF).
-               ;; dos (CR-LF) style EOL may destroy position of marker.
-               (coding-system-change-eol-conversion
-                buffer-file-coding-system 'unix)))
-          ;; BEGIN nil means entire buffer
-          (write-region begin finish langtool-temp-file nil 'no-msg))
-        (setq file langtool-temp-file)))
-    (langtool--invoke-checker-process file begin finish lang)
+    (langtool--invoke-checker-process begin finish lang)
     (force-mode-line-update)))
 
 ;;;###autoload
@@ -1638,7 +1705,7 @@ Restrict to selection when region is activated.
 (defun langtool-server-stop ()
   "Terminate LanguageTool HTTP server."
   (interactive)
-  (langtool-server-ensure-stop)
+  (langtool-adapter-ensure-terminate)
   (message "Server is terminated."))
 
 (defun langtool-toggle-debug ()
