@@ -1,10 +1,12 @@
 ;;; simple-httpd-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "simple-httpd" "simple-httpd.el" (23994 46381
-;;;;;;  779474 32000))
+;;;### (autoloads nil "simple-httpd" "simple-httpd.el" (0 0 0 0))
 ;;; Generated autoloads from simple-httpd.el
 
 (autoload 'httpd-start "simple-httpd" "\
@@ -29,11 +31,14 @@ Start the web server with given `directory' as `httpd-root'.
 
 \(fn DIRECTORY)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "simple-httpd" '("httpd" "defservlet" "with-httpd-buffer")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; simple-httpd-autoloads.el ends here
