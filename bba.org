@@ -566,7 +566,7 @@ search the web on your fingertips. C-c /.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20190416.538")
+        (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20200106.2058")
         (require 'expand-region)
         (define-key global-map (kbd "C-c C-<f12>") 'er/contract-region )
         (define-key global-map (kbd "C-c <f12>") 'er/expand-region )
