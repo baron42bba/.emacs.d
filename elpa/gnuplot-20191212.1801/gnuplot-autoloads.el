@@ -14,7 +14,7 @@ Major mode for editing and executing GNUPLOT scripts.
 This was written with version 4.6 of gnuplot in mind, but should
 work with newer and older versions.
 
-Report bugs in `gnuplot-mode' using \\[gnuplot-bug-report].
+Report bugs at https://github.com/emacsorphanage/gnuplot/issues
 
 			    ------O------
 
@@ -28,7 +28,7 @@ to make a list of keywords.
 
 The info file should be installed by default with the Gnuplot
 distribution, or is available at the `gnuplot-mode' web page:
-http://github.com/bruceravel/gnuplot-mode/
+https://github.com/emacsorphanage/gnuplot/
 
 With the new context-sensitive mode active, gnuplot-mode can also
 provide `eldoc-mode' syntax hints as you type.  This requires a

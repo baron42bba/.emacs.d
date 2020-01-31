@@ -89,7 +89,7 @@ and later.
                         ============
 
 A recent version of this file can be found at
-  http://github.com/bruceravel/gnuplot-mode/
+  https://github.com/emacsorphanage/gnuplot/
 
 To autoload gnuplot-mode on any file with gp extension, put this in
 your .emacs file
