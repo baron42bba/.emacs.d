@@ -10,4 +10,5 @@
 (require 'ob-tangle)
 (require 'ob-sql)
 (require 'ob-async)
+(require 'ob-gnuplot)
 (org-babel-load-file (expand-file-name "~/.emacs.d/bba.org"))

@@ -157,8 +157,9 @@ from bash.
             (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $https_proxy")))
               (setenv "https_proxy" path)
               )
-            )
-      )
+            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $INFOPATH")))
+              (setenv "INFOPATH" path))
+            (push "/opt/local/share/info" Info-directory-list)))
 #+END_SRC
 
 * move files to trash on osx
@@ -300,7 +301,6 @@ Keep track of your important stuff!
         (require 'package)
         (package-initialize)
         (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-        (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
         (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
         )
     (progn
@@ -799,6 +799,7 @@ Adjust indentation at work.
   (add-hook 'yaml-mode-hook
             (lambda()
               (auto-fill-mode -1)
+              (stripes-mode 1)
             (setq bba-keep-whitespaces 1)))
 
 #+END_SRC
@@ -974,6 +975,43 @@ this is how your firefox bookmark must look like:
 
 #+END_SRC
 
+** org-man
+[2018-08-28 Tue 16:57]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (org-add-link-type "man" 'org-man-open)
+  (add-hook 'org-store-link-functions 'org-man-store-link)
+
+  (defcustom org-man-command 'man
+    "The Emacs command to be used to display a man page."
+    :group 'org-link
+    :type '(choice (const man) (const woman)))
+
+  (defun org-man-open (path)
+    "Visit the manpage on PATH.
+  PATH should be a topic that can be thrown at the man command."
+    (funcall org-man-command path))
+
+  (defun org-man-store-link ()
+    "Store a link to a manpage."
+    (when (memq major-mode '(Man-mode woman-mode))
+      ;; This is a man page, we do make this link
+      (let* ((page (org-man-get-page-name))
+             (link (concat "man:" page))
+             (description (format "Manpage for %s" page)))
+        (org-store-link-props
+         :type "man"
+         :link link
+         :description description))))
+
+  (defun org-man-get-page-name ()
+    "Extract the page name from the buffer name."
+    ;; This works for both `Man-mode' and `woman-mode'.
+    (if (string-match " \\(\\S-+\\)\\*" (buffer-name))
+        (match-string 1 (buffer-name))
+      (error "Cannot create link to this man page")))
+
+#+END_SRC
 ** [[https://github.com/stig/ob-applescript.el][ob-applescript]]
 [2016-09-27 Tue 09:34]
 
@@ -1163,6 +1201,9 @@ Get reveal.js as well:
            :html-link-home        "http://www.bundesbrandschatzamt.de/~baron/"
            :html-link-use-abs-url t
            :with-toc              nil
+           :with-author           nil
+           :with-email            nil
+           :with-creator          nil
            :exclude               ".*"
            :include               ("index.org"))))
 
@@ -1208,7 +1249,38 @@ Get reveal.js as well:
 
   (define-key org-mode-map "\M-\S-w" 'bba-ox-clip-formatted-copy)
 #+END_SRC
+** comint-write-buffer
+[2018-01-09 Tue 14:10]
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun comint-write-output-buffer (buffername &optional append)
+    "Write output from interpreter since last input to BUFFER.
+  Any prompt at the end of the output is not written.
 
+  If the optional argument APPEND (the prefix argument when interactive)
+  is non-nil, the output is appended to the buffer instead.
+  If it is nil existing buffer gets killed upon request."
+    (interactive
+     (list (read-buffer
+            (if current-prefix-arg
+                "Append output to buffer: "
+              "Write output to buffer: "))
+           current-prefix-arg
+           ))
+    (if append
+        (get-buffer-create buffername)
+      (progn
+        (if (get-buffer buffername)
+            (kill-buffer-ask (get-buffer buffername)))
+        (get-buffer-create buffername)
+        )
+        )
+    (save-excursion
+      (goto-char (process-mark (get-buffer-process (current-buffer))))
+      (forward-line 0)
+      (append-to-buffer buffername comint-last-input-end (point))))
+      (define-key comint-mode-map (kbd "C-c s-s") 'comint-write-output-buffer)
+
+#+END_SRC
 ** bba-create-ticket-tmp-dir
 [2017-07-28 Fri 13:07]
 
@@ -1236,6 +1308,19 @@ Get reveal.js as well:
     (widen)
     (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-cd-to-clipboard\"'")
     )
+#+END_SRC
+** bba-remove-comments-and-empty-lines
+[2018-03-06 Tue 13:58]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-remove-comments-and-empty-lines()
+    "Remove all lines containing comments or nothing at all."
+    (interactive)
+    (goto-char (point-min))
+    (let (kill-ring)
+      (comment-kill (count-lines (point-min)(point-max))))
+    (goto-char (point-min))
+    (flush-lines "^$"))
 #+END_SRC
 ** search notes
 [2018-02-09 Fri 10:57]
@@ -1382,8 +1467,10 @@ This is helpful in training sessions.
             (setq -p1 (region-beginning) -p2 (region-end))
             (setq mark-active nil)
             (re-search-backward "\#\\+BEGIN_SRC")
-        (forward-line -1)
-        (if  (not (looking-at "\#"))(forward-line))
+            (forward-line -1)
+            (if (looking-at "\#\\+RESULTS:")(re-search-backward "\#\\+BEGIN_SRC"))
+            (forward-line -1)
+            (if  (not (looking-at "\#"))(forward-line))
             (set-mark-command nil)
             (forward-line)
             (beginning-of-line)
@@ -1406,8 +1493,10 @@ This is helpful in training sessions.
       (progn
         (push-mark)
         (re-search-backward "\#\\+BEGIN_SRC")
-    (forward-line -1)
-    (if  (not (looking-at "\#"))(forward-line))
+        (forward-line -1)
+        (if (looking-at "\#\\+RESULTS:")(re-search-backward "\#\\+BEGIN_SRC"))
+        (forward-line -1)
+        (if  (not (looking-at "\#"))(forward-line))
         (set-mark-command nil)
         (re-search-forward "\#\\+END_SRC")
         (forward-line)
@@ -1421,28 +1510,246 @@ This is helpful in training sessions.
         ))
     )
 
-  (defun bba-copy-org-src-block()
-    "copy last org src block. Can be around point, too."
-    (interactive)
+  (defun bba-copy-org-src-block(arg)
+    "copy org src block. Can be around point, too. If POSITION is negative look backwards for x occurance, if positive search forwards."
+    (interactive "p")
     (push-mark)
     (goto-char (point-at-bol))
-    (if  (not (looking-at "\#\\+BEGIN_SRC"))(re-search-backward "\#\\+BEGIN_SRC"))
-    (forward-line -1)
-    (if  (not (looking-at "\#"))(forward-line))
-    (set-mark-command nil)
-    (re-search-forward "\#\\+END_SRC")
-    (forward-line)
-    (goto-char (point-at-bol))
-    (kill-ring-save 1 1 1)
-    (set-mark-command '1)
-    (set-mark-command '1)
+    (if (not current-prefix-arg)
+      (progn
+        (message "foo %s" arg)
+        (if  (not (looking-at "\#\\+BEGIN_SRC"))(re-search-backward "\#\\+BEGIN_SRC"))
+        (forward-line -1)
+        (if (looking-at "\#\\+RESULTS:")(re-search-backward "\#\\+BEGIN_SRC"))
+        (forward-line -1)
+        (if  (not (looking-at "\#"))(forward-line))
+        (set-mark-command nil)
+        (re-search-forward "\#\\+END_SRC")
+        (forward-line)
+        (goto-char (point-at-bol))
+        (kill-ring-save 1 1 1)
+        (set-mark-command '1)
+        (set-mark-command '1))
+      (progn
+        (re-search-forward "\#\\+BEGIN_SRC" nil nil arg)
+        (forward-line -1)
+        (if  (not (looking-at "\#"))(forward-line))
+        (set-mark-command nil)
+        (re-search-forward "\#\\+END_SRC")
+        (forward-line)
+        (goto-char (point-at-bol))
+        (kill-ring-save 1 1 1)
+        (set-mark-command '1)
+        (set-mark-command '1)
+        (insert (pop kill-ring))
+        (re-search-backward "\#\\+BEGIN_SRC")
+        (forward-line)))
     )
+
+
+  ;; (defun bba-copy-org-src-block()
+  ;;   "copy last org src block. Can be around point, too."
+  ;;   (interactive)
+  ;;   (push-mark)
+  ;;   (goto-char (point-at-bol))
+  ;;   (if  (not (looking-at "\#\\+BEGIN_SRC"))(re-search-backward "\#\\+BEGIN_SRC"))
+  ;;   (forward-line -1)
+  ;;   (if  (not (looking-at "\#"))(forward-line))
+  ;;   (set-mark-command nil)
+  ;;   (re-search-forward "\#\\+END_SRC")
+  ;;   (forward-line)
+  ;;   (goto-char (point-at-bol))
+  ;;   (kill-ring-save 1 1 1)
+  ;;   (set-mark-command '1)
+  ;;   (set-mark-command '1)
+  ;;   )
 
   (define-key org-mode-map "\C-c\S-w" 'bba-copy-and-yank-org-src-block)
   (define-key org-mode-map (kbd "C-c s-w") 'bba-copy-org-src-block)
 
 #+END_SRC
 
+** org-babel-async
+[2016-12-27 Tue 15:45]
+
+Thanks to [[http://kitchingroup.cheme.cmu.edu/blog/2015/11/20/Asynchronously-running-python-blocks-in-org-mode/#disqus_thread][Asynchronously running pyton bocks in org-mode]]
+
+Still some work to do on the shell counterpart.
+=:dir= is not recongnised.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun org-babel-async-execute:shell ()
+    "Execute the sh src-block at point asynchronously.
+  :var headers are supported.
+  :results output is all that is supported for output.
+
+  A new window will pop up showing you the output as it appears,
+    and the output in that window will be put in the RESULTS section
+    of the code block."
+    (interactive)
+    (require 'org-id)
+    (require 'ob-core)
+    (let* ((current-file (buffer-file-name))
+	   (uuid (org-id-uuid))
+	   (code (org-element-property :value (org-element-context)))
+	   (temporary-file-directory "/tmp/")
+	   (tempfile (make-temp-file "sh-"))
+	   (pbuffer (format "*%s*" uuid))
+	   (varcmds (org-babel-variable-assignments:shell
+		     (nth 2 (org-babel-get-src-block-info))))
+	   process)
+
+      ;; get rid of old results, and put a place-holder for the new results to
+      ;; come.
+      (org-babel-remove-result)
+
+      (save-excursion
+	(re-search-forward "#\\+END_SRC")
+	(insert (format
+		 "\n\n#+RESULTS: %s\n: %s"
+		 (or (org-element-property :name (org-element-context))
+		     "")
+		 uuid)))
+
+      ;; open the results buffer to see the results in.
+      ;; (switch-to-buffer-other-window pbuffer)
+
+      ;; Create temp file containing the code.
+      (with-temp-file tempfile
+	;; if there are :var headers insert them.
+	(dolist (cmd varcmds)
+	  (insert cmd)
+	  (insert "\n"))
+	(insert code))
+
+	;; run the code
+      (setq process (start-process
+		     uuid
+		     pbuffer
+		     "bash"
+		     tempfile))
+
+      ;; when the process is done, run this code to put the results in the
+      ;; org-mode buffer.
+      (set-process-sentinel
+       process
+       `(lambda (process event)
+	  (save-window-excursion
+	    (save-excursion
+	      (save-restriction
+		(with-current-buffer (find-file-noselect ,current-file)
+		  (goto-char (point-min))
+		  (re-search-forward ,uuid)
+		  (beginning-of-line)
+		  (kill-line)
+		  (insert "#+begin_example")
+		  (newline)
+		  (insert
+		   (mapconcat
+		    (lambda (x)
+		      (format "%s" x))
+		    (butlast (split-string
+			      (with-current-buffer
+				  ,pbuffer
+				(buffer-string))
+			      "\n"))
+		    "\n"))
+		  (newline)
+		  (insert "#+end_example")
+
+		  ))))
+
+	  ;; delete the results buffer then delete the tempfile.
+	  ;; finally, delete the process.
+	   (when (get-buffer ,pbuffer)
+	     (kill-buffer ,pbuffer)
+	    (delete-window))
+	  (delete-file ,tempfile)
+	  (delete-process process))))
+  )
+  (define-key org-mode-map (kbd "C-c C-S-c") 'org-babel-async-execute:shell)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun org-babel-async-execute:python ()
+    "Execute the python src-block at point asynchronously.
+  :var headers are supported.
+  :results output is all that is supported for output.
+
+  A new window will pop up showing you the output as it appears,
+  and the output in that window will be put in the RESULTS section
+  of the code block."
+    (interactive)
+    (let* ((current-file (buffer-file-name))
+           (uuid (org-id-uuid))
+           (code (org-element-property :value (org-element-context)))
+           (temporary-file-directory ".")
+           (tempfile (make-temp-file "py-"))
+           (pbuffer (format "*%s*" uuid))
+           (varcmds (org-babel-variable-assignments:python
+                     (nth 2 (org-babel-get-src-block-info))))
+           process)
+
+      ;; get rid of old results, and put a place-holder for the new results to
+      ;; come.
+      (org-babel-remove-result)
+
+      (save-excursion
+	(re-search-forward "#\\+END_SRC")
+	(insert (format
+		 "\n\n#+RESULTS: %s\n: %s"
+		 (or (org-element-property :name (org-element-context))
+                     "")
+		 uuid)))
+
+      ;; open the results buffer to see the results in.
+      (switch-to-buffer-other-window pbuffer)
+
+      ;; Create temp file containing the code.
+      (with-temp-file tempfile
+	;; if there are :var headers insert them.
+	(dolist (cmd varcmds)
+          (insert cmd)
+          (insert "\n"))
+	(insert code))
+
+      ;; run the code
+      (setq process (start-process
+                     uuid
+                     pbuffer
+                     "python"
+                     tempfile))
+
+      ;; when the process is done, run this code to put the results in the
+      ;; org-mode buffer.
+      (set-process-sentinel
+       process
+       `(lambda (process event)
+          (save-window-excursion
+            (save-excursion
+              (save-restriction
+		(with-current-buffer (find-file-noselect ,current-file)
+                  (goto-char (point-min))
+                  (re-search-forward ,uuid)
+                  (beginning-of-line)
+                  (kill-line)
+                  (insert
+                   (mapconcat
+                    (lambda (x)
+                      (format ": %s" x))
+                    (butlast (split-string
+                              (with-current-buffer
+                                  ,pbuffer
+				(buffer-string))
+                              "\n"))
+                    "\n"))))))
+          ;; delete the results buffer then delete the tempfile.
+          ;; finally, delete the process.
+          (when (get-buffer ,pbuffer)
+            (kill-buffer ,pbuffer)
+            (delete-window))
+          (delete-file ,tempfile)
+          (delete-process process)))))
 #+END_SRC
 
 ** tmux capture-pane
@@ -1921,6 +2228,39 @@ taken from http://doc.norang.ca/org-mode.org
 
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-duration-format '((special . h:mm)))
+#+END_SRC
+
+** clocktable
+[2016-04-15 Fri 17:05]
+
+Assuming that I understood your problem correctly, I hacked together a
+quick solution. First, you should ensure that you create only one
+outline entry per day, if you are checking in and out multiple
+times. Define the following function that'll compute the overtime for
+a given day.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun compute-overtime (duration-string)
+    "Computes overtime duration string for the given time DURATION-STRING."
+    (let (minutes-in-a-workday
+          work-minutes
+          overtime-minutes)
+      (defconst minutes-in-a-workday 480)
+      (setq work-minutes (org-duration-to-minutes duration-string)
+            overtime-minutes (- work-minutes minutes-in-a-workday))
+      (if (< overtime-minutes 0) (setq overtime-minutes 0))
+      (org-minutes-to-hh:mm-string overtime-minutes)))
+#+END_SRC
+
+Then, use this in a clock table formula in the file whatnot.
+
+#+BEGIN_SRC org
+  ,#+BEGIN: clocktable :maxlevel 1 :emphasize nil :scope file :formula "$3='(compute-overtime $2)::@2$3=string(\"Overtime\")"
+  ,#+END: clocktable
+#+END_SRC
+
 ** youtube links
 
 Thanks to [[http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html][endlessparentheses]]: Youtube makes it pretty simple
@@ -1960,6 +2300,39 @@ that Youtube specifies. The advantage (over simply writing out the
 iframe) is that this link can be clicked in org-mode, and can be
 exported to other formats as well.
 
+** [[http://kitchingroup.cheme.cmu.edu/blog/2016/03/21/Displaying-image-overlays-on-image-filenames-in-Emacs/][Displaying image overlays on image filenames in Emacs]]
+[2016-11-09 Wed 12:57]
+
+Thanks to John Kitchin we can display images in Emacs.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defvar image-tooltip-re (concat  "\\(?3:'\\|\"\\)\\(?1:.*\\."
+                                    (regexp-opt '("png" "PNG" "JPG" "jpeg"
+                                                  "jpg" "JPEG" "eps" "EPS"))
+                                    "\\)\\(?:\\3\\)")
+    "Regexp to match image filenames in quotes")
+
+  (defun image-tooltip (window object position)
+    (save-excursion
+      (goto-char position)
+      (let (beg end imgfile img s)
+        (while (not (looking-at image-tooltip-re))
+          (forward-char -1))
+        (setq imgfile (match-string-no-properties 1))
+        (when (file-exists-p imgfile)
+          (setq img (create-image (expand-file-name imgfile)
+                                  'imagemagick nil :width 200))
+          (propertize "Look in the minibuffer"
+                      'display img)))))
+
+  (font-lock-add-keywords
+   nil
+   `((,image-tooltip-re
+      0 '(face font-lock-keyword-face
+               help-echo image-tooltip))))
+
+  (font-lock-ensure)
+#+END_SRC
 
 ** org-mime-org-buffer-htmlize
 
@@ -2071,6 +2444,13 @@ file.
 	    )
 #+END_SRC
 
+** [[https://github.com/dfeich/org-listcruncher][org-listcruncher]]
+[2018-05-24 Thu 09:08]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (load-file (expand-file-name "~/.emacs.d/lisp/org-listcruncher.el"))
+
+#+END_SRC
 ** additional org settings
 [2016-11-03 Thu 09:36]
 Thanks to [[https://github.com/dakrone/eos/blob/master/eos-org.org][eos-org]].
@@ -2554,6 +2934,19 @@ list who can decrypt a file:
 
 #+END_SRC
 
+* Go
+[2019-09-12 Thu 16:00]
+
+#+begin_src emacs-lisp :tangle yes
+  (add-hook 'go-mode-hook
+    (lambda ()
+      (add-hook 'before-save-hook 'gofmt-before-save)
+      (setq-default)
+      (setq tab-width 4)
+      (setq standard-indent 4)
+      (setq indent-tabs-mode nil)))
+#+end_src
+
 * auto-completion
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2565,6 +2958,9 @@ list who can decrypt a file:
   (add-to-list 'ac-modes 'cfengine3-mode)
   (add-to-list 'ac-modes 'dns-mode)
   (add-to-list 'ac-sources 'ac-source-yasnippet)
+  (add-to-list 'ac-sources 'org-mode)
+
+  (setq ac-trigger-key "S-SPC")
 
 #+END_SRC
 
@@ -2642,7 +3038,13 @@ Combine abbrev with Ispell:
   (global-font-lock-mode 1)
 
 #+END_SRC
+* lsp
+[2020-01-16 Thu 11:26]
 
+#+begin_src emacs-lisp :tangle no
+  (lsp-define-stdio-client lsp-sql "sql"
+                           (lsp-make-traverser #'(lambda (dir) (directory-files dir nil "sss.sql"))) '("~/.vscode/extensions/ms-mssql.mssql-1.4.0/sqltoolsservice/1.4.0/Ubuntu16/MicrosoftSqlToolsServiceLayer"))
+#+end_src
 * sql
 [2016-11-27 Sun 17:56]
 
@@ -2677,7 +3079,7 @@ your =~/.emacs_secrets.el.gpg= might look like:
                   (sql-server "host42.foo.com")
                   (sql-user "dbadmin")
                   (sql-password "foo")
-                  (sql-database "smaatoprd"))
+                  (sql-database "bbaprd"))
           (bbatst (sql-product 'vertica)
                   (sql-server "host42.foo.com")
                   (sql-user "dbadmin")
@@ -2688,6 +3090,44 @@ your =~/.emacs_secrets.el.gpg= might look like:
   (provide 'my-password)
 #+END_SRC
 
+
+#+begin_src emacs-lisp :tangle yes
+  (defun my-sql-save-history-hook ()
+    (let ((lval 'sql-input-ring-file-name)
+          (rval 'sql-product))
+      (if (symbol-value rval)
+          (let ((filename
+                   (concat (if (equal "work" (getenv "SYSENV"))
+                               "~/workorg/sql/"
+                             "~/org/sql/")
+                           (symbol-name (symbol-value rval))
+                           "-history.sql")))
+              (set (make-local-variable lval) filename))
+          (error
+           (format "SQL history will not be saved because %s is nil"
+                   (symbol-name rval))))))
+
+    (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook)
+#+end_src
+
+incorporate helm-comint-mode-list
+
+#+begin_src emacs-lisp :tangle yes
+  (require 'sql)
+  (require 'helm-comint)
+  (defun helm-comint-sqli-input-ring ()
+    "Preconfigured `helm' that provide completion of `comint' history."
+    (interactive) ;; seq-contains helm-comint-mode-list major-mode
+    (when (or (member major-mode helm-comint-mode-list)
+              (derived-mode-p 'comint-mode))
+      (helm :sources 'helm-source-comint-input-ring
+            :input (buffer-substring-no-properties (comint-line-beginning-position)
+                                                   (point-at-eol))
+            :buffer "*helm comint history*")))
+
+  (define-key sql-interactive-mode-map (kbd "M-p") 'helm-comint-sqli-input-ring)
+
+#+end_src
 * [[https://github.com/steckerhalter/sqlformat.el][sqlformat]]
 [2016-08-19 Fri 16:20]
 
@@ -2751,11 +3191,7 @@ like these:
                                                    (lambda()
                                                       (unless (boundp 'bba-keep-whitespaces)
                                                         (save-excursion
-                                                          (delete-trailing-whitespace)))
-                                                      )
-                                                   )
-                                 )
-               ))
+                                                          (delete-trailing-whitespace))))))))
 
 
   (eval-after-load "cperl-mode"
@@ -3318,6 +3754,58 @@ Thanks to [[http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line
   (define-key global-map (kbd "M-w") 'xah-copy-line-or-region)
 #+END_SRC
 
+* bba copy line or region to iterm
+[2018-10-10 Wed 12:11]
+
+Based on xah-copy-line-or-region I wrote a version which copies just
+the current line or region ( no append) and insert it via Keyboard
+Maestro in my iterm. Quite useful to execute SQL commands in a remote
+gnu screen session. I don't append a newline thus I can still verify
+the clipboard content before executing it.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-copy-line-or-region-to-iterm ()
+    "Copy current line, or text selection and insert it in iterm via Keyboard Maestro.
+  When `universal-argument' is called first, copy whole buffer (respects `narrow-to-region')."
+
+    (interactive)
+    (let (-p1 -p2)
+      (if current-prefix-arg
+          (setq -p1 (point-min) -p2 (point-max))
+        (if (use-region-p)
+            (setq -p1 (region-beginning) -p2 (region-end))
+          (setq -p1 (line-beginning-position) -p2 (line-end-position))))
+      (progn
+        (kill-ring-save -p1 -p2)
+        (if current-prefix-arg
+            (message "Buffer text copied")
+          (message "Text copied")))
+      (if (not (use-region-p))
+          (progn
+            (end-of-line)
+            (forward-char))
+        ))
+    (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"iterm-insert-clipboard\"'" )
+    )
+
+  (define-key global-map (kbd "s-w") 'bba-copy-line-or-region-to-iterm)
+#+END_SRC
+
+* bba lookup dictionary
+[2019-05-27 Mon 15:15]
+coffee mug
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-dict ()
+  "Lookup thing at point in OS X Dictionary."
+  (interactive)
+  (if (use-region-p)
+      (shell-command (concat "open dict://\"" (buffer-substring (region-beginning)(region-end)) "\""))
+    (shell-command (concat "open dict://" (thing-at-point 'symbol)))
+    )
+  )
+  (define-key global-map (kbd "s-l") 'bba-dict)
+
+#+END_SRC
 * [[http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html][Xah Lee Move cursor to Bracket]]
 [2017-03-27 Mon 22:41]
 
@@ -3462,7 +3950,7 @@ Some links you might check out:
 	(define-key global-map "\C-x\C-b" 'helm-buffers-list)
 	(define-key global-map "\C-x\C-k\C-h" 'helm-execute-kmacro)
 	(define-key global-map (kbd "C-x r b") 'helm-bookmarks)
-	(define-key global-map (kbd "C-x C-S-f") 'helm-find-files)
+	(define-key global-map (kbd "C-x C-f") 'helm-find-files)
 	(define-key global-map "\C-cy" 'helm-yas-complete)
       (define-key org-mode-map "\C-ci" 'helm-org-in-buffer-headings)
 	(setq helm-yas-display-key-on-candidate t)
@@ -3540,7 +4028,7 @@ combine key strokes to access commands even faster.
   (key-chord-define-global "xb" 'helm-mini)
   (key-chord-define-global "xf" 'ido-find-file)
   (key-chord-define-global "xx" 'helm-M-x)
-  (key-chord-define org-mode-map "TT" 'org-set-tags)
+  (key-chord-define org-mode-map "TT" 'org-set-tags-command)
 
 
 
@@ -3601,6 +4089,7 @@ character before any spaces."
 #+BEGIN_SRC emacs-lisp :tangle yes
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
+  (define-key global-map (kbd "S-SPC") 'dabbrev-expand)
   (define-key global-map (kbd "s-r") 'repeat)
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
 
@@ -3610,6 +4099,8 @@ character before any spaces."
   (define-key global-map (kbd "s-b") 'clone-indirect-buffer)
 
   (define-key global-map (kbd "C-c M-s") 'string-edit-at-point)
+
+  (define-key global-map (kbd "s-i") 'indent-region)
 
   (define-key global-map "\C-cp" 'org-mark-ring-push)
   (define-key global-map "\C-cn" 'org-mark-ring-goto)
@@ -3815,6 +4306,31 @@ Adjust mouse speed:
   (setq mouse-wheel-progressive-speed nil)
 #+END_SRC
 
+* string-inflection
+[2019-02-08 Fri 12:14]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'string-inflection)
+  (global-set-key (kbd "M-S-TAB") 'bba-string-inflection-cycle)
+
+  (defun bba-string-inflection-cycle-auto ()
+      "switching by major-mode"
+      (interactive)
+      (cond
+       ;; for emacs-lisp-mode
+       ((eq major-mode 'emacs-lisp-mode)
+        (string-inflection-all-cycle))
+       ;; for java
+       ((eq major-mode 'java-mode)
+        (string-inflection-java-style-cycle))
+       ;; for python
+       ((eq major-mode 'python-mode)
+        (string-inflection-python-style-cycle))
+       (t
+        ;; default
+        (string-inflection-ruby-style-cycle))))
+
+#+END_SRC
 * By indentation
 
 Borrowed from [[https://github.com/Wilfred/.emacs.d][github]]:
@@ -4165,7 +4681,24 @@ update copyrights
                                          (copyright-update))))
 #+END_SRC
 
-* other stuff
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-to-list 'Info-additional-directory-list "~/.emacs.d/info")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (require 'info-look)
+  (info-lookup-add-help
+   :mode 'python-mode
+   :regexp "[[:alnum:]_]+"
+   :doc-spec
+   '(("(python)Index" nil "")))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq mouse-yank-at-point t)
+#+END_SRC
+
+* TODO other stuff
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 
@@ -4292,17 +4825,17 @@ whole team. No matter what editor gets used.
 
   (if (display-graphic-p)
       (progn
-	(custom-set-faces
-	 '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef"))) t)
-	 '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
-	 '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313"))))
-	 ;; '(show-paren-match ((t (:distant-foreground "#29759c":background "#84cbef" ))))
-	 ;;'(show-paren-match ((t (:inverse-video t))))
+        (custom-set-faces
+         '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef"))) t)
+         '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
+         '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313"))))
+         ;; '(show-paren-match ((t (:distant-foreground "#29759c":background "#84cbef" ))))
+         ;;'(show-paren-match ((t (:inverse-video t))))
        '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
        '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
-	 ;; '(show-paren-match ((t (:unterline (:color "#b8bb26" :style wave)))))
-	 )
-	(let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
+         ;; '(show-paren-match ((t (:unterline (:color "#b8bb26" :style wave)))))
+         )
+        (let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
                                      ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
                                      ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
                                      ((x-list-fonts "Verdana")         '(:font "Verdana"))
@@ -4321,11 +4854,18 @@ whole team. No matter what editor gets used.
                                   `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.4))))
                                   `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.6))))
                                   `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil)))))
-	  (custom-set-variables
-	    '(ansi-color-names-vector
-	      ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"]))
-	  )))
+          (custom-set-variables
+            '(ansi-color-names-vector
+              ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"]))
+          )))
 
+#+END_SRC
+* transparent window
+[2018-03-07 Wed 10:42]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (set-frame-parameter (selected-frame) 'alpha '(100 . 96 ))
+  (add-to-list 'default-frame-alist '(alpha . (100 . 96)))
 #+END_SRC
 
 * load custom file
@@ -4396,17 +4936,26 @@ all in your history.
   (if (equal "work" (getenv "SYSENV"))
       (if (file-exists-p "~/workorg")
           (setq savehist-file "~/workorg/emacshistory")
-	)
+        )
     (if (file-exists-p "~/org")
-	(setq savehist-file "~/org/emacshistory")
+        (setq savehist-file "~/org/emacshistory")
       )
     (if (file-exists-p savehist-file)
-	(load-file savehist-file)
-	)
+        (load-file savehist-file)
+        )
 
   )
   (savehist-mode 1)
 #+END_SRC
+
+* save place
+[2019-11-06 Wed 15:53]
+
+#+begin_src emacs-lisp :tangle yes
+  (setq save-place-file "~/.emacs-places")
+  (save-place-mode 1)
+  ;; (setq save-place-forget-unreadable-files nil)
+#+end_src
 
 * start ssh in screen session
 [2016-02-11 Thu 12:42]
@@ -4459,6 +5008,8 @@ Check a AWS Cloudformation template with [[https://github.com/stelligent/cfn_nag
     (shell-command (concat "cfn_nag_scan --input-path " buffer-file-name)))
   (require 'json-mode)
   (define-key json-mode-map (kbd "C-c C-n") 'bba-aws-cfn-nag-scan)
+  (require 'yaml-mode)
+  (define-key yaml-mode-map (kbd "C-c C-n") 'bba-aws-cfn-nag-scan)
 #+END_SRC
 
 Check a AWS Cloudformation template with [[https://github.com/awslabs/cfn-python-lint][cfn-lint]]:
@@ -4467,8 +5018,11 @@ Check a AWS Cloudformation template with [[https://github.com/awslabs/cfn-python
   (defun bba-aws-cfn-lint()
     "Check buffer with cfn_lint."
     (interactive)
-    (shell-command (concat "cfn-lint " buffer-file-name)))
+    (if (file-exists-p "~/.cfn-lint-override.json")
+        (shell-command (concat "cfn-lint --override-spec ~/.cfn-lint-override.json " buffer-file-name))
+    (shell-command (concat "cfn-lint " buffer-file-name))))
   (define-key json-mode-map (kbd "C-c C-l") 'bba-aws-cfn-lint)
+  (define-key yaml-mode-map (kbd "C-c C-l") 'bba-aws-cfn-lint)
 #+END_SRC
 
 
@@ -4514,6 +5068,69 @@ Amazon instance ID at point.
 
   (put 'instanceid 'bounds-of-thing-at-point
          'instanceid-bounds-of-instanceid-at-point)
+#+END_SRC
+
+* bba-emacs-keyboard-map
+[2016-03-15 Tue 09:49]
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun bba-emacs-keyboard-map ()
+    "create a keyboard map in a buffer."
+    (interactive)
+    (switch-to-buffer "*keyboard-map*")
+    (erase-buffer)
+    (org-mode)
+    (insert "|1|2|3|4|5|6|7|8|9|0|-|=|back|")
+    (newline)
+    (insert "|q|w|e|r|t|y|u|i|o|p|[|]|")
+    ;; (org-table-align)
+    (newline)
+    (insert "|")
+    (insert "M-q " )(insert (format "%s" (lookup-key global-map (kbd "M-q"))) "|")
+    (insert "M-w " )(insert (format "%s" (lookup-key global-map (kbd "M-w"))) "|")
+    (insert "M-e " )(insert (format "%s" (lookup-key global-map (kbd "M-e"))) "|")
+    (insert "M-r " )(insert (format "%s" (lookup-key global-map (kbd "M-r"))) "|")
+    (insert "M-t " )(insert (format "%s" (lookup-key global-map (kbd "M-t"))) "|")
+    (insert "M-y " )(insert (format "%s" (lookup-key global-map (kbd "M-y"))) "|")
+    (insert "M-u " )(insert (format "%s" (lookup-key global-map (kbd "M-u"))) "|")
+    (insert "M-i " )(insert (format "%s" (lookup-key global-map (kbd "M-i"))) "|")
+    (insert "M-o " )(insert (format "%s" (lookup-key global-map (kbd "M-o"))) "|")
+    (insert "M-p " )(insert (format "%s" (lookup-key global-map (kbd "M-p"))) "|")
+    (insert "M-[ " )(insert (format "%s" (lookup-key global-map (kbd "M-["))) "|")
+    (insert "M-] " )(insert (format "%s" (lookup-key global-map (kbd "M-]"))) "|")
+    (newline)
+    (insert "|a|s|d|f|g|h|j|k|l|;|'|")
+    (newline)
+    (insert "|")
+    (insert "M-a " )(insert (format "%s" (lookup-key global-map (kbd "M-a"))) "|")
+    (insert "M-s " )(insert "key-chord key" "|")
+    (insert "M-d " )(insert (format "%s" (lookup-key global-map (kbd "M-d"))) "|")
+    (insert "M-f " )(insert (format "%s" (lookup-key global-map (kbd "M-f"))) "|")
+    (insert "M-g " )(insert "key-chord key" "|")
+    (insert "M-h " )(insert (format "%s" (lookup-key global-map (kbd "M-h"))) "|")
+    (insert "M-j " )(insert (format "%s" (lookup-key global-map (kbd "M-j"))) "|")
+    (insert "M-k " )(insert (format "%s" (lookup-key global-map (kbd "M-k"))) "|")
+    (insert "M-l " )(insert (format "%s" (lookup-key global-map (kbd "M-l"))) "|")
+    (insert "M-; " )(insert (format "%s" (lookup-key global-map (kbd "M-;"))) "|")
+    (insert "M-\' " )(insert (format "%s" (lookup-key global-map (kbd "M-'"))) "|")
+    (newline)
+    (insert "|z|x|c|v|b|n|m|,|.|/|")
+    (newline)
+    (insert "|")
+    (insert "M-z " )(insert (format "%s" (lookup-key global-map (kbd "M-z"))) "|")
+    (insert "M-x " )(insert (format "%s" (lookup-key global-map (kbd "M-x"))) "|")
+    (insert "M-c " )(insert (format "%s" (lookup-key global-map (kbd "M-c"))) "|")
+    (insert "M-v " )(insert (format "%s" (lookup-key global-map (kbd "M-v"))) "|")
+    (insert "M-b " )(insert (format "%s" (lookup-key global-map (kbd "M-b"))) "|")
+    (insert "M-n " )(insert (format "%s" (lookup-key global-map (kbd "M-n"))) "|")
+    (insert "M-m " )(insert (format "%s" (lookup-key global-map (kbd "M-m"))) "|")
+    (insert "M-, " )(insert (format "%s" (lookup-key global-map (kbd "M-,"))) "|")
+    (insert "M-. " )(insert (format "%s" (lookup-key global-map (kbd "M-."))) "|")
+    (insert "M-/ " )(insert (format "%s" (lookup-key global-map (kbd "M-/"))) "|")
+
+    (newline)
+    )
+
 #+END_SRC
 
 * post
