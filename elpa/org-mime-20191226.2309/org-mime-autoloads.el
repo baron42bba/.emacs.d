@@ -1,10 +1,12 @@
 ;;; org-mime-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "org-mime" "org-mime.el" (23994 46438 579200
-;;;;;;  771000))
+;;;### (autoloads nil "org-mime" "org-mime.el" (0 0 0 0))
 ;;; Generated autoloads from org-mime.el
 
 (autoload 'org-mime-htmlize "org-mime" "\
@@ -45,11 +47,14 @@ Following headline properties can determine the mail headers,
 
 \(fn &optional HTMLIZE-FIRST-LEVEL)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-mime" '("org-mime-")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; org-mime-autoloads.el ends here

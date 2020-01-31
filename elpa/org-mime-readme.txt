@@ -1,4 +1,4 @@
-WYSWYG, html mime composition using org-mode
+WYSIWYG, html mime composition using org-mode
 
 For mail composed using the orgstruct-mode minor mode, this
 provides a function for converting all or part of your mail buffer
@@ -12,33 +12,36 @@ package the results into an email handling with appropriate MIME
 encoding.
 
 `org-mime-org-subtree-htmlize' is similar to `org-mime-org-buffer-htmlize'
-but works on subtree. It can also read subtree properties MAIL_SUBJECT,
-MAIL_TO, MAIL_CC, and MAIL_BCC. Here is the sample of subtree:
+but works on current subtree. It can read following subtree properties:
+MAIL_SUBJECT, MAIL_TO, MAIL_FROM, MAIL_CC, and MAIL_BCC.
 
+Here is the sample of a subtree:
 * mail one
   :PROPERTIES:
   :MAIL_SUBJECT: mail title
   :MAIL_TO: person1@gmail.com
+  :MAIL_FROM: sender@gmail.com
   :MAIL_CC: person2@gmail.com
   :MAIL_BCC: person3@gmail.com
   :END:
 
-To avoid exporting TOC, you can setup `org-mime-export-options',
+To avoid exporting the table of contents, you can setup
+`org-mime-export-options':
   (setq org-mime-export-options '(:section-numbers nil
                                   :with-author nil
                                   :with-toc nil))
-Or just setup your export options in org buffer/subtree which is overrided
-by `org-mime-export-options' when it's NOT nil.
 
-You can change `org-mime-up-subtree-heading' before exporting subtree.
-heck its documentation.
+Or just setup your export options in the org buffer/subtree. These are
+overridden by `org-mime-export-options' when it is non-nil.
+
 
 Quick start:
-Write mail in message-mode, make sure the mail body follows org format.
-Before sending mail, `M-x org-mime-htmlize'
+Write a message in message-mode, make sure the mail body follows
+org format. Before sending mail, run `M-x org-mime-htmlize' to convert the
+body to html, then send the mail as usual.
 
 Setup (OPTIONAL):
-you might want to bind this to a key with something like the
+You might want to bind this to a key with something like the
 following message-mode binding
 
   (add-hook 'message-mode-hook
@@ -50,3 +53,26 @@ and the following org-mode binding
   (add-hook 'org-mode-hook
             (lambda ()
               (local-set-key (kbd "C-c M-o") 'org-mime-org-buffer-htmlize)))
+
+Extra Tips:
+1. In order to embed images into your mail, use the syntax below,
+[[/full/path/to/your.jpg]]
+
+2. It's easy to add your own emphasis markup. For example, to render text
+between "@" in a red color, you can add a function to `org-mime-html-hook':
+
+  (add-hook 'org-mime-html-hook
+            (lambda ()
+              (while (re-search-forward "@\\([^@]*\\)@" nil t)
+                (replace-match "<span style=\"color:red\">\\1</span>"))))
+
+3. Now the quoted mail uses a modern style (like Gmail), so mail replies
+looks clean and modern. If you prefer the old style, please set
+`org-mime-beautify-quoted-mail' to nil.
+
+4. Please note this program can only embed exported HTML into mail.
+   Org-mode is responsible for rendering HTML.
+
+   For example, see https://github.com/org-mime/org-mime/issues/38
+   The solution is patching org-mode,
+   https://lists.gnu.org/archive/html/emacs-orgmode/2019-11/msg00016.html
