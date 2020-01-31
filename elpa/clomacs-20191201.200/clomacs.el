@@ -4,7 +4,7 @@
 
 ;; Author: Kostafey <kostafey@gmail.com>
 ;; URL: https://github.com/clojure-emacs/clomacs
-;; Package-Version: 20190925.1509
+;; Package-Version: 20191201.200
 ;; Keywords: clojure, interaction
 ;; Version: 0.0.4
 ;; Package-Requires: ((emacs "24.3") (cider "0.22.1") (s "1.12.0") (simple-httpd "1.4.6"))
@@ -92,7 +92,8 @@ If LIBRARY is nil, attempts to use \"clomacs\", \"localhost\" or
 any current connection.
 If can't find any nREPL process return nil."
   (if library
-      (clomacs-search-connection library)
+      (or (clomacs-search-connection library)
+          (if noninteractive (cider-current-repl)))
     (or (clomacs-search-connection "clomacs")
         (clomacs-search-connection "localhost")
         (cider-current-repl))))

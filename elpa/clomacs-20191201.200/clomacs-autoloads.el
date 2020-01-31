@@ -1,9 +1,12 @@
 ;;; clomacs-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "clomacs" "clomacs.el" (23994 46781 58246 126000))
+;;;### (autoloads nil "clomacs" "clomacs.el" (0 0 0 0))
 ;;; Generated autoloads from clomacs.el
 
 (autoload 'clomacs-def "clomacs" "\
@@ -37,11 +40,14 @@ evaluation can be added and executed.
 
 \(fn EL-FUNC-NAME CL-FUNC-NAME &key (CALL-TYPE :sync) (CALLBACK nil) (DOC nil) (INTERACTIVE nil) (RETURN-TYPE :string) (RETURN-VALUE :value) LIB-NAME NAMESPACE (HTTPD-STARTER nil) NREPL-READY-CALLBACK (BACKEND :clj))" nil t)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "clomacs" '("clo" "execute")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; clomacs-autoloads.el ends here
