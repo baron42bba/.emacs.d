@@ -8,6 +8,7 @@
 (require 'browse-url)
 (require 'wid-edit) ; widget-inactive face
 (require 'bookmark)
+(bookmark-maybe-load-default-file)
 
 (require 'elfeed)
 (require 'elfeed-db)
@@ -53,6 +54,13 @@ during live filter editing, but the results be will correct when
 live filter editing is exited."
   :group 'elfeed
   :type '(choice function (const nil)))
+
+(defcustom elfeed-search-remain-on-entry nil
+  "When non-nil, keep point at entry after performing a command.
+
+When nil, move to next entry."
+  :group 'elfeed
+  :type 'boolean)
 
 (defcustom elfeed-search-clipboard-type 'PRIMARY
   "Selects the clipboard `elfeed-search-yank' should use.
@@ -372,7 +380,8 @@ The customization `elfeed-search-date-format' sets the formatting."
         (matches ())
         (not-matches ())
         (limit nil)
-        (feeds ()))
+        (feeds ())
+        (not-feeds ()))
     (cl-loop for element in (split-string filter)
              for type = (aref element 0)
              do (cl-case type
@@ -399,6 +408,9 @@ The customization `elfeed-search-date-format' sets the formatting."
                   (?= (let ((re (substring element 1)))
                         (when (elfeed-valid-regexp-p re)
                           (push re feeds))))
+                  (?~ (let ((re (substring element 1)))
+                        (when (elfeed-valid-regexp-p re)
+                          (push re not-feeds))))
                   (otherwise (when (elfeed-valid-regexp-p element)
                                (push element matches)))))
     `(,@(when before
@@ -416,7 +428,9 @@ The customization `elfeed-search-date-format' sets the formatting."
       ,@(when limit
           (list :limit limit))
       ,@(when feeds
-          (list :feeds feeds)))))
+          (list :feeds feeds))
+      ,@(when not-feeds
+          (list :not-feeds not-feeds)))))
 
 (defun elfeed-search--recover-time (seconds)
   "Pick a reasonable filter representation for SECONDS."
@@ -458,7 +472,8 @@ original, but will be equal in its effect."
           (matches (plist-get filter :matches))
           (not-matches (plist-get filter :not-matches))
           (limit (plist-get filter :limit))
-          (feeds (plist-get filter :feeds)))
+          (feeds (plist-get filter :feeds))
+          (not-feeds (plist-get filter :not-feeds)))
       (when after
         (push (elfeed-search--recover-units after before) output))
       (dolist (tag must-have)
@@ -473,6 +488,8 @@ original, but will be equal in its effect."
         (push (format "#%d" limit) output))
       (dolist (feed feeds)
         (push (format "=%s" feed) output))
+      (dolist (feed not-feeds)
+        (push (format "~%s" feed) output))
       (mapconcat #'identity (nreverse output) " "))))
 
 (defun elfeed-search-filter (filter entry feed &optional count)
@@ -490,7 +507,8 @@ This function must *only* be called within the body of
         (matches (plist-get filter :matches))
         (not-matches (plist-get filter :not-matches))
         (limit (plist-get filter :limit))
-        (feeds (plist-get filter :feeds)))
+        (feeds (plist-get filter :feeds))
+        (not-feeds (plist-get filter :not-feeds)))
     (let* ((tags (elfeed-entry-tags entry))
            (date (elfeed-entry-date entry))
            (age (- (float-time) date))
@@ -519,7 +537,11 @@ This function must *only* be called within the body of
                (cl-some (lambda (f)
                           (or (string-match-p f feed-id)
                               (string-match-p f feed-title)))
-                        feeds))))))
+                        feeds))
+           (cl-notany (lambda (f)
+                        (or (string-match-p f feed-id)
+                            (string-match-p f feed-title)))
+                      not-feeds)))))
 
 (defun elfeed-search-compile-filter (filter)
   "Compile FILTER into a lambda function for `byte-compile'.
@@ -533,11 +555,12 @@ Executing a filter in bytecode form is generally faster than
         (matches (plist-get filter :matches))
         (not-matches (plist-get filter :not-matches))
         (limit (plist-get filter :limit))
-        (feeds (plist-get filter :feeds)))
+        (feeds (plist-get filter :feeds))
+        (not-feeds (plist-get filter :not-feeds)))
     `(lambda (,(if (or after matches not-matches must-have must-not-have)
                    'entry
                  '_entry)
-              ,(if feeds
+              ,(if (or feeds not-feeds)
                    'feed
                  '_feed)
               ,(if limit
@@ -552,7 +575,7 @@ Executing a filter in bytecode form is generally faster than
                   '((title (or (elfeed-meta entry :title)
                                (elfeed-entry-title entry)))
                     (link (elfeed-entry-link entry))))
-              ,@(when feeds
+              ,@(when (or feeds not-feeds)
                   '((feed-id (elfeed-feed-id feed))
                     (feed-title (or (elfeed-meta feed :title)
                                     (elfeed-feed-title feed) "")))))
@@ -578,6 +601,12 @@ Executing a filter in bytecode form is generally faster than
                            for regex in feeds
                            collect `(string-match-p ,regex feed-id)
                            collect `(string-match-p ,regex feed-title)))))
+              ,@(when not-feeds
+                  `((not
+                     (or ,@(cl-loop
+                            for regex in not-feeds
+                            collect `(string-match-p ,regex feed-id)
+                            collect `(string-match-p ,regex feed-title))))))
               ,@(when before
                   `((> age ,before))))))))
 
@@ -764,7 +793,8 @@ browser defined by `browse-url-generic-program'."
                     (browse-url-generic it)
                   (browse-url it)))
     (mapc #'elfeed-search-update-entry entries)
-    (unless (use-region-p) (forward-line))))
+    (unless (or elfeed-search-remain-on-entry (use-region-p))
+      (forward-line))))
 
 (defun elfeed-search-yank ()
   "Copy the selected feed items to clipboard and kill-ring."
@@ -781,7 +811,8 @@ browser defined by `browse-url-generic-program'."
           (x-set-selection elfeed-search-clipboard-type links-str)))
       (message "Copied: %s" links-str)
       (mapc #'elfeed-search-update-entry entries)
-      (unless (use-region-p) (forward-line)))))
+      (unless (or elfeed-search-remain-on-entry (use-region-p))
+        (forward-line)))))
 
 (defun elfeed-search-tag-all (tag)
   "Apply TAG to all selected entries."
@@ -789,7 +820,8 @@ browser defined by `browse-url-generic-program'."
   (let ((entries (elfeed-search-selected)))
     (elfeed-tag entries tag)
     (mapc #'elfeed-search-update-entry entries)
-    (unless (use-region-p) (forward-line))))
+    (unless (or elfeed-search-remain-on-entry (use-region-p))
+      (forward-line))))
 
 (defun elfeed-search-untag-all (tag)
   "Remove TAG from all selected entries."
@@ -797,7 +829,8 @@ browser defined by `browse-url-generic-program'."
   (let ((entries (elfeed-search-selected)))
     (elfeed-untag entries tag)
     (mapc #'elfeed-search-update-entry entries)
-    (unless (use-region-p) (forward-line))))
+    (unless (or elfeed-search-remain-on-entry (use-region-p))
+      (forward-line))))
 
 (defun elfeed-search-toggle-all (tag)
   "Toggle TAG on all selected entries."
@@ -810,7 +843,8 @@ browser defined by `browse-url-generic-program'."
     (elfeed-tag entries-tag tag)
     (elfeed-untag entries-untag tag)
     (mapc #'elfeed-search-update-entry entries)
-    (unless (use-region-p) (forward-line))))
+    (unless (or elfeed-search-remain-on-entry (use-region-p))
+      (forward-line))))
 
 (defun elfeed-search-show-entry (entry)
   "Display the currently selected item in a buffer."
@@ -819,7 +853,7 @@ browser defined by `browse-url-generic-program'."
   (when (elfeed-entry-p entry)
     (elfeed-untag entry 'unread)
     (elfeed-search-update-entry entry)
-    (forward-line)
+    (unless elfeed-search-remain-on-entry (forward-line))
     (elfeed-show-entry entry)))
 
 (defun elfeed-search-set-entry-title (title)
