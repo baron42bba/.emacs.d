@@ -1,10 +1,13 @@
 ;;; org-tree-slide-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "org-tree-slide" "org-tree-slide.el" (23994
-;;;;;;  46393 548148 999000))
+;;;### (autoloads nil "org-tree-slide" "org-tree-slide.el" (0 0 0
+;;;;;;  0))
 ;;; Generated autoloads from org-tree-slide.el
 
 (autoload 'org-tree-slide-mode "org-tree-slide" "\
@@ -139,11 +142,14 @@ Toggle show COMMENT item or not.
 
 \(fn)" t nil)
 
+(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "org-tree-slide" '("org-tree-slide")))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; org-tree-slide-autoloads.el ends here
