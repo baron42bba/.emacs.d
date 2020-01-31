@@ -684,7 +684,7 @@ log-format.
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20191028.2247")
+	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20191126.2142")
 	(require 'flycheck)
 	(add-hook 'after-init-hook #'global-flycheck-mode)
 	(flycheck-define-checker puppet-lint
