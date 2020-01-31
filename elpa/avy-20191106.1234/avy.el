@@ -4,7 +4,7 @@
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/avy
-;; Package-Version: 20191024.2310
+;; Package-Version: 20191106.1234
 ;; Version: 0.5.0
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5"))
 ;; Keywords: point, location
@@ -656,7 +656,7 @@ Commands using `avy-with' macro can be resumed."
 
 (defmacro avy-with (command &rest body)
   "Set `avy-keys' according to COMMAND and execute BODY.
-Set `avy-style' according to COMMMAND as well."
+Set `avy-style' according to COMMAND as well."
   (declare (indent 1)
            (debug (form body)))
   `(let ((avy-keys (or (cdr (assq ',command avy-keys-alist))
