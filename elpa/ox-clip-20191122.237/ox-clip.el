@@ -3,8 +3,8 @@
 ;; Copyright(C) 2016 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
-;; URL: https://github.com/jkitchin/ox-clip/ox-clip.el
-;; Package-Version: 20180306.340
+;; URL: https://github.com/jkitchin/ox-clip
+;; Package-Version: 20191122.237
 ;; Version: 0.3
 ;; Keywords: org-mode
 ;; Package-Requires: ((org "8.2") (htmlize "0"))
