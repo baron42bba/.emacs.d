@@ -1,6 +1,6 @@
 ;;; with-editor.el --- Use the Emacsclient as $EDITOR -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014-2019  The Magit Project Contributors
+;; Copyright (C) 2014-2020  The Magit Project Contributors
 ;;
 ;; You should have received a copy of the AUTHORS.md file.  If not,
 ;; see https://github.com/magit/with-editor/blob/master/AUTHORS.md.
@@ -210,7 +210,7 @@ performant implementation:
   trap \\\"exit 1\" USR2; \\
   while true; do sleep 1; done'\"
 
-Note that the unit seperator character () right after the file
+Note that the unit separator character () right after the file
 name ($0) is required.
 
 Also note that using this alternative implementation leads to a
@@ -343,7 +343,7 @@ And some tools that do not handle $EDITOR properly also break."
       (with-temp-buffer
         (setq default-directory dir)
         (setq-local with-editor-post-finish-hook post-finish-hook)
-        (when (bound-and-true-p git-commit-post-finish-hook)
+        (when post-commit-hook
           (setq-local git-commit-post-finish-hook post-commit-hook))
         (run-hooks 'with-editor-post-finish-hook)))))
 
@@ -582,7 +582,7 @@ the appropriate editor environment variable."
 (defun with-editor-set-process-filter (process filter)
   "Like `set-process-filter' but keep `with-editor-process-filter'.
 Give PROCESS the new FILTER but keep `with-editor-process-filter'
-if that was added earlier by the adviced `start-file-process'.
+if that was added earlier by the advised `start-file-process'.
 
 Do so by wrapping the two filter functions using a lambda, which
 becomes the actual filter.  It calls `with-editor-process-filter'

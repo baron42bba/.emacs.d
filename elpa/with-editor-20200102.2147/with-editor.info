@@ -1,7 +1,7 @@
 This is with-editor.info, produced by makeinfo version 6.5 from
 with-editor.texi.
 
-     Copyright (C) 2015-2019 Jonas Bernoulli <jonas@bernoul.li>
+     Copyright (C) 2015-2020 Jonas Bernoulli <jonas@bernoul.li>
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -39,9 +39,9 @@ library is made available as a separate package.  It also defines some
 additional functionality which makes it useful even for end-users, who
 don’t use Magit or another package which uses it internally.
 
-This manual is for With-Editor version 2.8.3.
+This manual is for With-Editor version 2.9.1.
 
-     Copyright (C) 2015-2019 Jonas Bernoulli <jonas@bernoul.li>
+     Copyright (C) 2015-2020 Jonas Bernoulli <jonas@bernoul.li>
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -176,7 +176,7 @@ it receives a signal.
           trap \"exit 1\" USR2; \
           while true; do sleep 1; done'"
 
-     Note that the unit seperator character () right after the file name
+     Note that the unit separator character () right after the file name
      ($0) is required.
 
      Also note that using this alternative implementation leads to a
