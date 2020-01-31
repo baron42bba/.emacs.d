@@ -2,8 +2,8 @@
 
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; Url: http://github.com/alphapapa/org-sticky-header
-;; Package-Version: 20190406.2313
-;; Version: 1.0.1
+;; Package-Version: 20191117.549
+;; Version: 1.1-pre
 ;; Package-Requires: ((emacs "24.4") (org "8.3.5"))
 ;; Keywords: hypermedia, outlines, Org
 
@@ -59,9 +59,17 @@
   "Value of header line")
 (put 'org-sticky-header-stickyline 'risky-local-variable t)
 
+(defvar org-sticky-header-keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<header-line> <mouse-1>") #'org-sticky-header-goto-heading)
+    map)
+  "Keymap used in header line.")
+
 (defconst org-sticky-header-header-line-format
   '(:eval (progn
-            (setq org-sticky-header-stickyline (org-sticky-header--fetch-stickyline))
+            (setq org-sticky-header-stickyline
+                  (propertize (org-sticky-header--fetch-stickyline)
+                              'keymap org-sticky-header-keymap))
             (list
              (propertize " " 'display '((space :align-to 0)))
              'org-sticky-header-stickyline)))
@@ -114,6 +122,14 @@ is enabled."
   :type 'string)
 
 ;;;; Functions
+
+(defun org-sticky-header-goto-heading (event)
+  "Go to heading displayed in sticky header (for click event EVENT)."
+  (interactive "e")
+  (with-selected-window (posn-window (event-start event))
+    (goto-char (window-start))
+    (unless (org-before-first-heading-p)
+      (org-back-to-heading))))
 
 (defun org-sticky-header--fetch-stickyline ()
   "Return string of Org heading or outline path for display in header line."

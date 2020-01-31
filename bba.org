@@ -2065,7 +2065,7 @@ file.
 [2017-04-26 Wed 13:09]
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20190406.2313" t)
+  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20191117.549" t)
   (add-hook 'org-mode-hook
 	      (lambda ()(org-sticky-header-mode 1))
 	    )
