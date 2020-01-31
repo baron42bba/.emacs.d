@@ -1,6 +1,6 @@
 ;;; editorconfig.el --- EditorConfig Emacs Plugin  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2011-2019 EditorConfig Team
+;; Copyright (C) 2011-2020 EditorConfig Team
 
 ;; Author: EditorConfig Team <editorconfig@googlegroups.com>
 ;; Version: 0.8.1
@@ -540,7 +540,7 @@ FILETYPE should be s string like `\"ini\"`, if not nil or empty string."
 Normally `editorconfig-apply' will be hooked so that it runs when changing
 `major-mode', so there is a possibility that MODE is called infinitely if
 MODE is called naively from inside of `editorconfig-apply'.
-This funcion will avoid such cases and set `major-mode' safely.
+This function will avoid such cases and set `major-mode' safely.
 
 Just checking current `major-mode' value is not enough, because it can be
 different from MODE value (for example, `conf-mode' will set `major-mode' to
