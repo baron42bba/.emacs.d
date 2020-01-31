@@ -1,6 +1,5 @@
-(define-package "magit-popup" "20190223.2234" "Define prefix-infix-suffix command combos"
+(define-package "magit-popup" "20200102.1811" "Define prefix-infix-suffix command combos"
   '((emacs "24.4")
-    (async "1.9.2")
     (dash "2.13.0"))
   :keywords
   '("bindings")
