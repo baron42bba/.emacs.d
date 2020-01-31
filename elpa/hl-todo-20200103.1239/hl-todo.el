@@ -1,11 +1,11 @@
 ;;; hl-todo.el --- highlight TODO and similar keywords  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013-2019  Jonas Bernoulli
+;; Copyright (C) 2013-2020  Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Homepage: https://github.com/tarsius/hl-todo
 ;; Keywords: convenience
-;; Package-Version: 20191024.1036
+;; Package-Version: 20200103.1239
 
 ;; Package-Requires: ((emacs "25"))
 
@@ -164,7 +164,7 @@ controls which of the two it is."
   "String of characters to highlight after keywords.
 
 Each of the characters appearing in this string is highlighted
-using the same face as the preceeding keyword when it directly
+using the same face as the preceding keyword when it directly
 follows the keyword.
 
 Characters whose syntax class is `w' (which means word),
