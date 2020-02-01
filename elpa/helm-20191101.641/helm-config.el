@@ -59,17 +59,13 @@
                       minibuffer-local-must-match-filename-map ; Older Emacsen
                       minibuffer-local-must-match-map
                       minibuffer-local-ns-map))
-      (let ((vmap (symbol-value map)))
-        (when (and (boundp map) (keymapp vmap))
-          (let ((val (and (boundp var) (symbol-value var))))
-            (when val
-              (define-key vmap
-                (if (stringp val) (read-kbd-macro val) val)
-                nil)))
-          (when key
-            (define-key (symbol-value map)
-              (if (stringp key) (read-kbd-macro key) key)
-              'helm-minibuffer-history)))))
+      (when (and (boundp map) (keymapp (symbol-value map)))
+        (when (and (boundp var) (symbol-value var))
+          (define-key (symbol-value map)
+              (read-kbd-macro (symbol-value var)) nil))
+        (when key
+          (define-key (symbol-value map)
+              (read-kbd-macro key) 'helm-minibuffer-history))))
     (set var key)))
 
 ;;; Command Keymap

@@ -101,16 +101,7 @@ pattern.
 **** Search inside buffers
 
 If you enter a space and a pattern prefixed by \"@\", Helm searches for text
-matching this pattern *inside* the buffer (i.e. not in the name of the buffer).
-
-Negation are supported i.e. \"!\".
-
-When you specify more than one of such patterns, it will match
-buffers with contents matching each of these patterns i.e. AND,
-not OR.  That's mean that if you specify \"@foo @bar\" the
-contents of buffer will have to be matched by foo AND bar.  If
-you specify \"@foo @!bar\" it means the contents of buffer have
-to be matched by foo but NOT bar.
+matching this pattern \*inside* the buffer (i.e. not in the name of the buffer).
 
 If you enter a pattern prefixed with an escaped \"@\", Helm searches for a
 buffer matching \"@pattern\" but does not search inside.
@@ -502,7 +493,7 @@ On completion:
 
 *** Use the wildcard to select multiple files
 
-Use of wildcard is supported to run an action over a set of files.
+Use of wilcard is supported to run an action over a set of files.
 
 Example: You can copy all the files with \".el\" extension by using \"*.el\" and
 then run copy action.
@@ -525,7 +516,7 @@ When using an action that involves an external backend (e.g. grep), using \"**\"
 is not recommended (even thought it works fine) because it will be slower to
 select all the files.  You are better off leaving the backend to do it, it will
 be faster.  However, if you know you have not many files it is reasonable to use
-this, also using not recursive wildcard (e.g. \"*.el\") is perfectly fine for
+this, also using not recursive wilcard (e.g. \"*.el\") is perfectly fine for
 this.
 
 The \"**\" feature is active by default in the option `helm-file-globstar'.  It
@@ -1072,7 +1063,7 @@ You can toggle the view of deleted files, see commands below.
      "* Helm `%s' read file name completion
 
 This is `%s' read file name completion that have been \"helmized\"
-because you have enabled [[Helm mode][helm-mode]].
+because you have enabled [[Helm mode][helm-mode]]'.
 Don't confuse this with `helm-find-files' which is a native helm command,
 see [[Helm functions vs helmized Emacs functions]].
 
@@ -1636,28 +1627,15 @@ marking it (`C-c u' or `RET') .
 
 ** Tips
 
-*** You can get help on any command with persistent action (\\<helm-map>\\[helm-execute-persistent-action])
+*** You can get help on any command with persistent action (\\[helm-execute-persistent-action])
 
 *** Prefix arguments
 
-You can pass prefix arguments *after* starting `helm-M-x'.  A mode-line
+You must pass prefix arguments \*after* starting `helm-M-x'.  A mode-line
 counter will display the number of given prefix arguments.
 
 If you pass prefix arguments before running `helm-M-x', it will be displayed in the prompt.
-The first `\\[universal-argument]' after `helm-M-x' clears those prefix arguments.
-
-NOTE: When you specify prefix arguments once `helm-M-x' is
-started, the prefix argument apply on the next command, so if you
-hit RET, it will apply on the selected command, but if you type a
-new character at prompt to narrow down further candidates, the
-prefix arg will apply to `self-insert-command' (e.g. if you type
-`C-u e' \"eeee\" will be inserted in prompt) so select the
-command you want to execute before specifying prefix arg.
-
-*** Completion styles in helm-M-x
-
-By default helm-M-x use 'helm completion style, if you want to enable fuzzy matching aka flex,
-see [[Completion-styles][Completion-styles]].")
+The first `\\[universal-argument]' after `helm-M-x' clears those prefix arguments.")
 
 ;;; Helm imenu
 ;;

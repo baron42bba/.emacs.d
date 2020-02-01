@@ -215,9 +215,9 @@
 
 (defcustom helm-type-function-actions
   (helm-make-actions
-   "Describe command" 'helm-describe-function
+   "Describe command" 'describe-function
+   "Add command to kill ring" 'helm-kill-new
    "Go to command's definition" 'find-function
-   "Info lookup" 'helm-info-lookup-symbol
    "Debug on entry" 'debug-on-entry
    "Cancel debug on entry" 'cancel-debug-on-entry
    "Trace function" 'trace-function
@@ -225,9 +225,7 @@
    "Untrace function" 'untrace-function)
     "Default actions for type functions."
   :group 'helm-elisp
-  ;; Use symbol as value type because some functions may not be
-  ;; autoloaded (like untrace-function).
-  :type '(alist :key-type string :value-type symbol))
+  :type '(alist :key-type string :value-type function))
 
 (defmethod helm-source-get-action-from-type ((object helm-type-function))
   (slot-value object 'action))
@@ -259,20 +257,18 @@
 
 (defcustom helm-type-command-actions
   (append (helm-make-actions
-           "Execute command" 'helm-M-x-execute-command)
-          (symbol-value
-           (helm-actions-from-type-function)))
+           "Call interactively" 'helm-call-interactively)
+          (helm-actions-from-type-function))
   "Default actions for type command."
   :group 'helm-command
-  :type '(alist :key-type string :value-type symbol))
+  :type '(alist :key-type string :value-type function))
 
 (defmethod helm--setup-source :primary ((_source helm-type-command)))
 
 (defmethod helm--setup-source :before ((source helm-type-command))
   (setf (slot-value source 'action) 'helm-type-command-actions)
   (setf (slot-value source 'coerce) 'helm-symbolify)
-  (setf (slot-value source 'persistent-action) 'helm-M-x-persistent-action)
-  (setf (slot-value source 'persistent-help) "Describe this command")
+  (setf (slot-value source 'persistent-action) 'describe-function)
   (setf (slot-value source 'group) 'helm-command))
 
 ;; Timers

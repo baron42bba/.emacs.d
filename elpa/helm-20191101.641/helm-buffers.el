@@ -699,25 +699,18 @@ i.e same color."
 (defun helm-buffers--match-from-inside (candidate)
   (let* ((cand (replace-regexp-in-string "^\\s-\\{1\\}" "" candidate))
          (buf  (get-buffer cand))
-         (pattern (cl-loop with pat = helm-pattern
-                           for p in (helm-mm-split-pattern pat)
-                           when (string-match "\\`@\\(.*\\)" p)
-                           collect (match-string 1 p) into lst
-                           finally return (mapconcat 'identity lst " ")))
-         (patterns (helm-mm-3-get-patterns pattern)))
-    (if (and buf patterns)
+         (regexp (cl-loop with pattern = helm-pattern
+                          for p in (helm-mm-split-pattern pattern)
+                          when (string-match "\\`@\\(.*\\)" p)
+                          return (match-string 1 p))))
+    (if (and buf regexp)
         (with-current-buffer buf
           (save-excursion
             (goto-char (point-min))
-            (cl-loop for (pred . regexp) in patterns
-                     always
-                     (save-excursion
-                       (funcall
-                        pred
-                        (if helm-migemo-mode
-                            (helm-mm-migemo-forward regexp nil t)
-                          (re-search-forward regexp nil t)))))))
-      t)))
+            (if helm-migemo-mode
+                (helm-mm-migemo-forward regexp nil t)
+             (re-search-forward regexp nil t))))
+        t)))
 
 (defun helm-buffers--match-from-directory (candidate)
   (let* ((cand (replace-regexp-in-string "^\\s-\\{1\\}" "" candidate))
@@ -1021,18 +1014,17 @@ If a prefix arg is given split windows vertically."
 (defun helm-ediff-marked-buffers (_candidate &optional merge)
   "Ediff 2 marked buffers or CANDIDATE and `helm-current-buffer'.
 With optional arg MERGE call `ediff-merge-buffers'."
-  (let* ((mkd (helm-marked-candidates))
-         (lg-lst (length mkd))
-         buf1 buf2)
+  (let ((lg-lst (length (helm-marked-candidates)))
+        buf1 buf2)
     (cl-case lg-lst
       (0
        (error "Error:You have to mark at least 1 buffer"))
       (1
        (setq buf1 helm-current-buffer
-             buf2 (cl-first mkd)))
+             buf2 (cl-first (helm-marked-candidates))))
       (2
-       (setq buf1 (cl-first mkd)
-             buf2 (cl-second mkd)))
+       (setq buf1 (cl-first (helm-marked-candidates))
+             buf2 (cl-second (helm-marked-candidates))))
       (t
        (error "Error:Too many buffers marked!")))
     (if merge
@@ -1057,7 +1049,7 @@ Can be used by any source that list buffers."
                                                     (get-buffer helm-buffer))
                                                    helm-pattern)
                                                " " t)
-                        thereis (and (string-match "\\`@\\([^!]*\\)" i)
+                        thereis (and (string-match "\\`@\\(.*\\)" i)
                                      (match-string 1 i)))))
     (helm-multi-occur-1 buffers input)))
 

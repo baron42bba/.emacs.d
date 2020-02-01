@@ -2137,7 +2137,10 @@ or when `helm-pattern' is equal to \"~/\"."
       (with-helm-buffer
         (let* ((history-p   (string= (assoc-default 'name src)
                                      "Read File Name History"))
-               (pat         (helm-ff-set-pattern helm-pattern))
+               (pat         (if (string-match helm-tramp-file-name-regexp
+                                              helm-pattern)
+                                (helm-ff--create-tramp-name helm-pattern)
+                                helm-pattern))
                (completed-p (string= (file-name-as-directory
                                       (expand-file-name
                                        (substitute-in-file-name pat)))
@@ -2237,12 +2240,7 @@ or when `helm-pattern' is equal to \"~/\"."
                                                   (file-name-directory input))))
              (with-helm-window
                (helm-set-pattern input)
-               (helm-check-minibuffer-input))))
-          ((string-match "\\`/\\(-\\):.*" helm-pattern)
-           (with-helm-window
-             (helm-set-pattern
-              (replace-match tramp-default-method t t helm-pattern 1))
-             (helm-check-minibuffer-input))))))
+               (helm-check-minibuffer-input)))))))
 
 (defun helm-ff--expand-file-name-no-dot (name &optional directory)
   "Prevent expanding \"/home/user/.\" to \"/home/user\"."
@@ -2258,15 +2256,12 @@ or when `helm-pattern' is equal to \"~/\"."
   ;; so use the root of current Drive. (i.e "C:/")
   (let* ((directory (and (memq system-type '(windows-nt ms-dos))
                          (getenv "SystemDrive")))
-         (subst (helm-substitute-in-filename pattern))
          ;; On Windows use a simple call to `expand-file-name' to
          ;; avoid Issue #2004.
          (expand-fn (if directory
                         #'expand-file-name
                       #'helm-ff--expand-file-name-no-dot)))
-    ;; Fix issue #2223 with tilde in directory names e.g. "~/tmp/~test/".
-    (funcall expand-fn (if (string-match-p "\\`~[^/]" subst)
-                           pattern subst)
+    (funcall expand-fn (helm-substitute-in-filename pattern)
              ;; directory is nil on Nix.
              directory)))
 
@@ -2403,10 +2398,7 @@ purpose."
            (comps (cl-loop for (f . h) in (tramp-get-completion-function method)
                            append (cl-loop for e in (funcall f (car h))
                                            for host = (and (consp e) (cadr e))
-                                           ;; On emacs-27 host may be
-                                           ;; ("root" t) in sudo method.
-                                           when (and (stringp host)
-                                                     (not (member host all-methods)))
+                                           when (and host (not (member host all-methods)))
                                            collect (concat (or (car mh-method) "/")
                                                            method ":" host)))))
       (helm-fast-remove-dups
@@ -2451,8 +2443,6 @@ purpose."
          (postfixed (helm-ff--tramp-postfixed-p pattern))
          (reg "\\`/\\([^[/:]+\\|[^/]+]\\):.*:")
          cur-method tramp-name)
-    (when (string-match "\\`/\\(-\\):" pattern)
-      (setq pattern (replace-match tramp-default-method t t pattern 1)))
     ;; In some rare cases tramp can return a nil input,
     ;; so be sure pattern is a string for safety (Issue #476).
     (unless pattern (setq pattern ""))
@@ -2797,7 +2787,7 @@ If PATTERN is a valid directory name,return PATTERN unchanged."
       ((or (not (helm-ff-fuzzy-matching-p))
            (string-match "\\s-" bn))    ; Fall back to multi-match.
        (concat (regexp-quote bd) bn))
-      ((or (string-match "[*][.]?.*" bn) ; Allow entering wildcard.
+      ((or (string-match "[*][.]?.*" bn) ; Allow entering wilcard.
            (string-match "/$" pattern)     ; Allow mkdir.
            (string-match helm-ff-url-regexp pattern)
            (and (string= helm-ff-default-directory "/") tramp-p))
@@ -3218,9 +3208,8 @@ Return candidates prefixed with basename of `helm-input' first."
                . helm-find-files-byte-compile)
               ("Load File(s) `M-L'" . helm-find-files-load-files))
             2))
-          ((string-match (concat (regexp-opt load-suffixes) "\\'")
-                         (helm-aif (helm-marked-candidates)
-                             (car it) candidate))
+          ((string-match "\\.elc?\\'" (helm-aif (helm-marked-candidates)
+                                          (car it) candidate))
            (helm-append-at-nth
             actions
             '(("Load File(s) `M-L'" . helm-find-files-load-files))
@@ -3678,13 +3667,7 @@ prefix arg, one prefix arg or two prefix arg."
              (tap         (helm-ffap-guesser))
              (guess       (and (stringp tap)
                                (substring-no-properties tap)))
-             (beg         (helm-aif (and guess
-                                         (save-excursion
-                                           (when (re-search-backward
-                                                  (regexp-quote guess)
-                                                  (point-at-bol) t)
-                                             (point))))
-                              it (point)))
+             (beg         (if guess (- (point) (length guess)) (point)))
              (full-path-p (and (stringp guess)
                                (or (string-match-p
                                     (concat "^" (getenv "HOME"))
@@ -3692,40 +3675,34 @@ prefix arg, one prefix arg or two prefix arg."
                                    (string-match-p
                                     "\\`\\(/\\|[[:lower:][:upper:]]:/\\)"
                                     guess))))
-             (escape-fn (if (memq major-mode
-                                  helm-modes-using-escaped-strings)
-                            #'shell-quote-argument #'identity)))
-        (when (and beg end)
-          (delete-region beg end))
+             (escape-fn (with-helm-current-buffer
+                          (if (memq major-mode
+                                    helm-modes-using-escaped-strings)
+                              #'shell-quote-argument #'identity))))
         (insert
-         (funcall
-          escape-fn
-          (helm-ff--format-fname-to-insert
-           candidate beg end full-path-p guess
-           helm-current-prefix-arg))
+         (funcall escape-fn (helm-ff--insert-fname
+                             candidate beg end full-path-p guess))
          (if (cdr mkds) " " "")
          (mapconcat escape-fn
                     (cl-loop for f in (cdr mkds)
-                             collect (helm-ff--format-fname-to-insert
-                                      f nil nil nil nil
-                                      helm-current-prefix-arg))
+                             collect (helm-ff--insert-fname f))
                     " "))))))
 
-(defun helm-ff--format-fname-to-insert (candidate
-                                        &optional beg end full-path guess prefarg)
+(defun helm-ff--insert-fname (candidate &optional beg end full-path guess)
   (set-text-properties 0 (length candidate) nil candidate)
   (if (and beg end guess (not (string= guess ""))
-           (null prefarg)
            (or (string-match
                 "^\\(~/\\|/\\|[[:lower:][:upper:]]:/\\)"
                 guess)
                (file-exists-p candidate)))
-      (cond (full-path
-             (expand-file-name candidate))
-            ((string= (match-string 1 guess) "~/")
-             (abbreviate-file-name candidate))
-            (t (file-relative-name candidate)))
-    (helm-acase prefarg
+      (prog1
+          (cond (full-path
+                 (expand-file-name candidate))
+                ((string= (match-string 1 guess) "~/")
+                 (abbreviate-file-name candidate))
+                (t (file-relative-name candidate)))
+        (delete-region beg end))
+    (helm-acase helm-current-prefix-arg
       ('(4)  (abbreviate-file-name candidate))
       ('(16) (file-relative-name candidate))
       ('(64) (helm-basename candidate))
@@ -4510,8 +4487,7 @@ Don't use it in your own code unless you know what you are doing.")
 (defvar helm-file-name-history-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
-    (define-key map (kbd "C-c d")   'helm-file-name-history-show-or-hide-deleted)
-    (define-key map (kbd "C-x C-f") 'helm-ff-file-name-history-run-ff)
+    (define-key map (kbd "C-c d") 'helm-file-name-history-show-or-hide-deleted)
     map))
 
 (defun helm-file-name-history-transformer (candidates _source)
@@ -4525,16 +4501,6 @@ Don't use it in your own code unless you know what you are doing.")
                       (t (unless helm--file-name-history-hide-deleted
                            (cons (propertize c 'face 'helm-history-deleted) c))))
            collect it))
-
-(defun helm-ff-file-name-history-ff (candidate)
-  (helm-set-pattern
-   (expand-file-name candidate)))
-
-(defun helm-ff-file-name-history-run-ff ()
-  "Switch back to current HFF session with selection as preselect."
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'helm-ff-file-name-history-ff)))
 
 (defun helm-ff-file-name-history ()
   "Switch to `file-name-history' without quitting `helm-find-files'."
@@ -4562,7 +4528,9 @@ Don't use it in your own code unless you know what you are doing.")
                                    (helm-set-pattern
                                     (expand-file-name candidate))
                                    (with-helm-after-update-hook (helm-exit-minibuffer)))
-                     "Find file in helm" 'helm-ff-file-name-history-ff)
+                     "Find file in helm" (lambda (candidate)
+                                           (helm-set-pattern
+                                            (expand-file-name candidate))))
             :keymap helm-file-name-history-map)))
   (with-helm-alive-p
     (helm :sources 'helm-source--ff-file-name-history

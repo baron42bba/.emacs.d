@@ -294,14 +294,12 @@ See also `helm-locate'."
                         (t (if helm-locate-case-fold-search
                                ignore-case-flag
                                case-sensitive-flag)))
-                      (helm-aif (cdr args)
-                          (concat
-                           ;; The pattern itself.
-                           (shell-quote-argument (car args)) " "
-                           ;; Possible locate args added
-                           ;; after pattern, don't quote them.
-                           (mapconcat 'identity it " "))
-                        (shell-quote-argument (car args)))))
+                      (concat
+                       ;; The pattern itself.
+                       (shell-quote-argument (car args)) " "
+                       ;; Possible locate args added
+                       ;; after pattern, don't quote them.
+                       (mapconcat 'identity (cdr args) " "))))
          (default-directory (if (file-directory-p default-directory)
                                 default-directory "/")))
     (helm-log "Starting helm-locate process")
