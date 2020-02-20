@@ -5025,6 +5025,46 @@ Check a AWS Cloudformation template with [[https://github.com/awslabs/cfn-python
   (define-key yaml-mode-map (kbd "C-c C-l") 'bba-aws-cfn-lint)
 #+END_SRC
 
+* aws sessionmanager
+[2020-02-20 Thu 15:22]
+
+Somebody decided to replace ssh with [[https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html][AWS Session Manager]]
+As a heavy user of Emacs TRAMP i was not very happy with that.
+In the end it turned out to be easy.
+
+ssm doesn't support hostnames. just strange instance ids.
+who can remmber those?
+Luckily i am not the only one with a bad memory.
+[[https://github.com/xen0l/aws-gate][aws-gate]] to the rescue!
+
+Now we can run commands like
+
+#+begin_src sh :eval never
+  aws-gate session hostname
+#+end_src
+
+if those are configured in your aws-gate config file you don't have to
+define aws account or region either.
+Based on the telnet configuration (they both have similar
+capabilities) I wrote this one:
+
+#+begin_src elisp
+  (add-to-list 'tramp-methods
+    '("ssm"
+      (tramp-login-program        "aws-gate")
+      (tramp-login-args           (("session")("%h") ("2>/dev/null")))
+      (tramp-remote-shell         "/bin/sh")
+      (tramp-remote-shell-login   ("-l"))
+      (tramp-remote-shell-args    ("-c"))))
+#+end_src
+
+Now we can again do strange, dark org-babel magic like:
+
+#+begin_src org :eval never
+  ,#+begin_src sh :dir /ssm:host01|sudo:host01:
+   date
+  ,#+end_src
+#+end_src
 
 * terraform
 [2016-09-02 Fri 14:57]
