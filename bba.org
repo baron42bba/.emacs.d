@@ -465,7 +465,8 @@ search the web on your fingertips. C-c /.
 | c | cfengine    |
 | g | google      |
 | G | github      |
-| m | google maps |
+| M | google maps |
+| m | mysql       |
 | p | puppet      |
 | v | vertica     |
 | w | wikipedia   |
@@ -480,72 +481,62 @@ search the web on your fingertips. C-c /.
 
         (defengine amazon
           "http://www.amazon.de/s/ref=nb_sb_noss?url=search-alias=aps&filed-keywords=%s"
-          :keybinding "a"
-          )
+          :keybinding "a")
 
         (defengine aws
           "https://docs.aws.amazon.com/search/doc-search.html?searchPath=documentation-guide&searchQuery=%s"
-          :keybinding "A"
-          )
+          :keybinding "A")
 
         (defengine bing
           "http://www.bing.com/search?q=%s&qs=bs&form=QBLH"
           :browser 'eww-browse-url
-          :keybinding "b"
-          )
+          :keybinding "b")
 
         (defengine cfengine
           "https://docs.cfengine.com/latest/search.html?q=%s"
           :browser 'eww-browse-url
-          :keybinding "c"
-          )
-
+          :keybinding "c")
 
         (defengine github
           "http://www.github.com/search?q=%s"
           :browser 'eww-browse-url
-          :keybinding "G"
-          )
+          :keybinding "G")
 
         (defengine google
           "http://www.google.com/?q=%s"
-          :keybinding "g"
-          )
-
-        (defengine leo
-          "http://dict.leo.org/ende/index_de.html#/search=%s"
-          :keybinding "l"
-          )
+          :keybinding "g")
 
         (defengine google-maps
           "http://maps.google.com/maps?q=%s"
-          :keybinding "m"
-          )
+          :keybinding "M")
+
+        (defengine leo
+          "http://dict.leo.org/ende/index_de.html#/search=%s"
+          :keybinding "l")
+
+        (defengine mysql
+          "https://dev.mysql.com/doc/search/?d=201&p=1&q=%s"
+          :keybinding "m")
 
         (defengine puppet
           "https://puppet.com/search/docs?keys=%s"
-          :keybinding "p"
-          )
+          :keybinding "p")
 
         (defengine vertica
           "https://www.vertica.com/docs/latest/HTML/Content/Search/search.php?zoom_query=%s"
-          :keybinding "v"
-          )
+          :keybinding "v")
 
         (defengine wikipedia
           "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
           :browser 'eww-browse-url
-          :keybinding "w"
-          )
+          :keybinding "w")
 
         (defengine youtube
           "http://www.youtube.com/results?aq=f&oq=&search_query=%s"
-          :keybinding "y"
-          )
+          :keybinding "y")
+
         (engine-mode 1)
-        (engine/set-keymap-prefix (kbd "C-c C-/"))
-        )
-    )
+        (engine/set-keymap-prefix (kbd "C-c C-/"))))
 #+END_SRC
 
 * xah-lookup
