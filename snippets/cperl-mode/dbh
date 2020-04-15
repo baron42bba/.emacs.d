@@ -1,0 +1,33 @@
+# -*- mode: snippet -*-
+# name: dbh
+# key: dbh_
+# --
+my $dbh = DBI->connect( "dbi:ODBC:$params{database}", undef, undef, {
+    AutoCommit => 0,
+    odbc_ignore_named_placeholders => 1
+   } ) or die "Can't connect to database: $DBI::errstr\n";
+
+if ( $params{debug} ) {
+    if ( -e "DBI.log" ) {
+	unlink "DBI.log";
+    }
+    if ( -e "SQL.log" ) {
+	unlink "SQL.log";
+    }
+    if ( -e "dbi.prof" ) {
+	unlink "dbi.prof";
+    }
+
+    if ( $params{debug} >= 2 ) {
+	$dbh->trace(15, "DBI.log");
+	$dbh->{Profile} = "6/DBI::ProfileDumper";
+    }
+    else {
+	$dbh->trace(2, "DBI.log");
+	$dbh->{Profile} = "2/DBI::ProfileDumper";
+    }
+
+    $dbh->{odbc_trace} = 1;
+    $dbh->{odbc_trace_file} = "SQL.log";
+    print "running in debug mode: See DBI.log, SQL.log and dbi.prof in current directory\n";
+}
