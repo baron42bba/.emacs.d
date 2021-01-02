@@ -22,6 +22,11 @@ or call the function `magit-todos-mode'.")
 (autoload 'magit-todos-mode "magit-todos" "\
 Show list of to-do items in Magit status buffer for tracked files in repo.
 
+If called interactively, enable Magit-Todos mode if ARG is
+positive, and disable it if ARG is zero or negative.  If called
+from Lisp, also enable the mode if ARG is omitted or nil, and
+toggle it if ARG is `toggle'; disable the mode otherwise.
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'magit-todos-list "magit-todos" "\

@@ -62,6 +62,7 @@
 (defgroup magit-log nil
   "Inspect and manipulate Git history."
   :link '(info-link "(magit)Logging")
+  :group 'magit-commands
   :group 'magit-modes)
 
 (defcustom magit-log-mode-hook nil
@@ -455,7 +456,9 @@ the upstream isn't ahead of the current branch) show."
           (magit--any-wip-mode-enabled-p))
     :description "Wiplog"
     ("i" "index"          magit-wip-log-index)
-    ("w" "worktree"       magit-wip-log-worktree)]])
+    ("w" "worktree"       magit-wip-log-worktree)]
+   ["Other"
+    (5 "s" "shortlog"    magit-shortlog)]])
 
 ;;;###autoload (autoload 'magit-log-refresh "magit-log" nil t)
 (transient-define-prefix magit-log-refresh ()
@@ -872,6 +875,48 @@ is displayed in the current frame."
                 (concat "Parent " parent-hash " not found.  Try typing "
                         "\\[magit-log-double-commit-limit] first"))))
           (user-error "Parent %s does not exist" parent-rev))))))
+
+;;;; Shortlog Commands
+
+;;;###autoload (autoload 'magit-shortlog "magit-log" nil t)
+(transient-define-prefix magit-shortlog ()
+  "Show a history summary."
+  :man-page "git-shortlog"
+  :value '("--numbered" "--summary")
+  ["Arguments"
+   ("-n" "Sort by number of commits"      ("-n" "--numbered"))
+   ("-s" "Show commit count summary only" ("-s" "--summary"))
+   ("-e" "Show email addresses"           ("-e" "--email"))
+   ("-g" "Group commits by" "--group="
+    :choices ("author" "committer" "trailer:"))
+   (7 "-f" "Format string" "--format=")
+   (7 "-w" "Linewrap" "-w" :class transient-option)]
+  ["Shortlog"
+   ("s" "since" magit-shortlog-since)
+   ("r" "range" magit-shortlog-range)])
+
+(defun magit-git-shortlog (rev args)
+  (with-current-buffer (get-buffer-create "*magit-shortlog*")
+    (erase-buffer)
+    (save-excursion
+      (magit-git-insert "shortlog" args rev))
+    (switch-to-buffer-other-window (current-buffer))))
+
+;;;###autoload
+(defun magit-shortlog-since (rev args)
+  "Show a history summary for commits since REV."
+  (interactive
+   (list (magit-read-branch-or-commit "Shortlog since" (magit-get-current-tag))
+         (transient-args 'magit-shortlog)))
+  (magit-git-shortlog (concat rev "..") args))
+
+;;;###autoload
+(defun magit-shortlog-range (rev-or-range args)
+  "Show a history summary for commit or range REV-OR-RANGE."
+  (interactive
+   (list (magit-read-range-or-commit "Shortlog for revision or range")
+         (transient-args 'magit-shortlog)))
+  (magit-git-shortlog rev-or-range args))
 
 ;;; Log Mode
 
@@ -1661,12 +1706,7 @@ Type \\[magit-cherry-pick] to apply the commit at point.
 (defun magit-insert-unpulled-from-pushremote ()
   "Insert commits that haven't been pulled from the push-remote yet."
   (--when-let (magit-get-push-branch)
-    (unless (and (equal (magit-rev-name it)
-                        (magit-rev-name "@{upstream}"))
-                 (or (memq 'magit-insert-unpulled-from-upstream
-                           magit-status-sections-hook)
-                     (memq 'magit-insert-unpulled-from-upstream-or-recent
-                           magit-status-sections-hook)))
+    (when (magit--insert-pushremote-log-p)
       (magit-insert-section (unpulled (concat ".." it) t)
         (magit-insert-heading
           (format (propertize "Unpulled from %s."
@@ -1730,12 +1770,7 @@ Show the last `magit-log-section-commit-count' commits."
 (defun magit-insert-unpushed-to-pushremote ()
   "Insert commits that haven't been pushed to the push-remote yet."
   (--when-let (magit-get-push-branch)
-    (unless (and (equal (magit-rev-name it)
-                        (magit-rev-name "@{upstream}"))
-                 (or (memq 'magit-insert-unpushed-to-upstream
-                           magit-status-sections-hook)
-                     (memq 'magit-insert-unpushed-to-upstream-or-recent
-                           magit-status-sections-hook)))
+    (when (magit--insert-pushremote-log-p)
       (magit-insert-section (unpushed (concat it "..") t)
         (magit-insert-heading
           (format (propertize "Unpushed to %s."
@@ -1743,6 +1778,15 @@ Show the last `magit-log-section-commit-count' commits."
                   (propertize it 'font-lock-face 'magit-branch-remote)))
         (magit-insert-log (concat it "..") magit-buffer-log-args)
         (magit-log-insert-child-count)))))
+
+(defun magit--insert-pushremote-log-p ()
+  (magit--with-refresh-cache 'magit--insert-pushremote-log-p
+    (not (and (equal (magit-get-push-branch)
+                     (magit-get-upstream-branch))
+              (or (memq 'magit-insert-unpulled-from-upstream
+                        magit-status-sections-hook)
+                  (memq 'magit-insert-unpulled-from-upstream-or-recent
+                        magit-status-sections-hook))))))
 
 (defun magit-log-insert-child-count ()
   (when magit-section-show-child-count

@@ -87,8 +87,12 @@ argument the push-remote can be changed before pushed to it."
   :if 'magit-get-current-branch
   :description 'magit-push--pushbranch-description
   (interactive (list (magit-push-arguments)))
-  (pcase-let ((`(,branch ,remote)
+  (pcase-let ((`(,branch ,remote ,changed)
                (magit--select-push-remote "push there")))
+    (when changed
+      (magit-confirm 'set-and-push
+        (format "Really use \"%s\" as push-remote and push \"%s\" there"
+                remote branch)))
     (run-hooks 'magit-credential-hook)
     (magit-run-git-async "push" "-v" args remote
                          (format "refs/heads/%s:refs/heads/%s"
@@ -136,16 +140,19 @@ the upstream."
                         branches nil nil nil 'magit-revision-history
                         (or (car (member (magit-remote-branch-at-point) branches))
                             (car (member "origin/master" branches)))))
-             (upstream (or (magit-get-tracked upstream)
-                           (magit-split-branch-name upstream))))
-        (setq remote (car upstream))
-        (setq merge  (cdr upstream))
+             (upstream* (or (magit-get-tracked upstream)
+                            (magit-split-branch-name upstream))))
+        (setq remote (car upstream*))
+        (setq merge  (cdr upstream*))
         (unless (string-prefix-p "refs/" merge)
           ;; User selected a non-existent remote-tracking branch.
           ;; It is very likely, but not certain, that this is the
           ;; correct thing to do.  It is even more likely that it
           ;; is what the user wants to happen.
-          (setq merge (concat "refs/heads/" merge))))
+          (setq merge (concat "refs/heads/" merge)))
+        (magit-confirm 'set-and-push
+          (format "Really use \"%s\" as upstream and push \"%s\" there"
+                  upstream branch)))
       (cl-pushnew "--set-upstream" args :test #'equal))
     (run-hooks 'magit-credential-hook)
     (magit-run-git-async "push" "-v" args remote (concat branch ":" merge))))

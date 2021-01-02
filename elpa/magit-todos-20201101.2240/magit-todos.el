@@ -4,9 +4,9 @@
 
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; URL: http://github.com/alphapapa/magit-todos
-;; Package-Version: 20200310.28
-;; Package-Commit: a0e5d1f3c7dfcb4f18c1b0d57f1746a4872df5c6
-;; Version: 1.5.2
+;; Package-Version: 20201101.2240
+;; Package-Commit: 78d24cf419138b543460f40509c8c1a168b52ca0
+;; Version: 1.6-pre
 ;; Package-Requires: ((emacs "25.2") (async "1.9.2") (dash "2.13.0") (f "0.17.2") (hl-todo "1.9.0") (magit "2.13.0") (pcre2el "1.8") (s "1.12.0"))
 ;; Keywords: magit, vc
 
@@ -360,6 +360,10 @@ By default, the branch todo list would show todos from both the
 from the \"topic2\" branch, this option could be set to
 \"topic\"."
   :type 'string)
+
+(defcustom magit-todos-submodule-list nil
+  "Show submodule to-do list."
+  :type 'boolean)
 
 ;;;; Commands
 
@@ -782,7 +786,7 @@ sections."
   ;; NOTE: `magit-insert-section' seems to bind `magit-section-visibility-cache' to nil, so setting
   ;; visibility within calls to it probably won't work as intended.
   (declare (indent defun))
-  (let* ((indent (s-repeat (* 2 depth) " "))
+  (let* ((indent (propertize (s-repeat (* 2 depth) " ") 'face nil))
          (heading (concat indent heading))
          (magit-insert-section--parent (if (= 0 depth)
                                            magit-root-section
@@ -844,7 +848,7 @@ sections."
   ;; NOTE: `magit-insert-section' seems to bind `magit-section-visibility-cache' to nil, so setting
   ;; visibility within calls to it probably won't work as intended.
   (declare (indent defun))
-  (let* ((indent (s-repeat (* 2 depth) " "))
+  (let* ((indent (propertize (s-repeat (* 2 depth) " ") 'face nil))
          (magit-insert-section--parent (if (= 0 depth)
                                            magit-root-section
                                          magit-insert-section--parent))
@@ -1274,6 +1278,9 @@ When SYNC is non-nil, match items are returned."
                  (when magit-todos-exclude-globs
                    (--map (list "--glob" (concat "!" it))
                           magit-todos-exclude-globs))
+                 (unless magit-todos-submodule-list
+                   (--map (list "--glob" (concat "!" it))
+                          (magit-list-module-paths)))
                  extra-args search-regexp-pcre directory))
 
 (magit-todos-defscanner "git grep"
@@ -1289,7 +1296,10 @@ When SYNC is non-nil, match items are returned."
                  extra-args "--" directory
                  (when magit-todos-exclude-globs
                    (--map (concat ":!" it)
-                          magit-todos-exclude-globs))))
+                          magit-todos-exclude-globs))
+                 (unless magit-todos-submodule-list
+                   (--map (list "--glob" (concat "!" it))
+                          (magit-list-module-paths)))))
 
 (magit-todos-defscanner "git diff"
   ;; NOTE: This scanner implements the regexp *searching* in elisp rather than in the
@@ -1345,6 +1355,11 @@ When SYNC is non-nil, match items are returned."
                            (list "-o" "("
                                  (--map (list "-iname" it)
                                         magit-todos-exclude-globs)
+                                 ")" "-prune"))
+                         (unless magit-todos-submodule-list
+                           (list "-o" "("
+                                 (--map (list "-iname" it)
+                                        (magit-list-module-paths))
                                  ")" "-prune")))
                    (list "-o" "-type" "f")
                    ;; NOTE: This uses "grep -P", i.e. "Interpret the pattern as a

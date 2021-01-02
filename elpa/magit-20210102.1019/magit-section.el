@@ -1503,13 +1503,17 @@ invisible."
     (goto-char beg)
     (let ((section (magit-current-section)))
       (while section
-        (if (and (magit-section-invisible-p section)
-                 (<= (oref section content) beg (oref section end)))
-            (progn
-              (magit-section-show section)
-              (push section magit-section--opened-sections)
-              (setq section (oref section parent)))
-          (setq section nil)))))
+        (let ((content (oref section content)))
+          (if (and (magit-section-invisible-p section)
+                   (<= (or content (oref section start))
+                       beg
+                       (oref section end)))
+              (progn
+                (when content
+                  (magit-section-show section)
+                  (push section magit-section--opened-sections))
+                (setq section (oref section parent)))
+            (setq section nil))))))
   (or (eq search-invisible t)
       (not (isearch-range-invisible beg end))))
 
@@ -1747,8 +1751,11 @@ Configuration'."
                                                magit--current-section-hook)))
         (unless (memq entry magit-disabled-section-inserters)
           (if (bound-and-true-p magit-refresh-verbose)
-              (message "  %-50s %s" entry
-                       (benchmark-elapse (apply entry args)))
+              (let ((time (benchmark-elapse (apply entry args))))
+                (message "  %-50s %s %s" entry time
+                         (cond ((> time 0.03) "!!")
+                               ((> time 0.01) "!")
+                               (t ""))))
             (apply entry args)))))))
 
 (cl-defun magit--overlay-at (pos prop &optional (val nil sval) testfn)

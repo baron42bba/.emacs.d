@@ -1,6 +1,6 @@
 This is magit.info, produced by makeinfo version 6.5 from magit.texi.
 
-     Copyright (C) 2015-2020 Jonas Bernoulli <jonas@bernoul.li>
+     Copyright (C) 2015-2021 Jonas Bernoulli <jonas@bernoul.li>
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -41,8 +41,9 @@ beside the ones below, but these didn’t fit well anywhere else.
      When the region is active, this command saves that to the
      ‘kill-ring’, like ‘kill-ring-save’ would, instead of behaving as
      described above.  If a prefix argument is used and the region is
-     within a hunk, it strips the outer diff marker column before saving
-     the text.
+     within a hunk, then it strips the diff marker column and keeps only
+     either the added or removed lines, depending on the sign of the
+     prefix argument.
 
 ‘M-w’     (‘magit-copy-buffer-revision’)
 
@@ -833,9 +834,11 @@ more information.
 
    On Catalina, and potentially other macOS releases, there may be a
 performance problem where any action takes 20 times longer on Darwin
-than on Linux.  This can be fixed by setting ‘magit-git-executable’ to
-the absolute path of the ‘git’ executable, instead of relying on
-resolving the ‘$PATH’.
+than on Linux.  This can be worked around by setting
+‘magit-git-executable’ to the absolute path of the ‘git’ executable,
+instead of relying on resolving the ‘$PATH’.  You should not do that if
+you want to use Magit on remote machines using Tramp and if ‘git’ is not
+installed in the same location on those machines.
 
    ---------- Footnotes ----------
 
@@ -2443,7 +2446,7 @@ Appendix C Keystroke Index
 * M-p <2>:                               Editing Rebase Sequences.
                                                               (line  43)
 * M-w:                                   Blaming.             (line 127)
-* M-w <1>:                               Common Commands.     (line  27)
+* M-w <1>:                               Common Commands.     (line  28)
 * M-x magit-debug-git-executable:        Git Executable.      (line  45)
 * M-x magit-debug-git-executable <1>:    Debugging Tools.     (line  36)
 * M-x magit-describe-section-briefly:    Section Types and Values.
@@ -2783,7 +2786,7 @@ Appendix D Command Index
 * magit-commit-instant-squash:           Initiating a Commit. (line  63)
 * magit-commit-reword:                   Initiating a Commit. (line  33)
 * magit-commit-squash:                   Initiating a Commit. (line  55)
-* magit-copy-buffer-revision:            Common Commands.     (line  27)
+* magit-copy-buffer-revision:            Common Commands.     (line  28)
 * magit-copy-section-value:              Common Commands.     (line  10)
 * magit-cycle-margin-style:              Log Margin.          (line  70)
 * magit-debug-git-executable:            Git Executable.      (line  45)
