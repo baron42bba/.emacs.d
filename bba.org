@@ -4823,9 +4823,9 @@ whole team. No matter what editor gets used.
   (if (display-graphic-p)
       (progn
         (custom-set-faces
-         '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef"))) t)
+         '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))) t)
          '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
-         '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313"))))
+         '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
          ;; '(show-paren-match ((t (:distant-foreground "#29759c":background "#84cbef" ))))
          ;;'(show-paren-match ((t (:inverse-video t))))
        '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
