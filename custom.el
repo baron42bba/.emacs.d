@@ -50,8 +50,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313"))))
- '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef"))))
+ '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
+ '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))))
  '(org-block-end-line ((t (:inherit org-block-begin-line))))
  '(org-document-title ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.5 :underline nil))))
  '(org-level-1 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.6))))
