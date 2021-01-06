@@ -11,8 +11,9 @@
 ;;	Marius Vollmer <marius.vollmer@gmail.com>
 ;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
 
-;; Package-Requires: ((emacs "25.1") (dash "20180910") (transient "20190812") (with-editor "20181103"))
-;; Package-Version: 20200123.1706
+;; Package-Requires: ((emacs "25.1") (dash "20200524") (transient "20200601") (with-editor "20200522"))
+;; Package-Version: 20201222.1527
+;; Package-Commit: c5e11811197ef8c667a605e5d9dd8ec77247bd13
 ;; Keywords: git tools vc
 ;; Homepage: https://github.com/magit/magit
 
@@ -176,6 +177,9 @@ The major mode configured here is turned on by the minor mode
 `git-commit-mode'."
   :group 'git-commit
   :type '(choice (function-item text-mode)
+                 (function-item markdown-mode)
+                 (function-item org-mode)
+                 (function :tag "Another mode")
                  (const :tag "No major mode")))
 
 (defcustom git-commit-setup-hook
@@ -191,6 +195,7 @@ The major mode configured here is turned on by the minor mode
   :get (and (featurep 'magit-utils) 'magit-hook-custom-get)
   :options '(git-commit-save-message
              git-commit-setup-changelog-support
+             magit-generate-changelog
              git-commit-turn-on-auto-fill
              git-commit-turn-on-flyspell
              git-commit-propertize-diff
@@ -310,7 +315,7 @@ already using it, then you probably shouldn't start doing so."
 (defface git-commit-keyword
   '((t :inherit font-lock-string-face))
   "Face used for keywords in commit messages.
-In this context a \"keyword\" is text surrounded be brackets."
+In this context a \"keyword\" is text surrounded by brackets."
   :group 'git-commit-faces)
 
 (define-obsolete-face-alias 'git-commit-note
@@ -574,6 +579,8 @@ Don't use it directly, instead enable `global-git-commit-mode'."
 
 (defun git-commit-setup-changelog-support ()
   "Treat ChangeLog entries as unindented paragraphs."
+  (when (fboundp 'log-indent-fill-entry) ; New in Emacs 27.
+    (setq-local fill-paragraph-function #'log-indent-fill-entry))
   (setq-local fill-indent-according-to-mode t)
   (setq-local paragraph-start (concat paragraph-start "\\|\\*\\|(")))
 
@@ -697,7 +704,7 @@ With a numeric prefix ARG, go forward ARG comments."
 
 ;;; Headers
 
-(define-transient-command git-commit-insert-pseudo-header ()
+(transient-define-prefix git-commit-insert-pseudo-header ()
   "Insert a commit message pseudo header."
   [["Insert ... by yourself"
     ("a"   "Ack"         git-commit-ack)
@@ -767,6 +774,8 @@ With a numeric prefix ARG, go forward ARG comments."
             (getenv "EMAIL")
             (ignore-errors (car (process-lines "git" "config" "user.email")))
             (read-string "Email: "))))
+
+(defvar git-commit-read-ident-history nil)
 
 (defun git-commit-read-ident (prompt)
   (if (require 'magit-git nil t)
@@ -876,7 +885,7 @@ Added to `font-lock-extend-region-functions'."
   `(,@git-commit-font-lock-keywords-1
     ;; Comments
     (eval . `(,(format "^%s.*" comment-start)
-              (0 'font-lock-comment-face)))
+              (0 'font-lock-comment-face append)))
     (eval . `(,(format "^%s On branch \\(.*\\)" comment-start)
               (1 'git-commit-comment-branch-local t)))
     (eval . `(,(format "^%s \\(HEAD\\) detached at" comment-start)
@@ -929,8 +938,12 @@ Added to `font-lock-extend-region-functions'."
     (modify-syntax-entry ?`  "." table)
     (set-syntax-table table))
   (setq-local comment-start
-              (or (ignore-errors
-                    (car (process-lines "git" "config" "core.commentchar")))
+              (or (with-temp-buffer
+                    (call-process "git" nil (current-buffer) nil
+                                  "config" "core.commentchar")
+                    (unless (bobp)
+                      (goto-char (point-min))
+                      (buffer-substring (point) (line-end-position))))
                   "#"))
   (setq-local comment-start-skip (format "^%s+[\s\t]*" comment-start))
   (setq-local comment-end-skip "\n")
