@@ -1,9 +1,9 @@
-;;; smartparens-c.el --- Additional configuration for C/C++ mode.  -*- lexical-binding: t; -*-
+;;; sp-sublimetext-like.el --- Behavior for inserting parentheses similar to SublimeText editor.  -*- lexical-binding: t; -*-
 ;;
-;; Author: Naoya Yamashita <conao3@gmail.com>
+;; Author: Konstantin Kharlamov <Hi-Angel@yandex.ru>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
-;; Created: 23 June 2019
-;; Keywords: abbrev convenience editing
+;; Created: 16 December 2020
+;; Keywords: convenience editing
 ;; URL: https://github.com/Fuco1/smartparens
 ;;
 ;; This file is not part of GNU Emacs.
@@ -27,10 +27,10 @@
 ;;
 ;;; Commentary:
 ;;
-;; This file provides some additional configuration for C/C++ mode.
-;; To use it, simply add:
+;; This file configuation to make smartparens insertion behavae similarly to
+;; SublimeText editor.  To use it, simply add:
 ;;
-;; (require 'smartparens-c)
+;;     (require 'sp-sublimetext-like)
 ;;
 ;; into your configuration.  You can use this in conjunction with the
 ;; default config or your own configuration.
@@ -39,14 +39,19 @@
 
 (require 'smartparens)
 
-;; remap electric delete functions to smartparens function
-(define-key smartparens-strict-mode-map [remap c-electric-delete-forward] 'sp-delete-char)
-(define-key smartparens-strict-mode-map [remap c-electric-backspace] 'sp-backward-delete-char)
+(defun sp-point-not-before-word (_ action __)
+  "In insert and autoskip actions returns t when next symbol is
+not a word constituent."
+  (if (memq action '(insert autoskip))
+      (looking-at "\\(\\Sw\\|$\\)")
+    t))
 
-(sp-with-modes sp-c-modes
-  (sp-local-pair "{" nil :post-handlers '(("||\n[i]" "RET")))
-  (sp-local-pair "/*" "*/" :post-handlers '((" | " "SPC")
-                                            ("* ||\n[i]" "RET"))))
+(let ((when '(sp-point-not-before-word))
+      (actions  '(insert wrap autoskip navigate)))
+  (sp-pair "{" "}" :when when :actions actions)
+  (sp-pair "[" "]" :when when :actions actions)
+  (sp-pair "(" ")" :when when :actions actions))
 
-(provide 'smartparens-c)
-;;; smartparens-c.el ends here
+(provide 'sp-sublimetext-like)
+
+;;; sp-sublimetext-like.el ends here

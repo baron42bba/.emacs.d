@@ -404,8 +404,8 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
 #+BEGIN_SRC emacs-lisp :tangle yes
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20200105.1259")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20210101.1712")
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20201229.1937")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20210105.414")
         (require 'smartparens)
         (smartparens-global-mode 1)
         (defmacro def-pairs (pairs)

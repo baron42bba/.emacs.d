@@ -1,10 +1,12 @@
 ;;; dash.el --- A modern list library for Emacs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2021 Free Software Foundation, Inc.
 
 ;; Author: Magnar Sveen <magnars@gmail.com>
 ;; Version: 2.17.0
+;; Package-Requires: ((emacs "24"))
 ;; Keywords: extensions, lisp
+;; Homepage: https://github.com/magnars/dash.el
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,15 +23,9 @@
 
 ;;; Commentary:
 
-;; A modern list api for Emacs.
+;; A modern list API for Emacs.
 ;;
-;; See documentation on https://github.com/magnars/dash.el#functions
-;;
-;; **Please note** The lexical binding in this file is not utilised at the
-;; moment. We will take full advantage of lexical binding in an upcoming 3.0
-;; release of Dash. In the meantime, we've added the pragma to avoid a bug that
-;; you can read more about in https://github.com/magnars/dash.el/issues/130.
-;;
+;; See its overview at https://github.com/magnars/dash.el#functions.
 
 ;;; Code:
 
@@ -66,24 +62,23 @@
          (setq it-index (1+ it-index))
          (!cdr ,l)))))
 
-(defmacro -doto (eval-initial-value &rest forms)
-  "Eval a form, then insert that form as the 2nd argument to other forms.
-The EVAL-INITIAL-VALUE form is evaluated once. Its result is
-passed to FORMS, which are then evaluated sequentially. Returns
-the target form."
+(defmacro -doto (init &rest forms)
+  "Evaluate INIT and thread the result as the 2nd argument to other FORMS.
+INIT is evaluated once.  Its result is passed to FORMS, which are
+then evaluated sequentially.  Returns the target form."
   (declare (indent 1))
   (let ((retval (make-symbol "value")))
-    `(let ((,retval ,eval-initial-value))
+    `(let ((,retval ,init))
        ,@(mapcar (lambda (form)
-                   (if (sequencep form)
-                       `(,(-first-item form) ,retval ,@(cdr form))
+                   (if (listp form)
+                       `(,(car form) ,retval ,@(cdr form))
                      `(funcall form ,retval)))
                  forms)
        ,retval)))
 
 (defmacro --doto (eval-initial-value &rest forms)
   "Anaphoric form of `-doto'.
-Note: `it' is not required in each form."
+Note: `it' need not be used in each form."
   (declare (indent 1))
   `(let ((it ,eval-initial-value))
      ,@forms
@@ -170,18 +165,28 @@ Return nil, used for side-effects only."
   (--each-r-while list (funcall pred it) (funcall fn it)))
 
 (defmacro --dotimes (num &rest body)
-  "Repeatedly executes BODY (presumably for side-effects) with symbol `it' bound to integers from 0 through NUM-1."
-  (declare (debug (form body))
-           (indent 1))
-  (let ((n (make-symbol "num")))
+  "Evaluate BODY NUM times, presumably for side-effects.
+BODY is evaluated with the local variable `it' temporarily bound
+to successive integers running from 0, inclusive, to NUM,
+exclusive.  BODY is not evaluated if NUM is less than 1.
+
+This is the anaphoric version of `-dotimes'."
+  (declare (debug (form body)) (indent 1))
+  (let ((n (make-symbol "num"))
+        (i (make-symbol "i")))
     `(let ((,n ,num)
-           (it 0))
-       (while (< it ,n)
-         ,@body
-         (setq it (1+ it))))))
+           (,i 0)
+           it)
+       (ignore it)
+       (while (< ,i ,n)
+         (setq it ,i ,i (1+ ,i))
+         ,@body))))
 
 (defun -dotimes (num fn)
-  "Repeatedly calls FN (presumably for side-effects) passing in integers from 0 through NUM-1."
+  "Call FN NUM times, presumably for side-effects.
+FN is called with a single argument on successive integers
+running from 0, inclusive, to NUM, exclusive.  FN is not called
+if NUM is less than 1."
   (declare (indent 1))
   (--dotimes num (funcall fn it)))
 
@@ -516,6 +521,26 @@ See also: `-map-last'"
 Thus function FN should return a list."
   (--mapcat (funcall fn it) list))
 
+(defmacro --iterate (form init n)
+  "Anaphoric version of `-iterate'."
+  (declare (debug (form form form)))
+  (let ((res (make-symbol "result")))
+    `(let ((it ,init) ,res)
+       (dotimes (_ ,n)
+         (push it ,res)
+         (setq it ,form))
+       (nreverse ,res))))
+
+(defun -iterate (fun init n)
+  "Return a list of iterated applications of FUN to INIT.
+
+This means a list of the form:
+
+  (INIT (FUN INIT) (FUN (FUN INIT)) ...)
+
+N is the length of the returned list."
+  (--iterate (funcall fun it) init n))
+
 (defun -flatten (l)
   "Take a nested list L and return its contents as a single, flat list.
 
@@ -532,11 +557,6 @@ See also: `-flatten-n'"
   (if (and (listp l) (listp (cdr l)))
       (-mapcat '-flatten l)
     (list l)))
-
-(defmacro --iterate (form init n)
-  "Anaphoric version of `-iterate'."
-  (declare (debug (form form form)))
-  `(-iterate (lambda (it) ,form) ,init ,n))
 
 (defun -flatten-n (num list)
   "Flatten NUM levels of a nested LIST.
@@ -1714,17 +1734,6 @@ SOURCE is a proper or improper list."
      (t ;; Handle improper lists.  Last matching place, no need for shift
       (dash--match match-form (dash--match-cons-get-cdr skip-cdr source))))))
 
-(defun dash--vector-tail (seq start)
-  "Return the tail of SEQ starting at START."
-  (cond
-   ((vectorp seq)
-    (let* ((re-length (- (length seq) start))
-           (re (make-vector re-length 0)))
-      (--dotimes re-length (aset re it (aref seq (+ it start))))
-      re))
-   ((stringp seq)
-    (substring seq start))))
-
 (defun dash--match-vector (match-form source)
   "Setup a vector matching environment and call the real matcher."
   (let ((s (dash--match-make-source-symbol)))
@@ -1772,7 +1781,7 @@ is discarded."
                      (eq m '&rest))
                 (prog1 (dash--match
                         (aref match-form (1+ i))
-                        `(dash--vector-tail ,source ,i))
+                        `(substring ,source ,i))
                   (setq i l)))
                ((and (symbolp m)
                      ;; do not match symbols starting with _
@@ -1923,7 +1932,7 @@ Key-value stores are disambiguated by placing a token &plist,
            (eq '&as (aref match-form 1)))
       (let ((s (aref match-form 0)))
         (cons (list s source)
-              (dash--match (dash--vector-tail match-form 2) s))))
+              (dash--match (substring match-form 2) s))))
      (t (dash--match-vector match-form source))))))
 
 (defun dash--normalize-let-varlist (varlist)
@@ -1975,11 +1984,11 @@ If VARLIST only contains one (PATTERN SOURCE) element, you can
 optionally specify it using a vector and discarding the
 outer-most parens.  Thus
 
-  (-let ((PATTERN SOURCE)) ..)
+  (-let ((PATTERN SOURCE)) ...)
 
 becomes
 
-  (-let [PATTERN SOURCE] ..).
+  (-let [PATTERN SOURCE] ...).
 
 `-let' uses a convention of not binding places (symbols) starting
 with _ whenever it's possible.  You can use this to skip over
@@ -2004,7 +2013,7 @@ Conses and lists:
 
   (a b) - bind car of list to A and `cadr' to B
 
-  (a1 a2 a3  ...) - bind 0th car of list to A1, 1st to A2, 2nd to A3 ...
+  (a1 a2 a3 ...) - bind 0th car of list to A1, 1st to A2, 2nd to A3...
 
   (a1 a2 a3 ... aN . rest) - as above, but bind the Nth cdr to REST.
 
@@ -2477,12 +2486,10 @@ not, return a list with ARGS as elements."
     (if (listp arg) arg args)))
 
 (defun -repeat (n x)
-  "Return a list with X repeated N times.
+  "Return a new list of length N with each element being X.
 Return nil if N is less than 1."
   (declare (pure t) (side-effect-free t))
-  (let (ret)
-    (--dotimes n (!cons x ret))
-    ret))
+  (and (natnump n) (make-list n x)))
 
 (defun -sum (list)
   "Return the sum of LIST."
@@ -2551,20 +2558,6 @@ The items for the comparator form are exposed as \"it\" and \"other\"."
 The items for the comparator form are exposed as \"it\" and \"other\"."
   (declare (debug (form form)))
   `(-min-by (lambda (it other) ,form) ,list))
-
-(defun -iterate (fun init n)
-  "Return a list of iterated applications of FUN to INIT.
-
-This means a list of form:
-
-  (init (fun init) (fun (fun init)) ...)
-
-N is the length of the returned list."
-  (if (= n 0) nil
-    (let ((r (list init)))
-      (--dotimes (1- n)
-        (push (funcall fun (car r)) r))
-      (nreverse r))))
 
 (defun -fix (fn list)
   "Compute the (least) fixpoint of FN with initial input LIST.
