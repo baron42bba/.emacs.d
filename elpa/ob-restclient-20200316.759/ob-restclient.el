@@ -4,7 +4,8 @@
 
 ;; Author: Alf Lervåg
 ;; Keywords: literate programming, reproducible research
-;; Package-Version: 20200109.730
+;; Package-Version: 20200316.759
+;; Package-Commit: 0ebfc7c5ebf96d2fe1a476439831363a5a43b9b6
 ;; Homepage: https://github.com/alf/ob-restclient.el
 ;; Version: 0.02
 ;; Package-Requires: ((restclient "0"))
@@ -69,7 +70,8 @@ This function is called by `org-babel-execute-src-block'"
 	(goto-char (point-min))
 	(delete-trailing-whitespace)
 	(goto-char (point-min))
-        (restclient-http-parse-current-and-do 'restclient-http-do nil t))
+      (restclient-http-parse-current-and-do
+       'restclient-http-do (org-babel-restclient-raw-payload-p params) t))
 
       (while restclient-within-call
         (sleep-for 0.05))
@@ -108,6 +110,12 @@ This function is called by `org-babel-execute-src-block'"
   (let ((result-type (cdr (assoc :results params))))
     (when result-type
       (string-match "value\\|table" result-type))))
+
+(defun org-babel-restclient-raw-payload-p (params)
+  "Return t if the `:results' key in PARAMS contain `file'."
+  (let ((result-type (cdr (assoc :results params))))
+    (when result-type
+      (string-match "file" result-type))))
 
 (provide 'ob-restclient)
 ;;; ob-restclient.el ends here
