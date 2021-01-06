@@ -5,7 +5,8 @@
 ;; Author: Andrew Stahlman <andrewstahlman@gmail.com>
 ;; Created: 10 Feb 2017
 ;; Version: 0.1
-;; Package-Version: 20190916.1537
+;; Package-Version: 20200921.205
+;; Package-Commit: de1cd6c93242a4cb8773bbe115b7be3d4dd6b97e
 
 ;; Keywords: tools
 ;; Homepage: https://github.com/astahlman/ob-async
@@ -155,6 +156,8 @@ block."
                       ;; Initialize the new Emacs process with org-babel functions
                       (setq exec-path ',exec-path)
                       (setq load-path ',load-path)
+                      ;; setq any variables that are prefixed with "org-babel-"
+                      ,(async-inject-variables "\\borg-babel.+")
                       (package-initialize)
                       (setq ob-async-pre-execute-src-block-hook ',ob-async-pre-execute-src-block-hook)
                       (run-hooks 'ob-async-pre-execute-src-block-hook)
