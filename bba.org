@@ -3936,12 +3936,12 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
 	(add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20191031.839")
+                     "~/.emacs.d/elpa/helm-20210131.1946")
 	(require 'helm)
 	(helm-mode 1)
 	(global-set-key (kbd "M-y") 'helm-show-kill-ring)
 	(global-set-key (kbd "C-c w") 'helm-man-woman)
-	(global-set-key (kbd "M-x") 'helm-M-x)
+	(global-set-key (kbd "M-x") #'helm-M-x)
 	(global-set-key "\C-cr" 'helm-recentf)
 	(global-set-key (kbd "M-s o") 'helm-occur)
 	(define-key global-map "\C-x\C-b" 'helm-buffers-list)
@@ -4021,8 +4021,6 @@ combine key strokes to access commands even faster.
   (key-chord-define cfengine3-mode-map ",," "\C-e,")
   (key-chord-define prog-mode-map ";;" "\C-e;")
   (key-chord-define prog-mode-map ",," "\C-e,")
-  (key-chord-define-global "uu" 'undo)
-  (key-chord-define-global "xb" 'helm-mini)
   (key-chord-define-global "xf" 'ido-find-file)
   (key-chord-define-global "xx" 'helm-M-x)
   (key-chord-define org-mode-map "TT" 'org-set-tags-command)

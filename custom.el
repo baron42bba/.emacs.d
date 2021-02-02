@@ -18,7 +18,7 @@
     ("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" default)))
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(grep-template "grep -i <X> <C> -nH -e <R> <F>")
- '(helm-comint-mode-list (quote (comint-mode slime-repl-mode sql-interactive-mode)))
+ '(helm-comint-mode-list '(comint-mode slime-repl-mode sql-interactive-mode))
  '(history-length 1000)
  '(magit-commit-arguments (quote ("--signoff" "--gpg-sign=43BA01102D205F88")))
  '(magit-commit-signoff t)
