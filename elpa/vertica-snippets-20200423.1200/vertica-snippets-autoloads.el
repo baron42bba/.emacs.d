@@ -11,9 +11,7 @@
 ;;; Generated autoloads from vertica-snippets.el
 
 (autoload 'vertica-snippets-initialize "vertica-snippets" "\
-Add snippet dir to yas-snippet-dirs and load it.
-
-\(fn)" nil nil)
+Add snippet dir to yas-snippet-dirs and load it." nil nil)
 
 (eval-after-load 'yasnippet '(vertica-snippets-initialize))
 

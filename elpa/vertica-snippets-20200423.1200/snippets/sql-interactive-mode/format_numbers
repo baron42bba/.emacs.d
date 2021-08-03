@@ -5,4 +5,4 @@
 # condition: (if (string-equal sql-product 'vertica)t) 
 # expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
 # --
-TO_CHAR( $0, '999g999g999g999') AS
+TO_CHAR( $1, '999g999g999g990d99') AS $0
