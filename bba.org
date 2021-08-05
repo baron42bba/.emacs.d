@@ -3788,6 +3788,63 @@ the clipboard content before executing it.
   (define-key global-map (kbd "s-w") 'bba-copy-line-or-region-to-iterm)
 #+END_SRC
 
+* bba monitor buffer changes
+[2021-08-05 Thu 09:59]
+
+With some code from http://howardism.org/Technical/Emacs/beep-for-emacs.html
+
+#+begin_src emacs-lisp :tangle yes
+  (require 'alert)
+
+  (setq alert-default-style 'osx-notifier)
+
+  (defvar beep-speech-executable "say %s"
+    "An OS-dependent shell string to speak. Replaces `%s' with a phrase.")
+
+  (defvar beep-alert-sound-file
+    (expand-file-name "/System/Library/Sounds/Submarine.aiff")
+    "A WAV or AU file used at the completion of a function.")
+
+  (defun beep--beep ()
+    "Play a default notification sound file.
+  Customize the variable, `beep-alert-sound-file' to adjust the sound."
+    (play-sound-file beep-alert-sound-file))
+
+  (defun beep--speak (phrase)
+    "Call a program to speak the string, PHRASE.
+  Customize the variable, `beep-speech-executable'."
+    (let ((command (format beep-speech-executable phrase))
+          (inhibit-message t))
+      (shell-command command)))
+
+  (defun beep--when-finished (phrase)
+    "Notify us with string, PHRASE, to grab our attention.
+  Useful after a long process has completed, but use sparingly,
+  as this can be pretty distracting."
+    (message phrase)
+    (alert phrase :title "Completed")
+    (beep--beep)
+    (beep--speak phrase))
+
+  (defun bba-notify-hook(beg end _)
+    "notify after changes and remove hook."
+    (beep--when-finished "The command has completed")
+    (remove-hook 'after-change-functions 'bba-notify-hook t)
+   )
+
+  (defun bba-add-notify-hook()
+    "add notify hook."
+    (interactive)
+    (if (buffer-file-name)
+        (save-buffer)
+      (set-buffer-modified-p nil)) ;; set buffer as unmodified
+    (make-local-variable 'after-change-functions)
+    (add-hook 'after-change-functions 'bba-notify-hook nil t)
+    )
+
+
+#+end_src
+
 * bba lookup dictionary
 [2019-05-27 Mon 15:15]
 coffee mug
