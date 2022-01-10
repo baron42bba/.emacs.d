@@ -99,7 +99,7 @@ from bash.
 
   (if (string-equal system-type "darwin")
           (progn
-            (let ((path (shell-command-to-string ". ~/.bashrc >/dev/null; echo -n $PATH")))
+            (let ((path (shell-command-to-string ". ~/.bashrc 2>/dev/null >/dev/null; echo -n $PATH")))
               (setenv "PATH" path)
               (setq exec-path
                     (append
@@ -467,7 +467,8 @@ search the web on your fingertips. C-c /.
 | G | github      |
 | M | google maps |
 | m | mysql       |
-| p | puppet      |
+| p | postgresql  |
+| P | puppet      |
 | v | vertica     |
 | w | wikipedia   |
 | y | youtube     |
@@ -518,9 +519,13 @@ search the web on your fingertips. C-c /.
           "https://dev.mysql.com/doc/search/?d=201&p=1&q=%s"
           :keybinding "m")
 
+        (defengine postgresql
+            "https://www.postgresql.org/search/?u=/docs/14/&q=%s"
+            :keybinding "p")
+
         (defengine puppet
           "https://puppet.com/search/docs?keys=%s"
-          :keybinding "p")
+          :keybinding "P")
 
         (defengine vertica
           "https://www.vertica.com/docs/latest/HTML/Content/Search/search.php?zoom_query=%s"
