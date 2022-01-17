@@ -20,13 +20,13 @@
  '(grep-template "grep -i <X> <C> -nH -e <R> <F>")
  '(helm-comint-mode-list '(comint-mode slime-repl-mode sql-interactive-mode))
  '(history-length 1000)
- '(magit-commit-arguments (quote ("--signoff" "--gpg-sign=43BA01102D205F88")))
+ '(magit-commit-arguments '("--signoff" "--gpg-sign=43BA01102D205F88"))
  '(magit-commit-signoff t)
- '(magit-git-global-arguments (quote ("--no-pager")))
- '(magit-log-arguments (quote ("--graph" "--decorate" "-n256")))
- '(magit-log-margin (quote (t "%Y-%m-%d %H:%M " magit-log-margin-width t 18)))
+ '(magit-git-global-arguments '("--no-pager"))
+ '(magit-log-arguments '("--graph" "--decorate" "-n256"))
+ '(magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18))
  '(magit-pull-arguments nil)
- '(magit-repo-dirs (quote ("~/git")))
+ '(magit-repo-dirs '("~/git"))
  '(org-agenda-files
    (quote
     ("~/workorg/work.org" "~/org/notes.org" "~/org/emacs.org" "~/org/it.org" "~/org/refile.org" "~/org/workhours.org")))

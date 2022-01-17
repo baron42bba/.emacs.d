@@ -302,11 +302,7 @@ Keep track of your important stuff!
         (package-initialize)
         (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
         (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
-        )
-    (progn
-      (add-to-list 'load-path "~/.emacs.d/elpa/cl-lib-0.5")
-      (add-to-list 'load-path "~/.emacs.d/elpa/magit-1.2.0")
-      ))
+        ))
 #+END_SRC
 
 * calendar
@@ -4323,7 +4319,7 @@ function to convert groups of spaces to hard tabs.
                                      )
     )
   (define-key global-map "\M-g\M-b" 'magit-branch-manager)
-  (define-key global-map "\M-gb" 'magit-blame-popup)
+  (define-key global-map "\M-gb" 'magit-blame)
   (define-key global-map "\C-cm" 'magit-status)
   (global-set-key (kbd "C-c s-m") 'magit-list-repositories)
 
