@@ -1,6 +1,6 @@
 ;;; async-bytecomp.el --- Compile elisp files asynchronously -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014-2016 Free Software Foundation, Inc.
+;; Copyright (C) 2014-2019 Free Software Foundation, Inc.
 
 ;; Authors: John Wiegley <jwiegley@gmail.com>
 ;;          Thierry Volpiatto <thierry.volpiatto@gmail.com>
@@ -8,20 +8,18 @@
 ;; Keywords: dired async byte-compile
 ;; X-URL: https://github.com/jwiegley/dired-async
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -40,6 +38,9 @@
 
 (require 'cl-lib)
 (require 'async)
+
+(declare-function package-desc-name "package.el")
+(declare-function package-desc-dir "package.el")
 
 (defcustom async-bytecomp-allowed-packages 'all
   "Packages in this list will be compiled asynchronously by `package--compile'.
@@ -91,7 +92,7 @@ All *.elc files are systematically deleted before proceeding."
     (async-start
      `(lambda ()
         (require 'bytecomp)
-        ,(async-inject-variables "\\`\\(load-path\\)\\|byte\\'")
+        ,(async-inject-variables "\\`\\(?:load-path\\'\\|byte-\\)")
         (let ((default-directory (file-name-as-directory ,directory))
               error-data)
           (add-to-list 'load-path default-directory)
@@ -128,13 +129,15 @@ All *.elc files are systematically deleted before proceeding."
                                  pkgs)))))))
     seen))
 
-(defadvice package--compile (around byte-compile-async)
+(defun async--package-compile (orig-fun pkg-desc &rest args)
   (let ((cur-package (package-desc-name pkg-desc))
         (pkg-dir (package-desc-dir pkg-desc)))
     (if (or (member async-bytecomp-allowed-packages '(t all (all)))
             (memq cur-package (async-bytecomp--get-package-deps
                                async-bytecomp-allowed-packages)))
         (progn
+          ;; FIXME: Why do we use (eq cur-package 'async) once
+          ;; and (string= cur-package "async") afterwards?
           (when (eq cur-package 'async)
             (fmakunbound 'async-byte-recompile-directory))
           ;; Add to `load-path' the latest version of async and
@@ -145,7 +148,7 @@ All *.elc files are systematically deleted before proceeding."
           ;; `async-byte-recompile-directory' will add directory
           ;; as needed to `load-path'.
           (async-byte-recompile-directory (package-desc-dir pkg-desc) t))
-      ad-do-it)))
+      (apply orig-fun pkg-desc args))))
 
 ;;;###autoload
 (define-minor-mode async-bytecomp-package-mode
@@ -155,8 +158,8 @@ Async compilation of packages can be controlled by
   :group 'async
   :global t
   (if async-bytecomp-package-mode
-      (ad-activate 'package--compile)
-    (ad-deactivate 'package--compile)))
+      (advice-add 'package--compile :around #'async--package-compile)
+    (advice-remove 'package--compile #'async--package-compile)))
 
 ;;;###autoload
 (defun async-byte-compile-file (file)
