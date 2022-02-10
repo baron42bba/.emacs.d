@@ -1,11 +1,11 @@
 (setq load-path
       (append
-       (list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-20200127"))
+       (list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-9.5.2"))
        load-path))
 (if (string-equal system-type "darwin")
     (delete ' "/Applications/Emacs.app/Contents/Resources/lisp/org" load-path))
 (setq org-use-extra-keys t)
-(require 'org "~/.emacs.d/elpa/org-20200127/org.el")
+(require 'org "~/.emacs.d/elpa/org-9.5.2/org.el")
 (require 'ob-core)
 (require 'ob-tangle)
 (require 'ob-sql)
