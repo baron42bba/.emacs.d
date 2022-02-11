@@ -3861,6 +3861,7 @@ the clipboard content before executing it.
 With some code from http://howardism.org/Technical/Emacs/beep-for-emacs.html
 
 #+begin_src emacs-lisp
+  (require 'log4e)
   (require 'alert)
 
   (setq alert-default-style 'osx-notifier)
