@@ -760,6 +760,13 @@ Single pipes interfere with org tables. Just go double.
   (setq hidepw-pattern "||\\(.*\\)||")
 #+END_SRC
 
+* asterisk
+[2020-07-10 Fri 13:17]
+
+#+begin_src emacs-lisp
+(load-file (expand-file-name "~/.emacs.d/lisp/asterisk-dialplan.el"))
+#+end_src
+
 * latex
 
 Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
