@@ -764,7 +764,7 @@ Probably the best help to keep track of the not every day used keybindings.
         (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.1300")
         (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150108.635")
         (require 'guide-key)
-        (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>"))
+        (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>" "s-l"))
         (setq guide-key/recursive-key-sequence-flag t)
         (setq guide-key/idle-delay 3)
         (guide-key-mode 1)
@@ -3949,7 +3949,7 @@ coffee mug
     (shell-command (concat "open dict://" (thing-at-point 'symbol)))
     )
   )
-  (define-key global-map (kbd "s-l") 'bba-dict)
+  (define-key global-map (kbd "s-L") 'bba-dict)
 
 #+END_SRC
 * [[http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html][Xah Lee Move cursor to Bracket]]
@@ -4240,7 +4240,12 @@ character before any spaces."
   (define-key global-map "\C-c\S-t" 'visit-tags-table)
   (define-key global-map "\C-cf" 'tags-search)
 
+  (define-key global-map (kbd "s-c") '(lambda () "insertwhichfunc" (interactive)(insert (which-function))))
   (define-key global-map (kbd "s-b") 'clone-indirect-buffer)
+  (define-key global-map (kbd "s-m") 'toggle-maximize-buffer)
+   (define-key global-map (kbd "M-s-m") 'maximize-window)
+
+  (define-key global-map (kbd "s-t") 'twist-split)
 
   (define-key global-map (kbd "C-c M-s") 'string-edit-at-point)
 
@@ -4347,6 +4352,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'eshell)
   (define-key bba/launcher "E" 'elfeed)
+  (define-key bba/launcher "g" '(lambda()"epa-file-encrypt-to"(interactive) (describe-variable 'epa-file-encrypt-to)))
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
   (define-key bba/launcher "l" 'magit-log-buffer-file)
@@ -4362,7 +4368,8 @@ function to convert groups of spaces to hard tabs.
   (define-prefix-command 'bba/keyboard-maestro)
   (define-prefix-command 'bba/multiple-cursors)
 
-  (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssh-to-fqdn-at-point)
+  (define-key bba/keyboard-maestro "S" 'bba-screen-start-ssh-to-fqdn-at-point)
+  (define-key bba/keyboard-maestro "s" 'bba-screen-start-ssm-to-fqdn-at-point)
   (define-key bba/keyboard-maestro "\C-s" 'bba-splunk-search)
   (define-key bba/keyboard-maestro "c" 'bba-open-file-dir-screen)
   (define-key bba/keyboard-maestro "C" 'bba-create-ticket-tmp-dir-open-dir-screen)
@@ -5137,6 +5144,28 @@ Assumption clipboard is a dns name.
     )
 
 #+END_SRC
+
+* start ssm in screen session
+[2020-02-25 Tue 12:20]
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-screen-start-ssm-to-clipboard (&optional arg)
+  "Use a macro in Keyboard Maestro to ssh into a system in iterm screen session."
+  (interactive)
+  (if arg
+      (kill-new (thing-at-point arg))
+    )
+  (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-ssm-to-clipboard\"'" )
+  )
+
+  (defun bba-screen-start-ssm-to-fqdn-at-point()
+    "run ssm to fqdn in screen session. fallback to clipboard."
+    (interactive)
+    (bba-screen-start-ssm-to-clipboard 'fqdn)
+    )
+
+#+END_SRC
+
 
 
 * aws
