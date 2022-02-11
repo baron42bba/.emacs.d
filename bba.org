@@ -3039,6 +3039,30 @@ Combine abbrev with Ispell:
 * lsp
 [2020-01-16 Thu 11:26]
 
+#+begin_src sh :eval never
+  cpan -i Complier::Lexer
+  cpan -i Perl::LanguageServer
+#+end_src
+
+cpan only has Version 2.0.2.
+thus installed via github.
+
+
+#+begin_src emacs-lisp
+  (require 'lsp-mode)
+  (require 'lsp-ui)
+  (setq lsp-keymap-prefix "s-l")
+  (add-hook 'sh-mode-hook #'lsp)
+  ;; crashes currently in our configuration (add-hook 'cperl-mode-hook #'lsp)
+  (setq lsp-ui-doc-enable t)
+  (setq lsp-ui-doc-header t)
+  (setq lsp-ui-doc-include-signature t)
+  (setq lsp-ui-doc-position 'top)
+  (setq lsp-ui-sideline-enable nil)
+  (setq lsp-ui-sideline-ignore-duplicate t)
+  (setq lsp-ui-sideline-show-code-actions nil)
+#+end_src
+
 #+begin_src emacs-lisp :tangle no
   (lsp-define-stdio-client lsp-sql "sql"
                            (lsp-make-traverser #'(lambda (dir) (directory-files dir nil "sss.sql"))) '("~/.vscode/extensions/ms-mssql.mssql-1.4.0/sqltoolsservice/1.4.0/Ubuntu16/MicrosoftSqlToolsServiceLayer"))
