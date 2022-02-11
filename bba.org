@@ -164,6 +164,18 @@ from bash.
             (push "/opt/local/share/info" Info-directory-list)))
 #+END_SRC
 
+* [[https://github.com/leoliu/play-sound-osx][play sound on osx]]
+[2021-01-22 Fri 11:58]
+
+#+begin_src emacs-lisp
+  (if (string-equal system-type "darwin")
+          (progn
+            (unless (and (fboundp 'play-sound-internal)
+                         (subrp (symbol-function 'play-sound-internal)))
+              (require 'play-sound))
+    (setq ring-bell-function (lambda ()
+                               (play-sound-file "~/.emacs.d/bell.wav")))))
+#+end_src
 * move files to trash on osx
 [2017-02-10 Fri 15:12]
 
