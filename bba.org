@@ -332,6 +332,23 @@ Keep track of your important stuff!
 
   (define-key calendar-mode-map (kbd "RET") 'calendar-insert-date)
 #+end_src
+
+* [[https://www.emacswiki.org/emacs/BookmarkPlus][Bookmark+]]
+[2022-02-10 Thu 15:22]
+
+#+BEGIN_SRC emacs-lisp
+  (if (equal "work" (getenv "SYSENV"))
+      (setq bookmark-default-file "~/workorg/bookmarks")
+    (setq bookmark-default-file "~/org/bookmarks"))
+  (load-file (expand-file-name "~/.emacs.d/lisp/bookmark+.el"))
+  (load-file (expand-file-name "~/.emacs.d/lisp/bookmark+-mac.el"))
+  (load-file (expand-file-name "~/.emacs.d/lisp/bookmark+-bmu.el"))
+  (load-file (expand-file-name "~/.emacs.d/lisp/bookmark+-1.el"))
+  (load-file (expand-file-name "~/.emacs.d/lisp/bookmark+-key.el"))
+  (load-file (expand-file-name "~/.emacs.d/lisp/bookmark+-lit.el"))
+
+#+END_SRC
+
 * magit
 
 For annotated tags prepare message with commit messages since last tag.
