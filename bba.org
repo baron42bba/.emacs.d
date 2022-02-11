@@ -2221,6 +2221,7 @@ taken from http://doc.norang.ca/org-mode.org
         (add-hook 'org-mode-hook
                   (lambda ()
                     (auto-fill-mode)
+                    (which-function-mode)
                     (flyspell-mode -1)
                     (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
                     (when (display-graphic-p)
@@ -2967,7 +2968,8 @@ list who can decrypt a file:
        (setq cperl-continued-statement-offset 4)
        (setq cperl-indent-level 4)
        (setq cperl-indent-parens-as-block t)
-       (setq cperl-tab-always-indent t)))))
+       (setq cperl-tab-always-indent t)
+       (which-function-mode)))))
 
 #+END_SRC
 
