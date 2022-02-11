@@ -707,7 +707,7 @@ log-format.
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20191126.2142")
+	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20210825.1804")
 	(require 'flycheck)
 	(add-hook 'after-init-hook #'global-flycheck-mode)
 	(flycheck-define-checker puppet-lint
@@ -747,6 +747,13 @@ log-format.
 #+BEGIN_SRC emacs-lisp
   (setq flycheck-json-python-json-executable "python2.7")
 #+END_SRC
+
+SQL:
+
+#+begin_src sh :tangle never
+  gem install --user-install sqlint
+#+end_src
+
 * [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 Probably the best help to keep track of the not every day used keybindings.
