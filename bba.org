@@ -4923,27 +4923,40 @@ whole team. No matter what editor gets used.
 #+BEGIN_SRC emacs-lisp
    (deftheme bba1 "DOCSTRING for bba1")
      (custom-theme-set-faces 'bba1
-      '(default ((t (:foreground "#07e30d" :background "#282828" ))))
-      '(cursor ((t (:background "#f09213" ))))
-      '(fringe ((t (:background "#131313" ))))
-      '(mode-line ((t (:foreground "#282828" :background "#d96503" ))))
-      '(region ((t (:background "#7a7674" ))))
-      '(secondary-selection ((t (:background "#584e47" ))))
-      '(font-lock-builtin-face ((t (:foreground "#fe8019" ))))
-      '(font-lock-comment-face ((t (:foreground "#df7114" ))))
-      '(font-lock-function-name-face ((t (:foreground "#b8bb26" ))))
-      '(font-lock-keyword-face ((t (:foreground "#fb4934" ))))
-      '(font-lock-string-face ((t (:foreground "#b8bb26" ))))
-      '(font-lock-type-face ((t (:foreground "#d3869b" ))))
-      '(font-lock-constant-face ((t (:foreground "#d3869b" ))))
-      '(font-lock-variable-name-face ((t (:foreground "#83a598" ))))
-      '(minibuffer-prompt ((t (:foreground "#b8bb26" :bold t ))))
-      '(font-lock-warning-face ((t (:foreground "red" :bold t ))))
+      '(default ((default (:foreground "#07e30d" :background "#282828" ))))
+      '(cursor ((default (:background "#f09213" ))))
+      '(fringe ((default (:background "#131313" ))))
+      '(mode-line ((default (:foreground "#282828" :background "#d96503" ))))
+      '(region ((default (:background "#7a7674" ))))
+      '(secondary-selection ((default (:background "#584e47" ))))
+      '(font-lock-builtin-face ((default (:foreground "#fe8019" ))))
+      '(font-lock-comment-face ((default (:foreground "#df7114" ))))
+      '(font-lock-function-name-face ((default (:foreground "#b8bb26" ))))
+      '(font-lock-keyword-face ((default (:foreground "#fb4934" ))))
+      '(font-lock-string-face ((default (:foreground "#b8bb26" ))))
+      '(font-lock-type-face ((default (:foreground "#d3869b" ))))
+      '(font-lock-constant-face ((default (:foreground "#d3869b" ))))
+      '(font-lock-variable-name-face ((default (:foreground "#83a598" ))))
+      '(minibuffer-prompt ((default (:foreground "#b8bb26" :bold t ))))
+      '(font-lock-warning-face ((default (:foreground "red" :bold t ))))
       )
    (provide-theme 'bba1)
 
   (if (display-graphic-p)
       (progn
+        (when (>= emacs-major-version 27)
+          (let ((custom--inhibit-theme-enable nil))
+            (custom-theme-set-faces
+             'bba1
+             ;; theme settings
+             ))
+          (with-eval-after-load 'org
+            (dolist (face '(org-block
+                        org-block-begin-line
+                        org-block-end-line
+                        org-level-1
+                        org-quote))
+          (set-face-attribute face nil :extend t ))))
         (custom-set-faces
          '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))) t)
          '(org-block-end-line ((t (:inherit org-block-begin-line))) t)
