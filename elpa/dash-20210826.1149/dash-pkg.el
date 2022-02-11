@@ -1,6 +1,6 @@
-(define-package "dash" "20210105.414" "A modern list library for Emacs"
+(define-package "dash" "20210826.1149" "A modern list library for Emacs"
   '((emacs "24"))
-  :commit "8879c41d30211ae2e72298e354fdffef627a3836" :authors
+  :commit "da167c51e9fd167a48d06c7c0ee8e3ac7abd9718" :authors
   '(("Magnar Sveen" . "magnars@gmail.com"))
   :maintainer
   '("Magnar Sveen" . "magnars@gmail.com")
