@@ -3126,15 +3126,15 @@ starting sql-connect.
   (defun my-sql-connect ()
     (interactive)
     (require 'my-password "~/.emacs_secrets.el.gpg")
-    (setq sql-product 'vertica)
     (let ((connection (helm-comp-read
                        "Select server: "
                        my-sql-servers-alist
                        )))
-      (sql-connect connection))
-    (sql-rename-buffer)
-    )
-
+      (message connection)
+      (if current-prefix-arg
+          (sql-connect connection connection)
+        (sql-connect connection))))
+  (global-set-key (kbd "s-s") 'my-sql-connect)
 #+END_SRC
 
 your =~/.emacs_secrets.el.gpg= might look like:
