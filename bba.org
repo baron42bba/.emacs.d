@@ -934,6 +934,7 @@ With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's e
 
 #+BEGIN_SRC emacs-lisp
   (require 'ox-md nil t)
+  (setq org-use-speed-commands t)
 #+END_SRC
 
 ** org-mac-link
