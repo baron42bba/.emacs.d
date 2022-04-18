@@ -78,6 +78,14 @@ No need for that:
   (setq inhibit-startup-screen t)
 #+END_SRC
 
+* native-compile
+[2022-04-18 Mon 16:02]
+
+#+begin_src emacs-lisp
+  (if (>= emacs-major-version 28)
+      (setq native-comp-deferred-compilation t))
+#+end_src
+
 * shell aliases
 
 Some aliases you might want to set in your bash to talk to your Emacs server:
