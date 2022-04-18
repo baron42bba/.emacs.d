@@ -1,4 +1,4 @@
-;;; erlang-autoloads.el --- automatically extracted autoloads
+;;; erlang-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -115,7 +115,7 @@ editing control characters:
 
 \(fn &optional COMMAND)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang" '("erlang-" "inferior-erlang-" "run-erlang")))
+(register-definition-prefixes "erlang" '("erlang-" "inferior-erlang-" "run-erlang"))
 
 ;;;***
 
@@ -123,25 +123,34 @@ editing control characters:
 ;;; Generated autoloads from erlang-edoc.el
 
 (autoload 'erlang-edoc-mode "erlang-edoc" "\
-Toggle Erlang-Edoc mode on or off.
+Toggle Erlang-EDoc mode on or off.
 
-If called interactively, enable Erlang-Edoc mode if ARG is
-positive, and disable it if ARG is zero or negative.  If called
-from Lisp, also enable the mode if ARG is omitted or nil, and
-toggle it if ARG is `toggle'; disable the mode otherwise.
+This is a minor mode.  If called interactively, toggle the
+`Erlang-EDoc mode' mode.  If the prefix argument is positive,
+enable the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `erlang-edoc-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
 
 \\{erlang-edoc-mode-map}
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang-edoc" '("erlang-edoc-")))
+(register-definition-prefixes "erlang-edoc" '("erlang-edoc-"))
 
 ;;;***
 
 ;;;### (autoloads nil "erlang-eunit" "erlang-eunit.el" (0 0 0 0))
 ;;; Generated autoloads from erlang-eunit.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang-eunit" '("erlang-e" "filename-join")))
+(register-definition-prefixes "erlang-eunit" '("erlang-e" "filename-join"))
 
 ;;;***
 
@@ -149,14 +158,14 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 ;;;;;;  0))
 ;;; Generated autoloads from erlang-flymake.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang-flymake" '("erlang-flymake-")))
+(register-definition-prefixes "erlang-flymake" '("erlang-flymake-"))
 
 ;;;***
 
 ;;;### (autoloads nil "erlang-skels" "erlang-skels.el" (0 0 0 0))
 ;;; Generated autoloads from erlang-skels.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang-skels" '("erlang-")))
+(register-definition-prefixes "erlang-skels" '("erlang-"))
 
 ;;;***
 
@@ -164,7 +173,7 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from erlang-skels-old.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang-skels-old" '("erlang-")))
+(register-definition-prefixes "erlang-skels-old" '("erlang-"))
 
 ;;;***
 
@@ -182,7 +191,7 @@ toggle it if ARG is `toggle'; disable the mode otherwise.
 ;;;### (autoloads nil "erlang-test" "erlang-test.el" (0 0 0 0))
 ;;; Generated autoloads from erlang-test.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erlang-test" '("erlang-")))
+(register-definition-prefixes "erlang-test" '("erlang-"))
 
 ;;;***
 
@@ -207,7 +216,7 @@ A function suitable for `eldoc-documentation-function'." nil nil)
 
 \(fn TOPIC)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "erldoc" '("erldoc-")))
+(register-definition-prefixes "erldoc" '("erldoc-"))
 
 ;;;***
 

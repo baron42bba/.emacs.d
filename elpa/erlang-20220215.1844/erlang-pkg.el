@@ -1,6 +1,6 @@
-(define-package "erlang" "20210315.1640" "Erlang major mode"
+(define-package "erlang" "20220215.1844" "Erlang major mode"
   '((emacs "24.1"))
-  :commit "e782c0305e2fcdff0b9ea9c2b365878e602df04a" :authors
+  :commit "ce4ee6e960ece4193fd3031880f8cfc6b50ee69f" :authors
   '(("Anders Lindgren"))
   :maintainer
   '("Anders Lindgren")

@@ -9,7 +9,7 @@
 
 ;; %CopyrightBegin%
 ;;
-;; Copyright Ericsson AB 1996-2020. All Rights Reserved.
+;; Copyright Ericsson AB 1996-2021. All Rights Reserved.
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -678,6 +678,8 @@ resulting regexp is surrounded by \\_< and \\_>."
       "of"
       "receive"
       "try"
+      "maybe"
+      "else"
       "when")
     "Erlang reserved keywords"))
 
@@ -1466,8 +1468,8 @@ Other commands:
       (modify-syntax-entry ?\n ">" table)
       (modify-syntax-entry ?\" "\"" table)
       (modify-syntax-entry ?# "." table)
-      ;; (modify-syntax-entry ?$ "\\" table)   ;; Creates problems with indention afterwards
-      ;; (modify-syntax-entry ?$ "'" table)    ;; Creates syntax highlighting and indention problems
+      ;; (modify-syntax-entry ?$ "\\" table)   ;; Creates problems with indentation afterwards
+      ;; (modify-syntax-entry ?$ "'" table)    ;; Creates syntax highlighting and indentation problems
       (modify-syntax-entry ?$ "/" table)    ;; Misses the corner case "string that ends with $"
       ;; we have to live with that for now..it is the best alternative
       ;; that can be worked around with "string that ends with \$"
@@ -2730,13 +2732,13 @@ Value is list (stack token-start token-type in-what)."
 
      ;; Word constituent: check and handle keywords.
      ((= cs ?w)
-      (cond ((looking-at "\\(end\\|after\\)[^_a-zA-Z0-9]")
+      (cond ((looking-at "\\(end\\|after\\|else\\)[^_a-zA-Z0-9]")
              ;; Must pop top icr layer, `after' will push a new
              ;; layer next.
              (progn
                (while (and stack (eq (car (car stack)) '->))
                  (erlang-pop stack))
-               (if (and stack (memq (car (car stack)) '(icr begin fun try)))
+               (if (and stack (memq (car (car stack)) '(icr begin fun try maybe)))
                    (erlang-pop stack))))
             ((looking-at "catch\\b.*of")
              t)
@@ -2746,7 +2748,7 @@ Value is list (stack token-start token-type in-what)."
              (progn
                (while (and stack (eq (car (car stack)) '->))
                  (erlang-pop stack))
-               (if (and stack (memq (car (car stack)) '(icr begin try)))
+               (if (and stack (memq (car (car stack)) '(icr begin try maybe)))
                    (erlang-pop stack))))
             )
       (cond ((looking-at "\\(if\\|case\\|receive\\)[^_a-zA-Z0-9]")
@@ -2768,7 +2770,7 @@ Value is list (stack token-start token-type in-what)."
 
             ((looking-at "\\(fun\\)[^_a-zA-Z0-9]")
              ;; Push a new layer if we are defining a `fun'
-             ;; expression, not when we are refering an existing
+             ;; expression, not when we are referring an existing
              ;; function.  'fun's defines are only indented one level now.
              (if (save-excursion
                    (goto-char (match-end 1))
@@ -2783,6 +2785,11 @@ Value is list (stack token-start token-type in-what)."
                  (erlang-push (list 'fun token (current-column)) stack)))
             ((looking-at "\\(begin\\)[^_a-zA-Z0-9]")
              (erlang-push (list 'begin token (current-column)) stack))
+            ((looking-at "\\(maybe\\)[^_a-zA-Z0-9]")
+             (erlang-push (list 'begin token (current-column)) stack))
+            ((looking-at "\\(else\\)[^_a-zA-Z0-9]")
+             (erlang-push (list 'icr token (current-column)) stack))
+
             ;; Normal when case
             ;;((looking-at "when\\s ")
             ;;((looking-at "when\\s *\\($\\|%\\)")
@@ -2820,7 +2827,7 @@ Value is list (stack token-start token-type in-what)."
         (forward-char 1))
        (t
         ;; Maybe a character literal, quote the next char to avoid
-        ;; situations as $" being seen as the begining of a string.
+        ;; situations as $" being seen as the beginning of a string.
         ;; Note the quoting something in the middle of a string is harmless.
         (quote (following-char))
         (forward-char 1))))
@@ -2875,7 +2882,7 @@ Value is list (stack token-start token-type in-what)."
           (erlang-pop stack))
         (cond ((eq (car (car stack)) '<<)
                (erlang-pop stack))
-              ((memq (car (car stack)) '(icr begin fun))
+              ((memq (car (car stack)) '(icr begin maybe fun))
                (error "Missing `end'"))
               (t
                (error "Unbalanced parentheses")))
@@ -2946,6 +2953,8 @@ Value is list (stack token-start token-type in-what)."
                (error "Missing `end'")
                ))
             ((eq (car (car stack)) 'begin)
+             (error "Missing `end'"))
+            ((eq (car (car stack)) 'maybe)
              (error "Missing `end'"))
             (t
              (error "Unbalanced parenthesis"))
@@ -3048,7 +3057,7 @@ Return nil if inside string, t if in a comment."
           ((and (eq (car stack-top) '||) (looking-at "\\(]\\|>>\\)[^_a-zA-Z0-9]"))
            (nth 2 (car (cdr stack))))
           ;; Real indentation, where operators create extra indentation etc.
-          ((memq (car stack-top) '(-> || try begin))
+          ((memq (car stack-top) '(-> || try begin maybe))
            (if (looking-at "\\(of\\)[^_a-zA-Z0-9]")
                (nth 2 stack-top)
              (goto-char (nth 1 stack-top))
@@ -3059,6 +3068,8 @@ Return nil if inside string, t if in a comment."
                    (skip 2))
                (cond ((null (cdr stack))) ; Top level in function.
                      ((eq (car stack-top) 'begin)
+                      (setq skip 5))
+                     ((eq (car stack-top) 'maybe)
                       (setq skip 5))
                      ((eq (car stack-top) 'try)
                       (setq skip 5))
@@ -3073,7 +3084,7 @@ Return nil if inside string, t if in a comment."
                (let ((base (erlang-indent-find-base stack indent-point off skip)))
                  ;; Special cases
                  (goto-char indent-point)
-                 (cond ((looking-at "\\(;\\|end\\|after\\)\\($\\|[^_a-zA-Z0-9]\\)")
+                 (cond ((looking-at "\\(;\\|end\\|after\\|else\\)\\($\\|[^_a-zA-Z0-9]\\)")
                         (if (eq (car stack-top) '->)
                             (erlang-pop stack))
                         (cond ((and stack (looking-at ";"))
@@ -3222,7 +3233,7 @@ Return nil if inside string, t if in a comment."
                 (progn
                   (if (memq (car stack-top) '(-> ||))
                       (erlang-pop stack))
-                  ;; Take parent identation + offset,
+                  ;; Take parent indentation + offset,
                   ;; else just erlang-indent-level if no parent
                   (if stack
                       (+ (caddr (car stack))
@@ -3324,8 +3335,8 @@ This assumes that the preceding expression is either simple
 
 (defun erlang-at-keyword ()
   "Are we looking at an Erlang keyword which will increase indentation?"
-  (looking-at (concat "\\(when\\|if\\|fun\\|case\\|begin\\|"
-                      "of\\|receive\\|after\\|catch\\|try\\)\\b")))
+  (looking-at (concat "\\(when\\|if\\|fun\\|case\\|begin\\|maybe\\|"
+                      "of\\|receive\\|after\\|catch\\|try\\|else\\)\\b")))
 
 (defun erlang-at-operator ()
   "Are we looking at an Erlang operator?"
@@ -5120,14 +5131,19 @@ about Erlang modules."
 ;;
 ;; As mentioned this xref implementation is based on the etags xref
 ;; implementation.  But in the cases where arity is considered the
-;; etags information structures (class xref-etags-location) will be
-;; translated to our own structures which include arity (class
+;; etags information structures (struct xref-etags-location) will be
+;; translated to our own structures which include arity (struct
 ;; erlang-xref-location).  This translation is started in the function
 ;; `erlang-refine-xrefs'.
 
 ;; I mention this as a head up that some of the functions below deal
 ;; with xref items with xref-etags-location and some deal with xref
 ;; items with erlang-xref-location.
+
+;; NOTE: Around Sept 2021, the xrefs package changed all of its defined types
+;; (i.e.  xref-location, xref-file-location) from EIEIO classes to CL-Lib
+;; structures. These are both supported. Older Emacsen with earlier versions of
+;; xref will continue to use defclass. Newer Emacsen will use cl-defstruct.
 
 (defun erlang-etags--xref-backend () 'erlang-etags)
 
@@ -5137,6 +5153,7 @@ about Erlang modules."
 
 (when (and (erlang-soft-require 'xref)
            (erlang-soft-require 'cl-generic)
+           (erlang-soft-require 'cl-lib)
            (erlang-soft-require 'eieio)
            (erlang-soft-require 'etags))
   ;; The purpose of using eval here is to avoid compilation
@@ -5165,10 +5182,20 @@ about Erlang modules."
         (let ((erlang-replace-etags-tags-completion-table t))
           (tags-completion-table)))
 
-      (defclass erlang-xref-location (xref-file-location)
-        ((arity :type fixnum :initarg :arity
-                :reader erlang-xref-location-arity))
-        :documentation "An erlang location is a file location plus arity.")
+      ;; Xref 1.3.1 bundled with Emacs 28+ switched from using EIEIO classes to
+      ;; using CL-Lib structs.
+      (if (find-class 'xref-file-location)
+          (progn
+            (defclass erlang-xref-location (xref-file-location)
+              ((arity :type fixnum :initarg :arity
+                      :reader erlang-xref-location-arity))
+              :documentation "An erlang location is a file location plus arity.")
+            ;; Make a constructor with the same name that a CL structure would have.
+            (defalias 'make-erlang-xref-location 'erlang-xref-location))
+        (cl-defstruct (erlang-xref-location
+                       (:include xref-file-location))
+          "An erlang location is a file location plus arity."
+          (arity 0 :type fixnum)))
 
       ;; This method definition only calls the superclass which is
       ;; the default behaviour if it was not defined.  It is only
@@ -5331,8 +5358,7 @@ is non-nil then TAG is a regexp."
       xrefs
     (when (and xrefs
                (fboundp 'xref-item-location)
-               (fboundp 'xref-location-group)
-               (fboundp 'slot-value))
+               (fboundp 'xref-location-group))
       (let (files)
         (cl-loop for xref in xrefs
                  for loc = (xref-item-location xref)
@@ -5357,7 +5383,8 @@ is non-nil then TAG is a regexp."
            t))))
 
 (defun erlang-xrefs-in-file (file kind tag is-regexp)
-  (when (fboundp 'make-instance)
+  (when (and (fboundp 'make-erlang-xref-location)
+             (fboundp 'xref-make))
     (with-current-buffer (find-file-noselect file)
       (save-excursion
         (goto-char (point-min))
@@ -5369,17 +5396,15 @@ is non-nil then TAG is a regexp."
                    for name = (match-string-no-properties 1)
                    for arity = (save-excursion
                                  (erlang-get-arity))
-                   for loc = (make-instance 'erlang-xref-location
-                                            :file file
-                                            :line (line-number-at-pos)
-                                            :column 0
-                                            :arity arity)
+                   for loc = (make-erlang-xref-location
+                              :file file
+                              :line (line-number-at-pos)
+                              :column 0
+                              :arity arity)
                    for sum = (erlang-xref-summary kind name arity)
                    when (and arity
                              (not (eq arity last-arity)))
-                   collect (make-instance 'xref-item
-                                          :summary sum
-                                          :location loc)
+                   collect (xref-make sum loc)
                    do (setq last-arity arity)))))))
 
 (defun erlang-xref-summary (kind tag arity)
@@ -6054,7 +6079,7 @@ unless the optional NO-DISPLAY is non-nil."
                 erlang-compile-erlang-function
                 module-name
                 (inferior-erlang-format-comma-opts opts))
-      (let (;; Hopefully, noone else will ever use these...
+      (let (;; Hopefully, no one else will ever use these...
             (tmpvar "Tmp7236")
             (tmpvar2 "Tmp8742"))
         (format
