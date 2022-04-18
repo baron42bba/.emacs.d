@@ -1,4 +1,4 @@
-;;; package-lint-autoloads.el --- automatically extracted autoloads
+;;; package-lint-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -8,6 +8,11 @@
 
 ;;;### (autoloads nil "package-lint" "package-lint.el" (0 0 0 0))
 ;;; Generated autoloads from package-lint.el
+
+(autoload 'package-lint-describe-symbol-history "package-lint" "\
+Show the version history of SYM, if any.
+
+\(fn SYM)" t nil)
 
 (autoload 'package-lint-buffer "package-lint" "\
 Get linter errors and warnings for BUFFER.
@@ -23,25 +28,20 @@ Current buffer is used if none is specified.
 \(fn &optional BUFFER)" nil nil)
 
 (autoload 'package-lint-current-buffer "package-lint" "\
-Display lint errors and warnings for the current buffer.
-
-\(fn)" t nil)
+Display lint errors and warnings for the current buffer." t nil)
 
 (autoload 'package-lint-batch-and-exit "package-lint" "\
 Run `package-lint-buffer' on the files remaining on the command line.
 Use this only with -batch, it won't work interactively.
 
-When done, exit Emacs with status 0 if there were no errors nor warnings or 1
-otherwise.
-
-\(fn)" nil nil)
+When done, exit Emacs with status 1 in case of any errors, otherwise exit
+with status 0.  The variable `package-lint-batch-fail-on-warnings' controls
+whether or not warnings alone produce a non-zero exit code." nil nil)
 
 (autoload 'package-lint-looks-like-a-package-p "package-lint" "\
-Return non-nil if the current buffer appears to be intended as a package.
+Return non-nil if the current buffer appears to be intended as a package." nil nil)
 
-\(fn)" nil nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "package-lint" '("package-lint-")))
+(register-definition-prefixes "package-lint" '("package-lint-"))
 
 ;;;***
 
