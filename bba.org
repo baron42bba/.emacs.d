@@ -4242,6 +4242,9 @@ character before any spaces."
 * key bindings
 
 #+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 28)
+      (setq mac-command-modifier 'super))
+
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
   (define-key global-map (kbd "S-SPC") 'dabbrev-expand)
