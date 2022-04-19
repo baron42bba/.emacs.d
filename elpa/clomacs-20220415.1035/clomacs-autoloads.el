@@ -1,4 +1,4 @@
-;;; clomacs-autoloads.el --- automatically extracted autoloads
+;;; clomacs-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -40,7 +40,7 @@ evaluation can be added and executed.
 
 \(fn EL-FUNC-NAME CL-FUNC-NAME &key (CALL-TYPE :sync) (CALLBACK nil) (DOC nil) (INTERACTIVE nil) (RETURN-TYPE :string) (RETURN-VALUE :value) LIB-NAME NAMESPACE (HTTPD-STARTER nil) NREPL-READY-CALLBACK (BACKEND :clj))" nil t)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "clomacs" '("clo" "execute")))
+(register-definition-prefixes "clomacs" '("clomacs-" "execute"))
 
 ;;;***
 
