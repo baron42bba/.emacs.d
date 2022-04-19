@@ -4243,7 +4243,8 @@ character before any spaces."
 
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 28)
-      (setq mac-command-modifier 'super))
+      (progn (setq mac-command-modifier 'super)
+             (setq mac-option-modifier 'meta)))
 
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
