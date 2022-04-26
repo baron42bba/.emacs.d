@@ -1377,12 +1377,12 @@ Your notes are more useful if you can easily search them!
   (defun snw ()
     "Search work notes."
     (interactive)
-    (lgrep (read-string "search for regex:") "work*.org" "~/workorg"))
+      (rgrep (read-regexp "Search for" 'grep-tag-default 'grep-regexp-history) "*.org" (file-truename "~/workorg")))
 
   (defun sn ()
     "Search notes."
     (interactive)
-    (lgrep (read-string "search for regex:") "notes.org" "~/org"))
+    (rgrep (read-regexp "Search for" 'grep-tag-default 'grep-regexp-history) "*.org" (file-truename "~/org")))
 
 #+END_SRC
 
