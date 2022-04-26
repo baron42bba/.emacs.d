@@ -1386,6 +1386,29 @@ Your notes are more useful if you can easily search them!
 
 #+END_SRC
 
+** search last miliseconds and convert to hours at point
+[2022-04-21 Thu 13:17]
+
+#+begin_src emacs-lisp :eval never
+  (defun bba-ms-to-h ()
+    "search for last miliseconds and conver tto hours at point.
+    Useful for Vertica timing output."
+    (interactive)
+    (save-mark-and-excursion
+      (let (bounds pos1 pos2 mything oldpos)
+        (setq oldpos (point))
+        (search-backward " ms")
+        (search-backward " ")
+        (right-char)
+      (setq bounds (bounds-of-thing-at-point 'symbol))
+      (setq pos1 (car bounds))
+      (setq pos2 (cdr bounds))
+      (setq mything (buffer-substring-no-properties pos1 pos2))
+      (setq mything (/ (round (/ (string-to-number mything) 10 60 60.0)) 100.0))
+      (goto-char oldpos)
+      (insert-before-markers (format "%s hours." mything)))))
+#+end_src
+
 ** Some initial languages we want org-babel to support
 
 #+BEGIN_SRC emacs-lisp
