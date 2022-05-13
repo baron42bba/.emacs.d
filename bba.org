@@ -1368,6 +1368,30 @@ Get reveal.js as well:
     (goto-char (point-min))
     (flush-lines "^$"))
 #+END_SRC
+
+** bba-edit-sql
+[2022-05-13 Fri 13:23]
+
+use edit-indirect-region to zoom into a END_PREPARE region in
+sql-mode. Handy for embedded SQL in Perl.
+
+#+begin_src emacs-lisp
+  (defun bba-edit-sql ()
+    "Find the region between previous END_PREPARE and the one after it.
+  Open that block in edit-indirect-region and switch to sql-mode."
+    (interactive)
+    (save-mark-and-excursion
+      (search-backward "END_PREPARE")
+      (next-line)
+      (beginning-of-line)
+      (set-mark-command nil)
+      (search-forward "END_PREPARE")
+      (beginning-of-line)
+      (edit-indirect-region (mark) (point) t)
+      (sql-mode)
+    ))
+  (global-set-key (kbd "s-S") 'bba-edit-sql)
+#+end_src
 ** search notes
 [2018-02-09 Fri 10:57]
 
