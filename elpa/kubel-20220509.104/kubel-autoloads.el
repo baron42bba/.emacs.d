@@ -1,4 +1,4 @@
-;;; kubel-autoloads.el --- automatically extracted autoloads
+;;; kubel-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -16,7 +16,7 @@ DIRECTORY is optional for TRAMP support.
 
 \(fn &optional DIRECTORY)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "kubel" '("kubel-")))
+(register-definition-prefixes "kubel" '("kubel-"))
 
 ;;;***
 

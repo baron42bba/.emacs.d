@@ -1,2 +1,0 @@
-;;; Generated package description from /Users/andreas/.emacs.d/elpa/kubel-20201223.1730/kubel.el  -*- no-byte-compile: t -*-
-(define-package "kubel" "20201223.1730" "Control Kubernetes with limited permissions" '((transient "0.1.0") (emacs "25.3") (dash "2.12.0") (s "1.2.0") (yaml-mode "0.0.14")) :commit "9b1aa4830a4470ff8f11ecc0bc80b5cdaee473fd" :authors '(("Adrien Brochard")) :maintainer '("Adrien Brochard") :keywords '("kubernetes" "k8s" "tools" "processes") :url "https://github.com/abrochard/kubel")
