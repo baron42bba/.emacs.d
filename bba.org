@@ -1058,6 +1058,73 @@ this is how your firefox bookmark must look like:
       (error "Cannot create link to this man page")))
 
 #+END_SRC
+
+** org-clocktable
+[2022-08-03 Wed 17:02]
+
+https://www.erichgrunewald.com/posts/how-i-track-my-hour-balance-with-a-custom-org-mode-clock-table/
+
+#+begin_src emacs-lisp
+  (require 'cl-lib)
+  (require 'org-clock)
+  (defun org-dblock-write:work-report (params)
+    "Calculate how many hours too many or too few I have worked.
+  PARAMS are defined in the template, they are :tstart for the
+  first day for which there's data (e.g. <2022-01-01>)
+  and :tend for the last date (e.g. <now>)."
+    ;; cl-flet is a macro from the common lisp emulation package that allows us to
+    ;; bind functions, just like let allows us to do with values.
+    (cl-flet*
+        ((format-time (time) (format-time-string
+                              (org-time-stamp-format t t) time))
+         (get-minutes-from-log (t1 t2) (cl-second
+                             (org-clock-get-table-data
+                              (buffer-file-name)
+                              (list :maxlevel 0
+                                    :tstart (format-time t1)
+                                    :tend (format-time t2))))))
+        (let* ((start
+                (seconds-to-time (org-matcher-time (plist-get params :tstart))))
+               (end
+                (seconds-to-time (org-matcher-time (plist-get params :tend))))
+               (time start)
+               (total-days-worked 0))
+          (progn
+            ;; loop through all the days in the time frame provided and count how
+            ;; many days minutes were reported.
+            (while (time-less-p time end)
+              (let* ((next-day (time-add time (date-to-time "1970-01-02T00:00Z")))
+                     (minutes-in-day (get-minutes-from-log time next-day)))
+                ;; exclude weekend
+                (if (and (> (string-to-number (format-time-string "%w" time)) 0)
+                         (< (string-to-number (format-time-string "%w" time)) 6)
+                         (> minutes-in-day 0)) (cl-incf total-days-worked 1))
+                (setq time next-day)))
+            ;; now we can just do some simple arithmetic to get the difference
+            ;; between hours ideally worked and hours actually worked.
+            (let* ((total-minutes-worked (get-minutes-from-log start end))
+                   (hours-worked (/ total-minutes-worked 60.0))
+                   (hours-per-workday 8)
+                   (hours-should-work (* total-days-worked hours-per-workday))
+                   (hour-difference (- hours-worked hours-should-work)))
+              (insert (format "%0.1f" hour-difference)))))))
+#+end_src
+
+#+begin_src org :eval never
+  ,#+BEGIN: work-report :tstart "<2022-04-01>" :tend "<2022-04-27>"
+  ,#+END:
+#+end_src
+
+#+begin_quote
+One limitation is that the algorithm assumes that any day you worked
+on is a day on which you should have worked the full number of
+hours. So if I log a session that goes from Friday afternoon to after
+midnight (that is, early Saturday morning), it assumes I should have
+worked 16 hours those days, whereas in fact only Friday was a
+workday. I solve this by editing my hour reports manually whenever
+this happens.
+#+end_quote
+
 ** [[https://github.com/stig/ob-applescript.el][ob-applescript]]
 [2016-09-27 Tue 09:34]
 

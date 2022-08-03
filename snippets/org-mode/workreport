@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: workreport
+# key: workreport_
+# --
+$0#+BEGIN: work-report :tstart "${1:`(insert (car(cdr(org-get-outline-path t))) "-01"))`}" :tend "${2:`(insert (car(cdr(org-get-outline-path t))) "-" (number-to-string (calendar-last-day-of-month (nth 4 (parse-time-string (concat (car(cdr(org-get-outline-path t))) "-01"))) (nth 5 (parse-time-string (concat (car(cdr(org-get-outline-path t))) "-01"))))))`}"
+#+END:
