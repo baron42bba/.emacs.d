@@ -439,7 +439,7 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20201229.1937")
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20220623.1523")
         (add-to-list 'load-path "~/.emacs.d/elpa/dash-20210826.1149")
         (require 'smartparens)
         (smartparens-global-mode 1)
@@ -484,7 +484,7 @@ But we use it only in graphical mode as text mode lacks color depth.
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (when (display-graphic-p)
-        (add-to-list 'load-path "~/.emacs.d/elpa/rainbow-delimiters-20191018.1233")
+        (add-to-list 'load-path "~/.emacs.d/elpa/rainbow-delimiters-20210515.1254")
         ))
 
 
