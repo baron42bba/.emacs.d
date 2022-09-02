@@ -3095,6 +3095,10 @@ list who can decrypt a file:
   (require 'cperl-mode)
   (fset 'perl-mode 'cperl-mode)
 
+  (autoload 'perlcritic        "perlcritic" "" t)
+  (autoload 'perlcritic-region "perlcritic" "" t)
+  (autoload 'perlcritic-mode   "perlcritic" "" t)
+
   (eval-after-load "cperl-mode"
     '(progn
        (add-hook 'cperl-mode-hook (lambda() (cperl-set-style "K&R")
@@ -3103,6 +3107,7 @@ list who can decrypt a file:
        (setq cperl-indent-level 4)
        (setq cperl-indent-parens-as-block t)
        (setq cperl-tab-always-indent t)
+       (perlcritic-mode)
        (which-function-mode)))))
 
 #+END_SRC
