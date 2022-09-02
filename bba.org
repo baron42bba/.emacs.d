@@ -1362,6 +1362,17 @@ Get reveal.js as well:
 
   (define-key org-mode-map "\M-\S-w" 'bba-ox-clip-formatted-copy)
 #+END_SRC
+
+** comint
+[2022-02-25 Fri 11:49]
+
+remove duplicates in modes like sqli.
+
+#+begin_src emacs-lisp
+  (add-hook 'comint-mode-hook
+            '(lambda () (setq comint-input-ignoredups t)))
+#+end_src
+
 ** comint-write-buffer
 [2018-01-09 Tue 14:10]
 #+BEGIN_SRC emacs-lisp
