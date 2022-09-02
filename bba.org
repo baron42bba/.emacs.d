@@ -597,7 +597,7 @@ search the web on your fingertips. C-c /.
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20200106.2058")
+        (add-to-list 'load-path "~/.emacs.d/elpa/expand-region-20220729.659")
         (require 'expand-region)
         (define-key global-map (kbd "C-c C-<f12>") 'er/contract-region )
         (define-key global-map (kbd "C-c <f12>") 'er/expand-region )

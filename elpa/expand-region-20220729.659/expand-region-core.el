@@ -26,7 +26,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 (require 'expand-region-custom)
 (declare-function er/expand-region "expand-region")
 
@@ -210,10 +210,10 @@ before calling `er/expand-region' for the first time."
              `(lambda ()
                 (interactive)
                 (setq this-command `,(cadr ',binding))
-                (or (minibufferp) (message "%s" ,msg))
+                (or (not expand-region-show-usage-message) (minibufferp) (message "%s" ,msg))
                 (eval `,(cdr ',binding))))))
        t)
-      (or (minibufferp) (message "%s" msg)))))
+      (or (not expand-region-show-usage-message) (minibufferp) (message "%s" msg)))))
 
 (if (fboundp 'set-temporary-overlay-map)
     (fset 'er/set-temporary-overlay-map 'set-temporary-overlay-map)
