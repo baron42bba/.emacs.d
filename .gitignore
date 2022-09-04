@@ -4,7 +4,9 @@
 /.mc-lists.el
 archive-contents
 /ac-comphist.dat
+/cache
 /elpa/archives/*
+/eln-cache
 /eshell/*
 /history
 /mthesaur.txt.cache
