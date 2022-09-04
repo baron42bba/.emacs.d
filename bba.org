@@ -3626,6 +3626,24 @@ Right from [[https://gist.github.com/etherald/dcdcf579751c75a2c796][gisthub]]:
     (set-window-buffer (second (window-list)) buffer2))
 #+END_SRC
 
+https://www.masteringemacs.org/article/demystifying-emacs-window-manager
+
+#+begin_src emacs-lisp
+  (defun mp-split-below (arg)
+    "Split window below from the parent or from root with ARG."
+    (interactive "P")
+    (split-window (if arg (frame-root-window)
+                    (window-parent (selected-window)))
+                  nil 'below nil))
+
+  (defun mp-split-right (arg)
+    "Split window below from the parent or from root with ARG."
+    (interactive "P")
+    (split-window (if arg (frame-root-window)
+                    (window-parent (selected-window)))
+                  nil 'right nil))
+#+end_src
+
 * [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
 #+BEGIN_SRC emacs-lisp
       (require 'ipcalc)
