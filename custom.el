@@ -13,6 +13,7 @@
    (quote
     ("us-east-1" "eu-west-1" "ap-southeast-1" "cn-north-1")))
  '(blink-cursor-mode t)
+ '(cfengine-parameters-indent '(promise pname 2))
  '(custom-safe-themes
    (quote
     ("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" default)))
