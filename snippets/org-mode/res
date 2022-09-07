@@ -3,6 +3,6 @@
 # key: res_
 # --
 #+RESULTS:
-:RESULTS:
+#+begin_src fundamental
 $0
-:END:
+#+end_src

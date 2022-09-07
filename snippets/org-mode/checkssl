@@ -3,6 +3,6 @@
 # key: checkssl_
 # --
 #+begin_src sh :results output :wrap SRC fundamental :epilogue true
-  curl -vvI https://$1 2>&1 | grep -E '(start date|expire date|subject)'
+  curl -kvvI https://$1 2>&1 | grep -E '(start date|expire date|subject)'
 #+end_src
 $0

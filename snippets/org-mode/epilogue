@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: epilogue
+# key: :epi
+# --
+:epilogue true$0
