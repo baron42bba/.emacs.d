@@ -604,7 +604,36 @@ search the web on your fingertips. C-c /.
         ))
 
 #+END_SRC
+* [[https://emacs.stackexchange.com/a/36800][toggle-quotes]]
+[2022-04-15 Fri 12:33]
 
+#+begin_src emacs-lisp
+  (defun toggle-quotes (uarg)
+    "Toggle single and double quotes around a string.
+
+  Does the change only if the point is inside quotes that are
+  syntactically correct under the current major mode. For example,
+  single quotes are not valid strings under elisp-mode. You can
+  force the change by using the universal argument C-u."
+    (interactive "p")
+    (let ((quotes-re "['\"]")
+          (forward-char "")
+          (new-quote-char "'"))
+      (if (or (nth 3 (syntax-ppss)) (= uarg 4))
+          (save-excursion
+            (when (re-search-forward quotes-re nil t)
+              (setq forward-char (match-string 0))
+              (if (string-match forward-char "'")
+                  (setq new-quote-char "\""))
+              (when (re-search-backward forward-char nil t 2)
+                (goto-char (match-beginning 0))
+                (replace-match new-quote-char)
+                (re-search-forward quotes-re nil t)
+                (replace-match new-quote-char))))
+        (message "Point not inside a valid string! Universal argument overrides."))))
+
+  (define-key global-map (kbd "C-c C-'") #'toggle-quotes)
+#+end_src
 * yasnippet
 
 My first thought: Nice. But do I have a use case? After half a year I
