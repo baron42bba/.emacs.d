@@ -1001,25 +1001,47 @@ this is how your firefox bookmark must look like:
   (setq org-startup-indented 1)
 
   (if (equal "work" (getenv "SYSENV"))
-  (setq org-agenda-files (list "~/workorg/work.org"
-                               "~/org/notes.org"
-                               "~/org/emacs.org"
-                               "~/org/private.org"
-                               "~/org/it.org"
-                               "~/org/refile.org"
-                               "~/org/workhours.org"
-                               ))
-  (setq org-agenda-files (list "~/org/work.org"
-                               "~/org/notes.org"
-                               "~/org/emacs.org"
-                               "~/org/private.org"
-                               "~/org/it.org"
-                               "~/org/refile.org"
-                               "~/org/workhours.org"
-                               ))
-  )
+      (setq org-agenda-files (list "~/workorg/work.org"
+                                   "~/org/todo.org"
+                                   "~/org/notes.org"
+                                   "~/org/emacs.org"
+                                   "~/org/it.org"
+                                   "~/org/refile.org"))
+    (setq org-agenda-files (list "~/org/work.org"
+                                 "~/org/todo.org"
+                                 "~/org/notes.org"
+                                 "~/org/emacs.org"
+                                 "~/org/it.org"
+                                 "~/org/refile.org")))
 
 #+END_SRC
+
+** org sync to icloud
+[2022-09-07 Wed 11:11]
+
+With [[https://beorgapp.com][beorg]] we can have our tasks with us.
+As it supports icloud drive we can use a git hook to sync files after commit:
+
+#+begin_src sh :eval never
+  #!/bin/bash
+
+  for file in notes todo motorcycles; do
+      rsync -tuvq ~/org/${file}.org ~/Library/Mobile\ Documents/iCloud~com~appsonthemove~beorg/Documents/org/${file}.org
+      rsync -tuvq ~/Library/Mobile\ Documents/iCloud~com~appsonthemove~beorg/Documents/org/${file}.org ~/org/${file}.org
+  done
+#+end_src
+
+However sometimes it's nice to sync manually as well.
+Why leave Emacs for that?
+
+#+begin_src emacs-lisp
+  (defun isync ()
+    "sync org files to and from icloud drive."
+    (interactive)
+    (save-some-buffers)
+    (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'"))
+  (define-key global-map (kbd "S-<f1>") 'isync)
+#+end_src
 
 ** org-man
 [2018-08-28 Tue 16:57]
@@ -2072,6 +2094,8 @@ and call this function.
 
 #+END_SRC
 
+** org-capture
+
 #+BEGIN_SRC emacs-lisp
 
   ;; (setq org-clock-persist 'history)
@@ -2081,14 +2105,13 @@ and call this function.
   (define-key global-map "\C-cc" 'org-capture)
 
   (setq org-capture-templates
-
-  '(("t" "todo" entry (file+headline "~/org/refile.org" "Tasks")
+  '(("t" "todo" entry (file+headline "~/org/todo.org" "Tasks")
   "* TODO %^{Task}\n%U\n
 
   %i\n
   %a\n
   %?
-  ")
+  " :prepend t)
 
     ("m" "Meeting" entry (file "~/org/refile.org")
      "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
@@ -2100,14 +2123,12 @@ and call this function.
   %a")
 
     ("w" "work todo" entry (file+headline "~/workorg/work.org" "Tasks")
-  "* TODO %^{Task}\n%U\n
+  "* TODO %? %^{Task}\n%U\n
 
   %i\n
-  %a\n
-  %?
-  ")
+  %a\n\n" :prepend t)
 
-  ("j" "Journal" entry (file+datetree "~/git/org/diary.org")
+  ("j" "Journal" entry (file+datetree "~/org/diary.org")
    "* %?\n%U\n" :clock-in t :clock-resume t)
 
   ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
@@ -2116,7 +2137,6 @@ and call this function.
   ("C" "Cookbook" entry (file+headline "~/org/kitchen.org" "[[http://allrecipes.com][AllRecipes.com]]")
    "%(org-chef-get-recipe-from-url)"
     :empty-lines 1)))
-
 #+END_SRC
 
 ** Define some handy link abbreviations
@@ -5539,19 +5559,20 @@ Split and show workhours:
 
 #+BEGIN_SRC emacs-lisp
   (if (equal "work" (getenv "SYSENV"))
-    (progn (split-window-below)
+    (progn (org-agenda-list)
+           (split-window-right)
            (other-window 1)
            (find-file "~/org/workhours.org")
            (goto-char (point-min))
            (org-shifttab 3)
-	   (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
-	       (org-beginning-of-line)
-	     (progn
-	       (goto-char (point-min))
-	       (org-next-visible-heading '1)
-	       (org-meta-return)
-	       (insert (format-time-string "%Y-%m"))
-	       ))
+           (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
+               (org-beginning-of-line)
+             (progn
+               (goto-char (point-min))
+               (org-next-visible-heading '1)
+               (org-meta-return)
+               (insert (format-time-string "%Y-%m"))
+               ))
            ))
 
 #+END_SRC
