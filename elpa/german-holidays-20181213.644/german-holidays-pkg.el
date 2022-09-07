@@ -1,0 +1,2 @@
+;;; Generated package description from german-holidays.el  -*- no-byte-compile: t -*-
+(define-package "german-holidays" "20181213.644" "German holidays for Emacs calendar" 'nil :commit "a8462dffccaf2b665f2032e646b5370e993a386a" :authors '(("Sebastian Christ" . "rudolfo.christ@gmail.com")) :maintainer '("Sebastian Christ" . "rudolfo.christ@gmail.com") :url "https://github.com/rudolfochrist/german-holidays")

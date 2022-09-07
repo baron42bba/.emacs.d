@@ -1513,9 +1513,9 @@ Your notes are more useful if you can easily search them!
 ** search last miliseconds and convert to hours at point
 [2022-04-21 Thu 13:17]
 
-#+begin_src emacs-lisp :eval never
+#+begin_src emacs-lisp
   (defun bba-ms-to-h ()
-    "search for last miliseconds and conver tto hours at point.
+    "search for last miliseconds and convert to hours at point.
     Useful for Vertica timing output."
     (interactive)
     (save-mark-and-excursion
@@ -1571,6 +1571,15 @@ Your notes are more useful if you can easily search them!
   (setq org-babel-tmux-location "/opt/local/bin/tmux")
 
 #+END_SRC
+
+** holidays
+[2022-09-06 Tue 18:32]
+
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/german-holidays-20181213.644")
+  (require 'german-holidays)
+  (setq holiday-local-holidays holiday-german-HH-holidays)
+#+end_src
 
 ** open current directory in finder
 [2017-01-09 Mon 15:18]
