@@ -4164,6 +4164,8 @@ coffee mug
   (define-key global-map (kbd "s-L") 'bba-dict)
 
 #+END_SRC
+
+
 * [[http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html][Xah Lee Move cursor to Bracket]]
 [2017-03-27 Mon 22:41]
 
@@ -4449,7 +4451,21 @@ character before any spaces."
 
   (define-key global-map (kbd "M-@") 'cycle-spacing)
   (define-key global-map (kbd "M-SPC") 'cycle-spacing)
-  (define-key global-map (kbd "S-SPC") 'dabbrev-expand)
+  ;; (define-key global-map (kbd "S-SPC") 'dabbrev-expand)
+  (define-key global-map (kbd "S-SPC") 'hippie-expand)
+
+  (setq hippie-expand-try-functions-list
+        '(try-expand-dabbrev
+          try-expand-dabbrev-all-buffers
+          try-complete-file-name-partially
+          try-complete-file-name
+          try-expand-all-abbrevs
+          try-expand-list
+          try-expand-line
+          try-expand-dabbrev-from-kill
+          try-complete-lisp-symbol-partially
+          try-complete-lisp-symbol))
+
   (define-key global-map (kbd "s-r") 'repeat)
   (define-key global-map "\C-x\S-f" 'find-file-at-point)
 
