@@ -1414,6 +1414,17 @@ Get reveal.js as well:
   (define-key org-mode-map "\M-\S-w" 'bba-ox-clip-formatted-copy)
 #+END_SRC
 
+** org-edit-special
+[2022-09-08 Thu 14:00]
+
+For whatever reason rainbow-delimiter was not active in the special
+buffer. SQL is so much better with rainbows.
+
+#+begin_src emacs-lisp
+  (define-advice org-edit-special (:after (&optional arg) my-big-advice)
+    (rainbow-delimiters-mode 1))
+#+end_src
+
 ** comint
 [2022-02-25 Fri 11:49]
 
