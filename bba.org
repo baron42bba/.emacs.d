@@ -3331,6 +3331,7 @@ have a look in [[file:/Applications/Emacs.app/Contents/Resources/lisp/progmodes/
 starting sql-connect.
 
 #+BEGIN_SRC emacs-lisp
+  (if (file-exists-p "~/.emacs_secrets.el.gpg")
   (defun my-sql-connect ()
     (interactive)
     (require 'my-password "~/.emacs_secrets.el.gpg")
@@ -3342,7 +3343,7 @@ starting sql-connect.
       (if current-prefix-arg
           (sql-connect connection connection)
         (sql-connect connection))))
-  (global-set-key (kbd "s-s") 'my-sql-connect)
+  (global-set-key (kbd "s-s") 'my-sql-connect))
 #+END_SRC
 
 your =~/.emacs_secrets.el.gpg= might look like:
