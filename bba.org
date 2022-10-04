@@ -5063,7 +5063,7 @@ highlighting.
 
 #+BEGIN_SRC emacs-lisp
   (setq diredp-hide-details-initially-flag nil)
-  (require 'dired+)
+  (load-file (expand-file-name "~/.emacs.d/lisp/dired+.el"))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
