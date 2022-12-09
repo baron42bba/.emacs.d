@@ -4673,7 +4673,8 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "\C-s" 'helm-swoop)
   (define-key bba/launcher "t" 'git-timemachine)
   (define-key bba/launcher "T" 'twittering-mode)
-
+  (define-key bba/launcher "v" 'vterm)
+  
   (define-prefix-command 'bba/keyboard-maestro)
   (define-prefix-command 'bba/multiple-cursors)
 
