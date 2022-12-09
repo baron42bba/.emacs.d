@@ -2405,11 +2405,38 @@ taken from http://doc.norang.ca/org-mode.org
 
     (setq org-refile-target-verify-function 'bh/verify-refile-target)
 
+  (defun bba-clock-in ()
+    "Clock in of workhours."
+    (interactive)
+    (find-file "~/org/workhours.org")
+    (goto-char (point-min))
+    (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
+        (progn (org-beginning-of-line)
+               (re-search-forward "^ *:LOGBOOK:")
+               (next-line)
+               (org-beginning-of-line)
+               (insert (format-time-string "CLOCK: [%Y-%m-%d %a %H:%M]"))
+               (newline)
+               )))
+
+  (defun bba-clock-out ()
+    "Clock out of workhours."
+    (interactive)
+    (find-file "~/org/workhours.org")
+    (goto-char (point-min))
+    (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
+        (progn (org-beginning-of-line)
+               (re-search-forward "^ *:LOGBOOK:")
+               (next-line)
+               (org-end-of-line)
+               (insert (format-time-string "--[%Y-%m-%d %a %H:%M]"))
+               (org-ctrl-c-ctrl-c))))
+
 
     (global-set-key (kbd "<f12>") 'org-agenda)
     (global-set-key (kbd "<f9> c") 'calendar)
-    (global-set-key (kbd "<f9> I") 'bh/punch-in)
-    (global-set-key (kbd "<f9> O") 'bh/punch-out)
+    (global-set-key (kbd "<f9> I") 'bba-clock-in)
+    (global-set-key (kbd "<f9> O") 'bba-clock-out)
     (global-set-key (kbd "<f9> t") 'bh/insert-inactive-timestamp)
     (global-set-key (kbd "<f9> T") 'bh/toggle-insert-inactive-timestamp)
     (global-set-key (kbd "C-<f9>") 'previous-buffer)
@@ -5611,7 +5638,7 @@ Some private settings outside this repository are loaded after this configuratio
 #+END_SRC
 
 * done
-
+[2014-08-27 Wed 11:02]
 Display greetings:
 
 #+BEGIN_SRC emacs-lisp
@@ -5623,27 +5650,30 @@ Display greetings:
 
 Split and show workhours:
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (if (equal "work" (getenv "SYSENV"))
-    (progn (org-agenda-list)
-           (split-window-right)
-           (other-window 1)
-           (find-file "~/org/workhours.org")
-           (goto-char (point-min))
-           (org-shifttab 3)
-           (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
-               (org-beginning-of-line)
-             (progn
-               (goto-char (point-min))
-               (org-next-visible-heading '1)
-               (org-meta-return)
-               (insert (format-time-string "%Y-%m"))
-               ))
-           ))
+      (progn (org-agenda-list)
+             (split-window-right)
+             (other-window 1)
+             (find-file "~/org/workhours.org")
+             (goto-char (point-min))
+             (org-shifttab 3)
+             (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
+                 (progn
+                   (org-beginning-of-line)
+                   (org-cycle))
+               (progn
+                 (goto-char (point-min))
+                 (org-next-visible-heading '1)
+                 (org-meta-return)
+                 (insert (format-time-string "%Y-%m"))
+                 (newline)
+                 (insert ":LOGBOOK:")
+                 (newline)
+                 (insert ":END:")))
+             ))
+#+end_src
 
-#+END_SRC
-
-    [2014-08-27 Wed 11:02]
 * old config
 
 #+BEGIN_SRC emacs-lisp :eval no :tangle no
