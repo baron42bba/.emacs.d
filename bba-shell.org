@@ -1,0 +1,501 @@
+* Shell
+
+Everything related to shells in Emacs can be found here.
+
+* eshell and shell environment
+
+We don't need a =$PAGER= in Emacs:
+
+#+BEGIN_SRC emacs-lisp
+     (setenv "PAGER" "cat")
+#+END_SRC
+
+Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right?
+
+#+BEGIN_SRC emacs-lisp
+    (defalias 'e 'find-file)
+    (defalias 'ff 'find-file)
+    (defalias 'emacs 'find-file)
+#+END_SRC
+
+Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll’:
+
+  #+BEGIN_SRC elisp
+    (require 'em-alias)
+    (add-hook 'eshell-mode-hook
+              (lambda ()
+                ;; The 'ls' executable requires the Gnu version on the Mac
+                (let ((ls (if (file-exists-p "/opt/local/bin/gls")
+                              "/opt/local/bin/gls"
+                            "/bin/ls")))
+                  (add-to-list 'eshell-command-aliases-list (list "ll" (concat ls " -AlohG --color=always") )))))
+  #+END_SRC
+
+What about =gd= to call the Diff command?
+
+   #+BEGIN_SRC elisp
+     (defalias 'gd 'magit-diff-unstaged)
+     (defalias 'gds 'magit-diff-staged)
+   #+END_SRC
+
+A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bodil-eshell.el
+
+#+BEGIN_SRC elisp
+  (require 'f)
+
+  ;; Prompt with a bit of help from http://www.emacswiki.org/emacs/EshellPrompt
+    (defmacro with-face (str &rest properties)
+      `(propertize ,str 'face (list ,@properties)))
+
+  (setq hostname (replace-regexp-in-string "\\(^[[:space:]\n]*\\|[[:space:]\n]*$\\)" "" (with-output-to-string (call-process "hostname" nil standard-output))))
+
+  (defun eshell/abbr-pwd ()
+    (let ((home (getenv "HOME"))
+    (path (eshell/pwd)))
+    (cond
+    ((string-equal home path) "~")
+    ((f-ancestor-of? home path) (concat "~/" (f-relative path home)))
+    (path))))
+
+    (defun eshell/my-prompt ()
+    (let ((header-bg "#161616"))
+    (concat
+    (with-face user-login-name :foreground "#d75faf")
+    (with-face (concat "@" hostname) :foreground "#8700af")
+    " "
+    (with-face (eshell/abbr-pwd) :foreground "#008700")
+    (if (= (user-uid) 0)
+    (with-face "#" :foreground "red")
+    (with-face "$" :foreground "#2345ba"))
+    " ")))
+
+    (setq eshell-prompt-function 'eshell/my-prompt)
+    (setq eshell-highlight-prompt nil)
+    (setq eshell-prompt-regexp "^[^#$\n]+[#$] ")
+#+END_SRC
+
+
+
+** Most of this stolen from the great [[https://github.com/howardabrams/hamacs/blob/main/ha-eshell.org][Howard Abrams]]!
+[2022-12-08 Thu 17:43]
+*** Aliases
+[2022-12-08 Thu 17:42]
+Gotta have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right? We have three ways of doing
+that. First, enter them into an =eshell= session:
+
+#+begin_src sh
+  alias ll 'ls -AlohG --color=always'
+#+end_src
+Note that you need single quotes (not double quotes). Also note that
+more than one parameter doesn’t work with aliases (to resolve that, we
+need to write [[Eshell Functions][a function]]).
+
+Second, you can create/populate the alias file,
+[[file:~/.emacs.d/eshell/alias][~/.emacs.d/eshell/alias]] … as long as you don’t use those single
+quotes:
+
+#+begin_src shell :tangle ~/.emacs.d/eshell/alias
+  alias ll ls -AlohG --color=always
+  alias cls clear 1
+  alias d dired $1
+  alias find echo 'Please use fd <pattern> <paths> instead.'
+#+end_src
+Yeah, the variable =$*= doesn’t work as you’d expect, so use =$1= when calling Emacs functions that take one parameter).
+For instance, while I would like to have the following, the real solution is to make functions (see [[Less and More][below for details]]).
+#+begin_src sh
+  alias less view-file
+#+end_src
+
+Third,  you want more /control/, you can use the help:eshell/alias function, but it doesn’t honor =$1= and other parameters, so we could create conditionally create function that we add to the [[help:eshell-mode-hook][eshell-mode-hook]], for instance:
+#+begin_src emacs-lisp :tangle no
+  (defun ha-eshell-add-aliases ()
+    "Call `eshell/alias' to define my aliases."
+    ;; The 'ls' executable requires the Gnu version on the Mac
+    (let ((ls (if (file-exists-p "/usr/local/bin/gls")
+                  "/usr/local/bin/gls"
+                "/bin/ls")))
+      (eshell/alias "ll" (concat ls " -AlohG --color=always"))))
+#+end_src
+
+I have also had a lot of trouble getting aliases to work, for instance =dired= works, but =less= does not:
+#+begin_src sh :tangle no
+  alias less view-file $1
+  alias d dired $1
+#+end_src
+To work around this, I create functions instead.
+
+*** Eshell Functions
+[2022-12-08 Thu 17:42]
+
+Any function that begins with =eshell/= is available as a command (with the remaining letters) Once I had a function =eshell/f= as a replacement for =find=, but the [[https://github.com/sharkdp/fd][fd]] project is better.
+
+Since =eshell= is an /Emacs/ shell, I try to think how to use Emacs buffers in a shell-focused workflow. For instance, use =view-file= instead of =less=, as it will show a file with syntax coloring, and typing ~q~ returns to your shell session.
+
+This helper function can tell me if an executable program is
+available, and return its location:
+
+#+begin_src emacs-lisp
+  (defun ha-find-executable (program)
+    "Return full path to executable PROGRAM on the `exec-path'."
+    (first
+     (-filter 'file-executable-p
+              (--map (expand-file-name program it) (exec-path)))))
+#+end_src
+
+Calling Emacs functions that take a single argument from =eshell= that
+could accept zero or more, can result in an error. This helper
+function can open each argument in a different window. It takes two
+functions, and calls the first function on the first argument, and
+calls the second function on each of the rest:
+
+#+begin_src emacs-lisp
+  (defun eshell-fn-on-files (fun1 fun2 args)
+    "Call FUN1 on the first element in list, ARGS.
+  Call FUN2 on all the rest of the elements in ARGS."
+    (unless (null args)
+      (let ((filenames (flatten-list args)))
+        (funcall fun1 (car filenames))
+        (when (cdr filenames)
+          (mapcar fun2 (cdr filenames))))
+      ;; Return an empty string, as the return value from `fun1'
+      ;; probably isn't helpful to display in the `eshell' window.
+      ""))
+#+end_src
+
+The =eshell-command= is supposed to be an interactive command for
+prompting for a shell command in the mini-buffer. However, I have some
+functions that run a command and gather the output. For that, we call
+=eshell-command= but a =t= for the second argument:
+
+#+begin_src emacs-lisp
+  (defun eshell-command-to-string (command)
+    "Return results of executing COMMAND in an eshell environtment.
+  The COMMAND can either be a string or a list."
+    (when (listp command)
+      ;; Since `eshell-command' accepts a string (and we want all its
+      ;; other goodies), we synthesize a string, but since `command'
+      ;; could be a parsed list, we quote all of the arguments.
+      ;;
+      ;; Hacky. Until I figure out a better way to call eshell,
+      ;; as `eshell-named-command' doesn't work reliably:
+      (setq command (s-join " " (cons (first command)
+                                      (--map (format "\"%s\"" it) (rest command))))))
+    (with-temp-buffer
+      (eshell-command command t)
+      (buffer-string)))
+#+end_src
+
+*** Getopts
+I need a function to analyze command line options. I’ve tried to use
+[[help:eshell-eval-using-options][eshell-eval-using-options]], but it lacks the ability to have both
+dashed parameter arguments /and/ non-parameter arguments. For instance,
+I want to type:
+
+#+begin_src sh
+  flow --lines some-buffer another-buffer
+#+end_src
+
+To have both a =—lines= parameter, as well as a list of buffers, so I’ll need to roll my own.
+While the =shell-getopts= function works, it doesn’t do the following:
+  - Separates more than one single letter options, like =-la= … it accepts the =-l= but would ignore the implied =-a=.
+  - Requires that all options go before the rest of the parameters.
+  - Doesn’t allow default values for a parameter.
+
+This wee beastie takes a list of arguments given to the function,
+along with a /argument definition/, and returns a hash-table of
+results.
+#+begin_src emacs-lisp
+  (defun eshell-getopts (defargs args)
+    "Return hash table of ARGS parsed against DEFARGS.
+  Where DEFARGS is an argument definition, a list of plists.
+  For instance:
+     '((:name number :short \"n\"                 :parameter integer :default 0)
+       (:name title  :short \"t\" :long \"title\" :parameter string)
+       (:name debug  :short \"d\" :long \"debug\"))
+
+  If ARGS, a list of _command line parameters_ is something like:
+
+      '(\"-d\" \"-n\" \"4\" \"--title\" \"How are that\" \"this\" \"is\" \"extra\")
+
+  The hashtable return would contain these entries:
+
+      debug t
+      number 4  ; as a number
+      title \"How are that\" ; as a string
+      parameters (\"this\" \"is\" \"extra\") ; as a list of strings "
+    (let ((retmap    (make-hash-table))
+          (short-arg (rx string-start "-" (group alnum)))
+          (long-arg  (rx string-start "--" (group (1+ any)))))
+
+      ;; Let's not pollute the Emacs name space with tiny functions, as
+      ;; well as we want these functions to have access to the "somewhat
+      ;; global variables", `retmap' and `defargs', we use the magical
+      ;; `cl-labels' macro to define small functions:
+
+      (cl-labels ((match-short (str defarg)
+                    ;; Return t if STR matches against DEFARG's short label:
+                    (and (string-match short-arg str)
+                         (string= (match-string 1 str)
+                                  (plist-get defarg :short))))
+
+                  (match-long (str defarg)
+                    ;; Return t if STR matches against DEFARG's long label:
+                    (and (string-match long-arg str)
+                         (string= (match-string 1 str)
+                                  (plist-get defarg :long))))
+
+                  (match-arg (str defarg)
+                    ;; Return DEFARG if STR matches its definition (and it's a string):
+                    (when (and (stringp str)
+                               (or (match-short str defarg)
+                                   (match-long str defarg)))
+                      defarg))
+
+                  (find-argdef (str)
+                    ;; Return entry in DEFARGS that matches STR:
+                    (first (--filter (match-arg str it) defargs)))
+
+                  (process-args (arg parm rest)
+                    (when arg
+                      (let* ((defarg (find-argdef arg))
+                             (key    (plist-get defarg :name)))
+                        (cond
+                         ;; If ARG doesn't match any definition, add
+                         ;; everything else to PARAMETERS key:
+                         ((null defarg)
+                          (puthash 'parameters (cons arg rest) retmap))
+
+                         ((plist-get defarg :help)
+                          (error (documentation (plist-get defarg :help))))
+
+                         ;; If argument definition has a integer parameter,
+                         ;; convert next entry as a number and process rest:
+                         ((eq (plist-get defarg :parameter) 'integer)
+                          (puthash key (string-to-number parm) retmap)
+                          (process-args (cadr rest) (caddr rest) (cddr rest)))
+
+                         ;; If argument definition has a parameter, use
+                         ;; the next entry as the value and process rest:
+                         ((plist-get defarg :parameter)
+                          (puthash key parm retmap)
+                          (process-args (cadr rest) (caddr rest) (cddr rest)))
+
+                         ;; No parameter? Store true for its key:
+                         (t
+                          (puthash key t retmap)
+                          (process-args (first rest) (second rest) (cdr rest))))))))
+
+        (process-args (first args) (second args) (cdr args))
+        retmap)))
+#+end_src
+
+Let’s make some test examples:
+#+begin_src emacs-lisp :tangle no
+  (ert-deftest eshell-getopts-test ()
+    (let* ((defargs
+            '((:name number :short "n"                :parameter integer :default 0)
+              (:name title  :short "t" :long "title"  :parameter string)
+              (:name debug  :short "d" :long "debug")))
+           (no-options   '())
+           (just-params  '("apple" "banana" "carrot"))
+           (just-options '("-d" "-t" "this is a title"))
+           (all-options  '("-d" "-n" "4" "--title" "My title" "apple" "banana" "carrot"))
+           (odd-params   `("ha-eshell.org" ,(get-buffer "ha-eshell.org"))))
+
+      ;; No options ...
+      (should (= (hash-table-count (eshell-getopts defargs no-options)) 0))
+
+      ;; Just parameters, no options
+      (let ((opts (eshell-getopts defargs just-params)))
+        (should (= (hash-table-count opts) 1))
+        (should (= (length (gethash 'parameters opts)) 3)))
+
+      ;; No parameters, few options
+      (let ((opts (eshell-getopts defargs just-options)))
+        (should (= (hash-table-count opts) 2))
+        (should (= (length (gethash 'parameters opts)) 0))
+        (should (gethash 'debug opts))
+        (should (string= (gethash 'title opts) "this is a title")))
+
+      ;; All options
+      (let ((opts (eshell-getopts defargs all-options)))
+        (should (= (hash-table-count opts) 4))
+        (should (gethash 'debug opts))
+        (should (= (gethash 'number opts) 4))
+        (should (string= (gethash 'title opts) "My title"))
+        (should (= (length (gethash 'parameters opts)) 3)))
+
+      (let* ((opts  (eshell-getopts defargs odd-params))
+             (parms (gethash 'parameters opts)))
+
+        (should (= (hash-table-count opts) 1))
+        (should (= (length parms) 2))
+        (should (stringp (first parms)))
+        (should (bufferp (second parms))))))
+#+end_src
+
+*** Setting Variables
+To set a variable in Eshell, you use good ol’ =setq=, but that would
+create global variables. We can make a version for Eshell, that makes
+buffer-local variables.
+#+begin_src emacs-lisp
+  (defun eshell/set (&rest args)
+    "Creates a buffer local variables."
+    (dolist (arg-pair (seq-partition args 2))
+      (seq-let (var val) arg-pair
+        (let ((var-sym (make-symbol var)))
+          (set (make-local-variable var-sym) val)))))
+#+end_src
+
+*** Less and More
+[2022-12-08 Thu 17:53]
+
+While I can type =find-file=, I often use =e= as an alias for =emacsclient=
+in Terminals, so let’s do something similar for =eshell=:
+Also note that we can take advantage of the =eshell-fn-on-files=
+function to expand the [[help:find-file][find-file]] (which takes one argument), to open
+more than one file at one time.
+
+#+begin_src emacs-lisp
+  (defun eshell/e (&rest files)
+    "Essentially an alias to the `find-file' function."
+    (eshell-fn-on-files 'find-file 'find-file-other-window files))
+
+  (defun eshell/ee (&rest files)
+    "Edit one or more files in another window."
+    (eshell-fn-on-files 'find-file-other-window 'find-file-other-window files))
+#+end_src
+
+No way would I accidentally type any of the following commands:
+
+#+begin_src emacs-lisp
+  (defalias 'eshell/emacs 'eshell/e)
+  (defalias 'eshell/vi 'eshell/e)
+  (defalias 'eshell/vim 'eshell/e)
+#+end_src
+
+Both =less= and =more= are the same to me. as I want to scroll through a
+file. Sure the [[https://github.com/sharkdp/bat][bat]] program is cool, but from eshell, we could call
+[[help:view-file][view-file]], and hit ~q~ to quit and return to the shell.
+
+#+begin_src emacs-lisp
+  (defun eshell/less (&rest files)
+    "Essentially an alias to the `view-file' function."
+    (eshell-fn-on-files 'view-file 'view-file-other-window files))
+#+end_src
+Do I type =more= any more than =less=?
+#+begin_src emacs-lisp
+  (defalias 'eshell/more 'eshell/less)
+  (defalias 'eshell/view 'eshell/less)
+#+end_src
+
+*** git
+[2022-12-08 Thu 17:55]
+
+I used to have a number =g=-prefixed aliases to call git-related
+commands, but now, I call [[file:ha-config.org::*Magit][Magit]] instead. My =gst= command is an alias to
+=magit-status=, but using the =alias= doesn't pull in the current working
+directory, so I make it a function, instead:
+
+#+begin_src emacs-lisp
+  (defun eshell/gst (&rest args)
+      (magit-status (pop args) nil)
+      (eshell/echo))   ;; The echo command suppresses output
+#+end_src
+
+*** Regular Expressions
+[2022-12-08 Thu 17:57]
+
+I think using the [[help:rx][rx]] macro with applications like =grep= is great reason why =eshell= rocks. Assuming we can’t remember cryptic regular expression syntax, we could look for a GUID-like strings using =ripgrep= with:
+#+begin_src sh
+  $ rg (rx (one-or-more hex) "-" (one-or-more hex))
+#+end_src
+The problem with this trick is that =rx= outputs an Emacs-compatible regular expression, which doesn’t always match regular expressions accepted by most applications.
+
+The [[https://github.com/joddie/pcre2el][pcre2el]] project can convert from a Lisp regular expression to a
+[[http://www.pcre.org/][PCRE]] (Perl Compatible Regular Expression), acceptable by [[https://github.com/BurntSushi/ripgrep][ripgrep]].
+
+#+begin_src emacs-lisp
+  (require 'pcre2el)
+
+  (defmacro prx (&rest expressions)
+          "Convert the rx-compatible regular EXPRESSIONS to PCRE.
+        Most shell applications accept Perl Compatible Regular Expressions."
+          `(rx-let ((integer (1+ digit))
+                    (float   (seq integer "." integer))
+                    (b256    (seq (optional (or "1" "2"))
+                                  (regexp "[0-9]\\{1,2\\}")))
+                    (ipaddr  (seq b256 "." b256 "." b256 "." b256))
+                    (time    (seq digit (optional digit) ":" (= 2 digit) (optional ":" (= 2 digit))))
+                    (email   (seq (1+ (regexp "[^,< ]")) "@" (1+ (seq (1+ (any alnum "-"))) ".") (1+ alnum)))
+                    (date    (seq (= 2 digit) (or "/" "-") (= 2 digit) (or "/" "-") (= 4 digit)))
+                    (ymd     (seq (= 4 digit) (or "/" "-") (= 2 digit) (or "/" "-") (= 2 digit)))
+                    (uuid    (seq (= 8 hex) "-" (= 3 (seq (= 4 hex) "-")) (= 12 hex)))
+                    (guid    (seq uuid)))
+             (rxt-elisp-to-pcre (rx ,@expressions))))
+#+end_src
+
+*** Map over Files
+[2022-12-08 Thu 17:58]
+
+While I like eshell’s =for= loop well enough (if I can remember the
+syntax), as in:
+
+#+begin_src sh :tangle no
+  for file in *.org {
+    chmod a+x $file
+  }
+#+end_src
+
+I like the idea of using a /map/ structure, for instance, wouldn’t it be
+cool to type something like:
+
+#+begin_src sh :tangle no
+  do chmod a+x *.org
+#+end_src
+
+How would this work without special syntax? Well, eshell sends the
+=*.org= as a list of files, which we could use as the delimiter. The
+downside is that we want to list the files, we need to actually /list/
+the files, as in:
+
+#+begin_src sh :tangle no
+  do chmod a+x (list "a.org" "c.org")
+#+end_src
+
+Pretty ugly, but what about using =::= as a separator of the /lambda/ from
+the /list/, like:
+
+#+begin_src sh :tangle no
+  do chmod a+x :: *.org b.txt
+#+end_src
+
+Here is my initial function. After separating the arguments into two
+groups (split on the =::= string), we iterate over the file elements,
+creating a /form/ that includes the filename.
+
+#+begin_src emacs-lisp
+  (defun eshell/do (&rest args)
+    "Execute a command sequence over a collection of file elements.
+  Separate the sequence and the elements with a `::' string.
+  For instance:
+
+      do chown _ angela :: *.org(u'oscar')
+
+  The function substitutes the `_' sequence to a single filename
+  element, and if not specified, it appends the file name to the
+  command. So the following works as expected:
+
+      do chmod a+x :: *.org"
+    (seq-let (forms elements) (-split-on "::" args)
+      (dolist (element (-flatten (-concat elements)))
+        (message "Working on %s ... %s" element forms)
+        (let* ((form (if (-contains? forms "_")
+                         (-replace "_" element forms)
+                       (-snoc forms element)))
+               (cmd  (car form))
+               (args (cdr form)))
+          (eshell-named-command cmd args)))))
+#+end_src
+The [[help:eshell-named-command][eshell-named-command]] takes the command separately from the
+arguments, so we use =car= and =cdr= on the form.

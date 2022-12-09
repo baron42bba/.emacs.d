@@ -206,78 +206,6 @@ If trash is missing you might want to run
 
 With trash you can recover files to it's original location.
 
-* eshell and shell environment
-
-We don't need a =$PAGER= in Emacs:
-
-#+BEGIN_SRC emacs-lisp
-     (setenv "PAGER" "cat")
-#+END_SRC
-
-Want to have some [[http://www.emacswiki.org/emacs/EshellAlias][shell aliases]], right?
-
-#+BEGIN_SRC emacs-lisp
-    (defalias 'e 'find-file)
-    (defalias 'ff 'find-file)
-    (defalias 'emacs 'find-file)
-#+END_SRC
-
-Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll’:
-
-  #+BEGIN_SRC elisp
-    (require 'em-alias)
-    (add-hook 'eshell-mode-hook
-              (lambda ()
-                ;; The 'ls' executable requires the Gnu version on the Mac
-                (let ((ls (if (file-exists-p "/opt/local/bin/gls")
-                              "/opt/local/bin/gls"
-                            "/bin/ls")))
-                  (add-to-list 'eshell-command-aliases-list (list "ll" (concat ls " -AlohG --color=always") )))))
-  #+END_SRC
-
-What about =gd= to call the Diff command?
-
-   #+BEGIN_SRC elisp
-     (defalias 'gd 'magit-diff-unstaged)
-     (defalias 'gds 'magit-diff-staged)
-   #+END_SRC
-
-A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bodil-eshell.el
-
-#+BEGIN_SRC elisp
-  (require 'f)
-
-  ;; Prompt with a bit of help from http://www.emacswiki.org/emacs/EshellPrompt
-    (defmacro with-face (str &rest properties)
-      `(propertize ,str 'face (list ,@properties)))
-
-  (setq hostname (replace-regexp-in-string "\\(^[[:space:]\n]*\\|[[:space:]\n]*$\\)" "" (with-output-to-string (call-process "hostname" nil standard-output))))
-
-  (defun eshell/abbr-pwd ()
-    (let ((home (getenv "HOME"))
-    (path (eshell/pwd)))
-    (cond
-    ((string-equal home path) "~")
-    ((f-ancestor-of? home path) (concat "~/" (f-relative path home)))
-    (path))))
-
-    (defun eshell/my-prompt ()
-    (let ((header-bg "#161616"))
-    (concat
-    (with-face user-login-name :foreground "#d75faf")
-    (with-face (concat "@" hostname) :foreground "#8700af")
-    " "
-    (with-face (eshell/abbr-pwd) :foreground "#008700")
-    (if (= (user-uid) 0)
-    (with-face "#" :foreground "red")
-    (with-face "$" :foreground "#2345ba"))
-    " ")))
-
-    (setq eshell-prompt-function 'eshell/my-prompt)
-    (setq eshell-highlight-prompt nil)
-    (setq eshell-prompt-regexp "^[^#$\n]+[#$] ")
-#+END_SRC
-
 * define emacs shutdown function
 
 I like to commit my notes in my org and workorg folders after a days work.
@@ -5627,6 +5555,37 @@ Amazon instance ID at point.
     )
 
 #+END_SRC
+
+
+* Load the Rest
+[2022-12-09 Fri 18:09]
+
+#+begin_src emacs-lisp
+  (defvar bba-emacs-files (flatten-list
+                           `("bba-shell.org"))
+    "List of org files that complete my configuration.")
+
+  (defun bba-emacs-load (file)
+    "load or reload an org-mode FILE containing lterate Emacs configuration code."
+    (interactive (list (completing-read "Org file: " 'bba-emacs-files)))
+    (let ((full-file (f-join "~/.emacs.d/" file)))
+      (when (f-exists? full-file)
+        (org-babel-load-file full-file))))
+
+  (defun bba-emacs-reload-all ()
+    "Reload our entire ecosystem of configuration files."
+    (interactive)
+    (dolist (file bba-emacs-files)
+      (unless (equal file "bba.org"))
+      (bba-emacs-load file)))
+
+#+end_src
+
+And do it:
+#+begin_src emacs-lisp
+  (bba-emacs-reload-all)
+#+end_src
+
 
 * post
   [2015-10-02 Fri 13:26]
