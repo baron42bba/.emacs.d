@@ -889,1812 +889,195 @@ I still like ido-find-file.
   )
 #+END_SRC
 
-* org-mode
-
-See [[http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html][orgtutorial_dto]] for details.
-
-It's worth to use Emacs for org-mode alone.
-[[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] and [[http://www.howardism.org/Technical/Emacs/literate-database.html][Literate Database Work]] are only 2 use cases.
-With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's easy to generate beautiful output.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'ox-md nil t)
-  (setq org-use-speed-commands t)
-#+END_SRC
-
-** org-mac-link
-[2018-11-06 Tue 14:20]
-
-#+BEGIN_SRC emacs-lisp
-  (if (string-equal system-type "darwin")
-      (progn (require 'org-mac-link)
-             (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
-#+END_SRC
-
-** org-eldoc
-[2017-01-06 Fri 14:23]
-
-#+BEGIN_SRC emacs-lisp
-  (load-file (expand-file-name "~/.emacs.d/lisp/org-eldoc.el"))
-#+END_SRC
-
-** org-plus-contrib
-
-Some extra functionality from the org package repository.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-    (if (>= emacs-major-version 24)
-        (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20191028" t)
-          ))
-
-#+END_SRC
-
-** org-protocol
-
-Run these commands to make org-protocol work in gnome:
-
-#+BEGIN_SRC sh :eval no :tangle no
-  gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/command '/usr/bin/emacsclient %s' --type String
-  gconftool-2 -s /desktop/gnome/url-handlers/org-protocol/enabled --type Boolean true
-#+END_SRC
-
-this is how your firefox bookmark must look like:
-
-#+BEGIN_SRC :eval no :tangle no
-  javascript:location.href='org-protocol://capture:/l/'%20+%20encodeURIComponent(location.href)+'/'%20+%20encodeURIComponent(document.title)+%20'/'%20+%20encodeURIComponent(window.getSelection()%20)
-#+END_SRC
-
-
-#+BEGIN_SRC emacs-lisp
-  (require 'org-protocol)
-
-  (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-  (define-key global-map "\C-cl" 'org-store-link)
-  (define-key global-map "\C-ca" 'org-agenda)
-  (setq org-log-done t)
-  (setq org-id-method (quote uuidgen))
-  (setq org-src-window-setup 'current-window)
-  (setq org-startup-indented 1)
-
-  (if (equal "work" (getenv "SYSENV"))
-      (setq org-agenda-files (list "~/workorg/work.org"
-                                   "~/org/todo.org"
-                                   "~/org/notes.org"
-                                   "~/org/emacs.org"
-                                   "~/org/it.org"
-                                   "~/org/refile.org"))
-    (setq org-agenda-files (list "~/org/work.org"
-                                 "~/org/todo.org"
-                                 "~/org/notes.org"
-                                 "~/org/emacs.org"
-                                 "~/org/it.org"
-                                 "~/org/refile.org")))
-
-#+END_SRC
-
-** org sync to icloud
-[2022-09-07 Wed 11:11]
-
-With [[https://beorgapp.com][beorg]] we can have our tasks with us.
-As it supports icloud drive we can use a git hook to sync files after commit:
-
-#+begin_src sh :eval never
-  #!/bin/bash
-
-  for file in notes todo motorcycles; do
-      rsync -tuvq ~/org/${file}.org ~/Library/Mobile\ Documents/iCloud~com~appsonthemove~beorg/Documents/org/${file}.org
-      rsync -tuvq ~/Library/Mobile\ Documents/iCloud~com~appsonthemove~beorg/Documents/org/${file}.org ~/org/${file}.org
-  done
+                      (list
+                       (cons 'name prompt)
+                       (cons 'candidates cands)
+                       '(action . (("Expand" . (lambda (selection) selection))))
+                       ))
+                (setq result (helm-other-buffer '(tmpsource) "*helm-select-yasnippet"))
+                (if (null result)
+                    (signal 'quit "user quit!")
+                  (cdr (assoc result rmap))))
+            nil)))
 #+end_src
 
-However sometimes it's nice to sync manually as well.
-Why leave Emacs for that?
-
-#+begin_src emacs-lisp
-  (defun isync ()
-    "sync org files to and from icloud drive."
-    (interactive)
-    (save-some-buffers)
-    (shell-command "git --work-tree ~/org/ --git-dir ~/org/.git commit -a -m 'autocommit'"))
-  (define-key global-map (kbd "S-<f1>") 'isync)
-#+end_src
-
-** org-man
-[2018-08-28 Tue 16:57]
+Default to snippet-mode if we are in a sub directory of snippets:
 
 #+BEGIN_SRC emacs-lisp
-  (org-add-link-type "man" 'org-man-open)
-  (add-hook 'org-store-link-functions 'org-man-store-link)
-
-  (defcustom org-man-command 'man
-    "The Emacs command to be used to display a man page."
-    :group 'org-link
-    :type '(choice (const man) (const woman)))
-
-  (defun org-man-open (path)
-    "Visit the manpage on PATH.
-  PATH should be a topic that can be thrown at the man command."
-    (funcall org-man-command path))
-
-  (defun org-man-store-link ()
-    "Store a link to a manpage."
-    (when (memq major-mode '(Man-mode woman-mode))
-      ;; This is a man page, we do make this link
-      (let* ((page (org-man-get-page-name))
-             (link (concat "man:" page))
-             (description (format "Manpage for %s" page)))
-        (org-store-link-props
-         :type "man"
-         :link link
-         :description description))))
-
-  (defun org-man-get-page-name ()
-    "Extract the page name from the buffer name."
-    ;; This works for both `Man-mode' and `woman-mode'.
-    (if (string-match " \\(\\S-+\\)\\*" (buffer-name))
-        (match-string 1 (buffer-name))
-      (error "Cannot create link to this man page")))
-
+  (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
 #+END_SRC
 
-** org-clocktable
-[2022-08-03 Wed 17:02]
+* define some major modes for yasnippets
+[2016-05-25 Wed 10:26]
 
-https://www.erichgrunewald.com/posts/how-i-track-my-hour-balance-with-a-custom-org-mode-clock-table/
-
-#+begin_src emacs-lisp
-  (require 'cl-lib)
-  (require 'org-clock)
-  (defun org-dblock-write:work-report (params)
-    "Calculate how many hours too many or too few I have worked.
-  PARAMS are defined in the template, they are :tstart for the
-  first day for which there's data (e.g. <2022-01-01>)
-  and :tend for the last date (e.g. <now>)."
-    ;; cl-flet is a macro from the common lisp emulation package that allows us to
-    ;; bind functions, just like let allows us to do with values.
-    (cl-flet*
-        ((format-time (time) (format-time-string
-                              (org-time-stamp-format t t) time))
-         (get-minutes-from-log (t1 t2) (cl-second
-                             (org-clock-get-table-data
-                              (buffer-file-name)
-                              (list :maxlevel 0
-                                    :tstart (format-time t1)
-                                    :tend (format-time t2))))))
-        (let* ((start
-                (seconds-to-time (org-matcher-time (plist-get params :tstart))))
-               (end
-                (seconds-to-time (org-matcher-time (plist-get params :tend))))
-               (time start)
-               (total-days-worked 0))
-          (progn
-            ;; loop through all the days in the time frame provided and count how
-            ;; many days minutes were reported.
-            (while (time-less-p time end)
-              (let* ((next-day (time-add time (date-to-time "1970-01-02T00:00Z")))
-                     (minutes-in-day (get-minutes-from-log time next-day)))
-                ;; exclude weekend
-                (if (and (> (string-to-number (format-time-string "%w" time)) 0)
-                         (< (string-to-number (format-time-string "%w" time)) 6)
-                         (> minutes-in-day 0)) (cl-incf total-days-worked 1))
-                (setq time next-day)))
-            ;; now we can just do some simple arithmetic to get the difference
-            ;; between hours ideally worked and hours actually worked.
-            (let* ((total-minutes-worked (get-minutes-from-log start end))
-                   (hours-worked (/ total-minutes-worked 60.0))
-                   (hours-per-workday 8)
-                   (hours-should-work (* total-days-worked hours-per-workday))
-                   (hour-difference (- hours-worked hours-should-work)))
-              (insert (format "%0.1f" hour-difference)))))))
-#+end_src
-
-#+begin_src org :eval never
-  ,#+BEGIN: work-report :tstart "<2022-04-01>" :tend "<2022-04-27>"
-  ,#+END:
-#+end_src
-
-#+begin_quote
-One limitation is that the algorithm assumes that any day you worked
-on is a day on which you should have worked the full number of
-hours. So if I log a session that goes from Friday afternoon to after
-midnight (that is, early Saturday morning), it assumes I should have
-worked 16 hours those days, whereas in fact only Friday was a
-workday. I solve this by editing my hour reports manually whenever
-this happens.
-#+end_quote
-
-** [[https://github.com/stig/ob-applescript.el][ob-applescript]]
-[2016-09-27 Tue 09:34]
-
-This module lets you run AppleScript from AppleScript source code
-blocks with Org Babel.
-
-This package is a direct result of attempting to answer a question on
-this [[http://emacs.stackexchange.com/q/26374/10625][emacs.stackexchange.com thread]].
+I use yasnippet for sql a lot.
+Languages differ and I need different templates.
 
 #+BEGIN_SRC emacs-lisp
-  (require 'ob-applescript)
-#+END_SRC
-
-** [[https://github.com/stig/ox-jira.el][ox-jira]]
-[2016-05-22 Sun 20:53]
-
-Org-mode export backend for JIRA markup
-
-#+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
-      (require 'ox-jira))
-#+END_SRC
-
-We are lazy and want to speed up things:
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-org-export-jira-clipboard()
-    "narrow to org subtree and store content in jira format in clipboard."
-    (interactive)
-    (org-narrow-to-subtree)
-    (bba-export-jira-org)
-    (let ((org-export-use-babel nil))
-      (ox-jira-export-as-jira))
-    (delete-region (point) (progn (forward-line 1)(point)))
-    (push-mark (point))
-    (push-mark (point-max) nil t)
-    (goto-char (point-min))
-    (kill-ring-save 1 1 1)
-    (other-window -1)
-    (widen)
-    (other-window 1)
-    )
-
-  (define-key org-mode-map "\C-c\S-j" 'bba-org-export-jira-clipboard)
-#+END_SRC
-
-Besides the clipboard we want also an org file in =/tmp/= to attach to
-the jira ticket. Of course some boiler plate for the poor souls who
-never heard of orgmode.
-
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-export-jira-org()
-    "export current narrowed view to file in tmp and open a finder window on OS-X."
-    (interactive)
-    (goto-char (point-min))
-    (insert "# This file is just plain text called orgmode")
-    (newline)
-    (insert "# https://en.wikipedia.org/wiki/Org-mode")
-    (newline)
-    (insert "# You can open it in any text editor or file reader.")
-    (newline)
-    (insert "# You might want to use Emacs for best experience.")
-    (newline)
-    (if (re-search-forward "jira:" nil t 1)
-        (if (org-in-regexp org-bracket-link-regexp 1)
-            (let ((remove (list (match-beginning 0) (match-end 0)))
-                  (description (last (split-string (if (match-end 3)
-                                                       (match-string-no-properties 3)
-                                                     (match-string-no-properties 1)) ":"))))
-              (org-open-at-point)
-              (push-mark (point))
-              (push-mark (point-max) nil t)
-              (goto-char (point-min))
-              (write-region (mark) (point) (concat "/tmp/" (car description) ".org") nil nil )
-              (deactivate-mark)
-              (if (string-equal system-type "darwin")(shell-command "open /tmp/"))
-              )))
-    (goto-char (point-min))
-    (kill-line 4)
+  (define-derived-mode sql-oracle-mode sql-mode "OracleSQL"
+    "Major mode for ORACLE SQL"
+    (setq sql-product 'oracle)
     )
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (defun bba-open-jira()
-  "open current ticket."
-  (interactive)
-  (let ((oldpoint (point-marker)))
-  (org-narrow-to-subtree)
-  (goto-char (point-min))
-  (if (re-search-forward "jira:" nil t 1)
-      (org-open-at-point)
-    (progn (widen)
-            (outline-up-heading 1 t)
-            (bba-open-jira)
-  ))
-  (widen)
-  (goto-char oldpoint)
-  )
-  )
+    (define-derived-mode sql-vertica-mode sql-mode "VerticaSQL"
+      "Major mode for Vertica"
+      (setq sql-product 'ansi)
+      )
 
-  (define-key org-mode-map "\C-xl\S-j" 'bba-open-jira)
 #+END_SRC
 
-** ox-reveal
-[2017-11-06 Mon 23:26]
+#+BEGIN_SRC emacs-lisp
+  (define-derived-mode sql-mysql-mode sql-mode "MySQL"
+    "Major mode for MySQL"
+    (setq sql-product 'mysql)
+    )
 
-Get reveal.js as well:
+#+END_SRC
+
+* [[https://github.com/flycheck/flycheck][flycheck]]
+
+To get puppet-lint:
 
 #+BEGIN_SRC sh :tangle never
-  git clone https://github.com/hakimel/reveal.js/
+  gem install puppet-lint
 #+END_SRC
+
+modified puppet-lint definition to include no-80chars-check and fixed
+log-format.
 
 #+BEGIN_SRC emacs-lisp
-  (require 'ox-reveal)
-#+END_SRC
-
-** ox-publish
-[2018-01-24 Wed 20:29]
-
-  #+BEGIN_SRC emacs-lisp
-    (require 'ox-html)
-    (require 'ox-publish)
-    (require 'ox-rss)
-    (require 'htmlize)
-  #+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-mode-websrc-directory (concat (getenv "HOME") "/git/website/org"))
-  (setq org-mode-publishing-directory (concat (getenv "HOME") "/git/website/html/"))
-
-  (setq org-publish-project-alist
-        `(("all"
-           :components ("blog-content" "blog-static" "blog-rss"))
-
-          ("blog-content"
-           :base-directory       ,org-mode-websrc-directory
-           :base-extension       "org"
-           :publishing-directory ,org-mode-publishing-directory
-           :recursive            t
-           :publishing-function  org-html-publish-to-html
-  ;         :preparation-function org-mode-blog-prepare
-           :export-with-tags     nil
-           :headline-levels      4
-           :auto-preamble        t
-           :auto-postamble       nil
-           :auto-sitemap         t
-           :sitemap-title        "Bundesbrandschatzamt"
-           :section-numbers      nil
-           :table-of-contents    nil
-           :with-toc             nil
-           :with-author          nil
-           :with-creator         nil
-           :with-tags            t
-           :with-smart-quotes    t
-
-           :html-doctype         "html5"
-           :html-html5-fancy     t
-           :html-preamble        org-mode-blog-preamble
-           :html-postamble       org-mode-blog-postamble
-           :html-head  "<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-              <link href='http://fonts.googleapis.com/css?family=Source+Serif+Pro:400,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-              <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
-              <link rel=\"stylesheet\" href=\"/~baron/css/styles.css\" type=\"text/css\"/>\n"
-           :html-head-extra "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>
-              <script src=\"/~baron/js/magic.js\"></script>
-              <link rel=\"icon\" href=\"/~baron/img/dragon.svg\">
-              <link rel=\"shortcut icon\" href=\"~baron/img/dragon-head.png\">
-              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
-           :html-head-include-default-style nil
-           )
-
-          ("blog-static"
-           :base-directory       ,org-mode-websrc-directory
-           :base-extension       "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|svg"
-           :publishing-directory ,org-mode-publishing-directory
-           :recursive            t
-           :publishing-function  org-publish-attachment
-           )
-
-          ("blog-rss"
-           :base-directory        ,org-mode-websrc-directory
-           :base-extension        "org"
-           :rss-image-url         "http://www.bundesbrandschatzamt.de/~baron/img/dragon-head.png"
-           :publishing-directory  ,org-mode-publishing-directory
-           :publishing-function   (org-rss-publish-to-rss)
-           :html-link-home        "http://www.bundesbrandschatzamt.de/~baron/"
-           :html-link-use-abs-url t
-           :with-toc              nil
-           :with-author           nil
-           :with-email            nil
-           :with-creator          nil
-           :exclude               ".*"
-           :include               ("index.org"))))
-
-  (defun org-mode-blog-preamble (options)
-    "The function that creates the preamble top section for the blog.
-  OPTIONS contains the property list from the org-mode export."
-    (let ((base-directory (plist-get options :base-directory)))
-      (org-babel-with-temp-filebuffer (expand-file-name "top-bar.html" base-directory) (buffer-string))))
-
-  (defun org-mode-blog-postamble (options)
-    "The function that creates the postamble, or bottom section for the blog.
-  OPTIONS contains the property list from the org-mode export."
-    (let ((base-directory (plist-get options :base-directory)))
-      (org-babel-with-temp-filebuffer (expand-file-name "bottom.html" base-directory) (buffer-string))))
-
-  (defun org-mode-blog-prepare ()
-    "`index.org' should always be exported so touch the file before publishing."
-    (let* ((base-directory (plist-get project-plist :base-directory))
-           (buffer (find-file-noselect (expand-file-name "index.org" base-directory) t)))
-      (with-current-buffer buffer
-        (set-buffer-modified-p t)
-        (save-buffer 0))
-      (kill-buffer buffer)))
-#+END_SRC
-
-** [[https://github.com/tarsius/ox-texinfo-plus][ox-texinfo+]]
-[2019-01-23 Wed 16:08]
-
-#+BEGIN_SRC emacs-lisp
-  (load-file (expand-file-name "~/.emacs.d/lisp/ox-texinfo+.el"))
-#+END_SRC
-
-** bba-ox-clip-formatted-copy
-[2016-12-13 Tue 15:29]
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-ox-clip-formatted-copy()
-    "wrapper for ox-clip-formatted-copy to disable org-export-use-babel."
-    (interactive)
-    (let ((org-export-use-babel nil))
-      (ox-clip-formatted-copy (mark) (point)))
-    )
-
-  (define-key org-mode-map "\M-\S-w" 'bba-ox-clip-formatted-copy)
-#+END_SRC
-
-** org-edit-special
-[2022-09-08 Thu 14:00]
-
-For whatever reason rainbow-delimiter was not active in the special
-buffer. SQL is so much better with rainbows.
-
-#+begin_src emacs-lisp
-  (define-advice org-edit-special (:after (&optional arg) my-big-advice)
-    (rainbow-delimiters-mode 1))
-#+end_src
-
-** comint
-[2022-02-25 Fri 11:49]
-
-remove duplicates in modes like sqli.
-
-#+begin_src emacs-lisp
-  (add-hook 'comint-mode-hook
-            '(lambda () (setq comint-input-ignoredups t)))
-#+end_src
-
-** comint-write-buffer
-[2018-01-09 Tue 14:10]
-#+BEGIN_SRC emacs-lisp
-  (defun comint-write-output-buffer (buffername &optional append)
-    "Write output from interpreter since last input to BUFFER.
-  Any prompt at the end of the output is not written.
-
-  If the optional argument APPEND (the prefix argument when interactive)
-  is non-nil, the output is appended to the buffer instead.
-  If it is nil existing buffer gets killed upon request."
-    (interactive
-     (list (read-buffer
-            (if current-prefix-arg
-                "Append output to buffer: "
-              "Write output to buffer: "))
-           current-prefix-arg
-           ))
-    (if append
-        (get-buffer-create buffername)
-      (progn
-        (if (get-buffer buffername)
-            (kill-buffer-ask (get-buffer buffername)))
-        (get-buffer-create buffername)
-        )
-        )
-    (save-excursion
-      (goto-char (process-mark (get-buffer-process (current-buffer))))
-      (forward-line 0)
-      (append-to-buffer buffername comint-last-input-end (point))))
-      (define-key comint-mode-map (kbd "C-c s-s") 'comint-write-output-buffer)
-
-#+END_SRC
-** bba-create-ticket-tmp-dir
-[2017-07-28 Fri 13:07]
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-create-ticket-tmp-dir-open-dir-screen()
-    "Create directory for the current ticket in tmp if not exist.
-  Open the directory of the current ticket in iterm screen via keyboard maestro."
-    (interactive)
-    (org-narrow-to-subtree)
-    (let ((beg (point)))
-      (goto-char (point-min))
-      (if (re-search-forward "jira:" nil t 1)
-          (if (org-in-regexp org-bracket-link-regexp 1)
-              (let ((remove (list (match-beginning 0) (match-end 0)))
-                    (description (last (split-string (if (match-end 3)
-                                                         (match-string-no-properties 3)
-                                                       (match-string-no-properties 1)) ":"))))
-                (unless (file-exists-p (concat "~/tmp/" (downcase (car description))))
-                                       (mkdir (concat "~/tmp/" (downcase (car description))))
-                                       )
-                (kill-new (concat "~/tmp/" (downcase (car description))))
-                )))
-      (goto-char beg)
-      )
-    (widen)
-    (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-cd-to-clipboard\"'")
-    )
-#+END_SRC
-** bba-remove-comments-and-empty-lines
-[2018-03-06 Tue 13:58]
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-remove-comments-and-empty-lines()
-    "Remove all lines containing comments or nothing at all."
-    (interactive)
-    (goto-char (point-min))
-    (let (kill-ring)
-      (comment-kill (count-lines (point-min)(point-max))))
-    (goto-char (point-min))
-    (flush-lines "^$"))
-#+END_SRC
-
-** bba-edit-sql
-[2022-05-13 Fri 13:23]
-
-use edit-indirect-region to zoom into a END_PREPARE region in
-sql-mode. Handy for embedded SQL in Perl.
-
-#+begin_src emacs-lisp
-  (defun bba-edit-sql ()
-    "Find the region between previous END_PREPARE and the one after it.
-  Open that block in edit-indirect-region and switch to sql-mode."
-    (interactive)
-    (save-mark-and-excursion
-      (search-backward "END_PREPARE")
-      (next-line)
-      (beginning-of-line)
-      (set-mark-command nil)
-      (search-forward "END_PREPARE")
-      (beginning-of-line)
-      (edit-indirect-region (mark) (point) t)
-      (sql-mode)
-    ))
-  (global-set-key (kbd "s-S") 'bba-edit-sql)
-#+end_src
-** search notes
-[2018-02-09 Fri 10:57]
-
-Your notes are more useful if you can easily search them!
-
-#+BEGIN_SRC emacs-lisp
-  (defun snw ()
-    "Search work notes."
-    (interactive)
-      (rgrep (read-regexp "Search for" 'grep-tag-default 'grep-regexp-history) "*.org" (file-truename "~/workorg")))
-
-  (defun sn ()
-    "Search notes."
-    (interactive)
-    (rgrep (read-regexp "Search for" 'grep-tag-default 'grep-regexp-history) "*.org" (file-truename "~/org")))
-
-#+END_SRC
-
-** search last miliseconds and convert to hours at point
-[2022-04-21 Thu 13:17]
-
-#+begin_src emacs-lisp
-  (defun bba-ms-to-h ()
-    "search for last miliseconds and convert to hours at point.
-    Useful for Vertica timing output."
-    (interactive)
-    (save-mark-and-excursion
-      (let (bounds pos1 pos2 mything oldpos)
-        (setq oldpos (point))
-        (search-backward " ms")
-        (search-backward " ")
-        (right-char)
-      (setq bounds (bounds-of-thing-at-point 'symbol))
-      (setq pos1 (car bounds))
-      (setq pos2 (cdr bounds))
-      (setq mything (buffer-substring-no-properties pos1 pos2))
-      (setq mything (/ (round (/ (string-to-number mything) 10 60 60.0)) 100.0))
-      (goto-char oldpos)
-      (insert-before-markers (format "%s hours." mything)))))
-#+end_src
-
-** Some initial languages we want org-babel to support
-
-#+BEGIN_SRC emacs-lisp
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '(
-     (shell . t)
-     (python . t)
-     (R . t)
-     (ruby . t)
-     (ditaa . t)
-     (dot . t)
-     (octave . t)
-     (sqlite . t)
-     (perl . t)
-     (sql . t)
-     (tmux . sh)
-     (R . t)
-     ))
-
-  ;;(setq org-html-preamble nil
-  ;;     org-html-postamble nil
-  ;;      org-html-head "")
-
-  ;; (setq org-html-preamble nil
-  ;;       org-html-postamble nil
-  ;;       org-html-include-default-style nil
-  ;;       org-html-head ""
-  ;;       org-export-html-with-timestamp nil
-  ;;       org-export-html-style "body-only"
-  ;; )
-  ;; body-only option ?
-
-  ;; (setq html (org-export-as-html 3 nil nil 1))
-  (setq org-babel-tmux-location "/opt/local/bin/tmux")
-
-#+END_SRC
-
-** holidays
-[2022-09-06 Tue 18:32]
-
-#+begin_src emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/german-holidays-20181213.644")
-  (require 'german-holidays)
-  (setq holiday-local-holidays holiday-german-HH-holidays)
-#+end_src
-
-** open current directory in finder
-[2017-01-09 Mon 15:18]
-
-Sometimes you need a file finder in the current buffers directory.
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-open-file-dir-finder ()
-    "Open the directory of the current file in finder."
-    (interactive)
-    (if (string-equal system-type "darwin")
-	(shell-command (concat "open " (file-name-directory (buffer-file-name))))
-      )
-    )
-
-#+END_SRC
-
-** open current file via osx open
-[2017-06-07 Wed 13:50]
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-open-file-system ()
-    "Open the current file via osx open."
-    (interactive)
-    (if (string-equal system-type "darwin")
-	(shell-command (concat "open " (buffer-file-name)))
-      )
-    )
-
-#+END_SRC
-
-** open current directory in iterm screen
-[2017-02-14 Tue 12:24]
-
-Open current buffers directory in gnu screen in iterm.
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-open-file-dir-screen ()
-    "Open the directory of the current file in iterm screen via keyboard maestro."
-    (interactive)
-    (if (string-equal system-type "darwin")
-	(progn
-	  (if (null buffer-file-name)
-	      (kill-new default-directory)
-	      (kill-new (file-name-directory (buffer-file-name))))
-	  (shell-command "osascript -e \'tell app \"Keyboard Maestro Engine\" to do script \"screen-start-cd-to-clipboard\"'")
-	  )
-      )
-    )
-
-
-
-#+END_SRC
-
-** Find next and previous =#+BEGIN_SRC sh= block.
-Very useful for repetitive literate devops jobs.
-<C-c> <S-n> then <C-c><C-c> and so on.
-
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'org-mode-hook
-            (lambda ()
-
-              (fset 'bba/org-search-src-sh
-                    (lambda (&optional arg) "Find next BEGIN_SRC sh block." (interactive "p") (kmacro-exec-ring-item (quote ([19 94 35 92 43 66 69 71 73 78 95 83 82 67 32 115 104 down] 0 "%d")) arg)))
-              (define-key org-mode-map "\C-c\S-n" 'bba/org-search-src-sh)
-
-              (fset 'bba/org-search-src-sh-reverse
-                    (lambda (&optional arg) "Find previous BEGIN_SRC sh block." (interactive "p") (kmacro-exec-ring-item (quote ([18 94 35 92 43 66 69 71 73 78 95 83 82 67 32 115 104 18 down] 0 "%d")) arg)))
-              (define-key org-mode-map "\C-c\S-p" 'bba/org-search-src-sh-reverse)
-  ))
-
-#+END_SRC
-
-** copy previous src block
-[2016-08-25 Thu 23:36]
-
-This is helpful in training sessions.
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-copy-and-yank-org-src-block()
-    "copy last org src block and insert it at point.
-  If region is active copy only the src begin and src end lines."
-    (interactive)
-    (if (use-region-p)
-        (progn
-          (let (-p1 -p2 srclength)
-            (setq -p1 (region-beginning) -p2 (region-end))
-            (setq mark-active nil)
-            (re-search-backward "\#\\+BEGIN_SRC")
-            (forward-line -1)
-            (if (looking-at "\#\\+RESULTS:")(re-search-backward "\#\\+BEGIN_SRC"))
-            (forward-line -1)
-            (if  (not (looking-at "\#"))(forward-line))
-            (set-mark-command nil)
-            (forward-line)
-            (beginning-of-line)
-            (kill-ring-save 1 1 1)
-            (goto-char -p1)
-            (set-mark-command nil)
-            (insert (pop kill-ring))
-            (setq srclength (- (region-end) (region-beginning)))
-            (setq mark-active nil)
-            (re-search-backward "\#\\+END_SRC")
-            (set-mark-command nil)
-            (forward-line)
-            (beginning-of-line)
-            (kill-ring-save 1 1 1)
-            (kill-append "\n" nil)
-            (goto-char (+ -p2 srclength))
-            (insert (pop kill-ring))
-            )
-          )
-      (progn
-        (push-mark)
-        (re-search-backward "\#\\+BEGIN_SRC")
-        (forward-line -1)
-        (if (looking-at "\#\\+RESULTS:")(re-search-backward "\#\\+BEGIN_SRC"))
-        (forward-line -1)
-        (if  (not (looking-at "\#"))(forward-line))
-        (set-mark-command nil)
-        (re-search-forward "\#\\+END_SRC")
-        (forward-line)
-        (beginning-of-line)
-        (kill-ring-save 1 1 1)
-        (set-mark-command '1)
-        (set-mark-command '1)
-        (insert (pop kill-ring))
-        (re-search-backward "\#\\+BEGIN_SRC")
-        (forward-line)
-        ))
-    )
-
-  (defun bba-copy-org-src-block(arg)
-    "copy org src block. Can be around point, too. If POSITION is negative look backwards for x occurance, if positive search forwards."
-    (interactive "p")
-    (push-mark)
-    (goto-char (point-at-bol))
-    (if (not current-prefix-arg)
-      (progn
-        (message "foo %s" arg)
-        (if  (not (looking-at "\#\\+BEGIN_SRC"))(re-search-backward "\#\\+BEGIN_SRC"))
-        (forward-line -1)
-        (if (looking-at "\#\\+RESULTS:")(re-search-backward "\#\\+BEGIN_SRC"))
-        (forward-line -1)
-        (if  (not (looking-at "\#"))(forward-line))
-        (set-mark-command nil)
-        (re-search-forward "\#\\+END_SRC")
-        (forward-line)
-        (goto-char (point-at-bol))
-        (kill-ring-save 1 1 1)
-        (set-mark-command '1)
-        (set-mark-command '1))
-      (progn
-        (re-search-forward "\#\\+BEGIN_SRC" nil nil arg)
-        (forward-line -1)
-        (if  (not (looking-at "\#"))(forward-line))
-        (set-mark-command nil)
-        (re-search-forward "\#\\+END_SRC")
-        (forward-line)
-        (goto-char (point-at-bol))
-        (kill-ring-save 1 1 1)
-        (set-mark-command '1)
-        (set-mark-command '1)
-        (insert (pop kill-ring))
-        (re-search-backward "\#\\+BEGIN_SRC")
-        (forward-line)))
-    )
-
-
-  ;; (defun bba-copy-org-src-block()
-  ;;   "copy last org src block. Can be around point, too."
-  ;;   (interactive)
-  ;;   (push-mark)
-  ;;   (goto-char (point-at-bol))
-  ;;   (if  (not (looking-at "\#\\+BEGIN_SRC"))(re-search-backward "\#\\+BEGIN_SRC"))
-  ;;   (forward-line -1)
-  ;;   (if  (not (looking-at "\#"))(forward-line))
-  ;;   (set-mark-command nil)
-  ;;   (re-search-forward "\#\\+END_SRC")
-  ;;   (forward-line)
-  ;;   (goto-char (point-at-bol))
-  ;;   (kill-ring-save 1 1 1)
-  ;;   (set-mark-command '1)
-  ;;   (set-mark-command '1)
-  ;;   )
-
-  (define-key org-mode-map "\C-c\S-w" 'bba-copy-and-yank-org-src-block)
-  (define-key org-mode-map (kbd "C-c s-w") 'bba-copy-org-src-block)
-
-#+END_SRC
-
-** org-babel-async
-[2016-12-27 Tue 15:45]
-
-Thanks to [[http://kitchingroup.cheme.cmu.edu/blog/2015/11/20/Asynchronously-running-python-blocks-in-org-mode/#disqus_thread][Asynchronously running pyton bocks in org-mode]]
-
-Still some work to do on the shell counterpart.
-=:dir= is not recongnised.
-
-#+BEGIN_SRC emacs-lisp
-  (defun org-babel-async-execute:shell ()
-    "Execute the sh src-block at point asynchronously.
-  :var headers are supported.
-  :results output is all that is supported for output.
-
-  A new window will pop up showing you the output as it appears,
-    and the output in that window will be put in the RESULTS section
-    of the code block."
-    (interactive)
-    (require 'org-id)
-    (require 'ob-core)
-    (let* ((current-file (buffer-file-name))
-	   (uuid (org-id-uuid))
-	   (code (org-element-property :value (org-element-context)))
-	   (temporary-file-directory "/tmp/")
-	   (tempfile (make-temp-file "sh-"))
-	   (pbuffer (format "*%s*" uuid))
-	   (varcmds (org-babel-variable-assignments:shell
-		     (nth 2 (org-babel-get-src-block-info))))
-	   process)
-
-      ;; get rid of old results, and put a place-holder for the new results to
-      ;; come.
-      (org-babel-remove-result)
-
-      (save-excursion
-	(re-search-forward "#\\+END_SRC")
-	(insert (format
-		 "\n\n#+RESULTS: %s\n: %s"
-		 (or (org-element-property :name (org-element-context))
-		     "")
-		 uuid)))
-
-      ;; open the results buffer to see the results in.
-      ;; (switch-to-buffer-other-window pbuffer)
-
-      ;; Create temp file containing the code.
-      (with-temp-file tempfile
-	;; if there are :var headers insert them.
-	(dolist (cmd varcmds)
-	  (insert cmd)
-	  (insert "\n"))
-	(insert code))
-
-	;; run the code
-      (setq process (start-process
-		     uuid
-		     pbuffer
-		     "bash"
-		     tempfile))
-
-      ;; when the process is done, run this code to put the results in the
-      ;; org-mode buffer.
-      (set-process-sentinel
-       process
-       `(lambda (process event)
-	  (save-window-excursion
-	    (save-excursion
-	      (save-restriction
-		(with-current-buffer (find-file-noselect ,current-file)
-		  (goto-char (point-min))
-		  (re-search-forward ,uuid)
-		  (beginning-of-line)
-		  (kill-line)
-		  (insert "#+begin_example")
-		  (newline)
-		  (insert
-		   (mapconcat
-		    (lambda (x)
-		      (format "%s" x))
-		    (butlast (split-string
-			      (with-current-buffer
-				  ,pbuffer
-				(buffer-string))
-			      "\n"))
-		    "\n"))
-		  (newline)
-		  (insert "#+end_example")
-
-		  ))))
-
-	  ;; delete the results buffer then delete the tempfile.
-	  ;; finally, delete the process.
-	   (when (get-buffer ,pbuffer)
-	     (kill-buffer ,pbuffer)
-	    (delete-window))
-	  (delete-file ,tempfile)
-	  (delete-process process))))
-  )
-  (define-key org-mode-map (kbd "C-c C-S-c") 'org-babel-async-execute:shell)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (defun org-babel-async-execute:python ()
-    "Execute the python src-block at point asynchronously.
-  :var headers are supported.
-  :results output is all that is supported for output.
-
-  A new window will pop up showing you the output as it appears,
-  and the output in that window will be put in the RESULTS section
-  of the code block."
-    (interactive)
-    (let* ((current-file (buffer-file-name))
-           (uuid (org-id-uuid))
-           (code (org-element-property :value (org-element-context)))
-           (temporary-file-directory ".")
-           (tempfile (make-temp-file "py-"))
-           (pbuffer (format "*%s*" uuid))
-           (varcmds (org-babel-variable-assignments:python
-                     (nth 2 (org-babel-get-src-block-info))))
-           process)
-
-      ;; get rid of old results, and put a place-holder for the new results to
-      ;; come.
-      (org-babel-remove-result)
-
-      (save-excursion
-	(re-search-forward "#\\+END_SRC")
-	(insert (format
-		 "\n\n#+RESULTS: %s\n: %s"
-		 (or (org-element-property :name (org-element-context))
-                     "")
-		 uuid)))
-
-      ;; open the results buffer to see the results in.
-      (switch-to-buffer-other-window pbuffer)
-
-      ;; Create temp file containing the code.
-      (with-temp-file tempfile
-	;; if there are :var headers insert them.
-	(dolist (cmd varcmds)
-          (insert cmd)
-          (insert "\n"))
-	(insert code))
-
-      ;; run the code
-      (setq process (start-process
-                     uuid
-                     pbuffer
-                     "python"
-                     tempfile))
-
-      ;; when the process is done, run this code to put the results in the
-      ;; org-mode buffer.
-      (set-process-sentinel
-       process
-       `(lambda (process event)
-          (save-window-excursion
-            (save-excursion
-              (save-restriction
-		(with-current-buffer (find-file-noselect ,current-file)
-                  (goto-char (point-min))
-                  (re-search-forward ,uuid)
-                  (beginning-of-line)
-                  (kill-line)
-                  (insert
-                   (mapconcat
-                    (lambda (x)
-                      (format ": %s" x))
-                    (butlast (split-string
-                              (with-current-buffer
-                                  ,pbuffer
-				(buffer-string))
-                              "\n"))
-                    "\n"))))))
-          ;; delete the results buffer then delete the tempfile.
-          ;; finally, delete the process.
-          (when (get-buffer ,pbuffer)
-            (kill-buffer ,pbuffer)
-            (delete-window))
-          (delete-file ,tempfile)
-          (delete-process process)))))
-#+END_SRC
-
-** tmux capture-pane
-[2016-10-08 Sat 13:43]
-
-Recently I had to get screen-shots of a ncurses based tool.
-=script=, =gnu screen= and =iterm2= were not very helpful because
-ncurses repositions the cursor and this information get's lost in
-the log files created with them. [[https://tmux.github.io][tmux]] and [[http://www.andre-simon.de/doku/ansifilter/en/ansifilter.php][ansifilter]] came to the
-rescue.
-
-Of course I wanted the screen-shots in my orgmode files.
-
-To make it short you can run a terminal window in standard 80x24 with
-tmux in it. start your tasks and every time you need a screen-shot run
-=bba-org-tmux-capture-pane= in your org notes file.
-You get a src sh code block with the screen-shot. Additionally save
-the below code snippet as =tmuxhardcopy.sh=. Then you have the ANSI
-color version sitting in your =/tmp/= directory.
-
-Of course you will loose the information of what was selected in your
-ncurses tool. But don't worry: Select the start and end point in that
-line of your screen-shot and call =bba-insert-arrows=. Here is an
-example what you will have finally:
-
-#+BEGIN_SRC sh :tangle no
-   ──────────────────────────────────────────────────────────────────────────────
-
-           ┌──────────────────────────────────────────────────────────┐
-           │ Main Menu                                                │
-           │ ┌──────────────────────────────────────────────────────┐ │
-           │ │        1  View Database Cluster State                │ │
-           │ │  ->    2  Connect to Database                   <-   │ │
-           │ │        3  Start Database                             │ │
-           │ │        4  Stop Database                              │ │
-           │ │        5  Restart Vertica on Host                    │ │
-           │ │        6  Configuration Menu                         │ │
-           │ │        7  Advanced Menu                              │ │
-           │ │        8  Help Using the Administration Tools        │ │
-           │ │        E  Exit                                       │ │
-           │ └──────────────────────────────────────────────────────┘ │
-           ├──────────────────────────────────────────────────────────┤
-           │           <  OK  >      <Cancel>      < Help >           │
-           └──────────────────────────────────────────────────────────┘
-#+END_SRC
-
-Here is the code:
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-org-tmux-capture-pane()
-    "capture pane of tmux window and insert it as org-mode sh src block."
-    (interactive)
-    (insert "#+BEGIN_SRC sh")
-    (newline)
-    (insert (shell-command-to-string "tmux capture-pane -eJp | ansifilter"))
-    (shell-command "tmuxhardcopy.sh")
-    (insert "#+END_SRC")
-    (newline)
-    (forward-line -2)
-    (org-edit-special)
-    (delete-trailing-whitespace)
-    (org-edit-src-exit)
-    (forward-line 2)
-    )
-#+END_SRC
-
-To capture the raw output from tmux including the ANSI colors and see
-selections I call this script:
-
-#+NAME: tmuxhardcopy.sh
-#+BEGIN_SRC sh :tangle no
-  #!/bin/sh
-  COUNTER=00
-  FILE=/tmp/tmux.hardcopy
-  /opt/local/bin/tmux capture-pane -eJ
-
-  for i in 0{1..9} {10..99}; do
-      if ! [ -e ${FILE}${i} ]; then
-          COUNTER=${i}
-          break
-      fi
-  done
-
-  /opt/local/bin/tmux save-buffer ${FILE}${COUNTER}
-
-#+END_SRC
-
-** insert arrow
-[2016-10-07 Fri 12:25]
-
-I am using ansifilter to convert ncurses screenshots to ascii only.
-That way I can include them into org files as documentation.
-The downside of this process: I loose the selections.
-As a replacement you can use this function.
-Select the start and end points where you want to have ascii arrows
-and call this function.
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-insert-arrows()
-    "insert ascii arrows at start and end of selection."
-    (interactive)
-    (insert "<-")
-    (delete-char 2)
-    (exchange-point-and-mark)
-    (insert "->")
-    (delete-char 2)
-    (exchange-point-and-mark)
-  )
-#+END_SRC
-
-** Define some shortcuts to access major org files.
-
-#+BEGIN_SRC emacs-lisp
-
-
-  (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
-
-  (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/private.org")))
-  (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))
-  (if (equal "work" (getenv "SYSENV"))
-      (progn
-        (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
-        (global-set-key (kbd "C-c S-<f6>") '(lambda () (interactive) (find-file "~/workorg/work_archive.org")))
-        (global-set-key (kbd "C-c C-<f6>") '(lambda () (interactive) (org-id-goto "0C6EAD45-9046-4A56-96C3-3B378A444263")))
-        )
-    (progn
-      (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
-      ))
-
-  (global-set-key (kbd "C-c <f9>") '(lambda () (interactive)
-                                      ( if (file-exists-p "~/org/emacs.org")
-                                          (find-file "~/org/emacs.org")
-                                        (find-file "~/.emacs.d/org/emacs.org"))))
-  (global-set-key (kbd "C-c <f10>") '(lambda () (interactive) (find-file "~/.emacs.d/bba.org")))
-
-#+END_SRC
-
-** Tag tasks with GTD contexts
-
-#+BEGIN_SRC emacs-lisp
-               (setq org-tag-alist '(("@work" . ?b)
-                                     ("@home" . ?h)
-                                     ("@errands" . ?e)
-                                     ("@coding" . ?c)
-                                     ("@phone" . ?p)
-                                     ("@reading" . ?r)
-                                     ("@computer" . ?l)
-                                     ))
-
-#+END_SRC
-
-** org-capture
-
-#+BEGIN_SRC emacs-lisp
-
-  ;; (setq org-clock-persist 'history)
-  (org-clock-persistence-insinuate)
-  (setq org-clock-persist t)
-  (setq org-default-notes-file (concat org-directory "/refile.org"))
-  (define-key global-map "\C-cc" 'org-capture)
-
-  (setq org-capture-templates
-  '(("t" "todo" entry (file+headline "~/org/todo.org" "Tasks")
-  "* TODO %^{Task}\n%U\n
-
-  %i\n
-  %a\n
-  %?
-  " :prepend t)
-
-    ("m" "Meeting" entry (file "~/org/refile.org")
-     "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-
-    ("n" "note" entry (file+headline "~/org/refile.org" "Note")
-     "* NOTE %?\n%U\n
-
-  %i\n
-  %a")
-
-    ("w" "work todo" entry (file+headline "~/workorg/work.org" "Tasks")
-  "* TODO %? %^{Task}\n%U\n
-
-  %i\n
-  %a\n\n" :prepend t)
-
-  ("j" "Journal" entry (file+datetree "~/org/diary.org")
-   "* %?\n%U\n" :clock-in t :clock-resume t)
-
-  ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
-  "** %c\n\n  %u\n  %i"
-           :empty-lines 1)
-  ("C" "Cookbook" entry (file+headline "~/org/kitchen.org" "[[http://allrecipes.com][AllRecipes.com]]")
-   "%(org-chef-get-recipe-from-url)"
-    :empty-lines 1)))
-#+END_SRC
-
-** Define some handy link abbreviations
-
-#+BEGIN_SRC emacs-lisp
-
-  (setq org-link-abbrev-alist '(
-  ("bing" . "http://www.bing.com/search?q=%sform=OSDSRC")
-  ("cpan" . "http://search.cpan.org/search?query=%s&mode=all")
-  ("google" . "http://www.google.com/search?q=")
-  ("gmap" . "http://maps.google.com/maps?q=%s")
-  ("omap" . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
-  ("bmap" . "http://www.bing.com/maps/default.aspx?q=%s&mkt=en&FORM=HDRSC4")
-  ("wiki" . "http://en.wikipedia.org/wiki/")
-  ("rfc" . "http://tools.ietf.org/rfc/rfc%s.txt")
-  ("ads" . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")
-  ("vertica" . "https://my.vertica.com/docs/7.2.x/HTML/Content/Search/index.htm?q=%s")
-  ))
-  ;; example: [[bmap:space needle]]
-
-#+END_SRC
-
-** Some clock stuff.
-taken from http://doc.norang.ca/org-mode.org
-
-#+BEGIN_SRC emacs-lisp
-
-
-    ;;
-    ;; Resume clocking task when emacs is restarted
-    (org-clock-persistence-insinuate)
-    ;;
-    ;; Show lot of clocking history so it's easy to pick items off the C-F11 list
-    (setq org-clock-history-length 23)
-    ;; Resume clocking task on clock-in if the clock is open
-    (setq org-clock-in-resume t)
-    ;; Change tasks to NEXT when clocking in
-    (setq org-clock-in-switch-to-state 'bh/clock-in-to-next)
-    ;; Separate drawers for clocking and logs
-    (setq org-drawers (quote ("PROPERTIES" "LOGBOOK" "RESULTS")))
-    ;; Save clock data and state changes and notes in the LOGBOOK drawer
-    (setq org-clock-into-drawer t)
-    ;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
-    (setq org-clock-out-remove-zero-time-clocks t)
-    ;; Clock out when moving task to a done state
-    (setq org-clock-out-when-done t)
-    ;; Save the running clock and all clock history when exiting Emacs, load it on startup
-    (setq org-clock-persist t)
-    ;; Do not prompt to resume an active clock
-    (setq org-clock-persist-query-resume nil)
-    ;; Enable auto clock resolution for finding open clocks
-    (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
-    ;; Include current clocking task in clock reports
-    (setq org-clock-report-include-clocking-task t)
-    (setq org-duration-format
-          '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
-    (setq bh/keep-clock-running nil)
-
-  (defun bh/is-project-p ()
-    "Any task with a todo keyword subtask"
-    (save-restriction
-      (widen)
-      (let ((has-subtask)
-            (subtree-end (save-excursion (org-end-of-subtree t)))
-            (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
-        (save-excursion
-          (forward-line 1)
-          (while (and (not has-subtask)
-                      (< (point) subtree-end)
-                      (re-search-forward "^\*+ " subtree-end t))
-            (when (member (org-get-todo-state) org-todo-keywords-1)
-              (setq has-subtask t))))
-        (and is-a-task has-subtask))))
-
-    (defun bh/clock-in-to-next (kw)
-      "Switch a task from TODO to NEXT when clocking in.
-    Skips capture tasks, projects, and subprojects.
-    Switch projects and subprojects from NEXT back to TODO"
-      (when (not (and (boundp 'org-capture-mode) org-capture-mode))
-        (cond
-         ((and (member (org-get-todo-state) (list "TODO"))
-               (bh/is-task-p))
-          "NEXT")
-         ((and (member (org-get-todo-state) (list "NEXT"))
-               (bh/is-project-p))
-          "TODO"))))
-
-    (defun bh/find-project-task ()
-      "Move point to the parent (project) task if any"
-      (save-restriction
-        (widen)
-        (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
-          (while (org-up-heading-safe)
-            (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-              (setq parent-task (point))))
-          (goto-char parent-task)
-          parent-task)))
-
-    (defun bh/punch-in (arg)
-      "Start continuous clocking and set the default task to the
-    selected task.  If no task is selected set the Organization task
-    as the default task."
-      (interactive "p")
-      (setq bh/keep-clock-running t)
-      (if (equal major-mode 'org-agenda-mode)
-          ;;
-          ;; We're in the agenda
-          ;;
-          (let* ((marker (org-get-at-bol 'org-hd-marker))
-                 (tags (org-with-point-at marker (org-get-tags-at))))
-            (if (and (eq arg 4) tags)
-                (org-agenda-clock-in '(16))
-              (bh/clock-in-organization-task-as-default)))
-        ;;
-        ;; We are not in the agenda
-        ;;
-        (save-restriction
-          (widen)
-          ; Find the tags on the current task
-          (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
-              (org-clock-in '(16))
-            (bh/clock-in-organization-task-as-default)))))
-
-    (defun bh/punch-out ()
-      (interactive)
-      (setq bh/keep-clock-running nil)
-      (when (org-clock-is-active)
-        (org-clock-out))
-      (org-agenda-remove-restriction-lock))
-
-    (defun bh/clock-in-default-task ()
-      (save-excursion
-        (org-with-point-at org-clock-default-task
-          (org-clock-in))))
-
-    (defun bh/clock-in-parent-task ()
-      "Move point to the parent (project) task if any and clock in"
-      (let ((parent-task))
-        (save-excursion
-          (save-restriction
-            (widen)
-            (while (and (not parent-task) (org-up-heading-safe))
-              (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-                (setq parent-task (point))))
-            (if parent-task
-                (org-with-point-at parent-task
-                  (org-clock-in))
-              (when bh/keep-clock-running
-                (bh/clock-in-default-task)))))))
-
-    ;; (defvar bh/organization-task-id "eb155a82-92b2-4f25-a3c6-0304591af2f9")
-    (defvar bh/organization-task-id "20140625-424242-424242")
-
-    (defun bh/clock-in-organization-task-as-default ()
-      (interactive)
-      (org-with-point-at (org-id-find bh/organization-task-id 'marker)
-        (org-clock-in '(16))))
-
-    (defun bh/clock-out-maybe ()
-      (when (and bh/keep-clock-running
-                 (not org-clock-clocking-in)
-                 (marker-buffer org-clock-default-task)
-                 (not org-clock-resolving-clocks-due-to-idleness))
-        (bh/clock-in-parent-task)))
-
-    (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
-
-    (defvar bh/insert-inactive-timestamp t)
-
-    (defun bh/toggle-insert-inactive-timestamp ()
-      (interactive)
-      (setq bh/insert-inactive-timestamp (not bh/insert-inactive-timestamp))
-      (message "Heading timestamps are %s" (if bh/insert-inactive-timestamp "ON" "OFF")))
-
-    (defun bh/insert-inactive-timestamp ()
-      (interactive)
-      (org-insert-time-stamp nil t t nil nil nil))
-
-    (defun bh/insert-heading-inactive-timestamp ()
-      (save-excursion
-        (when bh/insert-inactive-timestamp
-          (org-return)
-          (org-cycle)
-          (bh/insert-inactive-timestamp))))
-
-    (add-hook 'org-insert-heading-hook 'bh/insert-heading-inactive-timestamp 'append)
-
-    ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-    (setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                     (org-agenda-files :maxlevel . 9))))
-
-    ; Use full outline paths for refile targets - we file directly with IDO
-    (setq org-refile-use-outline-path t)
-
-    ; Targets complete directly with IDO
-    (setq org-outline-path-complete-in-steps nil)
-
-    ; Allow refile to create parent tasks with confirmation
-    (setq org-refile-allow-creating-parent-nodes (quote confirm))
-
-    ;; Use IDO for both buffer and file completion and ido-everywhere to t
-    ;(setq org-completion-use-ido t)
-    ;(setq ido-everywhere t)
-    ;(setq ido-max-directory-size 100000)
-    ;(ido-mode (quote both))
-    ; Use the current window when visiting files and buffers with ido
-    ;(setq ido-default-file-method 'selected-window)
-    ;(setq ido-default-buffer-method 'selected-window)
-    ; Use the current window for indirect buffer display
-    (setq org-indirect-buffer-display 'current-window)
-
-    ;;;; Refile settings
-    ; Exclude DONE state tasks from refile targets
-    (defun bh/verify-refile-target ()
-      "Exclude todo keywords with a done state from refile targets"
-      (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-
-    (setq org-refile-target-verify-function 'bh/verify-refile-target)
-
-  (defun bba-clock-in ()
-    "Clock in of workhours."
-    (interactive)
-    (find-file "~/org/workhours.org")
-    (goto-char (point-min))
-    (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
-        (progn (org-beginning-of-line)
-               (re-search-forward "^ *:LOGBOOK:")
-               (next-line)
-               (org-beginning-of-line)
-               (insert (format-time-string "CLOCK: [%Y-%m-%d %a %H:%M]"))
-               (newline)
-               )))
-
-  (defun bba-clock-out ()
-    "Clock out of workhours."
-    (interactive)
-    (find-file "~/org/workhours.org")
-    (goto-char (point-min))
-    (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
-        (progn (org-beginning-of-line)
-               (re-search-forward "^ *:LOGBOOK:")
-               (next-line)
-               (org-end-of-line)
-               (insert (format-time-string "--[%Y-%m-%d %a %H:%M]"))
-               (org-ctrl-c-ctrl-c))))
-
-
-    (global-set-key (kbd "<f12>") 'org-agenda)
-    (global-set-key (kbd "<f9> c") 'calendar)
-    (global-set-key (kbd "<f9> I") 'bba-clock-in)
-    (global-set-key (kbd "<f9> O") 'bba-clock-out)
-    (global-set-key (kbd "<f9> t") 'bh/insert-inactive-timestamp)
-    (global-set-key (kbd "<f9> T") 'bh/toggle-insert-inactive-timestamp)
-    (global-set-key (kbd "C-<f9>") 'previous-buffer)
-    (global-set-key (kbd "C-<f10>") 'next-buffer)
-    (global-set-key (kbd "<f11>") 'org-clock-goto)
-    (global-set-key (kbd "C-<f11>") 'org-clock-in)
-
-
-
   (if (>= emacs-major-version 24)
       (progn
-        (add-hook 'org-mode-hook
-                  (lambda ()
-                    (auto-fill-mode)
-                    (which-function-mode)
-                    (flyspell-mode -1)
-                    (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
-                    (when (display-graphic-p)
-                      (progn
-                        (rainbow-delimiters-mode))
-                      )
-                    )
-                  )
-        (add-hook 'text-mode-hook
-                  (lambda ()
-                    (auto-fill-mode)
-                    (flyspell-mode)
-                    )
-                  )
-        (add-hook 'snippet-mode-hook
-                  (lambda ()
-                    (auto-fill-mode -1)
-                    (flyspell-mode -1)
-                    )
-                  )
-        (add-hook 'prog-mode-hook
-                  (lambda ()
-                    (when (display-graphic-p)
-                      (rainbow-delimiters-mode))
-                    )
-                  )
-        (add-hook 'eshell-mode-hook
-                  (lambda ()
-                    (smartparens-mode t)
-                    )
-                  )
+	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20210825.1804")
+	(require 'flycheck)
+	(add-hook 'after-init-hook #'global-flycheck-mode)
+	(flycheck-define-checker puppet-lint
+          "A Puppet DSL style checker using puppet-lint.
+
+  See URL `http://puppet-lint.com/'."
+          ;; We must check the original file, because Puppetlint is quite picky on the
+          ;; names of files and there place in the directory structure, to comply with
+          ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
+          ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
+          ;; temporary file will cause an error.
+          :command ("puppet-lint"
+                    "--no-80chars-check" "--log-format" "%{path}:%{line}:%{kind}: %{message} (%{check})"
+                    source-original)
+          :error-patterns
+          ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
+           (error line-start (file-name) ":" line ":error: " (message) line-end))
+          :modes puppet-mode
+          ;; Since we check the original file, we can only use this syntax checker if
+          ;; the buffer is actually linked to a file, and if it is not modified.
+          :predicate flycheck-buffer-saved-p)
+	))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq puppet-lint-command
+	(concat
+	 "puppet-lint --with-context "
+	 "--no-80chars-check "
+	 "--no-puppet_url_without_modules-check "
+	 "--fail-on-warnings "
+	 "--log-format \"%{path}:%{line}: %{kind}: %{message} (%{check})\""
+	 )
+	)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq flycheck-json-python-json-executable "python2.7")
+#+END_SRC
+
+SQL:
+
+#+begin_src sh :tangle never
+  gem install --user-install sqlint
+#+end_src
+
+* [[https://github.com/kai2nenobu/guide-key][guide-key]]
+
+Probably the best help to keep track of the not every day used keybindings.
+
+#+BEGIN_SRC emacs-lisp
+  (if (>= emacs-major-version 24)
+      (progn
+        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.1300")
+        (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150108.635")
+        (require 'guide-key)
+        (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>" "s-l"))
+        (setq guide-key/recursive-key-sequence-flag t)
+        (setq guide-key/idle-delay 3)
+        (guide-key-mode 1)
         )
-    (progn
-      (add-hook 'org-mode-hook
-                (lambda ()
-                  (auto-fill-mode)
-                  (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org"))))
-                ))
-
     )
-
-
 #+END_SRC
+
+* [[https://github.com/jekor/hidepw][hidepw]]
+[2016-02-11 Thu 16:10]
+
+Hide passwords on the screen from shoulder surfing.
+Single pipes interfere with org tables. Just go double.
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-duration-format '((special . h:mm)))
+  (load-file (expand-file-name "~/.emacs.d/lisp/hidepw.el"))
+  (add-hook 'org-mode-hook  'hidepw-mode)
+  (setq hidepw-pattern "||\\(.*\\)||")
 #+END_SRC
 
-** clocktable
-[2016-04-15 Fri 17:05]
+* latex
 
-Assuming that I understood your problem correctly, I hacked together a
-quick solution. First, you should ensure that you create only one
-outline entry per day, if you are checking in and out multiple
-times. Define the following function that'll compute the overtime for
-a given day.
+Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
 
 #+BEGIN_SRC emacs-lisp
-  (defun compute-overtime (duration-string)
-    "Computes overtime duration string for the given time DURATION-STRING."
-    (let (minutes-in-a-workday
-          work-minutes
-          overtime-minutes)
-      (defconst minutes-in-a-workday 480)
-      (setq work-minutes (org-duration-to-minutes duration-string)
-            overtime-minutes (- work-minutes minutes-in-a-workday))
-      (if (< overtime-minutes 0) (setq overtime-minutes 0))
-      (org-minutes-to-hh:mm-string overtime-minutes)))
+  (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+
+  (add-hook 'latex-mode-hook
+    (lambda ()
+      (auto-fill-mode)
+      (orgtbl-mode)
+      ))
+
+
 #+END_SRC
 
-Then, use this in a clock table formula in the file whatnot.
-
-#+BEGIN_SRC org
-  ,#+BEGIN: clocktable :maxlevel 1 :emphasize nil :scope file :formula "$3='(compute-overtime $2)::@2$3=string(\"Overtime\")"
-  ,#+END: clocktable
-#+END_SRC
-
-** youtube links
-
-Thanks to [[http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html][endlessparentheses]]: Youtube makes it pretty simple
-to embed videos, they give you the entire iframe HTML code to use, but
-this wouldn’t really be Emacs if we couldn’t make things just a little
-bit easier.
-
-#+BEGIN_SRC emacs-lisp :tangle never
-  (defvar yt-iframe-format
-    ;; You may want to change your width and height.
-    (concat "<iframe width=\"440\""
-            " height=\"335\""
-            " src=\"https://www.youtube.com/embed/%s\""
-            " frameborder=\"0\""
-            " allowfullscreen>%s</iframe>"))
-
-  (org-add-link-type
-   "yt"
-   (lambda (handle)
-     (browse-url
-      (concat "https://www.youtube.com/embed/"
-              handle)))
-   (lambda (path desc backend)
-     (cl-case backend
-       (html (format yt-iframe-format
-                     path (or desc "")))
-       (latex (format "\href{%s}{%s}"
-                      path (or desc "video"))))))
-#+END_SRC
-
-To use this, just write your org links in the following way (optionally adding a description).
-
-[[yt:A3JAlWM8qRM]]
-
-When you export to HTML, this will produce that same inlined snippet
-that Youtube specifies. The advantage (over simply writing out the
-iframe) is that this link can be clicked in org-mode, and can be
-exported to other formats as well.
-
-** [[http://kitchingroup.cheme.cmu.edu/blog/2016/03/21/Displaying-image-overlays-on-image-filenames-in-Emacs/][Displaying image overlays on image filenames in Emacs]]
-[2016-11-09 Wed 12:57]
-
-Thanks to John Kitchin we can display images in Emacs.
+* thesaurus
 
 #+BEGIN_SRC emacs-lisp
-  (defvar image-tooltip-re (concat  "\\(?3:'\\|\"\\)\\(?1:.*\\."
-                                    (regexp-opt '("png" "PNG" "JPG" "jpeg"
-                                                  "jpg" "JPEG" "eps" "EPS"))
-                                    "\\)\\(?:\\3\\)")
-    "Regexp to match image filenames in quotes")
-
-  (defun image-tooltip (window object position)
-    (save-excursion
-      (goto-char position)
-      (let (beg end imgfile img s)
-        (while (not (looking-at image-tooltip-re))
-          (forward-char -1))
-        (setq imgfile (match-string-no-properties 1))
-        (when (file-exists-p imgfile)
-          (setq img (create-image (expand-file-name imgfile)
-                                  'imagemagick nil :width 200))
-          (propertize "Look in the minibuffer"
-                      'display img)))))
-
-  (font-lock-add-keywords
-   nil
-   `((,image-tooltip-re
-      0 '(face font-lock-keyword-face
-               help-echo image-tooltip))))
-
-  (font-lock-ensure)
-#+END_SRC
-
-** org-mime-org-buffer-htmlize
-
-Use =C-c M= to send a multipart email with .org as text and exported
-html.
-
-#+BEGIN_SRC emacs-lisp
-  (load-file "~/.emacs.d/elpa/org-mime-20191226.2309/org-mime.el")
-  (add-hook 'org-mode-hook
-            (lambda()
-              (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
-#+END_SRC
-
-** org-bullets
-#+BEGIN_SRC emacs-lisp
-  (when (display-graphic-p)
-    (load-file "~/.emacs.d/lisp/org-bullets.el")
-    (require 'org-bullets)
-    (add-hook 'org-mode-hook (lambda ()
-                               (progn
-                                 (org-bullets-mode 1)))))
-#+END_SRC
-
-** org-ellipsis
-
-#+BEGIN_SRC emacs-lisp
-  (when (display-graphic-p)
-    (setq org-ellipsis " ↴↴↴")
-    )
+  ;; The file names are absolute, not relative, locations
+  ;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
+  (setq synonyms-file        "~/.emacs.d/mthesaur.txt")
+  (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
+  (require 'synonyms)
+;;  (define-key global-map (kbd "C-c ?") 'synonyms)
 
 #+END_SRC
 
-** fontify
+* highlight indentation
+[2016-10-09 Sun 17:13]
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-src-fontify-natively t)
+  (load-file (expand-file-name "~/.emacs.d/lisp/highlight-indentation.el"))
+  (set-face-background 'highlight-indentation-face "#e3e3d3")
+  (set-face-background 'highlight-indentation-current-column-face "#c3b3b3")
 #+END_SRC
+* htmlize
 
-** hide emphasis-markers
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-hide-emphasis-markers t)
-  (setq org-catch-invisible-edits 'smart)
-#+END_SRC
-
-** underscore in export
-[2016-10-28 Fri 12:08]
+To get syntax highlight for HTML exports:
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-export-with-sub-superscripts nil)
-#+END_SRC
+  (if (>= emacs-major-version 24)
+      (progn
+        (require 'htmlize )
+        )
+  )
 
-** css style html export
-[2016-10-28 Fri 12:21]
 
-run =toggle-org-custom-inline-style= in a org buffer associated with a
-file.
-
-#+BEGIN_SRC emacs-lisp
-  ;; put your css files there
-  (defvar org-theme-css-dir "~/.emacs.d/org-css/")
-  (defvar org-theme-css)
-
-  (defun toggle-org-custom-inline-style ()
-    (interactive)
-    (let ((hook 'org-export-before-parsing-hook)
-          (fun 'set-org-html-style))
-      (if (memq fun (eval hook))
-          (progn
-            (remove-hook hook fun 'buffer-local)
-            (message "Removed %s from %s" (symbol-name fun) (symbol-name hook)))
-        (add-hook hook fun nil 'buffer-local)
-        (message "Added %s to %s" (symbol-name fun) (symbol-name hook)))))
-
-  (defun org-theme ()
-    (interactive)
-    (let* ((cssdir org-theme-css-dir)
-           (css-choices (directory-files cssdir nil ".css$"))
-           (css (completing-read "theme: " css-choices nil t)))
-      (concat cssdir css)))
-
-  (defun set-org-html-style (&optional backend)
-    (interactive)
-    (when (or (null backend) (eq backend 'html))
-      (let ((f (or (and (boundp 'org-theme-css) org-theme-css) (org-theme))))
-        (if (file-exists-p f)
-            (progn
-              (set (make-local-variable 'org-theme-css) f)
-              (set (make-local-variable 'org-html-head)
-                   (with-temp-buffer
-                     (insert "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!--*/\n")
-                     (insert-file-contents f)
-                     (goto-char (point-max))
-                     (insert "\n/*]]>*/-->\n</style>\n")
-                     (buffer-string)))
-              (set (make-local-variable 'org-html-head-include-default-style)
-                   nil)
-              (message "Set custom style from %s" f))
-          (message "Custom header file %s doesnt exist" f)))))
-#+END_SRC
-
-** org-sticky-header
-[2017-04-26 Wed 13:09]
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20191117.549" t)
-  (add-hook 'org-mode-hook
-	      (lambda ()(org-sticky-header-mode 1))
-	    )
-#+END_SRC
-
-** [[https://github.com/dfeich/org-listcruncher][org-listcruncher]]
-[2018-05-24 Thu 09:08]
-
-#+BEGIN_SRC emacs-lisp
-  (load-file (expand-file-name "~/.emacs.d/lisp/org-listcruncher.el"))
-
-#+END_SRC
-** additional org settings
-[2016-11-03 Thu 09:36]
-Thanks to [[https://github.com/dakrone/eos/blob/master/eos-org.org][eos-org]].
-
-Special begin/end of line to skip tags and stars
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-special-ctrl-a/e t)
-#+END_SRC
-
-Special keys for killing a headline
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-special-ctrl-k t)
-#+END_SRC
-
-blank lines are removed when exiting the code edit buffer
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-src-strip-leading-and-trailing-blank-lines t)
-#+END_SRC
-
-Return on a link breaks the link? Just follow it.
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-return-follows-link t)
-#+END_SRC
-
-Smart yanking: https://www.gnu.org/software/emacs/manual/html_node/org/Structure-editing.html
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-yank-adjusted-subtree t)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-tags-column -102)
-
-#+END_SRC
-
-use emacs as default. Otherwise executables without extension get
-executed instead of opened.
-
-#+BEGIN_SRC emacs-lisp
-  (setq org-file-apps '((auto-mode . emacs)
-			("\\.mm\\'" . default)
-			("\\.x?html?\\'" . default)
-			("\\.pdf\\'" . default)
-			( t . emacs)))
 #+END_SRC
 
 * goto-address-mode
@@ -5562,7 +3945,8 @@ Amazon instance ID at point.
 
 #+begin_src emacs-lisp
   (defvar bba-emacs-files (flatten-list
-                           `("bba-shell.org"))
+			   `("bba-shell.org"
+			     "bba-orgmode.org"))
     "List of org files that complete my configuration.")
 
   (defun bba-emacs-load (file)
