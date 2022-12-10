@@ -1,0 +1,294 @@
+* asterisk
+[2020-07-10 Fri 13:17]
+
+#+begin_src emacs-lisp
+(load-file (expand-file-name "~/.emacs.d/lisp/asterisk-dialplan.el"))
+#+end_src
+
+* CFEngine
+
+#+BEGIN_SRC emacs-lisp
+  ;;   (load-library "cfengine")
+     (load-file (expand-file-name "~/.emacs.d/lisp/cfengine.el"))
+     (add-to-list 'auto-mode-alist '("\\.cf$" . cfengine3-mode))
+
+     ;; post-commit and post-merge hook for git:
+     ;; #!/bin/bash
+     ;; rm .git/etags
+     ;; find ${PWD} -type f -regex ".*\(\.cf\|_pl\.dat\|_conf.dat\)" | xargs etags --append --output=.git/etags
+     ;; set link for emacs:
+     ;; ln -s ~/.cfagent/inputs/../.git/etags ~/.cfengine_tags
+
+     (defun load-git-cfengine ()
+       "Load config and tags file of git cfengine repo"
+     (interactive) (visit-tags-table "~/.cfengine_tags")
+     (find-file "~/.cfagent/inputs/config.cf")
+     )
+
+     ;; cfe-config-adduser-ldap runs ldapsearch with cn=user to fill some values.
+
+     (defun cfe-config-adduser-ldap ( user )
+       "Insert usertemplate based on ldap information for config.cf"
+       (interactive "sUser: ")
+       (insert "      \"users[" user "][login]\" string => \"" user "\";
+           \"users[" user "][fullname]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " givenName ")) 0 -1) " " (substring ( shell-command-to-string (concat "ldapse " user " sn ")) 0 -1) "\";
+           \"users[" user "][uid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1) "\";
+           \"users[" user "][gid]\" string => \"" (substring ( shell-command-to-string (concat "ldapse " user " uidNumber")) 0 -1)"\";
+           \"users[" user "][group]\" string => \"" user "\";
+           \"users[" user "][groups]\" string => \"adm,apache,games\";
+           \"users[" user "][home]\" string => \"/home/" user "\";
+           \"users[" user "][shell]\" string => \"/bin/bash\";
+           \"users[" user "][flags]\" string => \"-m\";
+           \"users[" user "][authorized_keys][0]\" string => \"\";" )
+
+     )
+
+     (defun cfe-config-adduser ( user )
+       "Insert usertemplate for config.cf"
+       (interactive "sUser: ")
+       (insert "      \"users[" user "][login]\" string => \"" user "\";
+           \"users[" user "][fullname]\" string => \"\";
+           \"users[" user "][uid]\" string => \"\";
+           \"users[" user "][gid]\" string => \"\";
+           \"users[" user "][group]\" string => \"" user "\";
+           \"users[" user "][groups]\" string => \"" user "\";
+           \"users[" user "][home]\" string => \"/home/" user "\";
+           \"users[" user "][shell]\" string => \"/bin/bash\";
+           \"users[" user "][flags]\" string => \"-m\";
+           \"users[" user "][authorized_keys][0]\" string => \"\";" )
+
+     )
+
+     (add-hook 'cfengine3-mode-hook
+       (lambda ()
+         (which-function-mode)
+
+         (define-key cfengine3-mode-map "\C-c\S-t" (lambda()
+                                                     (interactive)
+                                                     (shell-command "~/bin/cfengine_update_testing.sh" )))
+         (define-key cfengine3-mode-map "\C-cu" 'cfe-config-adduser-ldap)
+         (define-key cfengine3-mode-map "\C-c\C-c" 'compile)
+         (define-key cfengine3-mode-map "\C-c," (lambda()
+                                                   (interactive)
+                                                   (browse-url (concat "https://docs.cfengine.com/latest/search.html?q=" (word-at-point)))))
+           (define-key cfengine3-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/cfengine3-mode.org")))
+         ))
+
+
+#+END_SRC
+
+for C-c T you can use a file like this one:
+
+#+NAME: ~/bin/cfengine_update_testing.sh
+#+BEGIN_SRC sh :tangle no
+  #!/bin/bash
+  :<<cut
+  =cut
+
+  =pod
+
+  =head1 NAME
+
+  cfengine_update_testing
+
+  =head1 DESCRIPTION
+
+  sync cfengine inputs to agtest03 and run failsafe.
+
+  =cut
+
+  cf-promises -D customlib_active || exit 3
+  rsync -av --progress --delete -e ssh ~/.cfagent/inputs/ agtest03:/var/cfengine/masterfiles/
+  ssh agtest03 "/usr/local/sbin/cf-agent -f /var/cfengine/inputs/failsafe.cf"
+
+  :<<=cut
+
+  =head1 AUTHOR
+
+  Andreas Gerler <baron@bundesbrandschatzamt.de>
+
+  =cut
+#+END_SRC
+
+* Go
+[2019-09-12 Thu 16:00]
+
+#+begin_src emacs-lisp
+  (add-hook 'go-mode-hook
+    (lambda ()
+      (add-hook 'before-save-hook 'gofmt-before-save)
+      (setq-default)
+      (setq tab-width 4)
+      (setq standard-indent 4)
+      (setq indent-tabs-mode nil)))
+#+end_src
+* [[http://emacswiki.org/emacs/KeyChord][key-chord]]
+
+combine key strokes to access commands even faster.
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20160227.1238")
+
+  (require 'key-chord)
+  (key-chord-mode 1)
+  (setq key-chord-two-keys-delay 0.42)
+  (key-chord-define cfengine3-mode-map ";;" "\C-e;")
+  (key-chord-define cfengine3-mode-map ",," "\C-e,")
+  (key-chord-define prog-mode-map ";;" "\C-e;")
+  (key-chord-define prog-mode-map ",," "\C-e,")
+  (key-chord-define-global "xf" 'ido-find-file)
+  (key-chord-define-global "xx" 'helm-M-x)
+  (key-chord-define org-mode-map "TT" 'org-set-tags-command)
+
+
+
+#+END_SRC
+
+* magit
+
+For annotated tags prepare message with commit messages since last tag.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'magit)
+  (setq magit-last-seen-setup-instructions "1.4.0")
+  (define-key magit-mode-map (kbd "<s-return>") 'ffap)
+
+  (add-hook 'git-commit-mode-hook
+            (lambda()
+              (when (equal "TAG_EDITMSG" (buffer-name))
+                (progn
+                  (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" ))
+                  (newline)
+                  (goto-char (point-min))
+                  (newline)
+                  (goto-char (point-min))
+                  )
+                )
+              )
+            )
+
+#+END_SRC
+
+Display open TODO items in magit-status.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'magit-todos)
+  (magit-todos-mode)
+  (setq magit-todos-keywords-list
+        (append '("BUGBUG")
+                magit-todos-keywords-list))
+#+END_SRC
+
+do a stash, pull, pop.
+in the end use magit-stash.
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-pull ()
+    "Do git stash, pull, pop"
+    (interactive)
+    (shell-command "git stash; git pull; git stash pop")
+    )
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (require 'magit-gitflow)
+  (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
+#+END_SRC
+
+#+begin_src emacs-lisp :tangle no
+  (defun grep-test ()
+  ((let grep-command 'git grep "string/regexp" $(git rev-list --all)))
+  (grep)
+  )
+#+end_src
+
+* Perl
+
+#+BEGIN_SRC emacs-lisp
+  (require 'cperl-mode)
+  (fset 'perl-mode 'cperl-mode)
+
+  (autoload 'perlcritic        "perlcritic" "" t)
+  (autoload 'perlcritic-region "perlcritic" "" t)
+  (autoload 'perlcritic-mode   "perlcritic" "" t)
+
+  (eval-after-load "cperl-mode"
+    '(progn
+       (add-hook 'cperl-mode-hook (lambda() (cperl-set-style "K&R")
+     ;;  (setq cperl-close-paren-offset -4)
+       (setq cperl-continued-statement-offset 4)
+       (setq cperl-indent-level 4)
+       (setq cperl-indent-parens-as-block t)
+       (setq cperl-tab-always-indent t)
+       (perlcritic-mode)
+       (which-function-mode)))))
+
+#+END_SRC
+
+* Puppet
+[2016-02-29 Mon 16:36]
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.erb$" . rhtml-mode))
+#+END_SRC
+
+* Ruby
+[2016-03-11 Fri 12:18]
+
+Vagrant files are Ruby, so use ruby-mode for them:
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("Vagrantfile" . ruby-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (defun bba-ruby-lint()
+  (interactive)
+  "check current buffer via ruby"
+  (let* ((buffer-file-name (or (buffer-file-name) ""))
+           (filename (or (file-remote-p buffer-file-name 'localname)
+			 buffer-file-name))
+	   (command (concat "ruby -c "
+				 (shell-quote-argument filename)))
+	   )
+      (compilation-start (concat "ruby -c "
+				 (shell-quote-argument filename))
+			 nil
+			 (lambda (_) (format "*Ruby Validate: %s*" command))
+			 ))
+  )
+#+END_SRC
+
+* TemplateToolkit
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.tt2$" . html-mode))
+
+#+END_SRC
+
+* vc-git
+
+#+BEGIN_SRC emacs-lisp
+  (require 'vc-git)
+    (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
+
+#+END_SRC
+
+* yaml mode
+
+Adjust indentation at work.
+
+#+BEGIN_SRC emacs-lisp
+   ;; load yaml-mode
+   (require 'yaml-mode)
+   (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+  (defvar bba-keep-whitespaces)
+  (if (equal "work" (getenv "SYSENV"))
+      (setq yaml-indent-offset 4))
+  (add-hook 'yaml-mode-hook
+            (lambda()
+              (auto-fill-mode -1)
+              ;; (stripes-mode 1)
+            (setq bba-keep-whitespaces 1)))
+
+#+END_SRC

@@ -1,4 +1,7 @@
 /bba.el
+/bba-orgmode.el
+/bba-programming.el
+/bba-shell.el
 /bookmarks
 *.elc
 /.mc-lists.el
