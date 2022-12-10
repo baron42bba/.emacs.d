@@ -1232,8 +1232,8 @@ and call this function.
    "* %?\n%U\n" :clock-in t :clock-resume t)
 
   ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
-  "** %c\n\n  %u\n  %i"
-           :empty-lines 1) ; (org-capture-string (org-mac-link-safari-get-frontmost-url) "u")
+  "** %(org-mac-link-safari-get-frontmost-url)\n%u\n\n"
+           :empty-lines 1)
   ("C" "Cookbook" entry (file+headline "~/org/kitchen.org" "[[http://allrecipes.com][AllRecipes.com]]")
    "%(org-chef-get-recipe-from-url)"
     :empty-lines 1)))
