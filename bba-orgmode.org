@@ -1234,10 +1234,58 @@ and call this function.
   ("l" "Links (it)" entry (file+headline "~/org/refile.org" "Links")
   "** %(org-mac-link-safari-get-frontmost-url)\n%u\n\n"
            :empty-lines 1)
-  ("C" "Cookbook" entry (file+headline "~/org/kitchen.org" "[[http://allrecipes.com][AllRecipes.com]]")
+  ("k" "Kitchen" entry (file+headline "~/org/kitchen.org" "[[http://allrecipes.com][AllRecipes.com]]")
    "%(org-chef-get-recipe-from-url)"
     :empty-lines 1)))
 #+END_SRC
+
+Org has one task at a time that can be /clocked in/ keeping a timer. I use that as a /destination/ for collecting notes. For instance, capturing with a =c= allows me to enter details under that task without switching to it:
+#+begin_src emacs-lisp
+  (add-to-list 'org-capture-templates
+               '("c" "Currently clocked in task"))
+#+end_src
+
+The /default/ is just to type information to the current clocked-in task using ~c c~:
+#+begin_src emacs-lisp
+  (add-to-list 'org-capture-templates
+               `("ci" "Item to Current Clocked Task" item
+                 (clock)
+                 "%?" :empty-lines 1))
+#+end_src
+
+We can select a /region/ and copy that using ~c r~:
+#+begin_src emacs-lisp
+  (add-to-list 'org-capture-templates
+               `("cc" "Contents to Current Clocked Task" plain
+                 (clock)
+                 "%i" :immediate-finish t :empty-lines 1))
+#+end_src
+
+If we have copied anything into the clipboard, that information can be add to the current task using ~c k~:
+#+begin_src emacs-lisp
+  (add-to-list 'org-capture-templates
+               `("ck" "Kill-ring to Current Clocked Task" plain
+                 (clock)
+                 "%c" :immediate-finish t :empty-lines 1))
+#+end_src
+
+Instead, if I am looking at some code, I can copy some code from a region, but use a helper function to create a /link/ to the original source code using ~c f~:
+#+begin_src emacs-lisp
+  (add-to-list 'org-capture-templates
+               `("cf" "Code Reference with Comments to Current Task"
+                 plain (clock)
+                 "%(ha-org-capture-code-snippet \"%F\")\n\n   %?"
+                 :empty-lines 1))
+#+end_src
+
+If I want a reference to the code, without any comments, I call ~c l~:
+#+begin_src emacs-lisp
+(add-to-list 'org-capture-templates
+             `("cl" "Link to Code Reference to Current Task"
+               plain (clock)
+               "%(ha-org-capture-code-snippet \"%F\")"
+               :empty-lines 1 :immediate-finish t))
+#+end_src
 
 https://raw.githubusercontent.com/howardabrams/hamacs/main/ha-capturing-notes.org
 
