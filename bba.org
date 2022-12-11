@@ -285,57 +285,6 @@ Keep track of your important stuff!
 
 #+END_SRC
 
-* magit
-
-For annotated tags prepare message with commit messages since last tag.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'magit)
-  (setq magit-last-seen-setup-instructions "1.4.0")
-  (define-key magit-mode-map (kbd "<s-return>") 'ffap)
-
-  (add-hook 'git-commit-mode-hook
-            (lambda()
-              (when (equal "TAG_EDITMSG" (buffer-name))
-                (progn
-                  (insert (shell-command-to-string "git log --pretty=format:\"* %s\" `git rev-list --tags --max-count=1`..HEAD" ))
-                  (newline)
-                  (goto-char (point-min))
-                  (newline)
-                  (goto-char (point-min))
-                  )
-                )
-              )
-            )
-
-#+END_SRC
-
-Display open TODO items in magit-status.
-
-#+BEGIN_SRC emacs-lisp
-  (require 'magit-todos)
-  (magit-todos-mode)
-  (setq magit-todos-keywords-list
-        (append '("BUGBUG")
-                magit-todos-keywords-list))
-#+END_SRC
-
-do a stash, pull, pop.
-in the end use magit-stash.
-
-#+BEGIN_SRC emacs-lisp
-  (defun bba-pull ()
-    "Do git stash, pull, pop"
-    (interactive)
-    (shell-command "git stash; git pull; git stash pop")
-    )
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (require 'magit-gitflow)
-  (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)
-#+END_SRC
-
 * fullframe
 open ibuffer and magit-status in fullframe mode.
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -415,8 +364,9 @@ But we use it only in graphical mode as text mode lacks color depth.
         (add-to-list 'load-path "~/.emacs.d/elpa/rainbow-delimiters-20210515.1254")
         ))
 
-
-#+END_SRC
+  (add-hook 'sql-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'sql-interactive-mode-hook 'rainbow-delimiters-mode)
+#+end_src
 
 * [[https://github.com/hrs/engine-mode][engine-mode]]
 
@@ -855,197 +805,6 @@ I still like ido-find-file.
   )
 #+END_SRC
 
-                      (list
-                       (cons 'name prompt)
-                       (cons 'candidates cands)
-                       '(action . (("Expand" . (lambda (selection) selection))))
-                       ))
-                (setq result (helm-other-buffer '(tmpsource) "*helm-select-yasnippet"))
-                (if (null result)
-                    (signal 'quit "user quit!")
-                  (cdr (assoc result rmap))))
-            nil)))
-#+end_src
-
-Default to snippet-mode if we are in a sub directory of snippets:
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'auto-mode-alist '("\\.emacs.d/snippets/[^/]*/" . snippet-mode))
-#+END_SRC
-
-* define some major modes for yasnippets
-[2016-05-25 Wed 10:26]
-
-I use yasnippet for sql a lot.
-Languages differ and I need different templates.
-
-#+BEGIN_SRC emacs-lisp
-  (define-derived-mode sql-oracle-mode sql-mode "OracleSQL"
-    "Major mode for ORACLE SQL"
-    (setq sql-product 'oracle)
-    )
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-    (define-derived-mode sql-vertica-mode sql-mode "VerticaSQL"
-      "Major mode for Vertica"
-      (setq sql-product 'ansi)
-      )
-
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (define-derived-mode sql-mysql-mode sql-mode "MySQL"
-    "Major mode for MySQL"
-    (setq sql-product 'mysql)
-    )
-
-#+END_SRC
-
-* [[https://github.com/flycheck/flycheck][flycheck]]
-
-To get puppet-lint:
-
-#+BEGIN_SRC sh :tangle never
-  gem install puppet-lint
-#+END_SRC
-
-modified puppet-lint definition to include no-80chars-check and fixed
-log-format.
-
-#+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
-      (progn
-	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20210825.1804")
-	(require 'flycheck)
-	(add-hook 'after-init-hook #'global-flycheck-mode)
-	(flycheck-define-checker puppet-lint
-          "A Puppet DSL style checker using puppet-lint.
-
-  See URL `http://puppet-lint.com/'."
-          ;; We must check the original file, because Puppetlint is quite picky on the
-          ;; names of files and there place in the directory structure, to comply with
-          ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
-          ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
-          ;; temporary file will cause an error.
-          :command ("puppet-lint"
-                    "--no-80chars-check" "--log-format" "%{path}:%{line}:%{kind}: %{message} (%{check})"
-                    source-original)
-          :error-patterns
-          ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
-           (error line-start (file-name) ":" line ":error: " (message) line-end))
-          :modes puppet-mode
-          ;; Since we check the original file, we can only use this syntax checker if
-          ;; the buffer is actually linked to a file, and if it is not modified.
-          :predicate flycheck-buffer-saved-p)
-	))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (setq puppet-lint-command
-	(concat
-	 "puppet-lint --with-context "
-	 "--no-80chars-check "
-	 "--no-puppet_url_without_modules-check "
-	 "--fail-on-warnings "
-	 "--log-format \"%{path}:%{line}: %{kind}: %{message} (%{check})\""
-	 )
-	)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (setq flycheck-json-python-json-executable "python2.7")
-#+END_SRC
-
-SQL:
-
-#+begin_src sh :tangle never
-  gem install --user-install sqlint
-#+end_src
-
-* [[https://github.com/kai2nenobu/guide-key][guide-key]]
-
-Probably the best help to keep track of the not every day used keybindings.
-
-#+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
-      (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.1300")
-        (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150108.635")
-        (require 'guide-key)
-        (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>" "s-l"))
-        (setq guide-key/recursive-key-sequence-flag t)
-        (setq guide-key/idle-delay 3)
-        (guide-key-mode 1)
-        )
-    )
-#+END_SRC
-
-* [[https://github.com/jekor/hidepw][hidepw]]
-[2016-02-11 Thu 16:10]
-
-Hide passwords on the screen from shoulder surfing.
-Single pipes interfere with org tables. Just go double.
-
-#+BEGIN_SRC emacs-lisp
-  (load-file (expand-file-name "~/.emacs.d/lisp/hidepw.el"))
-  (add-hook 'org-mode-hook  'hidepw-mode)
-  (setq hidepw-pattern "||\\(.*\\)||")
-#+END_SRC
-
-* latex
-
-Use [[http://orgmode.org/manual/A-LaTeX-example.html#A-LaTeX-example][orgtbl]] to create tables.
-
-#+BEGIN_SRC emacs-lisp
-  (setq tex-dvi-view-command "(f=*; pdflatex \"${f%.dvi}.tex\" && open \"${f%.dvi}.pdf\")")
-  (setq TeX-auto-save t)
-  (setq TeX-parse-self t)
-  (setq-default TeX-master nil)
-
-  (add-hook 'latex-mode-hook
-    (lambda ()
-      (auto-fill-mode)
-      (orgtbl-mode)
-      ))
-
-
-#+END_SRC
-
-* thesaurus
-
-#+BEGIN_SRC emacs-lisp
-  ;; The file names are absolute, not relative, locations
-  ;;     - e.g. /foobar/mthesaur.txt.cache, not mthesaur.txt.cache
-  (setq synonyms-file        "~/.emacs.d/mthesaur.txt")
-  (setq synonyms-cache-file  "~/.emacs.d/mthesaur.txt.cache")
-  (require 'synonyms)
-;;  (define-key global-map (kbd "C-c ?") 'synonyms)
-
-#+END_SRC
-
-* highlight indentation
-[2016-10-09 Sun 17:13]
-
-#+BEGIN_SRC emacs-lisp
-  (load-file (expand-file-name "~/.emacs.d/lisp/highlight-indentation.el"))
-  (set-face-background 'highlight-indentation-face "#e3e3d3")
-  (set-face-background 'highlight-indentation-current-column-face "#c3b3b3")
-#+END_SRC
-* htmlize
-
-To get syntax highlight for HTML exports:
-
-#+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 24)
-      (progn
-        (require 'htmlize )
-        )
-  )
-
-
-#+END_SRC
-
 * goto-address-mode
 [2018-08-28 Tue 20:34]
 
@@ -1439,6 +1198,8 @@ thus installed via github.
   (setq lsp-ui-sideline-enable nil)
   (setq lsp-ui-sideline-ignore-duplicate t)
   (setq lsp-ui-sideline-show-code-actions nil)
+  (add-hook 'sql-mode-hook 'lsp)
+  (add-hook 'org-src-mode-hook 'lsp)
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
@@ -1455,7 +1216,7 @@ starting sql-connect.
 
 #+BEGIN_SRC emacs-lisp
   (if (file-exists-p "~/.emacs_secrets.el.gpg")
-  (defun my-sql-connect ()
+  (progn (defun my-sql-connect ()
     (interactive)
     (require 'my-password "~/.emacs_secrets.el.gpg")
     (let ((connection (helm-comp-read
@@ -1466,7 +1227,7 @@ starting sql-connect.
       (if current-prefix-arg
           (sql-connect connection connection)
         (sql-connect connection))))
-  (global-set-key (kbd "s-s") 'my-sql-connect))
+  (global-set-key (kbd "s-s") 'my-sql-connect)))
 #+END_SRC
 
 your =~/.emacs_secrets.el.gpg= might look like:
@@ -1835,6 +1596,17 @@ https://www.masteringemacs.org/article/demystifying-emacs-window-manager
     (split-window (if arg (frame-root-window)
                     (window-parent (selected-window)))
                   nil 'right nil))
+#+end_src
+
+#+begin_src emacs-lisp
+  (defun toggle-maximize-buffer ()
+    "Maximize buffer"
+    (interactive)
+    (if (= 1 (length (window-list)))
+        (jump-to-register '_)
+      (progn
+        (window-configuration-to-register '_)
+        (delete-other-windows))))
 #+end_src
 
 * [[https://github.com/dotemacs/ipcalc.el][ipcalc]]
@@ -2732,6 +2504,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "\C-b" 'helm-safari-bookmarks)
   (define-key bba/launcher "\C-h" 'helm-safari-history)
   (define-key bba/launcher "c" 'helm-calcul-expression)
+  (define-key bba/launcher "C" 'atomic-chrome-start-server)
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'eshell)
   (define-key bba/launcher "E" 'elfeed)
@@ -2748,7 +2521,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "t" 'git-timemachine)
   (define-key bba/launcher "T" 'twittering-mode)
   (define-key bba/launcher "v" 'vterm)
-  
+
   (define-prefix-command 'bba/keyboard-maestro)
   (define-prefix-command 'bba/multiple-cursors)
 
@@ -3718,7 +3491,7 @@ Amazon instance ID at point.
     (interactive (list (completing-read "Org file: " 'bba-emacs-files)))
     (let ((full-file (f-join "~/.emacs.d/" file)))
       (when (f-exists? full-file)
-        (org-babel-load-file full-file))))
+	(org-babel-load-file full-file))))
 
   (defun bba-emacs-reload-all ()
     "Reload our entire ecosystem of configuration files."
@@ -3733,7 +3506,6 @@ And do it:
 #+begin_src emacs-lisp
   (bba-emacs-reload-all)
 #+end_src
-
 
 * post
   [2015-10-02 Fri 13:26]
