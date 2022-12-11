@@ -1,9 +1,9 @@
-(define-package "async" "20220104.1222" "Asynchronous processing in Emacs"
+(define-package "async" "20221103.638" "Asynchronous processing in Emacs"
   '((emacs "24.4"))
-  :commit "0d52411d3accc3e11a2c64838703a8ce9755c77c" :authors
+  :commit "10cedd8ac7173e92a6822317f1782550199d2d6d" :authors
   '(("John Wiegley" . "jwiegley@gmail.com"))
   :maintainer
-  '("John Wiegley" . "jwiegley@gmail.com")
+  '("Thierry Volpiatto" . "thievol@posteo.net")
   :keywords
   '("async")
   :url "https://github.com/jwiegley/emacs-async")

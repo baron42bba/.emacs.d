@@ -1,9 +1,9 @@
 ;;; async-bytecomp.el --- Compile elisp files asynchronously -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014-2019 Free Software Foundation, Inc.
+;; Copyright (C) 2014-2022 Free Software Foundation, Inc.
 
 ;; Authors: John Wiegley <jwiegley@gmail.com>
-;;          Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;;          Thierry Volpiatto <thievol@posteo.net>
 
 ;; Keywords: dired async byte-compile
 ;; X-URL: https://github.com/jwiegley/dired-async
@@ -38,6 +38,7 @@
 
 (require 'cl-lib)
 (require 'async)
+(require 'bytecomp)
 
 (declare-function package-desc-name "package.el")
 (declare-function package-desc-dir "package.el")
@@ -55,6 +56,9 @@ all packages are always compiled asynchronously."
 
 (defvar async-byte-compile-log-file
   (concat user-emacs-directory "async-bytecomp.log"))
+
+(defvar async-bytecomp-load-variable-regexp "\\`load-path\\'"
+  "The variable used by `async-inject-variables' when (re)compiling async.")
 
 ;;;###autoload
 (defun async-byte-recompile-directory (directory &optional quiet)
@@ -92,7 +96,7 @@ All *.elc files are systematically deleted before proceeding."
     (async-start
      `(lambda ()
         (require 'bytecomp)
-        ,(async-inject-variables "\\`\\(?:load-path\\'\\|byte-\\)")
+        ,(async-inject-variables async-bytecomp-load-variable-regexp)
         (let ((default-directory (file-name-as-directory ,directory))
               error-data)
           (add-to-list 'load-path default-directory)
@@ -189,7 +193,7 @@ Same as `byte-compile-file' but asynchronous."
     (async-start
      `(lambda ()
         (require 'bytecomp)
-        ,(async-inject-variables "\\`load-path\\'")
+        ,(async-inject-variables async-bytecomp-load-variable-regexp)
         (let ((default-directory ,(file-name-directory file)))
           (add-to-list 'load-path default-directory)
           (byte-compile-file ,file)
