@@ -1355,8 +1355,16 @@ taken from http://doc.norang.ca/org-mode.org
     (setq org-clock-history-length 23)
     ;; Resume clocking task on clock-in if the clock is open
     (setq org-clock-in-resume t)
-    ;; Change tasks to NEXT when clocking in
+#+end_src
+
+Change tasks to NEXT when clocking in. disabled right now because it
+is not working in my configuration.
+
+#+begin_src emacs-lisp :tangle no
     (setq org-clock-in-switch-to-state 'bh/clock-in-to-next)
+#+end_src
+
+#+begin_src emacs-lisp
     ;; Separate drawers for clocking and logs
     (setq org-drawers (quote ("PROPERTIES" "LOGBOOK" "RESULTS")))
     ;; Save clock data and state changes and notes in the LOGBOOK drawer
@@ -1376,6 +1384,9 @@ taken from http://doc.norang.ca/org-mode.org
     (setq org-duration-format
           '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
     (setq bh/keep-clock-running nil)
+#+end_src
+
+#+begin_src emacs-lisp
 
   (defun bh/is-project-p ()
     "Any task with a todo keyword subtask"
@@ -1392,6 +1403,22 @@ taken from http://doc.norang.ca/org-mode.org
             (when (member (org-get-todo-state) org-todo-keywords-1)
               (setq has-subtask t))))
         (and is-a-task has-subtask))))
+
+  (defun bh/is-task-p ()
+    "Any task with a todo keyword and no subtask"
+    (save-restriction
+      (widen)
+      (let ((has-subtask)
+            (subtree-end (save-excursion (org-end-of-subtree t)))
+            (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+        (save-excursion
+          (forward-line 1)
+          (while (and (not has-subtask)
+                      (< (point) subtree-end)
+                      (re-search-forward "^\*+ " subtree-end t))
+            (when (member (org-get-todo-state) org-todo-keywords-1)
+              (setq has-subtask t))))
+        (and is-a-task (not has-subtask)))))
 
     (defun bh/clock-in-to-next (kw)
       "Switch a task from TODO to NEXT when clocking in.
@@ -1537,7 +1564,9 @@ taken from http://doc.norang.ca/org-mode.org
       (not (member (nth 2 (org-heading-components)) org-done-keywords)))
 
     (setq org-refile-target-verify-function 'bh/verify-refile-target)
+#+end_src
 
+#+begin_src emacs-lisp
   (defun bba-clock-in ()
     "Clock in of workhours."
     (interactive)
@@ -1565,7 +1594,11 @@ taken from http://doc.norang.ca/org-mode.org
                (insert (format-time-string "--[%Y-%m-%d %a %H:%M]"))
                (org-ctrl-c-ctrl-c))))
 
+#+end_src
 
+Some keybindings.
+
+#+begin_src emacs-lisp
     (global-set-key (kbd "<f12>") 'org-agenda)
     (global-set-key (kbd "<f9> c") 'calendar)
     (global-set-key (kbd "<f9> I") 'bba-clock-in)
@@ -1576,8 +1609,11 @@ taken from http://doc.norang.ca/org-mode.org
     (global-set-key (kbd "C-<f10>") 'next-buffer)
     (global-set-key (kbd "<f11>") 'org-clock-goto)
     (global-set-key (kbd "C-<f11>") 'org-clock-in)
+#+end_src
 
+TODO: this block should be splitted and moved to the right org files.
 
+#+begin_src emacs-lisp
 
   (if (>= emacs-major-version 24)
       (progn
@@ -1627,7 +1663,7 @@ taken from http://doc.norang.ca/org-mode.org
     )
 
 
-#+END_SRC
+#+end_src
 
 #+BEGIN_SRC emacs-lisp
   (setq org-duration-format '((special . h:mm)))
