@@ -2537,7 +2537,6 @@ function to convert groups of spaces to hard tabs.
   (global-unset-key (kbd "M-<down-mouse-1>"))
   (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
   (define-key global-map "\C-c\C-t" 'insert-timestamp)
-  (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
   (define-key global-map "\C-ci" 'imenu)
   (define-key global-map "\C-c\S-g" 'rgrep)
@@ -3708,7 +3707,6 @@ body {
     (define-key global-map "\C-cf" 'tags-search)
 
     (define-key global-map "\C-c\C-t" 'insert-timestamp)
-    (define-key global-map "\C-c\M-c" 'centered-cursor-mode)
 
     (define-key global-map "\C-cf" 'load-git-cfengine)
 
