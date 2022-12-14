@@ -82,6 +82,12 @@ this is how your firefox bookmark must look like:
 
 #+END_SRC
 
+We want to see the next weeks as well in the agenda.
+
+#+begin_src emacs-lisp
+  (setq org-agenda-span 30)
+#+end_src
+
 ** org sync to icloud
 [2022-09-07 Wed 11:11]
 
