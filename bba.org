@@ -3540,6 +3540,7 @@ Split and show workhours:
              (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
                  (progn
                    (org-beginning-of-line)
+                   (if (invisible-p (point-at-eol)) (org-cycle))
                    (org-cycle))
                (progn
                  (goto-char (point-min))
