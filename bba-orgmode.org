@@ -1679,6 +1679,21 @@ TODO: this block should be splitted and moved to the right org files.
   (setq org-duration-format '((special . h:mm)))
 #+END_SRC
 
+Usually I am clocked into notes for Jira tickets.
+Instead of manually typing I want to have a keybinding to insert the
+current ticket number.
+
+#+begin_src emacs-lisp :eval never
+  (defun bba-insert-ticketnumber()
+    "Assume we are clocked into a ticket.
+  Insert ticket number at point."
+    (interactive)
+    (insert (first (s-split " " (car (last (split-string org-clock-heading ":"))))))
+    )
+
+  (global-set-key (kbd "<f9> j") 'bba-insert-ticketnumber)
+#+end_src
+
 ** clocktable
 [2016-04-15 Fri 17:05]
 
