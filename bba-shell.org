@@ -499,3 +499,53 @@ creating a /form/ that includes the filename.
 #+end_src
 The [[help:eshell-named-command][eshell-named-command]] takes the command separately from the
 arguments, so we use =car= and =cdr= on the form.
+
+* vterm
+[2022-12-17 Sat 14:15]
+
+vterm can recognize the prompt and you can use <ctrl> c <ctrl> p  and
+<ctrl> c <ctrl> n to jump around.
+For this we have to tweak the bash configuration a little bit.
+
+#+begin_src shell :eval never
+  if [ "$INSIDE_EMACS" == "vterm" ]; then
+      function vterm_printf() {
+          if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ]); then
+              # Tell tmux to pass the escape sequences through
+              printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+          elif [ "${TERM%%-*}" = "screen" ]; then
+              # GNU screen (screen, screen-256color, screen-256color-bce)
+              printf "\eP\e]%s\007\e\\" "$1"
+          else
+              printf "\e]%s\e\\" "$1"
+          fi
+      }
+
+      function vterm_prompt_end(){
+          vterm_printf "51;A$(whoami)@$(hostname):$(pwd)"
+      }
+  fi
+
+#+end_src
+
+Additionally we have to modify the prompt:
+
+#+begin_src shell :eval never
+  if [ "$INSIDE_EMACS" == "vterm" ]; then
+      export PS1=$PS1'\[$(vterm_prompt_end)\]'
+  fi
+#+end_src
+
+Usually I don't need f keys in the shell.
+If necessary I can still prefix with <ctrl>q
+
+#+begin_src emacs-lisp
+  (defun bba-vterm-hook ()
+    (define-key vterm-mode-map (kbd "<f3>") nil)
+    (define-key vterm-mode-map (kbd "S-<f3>") nil)
+    (define-key vterm-mode-map (kbd "<f4>") nil)
+    (define-key vterm-mode-map (kbd "S-<f4>") nil)
+    (define-key vterm-mode-map (kbd "<f9>") nil)
+    )
+  (add-hook 'vterm-mode-hook 'bba-vterm-hook)
+#+end_src
