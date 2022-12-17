@@ -17,7 +17,7 @@ With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's e
 #+BEGIN_SRC emacs-lisp
   (if (string-equal system-type "darwin")
       (progn (require 'org-mac-link)
-             (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
+             (define-key org-mode-map (kbd "C-c g") 'org-mac-link-get-link)))
 #+END_SRC
 
 ** org-eldoc
@@ -1947,4 +1947,3 @@ executed instead of opened.
 			("\\.pdf\\'" . default)
 			( t . emacs)))
 #+END_SRC
-
