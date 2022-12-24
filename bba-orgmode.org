@@ -1576,7 +1576,9 @@ is not working in my configuration.
   (defun bba-clock-in ()
     "Clock in of workhours."
     (interactive)
-    (find-file "~/org/workhours.org")
+    (if (get-buffer "workhours.org")
+        (pop-to-buffer "workhours.org")
+      (find-file "~/org/workhours.org"))
     (goto-char (point-min))
     (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
         (progn (org-beginning-of-line)
@@ -1592,7 +1594,9 @@ is not working in my configuration.
   (defun bba-clock-out ()
     "Clock out of workhours."
     (interactive)
-    (find-file "~/org/workhours.org")
+    (if (get-buffer "workhours.org")
+        (pop-to-buffer "workhours.org")
+      (find-file "~/org/workhours.org"))
     (goto-char (point-min))
     (if (re-search-forward (concat "^\*\* "(format-time-string "%Y-%m")) nil t)
         (progn (org-beginning-of-line)
