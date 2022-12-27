@@ -1941,6 +1941,58 @@ Thanks to [[http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line
   (global-set-key (kbd "s-e") 'xah-end-of-line-or-block)
 #+END_SRC
 
+* move cursor on this and next window
+[2022-12-27 Tue 15:48]
+
+sometimes you have to diff files manually.
+Here we have some functions to move the cursor on the current and next
+window.
+
+#+begin_src emacs-lisp
+  (defun bba-cursor-up ()
+   "Move cursor up here and next window."
+   (interactive)
+   (previous-line)
+   (move-cursor-next-pane)
+   (previous-line)
+   (if hl-line-mode (hl-line-highlight))
+   (move-cursor-previous-pane)
+   )
+
+  (defun bba-cursor-down ()
+   "Move cursor down here and next window."
+   (interactive)
+   (next-line)
+   (move-cursor-next-pane)
+   (next-line)
+   (if hl-line-mode (hl-line-highlight))
+   (move-cursor-previous-pane)
+   )
+
+  (defun bba-cursor-left ()
+   "Move cursor left here and next window."
+   (interactive)
+   (left-char)
+   (move-cursor-next-pane)
+   (left-char)
+   (move-cursor-previous-pane)
+   )
+
+  (defun bba-cursor-right ()
+   "Move cursor rioht here and next window."
+   (interactive)
+   (right-char)
+   (move-cursor-next-pane)
+   (right-char)
+   (move-cursor-previous-pane)
+   )
+
+  (define-key global-map (kbd "s-<up>") 'bba-cursor-up)
+  (define-key global-map (kbd "s-<down>") 'bba-cursor-down)
+  (define-key global-map (kbd "s-<right>") 'bba-cursor-right)
+  (define-key global-map (kbd "s-<left>") 'bba-cursor-left)
+#+end_src
+
 * move lines
     [2014-11-11 Tue 12:24]
 
