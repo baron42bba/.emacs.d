@@ -38,14 +38,15 @@
 
 (defun org-babel-eval-error-notify (exit-code stderr)
   "Open a buffer to display STDERR and a message with the value of EXIT-CODE."
-  (let ((buf (get-buffer-create org-babel-error-buffer-name)))
+  (if (> exit-code 0)
+      (let ((buf (get-buffer-create org-babel-error-buffer-name)))
     (with-current-buffer buf
       (goto-char (point-max))
       (save-excursion
         (unless (bolp) (insert "\n"))
         (insert stderr)
         (insert (format "[ Babel evaluation exited with code %S ]" exit-code))))
-    (display-buffer buf))
+    (display-buffer buf)))
   (message "Babel evaluation exited with code %S" exit-code))
 
 (defun org-babel-eval (command query)
