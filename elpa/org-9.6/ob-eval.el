@@ -1,6 +1,6 @@
 ;;; ob-eval.el --- Babel Functions for External Code Evaluation -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2022 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research, comint
@@ -36,17 +36,25 @@
 (defvar org-babel-error-buffer-name "*Org-Babel Error Output*")
 (declare-function org-babel-temp-file "ob-core" (prefix &optional suffix))
 
+(defcustom org-babel-eval-error-display-notify nil
+  "Display org-babel-eval-errors always or only if exit code is not 0."
+  :group 'org-babel
+  :version "29.1"
+  :type 'boolean)
+
 (defun org-babel-eval-error-notify (exit-code stderr)
   "Open a buffer to display STDERR and a message with the value of EXIT-CODE."
-  (if (> exit-code 0)
-      (let ((buf (get-buffer-create org-babel-error-buffer-name)))
+  (let ((buf (get-buffer-create org-babel-error-buffer-name)))
     (with-current-buffer buf
       (goto-char (point-max))
       (save-excursion
         (unless (bolp) (insert "\n"))
         (insert stderr)
         (insert (format "[ Babel evaluation exited with code %S ]" exit-code))))
-    (display-buffer buf)))
+    (when (or org-babel-eval-error-display-notify
+            (or (not (numberp exit-code))
+            (> exit-code 0)))
+        (display-buffer buf)))
   (message "Babel evaluation exited with code %S" exit-code))
 
 (defun org-babel-eval (command query)
