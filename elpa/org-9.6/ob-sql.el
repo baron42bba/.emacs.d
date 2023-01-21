@@ -1,6 +1,6 @@
 ;;; ob-sql.el --- Babel Functions for SQL            -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2022 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Maintainer: Daniel Kraus <daniel@kraus.my>
@@ -231,10 +231,14 @@ database connections."
                                   (:dbuser . sql-user)
                                   (:dbpassword . sql-password)
                                   (:dbinstance . sql-dbinstance)
-                                  (:database . sql-database)))
+                                  (:database . sql-database)
+                                  (:engine . sql-product)))
                   (mapped-name (cdr (assq name name-mapping))))
-             (cadr (assq mapped-name
-                         (cdr (assoc-string dbconnection sql-connection-alist t))))))))
+             (if (string-equal ":engine" name)
+                 (symbol-name (cadr (cadr (assq mapped-name
+                                   (cdr (assoc-string dbconnection sql-connection-alist t))))))
+               (cadr (assq mapped-name
+                           (cdr (assoc-string dbconnection sql-connection-alist t)))))))))
 
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
@@ -247,7 +251,7 @@ This function is called by `org-babel-execute-src-block'."
          (dbpassword (org-babel-find-db-connection-param params :dbpassword))
          (dbinstance (org-babel-find-db-connection-param params :dbinstance))
          (database (org-babel-find-db-connection-param params :database))
-         (engine (cdr (assq :engine params)))
+         (engine  (org-babel-find-db-connection-param params :engine))
          (colnames-p (not (equal "no" (cdr (assq :colnames params)))))
          (in-file (org-babel-temp-file "sql-in-"))
          (out-file (or (cdr (assq :out-file params))
