@@ -822,6 +822,15 @@ I still like ido-find-file.
        (add-hook 'shell-mode 'goto-address-mode)
        (define-key shell-mode-map "\C-c\C-o" 'goto-address-at-point)))
 #+END_SRC
+
+* magit
+[2023-01-17 Tue 09:33]
+
+#+begin_src emacs-lisp
+  (with-eval-after-load 'magit
+    (require 'forge))
+#+end_src
+
 * mwheel
 
 #+BEGIN_SRC emacs-lisp
@@ -3180,7 +3189,7 @@ whole team. No matter what editor gets used.
 #+BEGIN_SRC emacs-lisp
    (deftheme bba1 "DOCSTRING for bba1")
      (custom-theme-set-faces 'bba1
-      '(default ((default (:foreground "#07e30d" :background "#282828" ))))
+      '(default ((default (:foreground "#07e30d" :background "#000000" ))))
       '(cursor ((default (:background "#f09213" ))))
       '(fringe ((default (:background "#131313" ))))
       '(mode-line ((default (:foreground "#282828" :background "#d96503" ))))
@@ -3271,9 +3280,22 @@ whole team. No matter what editor gets used.
 
 * Set default font on Mac
 
+https://github.com/IBM/plex/releases
+
+#+begin_src emacs-lisp :tangle no
+  (seq-filter (lambda (font)
+              (when-let ((info (font-info font)))
+                (string-match-p "spacing=100" (aref info 1))))
+            (font-family-list))
+
+#+end_src
+
+#+RESULTS:
+| Andale Mono | Courier New | IBM 3270 Condensed | IBM 3270 Semi-Condensed | IBM Plex Mono | Menlo | Monaco | PT Mono |
+
 #+BEGIN_SRC emacs-lisp
   (if (string-equal system-type "darwin")
-   (set-frame-font "Menlo 12"))
+    (set-frame-font "IBM Plex Mono 15"))
 #+END_SRC
 
 * dns-mode
@@ -3319,7 +3341,7 @@ not in the public git emacs configuration.
 all in your history.
 
 #+BEGIN_SRC emacs-lisp
-  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history))
+  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history register-alist))
   (setq kmacro-ring-max 42)
   (setq history-delete-duplicates t)
   (if (equal "work" (getenv "SYSENV"))

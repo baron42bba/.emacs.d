@@ -183,6 +183,7 @@ SQL Server on Windows and Linux platform."
 (defun org-babel-sql-dbstring-vertica (host port user password database)
   "Make Vertica command line args for database connection.
 Pass nil to omit that arg."
+  (message "org-babel-sql-dbstring-vertica host: %s" host)
   (mapconcat #'identity
 	     (delq nil
 		   (list (when host     (format "-h %s" host))
@@ -223,6 +224,7 @@ then look for the parameter into the corresponding connection
 defined in `sql-connection-alist', otherwise look into PARAMS.
 See `sql-connection-alist' (part of SQL mode) for how to define
 database connections."
+;  (message "org-babel-find-db-connection-param %s: %s" (cdr (assq :dbconnection params)) name)
   (or (cdr (assq name params))
       (and (assq :dbconnection params)
            (let* ((dbconnection (cdr (assq :dbconnection params)))
@@ -239,6 +241,7 @@ database connections."
                                    (cdr (assoc-string dbconnection sql-connection-alist t))))))
                (cadr (assq mapped-name
                            (cdr (assoc-string dbconnection sql-connection-alist t)))))))))
+
 
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
@@ -350,6 +353,7 @@ SET COLSEP '|'
        (org-babel-expand-body:sql body params)
        ;; "sqsh" requires "go" inserted at EOF.
        (if (string= engine "sqsh") "\ngo" "")))
+    (message "command is: %s" command)
     (org-babel-eval command "")
     (org-babel-result-cond result-params
       (with-temp-buffer

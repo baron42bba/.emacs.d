@@ -124,6 +124,19 @@ I have also had a lot of trouble getting aliases to work, for instance =dired= w
 #+end_src
 To work around this, I create functions instead.
 
+*** Better Command Line History
+On [[http://www.reddit.com/r/emacs/comments/1zkj2d/advanced_usage_of_eshell/][this discussion]] a little gem for using IDO to search back through the history, instead of =M-R= to prompt for the history.
+#+begin_src emacs-lisp
+  (defun eshell-insert-history ()
+    "Displays the eshell history to select and insert back into your eshell."
+    (interactive)
+    (insert (completing-read "Eshell history: "
+                                 (delete-dups
+                                  (ring-elements eshell-history-ring)))))
+  (define-key eshell-mode-map (kbd "M-P") 'eshell-insert-history)
+
+
+  #+END_SRC
 *** Eshell Functions
 [2022-12-08 Thu 17:42]
 
