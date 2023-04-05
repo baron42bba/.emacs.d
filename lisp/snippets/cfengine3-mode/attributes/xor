@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: xor => clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+
+# key: xor
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 62d80b5a-5ef5-47b9-978b-47c2db98bfe9
+# --
+xor => ${1:clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+}$0

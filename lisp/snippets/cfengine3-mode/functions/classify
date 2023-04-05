@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function classify(text)
+# key: classify
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e340ed0a-f7a3-4311-a376-c2df4d1c6b02
+# --
+classify("${1:text}")$0

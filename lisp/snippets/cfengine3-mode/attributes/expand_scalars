@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: expand_scalars => boolean
+# key: expand_scalars
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1a77dc5d-0c64-4c00-bc9c-bd397d8c4617
+# --
+expand_scalars => "${1:$$(yas-choose-value '("true" "false"))}"$0

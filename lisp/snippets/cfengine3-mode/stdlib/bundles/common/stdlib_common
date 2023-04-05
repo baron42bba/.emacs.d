@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common stdlib_common
+# key: stdlib_common
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7597342d-b7cf-4c19-8a6f-80d0415ef7c9
+# --
+stdlib_common$0

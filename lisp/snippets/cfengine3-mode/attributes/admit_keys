@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: admit_keys => slist
+# key: admit_keys
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7d091382-060a-4397-aa70-a2bb187f6d9d
+# --
+admit_keys => { ${1:slist} }$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method freebsd_portmaster
+# key: freebsd_portmaster
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 85330e95-b334-41e3-bd00-436b56bf6a36
+# --
+freebsd_portmaster$0

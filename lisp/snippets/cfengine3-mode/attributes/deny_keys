@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: deny_keys => slist
+# key: deny_keys
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 71afcafb-bbe9-4fe5-b5f1-e785cc78bb7b
+# --
+deny_keys => { ${1:slist} }$0

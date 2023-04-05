@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function sysctlvalue(key)
+# key: sysctlvalue
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5c281369-7a54-4967-9a40-b0cd8bfb2b5c
+# --
+sysctlvalue("${1:key}")$0

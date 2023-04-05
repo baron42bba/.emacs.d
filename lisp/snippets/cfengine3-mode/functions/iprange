@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function iprange(range, interface)
+# key: iprange
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 153329ee-8ff5-4086-83bf-5667b8987426
+# --
+iprange("${1:range}", "${2:interface}")$0

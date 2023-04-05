@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: mount => body mount
+# key: mount
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 657555d8-47b3-48f4-899e-9ed503ce564a
+# --
+mount => ${1:$$(yas-choose-value '("nfs" "nfs_p" "unmount"))}$0

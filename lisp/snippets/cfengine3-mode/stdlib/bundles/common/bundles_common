@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common bundles_common
+# key: bundles_common
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f1f8ab56-a2eb-4f7b-8cff-7ee65e2ef945
+# --
+bundles_common$0

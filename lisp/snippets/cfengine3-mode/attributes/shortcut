@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: shortcut => string
+# key: shortcut
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2f8941e1-99e7-4682-9c77-76f0c811da16
+# --
+shortcut => "$1"$0

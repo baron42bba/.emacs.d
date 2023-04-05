@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_database_cleanup_consumer_status(row_count)
+# key: cfe_internal_database_cleanup_consumer_status 
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e9e92987-e820-41d0-b5e2-4f6c83ccf746
+# --
+cfe_internal_database_cleanup_consumer_status("${1:row_count}")$0

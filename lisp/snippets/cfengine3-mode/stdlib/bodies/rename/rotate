@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body rename rotate(level)
+# key: rotate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a5969895-6169-4559-b328-1507b93f5a88
+# --
+rotate("${1:level}")$0

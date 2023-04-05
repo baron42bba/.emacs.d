@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line
+# key: edit_line
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eb9a1594-e51f-4d35-92d5-508ac0228721
+# --
+bundle edit_line $1
+{
+meta:
+vars:
+defaults:
+classes:
+delete_lines:
+field_edits:
+insert_lines:
+replace_patterns:
+reports:
+}

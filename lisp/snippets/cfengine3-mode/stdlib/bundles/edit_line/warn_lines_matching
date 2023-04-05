@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line warn_lines_matching(regex)
+# key: warn_lines_matching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2aed0c5b-3e3f-4d90-ad75-fdecc70eebb3
+# --
+warn_lines_matching("${1:regex}")$0

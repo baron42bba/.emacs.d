@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: service_method => body service_method
+# key: service_method
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5f3d6110-bafc-4933-87c2-050b9446dd73
+# --
+service_method => ${1:$$(yas-choose-value '("bootstart" "force_deps" "standard_services"))}$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: delete => body delete
+# key: delete
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7ac2a5e8-cf47-4eef-806d-464da00b4557
+# --
+delete => ${1:$$(yas-choose-value '("tidy"))}$0

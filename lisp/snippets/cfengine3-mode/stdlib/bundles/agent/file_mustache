@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_mustache(mustache_file, json_file, target_file)
+# key: file_mustache
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a9a7c50c-42f7-4fe1-b8ed-ac86aa109b71
+# --
+file_mustache("${1:mustache_file}", "${2:json_file}", "${3:target_file}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line regex_replace(find, replace)
+# key: regex_replace
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ccad2a6d-65c4-4ece-bb7a-7408727f8a2f
+# --
+regex_replace("${1:find}", "${2:replace}")$0

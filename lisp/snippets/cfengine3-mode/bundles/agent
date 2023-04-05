@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: bundle agent
+# key: agent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a4a207b2-466b-4330-921b-ffe718ea9c58
+# --
+bundle agent $1
+{
+meta:
+vars:
+defaults:
+classes:
+users:
+files:
+packages:
+guest_environments:
+methods:
+processes:
+services:
+commands:
+storage:
+databases:
+reports:
+}

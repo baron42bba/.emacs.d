@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: classes => body classes
+# key: classes
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b01ab99f-6d37-497b-b0d9-ef2c00c6293d
+# --
+classes => ${1:$$(yas-choose-value '("always" "cf2_if_else" "classes_generic" "cmd_repair" "diff_results" "enumerate" "event_cancel_events" "feature_cancel" "if_else" "if_notkept" "if_ok" "if_ok_cancel" "if_repaired" "kept_successful_command" "results" "scoped_classes_generic" "state_repaired" "u_kept_successful_command"))}$0

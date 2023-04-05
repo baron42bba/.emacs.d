@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function none(regex, list)
+# key: none
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e02614ad-1cd3-406b-84ac-003a72616fe2
+# --
+none("${1:regex}", "${2:list}")$0

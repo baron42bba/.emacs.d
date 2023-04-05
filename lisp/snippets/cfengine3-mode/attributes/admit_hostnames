@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: admit_hostnames => slist
+# key: admit_hostnames
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a38e99d0-24c0-4eb4-a07e-ecd2d97b148d
+# --
+admit_hostnames => { ${1:slist} }$0

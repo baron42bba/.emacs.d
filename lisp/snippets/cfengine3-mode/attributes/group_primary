@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: group_primary => string
+# key: group_primary
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 86fd42fb-b74b-4251-a882-36499d1c8962
+# --
+group_primary => "$1"$0

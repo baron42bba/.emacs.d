@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function datastate()
+# key: datastate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c7ca9325-9c3a-4c1c-bfbc-109e4d808803
+# --
+datastate()$0

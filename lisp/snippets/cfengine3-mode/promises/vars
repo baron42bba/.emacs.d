@@ -1,0 +1,25 @@
+# -*- mode: snippet -*-
+# name: vars promise
+# key: vars
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f1d18e6f-b148-4646-91ef-6585ad7da512
+# --
+"${1:vars}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+data
+ilist
+int
+policy
+real
+rlist
+slist
+string

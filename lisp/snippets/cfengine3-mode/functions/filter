@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function filter(filter, list, is_regex, invert, max_return)
+# key: filter
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5e1cf69d-bebc-47c7-a3bc-c3f62d1ddcaf
+# --
+filter("${1:filter}", "${2:list}", "${3:$$(yas-choose-value '("true" "false"))}", "${4:$$(yas-choose-value '("true" "false"))}", "${5:max_return}")$0

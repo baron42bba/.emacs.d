@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: acl => body acl
+# key: acl
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a7d65fa2-cc5f-407a-8f8a-21f63039388b
+# --
+acl => ${1:$$(yas-choose-value '("access_generic" "ntfs" "strict"))}$0

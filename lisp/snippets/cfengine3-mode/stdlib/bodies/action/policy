@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action policy(p)
+# key: policy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0dd34624-30d8-4e30-9eec-55a397352a18
+# --
+policy("${1:p}")$0

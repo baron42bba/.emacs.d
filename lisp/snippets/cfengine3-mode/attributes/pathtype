@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: pathtype => one of literal, regex, guess
+# key: pathtype
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6574ffd6-bddc-4958-b8c3-49f132625a08
+# --
+pathtype => ${1:$$(yas-choose-value '("literal" "regex" "guess"))}

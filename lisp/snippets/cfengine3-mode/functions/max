@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function max(list, sortmode)
+# key: max
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ae1966bc-ff8b-43f3-9ada-695c517c536d
+# --
+max("${1:list}", "${1:$$(yas-choose-value '("lex" "int" "real" "IP" "ip" "MAC" "mac"))}")$0

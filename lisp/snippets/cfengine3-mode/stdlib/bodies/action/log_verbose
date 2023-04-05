@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action log_verbose
+# key: log_verbose
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 71996660-e55d-4e87-8c33-78299da2cf4a
+# --
+log_verbose$0

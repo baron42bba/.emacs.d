@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body process_select exclude_procs(x)
+# key: exclude_procs
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0482548f-7d74-459c-a698-180aec06ed46
+# --
+exclude_procs("${1:x}")$0

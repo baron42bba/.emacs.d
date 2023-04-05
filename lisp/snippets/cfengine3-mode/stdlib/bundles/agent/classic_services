@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent classic_services(service, state)
+# key: classic_services
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 28ba9e3e-a32c-4659-8ce1-8f9f1a58368a
+# --
+classic_services("${1:service}", "${2:state}")$0

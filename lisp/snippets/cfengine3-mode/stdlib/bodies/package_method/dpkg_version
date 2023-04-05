@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method dpkg_version(repo)
+# key: dpkg_version
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 28041c3c-a4bf-48e4-8db4-4701513443de
+# --
+dpkg_version("${1:repo}")$0

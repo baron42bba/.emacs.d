@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line insert_before_if_no_line(before, string)
+# key: insert_before_if_no_line
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 36870f94-f421-490b-9bad-a29a2e7c8e35
+# --
+insert_before_if_no_line("${1:before}", "${2:string}")$0

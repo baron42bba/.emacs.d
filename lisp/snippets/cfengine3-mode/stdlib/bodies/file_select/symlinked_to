@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select symlinked_to(target)
+# key: symlinked_to
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c4f68cd0-69c4-4863-b96d-bc63b8276fdf
+# --
+symlinked_to("${1:target}")$0

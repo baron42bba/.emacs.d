@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent package_latest(package)
+# key: package_latest
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e779cfa1-dd81-4f1d-bf0a-331a231e3beb
+# --
+package_latest("${1:package}")$0

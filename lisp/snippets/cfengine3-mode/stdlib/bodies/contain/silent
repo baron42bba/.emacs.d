@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain silent
+# key: silent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 407281a7-536c-4483-bca1-b9300f343d2e
+# --
+silent$0

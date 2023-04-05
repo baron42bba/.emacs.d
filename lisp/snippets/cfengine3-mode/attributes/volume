@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: volume => body volume
+# key: volume
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 62d1011d-097c-48de-b607-f88e85fcc32b
+# --
+volume => ${1:$$(yas-choose-value '("min_free_space"))}$0

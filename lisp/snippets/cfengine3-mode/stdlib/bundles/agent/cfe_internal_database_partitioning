@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_database_partitioning()
+# key: cfe_internal_database_partitioning
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 645f36c5-052b-40d3-9600-fad2532a1ca3
+# --
+cfe_internal_database_partitioning($1)$0

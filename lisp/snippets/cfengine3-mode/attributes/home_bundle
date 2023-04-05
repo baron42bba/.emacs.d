@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: home_bundle => bundle
+# key: home_bundle
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 26f802d4-6be3-49a8-962b-ef5ce69505fa
+# --
+home_bundle => ${1:bundle}$0

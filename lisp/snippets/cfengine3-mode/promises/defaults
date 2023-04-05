@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: defaults promise
+# key: defaults
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c34ec43a-8e0e-4c51-8b9e-d3431aa2a756
+# --
+"${1:defaults}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+if_match_regex
+slist
+string

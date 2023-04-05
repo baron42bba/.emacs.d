@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function grep(regex, list)
+# key: grep
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0c783174-2339-4597-91cb-219107dc0306
+# --
+grep("${1:regex}", "${2:list}")$0

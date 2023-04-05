@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function min(list, sortmode)
+# key: min
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 85a170dc-fcb0-47a5-8acc-2b115f7b808e
+# --
+min("${1:list}", "${2:$$(yas-choose-value '("lex" "int" "real" "IP" "ip" "MAC" "mac"))}")$0

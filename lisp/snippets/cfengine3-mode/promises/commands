@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: commands promise
+# key: commands
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 565a22fd-ee43-493f-bd5f-8bc4cd050cf4
+# --
+"${1:commands}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+arglist
+args
+contain
+module

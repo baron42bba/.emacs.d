@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: useresult => string in range [a-zA-Z0-9_$(){}[].:]+
+# key: useresult
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 619a5245-b289-454a-aea9-6bec98439cc8
+# --
+useresult => "$1"$0

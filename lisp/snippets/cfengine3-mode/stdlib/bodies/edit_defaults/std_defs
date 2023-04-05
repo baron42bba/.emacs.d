@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_defaults std_defs
+# key: std_defs
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 32a56134-e576-41d2-9f39-948bfec47ba1
+# --
+std_defs$0

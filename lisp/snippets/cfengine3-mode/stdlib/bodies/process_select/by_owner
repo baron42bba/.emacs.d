@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body process_select by_owner(u)
+# key: by_owner
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3d275bb4-444e-4ab8-bc27-c0ab1cce0e29
+# --
+by_owner("${1:u}")$0

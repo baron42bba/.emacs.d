@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from sync_cp(from, server)
+# key: sync_cp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 49bf40bf-3b1a-468d-a7ec-959fb8c34bc2
+# --
+sync_cp("${1:from}", "${2:server}")$0

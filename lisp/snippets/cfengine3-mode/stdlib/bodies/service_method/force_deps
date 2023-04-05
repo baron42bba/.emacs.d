@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body service_method force_deps
+# key: force_deps
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 20f1a746-e33c-4082-8e42-94b67552b9e1
+# --
+force_deps$0

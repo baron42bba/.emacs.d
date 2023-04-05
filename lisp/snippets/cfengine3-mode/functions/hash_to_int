@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hash_to_int(lower, upper, string)
+# key: hash_to_int
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d67dce53-6e77-456f-8d3c-d5138b6e17d5
+# --
+hash_to_int("${1:lower}", "${2:upper}", "${3:string}")$0

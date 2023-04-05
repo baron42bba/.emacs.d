@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function randomint(lower, upper)
+# key: randomint
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 31ef3ad8-1aaf-462f-ac56-3d0415202b61
+# --
+randomint("${1:lower}", "${2:upper}")$0

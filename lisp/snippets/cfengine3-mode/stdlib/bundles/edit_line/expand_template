@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line expand_template(templatefile)
+# key: expand_template
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d5923af3-5a7b-4bca-95b8-58481cbb9d97
+# --
+expand_template("${1:templatefile}")$0

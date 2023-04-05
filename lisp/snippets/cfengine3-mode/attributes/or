@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: or => clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+
+# key: or
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ae3d723f-1309-4a11-82a8-9c1f07b2eecc
+# --
+or => ${1:clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+}$0

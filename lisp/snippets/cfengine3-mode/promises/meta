@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: meta promise
+# key: meta
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 97ea15ca-eef3-44fc-ae6b-76ca8dcf40fd
+# --
+"${1:meta}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+data
+slist
+string

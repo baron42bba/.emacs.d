@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: not => class expression in range [a-zA-Z0-9_!&@@$|.()[]{}:]+
+# key: not
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a31d6380-887a-4984-80c4-31025889ecdd
+# --
+not => ${1:class expression in range [a-zA-Z0-9_!&@@$|.()[]{}:]+}$0

@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: body process_count
+# key: body-process_count
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5d575de7-f4a5-4021-a355-5dfa2ee32e37
+# --
+body process_count $1
+{
+inherit_from
+meta
+in_range_define
+match_range
+out_of_range_define
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function countclassesmatching(regex, tag1, tag2, ...))
+# key: countclassesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0d00f2a4-a0ab-4ea8-9fc6-160468d2b824
+# --
+countclassesmatching("${1:condition}")$0

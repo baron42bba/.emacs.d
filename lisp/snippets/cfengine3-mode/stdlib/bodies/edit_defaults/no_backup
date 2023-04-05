@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_defaults no_backup
+# key: no_backup
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c3a51123-9512-47f8-923b-1202e39878b5
+# --
+no_backup$0

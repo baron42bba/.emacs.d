@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_xml xml_set_value(value, xpath)
+# key: xml_set_value
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5c783a9e-f243-4680-940e-afc410f029d6
+# --
+xml_set_value("${1:value}", "${2:xpath}")$0

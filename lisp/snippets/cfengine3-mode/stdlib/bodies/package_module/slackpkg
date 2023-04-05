@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_module slackpkg
+# key: slackpkg
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0fd651ee-6317-40cc-8a8c-6457a1f70c46
+# --
+slackpkg$0

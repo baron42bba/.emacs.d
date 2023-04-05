@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes classes_generic(x)
+# key: classes_generic
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cd062cd5-3a81-470c-a7ec-7eac2e9b6b07
+# --
+classes_generic("${1:x}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method freebsd
+# key: freebsd
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 224b47ea-ac1d-472d-b80d-377d80bac242
+# --
+freebsd$0

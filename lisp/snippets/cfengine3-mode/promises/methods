@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: methods promise
+# key: methods
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e829e26b-f62f-4482-9c53-31460a966b08
+# --
+"${1:methods}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+inherit
+usebundle
+useresult

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function processexists(regex)
+# key: processexists
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 07212c61-9a6d-4eba-9528-473163c45b1d
+# --
+processexists("${1:regex}")$0

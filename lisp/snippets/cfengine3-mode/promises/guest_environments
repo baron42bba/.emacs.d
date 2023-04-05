@@ -1,0 +1,22 @@
+# -*- mode: snippet -*-
+# name: guest_environments promise
+# key: guest_environments
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ca5eeb50-4af1-42fb-a45b-88e5b81e82ed
+# --
+"${1:guest_environments}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+environment_host
+environment_interface
+environment_resources
+environment_state
+environment_type

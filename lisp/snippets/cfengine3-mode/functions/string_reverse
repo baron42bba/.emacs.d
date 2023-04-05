@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function string_reverse(data)
+# key: string_reverse
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0c1e1f04-2f5f-48b7-9d8d-8483919049fb
+# --
+string_reverse("${1:data}")$0

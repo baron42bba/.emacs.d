@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function usemodule(module, args)
+# key: usemodule
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3cf2e7de-8e60-4e80-867c-8a3f34f31f8f
+# --
+usemodule("${1:module}", "${1:args}")$0

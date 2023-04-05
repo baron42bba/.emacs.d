@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: package_architectures => slist
+# key: package_architectures
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 30ff7842-1ff0-4d6a-ac36-d71c66782917
+# --
+package_architectures => { ${1:slist} }$0

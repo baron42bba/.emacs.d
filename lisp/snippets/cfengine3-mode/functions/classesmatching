@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function classesmatching(name, tag1, tag2, ...)
+# key: classesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 20c9c9ad-c302-4cea-9325-58f2ed52645b
+# --
+classesmatching("${1:condition}")$0

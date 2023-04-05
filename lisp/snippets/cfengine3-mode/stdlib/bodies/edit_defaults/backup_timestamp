@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_defaults backup_timestamp
+# key: backup_timestamp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b660d690-3935-4f71-8643-f895c8e52c9c
+# --
+backup_timestamp$0

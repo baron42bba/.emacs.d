@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: services promise
+# key: services
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1940cee9-d77e-4a25-b5cc-37f85367d308
+# --
+"${1:services}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+service_dependencies
+service_method
+service_policy

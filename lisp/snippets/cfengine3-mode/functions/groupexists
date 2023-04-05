@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function groupexists(group)
+# key: groupexists
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3e9b0883-6641-44e6-8401-5d4696adac02
+# --
+groupexists("${1:group}")$0

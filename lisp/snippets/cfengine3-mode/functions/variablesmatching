@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function variablesmatching(name, tag1, tag2, ...)
+# key: variablesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 12227c3a-8c20-45d5-995f-0be077ed62db
+# --
+variablesmatching("${1:strings}")$0

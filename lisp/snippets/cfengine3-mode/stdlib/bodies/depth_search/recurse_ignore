@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body depth_search recurse_ignore(d, list)
+# key: recurse_ignore
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2fe85727-9a88-46dd-94d0-6373bf827026
+# --
+recurse_ignore("${1:d}", "${2:list}")$0

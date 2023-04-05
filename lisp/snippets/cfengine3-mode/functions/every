@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function every(regex, list)
+# key: every
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5d57aea6-0f78-4562-a07c-e3df9ad02d77
+# --
+every("${1:regex}", "${2:list}")$0

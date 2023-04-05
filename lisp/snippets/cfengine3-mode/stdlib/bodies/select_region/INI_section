@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body select_region INI_section(x)
+# key: INI_section
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a74f6efe-c06e-40bb-8690-37f3c198ba64
+# --
+INI_section("${1:x}")$0

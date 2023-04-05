@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_make_mog(file, str, mode, owner, group)
+# key: file_make_mog
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 007baef0-7d86-40b4-acf4-8f2f58bf565e
+# --
+file_make_mog("${1:file}", "${2:str}", "${3:mode}", "${4:owner}", "${5:group}")$0

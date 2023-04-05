@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method pip(flags)
+# key: pip
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 99286e0d-167c-4c4e-8f7a-15795692a418
+# --
+pip("${1:flags}")$0

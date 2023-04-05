@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_field fstab_options(newval, method)
+# key: fstab_options
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ee07b045-6afb-4535-a1fb-ec86ac799fbe
+# --
+fstab_options("${1:newval}", "${2:method}")$0

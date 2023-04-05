@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common package_module_knowledge
+# key: package_module_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 97224079-77d0-4a69-8acf-82941839247d
+# --
+package_module_knowledge$0

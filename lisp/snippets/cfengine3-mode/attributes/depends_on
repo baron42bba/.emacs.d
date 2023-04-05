@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: depends_on => slist
+# key: depends_on
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f83b1cba-e31c-468d-91a5-978196d2c6e8
+# --
+depends_on => { ${1:slist} }$0

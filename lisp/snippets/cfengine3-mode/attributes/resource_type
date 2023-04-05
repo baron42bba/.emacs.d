@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: resource_type => one of path, literal, context, query, variable, bundle
+# key: resource_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 456856a6-c5ce-494c-b6b6-4362f8d414ac
+# --
+resource_type => ${1:$$(yas-choose-value '("path" "literal" "context" "query" "variable" "bundle"))}

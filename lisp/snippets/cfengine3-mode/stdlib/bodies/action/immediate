@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action immediate
+# key: immediate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2d73fa36-11f5-4cce-9fa1-26616f33797e
+# --
+immediate$0

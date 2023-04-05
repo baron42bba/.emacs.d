@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function lastnode(string, separator)
+# key: lastnode
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 654acb2c-362f-42b7-9927-08e3596dadaf
+# --
+lastnode("${1:string}", "${2:separator}")$0

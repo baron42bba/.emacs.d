@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method smartos_pkg_add(repo)
+# key: smartos_pkg_add
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a03c1af7-a982-4196-b7ef-790740b2df60
+# --
+smartos_pkg_add("${1:repo}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function read_module_protocol(file_path)
+# key: read_module_protocol
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 5e088412-5086-4144-9ba0-3d97d5edb143
+# --
+read_module_protocol("${1:file_path}")$0

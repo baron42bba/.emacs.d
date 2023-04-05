@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: registry_exclude => slist
+# key: registry_exclude
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 222ceaa0-cca7-4d54-ba7b-e48ad8902172
+# --
+registry_exclude => { ${1: slist} }$0

@@ -1,0 +1,42 @@
+# -*- mode: snippet -*-
+# name: body package_method
+# key: body-package_method
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fb886396-ccbc-4d04-9f90-48c88cbeec1d
+# --
+body package_method $1
+{
+inherit_from
+meta
+package_add_command
+package_arch_regex
+package_changes
+package_commands_useshell
+package_default_arch_command
+package_delete_command
+package_delete_convention
+package_file_repositories
+package_installed_regex
+package_list_arch_regex
+package_list_command
+package_list_name_regex
+package_list_update_command
+package_list_update_ifelapsed
+package_list_version_regex
+package_multiline_start
+package_name_convention
+package_name_regex
+package_noverify_regex
+package_noverify_returncode
+package_patch_arch_regex
+package_patch_command
+package_patch_installed_regex
+package_patch_list_command
+package_patch_name_regex
+package_patch_version_regex
+package_update_command
+package_verify_command
+package_version_equal_command
+package_version_less_command
+package_version_regex
+}

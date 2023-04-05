@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method apt
+# key: apt
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c7afbc53-4aeb-4c21-88fb-4c057fdfbb27
+# --
+apt$0

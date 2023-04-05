@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body perms m(mode)
+# key: m
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f5b8b28f-1793-4952-afee-02f58fa8010d
+# --
+m("${1:mode}")$0

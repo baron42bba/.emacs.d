@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes cf2_if_else(yes, no)
+# key: cf2_if_else
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 57c0c1e2-2da2-43cd-8ece-65a15d31e729
+# --
+cf2_if_else("${1:yes}", "${2:no}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes if_else(yes, no)
+# key: if_else
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 105b0b52-c4ac-4d73-bd16-38fc897c2674
+# --
+if_else("${1:yes}", "${2:no}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line append_groups_starting(v)
+# key: append_groups_starting
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a7cde411-831d-4034-9a65-224876295374
+# --
+append_groups_starting("${1:v}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function intersection(list1, list2)
+# key: intersection
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 34625faa-93d9-4095-8e35-dc8ccfbb6ade
+# --
+intersection("${1:list1}", "${2:list2}")$0

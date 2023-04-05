@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body process_count any_count(cl)
+# key: any_count
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 89baf5a6-0842-4512-a61f-46e07599a99a
+# --
+any_count("${1:cl}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent prunedir(dir, max_days)
+# key: prunedir
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3ec93539-c977-4dbe-8a01-0d105e93363d
+# --
+prunedir("${1:dir}", "${2:max_days}")$0

@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: body environment_interface
+# key: body-environment_interface
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 719c0edb-af41-4cd0-9cb2-57b3534e1e97
+# --
+body environment_interface $1
+{
+inherit_from
+meta
+env_addresses
+env_name
+env_network
+}

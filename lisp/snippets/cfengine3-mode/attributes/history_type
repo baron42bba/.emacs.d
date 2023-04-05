@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: history_type => one of weekly, scalar, static, log
+# key: history_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c0d06f99-c03f-47c6-9756-876640246f12
+# --
+history_type => ${1:$$(yas-choose-value '("weekly" "scalar" "static" "log"))}

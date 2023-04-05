@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function fileexists(filename)
+# key: fileexists
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d92e1097-9e40-4d61-b346-4e410bfb44a8
+# --
+fileexists("${1:filename}")$0

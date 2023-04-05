@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent prunetree(dir, depth, max_days)
+# key: prunetree
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ea1f780a-78ad-4412-9721-8512116a827e
+# --
+prunetree("${1:dir}", "${2:depth}", "${3:max_days}")$0

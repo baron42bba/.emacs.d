@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: move_obstructions => boolean
+# key: move_obstructions
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 34d9508d-eca0-4ce3-9a57-e3cc62e8166d
+# --
+move_obstructions => "${1:$$(yas-choose-value '("true" "false"))}"$0

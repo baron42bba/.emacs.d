@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function bundlesmatching(name, tag1, tag2, ...)
+# key: bundlesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: db05ef56-02d9-4632-831f-50e34acc1950
+# --
+bundlesmatching("${1:condition}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes enumerate(x)
+# key: enumerate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9f2bb2be-8ee0-47fc-8c24-58c9893db62a
+# --
+enumerate("${1:x}")$0

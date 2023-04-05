@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body link_from linkchildren(tofile)
+# key: linkchildren
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 62d1b114-6ff0-4c2a-8823-032a3c43a378
+# --
+linkchildren("${1:tofile}")$0

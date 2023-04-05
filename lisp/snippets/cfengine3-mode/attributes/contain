@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: contain => body contain
+# key: contain
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a5355496-a0de-4520-86a5-bc6a05adf153
+# --
+contain => ${1:$$(yas-choose-value '("in_dir" "in_dir_shell" "in_dir_shell_and_silent" "in_shell" "in_shell_and_silent" "in_shell_bg" "jail" "setuid" "setuid_gid_umask" "setuid_sh" "setuid_umask" "setuidgid_dir" "setuidgid_sh" "silent" "silent_in_dir"))}$0

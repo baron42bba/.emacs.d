@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: ifvarclass => string
+# key: ifvarclass
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c08755a-7485-4c3c-b597-c084692f83d3
+# --
+ifvarclass => "$1"$0

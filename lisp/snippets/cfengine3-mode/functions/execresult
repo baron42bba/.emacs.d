@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function execresult(command, shell)
+# key: execresult
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 357a8ebe-7fa1-4238-8b28-ac0a1faa5873
+# --
+execresult("${1:command}", "${2:$$(yas-choose-value '("noshell" "useshell" "powershell"))}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common cfengine_enterprise_hub_ha
+# key: cfengine_enterprise_hub_ha
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7e02ed0b-9faa-4334-af0f-c31551c6615f
+# --
+cfengine_enterprise_hub_ha$0

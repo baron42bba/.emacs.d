@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function rrange(arg1, arg2)
+# key: rrange
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bafa20a4-a23e-4586-b960-d7c2bc56e97a
+# --
+rrange("${1:arg1}", "${2:arg2}")$0

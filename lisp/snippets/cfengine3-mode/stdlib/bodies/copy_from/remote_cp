@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from remote_cp(from, server)
+# key: remote_cp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fcdf2138-a34e-4621-a010-02a70b77d1d4
+# --
+remote_cp("${1:from}", "${2:server}")$0

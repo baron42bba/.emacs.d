@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function eval(expression, mode, options)
+# key: eval
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 40d32abb-9505-4d86-b506-e39448143327
+# --
+eval("${1:expression}", "${2:mode}", "${3:options}")$0

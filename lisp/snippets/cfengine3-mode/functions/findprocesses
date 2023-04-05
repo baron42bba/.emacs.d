@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function findprocesses(regex)
+# key: findprocesses
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 53d41111-f5e3-4167-8909-a13354083ea7
+# --
+findprocesses("${1:regex}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain jail(owner, jail_root, dir)
+# key: jail
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3b23baeb-0b04-4fd7-a897-befbb3f7ea11
+# --
+jail("${1:owner}", "${2:jail_root}", "${3:dir}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readjson(filename, optional_maxbytes)
+# key: readjson
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1e40a3c0-8420-4cca-8b9b-05526579b1d5
+# --
+readjson("${1:filename}", "${2:optional_maxbytes}")$0

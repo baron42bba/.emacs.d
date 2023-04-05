@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes if_ok_cancel(x)
+# key: if_ok_cancel
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 707095f0-6529-4d79-9629-dcf412c1d147
+# --
+if_ok_cancel("${1:x}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common npm_knowledge
+# key: npm_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: caf53073-7079-4440-9e8e-ef96a2d40818
+# --
+npm_knowledge$0

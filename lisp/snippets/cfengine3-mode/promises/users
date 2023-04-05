@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: users promise
+# key: users
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d7771e66-6de2-4eb9-bef5-0b709af44b98
+# --
+"${1:users}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+description
+group_primary
+groups_secondary
+home_bundle
+home_bundle_inherit
+home_dir
+password
+policy
+shell
+uid

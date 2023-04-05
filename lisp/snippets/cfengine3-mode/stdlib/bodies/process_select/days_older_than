@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body process_select days_older_than(d)
+# key: days_older_than
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 404b25f7-4a21-49c4-b0e1-c0bd07c3ea02
+# --
+days_older_than("${1:d}")$0

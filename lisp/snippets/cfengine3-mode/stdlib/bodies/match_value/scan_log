@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body match_value scan_log(line)
+# key: scan_log
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2c8e4c8e-a954-4b8e-bc1a-c088fa582132
+# --
+scan_log("${1:line}")$0

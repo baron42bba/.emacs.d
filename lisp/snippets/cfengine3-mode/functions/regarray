@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function regarray(array, regex)
+# key: regarray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9dc9779f-ce58-4fb6-9570-5e98301aa19d
+# --
+regarray("${1:array}", "${2:regex}")$0

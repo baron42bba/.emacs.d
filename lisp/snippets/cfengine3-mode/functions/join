@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function join(glue, list)
+# key: join
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d5dac791-8628-4290-9461-a5c5d4067595
+# --
+join("${1:glue}", "${1:list}")$0

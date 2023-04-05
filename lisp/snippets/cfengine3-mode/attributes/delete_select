@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: delete_select => body delete_select
+# key: delete_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fc91488d-ae4b-4397-9c51-9f833cceb977
+# --
+delete_select => ${1:body_delete_select}$0

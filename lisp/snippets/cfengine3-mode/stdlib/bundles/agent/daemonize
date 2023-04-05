@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent daemonize(command)
+# key: daemonize
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 56c6cd42-64f5-4a57-9038-5e7c94ad1ab9
+# --
+daemonize("${1:command}")$0

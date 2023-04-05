@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_xml xml_insert_tree_nopath(treestring)
+# key: xml_insert_tree_nopath
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9bbd56f4-b2a4-4a87-9886-4c3c58ca2307
+# --
+xml_insert_tree_nopath("${1:treestring}")$0

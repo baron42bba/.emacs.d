@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function makerule(target, sources)
+# key: makerule
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: add2386c-11f1-4ea8-861a-526ea74a5ec0
+# --
+makerule("${1:target}", "${2:sources}")$0

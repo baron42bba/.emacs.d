@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_generic_report(format, outfile)
+# key: testing_generic_report
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6e88cddc-b15d-4953-be91-7819d7ff9818
+# --
+testing_generic_report("${1:format}", "${2:outfile}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes event_cancel_events(events)
+# key: event_cancel_events
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: db45fbca-7221-4a73-930d-4efde17ee97f
+# --
+event_cancel_events("${1:events}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: insert_type => one of literal, string, file, file_preserve_block, preserve_block, preserve_all_lines
+# key: insert_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8a92c705-b537-4e41-843f-0db3952bd4f9
+# --
+insert_type => ${1:$$(yas-choose-value '("literal" "string" "file" "file_preserve_block" "preserve_block" "preserve_all_lines"))}$0

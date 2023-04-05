@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: body edit_defaults
+# key: body-edit_defaults
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8bcb6d14-5189-45d2-b969-8360b5a3374b
+# --
+body edit_defaults $1
+{
+inherit_from
+meta
+edit_backup
+empty_file_before_editing
+inherit
+max_file_size
+recognize_join
+rotate
+}

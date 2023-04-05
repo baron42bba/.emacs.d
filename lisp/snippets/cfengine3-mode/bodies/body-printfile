@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: body printfile
+# key: body-printfile
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9e1a8e6d-9dc0-427b-9fe9-759e334634a8
+# --
+body printfile $1
+{
+inherit_from
+meta
+file_to_print
+number_of_lines
+}

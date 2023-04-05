@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function packagesmatching(package_regex, version_regex, arch_regex, method_regex)
+# key: packagesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e5a85bcb-60b6-47ac-8b01-973a3580ec1d
+# --
+packagesmatching("${1:package_regex}", "${2:version_regex}", "${3:arch_regex}", "${4:method_regex}")$0

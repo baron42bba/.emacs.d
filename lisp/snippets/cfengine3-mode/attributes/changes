@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: changes => body changes
+# key: changes
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 52178d40-1240-4ce7-bb52-6a8cbbb00e0e
+# --
+changes => ${1:$$(yas-choose-value '("all_changes" "detect_all_change" "detect_all_change_using" "detect_content" "detect_content_using" "diff" "diff_noupdate" "noupdate"))}$0

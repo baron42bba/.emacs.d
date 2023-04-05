@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file control
+# key: control
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 239df0fc-84ab-4151-9514-e2abc6fd3e53
+# --
+control$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: edit_xml => bundle
+# key: edit_xml
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 36009f4b-c7bf-4712-b2ff-9b008698202c
+# --
+edit_xml => ${1:$$(yas-choose-value '("xml_insert_tree" "xml_insert_tree_nopath" "xml_set_attribute" "xml_set_value"))}$0

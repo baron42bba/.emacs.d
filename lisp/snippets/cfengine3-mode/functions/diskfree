@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function diskfree(path)
+# key: diskfree
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9587ab96-9982-4691-a418-45c1dc6dc0b2
+# --
+diskfree("${1:path}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_xml xml_insert_tree(treestring, xpath)
+# key: xml_insert_tree
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: be97c421-bb5a-4c06-9627-337a31f964c8
+# --
+xml_insert_tree("${1:treestring}", "${2:xpath}")$0

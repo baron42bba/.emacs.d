@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_link(target, link)
+# key: file_link
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 275056c4-30c4-4771-9ad2-7fd636425b4b
+# --
+file_link("${1:target}", "${2:link}")$0

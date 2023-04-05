@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent probabilistic_usebundle(probability, bundlename)
+# key: probabilistic_usebundle
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bb55a76f-cb93-4f7d-8686-80ef63921b2e
+# --
+probabilistic_usebundle("${1:probability}", "${2:bundlename}")$0

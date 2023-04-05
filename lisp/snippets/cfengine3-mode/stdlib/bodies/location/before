@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body location before(str)
+# key: before
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d170fb27-b900-4ca3-aec0-7bb7e1297dac
+# --
+before("${1:str}")$0

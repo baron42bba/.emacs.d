@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent git_init(repo_path)
+# key: git_init
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5c82bbe0-015c-42ab-be7d-b2f71cf3f141
+# --
+git_init("${1:repo_path}")$0

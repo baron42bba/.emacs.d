@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method msi_implicit(repo)
+# key: msi_implicit
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 80f5142f-9c7a-4dc0-9719-f62bca292a37
+# --
+msi_implicit("${1:repo}")$0

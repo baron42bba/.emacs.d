@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readdata(filename, filetype)
+# key: readdata
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d68802ba-e071-4313-a3b4-29587cbd2d24
+# --
+readdata("${1:filename}", "${2:$$(yas-choose-value '("CSV" "YAML" "JSON" "ENV" "auto"))}")$0

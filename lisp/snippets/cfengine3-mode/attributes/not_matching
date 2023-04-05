@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: not_matching => boolean
+# key: not_matching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ed35c5b2-08fc-4c70-8c91-d99cda24068f
+# --
+not_matching => "${1:$$(yas-choose-value '("true" "false"))}"$0

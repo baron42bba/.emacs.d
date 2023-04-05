@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: copy_from => body copy_from
+# key: copy_from
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a0ff2aad-cda9-4e47-b25a-ea70669d9b8f
+# --
+copy_from => ${1:$$(yas-choose-value '("backup_local_cp" "copyfrom_sync" "local_cp" "local_dcp" "no_backup_cp" "no_backup_dcp" "no_backup_rcp" "perms_cp" "perms_dcp" "remote_cp" "remote_dcp" "secure_cp" "seed_cp" "sync_cp"))}$0

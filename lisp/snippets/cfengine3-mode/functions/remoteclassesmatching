@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function remoteclassesmatching(regex, server, encrypt, prefix)
+# key: remoteclassesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cae04056-3893-47f1-b240-ad42fad1eac1
+# --
+remoteclassesmatching("${1:regex}", "${2:server}", "${3:$$(yas-choose-value '("true" "false" "yes" "no" "on" "off"))}", "${4:prefix}")$0

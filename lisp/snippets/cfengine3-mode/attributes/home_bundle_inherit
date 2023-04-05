@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: home_bundle_inherit => boolean
+# key: home_bundle_inherit
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8b9c692d-f04d-45d5-84a0-c7b1983bd5c6
+# --
+home_bundle_inherit => "${1:$$(yas-choose-value '("true" "false"))}"$0

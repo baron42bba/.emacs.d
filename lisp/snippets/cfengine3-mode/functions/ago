@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function ago(years, months, days, hours, minutes, seconds)
+# key: ago
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 29f05715-804f-4131-be10-1c8a2128f451
+# --
+ago("${1:years}", "${2:months}", "${3:days}", "${4:hours}", "${5:minutes}", "${6:seconds}")$0

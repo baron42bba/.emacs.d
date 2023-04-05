@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isvariable(var)
+# key: isvariable
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4e738f2c-4088-4e6a-adc9-65798e38e467
+# --
+isvariable("${1:var}")$0

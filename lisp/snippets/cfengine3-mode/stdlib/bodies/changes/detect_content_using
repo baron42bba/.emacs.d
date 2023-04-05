@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body changes detect_content_using(hash)
+# key: detect_content_using
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8bc1e991-a339-4221-b999-8aa9335ce0b8
+# --
+detect_content_using("${1:hash}")$0

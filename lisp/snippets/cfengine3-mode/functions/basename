@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function basename(filename, optional_extension)
+# key: basename
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 56effcd7-32f6-4dd0-98b6-85f9200bf182
+# --
+basename("${1:filename}", "${2:optional_extension}")$0

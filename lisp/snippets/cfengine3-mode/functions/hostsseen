@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hostsseen(horizon, seen, field)
+# key: hostsseen
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4fbda4dd-748b-40a8-8e36-eea44423a6db
+# --
+hostsseen("${1:horizon}", "${2:$$(yas-choose-value '("lastseen" "notseen"))}", "${3:$$(yas-choose-value '("name" "address"))}")$0

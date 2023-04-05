@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function parsestringarrayidx(array, input, comment, split, maxentries, maxbytes)
+# key: parsestringarrayidx
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0de5e2bd-0c8b-4a16-ad4e-dcdab184586b
+# --
+parsestringarrayidx("${1:array}", "${2:input}", "${3:comment}", "${4:split}", "${5:maxentries}", "${6:maxbytes}")$0

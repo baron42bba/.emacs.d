@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function regcmp(regex, string)
+# key: regcmp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d0d74c33-3c89-479b-9cec-bb06f22b6196
+# --
+regcmp("${1:regex}", "${2:string}")$0

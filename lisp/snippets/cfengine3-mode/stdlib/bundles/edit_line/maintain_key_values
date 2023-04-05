@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line maintain_key_values(v, sep)
+# key: maintain_key_values
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: df9d8782-502b-4865-977a-8f84426befaa
+# --
+maintain_key_values("${1:v}", "${2:sep}")$0

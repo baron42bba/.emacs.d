@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_variable_values(v)
+# key: set_variable_values
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d62ecdb8-aa07-4f20-81db-5b6713125e90
+# --
+set_variable_values("${1:v}")$0

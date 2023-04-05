@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function parseyaml(yaml_data)
+# key: parseyaml
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 04a59f5f-abdc-442a-9da1-220e7d378459
+# --
+parseyaml("${1:yaml_data}")$0

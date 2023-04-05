@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function network_connections(regex)
+# key: network_connections
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0303d784-03cf-41b4-84f5-d4c76fa786fd
+# --
+network_connections("${1:regex}")$0

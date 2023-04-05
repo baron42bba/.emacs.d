@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: lastseen => int in range 0,99999999999
+# key: lastseen
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b314337a-c2c3-4713-8fce-6672b1daa68f
+# --
+lastseen => ${1:int in range 0,99999999999}$0

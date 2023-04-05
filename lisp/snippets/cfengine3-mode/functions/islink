@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function islink(filename)
+# key: islink
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4d25b41a-2780-4cd5-bb04-8d5d82bf483f
+# --
+islink("${1:filename}")$0

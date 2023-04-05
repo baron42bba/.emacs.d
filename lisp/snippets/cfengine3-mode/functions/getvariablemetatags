@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getvariablemetatags(varname, optional_tag)
+# key: getvariablemetatags
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d38febda-91c8-44e2-a8a4-260d7aecee22
+# --
+getvariablemetatags("${1:varname}", "${2:optional_tag}")$0

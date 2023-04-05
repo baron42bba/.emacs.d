@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body service_method bootstart
+# key: bootstart
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fd455bcd-d807-4948-b3f7-64f2f3cdb1b1
+# --
+bootstart$0

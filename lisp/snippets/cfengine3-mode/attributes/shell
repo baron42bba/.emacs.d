@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: shell => string in range "?(/.*)
+# key: shell
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: df56523a-0514-488a-86db-ba157ad44642
+# --
+shell => "$1"$0

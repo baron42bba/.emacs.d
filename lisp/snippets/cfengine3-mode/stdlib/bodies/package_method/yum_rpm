@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method yum_rpm
+# key: yum_rpm
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f0839558-5ec1-4e79-93d8-aa7f63af2955
+# --
+yum_rpm$0

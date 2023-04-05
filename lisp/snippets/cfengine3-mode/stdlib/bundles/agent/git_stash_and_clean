@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent git_stash_and_clean(repo_path)
+# key: git_stash_and_clean
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 03e94c90-412a-4c54-b2f3-3b4ac7007a42
+# --
+git_stash_and_clean("${1:repo_path}")$0

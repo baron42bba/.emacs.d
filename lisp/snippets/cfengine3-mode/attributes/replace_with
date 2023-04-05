@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: replace_with => body replace_with
+# key: replace_with
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0f6130f2-7eb0-4905-978a-aaf0684c6c87
+# --
+replace_with => ${1:$$(yas-choose-value '("comment" "uncomment" "value"))}$0

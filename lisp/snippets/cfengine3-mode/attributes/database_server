@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: database_server => body database_server
+# key: database_server
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 519a0906-86f9-42b6-a0fd-8e139bfcb9bf
+# --
+database_server => ${1:$$(yas-choose-value '("local_mysql" "local_postgresql"))}$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line contains_literal_string(string)
+# key: contains_literal_string
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3f96da4a-9a45-4637-afea-107f7561235d
+# --
+contains_literal_string("${1:string}")$0

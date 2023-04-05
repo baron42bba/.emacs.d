@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_module nimclient
+# key: nimclient
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 360d8910-b10b-44ea-bffa-e42982ccbe3c
+# --
+nimclient$0

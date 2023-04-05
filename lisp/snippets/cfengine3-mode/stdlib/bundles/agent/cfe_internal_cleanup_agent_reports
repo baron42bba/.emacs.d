@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_cleanup_agent_reports
+# key: cfe_internal_cleanup_agent_reports
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6be2ee0f-45fa-4361-800d-69ebedb6a0a0
+# --
+cfe_internal_cleanup_agent_reports$0

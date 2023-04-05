@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: delete_text promise
+# key: delete_text
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 62e9c427-b222-4705-8e31-a4ffed40231c
+# --
+"${1:delete_text}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

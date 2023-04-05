@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body perms mog(mode, user, group)
+# key: mog
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c8ddfbbb-7c59-4c36-962a-63df53b6a746
+# --
+mog("${1:mode}", "${2:user}", "${3:group}")$0

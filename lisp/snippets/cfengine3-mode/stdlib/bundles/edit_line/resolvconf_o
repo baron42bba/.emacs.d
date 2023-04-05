@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line resolvconf_o(search, list, options)
+# key: resolvconf_o
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 64572565-cd97-4bad-a1b7-9c3ede409909
+# --
+resolvconf_o("${1:search}", "${2:list}", "${3:options}")$0

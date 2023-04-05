@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function remotescalar()
+# key: remotescalar
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2b68e47d-25f3-4c66-9716-8cd789b2c10e
+# --
+remotescalar("${1:id}", "${2:server}", "${3:$(yas-choose-value '("true" "false" "yes" "no" "on" "off"))}")$0

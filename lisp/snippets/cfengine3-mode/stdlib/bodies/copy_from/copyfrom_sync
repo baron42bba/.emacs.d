@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from copyfrom_sync(f)
+# key: copyfrom_sync
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1812692a-2f4e-43fc-b37e-40d4b483e86a
+# --
+copyfrom_sync("${1:f}")$0

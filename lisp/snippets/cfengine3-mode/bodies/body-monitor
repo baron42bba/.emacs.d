@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body monitor
+# key: body-monitor
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b1600a9f-0eba-50ae-9d26-db24e5eaa16c
+# --
+body monitor $1
+{
+inherit_from
+meta
+forgetrate
+histograms
+monitorfacility
+tcpdump
+tcpdumpcommand
+}

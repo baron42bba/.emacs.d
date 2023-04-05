@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: printfile => body printfile
+# key: printfile
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 02eecb13-2c8b-4290-9cb6-9405425791c2
+# --
+printfile => ${1:$$(yas-choose-value '("cat" "head" "head_n"))}$0

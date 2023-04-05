@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: file_select => body file_select
+# key: file_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 64dc13b0-d85d-4320-8f16-200422609ca2
+# --
+file_select => ${1:$$(yas-choose-value '("all" "bigger_than" "by_name" "days_old" "dirs" "ex_list" "exclude" "filetype_older_than" "filetypes_older_than" "name_age" "older_than" "plain" "size_range" "symlinked_to"))}$0

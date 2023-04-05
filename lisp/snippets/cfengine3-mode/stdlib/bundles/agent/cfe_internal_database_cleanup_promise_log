@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_database_cleanup_promise_log(history_length_days)
+# key: cfe_internal_database_cleanup_promise_log 
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f6137d2a-7cc4-4426-82f1-d0c85d5bd6c6
+# --
+cfe_internal_database_cleanup_promise_log("${1:history_length_days}")$0

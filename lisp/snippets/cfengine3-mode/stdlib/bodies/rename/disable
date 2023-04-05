@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body rename disable
+# key: disable
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0534150f-78f1-455f-99b6-8560716ab6bf
+# --
+disable$0

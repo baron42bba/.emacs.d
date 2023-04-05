@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: rlist => rlist in range -9.99999E100,9.99999E100
+# key: rlist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a724b826-3805-4a4b-9cb4-49030636e54f
+# --
+rlist => ${1:rlist in range -9.99999E100,9.99999E100}$0

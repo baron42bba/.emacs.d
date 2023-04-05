@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function file_hash(file, algorithm)
+# key: file_hash
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b0b0a195-4bd6-4b17-82a0-0801fadd273c
+# --
+file_hash("${1:file}", "${2:$$(yas-choose-value '("md5" "sha1" "sha256" "sha384" "sha512"))}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hash(input, algorithm)
+# key: hash
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3f23c8e2-faf7-4bc7-8c95-caa0a91d4a90
+# --
+hash("${1:input}", "${2:$$(yas-choose-value '("md5" "sha1" "sha256" "sha384" "sha512"))}")$0

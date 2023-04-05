@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function sublist(list, head_or_tail, max_elements)
+# key: sublist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b6d1b1a3-9273-447a-a2e2-e3b0a54e9f54
+# --
+sublist("${1:list}", "${2:$$(yas-choose-value '("head" "tail"))}", "${3:max_elements}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isplain(filename)
+# key: isplain
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 08630082-1386-43f8-8a6e-e3fc1f27da89
+# --
+isplain("${1:filename}")$0

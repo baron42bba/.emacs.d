@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function mergedata(one, two, etc)
+# key: mergedata
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8a331d3a-6223-4716-ac2a-4f34c93761d9
+# --
+mergedata("${1:list}")$0

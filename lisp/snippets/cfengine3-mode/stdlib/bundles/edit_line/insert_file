@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line insert_file(templatefile)
+# key: insert_file
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d5833db4-d702-49ad-be57-37e3e8f822c7
+# --
+insert_file("${1:templatefile}")$0

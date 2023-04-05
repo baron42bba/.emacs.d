@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body hub
+# key: body-hub
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4c6fbbb8-1466-5524-82a5-67ef5ec0266e
+# --
+body hub $1
+{
+inherit_from
+meta
+client_history_timeout
+exclude_hosts
+hub_schedule
+port
+query_timeout
+}

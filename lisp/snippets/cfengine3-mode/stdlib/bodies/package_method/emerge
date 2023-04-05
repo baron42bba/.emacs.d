@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method emerge
+# key: emerge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bc6f0d78-4feb-4b4d-b826-3e852aacf208
+# --
+emerge$0

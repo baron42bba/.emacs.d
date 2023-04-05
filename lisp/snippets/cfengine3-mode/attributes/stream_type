@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: stream_type => one of pipe, file
+# key: stream_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 06c9fec6-bc6f-4769-bd7b-5c5f4c95c5f2
+# --
+stream_type => ${1:$$(yas-choose-value '("pipe" "file"))}

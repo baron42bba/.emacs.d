@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: edit_line => bundle
+# key: edit_line
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 10ea4c96-3ef6-46ba-b3eb-c9bad88a347c
+# --
+edit_line => ${1:$$(yas-choose-value '("append_groups_starting" "append_if_no_line" "append_if_no_lines" "append_to_line_end" "append_user_field" "append_users_starting" "comment_lines_containing" "comment_lines_matching" "contains_literal_string" "converge" "create_solaris_admin_file" "delete_lines_matching" "expand_template" "fstab_option_editor" "insert_before_if_no_line" "insert_file" "insert_ini_section" "insert_lines" "lines_present" "maintain_key_values" "manage_variable_values_ini" "prepend_if_no_line" "regex_replace" "replace_line_end" "replace_or_add" "resolvconf" "resolvconf_o" "set_colon_field" "set_config_values" "set_config_values_matching" "set_line_based" "set_quoted_values" "set_user_field" "set_variable_values" "set_variable_values_ini" "uncomment_lines_containing" "uncomment_lines_matching" "warn_lines_matching"))}$0

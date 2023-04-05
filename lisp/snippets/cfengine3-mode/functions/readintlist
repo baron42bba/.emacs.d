@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readintlist(filename, comment, split, maxentries, maxbytes)
+# key: readintlist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7bfa6e32-bf02-4871-836d-8712048261da
+# --
+readintlist("${1:filename}", "${2:comment}", "${3:split}", "${4:maxentries}", "${5:maxbytes}")$0

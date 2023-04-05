@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: perms => body perms
+# key: perms
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 64188558-a0e5-414e-8c3e-8c008391477a
+# --
+perms => ${1:$$(yas-choose-value '("m" "mo" "mog" "og" "owner" "system_owned"))}$0

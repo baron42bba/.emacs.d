@@ -529,6 +529,7 @@ snippets for =aws cli= are awesome!
   (if (equal "work" (getenv "SYSENV"))
       (add-to-list 'yas-snippet-dirs "~/workorg/snippets"))
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/lisp/snippets")
   (yas-reload-all)
   (yas-global-mode 1)
   (setq yas-indent-line nil)

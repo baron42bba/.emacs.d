@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function sum(list)
+# key: sum
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 10da52b7-7d58-4972-8f9e-f4686a3b1f8e
+# --
+sum("${1:list}")$0

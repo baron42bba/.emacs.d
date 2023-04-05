@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent event_usage_example
+# key: event_usage_example
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a4577785-48f2-43d1-b997-aa97140b9201
+# --
+event_usage_example$0

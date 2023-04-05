@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line append_users_starting(v)
+# key: append_users_starting
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: aa3dfe7a-3798-403c-8fcc-b5ab31e30386
+# --
+append_users_starting("${1:v}")$0

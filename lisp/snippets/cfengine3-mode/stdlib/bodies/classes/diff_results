@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes diff_results(scope, x)
+# key: diff_results
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 169cbff1-9121-4216-897a-1799c5ec6fc3
+# --
+diff_results("${1:scope}", "${2:x}")$0

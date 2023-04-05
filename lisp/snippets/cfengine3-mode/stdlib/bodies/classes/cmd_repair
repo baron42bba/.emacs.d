@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes cmd_repair(code, cl)
+# key: cmd_repair
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2aa9118d-5a49-4baa-9fe7-42704c644301
+# --
+cmd_repair("${1:code}", "${2:cl}")$0

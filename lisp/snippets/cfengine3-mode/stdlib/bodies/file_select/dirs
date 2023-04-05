@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select dirs
+# key: dirs
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d8fc439a-b35c-41c8-ad9e-4f472814c199
+# --
+dirs$0

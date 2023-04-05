@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method alpinelinux
+# key: alpinelinux
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 692166a4-493d-40f4-9bcc-cb63c9737325
+# --
+alpinelinux$0

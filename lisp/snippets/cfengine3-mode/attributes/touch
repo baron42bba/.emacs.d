@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: touch => boolean
+# key: touch
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 96c87d3a-d0fa-4344-bf6a-67a1420d7fa7
+# --
+touch => "${1:$$(yas-choose-value '("true" "false"))}"$0

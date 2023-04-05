@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function search_up(directory, glob, max_levels)
+# key: search_up
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 0833e425-704b-4ea0-8f49-3b61725ee5af
+# --
+search_up("${1:directory}", "${2:glob}", "${3:max_levels}")$0

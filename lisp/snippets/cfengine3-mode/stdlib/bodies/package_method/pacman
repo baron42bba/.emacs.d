@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method pacman
+# key: pacman
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 425d9d6d-42c4-473e-b8b8-da422f15d617
+# --
+pacman$0

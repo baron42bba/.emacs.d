@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: authorize => slist
+# key: authorize
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c14bd281-3bdd-4021-a94e-123a299eaaa6
+# --
+authorize => { ${1:slist} }$0

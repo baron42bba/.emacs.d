@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: body acl
+# key: body-acl
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a172a3c8-f720-4588-b22f-25d36f9931e6
+# --
+body acl $1
+{
+inherit_from
+meta
+aces
+acl_default
+acl_directory_inherit
+acl_inherit
+acl_method
+acl_type
+specify_default_aces
+specify_inherit_aces
+}

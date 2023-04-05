@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_module pkgsrc
+# key: pkgsrc
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 06d8e85f-e65e-48d4-a109-304747a51fa1
+# --
+pkgsrc$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain setuid_gid_umask(uid, gid, umask)
+# key: setuid_gid_umask
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1032591e-ac54-4a92-a301-261acaa69133
+# --
+setuid_gid_umask("${1:uid}", "${2:gid}", "${3:umask}")$0

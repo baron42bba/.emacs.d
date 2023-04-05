@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: signals => olist in range hup,int,trap,kill,pipe,cont,abrt,stop,quit,term,child,usr1,usr2,bus,segv
+# key: signals
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f6cfd28f-4080-4963-ab53-499226644292
+# --
+signals => ${1:olist in range hup,int,trap,kill,pipe,cont,abrt,stop,quit,term,child,usr1,usr2,bus,segv}$0

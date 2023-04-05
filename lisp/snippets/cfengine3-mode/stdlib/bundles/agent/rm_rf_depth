@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent rm_rf_depth(name, depth)
+# key: rm_rf_depth
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 70263048-bd7f-4964-9c0b-7178c8c0e944
+# --
+rm_rf_depth("${1:name}", "${2:depth}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line prepend_if_no_line(string)
+# key: prepend_if_no_line
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ffec4911-a197-4483-9e97-5d5727a533f0
+# --
+prepend_if_no_line("${1:string}")$0

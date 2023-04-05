@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes results(scope, class_prefix)
+# key: results
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b91f44c7-8bce-4fb2-afbb-0853508639f9
+# --
+results("${1:scope}", "${2:class_prefix}")$0

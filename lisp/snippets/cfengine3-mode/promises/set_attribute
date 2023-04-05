@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: set_attribute promise
+# key: set_attribute
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 91edd752-7423-443d-ac81-4682b775b16e
+# --
+"${1:set_attribute}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+attribute_value
+build_xpath
+select_xpath

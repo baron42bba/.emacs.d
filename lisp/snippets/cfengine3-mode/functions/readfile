@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readfile(filename, optional_maxbytes)
+# key: readfile
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: be36b899-098e-453b-abb3-752a03ee11e4
+# --
+readfile("${1:filename}", "${2:optional_maxbytes}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain in_shell
+# key: in_shell
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 39ce4036-536e-42f5-8788-3926c97d0d53
+# --
+in_shell$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line append_user_field(group, field, allusers)
+# key: append_user_field
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cd3ec880-565f-4132-bea6-4dc0f51ae75b
+# --
+append_user_field("${1:group}", "${2:field}", "${3:allusers}")$0

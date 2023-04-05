@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function data_expand(data_container)
+# key: data_expand
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f979dc58-4989-4a87-ae46-179300158ee0
+# --
+data_expand("${1:data_container}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action measure_promise_time(identifier)
+# key: measure_promise_time
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a4ef0c3a-7e01-4e94-afce-424831aea164
+# --
+measure_promise_time("${1:identifier}")$0

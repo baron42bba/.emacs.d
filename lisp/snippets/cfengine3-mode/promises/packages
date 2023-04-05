@@ -1,0 +1,28 @@
+# -*- mode: snippet -*-
+# name: packages promise
+# key: packages
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b76d6663-3d08-46e3-92f4-659819d61a5c
+# --
+"${1:packages}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+additional_packages
+architecture
+options
+package_architectures
+package_method
+package_module
+package_policy
+package_select
+package_version
+policy
+version

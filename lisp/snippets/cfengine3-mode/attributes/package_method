@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: package_method => body package_method
+# key: package_method
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 890c59e2-bfb9-4d6c-86e7-cb6c165a02fc
+# --
+package_method => ${1:$$(yas-choose-value '("alpinelinux" "apt" "apt_get" "apt_get_permissive" "apt_get_release" "brew" "dpkg_version" "emerge" "freebsd" "freebsd_portmaster" "generic" "ips" "msi_explicit" "msi_implicit" "npm" "npm_g" "opencsw" "pacman" "pip" "rpm_filebased" "rpm_version" "smartos" "smartos_pkg_add" "solaris" "solaris_install" "windows_feature" "yum" "yum_group" "yum_rpm" "yum_rpm_enable_repo" "yum_rpm_permissive" "zypper"))}$0

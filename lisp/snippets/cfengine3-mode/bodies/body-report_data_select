@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: body report_data_select
+# key: body-report_data_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e4bd432a-2a3e-490b-b52e-16cc9b57ea78
+# --
+body report_data_select $1
+{
+inherit_from
+meta
+monitoring_exclude
+monitoring_include
+promise_handle_exclude
+promise_handle_include
+}

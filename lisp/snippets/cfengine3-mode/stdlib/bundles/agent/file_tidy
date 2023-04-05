@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_tidy(file)
+# key: file_tidy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fb06b9af-0dfb-44ae-90b8-cd24b382efa6
+# --
+file_tidy("${1:file}")$0

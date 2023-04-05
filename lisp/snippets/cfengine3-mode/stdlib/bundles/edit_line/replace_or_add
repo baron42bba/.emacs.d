@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line replace_or_add(pattern, line)
+# key: replace_or_add
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d9a08817-c818-4940-ac5d-624e605df2f9
+# --
+replace_or_add("${1:pattern}", "${2:line}")$0

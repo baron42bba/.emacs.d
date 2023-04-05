@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: body replace_with
+# key: body-replace_with
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 35f67035-ea02-4a02-9790-5993f9870042
+# --
+body replace_with $1
+{
+inherit_from
+meta
+occurrences
+replace_value
+}

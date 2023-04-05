@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function mean(list)
+# key: mean
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 35f0fae5-f827-418a-a4ae-4211c606c148
+# --
+mean("${1:list}")$0

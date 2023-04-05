@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function laterthan(year, month, day, hour, minute, second)
+# key: laterthan
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 32536946-ae16-4b55-9987-df116305c6d5
+# --
+laterthan("${1:year}", "${2:month}", "${3:day}", "${4:hour}", "${5:minute}", "${6:second}")$0

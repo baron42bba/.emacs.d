@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isipinsubnet(range, ip_address1, ip_address2, ...)
+# key: isipinsubnet
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 78ceb2b1-94c9-4da9-9589-e917c55cecbb
+# --
+isipinsubnet("${1:range}", "${2:ip_addresses}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: data => data
+# key: data
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0f967b0a-9da5-41ef-912e-ac1f7531efdb
+# --
+data => ${1:data}$0

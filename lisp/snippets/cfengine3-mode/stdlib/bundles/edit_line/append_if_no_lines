@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line append_if_no_lines(lines)
+# key: append_if_no_lines
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1df8bd8d-f61b-40f6-a536-ac223304746e
+# --
+append_if_no_lines("${1:lines}")$0

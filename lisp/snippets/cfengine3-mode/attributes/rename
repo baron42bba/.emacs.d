@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: rename => body rename
+# key: rename
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 74153a01-8398-4d62-a8f6-4948b5d8908e
+# --
+rename => ${1:$$(yas-choose-value '("disable" "rotate" "to"))}$0

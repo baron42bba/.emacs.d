@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: int => int in range -99999999999,99999999999
+# key: int
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b19b0a2b-64b2-4f16-8132-cdc3d85254ae
+# --
+int => ${1:int in range -99999999999,99999999999}$0

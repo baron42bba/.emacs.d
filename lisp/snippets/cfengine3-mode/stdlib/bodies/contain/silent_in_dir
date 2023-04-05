@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain silent_in_dir(dir)
+# key: silent_in_dir
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9201ca8c-646f-4df3-985e-840f7f2a99da
+# --
+silent_in_dir("${1:dir}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body depth_search include_base
+# key: include_base
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 12f57b47-4f0c-48f9-b30e-ce1fe49cf118
+# --
+include_base$0

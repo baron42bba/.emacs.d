@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action ifwin_bg
+# key: ifwin_bg
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a663bdfb-3d6b-403d-98aa-7da26f48c7fe
+# --
+ifwin_bg$0

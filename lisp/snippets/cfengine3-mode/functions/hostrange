@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hostrange(prefix, range)
+# key: hostrange
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e5ce00e9-78ae-4736-a7ff-9795bcd97f0b
+# --
+hostrange("${1:prefix}", "${2:range}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getclassmetatags(classname, optional_tag)
+# key: getclassmetatags
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b3c8d34a-c783-4662-8e02-49b44fd01c3c
+# --
+getclassmetatags("${1:classname}", "${2:optional_tag}")$0

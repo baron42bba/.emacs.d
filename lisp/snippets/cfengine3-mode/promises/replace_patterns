@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: replace_patterns promise
+# key: replace_patterns
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 63620b79-150d-47a8-96e8-6a9a7513dacd
+# --
+"${1:replace_patterns}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+replace_with
+select_region

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: friend_pattern => string
+# key: friend_pattern
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6d580387-3f2d-442b-a9cf-fdaf1b65d016
+# --
+friend_pattern => "$1"$0

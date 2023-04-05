@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body database_server
+# key: body-database_server
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 392992d0-4f0c-4bc7-aa72-11e96c40ee9b
+# --
+body database_server $1
+{
+inherit_from
+meta
+db_server_connection_db
+db_server_host
+db_server_owner
+db_server_password
+db_server_type
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: environment_resources => body environment_resources
+# key: environment_resources
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5f6b9a23-7285-449b-b3e4-89c8ef771a35
+# --
+environment_resources => ${1:$$(yas-choose-value '("kvm"))}$0

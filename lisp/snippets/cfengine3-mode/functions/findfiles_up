@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function findfiles_up(directory, glob, max_levels)
+# key: findfiles_up
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: f7c2cb81-ac10-4f45-af69-bc41b1c2687f
+# --
+findfiles_up("${1:directory}", "${2:glob}", "${3:max_levels}")$0

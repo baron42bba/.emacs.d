@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readintarray(array, filename, comment, split, maxentries, maxbytes)
+# key: readintarray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8655814d-4eee-4a7c-af3d-3b6059cc7e1d
+# --
+readintarray("${1:array}", "${2:filename}", "${3:comment}", "${4:split}", "${5:maxentries}", "${6:maxbytes}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method yum
+# key: yum
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 90fb5cab-135b-45f9-aacf-d23156ec5cdb
+# --
+yum$0

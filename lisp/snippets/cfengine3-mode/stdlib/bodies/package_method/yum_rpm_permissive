@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method yum_rpm_permissive
+# key: yum_rpm_permissive
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9de9f1a6-37f1-435e-925e-cfd13602bb65
+# --
+yum_rpm_permissive$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: create => boolean
+# key: create
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 82b1f85d-7f81-4b03-b2d6-216fa4313c9c
+# --
+create => "${1:$$(yas-choose-value '("true" "false"))}"$0

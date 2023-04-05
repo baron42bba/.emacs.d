@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body mount unmount
+# key: unmount
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: dae2137a-5c22-41e8-9292-f34c698b54e9
+# --
+unmount$0

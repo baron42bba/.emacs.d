@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body printfile head_n(file, n)
+# key: head_n
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3e43e794-53ca-4292-84b9-06dd99ad5623
+# --
+head_n("${1:file}", "${2:n}")$0

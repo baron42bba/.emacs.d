@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: if => string
+# key: if
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: dcd94f8c-bb90-49c4-886c-6e93dd254cab
+# --
+if => "$1"$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent package_present(package)
+# key: package_present
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4abc8a99-e8bf-4b8f-99b6-cb33473d06d1
+# --
+package_present("${1:package}")$0

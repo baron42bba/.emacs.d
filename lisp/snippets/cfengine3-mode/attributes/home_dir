@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: home_dir => string in range "?(/.*)
+# key: home_dir
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 711792f1-659e-4392-98f0-04b2591bde64
+# --
+home_dir => "$1"$0

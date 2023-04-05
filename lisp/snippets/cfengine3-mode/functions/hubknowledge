@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hubknowledge(id)
+# key: hubknowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4a2eb664-9266-41d0-a2a5-f96d1abb1153
+# --
+hubknowledge("${1:id}")$0

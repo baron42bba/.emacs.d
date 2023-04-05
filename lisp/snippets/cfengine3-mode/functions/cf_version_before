@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function cf_version_before(cfengine_version)
+# key: cf_version_before
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: f218873e-8444-4cc9-af51-5623cbd83f2
+# --
+cf_version_before("${1:maximum_version}")$0

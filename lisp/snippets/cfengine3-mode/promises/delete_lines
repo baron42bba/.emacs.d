@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: delete_lines promise
+# key: delete_lines
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 072dd859-77e7-47ca-9c9f-0cfc886cd6c3
+# --
+"${1:delete_lines}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+delete_select
+not_matching
+select_region

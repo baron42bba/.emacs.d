@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body changes detect_all_change
+# key: detect_all_change
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 349b54f8-b70b-4c28-ae18-a614b70f53a7
+# --
+detect_all_change$0

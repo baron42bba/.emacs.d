@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: package_module => body package_module
+# key: package_module
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 44ee2b2b-1ae6-45e5-9af8-359cc084ba4d
+# --
+package_module => ${1:$$(yas-choose-value '("apt_get" "freebsd_ports" "nimclient" "pkg" "pkgsrc" "slackpkg" "yum" "zypper"))}$0

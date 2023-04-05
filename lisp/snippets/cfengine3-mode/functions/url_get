@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function url_get(url, options_container)
+# key: url_get
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9946bfad-800c-46fb-b7f2-cccdbb1f8dc8
+# --
+url_get("${1:url}", "${2:options_container}")$0

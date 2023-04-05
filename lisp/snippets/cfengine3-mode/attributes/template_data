@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: template_data => data
+# key: template_data
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 23d2dbe0-7313-4f09-9097-01ae92467dfb
+# --
+template_data => ${1:data}$0

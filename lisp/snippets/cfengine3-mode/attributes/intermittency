@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: intermittency => real in range 0,1
+# key: intermittency
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1e0ecf0a-1988-4f45-b0d5-4870d62551c9
+# --
+intermittency => ${1:$$(yas-choose-value '("0" "1"))}$0

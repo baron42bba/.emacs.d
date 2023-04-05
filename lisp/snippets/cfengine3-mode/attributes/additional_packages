@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: additional_packages => slist
+# key: additional_packages
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9c2e6979-30c6-4297-92e5-9c870161f807
+# --
+additional_packages => { ${1:slist} }$0

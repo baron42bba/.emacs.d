@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function ifelse(...)
+# key: ifelse
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c2007936-2381-4a58-8b22-4da3082b345a
+# --
+ifelse("${1:condition}")$0

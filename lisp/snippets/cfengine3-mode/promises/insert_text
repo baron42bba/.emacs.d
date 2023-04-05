@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: insert_text promise
+# key: insert_text
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 505eec3c-afcb-4937-9163-1a422b61f12a
+# --
+"${1:insert_text}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

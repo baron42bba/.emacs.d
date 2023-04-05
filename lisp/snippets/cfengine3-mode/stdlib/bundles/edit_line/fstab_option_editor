@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line fstab_option_editor(method, mount, option)
+# key: fstab_option_editor
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 79560418-18fd-40ac-9b20-9f4e6947ac81
+# --
+fstab_option_editor("${1:method}", "${2:mount}", "${3:option}")$0

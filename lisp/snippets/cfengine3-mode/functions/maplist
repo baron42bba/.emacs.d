@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function maplist(pattern, list)
+# key: maplist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ce8f18cb-8a34-4ff7-a1fe-34ff5d11a190
+# --
+maplist("${1:pattern}", "${2:list}")$0

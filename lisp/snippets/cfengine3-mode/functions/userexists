@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function userexists(user)
+# key: userexists
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 76252664-01be-4afa-91c8-75e9a0b0f29a
+# --
+userexists("${1:user}")$0

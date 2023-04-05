@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: report_to_file => string in range "?(/.*)
+# key: report_to_file
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e98b120a-f39b-4f41-aa45-e28731204e61
+# --
+report_to_file => "$1"$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes kept_successful_command
+# key: kept_successful_command
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bf3fe1dd-9a9e-4f95-8d43-bfde5d6673a6
+# --
+kept_successful_command$0

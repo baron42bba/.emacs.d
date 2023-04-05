@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function variance(list)
+# key: variance
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b169428a-7ce8-407b-9bd3-0f5e2fa04905
+# --
+variance("${1:list}")$0

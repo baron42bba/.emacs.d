@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body acl access_generic(acl)
+# key: access_generic
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ad55efe2-e33b-4d1c-8ade-d6af542ef097
+# --
+access_generic("${1:acl}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method windows_feature
+# key: windows_feature
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: dfd38c8a-6623-4d38-bab7-d2d0bbf6818e
+# --
+windows_feature$0

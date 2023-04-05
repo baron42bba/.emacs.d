@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action if_elapsed_day
+# key: if_elapsed_day
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9a982d3c-3dca-4667-ade2-cf2f1d1d3bcf
+# --
+if_elapsed_day$0

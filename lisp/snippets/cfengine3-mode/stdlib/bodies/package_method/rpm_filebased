@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method rpm_filebased(path)
+# key: rpm_filebased
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ddd79f14-08df-4abe-84e8-b3b43fdc3a4b
+# --
+rpm_filebased("${1:path}")$0

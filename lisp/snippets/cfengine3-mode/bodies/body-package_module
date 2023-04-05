@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body package_module
+# key: body-package_module
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c040470f-2c2e-41bc-a9b6-301a752f5c5e
+# --
+body package_module $1
+{
+inherit_from
+meta
+default_options
+interpreter
+module_path
+query_installed_ifelapsed
+query_updates_ifelapsed
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function ldapvalue(uri, dn, filter, record, scope, security)
+# key: ldapvalue
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f9142286-328a-4603-91f8-27899d3c6f2b
+# --
+ldapvalue("${1:uri}", "${2:dn}", "${3:filter}", "${4:record}", "${5:$$(yas-choose-value '("subtree" "onelevel" "base"))}", "${6:$$(yas-choose-value '("none" "ssl" "sasl"))}")$0

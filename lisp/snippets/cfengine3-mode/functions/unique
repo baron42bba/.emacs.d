@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function unique(list)
+# key: unique
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 56776e4e-1831-4988-8a30-c977d0373ef5
+# --
+unique("${1:list}")$0

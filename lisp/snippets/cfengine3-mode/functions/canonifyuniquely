@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function canonifyuniquely(text)
+# key: canonifyuniquely
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f3da72b8-1ca1-4936-b249-f42d5046d828
+# --
+canonifyuniquely("${1:text}")$0

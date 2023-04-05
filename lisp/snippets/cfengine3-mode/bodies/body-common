@@ -1,0 +1,32 @@
+# -*- mode: snippet -*-
+# name: body common
+# key: body-common
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ef69a25c-780d-5d3d-8bc7-560a539121f1
+# --
+body common $1
+{
+inherit_from
+meta
+bundlesequence
+bwlimit
+cache_system_functions
+domain
+fips_mode
+goal_patterns
+ignore_missing_bundles
+ignore_missing_inputs
+inputs
+lastseenexpireafter
+output_prefix
+package_inventory
+package_module
+protocol_version
+require_comments
+site_classes
+syslog_host
+syslog_port
+tls_ciphers
+tls_min_version
+version
+}

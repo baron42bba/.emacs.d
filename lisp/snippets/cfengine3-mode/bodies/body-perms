@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body perms
+# key: body-perms
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a6bdc0c3-db3d-4042-8c7e-ee6195f4ef4c
+# --
+body perms $1
+{
+inherit_from
+meta
+bsdflags
+groups
+mode
+owners
+rxdirs
+}

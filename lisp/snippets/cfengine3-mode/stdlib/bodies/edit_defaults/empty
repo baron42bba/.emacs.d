@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_defaults empty
+# key: empty
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 10afd752-95e8-407b-84d8-6828f3e69b58
+# --
+empty$0

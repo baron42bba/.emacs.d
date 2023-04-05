@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: report_data_select => body report_data_select
+# key: report_data_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f1e1bd9c-6805-4c5a-9eae-6d6b1a645068
+# --
+report_data_select => ${1:body_report_data_select}$0

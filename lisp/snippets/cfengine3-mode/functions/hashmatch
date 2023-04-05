@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hashmatch(filename, algorithm, hash)
+# key: hashmatch
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eda44854-fa2f-410f-b28a-627b9fdcfcbf
+# --
+hashmatch("${1:filename}", "${2:$$(yas-choose-value '("md5" "sha1" "sha256" "sha384" "sha512"))}", "${3:hash}")$0

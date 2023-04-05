@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select size_range(from, to)
+# key: size_range
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 04c8e0d0-7551-4c37-abca-2163f7c3038a
+# --
+size_range("${1:from}", "${1:to}")$0

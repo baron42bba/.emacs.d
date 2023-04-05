@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: showstate => slist
+# key: showstate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e57e4b9b-74ae-4b31-bcc5-c2d507735125
+# --
+showstate => { ${1:slist} }$0

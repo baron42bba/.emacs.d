@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: groups_secondary => slist in range .*
+# key: groups_secondary
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e90c20a8-ecbf-4a73-954d-dc9503ca48bd
+# --
+groups_secondary => { ${1:slist in range .*} }$0

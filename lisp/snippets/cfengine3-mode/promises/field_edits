@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: field_edits promise
+# key: field_edits
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 24c79beb-b364-4723-a5e0-a2f7f15094ca
+# --
+"${1:field_edits}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+edit_field
+select_region

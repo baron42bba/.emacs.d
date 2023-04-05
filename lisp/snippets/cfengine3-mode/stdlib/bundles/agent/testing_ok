@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_ok(classname, message, format)
+# key: testing_ok
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: da162ca4-e118-4120-b372-0ee92b4766c4
+# --
+testing_ok("${1:classname}", "${2:message}", "${3:format}")$0

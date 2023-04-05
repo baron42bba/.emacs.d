@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function execresult_as_data(command, shell, output)
+# key: execresult_as_data
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 25231ad8-f346-403c-9689-7f7d634f7a3b
+# --
+execresult_as_data("${1:command}", "${2:$$(yas-choose-value '("noshell" "useshell" "powershell"))}", "${3:$$(yas-choose-value '("both" "stdout" "stderr"))}")$0

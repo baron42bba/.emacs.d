@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: process_select => body process_select
+# key: process_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f923efae-f9d4-4e6b-b4bd-01e65534e047
+# --
+process_select => ${1:$$(yas-choose-value '("by_owner" "by_pid" "days_older_than" "exclude_procs"))}$0

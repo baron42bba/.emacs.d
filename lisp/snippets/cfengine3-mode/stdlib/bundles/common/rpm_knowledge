@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common rpm_knowledge
+# key: rpm_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 20067685-4e6e-47c9-b638-b7b0cac95846
+# --
+rpm_knowledge$0

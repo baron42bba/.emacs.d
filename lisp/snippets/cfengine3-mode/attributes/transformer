@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: transformer => string in range "?(/.*)
+# key: transformer
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3bdb3ae1-736d-46c2-a7c1-73abd9ea7ae1
+# --
+transformer => "$1"$0

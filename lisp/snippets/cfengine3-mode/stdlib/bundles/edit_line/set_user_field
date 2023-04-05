@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_user_field(user, field, val)
+# key: set_user_field
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0da79e86-6793-498b-8224-9bd31b4eb713
+# --
+set_user_field("${1:user}", "${2:field}", "${3:val}")$0

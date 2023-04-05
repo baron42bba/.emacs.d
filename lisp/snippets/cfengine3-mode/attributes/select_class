@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: select_class => clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+
+# key: select_class
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9626c1c2-6597-48eb-8ce2-8ceb656a97f3
+# --
+select_class => ${1:clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+}$0

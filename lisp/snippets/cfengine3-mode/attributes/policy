@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: policy => one of free, overridable, constant, ifdefined
+# key: policy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 810deabb-69b6-4443-ac45-81a968a6ecb6
+# --
+policy => ${1:$$(yas-choose-value '("free" "overridable" "constant" "ifdefined"))}

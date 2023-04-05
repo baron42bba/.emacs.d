@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readenvfile(filename, optional_maxbytes)
+# key: readenvfile
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3400fcfe-7e78-4837-ab0f-193c82e48e8b
+# --
+readenvfile("${1:filename}", "${2:optional_maxbytes}")$0

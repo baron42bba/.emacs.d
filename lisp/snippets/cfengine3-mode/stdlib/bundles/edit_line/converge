@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line converge(marker, lines)
+# key: converge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0a4e4292-da71-4ae4-8b11-f99da824afc6
+# --
+converge("${1:marker}", "${2:lines}")$0

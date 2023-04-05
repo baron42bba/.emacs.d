@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function on(year, month, day, hour, minute, second)
+# key: on
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 89998c49-7776-495e-89c0-9f0c613b1271
+# --
+on("${1:year}", "${2:month}", "${3:day}", "${4:hour}", "${5:minute}", "${6:second}")$0

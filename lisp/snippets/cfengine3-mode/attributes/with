@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: with => string
+# key: with
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 76da7c19-d12d-4f1d-8a4a-3966b1b06122
+# --
+with => "$1"$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function regextract(regex, string, backref)
+# key: regextract
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a3c339ff-f22b-4dc0-b031-bedd48e2d61c
+# --
+regextract("${1:regex}", "${2:string}", "${3:backref}")$0

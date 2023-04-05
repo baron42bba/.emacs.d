@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select filetype_older_than(filetype, days)
+# key: filetype_older_than
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0d618e20-6b55-440c-97ad-0d835562c7c9
+# --
+filetype_older_than("${1:filetype}", "${2:days}")$0

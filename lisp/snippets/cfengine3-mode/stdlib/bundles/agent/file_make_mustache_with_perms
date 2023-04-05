@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_make_mustache_with_perms(file, template, data, mode, owner, group)
+# key: file_make_mustache_with_perms
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1a37c990-4f95-47ac-abdd-74a52c465984
+# --
+file_make_mustache_with_perms("${1:file}", "${2:template}", "${3:data}", "${4:mode}", "${5:owner}", "${6:group}")$0

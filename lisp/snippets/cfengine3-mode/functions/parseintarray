@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function parseintarray(array, input, comment, split, maxentries, maxbytes)
+# key: parseintarray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 99f0081e-0b7b-4c92-858d-02a183ece61a
+# --
+parseintarray("${1:array}", "${2:input}", "${3:comment}", "${4:split}", "${5:maxentries}", "${6:maxbytes}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function data_sysctlvalues()
+# key: data_sysctlvalues
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 87be90da-c9da-47ca-8953-be43bb0d465c
+# --
+data_sysctlvalues()$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line uncomment_lines_containing(regex, comment)
+# key: uncomment_lines_containing
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b28b2d1a-5ce0-40f3-88d4-78eb82497a7c
+# --
+uncomment_lines_containing("${1:regex}", "${2:comment}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isexecutable(filename)
+# key: isexecutable
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c4bb3f54-2b4b-4651-a5f9-15d533b6ed50
+# --
+isexecutable("${1:filename}")$0

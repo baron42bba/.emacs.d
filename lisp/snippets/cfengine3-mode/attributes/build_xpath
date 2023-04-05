@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: build_xpath => string
+# key: build_xpath
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4ffd4e1d-02f6-4b3c-84ff-7649ad3f6bb7
+# --
+build_xpath => "$1"$0

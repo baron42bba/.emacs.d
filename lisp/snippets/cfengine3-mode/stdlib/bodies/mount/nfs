@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body mount nfs(server, source)
+# key: nfs
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bf2e6b3a-f73e-45d7-b590-54794dbf07c9
+# --
+nfs("${1:server}", "${2:source}")$0

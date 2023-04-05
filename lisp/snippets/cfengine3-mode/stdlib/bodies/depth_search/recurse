@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body depth_search recurse(d)
+# key: recurse
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d2a80a88-e47e-48e6-a519-e4648d305067
+# --
+recurse("${1:d}")$0

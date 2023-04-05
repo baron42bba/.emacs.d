@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function dirname(path)
+# key: dirname
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c88a1e18-0de9-4fcb-bbdd-2ff21d4344e8
+# --
+dirname("${1:path}")$0

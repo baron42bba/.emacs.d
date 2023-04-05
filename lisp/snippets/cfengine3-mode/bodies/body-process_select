@@ -1,0 +1,25 @@
+# -*- mode: snippet -*-
+# name: body process_select
+# key: body-process_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 08fa06d2-bbce-4fb2-ad30-aa81a0543dce
+# --
+body process_select $1
+{
+inherit_from
+meta
+command
+pgid
+pid
+ppid
+priority
+process_owner
+process_result
+rsize
+status
+stime_range
+threads
+ttime_range
+tty
+vsize
+}

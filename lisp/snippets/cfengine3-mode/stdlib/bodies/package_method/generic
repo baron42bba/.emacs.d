@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method generic
+# key: generic
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7372ff71-f373-4832-bf47-467ca1dc031f
+# --
+generic$0

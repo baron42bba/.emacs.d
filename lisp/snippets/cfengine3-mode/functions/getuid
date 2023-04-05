@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getuid(username)
+# key: getuid
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6b39820f-e506-4e3b-8aac-589e0d7001d1
+# --
+getuid("${1:username}")$0

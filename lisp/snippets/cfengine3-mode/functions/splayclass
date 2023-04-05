@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function splayclass(input, policy)
+# key: splayclass
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bf38b6b8-7e92-455a-b043-67787dd4741a
+# --
+splayclass("${1:input}", "${2:$$(yas-choose-value '("daily" "hourly"))}")$0

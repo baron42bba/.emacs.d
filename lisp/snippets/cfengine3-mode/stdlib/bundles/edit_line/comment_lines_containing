@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line comment_lines_containing(regex, comment)
+# key: comment_lines_containing
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 97b92a04-1b0f-40d2-b4f2-e1d1acfcf6b5
+# --
+comment_lines_containing("${1:regex}", "${2:comment}")$0

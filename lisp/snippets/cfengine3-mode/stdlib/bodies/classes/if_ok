@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes if_ok(x)
+# key: if_ok
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 52ad60af-4a4e-4397-b74d-b634d94df276
+# --
+if_ok("${1:x}")$0

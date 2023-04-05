@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: insert_lines promise
+# key: insert_lines
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ead17f33-3247-43b0-889c-83bf1d6b1284
+# --
+"${1:insert_lines}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+expand_scalars
+insert_select
+insert_type
+location
+select_region
+whitespace_policy

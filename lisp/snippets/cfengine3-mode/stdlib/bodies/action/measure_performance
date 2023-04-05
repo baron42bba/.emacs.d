@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action measure_performance(x)
+# key: measure_performance
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 174201c4-0355-49b8-93ae-9c6f7452a5ea
+# --
+measure_performance("${1:x}")$0

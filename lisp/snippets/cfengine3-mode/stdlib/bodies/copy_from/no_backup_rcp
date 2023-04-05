@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from no_backup_rcp(from, server)
+# key: no_backup_rcp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c01c5e62-7cb6-422e-adaa-8b276f524a12
+# --
+no_backup_rcp("${1:from}", "${2:server}")$0

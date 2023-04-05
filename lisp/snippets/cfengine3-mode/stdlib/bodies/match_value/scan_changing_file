@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body match_value scan_changing_file(line)
+# key: scan_changing_file
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 17480971-10e8-4420-91fb-5dbafb169c11
+# --
+scan_changing_file("${1:line}")$0

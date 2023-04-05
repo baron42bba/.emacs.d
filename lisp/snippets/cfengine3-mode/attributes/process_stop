@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: process_stop => string in range "?(/.*)
+# key: process_stop
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 00783a44-3e78-4bdb-b2d3-2aa02fc62778
+# --
+process_stop => "$1"$0

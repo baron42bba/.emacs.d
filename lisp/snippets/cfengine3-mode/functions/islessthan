@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function islessthan(value1, value2)
+# key: islessthan
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b1cba6b0-a0eb-4c38-87f0-858bebc74e4a
+# --
+islessthan("${1:value1}", "${2:value2}")$0

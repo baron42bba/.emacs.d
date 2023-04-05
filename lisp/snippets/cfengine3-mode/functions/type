@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function type(var, detail)
+# key: type
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 435e3b0f-8dc5-4add-bd6a-67e4e6aec4f8
+# --
+type("${1:var}", "${2:detail}")$0

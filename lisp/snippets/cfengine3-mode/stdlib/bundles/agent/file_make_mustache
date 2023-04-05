@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_make_mustache(file, template, data)
+# key: file_make_mustache
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 587b6760-9044-4ade-ae27-d8486797c9e3
+# --
+file_make_mustache("${1:file}", "${2:template}", "${3:data}")$0

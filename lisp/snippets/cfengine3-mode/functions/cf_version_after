@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function cf_version_after(cfengine_version)
+# key: cf_version_after
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 36024acc-3c8e-4505-90dc-3bc5563db676
+# --
+cf_version_after("${1:minimum_version}")$0

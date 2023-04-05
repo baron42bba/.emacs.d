@@ -1,0 +1,30 @@
+# -*- mode: snippet -*-
+# name: access promise
+# key: access
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d51016a6-aca5-427b-99dc-f225aee47a7f
+# --
+"${1:access}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+admit
+admit_hostnames
+admit_ips
+admit_keys
+deny
+deny_hostnames
+deny_ips
+deny_keys
+ifencrypted
+maproot
+report_data_select
+resource_type
+shortcut

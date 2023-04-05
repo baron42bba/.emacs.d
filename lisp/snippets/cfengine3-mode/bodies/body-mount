@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: body mount
+# key: body-mount
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 17b9a3b4-f706-4746-9342-130bc67cc0a4
+# --
+body mount $1
+{
+inherit_from
+meta
+edit_fstab
+mount_options
+mount_server
+mount_source
+mount_type
+unmount
+}

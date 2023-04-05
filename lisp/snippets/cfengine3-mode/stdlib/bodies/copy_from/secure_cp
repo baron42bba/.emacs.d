@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from secure_cp(from, server)
+# key: secure_cp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cbbfe391-961a-4553-a1cd-00d3d87dbb9b
+# --
+secure_cp("${1:from}", "${2:server}")$0

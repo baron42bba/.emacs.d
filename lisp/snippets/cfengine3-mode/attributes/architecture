@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: architecture => string
+# key: architecture
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 30e43571-092f-438b-969a-69692a85f8f1
+# --
+architecture => "$1"$0

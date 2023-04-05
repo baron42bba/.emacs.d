@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from local_cp(from)
+# key: local_cp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: db59fbf7-dd12-4b1a-881c-d1120988962e
+# --
+local_cp("${1:from}")$0

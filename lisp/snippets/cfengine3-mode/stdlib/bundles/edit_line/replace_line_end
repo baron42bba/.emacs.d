@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line replace_line_end(start, end)
+# key: replace_line_end
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6315558e-6947-4912-884f-a351427b6acc
+# --
+replace_line_end("${1:start}", "${2:end}")$0

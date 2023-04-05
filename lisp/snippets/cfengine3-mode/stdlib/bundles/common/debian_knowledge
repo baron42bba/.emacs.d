@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common debian_knowledge
+# key: debian_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 12a347bc-a9a7-4091-9f7f-17eeeac8e766
+# --
+debian_knowledge$0

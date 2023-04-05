@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body database_server local_mysql(username, password)
+# key: local_mysql
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: de3d105f-8ac3-4a37-9d75-bce22ea543b9
+# --
+local_mysql("${1:username}", "${2:password}")$0

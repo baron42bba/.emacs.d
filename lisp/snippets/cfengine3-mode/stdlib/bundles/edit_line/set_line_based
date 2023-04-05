@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_line_based(v, sep, bp, kp, cp)
+# key: set_line_based
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 88bc8b2c-cd40-47b1-8f80-4dc3425e7a88
+# --
+set_line_based("${1:v}", "${2:sep}", "${3:bp}", "${4:kp}", "${5:cp}")$0

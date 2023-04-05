@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: units => string
+# key: units
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c26d60ee-4dd9-4f00-a2f7-4a295af3df26
+# --
+units => "$1"$0

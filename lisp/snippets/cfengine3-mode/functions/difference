@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function difference(list1, list2)
+# key: difference
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c2cda85-c2a0-4932-a013-cf424362068c
+# --
+difference("${1:list1}", "${2:list2}")$0

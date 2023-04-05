@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function ldaplist(uri, dn, filter, record, scope, security)
+# key: ldaplist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8cd6b6dd-08aa-4562-a195-259b2fd3c5b7
+# --
+ldaplist("${1:uri}", "${2:dn}", "${3:filter}", "${4:record}", "${5:$$(yas-choose-value '("subtree" "onelevel" "base"))}", "${6:$$(yas-choose-value '("none" "ssl" "sasl"))}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getgid(groupname)
+# key: getgid
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b341ed8c-7cb5-416d-8432-95ef365acb04
+# --
+getgid("${1:groupname}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent rm_rf(name)
+# key: rm_rf
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bb8fcd23-16df-4064-b08d-8288fa876747
+# --
+rm_rf("${1:name}")$0

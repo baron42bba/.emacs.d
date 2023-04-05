@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: attribute_value => string
+# key: attribute_value
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b2083ffe-c510-4c8f-81c6-408b5e72d31e
+# --
+attribute_value => "$1"$0

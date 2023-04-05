@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function parserealarray(array, input, comment, split, maxentries, maxbytes)
+# key: parserealarray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b0ff129b-e852-488a-a90b-89467d7cafe9
+# --
+parserealarray("${1:array}", "${2:input}", "${3:comment}", "${4:split}", "${5:maxentries}", "${6:maxbytes}")$0

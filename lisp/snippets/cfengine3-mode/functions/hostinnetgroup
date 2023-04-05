@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hostinnetgroup(netgroup)
+# key: hostinnetgroup
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 13db85f3-3417-4413-958a-58c676e1bea6
+# --
+hostinnetgroup("${1:netgroup}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body printfile cat(file)
+# key: cat
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ff52375a-c57a-4a9d-a267-55b29ddcf927
+# --
+cat("${1:file}")$0

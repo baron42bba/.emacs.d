@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body replace_with value(x)
+# key: value
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7b2c9192-89f7-44fe-a7b0-d93ab5dff94b
+# --
+value("${1:x}")$0

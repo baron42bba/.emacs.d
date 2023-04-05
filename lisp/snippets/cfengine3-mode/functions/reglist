@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function reglist(list, regex)
+# key: reglist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eca1f832-9f55-4917-be02-9e1af5c08979
+# --
+reglist("${1:list}", "${2:regex}")$0

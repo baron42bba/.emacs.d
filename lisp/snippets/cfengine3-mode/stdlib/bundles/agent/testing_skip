@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_skip(classname, message, format)
+# key: testing_skip
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6da8dae1-331d-4022-a7d6-fa9db1598fa5
+# --
+testing_skip("${1:classname}", "${2:message}", "${3:format}")$0

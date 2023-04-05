@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body changes diff
+# key: diff
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4098023a-2581-4f32-ba57-99fca2699fc7
+# --
+diff$0

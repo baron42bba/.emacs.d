@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: body insert_select
+# key: body-insert_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 50590856-d52f-4220-92af-c501fc1c5540
+# --
+body insert_select $1
+{
+inherit_from
+meta
+insert_if_contains_from_list
+insert_if_match_from_list
+insert_if_not_contains_from_list
+insert_if_not_match_from_list
+insert_if_not_startwith_from_list
+insert_if_startwith_from_list
+}

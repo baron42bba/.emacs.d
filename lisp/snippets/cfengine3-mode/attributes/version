@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: version => string
+# key: version
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 30f4d795-9019-4b41-8e68-a55fb0051325
+# --
+version => "$1"$0

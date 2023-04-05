@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from no_backup_dcp(from)
+# key: no_backup_dcp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 63e5df88-3a26-4d06-b6f2-699688d60992
+# --
+no_backup_dcp("${1:from}")$0

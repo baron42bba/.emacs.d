@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function lsdir(path, regex, include_base)
+# key: lsdir
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b6b992d0-7f32-46e6-9a9e-a3e1807fc022
+# --
+lsdir("${1:path}", "${2:regex}", "${3:$$(yas-choose-value '("true" "false" "yes" "no" "on" "off"))}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_module freebsd_ports
+# key: freebsd_ports
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6fb865fc-0778-4220-8d99-6dbc0bf12c0b
+# --
+freebsd_ports$0

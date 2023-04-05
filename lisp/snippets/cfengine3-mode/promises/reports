@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: reports promise
+# key: reports
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 71a1a871-32df-447c-a86b-81dac35ddb16
+# --
+"${1:reports}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+bundle_return_value_index
+friend_pattern
+intermittency
+lastseen
+printfile
+report_to_file
+showstate

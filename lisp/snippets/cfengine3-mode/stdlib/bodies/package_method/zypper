@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method zypper
+# key: zypper
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f88c65a5-8266-47d5-bb1c-1636ab9900dc
+# --
+zypper$0

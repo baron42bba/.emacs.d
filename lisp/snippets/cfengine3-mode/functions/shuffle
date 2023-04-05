@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function shuffle(list, seed)
+# key: shuffle
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: efdcabb9-4408-4841-af3a-d65335c68320
+# --
+shuffle("${1:list}", "${2:seed}")$0

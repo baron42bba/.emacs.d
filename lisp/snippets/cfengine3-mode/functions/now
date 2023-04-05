@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function now()
+# key: now
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 60fcb9db-6665-424a-b549-09680090cde9
+# --
+now()$0

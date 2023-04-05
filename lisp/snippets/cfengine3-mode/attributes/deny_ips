@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: deny_ips => slist
+# key: deny_ips
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f45abd93-da9e-48f1-bbbd-d3a45fe5a670
+# --
+deny_ips => { ${1:slist} }$0

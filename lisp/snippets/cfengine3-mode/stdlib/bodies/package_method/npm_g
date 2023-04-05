@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method npm_g
+# key: npm_g
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f90452c9-a916-4790-9b15-7e9cb8864ade
+# --
+npm_g$0

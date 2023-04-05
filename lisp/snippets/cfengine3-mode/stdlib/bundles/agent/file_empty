@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_empty(file)
+# key: file_empty
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 68023fee-a8e2-4736-87f4-f7f62b02622c
+# --
+file_empty("${1:file}")$0

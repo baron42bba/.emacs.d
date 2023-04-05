@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method smartos
+# key: smartos
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8901f13c-45d1-48cf-9632-04ccfbe1ac0a
+# --
+smartos$0

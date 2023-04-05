@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: body edit_field
+# key: body-edit_field
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 379a7c7f-39a5-44b5-83cf-50e4d5428729
+# --
+body edit_field $1
+{
+inherit_from
+meta
+allow_blank_fields
+extend_fields
+field_operation
+field_separator
+field_value
+select_field
+start_fields_from_zero
+value_separator
+}

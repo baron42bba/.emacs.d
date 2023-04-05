@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action log_repaired(log, message)
+# key: log_repaired
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 405b784d-81f6-4ccc-a17e-9d35161edeb5
+# --
+log_repaired("${1:log}", "${2:message}")$0

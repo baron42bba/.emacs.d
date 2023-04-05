@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body match_value single_value(regex)
+# key: single_value
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1be47c08-80a0-4e1d-9757-16644d1af907
+# --
+single_value("${1:regex}")$0

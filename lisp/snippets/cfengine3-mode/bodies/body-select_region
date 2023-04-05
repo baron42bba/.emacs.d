@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body select_region
+# key: body-select_region
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2dfcdb0c-c7bd-4dac-9678-6799a5aaf5a2
+# --
+body select_region $1
+{
+inherit_from
+meta
+include_end_delimiter
+include_start_delimiter
+select_end
+select_end_match_eof
+select_start
+}

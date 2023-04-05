@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent git_stash(repo_path, stash_name)
+# key: git_stash
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2fa57e4a-93f9-45c9-b8d2-0c0563ed2f3f
+# --
+git_stash("${1:repo_path}", "${2:stash_name}")$0

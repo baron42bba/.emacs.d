@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_quoted_values(v)
+# key: set_quoted_values
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1f5a6c46-7d0f-4282-b506-095aa1e124e4
+# --
+set_quoted_values("${1:v}")$0

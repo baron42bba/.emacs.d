@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent event_install_handler(events)
+# key: event_install_handler
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fd7b13bf-f3db-457a-9deb-a34de1d61b7f
+# --
+event_install_handler("${1:events}")$0

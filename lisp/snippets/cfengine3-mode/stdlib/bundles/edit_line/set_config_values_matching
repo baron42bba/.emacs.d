@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_config_values_matching(v, pat)
+# key: set_config_values_matching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: de85db88-6dce-48fc-8f01-8bf8dc0d4ca3
+# --
+set_config_values_matching("${1:v}", "${2:pat}")$0

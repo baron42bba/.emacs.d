@@ -1,0 +1,25 @@
+# -*- mode: snippet -*-
+# name: body classes
+# key: body-classes
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d5a412db-518f-4868-b94c-121bd249c919
+# --
+body classes $1
+{
+inherit_from
+meta
+cancel_kept
+cancel_notkept
+cancel_repaired
+failed_returncodes
+kept_returncodes
+persist_time
+promise_kept
+promise_repaired
+repair_denied
+repair_failed
+repair_timeout
+repaired_returncodes
+scope
+timer_policy
+}

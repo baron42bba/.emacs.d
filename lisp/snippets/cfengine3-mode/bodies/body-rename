@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body rename
+# key: body-rename
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b23a2a54-a502-48df-bbfa-4a91b4a5d00b
+# --
+body rename $1
+{
+inherit_from
+meta
+disable
+disable_mode
+disable_suffix
+newname
+rotate
+}

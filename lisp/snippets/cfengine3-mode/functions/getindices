@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getindices(varref)
+# key: getindices
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c7d6a42-e004-4963-9dde-90078210ffcf
+# --
+getindices("${1:varref}")$0

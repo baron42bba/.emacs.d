@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from perms_dcp(from)
+# key: perms_dcp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f09b6f8b-c6f2-4f76-ba56-38faee0f5552
+# --
+perms_dcp("${1:from}")$0

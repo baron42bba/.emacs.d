@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action bg(elapsed, expire)
+# key: bg
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4848d0d0-30d9-4aca-823b-a33770462f53
+# --
+bg("${1:elapsed}", "${2:expire}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function accessedbefore(newer, older)
+# key: accessedbefore
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c9d1e3d-6028-49f3-ac59-999059282f6f
+# --
+accessedbefore("${1:newer}", "${2:older}")$0

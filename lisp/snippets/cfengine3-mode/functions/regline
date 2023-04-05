@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function regline(regex, filename)
+# key: regline
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 29a4794c-6cfe-4275-bec0-c8b74c0dee46
+# --
+regline("${1:regex}", "${2:filename}")$0

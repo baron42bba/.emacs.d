@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cmerge(name, varlist)
+# key: cmerge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ac45f5d5-1bbb-425e-8bcd-b186ec9ed593
+# --
+cmerge("${1:name}", "${2:varlist}")$0

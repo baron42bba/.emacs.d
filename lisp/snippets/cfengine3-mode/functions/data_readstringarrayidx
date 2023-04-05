@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function data_readstringarrayidx(filename, comment, split, maxentries, maxbytes)
+# key: data_readstringarrayidx
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9ae39d8e-dd27-4349-9a86-2539865d6d0d
+# --
+data_readstringarrayidx("${1:filename}", "${2:comment}", "${3:split}", "${4:maxentries}", "${5:maxbytes}")$0

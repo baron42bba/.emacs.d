@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body replace_with uncomment
+# key: uncomment
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d37936aa-cb7d-4cf0-96fa-6aa10db7c895
+# --
+uncomment$0

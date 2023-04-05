@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent package_specific_latest(packageorfile, package_version, package_arch)
+# key: package_specific_latest
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 00fa69a4-abc9-4eb5-99fd-84b1c195de85
+# --
+package_specific_latest("${1:packageorfile}", "${2:package_version}", "${3:package_arch}")$0

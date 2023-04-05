@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select days_old(days)
+# key: days_old
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 25e4b373-52d6-4f71-aa59-54ef2667916a
+# --
+days_old("${1:days}")$0

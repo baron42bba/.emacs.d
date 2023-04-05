@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common solaris_knowledge
+# key: solaris_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: effcb4d5-d01a-4e48-8d8b-4ae4a495432e
+# --
+solaris_knowledge$0

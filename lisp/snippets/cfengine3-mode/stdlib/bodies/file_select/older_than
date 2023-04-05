@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select older_than(years, months, days, hours, minutes, seconds)
+# key: older_than
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 743d9543-65fb-469c-99ad-82e90b76028b
+# --
+older_than("${1:years}", "${2:months}", "${3:days}", "${4:hours}", "${5:minutes}", "${6:seconds}")$0

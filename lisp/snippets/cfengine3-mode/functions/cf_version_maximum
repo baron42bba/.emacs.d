@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function cf_version_maximum(cfengine_version)
+# key: cf_version_maximum
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 752b8eca-a853-4993-8b5d-43e2bd150301
+# --
+cf_version_maximum("${1:maximum_version}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function cf_version_at(cfengine_version)
+# key: cf_version_at
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 04c97e72-d3dd-4a22-b8da-19d14f37e8d4
+# --
+cf_version_at("${1:cfengine_version}")$0

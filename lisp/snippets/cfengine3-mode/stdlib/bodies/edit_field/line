@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_field line(split, col, newval, method)
+# key: line
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4e36dcde-28f0-4305-8b97-6e48c7c3456d
+# --
+line("${1:split}", "${2:col}", "${3:newval}", "${4:method}")$0

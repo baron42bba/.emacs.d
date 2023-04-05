@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent fileinfo(f)
+# key: fileinfo
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c351ce8b-2f52-4276-9d97-fe3ce298198d
+# --
+fileinfo("${1:f}")$0

@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: classes promise
+# key: classes
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3388f2fa-621c-49a8-913e-5f8d0b85435a
+# --
+"${1:classes}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+and
+dist
+expression
+not
+or
+persistence
+scope
+select_class
+xor

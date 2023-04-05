@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getenv(variable, maxlength)
+# key: getenv
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c4754caf-feb3-4af7-8479-fe669033e33e
+# --
+getenv("${1:variable}", "${2:maxlength}")$0

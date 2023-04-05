@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: build_xpath promise
+# key: build_xpath
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a522e5e9-8dd2-469d-bc8c-125d4662ffb1
+# --
+"${1:build_xpath}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

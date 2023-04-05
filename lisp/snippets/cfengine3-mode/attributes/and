@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: and => clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+
+# key: and
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eb1c7143-bb00-4886-856a-1ba289cd4cbe
+# --
+and => ${1:clist in range [a-zA-Z0-9_!&@@$|.()[]{}:]+}$0

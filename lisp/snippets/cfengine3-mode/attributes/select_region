@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: select_region => body select_region
+# key: select_region
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 18bad874-67d5-4db5-bb9b-a601169e1baa
+# --
+select_region => ${1:$$(yas-choose-value '("INI_section"))}$0

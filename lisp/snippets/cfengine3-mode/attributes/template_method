@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: template_method => one of cfengine, inline_mustache, mustache
+# key: template_method
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 553e580b-ccf7-43a0-9cb0-ff11ea1be32d
+# --
+template_method => ${1:$$(yas-choose-value '("cfengine" "inline_mustache" "mustache"))}

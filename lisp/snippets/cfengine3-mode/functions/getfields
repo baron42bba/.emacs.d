@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getfields(regex, filename, split, array_lval)
+# key: getfields
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f26290a2-435b-4b13-803f-90871e955ef7
+# --
+getfields("${1:regex}", "${2:filename}", "${3:split}", "${4:array_lval}")$0

@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: body file_select
+# key: body-file_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c939fd30-4bf9-4b22-a90f-59fead6f37dc
+# --
+body file_select $1
+{
+inherit_from
+meta
+atime
+ctime
+exec_program
+exec_regex
+file_result
+file_types
+issymlinkto
+leaf_name
+mtime
+path_name
+search_bsdflags
+search_groups
+search_mode
+search_owners
+search_size
+}

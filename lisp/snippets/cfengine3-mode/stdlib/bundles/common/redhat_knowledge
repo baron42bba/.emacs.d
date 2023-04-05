@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common redhat_knowledge
+# key: redhat_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8d9cfedd-2af0-4e02-9656-88102b7f1ea7
+# --
+redhat_knowledge$0

@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: body link_from
+# key: body-link_from
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7f80b961-7329-4e1b-a8eb-ac3cc4b47ade
+# --
+body link_from $1
+{
+inherit_from
+meta
+copy_patterns
+link_children
+link_type
+source
+when_linking_children
+when_no_source
+}

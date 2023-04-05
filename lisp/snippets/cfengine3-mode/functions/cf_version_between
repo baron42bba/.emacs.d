@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function cf_version_between(minimum_cfengine_version, maximum_cfengine_version)
+# key: cf_version_between
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 16243e72-c06a-4fb6-ac62-90ab7efdf0c4
+# --
+cf_version_between("${1:minimum_version}", "${2:maximum_version}")$0

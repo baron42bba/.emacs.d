@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: bundle server
+# key: server
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 29e771a0-7719-4f8e-9a7a-e0807f0c8a1b
+# --
+bundle server $1
+{
+vars:
+classes:
+roles:
+access:
+}

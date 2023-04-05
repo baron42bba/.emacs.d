@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_module pkg
+# key: pkg
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e3f1892f-e9f9-4702-ae37-49353d6c1459
+# --
+pkg$0

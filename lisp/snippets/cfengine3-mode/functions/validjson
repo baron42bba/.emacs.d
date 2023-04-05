@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function validjson(json_string, type)
+# key: validjson
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 7936ac98-ac7c-4a98-ac75-a0e353edb699
+# --
+validjson("${1:json_string}")$0

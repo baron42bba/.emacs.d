@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: module => boolean
+# key: module
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 587ae740-5e33-4d7c-94ad-194fab624b76
+# --
+module => "${1:$$(yas-choose-value '("true" "false"))}"$0

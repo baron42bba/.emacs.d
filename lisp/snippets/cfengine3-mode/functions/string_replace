@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function string_replace(string, match, replacement)
+# key: string_replace
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: adab223d-b788-4db7-ba71-1b8a870ae85e
+# --
+string_replace("${1:string}", "${2:match}", "${3:replacement}" )$0

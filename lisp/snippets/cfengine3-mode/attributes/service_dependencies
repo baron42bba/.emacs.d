@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: service_dependencies => slist in range [a-zA-Z0-9_$(){}[].:]+
+# key: service_dependencies
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 34072367-2464-4c19-9d67-d9b12649ef91
+# --
+service_dependencies => { ${1:slist in range [a-zA-Z0-9_$(){}[].:]+} }$0

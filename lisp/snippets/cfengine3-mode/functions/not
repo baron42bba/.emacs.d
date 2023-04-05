@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function not(expression)
+# key: not
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bb5efe00-a940-4cff-969e-cb894e0edafc
+# --
+not("${1:expression}")$0

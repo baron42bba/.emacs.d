@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method npm(dir)
+# key: npm
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: adc786fa-3901-4045-b8d7-1bc9a0b9cac6
+# --
+npm("${1:dir}")$0

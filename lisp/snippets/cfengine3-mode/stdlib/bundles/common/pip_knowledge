@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common pip_knowledge
+# key: pip_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b181b6a3-2632-4809-867f-a91e60bb16f7
+# --
+pip_knowledge$0

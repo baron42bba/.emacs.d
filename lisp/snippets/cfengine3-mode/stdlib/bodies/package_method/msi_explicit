@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method msi_explicit(repo)
+# key: msi_explicit
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 60056469-6c44-49f1-adff-1044cfaf7f2f
+# --
+msi_explicit("${1:repo}")$0

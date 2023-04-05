@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function ldaparray(array, uri, dn, filter, scope, security)
+# key: ldaparray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 165ca2da-7894-4eee-8e51-4178fc1bbec1
+# --
+ldaparray("${1:array}", "${2:uri}", "${3:dn}", "${4:filter}", "${5:$$(yas-choose-value '("subtree" "onelevel" "base"))}", "${6:$$(yas-choose-value '("none" "ssl" "sasl"))}")$0

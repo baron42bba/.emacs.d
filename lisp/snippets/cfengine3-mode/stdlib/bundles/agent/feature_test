@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent feature_test
+# key: feature_test
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6ec128e6-e2f2-4099-a802-89dc58928fde
+# --
+feature_test$0

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: body delete
+# key: body-delete
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7298ed32-619c-4c72-aa0a-3a0fb1175cd3
+# --
+body delete $1
+{
+inherit_from
+meta
+dirlinks
+rmdirs
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent standard_services(service, state)
+# key: standard_services
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e095816c-8f93-4c8d-9c60-10147edd2833
+# --
+standard_services("${1:service}", "${2:state}")$0

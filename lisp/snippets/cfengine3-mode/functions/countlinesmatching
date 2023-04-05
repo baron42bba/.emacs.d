@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function countlinesmatching(regex, filename)
+# key: countlinesmatching
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ad21797d-cb57-494e-889c-4f04693e7a93
+# --
+countlinesmatching("${1:regex}", "${2:filename}")$0

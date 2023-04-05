@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action sample_rate(x)
+# key: sample_rate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 04162033-f32c-4dfb-8438-f41fb276a53a
+# --
+sample_rate("${1:x}")$0

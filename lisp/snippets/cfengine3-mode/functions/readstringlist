@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readstringlist(filename, comment, split, maxentries, maxbytes)
+# key: readstringlist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0c498ef5-2b5a-4180-abf6-a058603fc638
+# --
+readstringlist("${1:filename}", "${2:comment}", "${3:split}", "${4:maxentries}", "${5:maxbytes}")$0

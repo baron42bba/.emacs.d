@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: body action
+# key: body-action
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d394abcc-e8e7-4268-ba17-d9f70e32fafa
+# --
+body action $1
+{
+inherit_from
+meta
+action_policy
+audit
+background
+expireafter
+ifelapsed
+log_failed
+log_kept
+log_level
+log_priority
+log_repaired
+log_string
+measurement_class
+report_level
+}

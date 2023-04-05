@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function product(list)
+# key: product
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3b9158ac-b165-4925-9a74-6e41b0066ea1
+# --
+product("${1:list}")$0

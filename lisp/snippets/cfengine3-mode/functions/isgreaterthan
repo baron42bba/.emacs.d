@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isgreaterthan(value1, value2)
+# key: isgreaterthan
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4dac511f-a4ee-4e10-94f3-0464f344dc62
+# --
+isgreaterthan("${1:value1}", "${2:value2}")$0

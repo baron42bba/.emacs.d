@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function nth(list_or_container, position_or_key)
+# key: nth
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6bad4d81-0485-4660-8a9d-61ef30f31354
+# --
+nth("${1:list_or_container}", "${2:position_or_key}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function expandrange(string_template, stepsize)
+# key: expandrange
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 498d6582-29a1-485b-891c-68ecff9d0628
+# --
+expandrange("${1:string_template}", "${2:stepsize}")$0

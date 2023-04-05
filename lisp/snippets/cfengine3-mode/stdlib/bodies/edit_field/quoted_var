@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body edit_field quoted_var(newval, method)
+# key: quoted_var
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4ea906ac-3a02-4054-a5f5-3c002b64a134
+# --
+quoted_var("${1:newval}", "${1:method}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_copy(from, to)
+# key: file_copy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0de7db8c-d518-49c6-b66d-95978d1a80a8
+# --
+file_copy("${1:from}", "${2:to}")$0

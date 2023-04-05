@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body process_count check_range(name, lower, upper)
+# key: check_range
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 00b87592-45f3-4c36-a52a-50a8aff8c69d
+# --
+check_range("${1:name}", "${2:lower}", "${3:upper}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body mount nfs_p(server, source, perm)
+# key: nfs_p
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3ae80e16-881e-4c7d-b04c-cd6e69438e0d
+# --
+nfs_p("${1:server}", "${2:source}", "${3:perm}")$0

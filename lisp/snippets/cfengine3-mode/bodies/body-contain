@@ -1,0 +1,20 @@
+# -*- mode: snippet -*-
+# name: body contain
+# key: body-contain
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b1fff2ce-4a2f-47ec-9808-69bcf0e0ae0c
+# --
+body contain $1
+{
+inherit_from
+meta
+chdir
+chroot
+exec_group
+exec_owner
+exec_timeout
+no_output
+preview
+umask
+useshell
+}

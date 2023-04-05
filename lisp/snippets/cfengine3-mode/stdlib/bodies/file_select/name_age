@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select name_age(name, days)
+# key: name_age
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6535fbfb-654d-4b96-a89d-5a609280fe9f
+# --
+name_age("${1:name}", "${2:days}")$0

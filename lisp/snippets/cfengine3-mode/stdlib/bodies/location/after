@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body location after(str)
+# key: after
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3791cbe8-bf0d-433a-98a8-461c1dfe896e
+# --
+after("${1:str}")$0

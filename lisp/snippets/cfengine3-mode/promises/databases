@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: databases promise
+# key: databases
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c33fd31-ce48-4de4-aa39-076c90653204
+# --
+"${1:databases}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+database_columns
+database_operation
+database_rows
+database_server
+database_type
+registry_exclude

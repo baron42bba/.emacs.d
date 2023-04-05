@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function string_mustache(template_string, optional_data_container)
+# key: string_mustache
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 35055351-045b-44d7-81ad-dc5c4ccc0a0b
+# --
+string_mustache("${1:template_string}", "${1:optional_data_container}")$0

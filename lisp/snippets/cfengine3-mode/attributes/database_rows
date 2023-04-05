@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: database_rows => slist in range .*,.*
+# key: database_rows
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bede0bd2-869f-46e5-bfd4-c01c7af73cc6
+# --
+database_rows => { ${1:slist in range .*,.*} }$0

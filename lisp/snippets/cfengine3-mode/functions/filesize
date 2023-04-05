@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function filesize(filename)
+# key: filesize
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6787f141-a889-4d63-9d84-ac07d9fe646a
+# --
+filesize("${1:filename}")$0

@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: set_text promise
+# key: set_text
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0a59d211-3dbd-46b6-8432-bedfadda77cf
+# --
+"${1:set_text}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

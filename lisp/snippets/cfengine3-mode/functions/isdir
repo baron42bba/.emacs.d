@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isdir(filename)
+# key: isdir
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c18c1581-2e53-4e66-9b63-a0b6f57b1d00
+# --
+isdir("${1:filename}")$0

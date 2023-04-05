@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action warn_only
+# key: warn_only
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3a437fbb-c50f-4bf5-9ab0-7b3b841d059b
+# --
+warn_only$0

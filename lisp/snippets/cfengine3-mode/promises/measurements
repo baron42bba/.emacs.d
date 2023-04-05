@@ -1,0 +1,22 @@
+# -*- mode: snippet -*-
+# name: measurements promise
+# key: measurements
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eaa135b2-8f95-49d2-b827-ceb0d5d24ee2
+# --
+"${1:measurements}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+data_type
+history_type
+match_value
+stream_type
+units

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function variablesmatching_as_data(name, tag1, tag2, ...)
+# key: variablesmatching_as_data
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 72f9a1fa-d725-49c5-9642-d5f807f204d0
+# --
+variablesmatching_as_data("${1:strings}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function sort(list, mode)
+# key: sort
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 92ab66f7-f934-45e0-bbff-c5e7204b9aff
+# --
+sort("${1:list}", "${2:$$(yas-choose-value '("lex" "int" "real" "IP" "ip" "MAC" "mac"))}")$0

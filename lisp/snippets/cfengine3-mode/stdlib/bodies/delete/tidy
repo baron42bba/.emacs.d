@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body delete tidy
+# key: tidy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 857aa713-350c-4ef0-b705-cb160a668a7c
+# --
+tidy$0

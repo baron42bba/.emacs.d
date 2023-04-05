@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select ex_list(names)
+# key: ex_list
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f129234f-7345-440c-ad08-b833ffeb0a73
+# --
+ex_list("${1:names}")$0

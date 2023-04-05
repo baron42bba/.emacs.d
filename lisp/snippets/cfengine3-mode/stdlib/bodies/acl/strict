@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body acl strict
+# key: strict
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 47c8872c-0a2e-4e36-a241-8292514875bd
+# --
+strict$0

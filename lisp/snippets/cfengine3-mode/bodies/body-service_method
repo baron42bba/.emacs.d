@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body service_method
+# key: body-service_method
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: feb76b13-e069-4f5a-9243-6ccdd621da2f
+# --
+body service_method $1
+{
+inherit_from
+meta
+service_args
+service_autostart_policy
+service_bundle
+service_dependence_chain
+service_type
+}

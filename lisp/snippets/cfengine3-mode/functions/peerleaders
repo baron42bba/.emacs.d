@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function peerleaders(filename, regex, groupsize)
+# key: peerleaders
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 834c6fb9-42da-4e58-a829-a16eba54371c
+# --
+peerleaders("${1:filename}", "${2:regex}", "${3:groupsize}")$0

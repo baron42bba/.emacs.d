@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function findfiles(glob1, glob2, ...)
+# key: findfiles
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c545977b-e5aa-48b0-b700-7e88f8d4c157
+# --
+findfiles("${1:strings}")$0

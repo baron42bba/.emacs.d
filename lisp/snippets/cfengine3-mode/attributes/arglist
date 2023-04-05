@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: arglist => slist in range .*
+# key: arglist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b3ca4078-b504-4bbf-a016-34425116b1d9
+# --
+arglist => { ${1:slist in range .*} }$0

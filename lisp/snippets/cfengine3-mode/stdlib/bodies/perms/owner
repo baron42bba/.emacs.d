@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body perms owner(user)
+# key: owner
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f9734c65-5d42-4f9d-a47d-c165196661d3
+# --
+owner("${1:user}")$0

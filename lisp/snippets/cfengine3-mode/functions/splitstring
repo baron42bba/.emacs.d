@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function splitstring(string, regex, maxent)
+# key: splitstring
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 713afd86-b104-4364-a74f-65d6b067b857
+# --
+splitstring("${1:string}", "${2:regex}", "${3:maxent}")$0

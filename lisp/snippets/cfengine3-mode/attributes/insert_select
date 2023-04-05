@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: insert_select => body insert_select
+# key: insert_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e901110d-e2ce-43e5-8b57-9fa19009730a
+# --
+insert_select => ${1:body_insert_select}$0

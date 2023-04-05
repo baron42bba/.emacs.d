@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent git_commit(repo_path, message)
+# key: git_commit
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7f22087b-4636-4735-96e9-58cd1b55d4ef
+# --
+git_commit("${1:repo_path}", "${2:message}")$0

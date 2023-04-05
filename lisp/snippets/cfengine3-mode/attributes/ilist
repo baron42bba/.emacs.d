@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: ilist => ilist in range -99999999999,99999999999
+# key: ilist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f429f594-99d3-4245-b2f9-c49db2539057
+# --
+ilist => { ${1:ilist in range -99999999999,99999999999} }$0

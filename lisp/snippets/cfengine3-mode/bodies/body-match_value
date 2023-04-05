@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body match_value
+# key: body-match_value
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 95065d2d-bbe9-441f-88de-2301aab26399
+# --
+body match_value $1
+{
+inherit_from
+meta
+extraction_regex
+select_line_matching
+select_line_number
+select_multiline_policy
+track_growing_file
+}

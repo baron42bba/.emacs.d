@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function maparray(pattern, array_or_container)
+# key: maparray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2818d5d4-3bdc-49dc-9b5e-500b35a4633f
+# --
+maparray("${1:pattern}", "${2:array_or_container}")$0

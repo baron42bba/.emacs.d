@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent collect_vars(name, tag, flatten)
+# key: collect_vars
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 88a64637-a975-405f-91ee-428ecc3ae9f6
+# --
+collect_vars("${1:name}", "${2:tag}", "${3:flatten}")$0

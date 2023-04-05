@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function ip2host(ip)
+# key: ip2host
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 66e0a9b0-0259-4e7a-b97c-4394ce4032d6
+# --
+ip2host("${1:ip}")$0

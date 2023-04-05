@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function hostswithclass(class, field)
+# key: hostswithclass
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a54b72d8-3ae7-45a6-9e18-49c8c68a7ac5
+# --
+hostswithclass("${1:class}", "${2:$$(yas-choose-value '("name" "address"))}")$0

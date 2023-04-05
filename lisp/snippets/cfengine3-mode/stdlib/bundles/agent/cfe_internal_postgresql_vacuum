@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_postgresql_vacuum
+# key: cfe_internal_postgresql_vacuum
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8216ddc8-5ec5-4e43-b9f0-b7eb005320cc
+# --
+cfe_internal_postgresql_vacuum$0

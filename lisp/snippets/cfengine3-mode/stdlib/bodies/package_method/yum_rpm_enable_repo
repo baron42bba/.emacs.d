@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method yum_rpm_enable_repo(repoid)
+# key: yum_rpm_enable_repo
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ff336c55-ae98-475a-9dcb-7b47c17c9092
+# --
+yum_rpm_enable_repo("${1:repoid}")$0

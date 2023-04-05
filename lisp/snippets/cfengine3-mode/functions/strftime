@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function strftime(mode, template, time)
+# key: strftime
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5e2fc567-7766-4a43-be14-71e48a45d32b
+# --
+strftime("${1:$$(yas-choose-value '("gmtime" "localtime"))}", "${2:template}", "${3:time}")$0

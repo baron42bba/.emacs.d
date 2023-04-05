@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_tap_report(outfile)
+# key: testing_tap_report
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3c477531-2c4a-4b61-8b49-c4e048ba3baf
+# --
+testing_tap_report("${1:outfile}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: action => body action
+# key: action
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c2b70545-422b-4255-b95a-69e1d439c560
+# --
+action => ${1:$$(yas-choose-value '("bg" "if_elapsed" "if_elapsed_day" "ifwin_bg" "immediate" "log_repaired" "log_verbose" "measure_performance" "measure_promise_time" "policy" "sample_rate" "warn_only"))}$0

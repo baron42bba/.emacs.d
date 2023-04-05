@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function peers(filename, regex, groupsize)
+# key: peers
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fd83fef5-0033-4b20-8ffb-ed1dee7d3f77
+# --
+peers("${1:filename}", "${2:regex}", "${3:groupsize}")$0

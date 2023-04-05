@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: environment_host => string in range [a-zA-Z0-9_]+
+# key: environment_host
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 58691484-211a-480d-8799-cf91cccbb6f7
+# --
+environment_host => "$1"$0

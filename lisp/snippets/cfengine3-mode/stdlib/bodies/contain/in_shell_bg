@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain in_shell_bg
+# key: in_shell_bg
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 58479fd7-4998-4f5f-96ef-ec85154e77be
+# --
+in_shell_bg$0

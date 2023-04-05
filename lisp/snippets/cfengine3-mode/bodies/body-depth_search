@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: body depth_search
+# key: body-depth_search
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 969a5e5a-ddd3-44e1-aa68-c1eecf21210b
+# --
+body depth_search $1
+{
+inherit_from
+meta
+depth
+exclude_dirs
+include_basedir
+include_dirs
+rmdeadlinks
+traverse_links
+xdev
+}

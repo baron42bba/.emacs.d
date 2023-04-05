@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common suse_knowledge
+# key: suse_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f16bea11-7490-4e66-b15e-4fbc9b7ec486
+# --
+suse_knowledge$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_hub_maintain
+# key: cfe_internal_hub_maintain
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cfe7c1ee-4aa3-4089-8826-9748d070590f
+# --
+cfe_internal_hub_maintain$0

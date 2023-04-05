@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: process_count => body process_count
+# key: process_count
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2bedf59a-8d8b-4064-a7cb-f88b16e058aa
+# --
+process_count => ${1:$$(yas-choose-value '("any_count" "check_range"))}$0

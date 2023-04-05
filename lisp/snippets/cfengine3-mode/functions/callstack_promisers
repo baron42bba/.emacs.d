@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function callstack_promisers()
+# key: callstack_promisers
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d64de760-febb-4128-95c6-d66617a9e23e
+# --
+callstack_promisers()$0

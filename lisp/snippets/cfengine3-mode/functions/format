@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function format(string, ...)
+# key: format
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 856146a4-1895-4755-8cea-c5aa26ea614e
+# --
+format("${1:strings}")$0

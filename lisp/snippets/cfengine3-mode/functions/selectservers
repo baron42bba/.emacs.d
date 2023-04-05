@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function selectservers(hostlist, port, query, regex, maxbytes, array)
+# key: selectservers
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 312ebab4-75f5-4006-b429-dc3cb87f5535
+# --
+selectservers("${1:hostlist}", "${2:port}", "${3:query}", "${4:regex}", "${5:maxbytes}", "${6:array}")$0

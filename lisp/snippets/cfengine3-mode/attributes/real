@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: real => real in range -9.99999E100,9.99999E100
+# key: real
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d7a39175-2870-4a52-a757-2b1fc70189ca
+# --
+real => ${1:real in range -9.99999E100,9.99999E100}$0

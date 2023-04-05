@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_tap_bailout(reason)
+# key: testing_tap_bailout
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b8acac62-23a3-4768-a718-d96968c6ca59
+# --
+testing_tap_bailout("${1:reason}")$0

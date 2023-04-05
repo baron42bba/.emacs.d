@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select exclude(name)
+# key: exclude
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 16b52d99-af63-493a-9689-3e34c24737db
+# --
+exclude("${1:name}")$0

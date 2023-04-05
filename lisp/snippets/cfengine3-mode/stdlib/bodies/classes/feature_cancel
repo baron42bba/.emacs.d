@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes feature_cancel(x)
+# key: feature_cancel
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 82133bf9-1323-491e-baba-b90f82b95c23
+# --
+feature_cancel("${1:x}")$0

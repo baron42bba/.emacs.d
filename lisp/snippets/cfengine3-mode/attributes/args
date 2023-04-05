@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: args => string
+# key: args
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 85109bc8-9738-45b7-a4f0-b5e53a908e43
+# --
+args => "$1"$0

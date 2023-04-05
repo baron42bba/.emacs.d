@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readyaml(filename, optional_maxbytes)
+# key: readyaml
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b4f7c2b8-10de-4499-b0da-21f449269664
+# --
+readyaml("${1:filename}", "${2:optional_maxbytes}")$0

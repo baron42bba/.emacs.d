@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method rpm_version(repo)
+# key: rpm_version
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 15528596-f129-4fe1-b5d9-4601c756e26f
+# --
+rpm_version("${1:repo}")$0

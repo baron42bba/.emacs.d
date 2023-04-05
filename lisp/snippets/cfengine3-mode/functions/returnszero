@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function returnszero(command, shell)
+# key: returnszero
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eecb1492-a1b0-4f7c-859f-234a3c7a130d
+# --
+returnszero("${1:command}", "${2:$$(yas-choose-value '("noshell" "useshell" "powershell"))}")$0

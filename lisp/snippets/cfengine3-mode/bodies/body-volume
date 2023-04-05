@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: body volume
+# key: body-volume
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d2e9d8f6-497e-4e5b-a022-85b06fd585f1
+# --
+body volume $1
+{
+inherit_from
+meta
+check_foreign
+freespace
+scan_arrivals
+sensible_count
+sensible_size
+}

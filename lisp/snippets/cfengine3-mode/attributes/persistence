@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: persistence => int in range 0,99999999999
+# key: persistence
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3b0b288a-4116-448d-8a59-59d64b25ce93
+# --
+persistence => ${1:int in range 0,99999999999}$0

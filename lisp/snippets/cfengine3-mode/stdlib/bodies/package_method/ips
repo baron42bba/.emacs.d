@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method ips
+# key: ips
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 4277732f-4fc9-468b-9d2d-8dd522ccbf13
+# --
+ips$0

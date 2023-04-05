@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent event_register(prefix, type, name, persistence, metadata)
+# key: event_register
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6660f1a0-a879-4393-b51f-e27ae3bb3741
+# --
+event_register("${1:prefix}", "${2:type}", "${3:name}", "${4:persistence}", "${5:metadata}")$0

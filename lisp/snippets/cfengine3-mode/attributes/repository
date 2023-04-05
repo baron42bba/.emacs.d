@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: repository => string in range "?(/.*)
+# key: repository
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5a650459-a828-4cb5-b772-d0028e714c72
+# --
+repository => "$1"$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: depth_search => body depth_search
+# key: depth_search
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 47076146-bf57-4666-92c3-aa813b3e6a7d
+# --
+depth_search => ${1:$$(yas-choose-value '("include_base" "recurse" "recurse_ignore" "recurse_with_base"))}$0

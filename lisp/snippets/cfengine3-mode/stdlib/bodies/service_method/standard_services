@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body service_method standard_services
+# key: standard_services
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e721aa5b-dd9a-4b01-a143-254555c36cc1
+# --
+standard_services$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: whitespace_policy => olist in range ignore_leading,ignore_trailing,ignore_embedded,exact_match
+# key: whitespace_policy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7cf42591-3671-4eee-b857-8c9966301e50
+# --
+whitespace_policy => ${1:olist in range ignore_leading,ignore_trailing,ignore_embedded,exact_match}$0

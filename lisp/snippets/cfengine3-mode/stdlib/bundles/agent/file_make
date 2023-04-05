@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent file_make(file, str)
+# key: file_make
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b89e7547-94a0-4f91-9c4b-875475dd5a89
+# --
+file_make("${1:file}", "${2:str}")$0

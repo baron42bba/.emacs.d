@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: body location
+# key: body-location
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a7224c6b-ca0b-4e07-8215-74b0e925bc1b
+# --
+body location $1
+{
+inherit_from
+meta
+before_after
+first_last
+select_line_matching
+}

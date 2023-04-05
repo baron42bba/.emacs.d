@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: body executor
+# key: body-executor
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 681aff9f-d7d2-5c9c-84de-4ba1c2f6f7cb
+# --
+body executor $1
+{
+inherit_from
+meta
+agent_expireafter
+exec_command
+executorfacility
+mailfilter_exclude
+mailfilter_include
+mailfrom
+mailmaxlines
+mailsubject
+mailto
+schedule
+smtpserver
+splaytime
+}

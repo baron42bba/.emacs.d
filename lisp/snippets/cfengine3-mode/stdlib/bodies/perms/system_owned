@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body perms system_owned(mode)
+# key: system_owned
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 73749f1a-b7e1-4700-9a6b-89ec50d6b4df
+# --
+system_owned("${1:mode}")$0

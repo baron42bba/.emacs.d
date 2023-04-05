@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function concat(...)
+# key: concat
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 14074df7-1e5f-449e-b439-4c74f47c7f24
+# --
+concat("${1:strings}")$0

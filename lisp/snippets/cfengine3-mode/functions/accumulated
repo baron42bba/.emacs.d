@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function accumulated(years, months, days, hours, minutes, seconds)
+# key: accumulated
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3b460f44-b2ee-44ca-8a78-bc6c5bca8df7
+# --
+accumulated("${1:years}", "${2:months}", "${3:days}", "${4:hours}", "${5:minutes}", "${6:seconds}")$0

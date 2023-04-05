@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: environment_state => one of create, delete, running, suspended, down
+# key: environment_state
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bcbaa719-ef15-44da-829c-3517a6e8ece8
+# --
+environment_state => ${1:$$(yas-choose-value '("create" "delete" "running" "suspended" "down"))}

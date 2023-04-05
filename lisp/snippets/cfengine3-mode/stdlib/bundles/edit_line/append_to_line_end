@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line append_to_line_end(start, end)
+# key: append_to_line_end
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: dfefa5a8-022e-42d5-8dcc-2320493eb263
+# --
+append_to_line_end("${1:start}", "${2:end}")$0

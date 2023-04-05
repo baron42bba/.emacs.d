@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent run_ifdefined(namespace, mybundle)
+# key: run_ifdefined
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 572e09f7-016e-4db2-a548-1c4cfd0777b4
+# --
+run_ifdefined("${1:namespace}", "${2:mybundle}")$0

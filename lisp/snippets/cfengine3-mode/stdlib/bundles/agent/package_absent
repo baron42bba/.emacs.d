@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent package_absent(package)
+# key: package_absent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a4e8e8b8-ddd6-40ae-8680-620f8737d8d8
+# --
+package_absent("${1:package}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain in_shell_and_silent
+# key: in_shell_and_silent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ca8f8c70-4f7b-425d-ac6e-53894e9decef
+# --
+in_shell_and_silent$0

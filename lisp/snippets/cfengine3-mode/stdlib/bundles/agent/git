@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent git(repo_path, subcmd, args)
+# key: git
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a2c9182f-a579-4bd4-b590-78e5d42329f6
+# --
+git("${1:repo_path}", "${2:subcmd}", "${3:args}")$0

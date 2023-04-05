@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body link_from linkfrom(source, type)
+# key: linkfrom
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e16ee8bd-138f-4e0b-9223-048f2b829a05
+# --
+linkfrom("${1:source}", "${2:type}")$0

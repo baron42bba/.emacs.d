@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line create_solaris_admin_file
+# key: create_solaris_admin_file
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 318ef6dc-a8a5-486f-a7e1-4e31e941f700
+# --
+create_solaris_admin_file$0

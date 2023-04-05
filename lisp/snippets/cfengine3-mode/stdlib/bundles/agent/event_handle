@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent event_handle(prefix, type)
+# key: event_handle
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2b3a18b4-7b7a-4ece-98c3-7600ead8510c
+# --
+event_handle("${1:prefix}", "${2:type}")$0

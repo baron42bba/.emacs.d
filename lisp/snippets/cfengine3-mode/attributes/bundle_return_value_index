@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle_return_value_index => string in range [a-zA-Z0-9_$(){}[].:]+
+# key: bundle_return_value_index
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2dfdeed3-de3c-4286-920b-f63ecb4812be
+# --
+bundle_return_value_index => "$1"$0

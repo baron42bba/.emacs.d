@@ -1,0 +1,34 @@
+# -*- mode: snippet -*-
+# name: body server
+# key: body-server
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 26fbb11c-36ca-5744-8d1f-79f69ef4e543
+# --
+body server $1
+{
+inherit_from
+meta
+allowallconnects
+allowciphers
+allowconnects
+allowlegacyconnects
+allowtlsversion
+allowusers
+auditing
+bindtointerface
+call_collect_interval
+cfruncommand
+collect_window
+denybadclocks
+denyconnects
+dynamicaddresses
+hostnamekeys
+listen
+logallconnections
+logencryptedtransfers
+maxconnections
+port
+serverfacility
+skipverify
+trustkeysfrom
+}

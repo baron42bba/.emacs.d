@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent feature
+# key: feature
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6e38a1f8-4835-4f17-b6fd-858c2f715f3c
+# --
+feature$0

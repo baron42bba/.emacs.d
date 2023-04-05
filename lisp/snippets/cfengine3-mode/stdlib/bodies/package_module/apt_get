@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_module apt_get
+# key: apt_get
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1ae1808f-8288-4360-96fa-75ca17691f2b
+# --
+apt_get$0

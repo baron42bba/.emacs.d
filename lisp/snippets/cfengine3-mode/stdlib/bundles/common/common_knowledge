@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common common_knowledge
+# key: common_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2155ae0c-57e1-4ef7-871b-08f7153249d4
+# --
+common_knowledge$0

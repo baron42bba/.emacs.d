@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes always(x)
+# key: always
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7fa91a58-d10d-42e0-a0da-f86670fa208f
+# --
+always("${1:x}")$0

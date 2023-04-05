@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: delete_attribute promise
+# key: delete_attribute
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 757173f0-8937-4439-a254-d1137420f1e2
+# --
+"${1:delete_attribute}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

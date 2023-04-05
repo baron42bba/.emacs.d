@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: edit_template => string in range "?(/.*)
+# key: edit_template
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 36d69890-4ea8-4bfb-aa4c-8030d9dc34e3
+# --
+edit_template => "$1"$0

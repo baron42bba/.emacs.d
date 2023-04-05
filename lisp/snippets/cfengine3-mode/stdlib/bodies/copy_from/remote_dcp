@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from remote_dcp(from, server)
+# key: remote_dcp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0ed9eed0-c5af-40c4-88a1-ca476240e8a8
+# --
+remote_dcp("${1:from}", "${2:server}")$0

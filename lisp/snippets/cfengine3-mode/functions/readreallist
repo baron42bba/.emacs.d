@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readreallist(filename, comment, split, maxentries, maxbytes)
+# key: readreallist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8bec76ed-45f4-4d65-90c6-1bb82d7ade13
+# --
+readreallist("${1:filename}", "${2:comment}", "${3:split}", "${4:maxentries}", "${5:maxbytes}")$0

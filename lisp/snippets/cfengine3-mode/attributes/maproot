@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: maproot => slist
+# key: maproot
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 70d07c37-83f9-4b0e-a049-c7664376ae83
+# --
+maproot => { ${1:slist} }$0

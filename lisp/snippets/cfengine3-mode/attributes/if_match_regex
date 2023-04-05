@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: if_match_regex => string
+# key: if_match_regex
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d2f9a236-3628-477a-b269-e25749d3a0f0
+# --
+if_match_regex => "$1"$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: package_policy => one of add, delete, reinstall, update, addupdate, patch, verify
+# key: package_policy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 95adddda-8f2a-4376-9da7-bc27de8bf476
+# --
+package_policy => ${1:$$(yas-choose-value '("add" "delete" "reinstall" "update" "addupdate" "patch" "verify"))}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function escape(text)
+# key: escape
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bbd27019-48a0-4cd7-ac66-db1d342c0274
+# --
+escape("${1:text}")$0

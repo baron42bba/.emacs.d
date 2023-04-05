@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_variable_values_ini(tab, sectionname)
+# key: set_variable_values_ini
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 67482c32-bca4-491c-8597-986fb2dacc5e
+# --
+set_variable_values_ini("${1:tab}", "${2:sectionname}")$0

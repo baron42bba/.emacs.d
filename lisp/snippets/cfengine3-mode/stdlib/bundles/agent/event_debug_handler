@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent event_debug_handler(events)
+# key: event_debug_handler
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 63f68003-9637-4aa7-94aa-99bf4b43be01
+# --
+event_debug_handler("${1:events}")$0

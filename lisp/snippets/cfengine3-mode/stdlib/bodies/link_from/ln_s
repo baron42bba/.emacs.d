@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body link_from ln_s(x)
+# key: ln_s
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 664be5e3-d2ce-47b8-899a-0211aadf1514
+# --
+ln_s("${1:x}")$0

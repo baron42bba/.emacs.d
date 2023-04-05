@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes if_repaired(x)
+# key: if_repaired
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ed451c8d-a7b0-44c8-b544-e689fa4c2f4f
+# --
+if_repaired("${1:x}")$0

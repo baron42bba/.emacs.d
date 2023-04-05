@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: slist => slist
+# key: slist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: bd7f5c53-1009-4a15-ac9f-003984bf322d
+# --
+slist => { ${1:slist} }$0

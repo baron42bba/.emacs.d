@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select all
+# key: all
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 75b54dac-cf54-495f-baa0-153b010e20e9
+# --
+all$0

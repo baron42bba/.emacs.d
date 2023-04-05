@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: body changes
+# key: body-changes
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d0e18289-2700-4f52-8ad3-c7aa3be7236a
+# --
+body changes $1
+{
+inherit_from
+meta
+hash
+report_changes
+report_diffs
+update_hashes
+}

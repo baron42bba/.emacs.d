@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_todo(classname, message, format)
+# key: testing_todo
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 428c2de9-eeb3-4b17-a118-ff10d5069bf8
+# --
+testing_todo("${1:classname}", "${2:message}", "${3:format}")$0

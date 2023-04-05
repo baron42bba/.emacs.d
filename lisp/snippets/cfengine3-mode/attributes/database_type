@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: database_type => one of sql, ms_registry
+# key: database_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e5d14ee7-552a-4bc2-bb64-2c0ba03bacc7
+# --
+database_type => ${1:$$(yas-choose-value '("sql" "ms_registry"))}

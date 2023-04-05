@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method solaris_install(adminfile)
+# key: solaris_install
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 71ef13fc-6bf5-4ecb-93cc-9b84f10ce002
+# --
+solaris_install("${1:adminfile}")$0

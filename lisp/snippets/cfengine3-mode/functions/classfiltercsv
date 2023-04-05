@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function classfiltercsv(filename, has_header, class_column, optional_sort_column)
+# key: classfiltercsv
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 634e1d25-a1b5-460d-ab32-ebd597ce5469
+# --
+classfiltercsv("${1:filename}", "${2:$$(yas-choose-value '("yes" "no" "true" "false" "on" "off"))}", "${3:class_column}", "${4:optional_sort_column}")$0

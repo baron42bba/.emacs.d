@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body process_select by_pid(pid)
+# key: by_pid
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2ac09a36-65cc-472b-9571-94f635c9d5dd
+# --
+by_pid("${1:pid}")$0

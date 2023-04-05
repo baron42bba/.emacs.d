@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: storage promise
+# key: storage
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9ae9f4db-ad97-400b-a714-e3661d94186f
+# --
+"${1:storage}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+mount
+volume

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: usebundle => bundle
+# key: usebundle
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2cd46129-f3f1-456d-9f9d-456f20af426b
+# --
+usebundle => ${1:bundle}$0

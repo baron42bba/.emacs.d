@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function mapdata(interpretation, pattern, array_or_container)
+# key: mapdata
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f3b8ab61-6846-47e0-b741-2f6b135f0972
+# --
+mapdata("${1:$$(yas-choose-value '("none" "canonify" "json" "json_pipe"))}", "${2:pattern}", "${3:array_or_container}")$0

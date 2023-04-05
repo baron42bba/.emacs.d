@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: location => body location
+# key: location
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d8aaf75d-0894-4f53-8333-755c58f1727b
+# --
+location => ${1:$$(yas-choose-value '(
+after
+before
+start
+))}$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dist => rlist in range -9.99999E100,9.99999E100
+# key: dist
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e1c129be-b575-421b-b374-e104f30a34d3
+# --
+dist => ${1:rlist in range -9.99999E100,9.99999E100}$0

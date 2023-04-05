@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body environment_resources kvm(name, arch, cpu_count, mem_kb, disk_file)
+# key: kvm
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 6aacb891-58f7-44e8-8e52-3d864f91fdf6
+# --
+kvm("${1:name}", "${2:arch}", "${3:cpu_count}", "${4:mem_kb}", "${5:disk_file}")$0

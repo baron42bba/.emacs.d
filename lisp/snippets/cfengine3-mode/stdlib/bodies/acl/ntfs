@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body acl ntfs(acl)
+# key: ntfs
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7addef37-e9e9-47f6-bdaa-9b05be5b3c70
+# --
+ntfs("${1:acl}")$0

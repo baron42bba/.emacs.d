@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function and(...)
+# key: and
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 98c3bf3a-ce17-465b-94a5-0686a87e44e3
+# --
+and("${1:condition}")$0

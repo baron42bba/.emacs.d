@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function regldap(uri, dn, filter, record, scope, regex, security)
+# key: regldap
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5f5e9b7a-0215-4587-98ea-f8c16650a06c
+# --
+regldap("${1:uri}", "${2:dn}", "${3:filter}", "${4:record}", "${5:$$(yas-choose-value '("subtree" "onelevel" "base"))}", "${6:regex}", "${7:$$(yas-choose-value '("none" "ssl" "sasl"))}")$0

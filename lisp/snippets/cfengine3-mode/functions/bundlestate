@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function bundlestate(bundlename)
+# key: bundlestate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c97ab90-48bc-4d89-9ac0-55ba255b9f8a
+# --
+bundlestate("${1:bundlename}")$0

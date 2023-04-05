@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent autorun
+# key: autorun
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: be180b02-9777-4d81-9857-8e87814a5205
+# --
+autorun$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes scoped_classes_generic(scope, x)
+# key: scoped_classes_generic
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ac9ff765-6c5d-4431-9792-a70c7bc74102
+# --
+scoped_classes_generic("${1:scope}", "${2:x}")$0

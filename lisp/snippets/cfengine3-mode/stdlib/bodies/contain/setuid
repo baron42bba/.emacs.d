@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain setuid(owner)
+# key: setuid
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 94ecaf28-1435-481c-a0b3-66de3228a926
+# --
+setuid("${1:owner}")$0

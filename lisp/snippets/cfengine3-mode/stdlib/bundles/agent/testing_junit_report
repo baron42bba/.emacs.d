@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_junit_report(outfile)
+# key: testing_junit_report
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8ac8090a-2060-4b03-b038-2e5e780779f8
+# --
+testing_junit_report("${1:outfile}")$0

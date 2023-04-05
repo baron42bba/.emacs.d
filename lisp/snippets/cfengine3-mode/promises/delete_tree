@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: delete_tree promise
+# key: delete_tree
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 36a544bc-422c-4fee-835c-c6812b585369
+# --
+"${1:delete_tree}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

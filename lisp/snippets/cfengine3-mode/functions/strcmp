@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function strcmp(string1, string2)
+# key: strcmp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 28523bfb-8916-4fe7-a965-b0be744b14bc
+# --
+strcmp("${1:string1}", "${2:string2}")$0

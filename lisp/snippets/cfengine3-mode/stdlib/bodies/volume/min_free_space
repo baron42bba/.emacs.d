@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body volume min_free_space(free)
+# key: min_free_space
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e8458be1-acbd-44bb-8bc7-7466f9b840b1
+# --
+min_free_space("${1:free}")$0

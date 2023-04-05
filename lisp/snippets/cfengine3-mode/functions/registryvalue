@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function registryvalue(key, valueid)
+# key: registryvalue
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 04ebf3d6-512e-447f-b5f7-18a987014362
+# --
+registryvalue("${1:key}", "${2:valueid}")$0

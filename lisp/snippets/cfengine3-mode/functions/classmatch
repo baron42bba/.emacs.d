@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function classmatch(regex, tag1, tag2, ...)
+# key: classmatch
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d15cad73-05ff-4927-877d-647a61b13ab5
+# --
+classmatch("${1:condition}")$0

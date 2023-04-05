@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select by_name(names)
+# key: by_name
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 833846a9-c761-48a0-b6c1-28345bb223d6
+# --
+by_name("${1:names}")$0

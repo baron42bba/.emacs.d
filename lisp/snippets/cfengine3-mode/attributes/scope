@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: scope => one of namespace, bundle
+# key: scope
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: dc9b61be-b6e1-4411-bb40-71122cb79226
+# --
+scope => ${1:$$(yas-choose-value '("namespace" "bundle"))}

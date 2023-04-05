@@ -1,0 +1,51 @@
+# -*- mode: snippet -*-
+# name: body agent
+# key: body-agent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7c9fac6d-1b9a-54e5-89e7-6c8b5e3ae414
+# --
+body agent $1
+{
+inherit_from
+meta
+abortbundleclasses
+abortclasses
+addclasses
+agentaccess
+agentfacility
+allclassesreport
+alwaysvalidate
+bindtointerface
+checksum_alert_time
+childlibpath
+default_repository
+default_timeout
+defaultcopytype
+dryrun
+editbinaryfilesize
+editfilesize
+environment
+expireafter
+files_auto_define
+files_single_copy
+hashupdates
+hostnamekeys
+ifelapsed
+inform
+intermittency
+max_children
+maxconnections
+mountfilesystems
+nonalphanumfiles
+refresh_processes
+repchar
+report_class_log
+secureinput
+select_end_match_eof
+sensiblecount
+sensiblesize
+skipidentify
+suspiciousnames
+timezone
+verbose
+}

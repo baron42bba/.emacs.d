@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: data_type => one of counter, int, real, string, slist
+# key: data_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9473b5f9-d19f-4123-8bdf-79c5aef5b765
+# --
+data_type => ${1:$$(yas-choose-value '("counter" "int" "real" "string" "slist"))}

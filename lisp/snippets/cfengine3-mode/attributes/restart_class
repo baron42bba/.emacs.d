@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: restart_class => string in range [a-zA-Z0-9_$(){}[].:]+
+# key: restart_class
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d2697596-f025-4445-860c-9b4b3e8ee870
+# --
+restart_class => "$1"$0

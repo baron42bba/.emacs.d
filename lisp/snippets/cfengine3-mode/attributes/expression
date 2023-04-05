@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: expression => class expression in range [a-zA-Z0-9_!&@@$|.()[]{}:]+
+# key: expression
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ca82134d-7e9a-4537-8ced-8e371c7b068d
+# --
+expression => ${1:class expression in range [a-zA-Z0-9_!&@@$|.()[]{}:]+}$0

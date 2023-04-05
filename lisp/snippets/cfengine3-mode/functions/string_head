@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function string_head(data, max)
+# key: string_head
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e403a98b-4f70-467f-a856-6d5f7bd1d2ff
+# --
+string_head("${1:data}", "${2:max}")$0

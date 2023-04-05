@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent dir_sync(from, to)
+# key: dir_sync
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e8dfb8f1-5207-4d35-b126-d3a93a5d227b
+# --
+dir_sync("${1:from}", "${2:to}")$0

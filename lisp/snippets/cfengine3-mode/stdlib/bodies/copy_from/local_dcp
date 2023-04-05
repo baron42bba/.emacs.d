@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body copy_from local_dcp(from)
+# key: local_dcp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a41c701e-26bc-448f-bfaf-db70d9be05b6
+# --
+local_dcp("${1:from}")$0

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: body file
+# key: body-file
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d4ebe3bb-02e7-5d51-9c73-49d158eee4a1
+# --
+body file $1
+{
+inherit_from
+meta
+inputs
+namespace
+}

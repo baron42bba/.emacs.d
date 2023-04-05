@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_database_cleanup_diagnostics(settings)
+# key: cfe_internal_database_cleanup_diagnostics 
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fa841789-31f6-4a6d-ac2e-d7a21512b596
+# --
+cfe_internal_database_cleanup_diagnostics("${1:settings}")$0

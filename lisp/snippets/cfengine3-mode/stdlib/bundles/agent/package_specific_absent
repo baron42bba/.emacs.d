@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent package_specific_absent(packageorfile, package_version, package_arch)
+# key: package_specific_absent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9c28e7b3-e042-4d3a-b0e2-33d327e08c25
+# --
+package_specific_absent("${1:packageorfile}", "${2:package_version}", "${3:package_arch}")$0

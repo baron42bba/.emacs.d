@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getusers(exclude_names, exclude_ids)
+# key: getusers
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 53dd4270-4425-4ecb-9678-3ef099972152
+# --
+getusers("${1:exclude_names}", "${2:exclude_ids}")$0

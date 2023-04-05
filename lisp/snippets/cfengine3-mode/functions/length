@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function length(list)
+# key: length
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 9e796c37-556c-4542-94ba-e91e562026ef
+# --
+length("${1:list}")$0

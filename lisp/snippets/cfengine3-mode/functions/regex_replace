@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function regex_replace(string, regex, replacement, options)
+# key: regex_replace
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 99a7c15f-cbc5-4d43-a998-eae3ac3b12ba
+# --
+regex_replace("${1:string}", "${2:regex}", "${3:replacement}", "${4:options}")$0

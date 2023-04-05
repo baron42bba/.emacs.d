@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function storejson(data_container)
+# key: storejson
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5405ee5c-fa42-469b-b5e4-fbef2e4f3692
+# --
+storejson("${1:data_container}")$0

@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: insert_tree promise
+# key: insert_tree
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 773d2062-bcd2-479c-8436-9f3c9ee8b49c
+# --
+"${1:insert_tree}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+build_xpath
+select_xpath

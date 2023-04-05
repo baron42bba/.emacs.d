@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function some(regex, list)
+# key: some
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c1ed2301-71f0-4904-a15d-d7684fe8b45c
+# --
+some("${1:regex}", "${2:list}")$0

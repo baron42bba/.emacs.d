@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: match_value => body match_value
+# key: match_value
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: eaccc8e5-f069-4214-997c-8b94e7b0dee0
+# --
+match_value => ${1:$$(yas-choose-value '("line_match_value" "scan_changing_file" "scan_log" "single_value"))}$0

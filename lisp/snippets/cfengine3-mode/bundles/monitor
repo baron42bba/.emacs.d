@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: bundle monitor
+# key: monitor
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 0774a928-d672-4237-8ff3-ebfec683ffcd
+# --
+bundle monitor $1
+{
+vars:
+classes:
+measurements:
+reports:
+}

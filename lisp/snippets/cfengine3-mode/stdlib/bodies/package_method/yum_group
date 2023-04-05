@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method yum_group
+# key: yum_group
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1484762f-cbd6-4391-8eea-012b2bbb68ea
+# --
+yum_group$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: database_columns => slist in range .*
+# key: database_columns
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 2a49a1da-7370-47c2-a469-22c92521dd68
+# --
+database_columns => { ${1:slist in range .*} }$0

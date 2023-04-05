@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body contain in_dir_shell(dir)
+# key: in_dir_shell
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3df43e27-b06e-4669-9b02-ff514fac4b80
+# --
+in_dir_shell("${1:dir}")$0

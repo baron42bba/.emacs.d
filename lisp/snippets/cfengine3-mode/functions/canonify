@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function canonify(text)
+# key: canonify
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3f5f8b78-2c47-44e4-b5f7-32aaf9939d71
+# --
+canonify("${1:text}")$0

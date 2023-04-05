@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line lines_present(lines)
+# key: lines_present
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 1e42ed11-3b23-4d08-b22c-78c89c0ddc2e
+# --
+lines_present("${1:lines}")$0

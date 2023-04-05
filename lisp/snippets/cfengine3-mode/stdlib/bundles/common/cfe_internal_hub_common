@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common cfe_internal_hub_common
+# key: cfe_internal_hub_common
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8f0ff4ae-8bf0-4f06-a519-1524faa2b4ad
+# --
+cfe_internal_hub_common$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent url_ping(host, method, port, uri)
+# key: url_ping
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cf794b2e-cf79-417a-9311-745456ce7349
+# --
+url_ping("${1:host}", "${2:method}", "${3:port}", "${4:uri}")$0

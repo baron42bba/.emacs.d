@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: ifencrypted => boolean
+# key: ifencrypted
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7740d7d4-6cd0-463d-93c5-373647f1d3a7
+# --
+ifencrypted => "${1:$$(yas-choose-value '("true" "false"))}"$0

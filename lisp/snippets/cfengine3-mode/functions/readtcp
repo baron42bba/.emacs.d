@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readtcp(hostnameip, port, sendstring, maxbytes)
+# key: readtcp
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f13d5a24-e78d-4139-a9a8-7713116b7633
+# --
+readtcp("${1:hostnameip}", "${2:port}", "${3:sendstring}", "${4:maxbytes}")$0

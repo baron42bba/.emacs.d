@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_colon_field(key, field, val)
+# key: set_colon_field
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: f9ed41d4-7bd9-4c43-a8c9-ebbcff701b48
+# --
+set_colon_field("${1:key}", "${2:field}", "${3:val}")$0

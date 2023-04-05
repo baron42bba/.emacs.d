@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body changes diff_noupdate
+# key: diff_noupdate
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8ee511da-d0c4-44ed-9f34-173daf81f714
+# --
+diff_noupdate$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function getvalues(varref)
+# key: getvalues
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: caa24221-de9f-44e6-a041-cba047733535
+# --
+getvalues("${1:varref}")$0

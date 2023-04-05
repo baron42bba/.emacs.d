@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: roles promise
+# key: roles
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ec3cc328-043b-4f25-b5ad-3e6540ed20ba
+# --
+"${1:roles}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+authorize

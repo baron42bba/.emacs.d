@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body replace_with comment(c)
+# key: comment
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 8301527f-3ca9-47d8-92fb-830529e99912
+# --
+comment("${1:c}")$0

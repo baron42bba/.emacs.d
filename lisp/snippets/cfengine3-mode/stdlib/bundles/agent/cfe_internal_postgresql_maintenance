@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cfe_internal_postgresql_maintenance
+# key: cfe_internal_postgresql_maintenance
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 59d05017-b5a0-4034-af64-72f7000ceca6
+# --
+cfe_internal_postgresql_maintenance$0

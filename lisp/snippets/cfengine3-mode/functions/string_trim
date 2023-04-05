@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function string_trim(string)
+# key: string_trim
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 3b53527d-98f5-4e41-830e-3d07ef13a176
+# --
+string_trim("${1:string}")$0

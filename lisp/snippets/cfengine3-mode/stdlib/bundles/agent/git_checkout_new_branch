@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent git_checkout_new_branch(repo_path, new_branch)
+# key: git_checkout_new_branch
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b2b407f9-8994-4aba-9350-32e199f1021e
+# --
+git_checkout_new_branch("${1:repo_path}", "${2:new_branch}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body file_select bigger_than(size)
+# key: bigger_than
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 74f28906-0728-44fa-96ab-0015425923e0
+# --
+bigger_than("${1:size}")$0

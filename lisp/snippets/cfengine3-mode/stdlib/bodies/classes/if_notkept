@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body classes if_notkept(x)
+# key: if_notkept
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: acde213a-ea1f-48b4-837a-4c61cdca64f8
+# --
+if_notkept("${1:x}")$0

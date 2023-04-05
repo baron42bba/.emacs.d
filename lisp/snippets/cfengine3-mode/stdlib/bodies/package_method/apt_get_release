@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method apt_get_release(release)
+# key: apt_get_release
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 5f2aca92-3b47-415e-baa8-3a044563b68c
+# --
+apt_get_release("${1:release}")$0

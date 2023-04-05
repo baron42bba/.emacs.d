@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: select_xpath => string
+# key: select_xpath
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ff156899-4013-449a-a320-2e8e49b61f0f
+# --
+select_xpath => "$1"$0

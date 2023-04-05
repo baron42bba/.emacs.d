@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function irange(arg1, arg2)
+# key: irange
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e36b48bb-e009-49f9-8f8a-da7a4fb4dfb6
+# --
+irange("${1:arg1}", "${2:arg2}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle edit_line set_config_values(v)
+# key: set_config_values
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: c5fedf0b-d910-4619-8c28-25fe0dd249f7
+# --
+set_config_values("${1:v}")$0

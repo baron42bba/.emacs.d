@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function validdata(data_string, type)
+# key: validdata
+# contributor: Nick Anderson <nick@cmdln.org>
+# uuid: 2c7f8674-2cfd-43d9-ad81-401a5ef24d33
+# --
+validdata("${1:data_string}", "${2:$$(yas-choose-value '("JSON"))}")$0

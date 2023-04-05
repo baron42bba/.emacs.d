@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readstringarray(array, filename, comment, split, maxentries, maxbytes)
+# key: readstringarray
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: a9918870-cf5b-418f-81b6-347364dbc77d
+# --
+readstringarray("${1:array}", "${2:filename}", "${3:comment}", "${4:split}", "${5:maxentries}", "${6:maxbytes}")$0

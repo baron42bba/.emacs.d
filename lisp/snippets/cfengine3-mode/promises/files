@@ -1,0 +1,40 @@
+# -*- mode: snippet -*-
+# name: files promise
+# key: files
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fd2731fa-2f33-487c-bee4-f6774d5148c6
+# --
+"${1:files}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+acl
+changes
+copy_from
+create
+delete
+depth_search
+edit_defaults
+edit_line
+edit_template
+edit_template_string
+edit_xml
+file_select
+file_type
+link_from
+move_obstructions
+pathtype
+perms
+rename
+repository
+template_data
+template_method
+touch
+transformer

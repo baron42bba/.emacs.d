@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: body runagent
+# key: body-runagent
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 98df4183-fbae-5299-9257-ff272e7bccb2
+# --
+body runagent $1
+{
+inherit_from
+meta
+background_children
+encrypt
+force_ipv4
+hosts
+max_children
+output_directory
+output_to_file
+port
+timeout
+trustkey
+}

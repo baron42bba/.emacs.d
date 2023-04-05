@@ -1,0 +1,22 @@
+# -*- mode: snippet -*-
+# name: processes promise
+# key: processes
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: ddaab1bb-b872-4f3b-9a7e-77db9a562c9f
+# --
+"${1:processes}"
+action
+classes
+comment
+depends_on
+handle
+if
+ifvarclass
+meta
+unless
+with
+process_count
+process_select
+process_stop
+restart_class
+signals

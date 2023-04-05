@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent testing_ok_if(classname, message, error, trace, format)
+# key: testing_ok_if
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 22529f91-ddfe-45ad-8f07-893338e6901e
+# --
+testing_ok_if("${1:classname}", "${2:message}", "${3:error}", "${4:trace}", "${5:format}")$0

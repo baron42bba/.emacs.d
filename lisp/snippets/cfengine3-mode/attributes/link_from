@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: link_from => body link_from
+# key: link_from
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: b0430eb1-5be8-4395-8266-5dfbe52405d2
+# --
+link_from => ${1:$$(yas-choose-value '("linkchildren" "linkfrom" "ln_s"))}$0

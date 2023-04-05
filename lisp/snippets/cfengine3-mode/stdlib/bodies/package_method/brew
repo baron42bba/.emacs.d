@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method brew(user)
+# key: brew
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 74b0ac5f-c016-4957-a148-6129762b6266
+# --
+brew("${1:user}")$0

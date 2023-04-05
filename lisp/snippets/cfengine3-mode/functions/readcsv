@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function readcsv(filename, optional_maxbytes)
+# key: readcsv
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 137a238b-c0bd-4dbf-8871-d83605fac63e
+# --
+readcsv("${1:filename}", "${2:optional_maxbytes}")$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent cronjob(commands, user, hours, mins)
+# key: cronjob
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fe579eac-4dc5-486e-9706-08120ae3a57c
+# --
+cronjob("${1:commands}", "${2:user}", "${3:hours}", "${4:mins}")$0

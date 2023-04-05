@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle agent process_kill(name)
+# key: process_kill
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: e253037e-6448-4cab-8e22-044ff1a7ebf6
+# --
+process_kill("${1:name}")$0

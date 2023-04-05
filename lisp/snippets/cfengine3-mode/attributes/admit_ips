@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: admit_ips => slist
+# key: admit_ips
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 499209b8-220e-4331-b9cd-35e1dd902d25
+# --
+admit_ips => { ${1:slist} }$0

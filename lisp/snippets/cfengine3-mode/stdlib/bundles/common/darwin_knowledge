@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bundle common darwin_knowledge
+# key: darwin_knowledge
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: fba3e8cd-0c04-48a0-8ba1-126d3cc66f3a
+# --
+darwin_knowledge$0

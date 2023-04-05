@@ -1,0 +1,35 @@
+# -*- mode: snippet -*-
+# name: body copy_from
+# key: body-copy_from
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7e099e07-a9ef-49c6-935a-e01c17e8bcdd
+# --
+body copy_from $1
+{
+inherit_from
+meta
+check_root
+collapse_destination_dir
+compare
+copy_backup
+copy_size
+copylink_patterns
+encrypt
+findertype
+force_ipv4
+force_update
+link_type
+linkcopy_patterns
+missing_ok
+portnumber
+preserve
+protocol_version
+purge
+servers
+source
+stealth
+timeout
+trustkey
+type_check
+verify
+}

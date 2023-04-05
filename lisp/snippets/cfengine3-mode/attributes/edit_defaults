@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: edit_defaults => body edit_defaults
+# key: edit_defaults
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3e54d905-afbc-4207-b6ff-c86ef764c4b8
+# --
+edit_defaults => ${1:$$(yas-choose-value '("backup_timestamp" "empty" "no_backup" "std_defs"))}$0

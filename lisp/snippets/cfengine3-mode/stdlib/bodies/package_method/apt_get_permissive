@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method apt_get_permissive
+# key: apt_get_permissive
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3e584bb4-6432-475a-a028-30018710702d
+# --
+apt_get_permissive$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: inherit => boolean
+# key: inherit
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 52477f64-8834-40a3-be9d-d1bd0f89bcc5
+# --
+inherit => "${1:$$(yas-choose-value '("true" "false"))}"$0

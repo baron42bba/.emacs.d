@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body package_method opencsw
+# key: opencsw
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3f43d9b5-f66c-417c-b8d4-3ef76903235a
+# --
+opencsw$0

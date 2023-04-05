@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body action if_elapsed(x)
+# key: if_elapsed
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d64cdc95-63b0-4dfe-b717-b98c52ca2adc
+# --
+if_elapsed("${1:x}")$0

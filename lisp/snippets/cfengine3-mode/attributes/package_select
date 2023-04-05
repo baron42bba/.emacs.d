@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: package_select => one of >, <, ==, !=, >=, <=
+# key: package_select
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 00073582-4f5b-437b-9dd3-c27c19dec1fd
+# --
+package_select => ${1:$$(yas-choose-value '(">" "<" "==" "!=" ">=" "<="))}

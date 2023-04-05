@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: service_policy => string
+# key: service_policy
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7119e3d2-2ff9-40c6-84f7-b7c2afed5992
+# --
+service_policy => "$1"$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: environment_type => one of xen, kvm, esx, vbox, test, xen_net, kvm_net, esx_net, test_net, zone, ec2, eucalyptus
+# key: environment_type
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 7795c5b4-d5a3-4807-9df8-cd7ac3f75463
+# --
+environment_type => ${1:$$(yas-choose-value '("xen" "kvm" "esx" "vbox" "test" "xen_net" "kvm_net" "esx_net" "test_net" "zone" "ec2" "eucalyptus"))}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body perms og(u, g)
+# key: og
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 127ba49c-2bbd-4aa7-a45e-ea692f0d2aaf
+# --
+og("${1:u}", "${2:g}")$0

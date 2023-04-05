@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function isnewerthan(newer, older)
+# key: isnewerthan
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3f7cd12e-d29d-47c0-907c-97b74c530d31
+# --
+isnewerthan("${1:newer}", "${2:older}")$0

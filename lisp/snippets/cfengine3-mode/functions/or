@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: function or(...)
+# key: or
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: 3eba904d-ab3f-4212-b6fd-ad0702bb348a
+# --
+or("${1:expressions}")$0

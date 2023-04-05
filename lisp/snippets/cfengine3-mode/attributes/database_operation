@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: database_operation => one of create, delete, drop, cache, verify, restore
+# key: database_operation
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: d95ea738-812c-4111-ade1-5e7c3e95a33c
+# --
+database_operation => ${1:$$(yas-choose-value '("create" "delete" "drop" "cache" "verify" "restore"))}

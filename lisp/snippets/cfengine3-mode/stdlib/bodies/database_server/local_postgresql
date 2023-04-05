@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: body database_server local_postgresql(username, password)
+# key: local_postgresql
+# contributor: Jeff Carlson <jeff@ultimateevil.org>
+# uuid: cc79db37-97d2-479a-8afe-fcad88bd0438
+# --
+local_postgresql("${1:username}", "${2:password}")$0
