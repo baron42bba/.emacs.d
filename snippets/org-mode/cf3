@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name : cf3-snippet
+# key : <cf3
+# contributor : Nick Anderson <nick@cmdln.org>
+# group : cfengine3
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# https://gitlab.com/nickanderson/the-agent-is-in/-/tree/main/Episodes/12
+# --
+#+caption: Example Policy
+#+begin_src cfengine3 :include-stdlib t :log-level info :exports both
+bundle agent __main__
+# @brief Drive default bundlesequence if called as policy entry
+{
+  methods:
+      "$2"
+        usebundle => $1();
+}
+bundle agent ${1:BundleName}()
+# @brief $1 ${2:is responsible for ...}
+{
+  $0
+}
+#+end_src
+
