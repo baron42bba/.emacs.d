@@ -6,7 +6,7 @@
 ;; URL: https://github.com/kostafey/ejc-sql
 ;; Keywords: sql, jdbc
 ;; Version: 0.4.1
-;; Package-Requires: ((emacs "26.3")(clomacs "0.0.5")(dash "2.16.0")(spinner "1.7.3")(direx "1.0.0"))
+;; Package-Requires: ((emacs "26.3")(clomacs "0.0.5")(dash "2.16.0")(spinner "1.7.3"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,7 +38,6 @@
 (require 'cl-lib)
 (require 'org-table)
 (require 'ejc-lib)
-(require 'ejc-direx)
 (require 'ejc-eldoc)
 (require 'ejc-format)
 (require 'ejc-interaction)
@@ -111,7 +110,7 @@ results. When nil, otherwise, provide `ejc-sql' users expected behaviour."
   :group 'ejc-sql
   :type '(plist :key-type string :value-type (vector symbol string)))
 
-(defcustom ejc-completion-system 'ido
+(defcustom ejc-completion-system 'standard
   "The completion system used by `ejc-connect'."
   :group 'ejc-sql
   :type '(radio
@@ -370,7 +369,11 @@ For more details about parameters see `get-connection' function in jdbc.clj:
 (defun ejc-set-mode-name (connection-name)
   "Show CONNECTION-NAME as part of `mode-name' in `mode-line'."
   (setq mode-name (format "%s->[%s]"
-                          (car (split-string mode-name "->\\[.+\\]"))
+                          (car (split-string
+                                (if (listp mode-name)
+                                    (car mode-name)
+                                  mode-name)
+                                "->\\[.+\\]"))
                           connection-name)))
 
 (cl-defun ejc-add-connection (&optional connection-name db)
@@ -861,7 +864,6 @@ Buffer can be saved to file with `ejc-temp-editor-file' path."
         (find-file tmp-file-path)
         (rename-buffer tmp-buffer-name)
         (sql-mode)
-        (auto-fill-mode t)
         (ejc-add-connection)
         (get-buffer tmp-buffer-name)))))
 

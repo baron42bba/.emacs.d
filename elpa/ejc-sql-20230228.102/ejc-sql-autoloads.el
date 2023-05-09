@@ -48,17 +48,6 @@ something#" t nil)
 
 ;;;***
 
-;;;### (autoloads nil "ejc-direx" "ejc-direx.el" (0 0 0 0))
-;;; Generated autoloads from ejc-direx.el
-
-(autoload 'ejc-direx:pop-to-buffer "ejc-direx" nil t nil)
-
-(autoload 'ejc-direx:switch-to-buffer "ejc-direx" nil t nil)
-
-(register-definition-prefixes "ejc-direx" '("direx" "ejc-direx:"))
-
-;;;***
-
 ;;;### (autoloads nil "ejc-doc" "ejc-doc.el" (0 0 0 0))
 ;;; Generated autoloads from ejc-doc.el
 
