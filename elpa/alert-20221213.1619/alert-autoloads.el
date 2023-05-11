@@ -1,4 +1,4 @@
-;;; alert-autoloads.el --- automatically extracted autoloads
+;;; alert-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -45,19 +45,21 @@ MESSAGE is what the user will see.  You may also use keyword
 arguments to specify additional details.  Here is a full example:
 
 \(alert \"This is a message\"
-       :severity \\='high          ;; The default severity is `normal'
-       :title \"Title\"           ;; An optional title
-       :category \\='example       ;; A symbol to identify the message
-       :mode \\='text-mode         ;; Normally determined automatically
-       :buffer (current-buffer) ;; This is the default
-       :data nil                ;; Unused by alert.el itself
-       :persistent nil          ;; Force the alert to be persistent;
-                                ;; it is best not to use this
-       :never-persist nil       ;; Force this alert to never persist
-       :id \\='my-id)              ;; Used to replace previous message of
-                                ;; the same id in styles that support it
-       :style \\='fringe)          ;; Force a given style to be used;
-                                ;; this is only for debugging!
+       :severity \\='high            ;; The default severity is `normal'
+       :title \"Title\"              ;; An optional title
+       :category \\='example         ;; A symbol to identify the message
+       :mode \\='text-mode           ;; Normally determined automatically
+       :buffer (current-buffer)      ;; This is the default
+       :data nil                     ;; Unused by alert.el itself
+       :persistent nil               ;; Force the alert to be persistent;
+                                     ;; it is best not to use this
+       :never-persist nil            ;; Force this alert to never persist
+       :id \\='my-id)                ;; Used to replace previous message of
+                                     ;; the same id in styles that support it
+       :style \\='fringe)            ;; Force a given style to be used;
+                                     ;; this is only for debugging!
+       :icon \\=\"mail-message-new\" ;; if style supports icon then add icon
+                                     ;; name or path here
 
 If no :title is given, the buffer-name of :buffer is used.  If
 :buffer is nil, it is the current buffer at the point of call.
@@ -87,7 +89,7 @@ Here are some more typical examples of usage:
 
 \(fn MESSAGE &key (SEVERITY \\='normal) TITLE ICON CATEGORY BUFFER MODE DATA STYLE PERSISTENT NEVER-PERSIST ID)" nil nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "alert" '("alert-" "x-urgen")))
+(register-definition-prefixes "alert" '("alert-" "x-urgen"))
 
 ;;;***
 
