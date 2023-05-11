@@ -1,0 +1,604 @@
+This is detached.info, produced by makeinfo version 7.0 from
+detached.texi.
+
+This manual describes the design of the ‘detached’ (version 0.10.1, last
+updated 1 November 2022) package, as well as its options and
+customizations.
+
+   Copyright © 2020-2022 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with no Front-Cover Texts,
+     and with no Back-Cover Texts.  A copy of the license is included in
+     the section entitled “GNU Free Documentation License”.
+
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Detached: (detached). Launch, interact and manage detached processes.
+END-INFO-DIR-ENTRY
+
+
+File: detached.info,  Node: Top,  Next: Overview,  Up: (dir)
+
+Detached processes for GNU Emacs
+********************************
+
+This manual describes the design of the ‘detached’ (version 0.10.1, last
+updated 1 November 2022) package, as well as its options and
+customizations.
+
+   Copyright © 2020-2022 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with no Front-Cover Texts,
+     and with no Back-Cover Texts.  A copy of the license is included in
+     the section entitled “GNU Free Documentation License”.
+
+* Menu:
+
+* Overview::
+* Dependencies::
+* Installation::
+* Configuration::
+* Workflows::
+* Customization::
+* Design::
+* Known limitations::
+* Contributions::
+* Acknowledgments::
+
+— The Detailed Node Listing —
+
+Installation
+
+* Install from source::
+* Install from package archives::
+* Install from Guix::
+
+Workflows
+
+* Integration with shells::
+* Integration with compile and shell-command::
+* Session management::
+
+Session management
+
+* Detached list sessions::
+
+Customization
+
+* Notifications::
+* Detached list::
+
+Design
+
+* Sessions::
+
+Sessions
+
+* Session creation::
+* Session initialization::
+* Session transition::
+
+Known limitations
+
+* Quotation marks::
+* Reproducible environments::
+
+Acknowledgments
+
+* Code contributors::
+* Idea contributors::
+
+
+
+File: detached.info,  Node: Overview,  Next: Dependencies,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+The ‘detached’ package allows Emacs to run processes which are
+independent from Emacs itself.  This is accomplished by offloading the
+process creation to the program ‘dtach’.
+
+   The package introduces a concept of a detached session.  A session
+constitutes of three parts:
+
+   • a dtach process
+   • a log with all the process output
+   • a datastructure in Emacs-Lisp
+
+   After a session has been created, Emacs can optionally attach to the
+process.  This is something that can be done seamlessly and therefore
+provides no disruption in the ordinary workflows.  Another feature
+provided by the package is its monitoring of sessions.  It will notify
+the user whenever a session transitions from active to inactive.  Since
+all the output of the session is captured, and stored persistently, it
+can be thought of as a text representation of the process.
+
+   The package provides integration with the following built-in Emacs
+packages:
+
+   • ‘compile’
+   • ‘dired’
+   • ‘eshell’
+   • ‘org’
+
+   It also offers support for some 3rd-party packages.  For a full list
+of all supported packages, see the variable
+‘detached-init-package-integration’.
+
+
+File: detached.info,  Node: Dependencies,  Next: Installation,  Prev: Overview,  Up: Top
+
+2 Dependencies
+**************
+
+The package has no dependencies to other Emacs packages.  The
+requirements are that it needs to run on either ‘Linux’ or ‘macOS,’
+since those are the operating systems supported by the program ‘dtach’.
+Apart from dtach, the complete list of external tools to get all the
+features from the package are:
+
+   • ‘tail’
+   • ‘script’
+   • ‘grep’
+   • ‘tee’
+
+
+File: detached.info,  Node: Installation,  Next: Configuration,  Prev: Dependencies,  Up: Top
+
+3 Installation
+**************
+
+The ‘detached’ package can be installed from ‘GNU ELPA’ which is enabled
+by default.  It is also available for installation through the ‘Guix’
+package manager.
+
+* Menu:
+
+* Install from source::
+* Install from package archives::
+* Install from Guix::
+
+
+File: detached.info,  Node: Install from source,  Next: Install from package archives,  Up: Installation
+
+3.1 Install from source
+=======================
+
+Download the source code from ‘sourcehut’.
+
+     git clone https://git.sr.ht/~niklaseklund/detached.el ~/.config/emacs/packages/detached.el
+
+   Add the following code to ‘init.el’.
+
+     (add-to-list 'load-path "~/.config/emacs/packages/detached.el")
+
+
+File: detached.info,  Node: Install from package archives,  Next: Install from Guix,  Prev: Install from source,  Up: Installation
+
+3.2 Install from package archives
+=================================
+
+Run ‘M-x package-refresh-contents’ to make sure the list of packages are
+up to date.  List all the packages with ‘M-x package-list-packages’ and
+and find ‘detached’.  Press return to get information about the package,
+and press install.
+
+
+File: detached.info,  Node: Install from Guix,  Prev: Install from package archives,  Up: Installation
+
+3.3 Install from Guix
+=====================
+
+To install ‘detached’ with Guix run the following command in a terminal.
+
+     guix install emacs-detached
+
+
+File: detached.info,  Node: Configuration,  Next: Workflows,  Prev: Installation,  Up: Top
+
+4 Configuration
+***************
+
+This is a a minimal ‘use-package’ configuration.
+
+     (use-package detached
+       :init
+       (detached-init)
+       :bind (([remap async-shell-command] . detached-shell-command)
+              ([remap compile] . detached-compile)
+              ([remap recompile] . detached-compile-recompile))
+       :custom ((detached-terminal-data-command system-type)
+                (detached-terminal-data-command system-type)))
+
+
+File: detached.info,  Node: Workflows,  Next: Customization,  Prev: Configuration,  Up: Top
+
+5 Workflows
+***********
+
+* Menu:
+
+* Integration with shells::
+* Integration with compile and shell-command::
+* Session management::
+
+
+File: detached.info,  Node: Integration with shells,  Next: Integration with compile and shell-command,  Up: Workflows
+
+5.1 Integration with shells
+===========================
+
+The package supports integration with ‘shell’, ‘eshell’ and ‘vterm’.
+All of the these extensions work similarly, each implementing a detached
+minor mode, ‘detached-.*mode’.  Each of the minor modes provides
+keybindings for the following operations:
+
+   • Creating a session
+   • Detaching from a session
+   • Attach to a session
+
+   When creating a session Emacs will automatically attach to the
+underlying ‘dtach’ process and the result will look the same as if
+‘detached’ wasn’t used.  The difference is that the user can detach from
+the session with the keybinding determined by the ‘detached-detach-key’.
+If the prefix argument is provided when creating the session detached
+will not attach to the session.  To later attach to a running session
+the user can do this with the attach command, by default bound to
+‘C-<return>’.
+
+
+File: detached.info,  Node: Integration with compile and shell-command,  Next: Session management,  Prev: Integration with shells,  Up: Workflows
+
+5.2 Integration with compile and shell-command
+==============================================
+
+When creating a session with ‘detached-compile’ or
+‘detached-shell-command’ Emacs will attach to the process and show the
+result in a buffer.  It is possible to detach from the process with the
+‘detached-detach-key’ and the buffer will then be closed.  Later on to
+attach to a session use any of the commands provided mentioned in
+Session management.
+
+
+File: detached.info,  Node: Session management,  Prev: Integration with compile and shell-command,  Up: Workflows
+
+5.3 Session management
+======================
+
+The package offers two different interfaces for session management,
+‘detached-open-session’ and ‘detached-list-sessions’.  The former uses
+the completing-read interface, whilst the latter uses the tabulated list
+interface.  Each of the interfaces can be used to interact with a
+session.  The ‘detached-list-sessions’ interface is however more feature
+rich, and is what is recommended from the package author.
+
+* Menu:
+
+* Detached list sessions::
+
+
+File: detached.info,  Node: Detached list sessions,  Up: Session management
+
+5.3.1 Detached list sessions
+----------------------------
+
+After opening ‘detached-list-sessions’ the user can press ‘?’ to view a
+list of all commands accessible in the buffer.  Generally speaking there
+are commands to either operate on the session at point, such as
+rerunning it and deleting it.  Or there are commands that operate on
+multiple sessions at once, such as marking sessions or narrow the list
+of sessions based on a criteria.
+
+   Narrow criteria are composable so that they each take effect after
+each other.  For example narrowing based on local sessions, narrows the
+list of candidates, which further can be narrowed to sessions where the
+command match a regular expression.  The mode also features a command
+‘detached-list-select-filter’ which allows the user to select a
+preconfigured set of criteria defined in ‘detached-list-filters’.
+
+
+File: detached.info,  Node: Customization,  Next: Design,  Prev: Workflows,  Up: Top
+
+6 Customization
+***************
+
+* Menu:
+
+* Notifications::
+* Detached list::
+
+
+File: detached.info,  Node: Notifications,  Next: Detached list,  Up: Customization
+
+6.1 Notifications
+=================
+
+By default ‘detached’ uses the built in ‘notifications’ library to issue
+notifications to the user.  This solution is dependent on ‘dbus’, and if
+that doesn’t work the user has the posbility to customize the
+‘detached-notification-function’.
+
+   The variable can be changed to:
+   • a custom function, created by the user
+   • the ‘detached-state-transition-echo-message’, which uses the echo
+     area
+   • the ‘detached-extra-alert-notification’, which relies on the
+     3rd-party package ‘alert’
+
+
+File: detached.info,  Node: Detached list,  Prev: Notifications,  Up: Customization
+
+6.2 Detached list
+=================
+
+The buffer created by ‘detached-list-sessions’ can be customized in its
+appearance.  This is done through the
+‘detached-list-display-buffer-action’.  By default it will use:
+
+     '(display-buffer-same-window
+       (inhibit-same-window . nil))
+
+   Which makes the buffer replace the buffer in the current window.  For
+those that prefer a popup window, created at the bottom of the frame,
+the following value can be used:
+
+     '(display-buffer-at-bottom
+       (window-height . 0.33))
+
+
+File: detached.info,  Node: Design,  Next: Known limitations,  Prev: Customization,  Up: Top
+
+7 Design
+********
+
+* Menu:
+
+* Sessions::
+
+
+File: detached.info,  Node: Sessions,  Up: Design
+
+7.1 Sessions
+============
+
+* Menu:
+
+* Session creation::
+* Session initialization::
+* Session transition::
+
+
+File: detached.info,  Node: Session creation,  Next: Session initialization,  Up: Sessions
+
+7.1.1 Session creation
+----------------------
+
+When creating a session ‘three actions’ are taken:
+   • The session’s directory is getting watched, unless its already
+     watched
+   • A timer-based validator function is being created
+   • The session object is added to the list of unvalidated sessions
+
+   The steps taken above is done in order to handle a couple of
+different scenarios:
+   • The underlying ‘dtach’ session is never created, the validator will
+     recognize this and never insert the session into the database
+   • The session is correctly created and is running when the validator
+     is called, it will update the state from ‘unknown’ to ‘active’ and
+     insert the object into the database
+   • The session is finished quickly before the validator is being run,
+     it will trigger a session directory event, this will update the
+     session and insert it into the database, at the same time it is
+     removed from the list of ‘unvalidated’ sessions which will cause
+     the ‘validator’ to not do anything
+
+   The logic described mean that the Emacs that creates the session is
+responsible for validating the session.  Only when a session has been
+validated, or become inactive, it will be added to the database.  When
+it is added to the database it will cause other ‘Emacsen’ to read from
+the database and then become aware of existence the session.
+
+
+File: detached.info,  Node: Session initialization,  Next: Session transition,  Prev: Session creation,  Up: Sessions
+
+7.1.2 Session initialization
+----------------------------
+
+The initialization of ‘sessions’ when ‘detached’ is loaded is performed
+in the following steps:
+   • All known sessions are read from the database
+   • The directory where the database resides are being watched in order
+     to detect updates made to the database
+   • A hash-table is created where all keys are session ids, and the
+     values are the status, which is initialized to ‘uninitialized’
+   • For all sessions that are accessible, which is either local
+     sessions or remote sessions with an active connection
+        • The hash-table is updated to ‘initialized’
+        • The sessions ‘initialized-emacsen’ property is updated with
+          the process id of the current Emacs
+        • If the session is registered as ‘active’ the session is
+          updated if it has transitioned to ‘inactive’, otherwise its
+          session directory is being watched
+        • If the session is missing, ‘e.g.’ it has been deleted from the
+          computer, the session is removed from the database
+
+
+File: detached.info,  Node: Session transition,  Prev: Session initialization,  Up: Sessions
+
+7.1.3 Session transition
+------------------------
+
+The ‘detached’ sessions are read from the persistent ‘detached.db’ file
+when the package is loaded.  All ‘Emacsen’ that loads ‘detached’ are
+reading and writing to the same database file, that allows the sessions
+to be shared among Emacsen.
+
+   To avoid all Emacsen from sending a notification when a session
+becomes inactive the responsibility is determined dynamically.  All
+Emacsen, where detached is loaded, registers their process in a file
+named ‘detached-emacsen’.  Initialization of sessions are done on a
+session basis
+
+
+File: detached.info,  Node: Known limitations,  Next: Contributions,  Prev: Design,  Up: Top
+
+8 Known limitations
+*******************
+
+The ‘detached’ package have some known limitations.  It is designed
+around the idea that a single command is executed.  Therefore it does
+not support a session that can be re-used over time, which is a common
+use-case with for example ‘tmux’.
+
+* Menu:
+
+* Quotation marks::
+* Reproducible environments::
+
+
+File: detached.info,  Node: Quotation marks,  Next: Reproducible environments,  Up: Known limitations
+
+8.1 Quotation marks
+===================
+
+The way the package transforms, the command the user wants to run, into
+a ‘detached’ command behaves incorrectly when it contain double
+quotation marks.  For example the following command:
+
+     git shortlog --summary --numbered --all --no-merges --since="01 Jan 2022"
+
+   Will unfortunately not be interpreted correctly.  Instead the user
+needs to use single quotation marks in order for it to work:
+
+     git shortlog --summary --numbered --all --no-merges --since='01 Jan 2022'
+
+
+File: detached.info,  Node: Reproducible environments,  Prev: Quotation marks,  Up: Known limitations
+
+8.2 Reproducible environments
+=============================
+
+The package works best when sessions can be re-run.  For this to work,
+the command needs to be robust against changes in the environment.
+Since only a single command is run there can be no dependency to
+previously run commands in the same shell, when the session is created.
+If the command the user wants to run have such requirements the best
+thing to do is to create a shell script that can set up that
+environment, and execute that script instead.
+
+   The tool ‘direnv’ could ideally be used with ‘detached’, however
+there seems to be no way to make it work for remote processes.  So the
+recommendation for that use-case is the same as above, create a shell
+script.  For example a script named ‘direnv_command’ with the following
+content:
+
+     #!/usr/bin/env bash
+     direnv exec . "$@"
+
+   Then the following command would be reproducible.
+
+     direnv_command python foo.py
+
+
+File: detached.info,  Node: Contributions,  Next: Acknowledgments,  Prev: Known limitations,  Up: Top
+
+9 Contributions
+***************
+
+The package is part of ‘ELPA’, which means that if you want to
+contribute, you must have a copyright assignement
+(https://www.gnu.org/software/emacs/manual/html_node/emacs/Copyright-Assignment.html).
+
+
+File: detached.info,  Node: Acknowledgments,  Prev: Contributions,  Up: Top
+
+10 Acknowledgments
+******************
+
+This package wouldn’t have been were it is today without these
+contributors.
+
+* Menu:
+
+* Code contributors::
+* Idea contributors::
+
+
+File: detached.info,  Node: Code contributors,  Next: Idea contributors,  Up: Acknowledgments
+
+10.1 Code contributors
+======================
+
+   • rosetail (https://gitlab.com/rosetail)
+   • protesilaos (https://lists.sr.ht/~protesilaos)
+   • Stefan Monnier (https://www.iro.umontreal.ca/~monnier)
+   • dpettersson
+   • Greg Pfeil (http://technomadic.org)
+
+
+File: detached.info,  Node: Idea contributors,  Prev: Code contributors,  Up: Acknowledgments
+
+10.2 Idea contributors
+======================
+
+   • rosetail (https://gitlab.com/rosetail) for all the great ideas and
+     improvements to the package.  Without those contributions
+     ‘detached.el‘ would be a less sophisticated package.
+   • Troy de Freitas (https://gitlab.com/ntdef) for solving the problem
+     of getting ‘detached.el‘ to work with ‘filenotify‘ on macOS.
+   • Daniel Mendler (https://gitlab.com/minad) for helping out in
+     improving ‘detached.el‘, among other things integration with other
+     packages such as ‘embark‘ and ‘consult‘.
+   • Ambrevar (https://gitlab.com/ambrevar) who indirectly contributed
+     by inspiring me with his yes eshell is my main shell
+     (https://www.reddit.com/r/emacs/comments/6y3q4k/yes_eshell_is_my_main_shell/).
+     It was through that I discovered his package-eshell-detach
+     (https://github.com/Ambrevar/dotfiles/blob/master/.emacs.d/lisp/package-eshell-detach.el)
+     which got me into the idea of using ‘dtach‘ as a base for detached
+     shell commands.
+
+
+
+Tag Table:
+Node: Top854
+Node: Overview2367
+Node: Dependencies3658
+Node: Installation4170
+Node: Install from source4561
+Node: Install from package archives4978
+Node: Install from Guix5431
+Node: Configuration5694
+Node: Workflows6247
+Node: Integration with shells6475
+Node: Integration with compile and shell-command7524
+Node: Session management8132
+Node: Detached list sessions8755
+Node: Customization9707
+Node: Notifications9874
+Node: Detached list10535
+Node: Design11154
+Node: Sessions11292
+Node: Session creation11453
+Node: Session initialization12969
+Node: Session transition14207
+Node: Known limitations14903
+Node: Quotation marks15352
+Node: Reproducible environments15984
+Node: Contributions17044
+Node: Acknowledgments17387
+Node: Code contributors17639
+Node: Idea contributors18008
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:
