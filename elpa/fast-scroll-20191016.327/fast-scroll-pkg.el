@@ -1,0 +1,2 @@
+;;; -*- no-byte-compile: t -*-
+(define-package "fast-scroll" "20191016.327" "Some utilities for faster scrolling over large buffers." '((emacs "25.1") (cl-lib "0.6.1")) :commit "3f6ca0d5556fe9795b74714304564f2295dcfa24" :keywords '("ahungry" "convenience" "fast" "scroll" "scrolling") :authors '(("Matthew Carter" . "m@ahungry.com")) :maintainer '("Matthew Carter" . "m@ahungry.com") :url "https://github.com/ahungry/fast-scroll")
