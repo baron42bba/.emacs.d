@@ -1,8 +1,10 @@
-(define-package "impatient-mode" "20200723.2117" "Serve buffers live over HTTP"
+(define-package "impatient-mode" "20230511.1746" "Serve buffers live over HTTP"
   '((emacs "24.3")
     (simple-httpd "1.5.0")
     (htmlize "1.40"))
-  :commit "cbddfd54242210df3e1c3b590fada5bb5423f5ed" :authors
+  :commit "a4e4e12852840996b027cb8e9fb2b809c37a0ee3" :authors
+  '(("Brian Taylor" . "el.wubo@gmail.com"))
+  :maintainers
   '(("Brian Taylor" . "el.wubo@gmail.com"))
   :maintainer
   '("Brian Taylor" . "el.wubo@gmail.com")

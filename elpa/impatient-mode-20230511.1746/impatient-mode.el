@@ -48,7 +48,7 @@
   "The delay in seconds between a keypress and the browser reload.
 Set to nil for no delay"
   :group 'impatient
-  :type 'boolean)
+  :type '(choice (const nil) integer))
 
 (defcustom imp-default-user-filters '((mhtml-mode . nil)
                                       (html-mode . nil)
