@@ -1,0 +1,16 @@
+{
+  "name": "${2:`(car (last (butlast (split-string (file-name-directory buffer-file-name) "/"))))`}",
+  "type": "module-repo",
+  "description": "Configure $2",
+  "provides": {
+    "vertica": {
+      "tags": ["local"],
+      "by": "${1:`(bba-insert-name)`}",
+      "steps": [
+        "copy $2 services/cfbs/site/$2",
+        "policy_files services/cfbs/site/$2/main.cf",
+        "bundles $2$0"
+      ]
+    }
+  }
+}
