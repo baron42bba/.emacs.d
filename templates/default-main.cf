@@ -1,0 +1,15 @@
+bundle agent ${1:`(car (last (butlast (split-string (file-name-directory buffer-file-name) "/"))))`}
+# @brief $2
+{
+  vars:
+      $0
+
+  methods:
+      
+  reports:
+
+    (DEBUG|DEBUG_$1)::
+
+      "DEBUG $(this.bundle)";
+}      
+}

@@ -543,6 +543,7 @@ snippets for =aws cli= are awesome!
     "Replace text in yasnippet template."
     (yas-expand-snippet (buffer-string) (point-min) (point-max)))
   (define-auto-insert "cfbs.json$" ["default-cfbs.json" ha-autoinsert-yas-expand])
+  (define-auto-insert "main.cf$" ["default-main.cf" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.go$" ["default-go.go" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.sh$" ["default-sh.sh" ha-autoinsert-yas-expand])
   (define-auto-insert "\\.pl$" ["default-pl.pl" ha-autoinsert-yas-expand])
