@@ -6,7 +6,6 @@
 ;;          Noam Postavsky <npostavs@gmail.com>
 ;; Maintainer: Noam Postavsky <npostavs@gmail.com>
 ;; Version: 0.14.0
-;; Package-Version: 20191222.2206
 ;; X-URL: http://github.com/joaotavora/yasnippet
 ;; Keywords: convenience, emulation
 ;; URL: http://github.com/joaotavora/yasnippet
@@ -1506,7 +1505,7 @@ Also tries to work around Emacs Bug#30931."
               (let ((result (eval form)))
                 (when result
                   (format "%s" result))))))
-      ((debug error) (cdr oops)))))
+      ((debug error) (error-message-string oops)))))
 
 (defun yas--eval-for-effect (form)
   (yas--safely-call-fun (apply-partially #'eval form)))
@@ -3502,7 +3501,8 @@ This renders the snippet as ordinary text."
     ;;
     (let ((previous-field (yas--snippet-previous-active-field snippet)))
       (when (and yas-snippet-end previous-field)
-        (yas--advance-end-maybe previous-field yas-snippet-end)))
+        (yas--advance-end-maybe-previous-fields
+         previous-field yas-snippet-end (cdr yas--active-snippets))))
 
     ;; Convert all markers to points,
     ;;
@@ -3850,14 +3850,9 @@ field start.  This hook does nothing if an undo is in progress."
                   (setf (yas--field-modified-p field) t)
                   ;; Adjust any pending active fields in case of stacked
                   ;; expansion.
-                  (let ((pfield field)
-                        (psnippets (yas--gather-active-snippets
-                                    overlay beg end t)))
-                    (while (and pfield psnippets)
-                      (let ((psnippet (pop psnippets)))
-                        (cl-assert (memq pfield (yas--snippet-fields psnippet)))
-                        (yas--advance-end-maybe pfield (overlay-end overlay))
-                        (setq pfield (yas--snippet-previous-active-field psnippet)))))
+                  (yas--advance-end-maybe-previous-fields
+                   field (overlay-end overlay)
+                   (yas--gather-active-snippets overlay beg end t))
                   ;; Update fields now, but delay auto indentation until
                   ;; post-command.  We don't want to run indentation on
                   ;; the intermediate state where field text might be
@@ -4111,7 +4106,9 @@ for normal snippets, and a list for command snippets)."
                                         (overlay-get yas--active-field-overlay 'yas--field))))
                (when existing-field
                  (setf (yas--snippet-previous-active-field snippet) existing-field)
-                 (yas--advance-end-maybe existing-field (overlay-end yas--active-field-overlay))))
+                 (yas--advance-end-maybe-previous-fields
+                  existing-field (overlay-end yas--active-field-overlay)
+                  (cdr yas--active-snippets))))
 
              ;; Exit the snippet immediately if no fields.
              (unless (yas--snippet-fields snippet)
@@ -4171,21 +4168,27 @@ Returns the newly created snippet."
       (yas--letenv expand-env
         ;; Put a single undo action for the expanded snippet's
         ;; content.
-        (let ((buffer-undo-list t)
-              (inhibit-modification-hooks t))
-          ;; Some versions of cc-mode fail when inserting snippet
-          ;; content in a narrowed buffer, so make sure to insert
-          ;; before narrowing.  Furthermore, call before and after
-          ;; change functions manually, otherwise cc-mode's cache can
-          ;; get messed up.
+        (let ((buffer-undo-list t))
           (goto-char begin)
-          (run-hook-with-args 'before-change-functions begin begin)
-          (insert content)
-          (setq end (+ end (length content)))
-          (narrow-to-region begin end)
-          (goto-char (point-min))
-          (yas--snippet-parse-create snippet)
-          (run-hook-with-args 'after-change-functions (point-min) (point-max) 0))
+          ;; Call before and after change functions manually,
+          ;; otherwise cc-mode's cache can get messed up.  Don't use
+          ;; `inhibit-modification-hooks' for that, that blocks
+          ;; overlay and text property hooks as well!  FIXME: Maybe
+          ;; use `combine-change-calls'?  (Requires Emacs 27+ though.)
+          (run-hook-with-args 'before-change-functions begin end)
+          (let ((before-change-functions nil)
+                (after-change-functions nil))
+            ;; Some versions of cc-mode (might be the one with Emacs
+            ;; 24.3 only) fail when inserting snippet content in a
+            ;; narrowed buffer, so make sure to insert before
+            ;; narrowing.
+            (insert content)
+            (narrow-to-region begin (point))
+            (goto-char (point-min))
+            (yas--snippet-parse-create snippet))
+          (run-hook-with-args 'after-change-functions
+                              (point-min) (point-max)
+                              (- end begin)))
         (when (listp buffer-undo-list)
           (push (cons (point-min) (point-max))
                 buffer-undo-list))
@@ -4336,6 +4339,13 @@ exit-marker have identical start and end markers."
          (yas--advance-end-of-parents-maybe (yas--fom-parent-field fom) newend))
         ((yas--exit-p fom)
          (yas--advance-start-maybe (yas--fom-next fom) newend))))
+
+(defun yas--advance-end-maybe-previous-fields (field end snippets)
+  "Call `yas--advance-end-maybe' on FIELD, and previous fields on SNIPPETS."
+  (dolist (snippet snippets)
+    (cl-assert (memq field (yas--snippet-fields snippet)))
+    (yas--advance-end-maybe field end)
+    (setq field (yas--snippet-previous-active-field snippet))))
 
 (defun yas--advance-start-maybe (fom newstart)
   "Maybe advance FOM's start to NEWSTART if it needs it.
@@ -4715,6 +4725,13 @@ SAVED-QUOTES is the in format returned by `yas--save-backquotes'."
           yas--indent-markers))
   (setq yas--indent-markers (nreverse yas--indent-markers)))
 
+(defun yas--scan-for-field-end ()
+  (while (progn (re-search-forward "\\${\\|}")
+                (when (eq (char-before) ?\{)
+                  ;; Nested field.
+                  (yas--scan-for-field-end))))
+  (point))
+
 (defun yas--field-parse-create (snippet &optional parent-field)
   "Parse most field expressions in SNIPPET, except for the simple one \"$n\".
 
@@ -4731,7 +4748,9 @@ When multiple expressions are found, only the last one counts."
   ;;
   (save-excursion
     (while (re-search-forward yas--field-regexp nil t)
-      (let* ((brace-scan (yas--scan-sexps (1+ (match-beginning 0)) 1))
+      (let* ((brace-scan (save-match-data
+                           (goto-char (match-beginning 2))
+                           (yas--scan-for-field-end)))
              ;; if the `brace-scan' didn't reach a brace, we have a
              ;; snippet with invalid escaping, probably a closing
              ;; brace escaped with two backslashes (github#979). But
