@@ -58,30 +58,3 @@
 :group 'SQL)
 
 (setq minibuffer-max-depth nil)
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :extend nil :stipple nil :background "#282828" :foreground "#07e30d" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 120 :width normal :foundry "nil" :family "Menlo"))))
- '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
- '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))))
- '(org-block-end-line ((t (:inherit org-block-begin-line))))
- '(org-document-title ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.5 :underline nil))))
- '(org-level-1 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.6))))
- '(org-level-2 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.4))))
- '(org-level-3 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.25))))
- '(org-level-4 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.1))))
- '(org-level-5 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(org-level-6 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(org-level-7 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(org-level-8 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(rainbow-delimiters-depth-1-face ((t (:inherit rainbow-delimiters-base-face :foreground "yellow"))))
- '(rainbow-delimiters-depth-2-face ((t (:inherit rainbow-delimiters-base-face :foreground "magenta1"))))
- '(rainbow-delimiters-depth-3-face ((t (:inherit rainbow-delimiters-base-face :foreground "cyan"))))
- '(rainbow-delimiters-depth-4-face ((t (:inherit rainbow-delimiters-base-face :foreground "SteelBlue1"))))
- '(rainbow-delimiters-depth-5-face ((t (:inherit rainbow-delimiters-base-face :foreground "pink"))))
- '(rainbow-delimiters-depth-6-face ((t (:inherit rainbow-delimiters-base-face :foreground "OrangeRed1"))))
- '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
- '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
- '(stripes-face ((t :background "gray0"))))
