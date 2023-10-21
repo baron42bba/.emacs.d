@@ -2506,7 +2506,6 @@ character before any spaces."
   (define-key bba/toggle "\S-h" 'highlight-indentation-current-column-mode)
   (define-key bba/toggle "\C-h" 'hl-line-mode)
   (define-key bba/toggle "\M-h" 'highlight-symbol-mode)
-  (define-key bba/toggle "i" 'impatient-mode)
   (define-key bba/toggle "p" 'smartparens-mode)
   (define-key bba/toggle "r" 'rainbow-delimiters-mode)
   (define-key bba/toggle "s" 'flyspell-mode)
