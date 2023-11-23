@@ -1,4 +1,4 @@
-;;; flymake-autoloads.el --- automatically extracted autoloads
+;;; flymake-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -60,10 +60,19 @@ region is invalid.  This function saves match data.
 (autoload 'flymake-mode "flymake" "\
 Toggle Flymake mode on or off.
 
-If called interactively, enable Flymake mode if ARG is positive,
-and disable it if ARG is zero or negative.  If called from Lisp,
-also enable the mode if ARG is omitted or nil, and toggle it if
-ARG is `toggle'; disable the mode otherwise.
+This is a minor mode.  If called interactively, toggle the
+`Flymake mode' mode.  If the prefix argument is positive, enable
+the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `flymake-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
 
 Flymake is an Emacs minor mode for on-the-fly syntax checking.
 Flymake collects diagnostic information from multiple sources,
@@ -78,6 +87,13 @@ whereupon Flymake decides to initiate a check of the buffer.
 The commands `flymake-goto-next-error' and
 `flymake-goto-prev-error' can be used to navigate among Flymake
 diagnostics annotated in the buffer.
+
+By default, `flymake-mode' doesn't override the \\[next-error] command, but
+if you're using Flymake a lot (and don't use the regular compilation
+mechanisms that often), it can be useful to put something like
+the following in your init file:
+
+  (setq next-error-function \\='flymake-goto-next-error)
 
 The visual appearance of each type of diagnostic can be changed
 by setting properties `flymake-overlay-control', `flymake-bitmap'
@@ -103,7 +119,7 @@ Turn Flymake mode on." nil nil)
 (autoload 'flymake-mode-off "flymake" "\
 Turn Flymake mode off." nil nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "flymake" '("flymake-")))
+(register-definition-prefixes "flymake" '("flymake-"))
 
 ;;;***
 

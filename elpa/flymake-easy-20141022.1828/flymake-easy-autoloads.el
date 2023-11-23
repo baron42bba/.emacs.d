@@ -1,4 +1,4 @@
-;;; flymake-easy-autoloads.el --- automatically extracted autoloads
+;;; flymake-easy-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -9,7 +9,11 @@
 ;;;### (autoloads nil "flymake-easy" "flymake-easy.el" (0 0 0 0))
 ;;; Generated autoloads from flymake-easy.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "flymake-easy" '("flymake-easy-")))
+(register-definition-prefixes "flymake-easy" '("flymake-easy-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("flymake-easy-pkg.el") (0 0 0 0))
 
 ;;;***
 
