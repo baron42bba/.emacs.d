@@ -4,7 +4,7 @@
 
 ;; Author:  <lompik@ArchOrion>
 ;; Keywords: convenience
-;; Package-Requires: ((helm-core "1.9.2"))
+;; Package-Requires: ((helm-core "3.6.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 ;;; Code:
 
-(require 'helm)
+(require 'helm-core)
 
 (defvar x-path-walker-source-dir (concat (if load-file-name
                                              (file-name-directory load-file-name)
@@ -43,9 +43,9 @@
 (defun x-path-build-cmd-path (args)
   (let ((cmdpython (x-path-walker-command)))
     (mapconcat #'identity
-             (append cmdpython
-                     args)
-             " ")))
+               (append cmdpython
+                       args)
+               " ")))
 
 (defun x-path-run-py-script (args)
   (let ((cmd (x-path-build-cmd-path args)))
@@ -94,7 +94,8 @@
                 (shell-command-on-region (point-min) (point-max)
                                          (concat "python3 -m json.tool "
                                                  (buffer-file-name))
-                                         (current-buffer))))
+                                         (current-buffer) t
+                                         "*x-path-walker-json-error*" t)))
     (unless (or (string= "" line))
       (goto-char 0)
       (forward-line (1- (string-to-number line)))

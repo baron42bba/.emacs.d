@@ -1,4 +1,4 @@
-;;; x-path-walker-autoloads.el --- automatically extracted autoloads
+;;; x-path-walker-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -9,12 +9,9 @@
 ;;;### (autoloads nil "x-path-walker" "x-path-walker.el" (0 0 0 0))
 ;;; Generated autoloads from x-path-walker.el
 
-(autoload 'helm-x-path-walker "x-path-walker" "\
+(autoload 'helm-x-path-walker "x-path-walker" nil t nil)
 
-
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "x-path-walker" '("x-path-")))
+(register-definition-prefixes "x-path-walker" '("x-path-"))
 
 ;;;***
 
