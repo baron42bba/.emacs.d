@@ -4,7 +4,6 @@
 
 ;; Author: Sterling Graham <sterlingrgraham@gmail.com>
 ;; URL: http://github.com/sterlingg/json-snatcher
-;; Package-Version: 20150512.347
 ;; Version: 1.0
 ;; Package-Requires: ((emacs "24"))
 
@@ -81,7 +80,6 @@
   "Hashes each open buffer to the ranges in the buffer for each of the parse trees nodes.")
 (defvar jsons-curr-region () "The node ranges in the current buffer.")
 (defvar jsons-path-printer 'jsons-print-path-python "Default jsons path printer")
-(add-hook 'kill-buffer-hook 'jsons-remove-buffer)
 
 (defun jsons-consume-token ()
   "Return the next token in the stream."
@@ -341,6 +339,8 @@ TODO: Remove extra comma printed after lists of object members, and lists of arr
   (progn
     (remhash (current-buffer) jsons-parsed)
     (remhash (current-buffer) jsons-parsed-regions)))
+
+(add-hook 'kill-buffer-hook 'jsons-remove-buffer)
 
 (provide 'json-snatcher)
 

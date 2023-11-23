@@ -2,8 +2,8 @@
 
 ;; Author: Wataru MIYAGUNI <gonngo@gmail.com>
 ;; URL: https://github.com/gongo/json-reformat
-;; Package-Version: 20160212.853
-;; Version: 0.0.6
+;; Package-Requires: ((emacs "24.3"))
+;; Version: 0.0.7
 ;; Keywords: json
 
 ;; Copyright (c) 2012 Wataru MIYAGUNI
@@ -48,7 +48,7 @@
 ;;; Code:
 
 (require 'json)
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 
 (unless (require 'subr-x nil t)
   ;; built-in subr-x from 24.4
@@ -127,11 +127,11 @@ Else t:
     (concat "[\n"
             (mapconcat
              'identity
-             (loop for v across val
-                   collect (concat
-                            (json-reformat:indent (1+ level))
-                            (json-reformat:print-node v (1+ level))
-                            ))
+             (cl-loop for v across val
+                      collect (concat
+                               (json-reformat:indent (1+ level))
+                               (json-reformat:print-node v (1+ level))
+                               ))
              (concat ",\n"))
             "\n" (json-reformat:indent level) "]"
             )))
