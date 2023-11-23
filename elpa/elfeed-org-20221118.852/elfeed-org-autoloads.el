@@ -1,4 +1,4 @@
-;;; elfeed-org-autoloads.el --- automatically extracted autoloads
+;;; elfeed-org-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -10,11 +10,13 @@
 ;;; Generated autoloads from elfeed-org.el
 
 (autoload 'elfeed-org "elfeed-org" "\
-Hook up rmh-elfeed-org to read the `org-mode' configuration when elfeed is run.
+Hook up rmh-elfeed-org to read the `org-mode' configuration when elfeed is run." t nil)
 
-\(fn)" t nil)
+(register-definition-prefixes "elfeed-org" '("elfeed-org-" "rmh-elfeed-"))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-org" '("elfeed-org-" "rmh-elfeed-org-")))
+;;;***
+
+;;;### (autoloads nil nil ("elfeed-org-pkg.el") (0 0 0 0))
 
 ;;;***
 

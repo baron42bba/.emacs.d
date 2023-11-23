@@ -1,4 +1,4 @@
-;;; elfeed-autoloads.el --- automatically extracted autoloads
+;;; elfeed-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -10,14 +10,10 @@
 ;;; Generated autoloads from elfeed.el
 
 (autoload 'elfeed-update "elfeed" "\
-Update all the feeds in `elfeed-feeds'.
-
-\(fn)" t nil)
+Update all the feeds in `elfeed-feeds'." t nil)
 
 (autoload 'elfeed "elfeed" "\
-Enter elfeed.
-
-\(fn)" t nil)
+Enter elfeed." t nil)
 
 (autoload 'elfeed-load-opml "elfeed" "\
 Load feeds from an OPML file into `elfeed-feeds'.
@@ -31,35 +27,35 @@ Export the current feed listing to OPML-formatted FILE.
 
 \(fn FILE)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed" '("elfeed-")))
+(register-definition-prefixes "elfeed" '("elfeed-"))
 
 ;;;***
 
 ;;;### (autoloads nil "elfeed-csv" "elfeed-csv.el" (0 0 0 0))
 ;;; Generated autoloads from elfeed-csv.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-csv" '("elfeed-csv-")))
+(register-definition-prefixes "elfeed-csv" '("elfeed-csv-"))
 
 ;;;***
 
 ;;;### (autoloads nil "elfeed-curl" "elfeed-curl.el" (0 0 0 0))
 ;;; Generated autoloads from elfeed-curl.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-curl" '("elfeed-curl-")))
+(register-definition-prefixes "elfeed-curl" '("elfeed-curl-"))
 
 ;;;***
 
 ;;;### (autoloads nil "elfeed-db" "elfeed-db.el" (0 0 0 0))
 ;;; Generated autoloads from elfeed-db.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-db" '("elfeed-" "with-elfeed-db-visit")))
+(register-definition-prefixes "elfeed-db" '("elfeed-" "with-elfeed-db-visit"))
 
 ;;;***
 
 ;;;### (autoloads nil "elfeed-lib" "elfeed-lib.el" (0 0 0 0))
 ;;; Generated autoloads from elfeed-lib.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-lib" '("elfeed-")))
+(register-definition-prefixes "elfeed-lib" '("elfeed-"))
 
 ;;;***
 
@@ -72,9 +68,7 @@ Store a link to an elfeed search or entry buffer.
 When storing a link to an entry, automatically extract all the
 entry metadata.  These can be used in the capture templates as
 %:elfeed-entry-<prop>.  See `elfeed-entry--create' for the list
-of available props.
-
-\(fn)" nil nil)
+of available props." nil nil)
 
 (autoload 'elfeed-link-open "elfeed-link" "\
 Jump to an elfeed entry or search.
@@ -91,7 +85,7 @@ search buffer or show a concrete entry.
 ;;;### (autoloads nil "elfeed-log" "elfeed-log.el" (0 0 0 0))
 ;;; Generated autoloads from elfeed-log.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-log" '("elfeed-log")))
+(register-definition-prefixes "elfeed-log" '("elfeed-log"))
 
 ;;;***
 
@@ -110,21 +104,26 @@ Restore the state of an elfeed-search buffer on desktop restore.
 
 (add-to-list 'desktop-buffer-mode-handlers '(elfeed-search-mode . elfeed-search-desktop-restore))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-search" '("elfeed-s")))
+(register-definition-prefixes "elfeed-search" '("elfeed-s"))
 
 ;;;***
 
 ;;;### (autoloads nil "elfeed-show" "elfeed-show.el" (0 0 0 0))
 ;;; Generated autoloads from elfeed-show.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "elfeed-show" '("elfeed-")))
+(autoload 'elfeed-show-bookmark-handler "elfeed-show" "\
+Show the bookmarked entry saved in the `RECORD'.
+
+\(fn RECORD)" nil nil)
+
+(register-definition-prefixes "elfeed-show" '("elfeed-"))
 
 ;;;***
 
 ;;;### (autoloads nil "xml-query" "xml-query.el" (0 0 0 0))
 ;;; Generated autoloads from xml-query.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "xml-query" '("xml-query")))
+(register-definition-prefixes "xml-query" '("xml-query"))
 
 ;;;***
 
