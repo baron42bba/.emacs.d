@@ -6,12 +6,11 @@
 ;; Maintainer: André Riemann <andre.riemann@web.de>
 ;; Created: 2007-09-14
 ;; Keywords: convenience
-;; Package-Version: 20190306.1006
 
 ;; URL: https://github.com/andre-r/centered-cursor-mode.el
 ;; Compatibility: tested with GNU Emacs 24, 26, 27
-;; Version: 0.5.11
-;; Last-Updated: 2019-03-06
+;; Version: 0.5.12
+;; Last-Updated: 2020-05-07
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,6 +56,8 @@
 ;; - more bugs?
 
 ;;; Change Log:
+;; 2020-05-07 hlissner
+;;   * autoload global-centered-cursor-mode
 ;; 2019-03-06 kqr
 ;;   * more customisable way to inhibit recentering after a command:
 ;;     new defcustom ccm-inhibit-centering-when
@@ -460,7 +461,7 @@ position (usually centered)."
     (remove-hook 'post-command-hook 'ccm-position-cursor t)
     (remove-hook 'window-configuration-change-hook 'ccm-vpos-recenter t))))
 
-
+;;;###autoload
 (define-global-minor-mode global-centered-cursor-mode centered-cursor-mode
   centered-cursor-mode)
 
