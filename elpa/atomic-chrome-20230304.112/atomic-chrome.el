@@ -4,8 +4,6 @@
 
 ;; Author: alpha22jp <alpha22jp@gmail.com>
 ;; Package-Requires: ((emacs "24.4") (let-alist "1.0.4") (websocket "1.4"))
-;; Package-Version: 20220723.113
-;; Package-Commit: 061958ab96c31085b5daf449b1d826b052777b59
 ;; Keywords: chrome edit textarea
 ;; URL: https://github.com/alpha22jp/atomic-chrome
 ;; Version: 2.0.0
@@ -188,7 +186,7 @@ frame, depending on `atomic-chrome-buffer-open-style'."
       (setq edit-frame
             (cond
              ((memq window-system '(pgtk x))
-              (if (string-match-p "wayland" x-display-name)
+              (if (or (not x-display-name) (string-match-p "wayland" x-display-name))
                   (make-frame frame-params)
                 (make-frame-on-display (getenv "DISPLAY") frame-params)))
              ;; Avoid using make-frame-on-display for Mac OS

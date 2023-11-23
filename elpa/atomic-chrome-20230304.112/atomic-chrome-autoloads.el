@@ -20,6 +20,10 @@ Stop websocket server for atomic-chrome." t nil)
 
 ;;;***
 
+;;;### (autoloads nil nil ("atomic-chrome-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
