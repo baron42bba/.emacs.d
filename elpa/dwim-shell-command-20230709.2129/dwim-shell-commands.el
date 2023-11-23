@@ -93,6 +93,15 @@ Optional argument ARGS as per `browse-url-default-browser'"
    :monitor-directory "~/Downloads"
    :silent-success t))
 
+(defun dwim-shell-commands-image-clear-exif-metadata ()
+  "Clear EXIF metadata in image(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "View EXIF"
+   "cp '<<f>>' '<<fne>>_cleared.<<e>>'
+    exiftool -all:all= -overwrite_original '<<fne>>_cleared.<<e>>'"
+   :utils "exiftool"))
+
 (defun dwim-shell-commands-image-exif-metadata ()
   "View EXIF metadata in image(s)."
   (interactive)
@@ -100,6 +109,14 @@ Optional argument ARGS as per `browse-url-default-browser'"
    "View EXIF"
    "exiftool '<<f>>'"
    :utils "exiftool"))
+
+(defun dwim-shell-commands-ocr-text-from-image ()
+  "Extract text from image via tesseract."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Extract text from image via tesseract."
+   "tesseract '<<f>>' -"
+   :utils "tesseract"))
 
 (defun dwim-shell-commands-image-browse-location ()
   "Open image(s) location in browser."
@@ -145,7 +162,7 @@ Optional argument ARGS as per `browse-url-default-browser'"
    :utils '("exiftool" "curl")
    :silent-success t
    :error-autofocus t
-   :on-completion (lambda (buffer)
+   :on-completion (lambda (buffer _process)
                     (with-current-buffer buffer
                       (goto-char (point-min))
                       (let ((matches '()))
@@ -156,6 +173,22 @@ Optional argument ARGS as per `browse-url-default-browser'"
                                                             matches)
                                                    "\n")))
                       (kill-buffer buffer)))))
+
+(defun dwim-shell-commands-image-horizontal-flip ()
+  "Horizontally flip image(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Image horizontal flip"
+   "convert -verbose -flop '<<f>>' '<<fne>>_h_flipped.<<e>>'"
+   :utils "convert"))
+
+(defun dwim-shell-commands-image-vertical-flip ()
+  "Horizontally flip image(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Image vertical flip"
+   "convert -verbose -flip '<<f>>' '<<fne>>_v_flipped.<<e>>'"
+   :utils "convert"))
 
 (defun dwim-shell-commands-image-to-jpg ()
   "Convert all marked images to jpg(s)."
@@ -194,12 +227,38 @@ Optional argument ARGS as per `browse-url-default-browser'"
   (interactive)
   (dwim-shell-command-on-marked-files
    "Join as pdf"
-   (format "convert -verbose '<<*>>' '%s'"
+   (format "convert -verbose '<<*>>' '<<%s(u)>>'"
            (dwim-shell-command-read-file-name
             "Join as pdf named (default \"joined.pdf\"): "
             :extension "pdf"
-            :default "<<joined.pdf(u)>>"))
+            :default "joined.pdf"))
    :utils "convert"))
+
+(defun dwim-shell-commands-join-images-horizontally ()
+  "Join all marked images horizontally as a single image."
+  (interactive)
+  (let ((filename (format "joined.%s"
+                          (or (seq-first (dwim-shell-command--file-extensions)) "png"))))
+    (dwim-shell-command-on-marked-files
+     "Join images horizontally"
+     (format "convert -verbose '<<*>>' +append '<<%s(u)>>'"
+             (dwim-shell-command-read-file-name
+              (format "Join as image named (default \"%s\"): " filename)
+              :default filename))
+     :utils "convert")))
+
+(defun dwim-shell-commands-join-images-vertically ()
+  "Join all marked images vertically as a single image."
+  (interactive)
+  (let ((filename (format "joined.%s"
+                          (or (seq-first (dwim-shell-command--file-extensions)) "png"))))
+    (dwim-shell-command-on-marked-files
+     "Join images vertically"
+     (format "convert -verbose '<<*>>' -append '<<%s(u)>>'"
+             (dwim-shell-command-read-file-name
+              (format "Join as image named (default \"%s\"): " filename)
+              :default filename))
+     :utils "convert")))
 
 (defun dwim-shell-commands-image-to-grayscale ()
   "Convert all marked images to grayscale."
@@ -265,6 +324,14 @@ Optional argument ARGS as per `browse-url-default-browser'"
    "Unzip" "atool --extract --explain '<<f>>'"
    :utils "atool"))
 
+(defun dwim-shell-commands-optimize-gif ()
+  "Convert all marked videos to optimized gif(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Convert to optimized gif"
+   "gifsicle -O3 '<<f>>' --lossy=90 -o '<<fne>>_optimized.gif'"
+   :utils '("ffmpeg" "gifsicle")))
+
 (defun dwim-shell-commands-speed-up-gif ()
   "Speeds up gif(s)."
   (interactive)
@@ -276,6 +343,24 @@ Optional argument ARGS as per `browse-url-default-browser'"
      :extensions "gif" :utils '("gifsicle" "identify")
      :post-process-template (lambda (script file)
                               (string-replace "<<frames>>" (dwim-shell-commands--gifsicle-frames-every factor file) script)))))
+
+(defun dwim-shell-commands-clip-round-rect-gif ()
+  "Clip gif(s) with round rectangle."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Clip round rect gif(s)"
+   "width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 '<<f>>')
+    height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 '<<f>>')
+    convert -quiet -size \"${width}x${height}\" xc:none -fill black -draw \"roundRectangle 0,0,${width},${height} <<Width width:27>>,<<Width width:27>>\" '<<td>>/mask.png'
+    convert  '<<f>>' -coalesce -background black -alpha remove -alpha off '<<td>>/no_alpha.<<e>>'
+    # https://stackoverflow.com/a/66990135
+    convert '<<td>>/no_alpha.<<e>>' -quiet -coalesce -alpha extract null: \\( '<<td>>/mask.png' -alpha extract \\) -compose multiply -layers composite '<<td>>/alpha.gif'
+    convert '<<td>>/no_alpha.<<e>>' null: '<<td>>/alpha.gif' -quiet -alpha off -compose copy_opacity -layers composite '<<fne>>_rounded.<<e>>'
+    # Turn looping on.
+    mogrify -loop 0 '<<fne>>_rounded.<<e>>'
+    gifsicle -O3  '<<fne>>_rounded.<<e>>' --lossy=80 -o '<<fne>>_rounded.<<e>>'"
+   :extensions "gif"
+   :utils '("ffprobe" "convert")))
 
 (defun dwim-shell-commands-resize-gif ()
   "Resize marked gif(s)."
@@ -339,7 +424,7 @@ Optional argument ARGS as per `browse-url-default-browser'"
                                (map-elt selection 'pid)
                                (map-elt selection 'user)
                                (map-elt selection 'comm))))
-    (when (y-or-n-p (format "Kill? %s" prompt-title))
+    (when (y-or-n-p (format "Kill %s?" prompt-title))
       (dwim-shell-command-on-marked-files
        (format "Kill %s" prompt-title)
        (format "kill -9 %d" (map-elt selection 'pid))
@@ -348,7 +433,7 @@ Optional argument ARGS as per `browse-url-default-browser'"
        :silent-success t))))
 
 (defun dwim-shell-commands-macos-toggle-bluetooth-device-connection ()
-  ""
+  "Toggle Bluetooth device connection."
   (interactive)
   (let* ((devices (seq-filter
                    (lambda (line)
@@ -513,7 +598,7 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
      "Generate a QR code from clipboard"
      (format "qrencode -s10 -o %s %s" temp-file (shell-quote-argument (current-kill 0)))
      :utils "qrencode"
-     :on-completion (lambda (buffer)
+     :on-completion (lambda (buffer _process)
                       (kill-buffer buffer)
                       (switch-to-buffer (find-file-noselect temp-file t))))))
 
@@ -552,17 +637,17 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
      :utils "osascript"
      :no-progress t
      :silent-success t
-     :on-completion (lambda (buffer)
+     :on-completion (lambda (buffer _process)
                       (kill-buffer buffer)
                       (dired-jump nil (file-name-concat target-dir (file-name-nondirectory (nth 0 files))))))))
 
-(defun dwim-shell-commands-macos-hardware-overview ()
-  "View macOS hardware overview."
+(defun dwim-shell-commands-macos-version-and-hardware-overview-info ()
+  "View macOS version and hardware overview info."
   (interactive)
   (dwim-shell-command-on-marked-files
    "macOS hardware overview"
-   "system_profiler SPHardwareDataType"
-   :utils "system_profiler"))
+   "sw_vers; system_profiler SPHardwareDataType"
+   :utils '("sw_vers" "system_profiler")))
 
 (defun dwim-shell-commands-macos-reveal-in-finder ()
   "Reveal selected files in macOS Finder."
@@ -647,7 +732,7 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
      :utils "swift")))
 
 (defun dwim-shell-commands-macos-toggle-display-rotation ()
-  "View macOS hardware overview."
+  "Rotate display."
   (interactive)
   ;; #  Display_ID    Resolution  ____Display_Bounds____  Rotation
   ;; 2  0x2b347692    1440x2560      0     0  1440  2560    270    [main]
@@ -667,7 +752,7 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
            (seq-mapcat (lambda (paths)
                          (directory-files-recursively
                           paths "\\.app$" t (lambda (path)
-                                             (not (string-suffix-p ".app" path)))))
+                                              (not (string-suffix-p ".app" path)))))
                        '("/Applications" "~/Applications" "/System/Applications")))))
 
 (defun dwim-shell-commands-macos-set-default-app ()
@@ -701,6 +786,119 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
      :no-progress t
      :utils "open")))
 
+(defun dwim-shell-commands-macos-open-with-firefox ()
+  "Open file(s) with specific external app."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Open with Firefox"
+   "open -a Firefox '<<*>>'"
+   :silent-success t
+   :no-progress t
+   :utils "open"))
+
+(defun dwim-shell-commands-macos-open-with-safari ()
+  "Open file(s) with specific external app."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Open with Firefox"
+   "open -a Safari '<<*>>'"
+   :silent-success t
+   :no-progress t
+   :utils "open"))
+
+(defun dwim-shell-commands-macos-start-recording-window ()
+  "Select and start recording a macOS window."
+  (interactive)
+  (let* ((window (dwim-shell-commands--macos-select-window))
+         (path (dwim-shell-commands--generate-path "~/Desktop" (car window) ".gif"))
+         (buffer-file-name path) ;; override so <<f>> picks it up
+         (inhibit-message t))
+    ;; Silence echo to avoid unrelated messages making into animation.
+    (cl-letf (((symbol-function 'dwim-shell-command--message)
+               (lambda (fmt &rest args) nil)))
+      (dwim-shell-command-on-marked-files
+       "Start recording a macOS window."
+       (format
+        "macosrec --record '%s' --gif --output '<<f>>'"
+        (cdr window))
+       :silent-success t
+       :monitor-directory "~/Desktop"
+       :no-progress t
+       :utils '("ffmpeg" "macosrec")
+       :on-completion
+       (lambda (buffer process)
+         (if (= (process-exit-status process) 0)
+             (progn
+               "Saved recording"
+               (dired-jump nil path)
+               (kill-buffer buffer))
+           (with-current-buffer buffer
+             (goto-char (point-min))
+             (if (search-forward "Aborted" nil t)
+                 (progn
+                   (message "Aborted recording")
+                   (kill-buffer buffer))
+               (switch-to-buffer buffer)))))))))
+
+(defun dwim-shell-commands--generate-path (dir name ext)
+  "Generate a timestamped path with DIR, NAME, and EXT."
+  (concat (file-name-as-directory (expand-file-name dir))
+          (format-time-string "%Y-%m-%d-%H:%M:%S-")
+          name ext))
+
+(defun dwim-shell-commands--macos-select-window ()
+  "Return a list of macOS windows."
+  (if-let* ((line (completing-read
+                   "Select: "
+                   (process-lines "macosrec" "--list") nil t))
+            (window-info (split-string line " "))
+            (window-number (string-to-number (nth 0 window-info)))
+            (window-app (nth 1 window-info))
+            (valid (> window-number 0)))
+      (cons window-app window-number)
+    (user-error "No window found")))
+
+(defun dwim-shell-commands-macos-end-recording-window ()
+  "Stop recording a macOS window."
+  (interactive)
+  (let ((inhibit-message t))
+    (cl-letf (((symbol-function 'dwim-shell-command--message)
+               (lambda (fmt &rest args) nil)))
+      (dwim-shell-command-on-marked-files
+       "End recording macOS window."
+       "macosrec --save"
+       :silent-success t
+       :no-progress t
+       :error-autofocus t
+       :utils "macosrec"))))
+
+(defun dwim-shell-commands-macos-abort-recording-window ()
+  "Stop recording a macOS window."
+  (interactive)
+  (let ((inhibit-message t))
+    (cl-letf (((symbol-function 'dwim-shell-command--message)
+               (lambda (fmt &rest args) nil)))
+      (dwim-shell-command-on-marked-files
+       "Abort recording macOS window."
+       "macosrec --abort"
+       :silent-success t
+       :no-progress t
+       :utils "macosrec"))))
+
+(defun dwim-shell-commands-macos-screenshot-window ()
+  "Select and screenshot macOS window."
+  (interactive)
+  ;; Silence echo to avoid unrelated messages making into screenshot.
+  (let ((window (dwim-shell-commands--macos-select-window))
+        (inhibit-message t))
+    (dwim-shell-command-on-marked-files
+     "Start recording a macOS window."
+     (format "macosrec --screenshot %s" (cdr window))
+     :silent-success t
+     :monitor-directory "~/Desktop"
+     :no-progress t
+     :utils "macosrec")))
+
 (defun dwim-shell-commands-files-combined-size ()
   "Get files combined file size."
   (interactive)
@@ -708,7 +906,7 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
    "Get files combined file size"
    "du -csh '<<*>>'"
    :utils "du"
-   :on-completion (lambda (buffer)
+   :on-completion (lambda (buffer _process)
                     (with-current-buffer buffer
                       (message "Total size: %s"
                                (progn
@@ -755,7 +953,7 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
        (format "Clone %s" (file-name-base url))
        (format "git clone %s" url)
        :utils "git"
-       :on-completion (lambda (buffer)
+       :on-completion (lambda (buffer _process)
                         (kill-buffer buffer)
                         (dired project-dir))))))
 
@@ -774,14 +972,14 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
           "HTTP serve current dir"
           "python2 -m SimpleHTTPServer"
           :utils "python2"
-          :focus-now
+          :focus-now t
           :no-progress t))
         ((executable-find "python")
          (dwim-shell-command-on-marked-files
           "HTTP serve current dir"
           "python -m SimpleHTTPServer"
           :utils "python"
-          :focus-now
+          :focus-now t
           :no-progress t))
         (t
          (error "No python found"))))
@@ -794,6 +992,38 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
    "git clone <<cb>>"
    :utils "git"))
 
+(defun dwim-shell-commands-pass-git-pull ()
+  "Pass git pull."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "pass git pull"
+   "pass git pull"
+   :utils '("pass" "git")
+   :silent-success t))
+
+(defun dwim-shell-commands-git-list-untracked-files ()
+  "List untracked git files in `default-directory'."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "List untracked"
+   "git ls-files --others ."
+   :utils "git"
+   :focus-now t))
+
+(defun dwim-shell-commands-git-delete-untracked-files ()
+  "Delete untracked git files in `default-directory'."
+  (interactive)
+  (when (y-or-n-p (format "Clean '%s'? \n\n%s\n...\n\n"
+                          default-directory
+                          (string-join
+                           (seq-take (process-lines "git" "ls-files" "--others" ".") 3)
+                           "\n")))
+    (dwim-shell-command-on-marked-files
+     "Clean untracked"
+     "git clean -f ."
+     :utils "git"
+     :silent-success t)))
+
 (defun dwim-shell-commands-external-ip ()
   "Copy external IP to kill ring."
   (interactive)
@@ -801,7 +1031,7 @@ ffmpeg -n -i '<<f>>' -vf \"scale=$width:-2\" '<<fne>>_x<<Scaling factor:0.5>>.<<
     (kill-new ip)
     (message "Copied %s" ip)))
 
-(defun dwim-shell-commands-install-iphone-device-ipa ()
+(defun dwim-shell-commands-macos-install-iphone-device-ipa ()
   "Install iPhone device .ipa.
 Needs ideviceinstaller and libmobiledevice installed."
   (interactive)
@@ -818,6 +1048,14 @@ Needs ideviceinstaller and libmobiledevice installed."
      (copy-file file "~/Downloads/" 1)
      (file-name-concat "~/Downloads" (file-name-nondirectory file)))
    :monitor-directory "~/Downloads"))
+
+(defun dwim-shell-commands-duplicate ()
+  "Duplicate file."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Duplicate file(s)."
+   "cp -R '<<f>>' '<<f(u)>>'"
+   :utils "cp"))
 
 (defun dwim-shell-commands-rename-all ()
   "Rename all marked file(s)."
@@ -877,6 +1115,37 @@ gpg: decryption failed: No pinentry"
    "gpgconf --kill gpg-agent"
    :utils "gpgconf"
    :silent-success t))
+
+;; Based on
+;; https://apps.bram85.nl/git/bram/gists/src/commit/31ac3363da925daafa2420b7f96c67612ca28241/gists/dwim-0x0-upload.el
+(defun dwim-shell-commands-upload-to-0x0 ()
+  "Upload the marked files to 0x0.st"
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "0x0 upload"
+   "curl -Ffile=@<<f>> -Fsecret= https://0x0.st"
+   :utils "curl"
+   :post-process-template
+   ;; Insert the single quotes at the appropriate place according to
+   ;; 0x0.st example online:
+   ;; curl -F'file=@yourfile.png' -Fsecret= https://0x0.st
+   ;;
+   ;; The placement of these single quotes confuse the escaping
+   ;; mechanisms of dwim-shell-command, as it considers @ as the
+   ;; opening 'quote' as it appears right in front of <<f>>.
+   (lambda (template path)
+     (string-replace "-Ffile" "-F'file"
+                     (string-replace path (concat path "'") template)))
+   :on-completion
+   (lambda (buffer process)
+     (if (= (process-exit-status process) 0)
+         (with-current-buffer buffer
+           (let ((url (car (last (split-string (string-trim (buffer-string)) "\n")))))
+             (eww url)
+             (kill-new url)
+             (message "Copied: %s" (current-kill 0)))
+           (kill-buffer buffer))
+       (switch-to-buffer buffer)))))
 
 (provide 'dwim-shell-commands)
 

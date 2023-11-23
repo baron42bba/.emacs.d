@@ -1,11 +1,11 @@
 ;;; dwim-shell-command.el --- Shell commands with DWIM behaviour -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2022 Alvaro Ramirez
+;; Copyright (C) 2022 Alvaro Ramirez https://xenodium.com
 
 ;; Author: Alvaro Ramirez
 ;; Package-Requires: ((emacs "28.1"))
 ;; URL: https://github.com/xenodium/dwim-shell-command
-;; Version: 0.41
+;; Version: 0.48
 
 ;; This package is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 (require 'view)
 
 (defcustom dwim-shell-command-prompt
-  "DWIM shell command (<<f>> <<fne>> <<e>> <<td>> <<*>> <<cb>> <<n>>): "
+  "DWIM shell command (<<f>> <<fne>> <<e>>): "
   "`dwim-shell-command' prompt.  Modify if shorter is preferred."
   :type 'string
   :group 'dwim-shell-command)
@@ -77,6 +77,11 @@ Set to nil to use `shell-file-name'."
   "Shell util, for example: '(\"-x\" \"-c\").
 Set to nil to use `shell-command-switch'."
   :type '(repeat string)
+  :group 'dwim-shell-command)
+
+(defcustom dwim-shell-command-shell-trace nil
+  "Attempt to add --xtrace to shell command to debug."
+  :type 'boolean
   :group 'dwim-shell-command)
 
 (defcustom dwim-shell-command-done-buffer-name
@@ -202,7 +207,7 @@ Prefix
                     #'minibuffer-default-add-shell-commands))
     (read-from-minibuffer dwim-shell-command-prompt dwim-shell-command-default-command nil nil 'shell-command-history)))
 
-(cl-defun dwim-shell-command-on-marked-files (buffer-name script &key utils extensions shell-util shell-args shell-pipe post-process-template on-completion repeat silent-success no-progress error-autofocus monitor-directory focus-now join-separator)
+(cl-defun dwim-shell-command-on-marked-files (buffer-name script &key utils extensions shell-util shell-args shell-trace shell-pipe post-process-template on-completion repeat silent-success no-progress error-autofocus monitor-directory focus-now join-separator)
   "Create DWIM utilities executing templated SCRIPT on given files.
 
 Here's a simple utility invoking SCRIPT to convert image files to jpg.
@@ -293,6 +298,7 @@ Quick exit
                                      :extensions extensions
                                      :shell-util shell-util
                                      :shell-args shell-args
+                                     :shell-trace shell-trace
                                      :shell-pipe shell-pipe
                                      :post-process-template post-process-template
                                      :on-completion on-completion
@@ -304,7 +310,7 @@ Quick exit
                                      :focus-now focus-now
                                      :join-separator join-separator))
 
-(cl-defun dwim-shell-command-execute-script (buffer-name script &key files extensions shell-util shell-args shell-pipe utils post-process-template on-completion silent-success gen-temp-dir repeat no-progress error-autofocus monitor-directory focus-now join-separator)
+(cl-defun dwim-shell-command-execute-script (buffer-name script &key files extensions shell-util shell-args shell-trace shell-pipe utils post-process-template on-completion silent-success gen-temp-dir repeat no-progress error-autofocus monitor-directory focus-now join-separator)
   "Execute a script asynchronously, DWIM style with SCRIPT and BUFFER-NAME.
 
 :FILES are used to instantiate SCRIPT as a noweb template.
@@ -393,14 +399,15 @@ This is implied when <<td>> appears in the script.
                        (when shell-command-switch
                          (list shell-command-switch))
                        '("-x" "-c")))
+  (when (and shell-args (stringp shell-args))
+    (setq shell-args (list shell-args)))
   ;; See if -x can be prepended.
   (when (and (not (seq-contains-p shell-args "-x"))
+             (or shell-trace dwim-shell-command-shell-trace)
              (apply #'dwim-shell-command--program-test
                     (seq-concatenate
                      'list shell-util '("-x") shell-args (list "echo"))))
     (setq shell-args (seq-concatenate 'list '("-x") shell-args)))
-  (when (and shell-args (stringp shell-args))
-    (setq shell-args (list shell-args)))
   (when (stringp utils)
     (setq utils (list utils)))
   (when (or gen-temp-dir (string-match-p "\<\<td\>\>" script 0))
@@ -444,7 +451,9 @@ This is implied when <<td>> appears in the script.
                 files)))
     (setq script (string-trim script))
     (with-current-buffer proc-buffer
-      (shell-mode)
+      (let ((inhibit-message t))
+      ;; Silence noise of entering shell-mode.
+        (shell-mode))
       (setq default-directory default-directory)
       (shell-command-save-pos-or-erase)
       (view-mode +1)
@@ -755,7 +764,18 @@ REPLACEMENTS is a cons list of literals to replace with values."
         (setq template (replace-regexp-in-string "\\([^ ]\\)\\(\<\<f\>\>\\)\\([^ ]\\)"
                                                  (string-replace unescaped-quote escaped-quote file)
                                                  template nil nil 2))
-      (setq template (replace-regexp-in-string "\\(\<\<f\>\>\\)" file template nil nil 1))))
+      (setq template (replace-regexp-in-string "\\(\<\<f\>\>\\)" file template nil nil 1)))
+
+    ;; "<<f(u)>>" with "/path/file.jpg" -> "/path/file(1).jpg"
+    (if-let* ((quoting (dwim-shell-command--escaped-quote-around "\<\<f(u)\>\>" template))
+              (unescaped-quote (nth 0 quoting))
+              (escaped-quote (nth 1 quoting)))
+        (setq template (replace-regexp-in-string "\\([^ ]\\)\\(\<\<f\(u)>\>\\)\\([^ ]\\)"
+                                                 (string-replace unescaped-quote escaped-quote
+                                                                 (dwim-shell-command--unique-new-file-path file))
+                                                 template nil nil 2))
+      (setq template (replace-regexp-in-string "\\(\<\<f(u)\>\>\\)"
+                                               (dwim-shell-command--unique-new-file-path file) template nil nil 1))))
 
   ;; "<<some.txt(u)>>" -> some.txt (if unique)
   ;;                   -> some(1).txt (if it exist)
@@ -809,7 +829,9 @@ Use OVERRIDE to override `default-directory'."
   (when-let ((default-directory (or override default-directory)))
     (seq-map (lambda (filename)
                (file-name-concat default-directory filename))
-             (process-lines "ls" "-1"))))
+             (cl-remove-if
+              (lambda (e) (member e '("." "..")))
+              (directory-files default-directory)))))
 
 (defun dwim-shell-command--last-modified-between (before after)
   "Compare files in BEFORE and AFTER and return oldest file in diff."
@@ -822,7 +844,8 @@ Use OVERRIDE to override `default-directory'."
 CALLING-BUFFER, FILES-BEFORE, PROCESS, PROGRESS-REPORTER,
 ERROR-AUTOFOCUS, ON-COMPLETION, SILENT-SUCCESS, and MONITOR-DIRECTORY are
 all needed to finalize processing."
-  (let ((oldest-new-file))
+  (let ((oldest-new-file)
+        (files-after))
     (when progress-reporter
       (progress-reporter-done progress-reporter))
     (if (= (process-exit-status process) 0)
@@ -831,43 +854,57 @@ all needed to finalize processing."
           (with-current-buffer (process-buffer process)
             (rename-buffer (generate-new-buffer-name (funcall dwim-shell-command-done-buffer-name (process-name process)))))
           (if on-completion
-              (funcall on-completion (process-buffer process))
+              (funcall on-completion (process-buffer process) process)
             (with-current-buffer calling-buffer
-              (when (equal major-mode 'dired-mode)
-                (when revert-buffer-function
-                  (funcall revert-buffer-function nil t))
-                ;; Region is not accurate if new files added. Wipe it.
-                (when mark-active
-                  (deactivate-mark)))
+              (if (equal major-mode 'dired-mode)
+                  (progn (when revert-buffer-function
+                           (funcall revert-buffer-function nil t))
+                         ;; Region is not accurate if new files added. Wipe it.
+                         (when (use-region-p)
+                           (deactivate-mark)))
+                (if (or buffer-auto-save-file-name
+                        buffer-file-name)
+                    (revert-buffer :ignore-auto :noconfirm)))
+              (setq files-after (dwim-shell-command--default-directory-files monitor-directory))
               (setq oldest-new-file
                     (dwim-shell-command--last-modified-between
                      files-before
-                     (dwim-shell-command--default-directory-files monitor-directory)))
-              (when oldest-new-file
-                (dired-jump nil oldest-new-file)))
+                     files-after))
+              ;; There's at least one new file. Show that.
+              (if oldest-new-file
+                  (dired-jump nil oldest-new-file)
+                ;; Files may have been deleted but harder to track.
+                ;; Open dired and refresh to show files are gone.
+                (unless (equal (length files-after)
+                               (length files-before))
+                  (dired monitor-directory)
+                  (when revert-buffer-function
+                    (funcall revert-buffer-function nil t)))))
             (unless (equal (process-buffer process)
                            (window-buffer (selected-window)))
               (if (or oldest-new-file silent-success)
                   (kill-buffer (process-buffer process))
                 (unless silent-success
                   (switch-to-buffer (process-buffer process)))))))
-      (if (and (buffer-name (process-buffer process))
-               (or error-autofocus
-                   ;; Buffer already selected. Don't ask.
-                   (equal (process-buffer process)
-                          (window-buffer (selected-window)))
-                   (ignore-error quit
-                     (y-or-n-p (format "%s error, see output? "
-                                       (buffer-name (process-buffer process)))))))
-          (progn
-            (with-current-buffer (process-buffer process)
-              (rename-buffer (generate-new-buffer-name (funcall dwim-shell-command-error-buffer-name (process-name process)))))
-            (when (or error-autofocus
-                      (equal (process-buffer process)
-                             (window-buffer (selected-window))))
-              (dwim-shell-command--message (funcall dwim-shell-command-error-buffer-name (process-name process))))
-            (switch-to-buffer (process-buffer process)))
-        (kill-buffer (process-buffer process))))
+      (if on-completion
+          (funcall on-completion (process-buffer process) process)
+        (if (and (buffer-name (process-buffer process))
+                 (or error-autofocus
+                     ;; Buffer already selected. Don't ask.
+                     (equal (process-buffer process)
+                            (window-buffer (selected-window)))
+                     (ignore-error quit
+                       (y-or-n-p (format "%s error, see output? "
+                                         (buffer-name (process-buffer process)))))))
+            (progn
+              (with-current-buffer (process-buffer process)
+                (rename-buffer (generate-new-buffer-name (funcall dwim-shell-command-error-buffer-name (process-name process)))))
+              (when (or error-autofocus
+                        (equal (process-buffer process)
+                               (window-buffer (selected-window))))
+                (dwim-shell-command--message (funcall dwim-shell-command-error-buffer-name (process-name process))))
+              (switch-to-buffer (process-buffer process)))
+          (kill-buffer (process-buffer process)))))
     (setq dwim-shell-command--commands
           (map-delete dwim-shell-command--commands (process-name process)))))
 
@@ -906,9 +943,18 @@ all needed to finalize processing."
     (progress-reporter-update reporter))
   (comint-output-filter process output))
 
+(defun dwim-shell-command--file-extensions ()
+  "Return buffer file extension or marked/region extensions for a `dired' buffer."
+  (seq-uniq
+   (seq-map
+    #'file-name-extension
+    (seq-filter
+     #'file-name-extension
+     (dwim-shell-command--files)))))
+
 (defun dwim-shell-command--files ()
   "Return buffer file (if available) or marked/region files for a `dired' buffer."
-  (cl-assert (not (and mark-active (let ((files (dired-get-marked-files nil nil nil t)))
+  (cl-assert (not (and (use-region-p) (let ((files (dired-get-marked-files nil nil nil t)))
                                      ;; Based on `dired-number-of-marked-files'.
                                      (cond ((null (cdr files))
                                             nil)
@@ -916,7 +962,7 @@ all needed to finalize processing."
                                                  (eq (car files) t))
                                             t)
                                            (t
-                                            (not (seq-empty-p (length files))))))))
+                                            (not (seq-empty-p files)))))))
              nil "Region and marked files both active. Choose one only.")
   (if (buffer-file-name)
       (list (buffer-file-name))
@@ -927,7 +973,7 @@ all needed to finalize processing."
 (defun dwim-shell-command--dired-paths-in-region ()
   "If `dired' buffer, return region files.  nil otherwise."
   (when (and (equal major-mode 'dired-mode)
-             mark-active)
+             (use-region-p))
     (let ((start (region-beginning))
           (end (region-end))
           (paths))
