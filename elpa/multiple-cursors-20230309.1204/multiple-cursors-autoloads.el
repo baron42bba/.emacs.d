@@ -1,4 +1,4 @@
-;;; multiple-cursors-autoloads.el --- automatically extracted autoloads
+;;; multiple-cursors-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -10,7 +10,7 @@
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from mc-cycle-cursors.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "mc-cycle-cursors" '("mc/")))
+(register-definition-prefixes "mc-cycle-cursors" '("mc/"))
 
 ;;;***
 
@@ -32,16 +32,12 @@ other non-nil value will cause short lines to be padded.
 \(fn &optional ARG)" t nil)
 
 (autoload 'mc/edit-ends-of-lines "mc-edit-lines" "\
-Add one cursor to the end of each line in the active region.
-
-\(fn)" t nil)
+Add one cursor to the end of each line in the active region." t nil)
 
 (autoload 'mc/edit-beginnings-of-lines "mc-edit-lines" "\
-Add one cursor to the beginning of each line in the active region.
+Add one cursor to the beginning of each line in the active region." t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "mc-edit-lines" '("mc/edit-lines-empty-lines")))
+(register-definition-prefixes "mc-edit-lines" '("mc/edit-lines-empty-lines"))
 
 ;;;***
 
@@ -56,9 +52,24 @@ mode press \"C-'\" while multiple-cursor-mode is active. You can
 still edit lines while you are in mc-hide-unmatched-lines
 mode. To leave this mode press <return> or \"C-g\"
 
+This is a minor mode.  If called interactively, toggle the
+`Mc-Hide-Unmatched-Lines mode' mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `mc-hide-unmatched-lines-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "mc-hide-unmatched-lines-mode" '("hum/")))
+(register-definition-prefixes "mc-hide-unmatched-lines-mode" '("hum/"))
 
 ;;;***
 
@@ -84,7 +95,7 @@ With zero ARG, skip the last one and mark next.
 (autoload 'mc/mark-next-word-like-this "mc-mark-more" "\
 Find and mark the next word of the buffer matching the currently active region
 The matching region must be a whole word to be a match
-If no region is active, mark the symbol at the point and find the next match
+If no region is active add a cursor on the next line
 With negative ARG, delete the last one instead.
 With zero ARG, skip the last one and mark next.
 
@@ -93,42 +104,61 @@ With zero ARG, skip the last one and mark next.
 (autoload 'mc/mark-next-symbol-like-this "mc-mark-more" "\
 Find and mark the next symbol of the buffer matching the currently active region
 The matching region must be a whole symbol to be a match
-If no region is active, mark the symbol at the point and find the next match
+If no region is active add a cursor on the next line
 With negative ARG, delete the last one instead.
 With zero ARG, skip the last one and mark next.
 
 \(fn ARG)" t nil)
 
 (autoload 'mc/mark-previous-like-this "mc-mark-more" "\
-Find and mark the previous part of the buffer matching the currently active region
-If no region is active add a cursor on the previous line
+Find and mark the previous part of the buffer matching the
+currently active region.
+
+If no region is active ,add a cursor on the previous line.
+
 With negative ARG, delete the last one instead.
+
 With zero ARG, skip the last one and mark next.
 
 \(fn ARG)" t nil)
 
 (autoload 'mc/mark-previous-like-this-word "mc-mark-more" "\
-Find and mark the previous part of the buffer matching the currently active region
-If no region is active, mark the word at the point and find the previous match
+Find and mark the previous part of the buffer matching the
+currently active region.
+
+If no region is active, mark the word at the point and find the
+previous match.
+
 With negative ARG, delete the last one instead.
+
 With zero ARG, skip the last one and mark previous.
 
 \(fn ARG)" t nil)
 
 (autoload 'mc/mark-previous-word-like-this "mc-mark-more" "\
-Find and mark the previous part of the buffer matching the currently active region
-The matching region must be a whole word to be a match
-If no region is active add a cursor on the previous line
+Find and mark the previous part of the buffer matching the
+currently active region.
+
+The matching region must be a whole word to be a match.
+
+If no region is active, add a cursor on the previous line.
+
 With negative ARG, delete the last one instead.
+
 With zero ARG, skip the last one and mark next.
 
 \(fn ARG)" t nil)
 
 (autoload 'mc/mark-previous-symbol-like-this "mc-mark-more" "\
-Find and mark the previous part of the buffer matching the currently active region
-The matching region must be a whole symbol to be a match
-If no region is active add a cursor on the previous line
+Find and mark the previous part of the buffer matching
+the currently active region.
+
+The matching region must be a whole symbol to be a match.
+
+If no region is active add a cursor on the previous line.
+
 With negative ARG, delete the last one instead.
+
 With zero ARG, skip the last one and mark next.
 
 \(fn ARG)" t nil)
@@ -144,39 +174,25 @@ With zero ARG, skip the last one and mark next.
 \(fn ARG)" t nil)
 
 (autoload 'mc/unmark-next-like-this "mc-mark-more" "\
-Deselect next part of the buffer matching the currently active region.
-
-\(fn)" t nil)
+Deselect next part of the buffer matching the currently active region." t nil)
 
 (autoload 'mc/unmark-previous-like-this "mc-mark-more" "\
-Deselect prev part of the buffer matching the currently active region.
-
-\(fn)" t nil)
+Deselect prev part of the buffer matching the currently active region." t nil)
 
 (autoload 'mc/skip-to-next-like-this "mc-mark-more" "\
-Skip the current one and select the next part of the buffer matching the currently active region.
-
-\(fn)" t nil)
+Skip the current one and select the next part of the buffer
+matching the currently active region." t nil)
 
 (autoload 'mc/skip-to-previous-like-this "mc-mark-more" "\
-Skip the current one and select the prev part of the buffer matching the currently active region.
-
-\(fn)" t nil)
+Skip the current one and select the prev part of the buffer
+matching the currently active region." t nil)
 
 (autoload 'mc/mark-all-like-this "mc-mark-more" "\
-Find and mark all the parts of the buffer matching the currently active region
+Find and mark all the parts of the buffer matching the currently active region" t nil)
 
-\(fn)" t nil)
+(autoload 'mc/mark-all-words-like-this "mc-mark-more" nil t nil)
 
-(autoload 'mc/mark-all-words-like-this "mc-mark-more" "\
-
-
-\(fn)" t nil)
-
-(autoload 'mc/mark-all-symbols-like-this "mc-mark-more" "\
-
-
-\(fn)" t nil)
+(autoload 'mc/mark-all-symbols-like-this "mc-mark-more" nil t nil)
 
 (autoload 'mc/mark-all-in-region "mc-mark-more" "\
 Find and mark all the parts in the region matching the given search
@@ -189,7 +205,7 @@ Find and mark all the parts in the region matching the given regexp.
 \(fn BEG END)" t nil)
 
 (autoload 'mc/mark-more-like-this-extended "mc-mark-more" "\
-Like mark-more-like-this, but then lets you adjust with arrows key.
+Like mark-more-like-this, but then lets you adjust with arrow keys.
 The adjustments work like this:
 
    <up>    Mark previous like this and set direction to 'up
@@ -205,9 +221,8 @@ If direction is 'down:
    <left>  Remove the cursor furthest down
    <right> Skip past the cursor furthest down
 
-The bindings for these commands can be changed. See `mc/mark-more-like-this-extended-keymap'.
-
-\(fn)" t nil)
+The bindings for these commands can be changed.
+See `mc/mark-more-like-this-extended-keymap'." t nil)
 
 (autoload 'mc/mark-all-like-this-dwim "mc-mark-more" "\
 Tries to guess what you want to mark all of.
@@ -230,19 +245,13 @@ If the region is inactive or on a single line, it will behave like
 \(fn ARG)" t nil)
 
 (autoload 'mc/mark-all-like-this-in-defun "mc-mark-more" "\
-Mark all like this in defun.
-
-\(fn)" t nil)
+Mark all like this in defun." t nil)
 
 (autoload 'mc/mark-all-words-like-this-in-defun "mc-mark-more" "\
-Mark all words like this in defun.
-
-\(fn)" t nil)
+Mark all words like this in defun." t nil)
 
 (autoload 'mc/mark-all-symbols-like-this-in-defun "mc-mark-more" "\
-Mark all symbols like this in defun.
-
-\(fn)" t nil)
+Mark all symbols like this in defun." t nil)
 
 (autoload 'mc/toggle-cursor-on-click "mc-mark-more" "\
 Add a cursor where you click, or remove a fake cursor that is
@@ -253,11 +262,9 @@ already there.
 (defalias 'mc/add-cursor-on-click 'mc/toggle-cursor-on-click)
 
 (autoload 'mc/mark-sgml-tag-pair "mc-mark-more" "\
-Mark the tag we're in and its pair for renaming.
+Mark the tag we're in and its pair for renaming." t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "mc-mark-more" '("mc/" "mc--")))
+(register-definition-prefixes "mc-mark-more" '("mc--" "mc/"))
 
 ;;;***
 
@@ -266,9 +273,7 @@ Mark the tag we're in and its pair for renaming.
 
 (autoload 'mc/mark-pop "mc-mark-pop" "\
 Add a cursor at the current point, pop off mark ring and jump
-to the popped mark.
-
-\(fn)" t nil)
+to the popped mark." t nil)
 
 ;;;***
 
@@ -288,15 +293,9 @@ Insert increasing letters for each cursor, starting at 0 or ARG.
 
 \(fn ARG)" t nil)
 
-(autoload 'mc/reverse-regions "mc-separate-operations" "\
+(autoload 'mc/reverse-regions "mc-separate-operations" nil t nil)
 
-
-\(fn)" t nil)
-
-(autoload 'mc/sort-regions "mc-separate-operations" "\
-
-
-\(fn)" t nil)
+(autoload 'mc/sort-regions "mc-separate-operations" nil t nil)
 
 (autoload 'mc/vertical-align "mc-separate-operations" "\
 Aligns all cursors vertically with a given CHARACTER to the one with the
@@ -306,11 +305,9 @@ Might not behave as intended if more than one cursors are on the same line.
 \(fn CHARACTER)" t nil)
 
 (autoload 'mc/vertical-align-with-space "mc-separate-operations" "\
-Aligns all cursors with whitespace like `mc/vertical-align' does
+Aligns all cursors with whitespace like `mc/vertical-align' does" t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "mc-separate-operations" '("mc/insert-numbers-default" "mc--")))
+(register-definition-prefixes "mc-separate-operations" '("mc--" "mc/insert-numbers-default"))
 
 ;;;***
 
@@ -318,12 +315,33 @@ Aligns all cursors with whitespace like `mc/vertical-align' does
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from multiple-cursors-core.el
 
+(autoload 'activate-cursor-for-undo "multiple-cursors-core" "\
+Called when undoing to temporarily activate the fake cursor
+which action is being undone.
+
+\(fn ID)" nil nil)
+
 (autoload 'multiple-cursors-mode "multiple-cursors-core" "\
 Mode while multiple cursors are active.
 
+This is a minor mode.  If called interactively, toggle the
+`Multiple-Cursors mode' mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `multiple-cursors-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "multiple-cursors-core" '("multiple-cursors-mode" "unsupported-cmd" "deactivate-cursor-after-undo" "activate-cursor-for-undo")))
+(register-definition-prefixes "multiple-cursors-core" '("deactivate-cursor-after-undo" "multiple-cursors-mode" "unsupported-cmd"))
 
 ;;;***
 
@@ -334,17 +352,31 @@ Mode while multiple cursors are active.
 (autoload 'set-rectangular-region-anchor "rectangular-region-mode" "\
 Anchors the rectangular region at point.
 
-Think of this one as `set-mark' except you're marking a rectangular region. It is
-an exceedingly quick way of adding multiple cursors to multiple lines.
-
-\(fn)" t nil)
+Think of this one as `set-mark' except you're marking a
+rectangular region. It is an exceedingly quick way of adding
+multiple cursors to multiple lines." t nil)
 
 (autoload 'rectangular-region-mode "rectangular-region-mode" "\
 A mode for creating a rectangular region to edit
 
+This is a minor mode.  If called interactively, toggle the
+`Rectangular-Region mode' mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `rectangular-region-mode'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "rectangular-region-mode" '("rectangular-region-mode" "rrm/")))
+(register-definition-prefixes "rectangular-region-mode" '("rectangular-region-mode" "rrm/"))
 
 ;;;***
 
