@@ -4,8 +4,6 @@
 ;;         Justin Burkett <justin@burkett.cc>
 ;; Maintainer: Titus von der Malsburg <malsburg@posteo.de>
 ;; URL: https://github.com/tmalsburg/helm-bibtex
-;; Package-Version: 20220404.1608
-;; Package-Commit: ce8c17690ddad73d01531084b282f221f8eb6669
 ;; Version: 1.0.0
 ;; Package-Requires: ((parsebib "1.0") (s "1.9.0") (dash "2.6.0") (f "0.16.2") (cl-lib "0.5") (biblio "0.2") (emacs "26.1"))
 
@@ -368,7 +366,6 @@ bibliography file is reparsed.")
 (defvar bibtex-completion-string-hash-table nil
   "A hash table used for string replacements.")
 
-
 (defun bibtex-completion-normalize-bibliography (&optional type)
   "Return a list of bibliography file(s) in `bibtex-completion-bibliography'.
 If there are org mode bibliography-files, their corresponding
@@ -383,7 +380,18 @@ their associated bibtex files."
                       bib-file)
     for bibtex-file = (if (consp bib-file)
                           (cdr bib-file)
-                        (concat (file-name-sans-extension main-file) ".bib"))
+                        (cond
+                         ((string= (file-name-extension main-file) "bib") main-file)
+                         ((string= (file-name-extension main-file) "org")
+                          (concat (file-name-sans-extension main-file) "bib"))
+                         ((and (string= (file-name-extension main-file) "gpg")
+                               (string= (file-name-extension
+                                         (file-name-sans-extension main-file)) "bib")) main-file)
+                         ((and (string= (file-name-extension main-file) "gpg")
+                               (string= (file-name-extension
+                                         (file-name-sans-extension main-file)) "org"))
+                          (concat (file-name-sans-extension
+                                   (file-name-sans-extension main-file)) ".bib.gpg"))))
     unless (equal type 'bibtex)
     collect main-file
     unless (equal type 'main)
@@ -488,7 +496,7 @@ The first element of these conses is a string containing authors,
 editors, title, year, type, and key of the entry.  This string
 is used for matching.  The second element is the entry (only the
 fields listed above) as an alist."
-  (let ((files (nreverse (bibtex-completion-normalize-bibliography 'bibtex)))
+  (let ((files (bibtex-completion-normalize-bibliography 'bibtex))
         (ht-strings (make-hash-table :test #'equal))
         reparsed-files)
 
@@ -569,10 +577,9 @@ fields listed above) as an alist."
 
     ;; Finally return the list of candidates:
     (message "Done (re)loading bibliography.")
-    (nreverse
-     (cl-loop
-      for file in files
-      append (cddr (assoc file bibtex-completion-cache))))))
+    (cl-loop
+     for file in files
+     append (reverse (cddr (assoc file bibtex-completion-cache))))))
 
 (defun bibtex-completion-resolve-crossrefs (files reparsed-files)
   "Expand all entries with fields from cross-referenced entries in FILES, assuming that only those files in REPARSED-FILES were reparsed whereas the other files in FILES were up-to-date."
@@ -1178,6 +1185,9 @@ string if FIELD is not present in ENTRY and DEFAULT is nil."
      ("editor-abbrev"
       (when-let ((value (bibtex-completion-get-value "editor" entry)))
         (bibtex-completion-apa-format-editors-abbrev value)))
+     ((or "journal" "journaltitle")
+      (or (bibtex-completion-get-value "journal" entry)
+          (bibtex-completion-get-value "journaltitle" entry)))
      (_
       ;; Real fields:
       (let ((value (bibtex-completion-get-value field entry)))

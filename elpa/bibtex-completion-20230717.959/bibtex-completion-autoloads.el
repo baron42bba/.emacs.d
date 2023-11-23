@@ -44,6 +44,10 @@ Bibtex-Completion-Notes mode.
 
 ;;;***
 
+;;;### (autoloads nil nil ("bibtex-completion-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
