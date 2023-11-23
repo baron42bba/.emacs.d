@@ -1108,9 +1108,9 @@ list who can decrypt a file:
 * auto-completion
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20170125.245")
+  (add-to-list 'load-path "~/.emacs.d/elpa/auto-complete-20221231.1633")
   (require 'auto-complete-config)
-  (add-to-list 'ac-dictionary-directories "~/.emacs.d/elpa/auto-complete-20170125.245")
+  (add-to-list 'ac-dictionary-directories "~/.emacs.d/elpa/auto-complete-20221231.1633")
   (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
   (ac-config-default)
   (add-to-list 'ac-modes 'cfengine3-mode)
