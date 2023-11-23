@@ -81,6 +81,15 @@ before calling `er/expand-region' for the first time.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from expand-region-core.el
 
+(autoload 'er/contract-region "expand-region-core" "\
+Contract the selected region to its previous size.
+With prefix argument contracts that many times.
+If prefix argument is negative calls `er/expand-region'.
+If prefix argument is 0 it resets point and mark to their state
+before calling `er/expand-region' for the first time.
+
+\(fn ARG)" t nil)
+
 (register-definition-prefixes "expand-region-core" '("er--" "er/"))
 
 ;;;***
