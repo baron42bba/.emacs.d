@@ -1,4 +1,4 @@
-;;; sx-autoloads.el --- automatically extracted autoloads
+;;; sx-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -10,11 +10,9 @@
 ;;; Generated autoloads from sx.el
 
 (autoload 'sx-bug-report "sx" "\
-File a bug report about the `sx' package.
+File a bug report about the `sx' package." t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx" '("sx-")))
+(register-definition-prefixes "sx" '("sx-"))
 
 ;;;***
 
@@ -47,60 +45,58 @@ following privileges are requested:
 After authorization with StackExchange, the user is then
 redirected to a website managed by SX.  The access token required
 to use authenticated methods is included in the hash (which is
-parsed and displayed prominently on the page).
+parsed and displayed prominently on the page)." t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-auth" '("sx-auth-")))
+(register-definition-prefixes "sx-auth" '("sx-auth-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-babel" "sx-babel.el" (0 0 0 0))
 ;;; Generated autoloads from sx-babel.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-babel" '("sx-babel-")))
+(register-definition-prefixes "sx-babel" '("sx-babel-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-button" "sx-button.el" (0 0 0 0))
 ;;; Generated autoloads from sx-button.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-button" '("sx-")))
+(register-definition-prefixes "sx-button" '("sx-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-cache" "sx-cache.el" (0 0 0 0))
 ;;; Generated autoloads from sx-cache.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-cache" '("sx-cache-")))
+(register-definition-prefixes "sx-cache" '("sx-cache-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-compose" "sx-compose.el" (0 0 0 0))
 ;;; Generated autoloads from sx-compose.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-compose" '("sx-compose-")))
+(register-definition-prefixes "sx-compose" '("sx-compose-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-encoding" "sx-encoding.el" (0 0 0 0))
 ;;; Generated autoloads from sx-encoding.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-encoding" '("sx-encoding-")))
+(register-definition-prefixes "sx-encoding" '("sx-encoding-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-favorites" "sx-favorites.el" (0 0 0 0))
 ;;; Generated autoloads from sx-favorites.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-favorites" '("sx-favorite")))
+(register-definition-prefixes "sx-favorites" '("sx-favorite"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-filter" "sx-filter.el" (0 0 0 0))
 ;;; Generated autoloads from sx-filter.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-filter" '("sx-")))
+(register-definition-prefixes "sx-filter" '("sx-"))
 
 ;;;***
 
@@ -114,11 +110,9 @@ With prefix NOTIFICATIONS, list notifications instead of inbox.
 \(fn &optional NOTIFICATIONS)" t nil)
 
 (autoload 'sx-inbox-notifications "sx-inbox" "\
-Display a buffer listing notification items.
+Display a buffer listing notification items." t nil)
 
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-inbox" '("sx-inbox-")))
+(register-definition-prefixes "sx-inbox" '("sx-inbox-"))
 
 ;;;***
 
@@ -133,9 +127,7 @@ Element can be a question, answer, or comment.
 \(fn LINK &optional _)" t nil)
 
 (autoload 'sx-org-get-link "sx-interaction" "\
-Add a link to this post to Org's memory.
-
-\(fn)" nil nil)
+Add a link to this post to Org's memory." nil nil)
 
 (autoload 'sx-ask "sx-interaction" "\
 Start composing a question for SITE.
@@ -143,35 +135,35 @@ SITE is a string, indicating where the question will be posted.
 
 \(fn SITE)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-interaction" '("sx-")))
+(register-definition-prefixes "sx-interaction" '("sx-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-method" "sx-method.el" (0 0 0 0))
 ;;; Generated autoloads from sx-method.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-method" '("sx-method-post-from-data")))
+(register-definition-prefixes "sx-method" '("sx-method-post-from-data"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-networks" "sx-networks.el" (0 0 0 0))
 ;;; Generated autoloads from sx-networks.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-networks" '("sx-network-")))
+(register-definition-prefixes "sx-networks" '("sx-network-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-notify" "sx-notify.el" (0 0 0 0))
 ;;; Generated autoloads from sx-notify.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-notify" '("sx-notify-")))
+(register-definition-prefixes "sx-notify" '("sx-notify-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-question" "sx-question.el" (0 0 0 0))
 ;;; Generated autoloads from sx-question.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-question" '("sx-")))
+(register-definition-prefixes "sx-question" '("sx-"))
 
 ;;;***
 
@@ -179,7 +171,7 @@ SITE is a string, indicating where the question will be posted.
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from sx-question-list.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-question-list" '("sx-question-list-")))
+(register-definition-prefixes "sx-question-list" '("sx-question-list-"))
 
 ;;;***
 
@@ -187,7 +179,7 @@ SITE is a string, indicating where the question will be posted.
 ;;;;;;  0 0 0))
 ;;; Generated autoloads from sx-question-mode.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-question-mode" '("sx-question-mode")))
+(register-definition-prefixes "sx-question-mode" '("sx-question-mode"))
 
 ;;;***
 
@@ -195,14 +187,14 @@ SITE is a string, indicating where the question will be posted.
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from sx-question-print.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-question-print" '("sx-question-mode-")))
+(register-definition-prefixes "sx-question-print" '("sx-question-mode-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-request" "sx-request.el" (0 0 0 0))
 ;;; Generated autoloads from sx-request.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-request" '("sx-")))
+(register-definition-prefixes "sx-request" '("sx-"))
 
 ;;;***
 
@@ -225,14 +217,14 @@ Follow tag under position POS or point.
 
 \(fn &optional POS)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-search" '("sx-search-")))
+(register-definition-prefixes "sx-search" '("sx-search-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-site" "sx-site.el" (0 0 0 0))
 ;;; Generated autoloads from sx-site.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-site" '("sx-site-")))
+(register-definition-prefixes "sx-site" '("sx-site-"))
 
 ;;;***
 
@@ -268,28 +260,28 @@ Follow tag under position POS or point.
 
 (autoload 'sx-tab-month "sx-tab" nil t)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-tab" '("sx-tab-")))
+(register-definition-prefixes "sx-tab" '("sx-tab-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-tag" "sx-tag.el" (0 0 0 0))
 ;;; Generated autoloads from sx-tag.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-tag" '("sx-tag-")))
+(register-definition-prefixes "sx-tag" '("sx-tag-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-time" "sx-time.el" (0 0 0 0))
 ;;; Generated autoloads from sx-time.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-time" '("sx-time-")))
+(register-definition-prefixes "sx-time" '("sx-time-"))
 
 ;;;***
 
 ;;;### (autoloads nil "sx-user" "sx-user.el" (0 0 0 0))
 ;;; Generated autoloads from sx-user.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "sx-user" '("sx-")))
+(register-definition-prefixes "sx-user" '("sx-"))
 
 ;;;***
 
