@@ -1,4 +1,4 @@
-;;; biblio-core-autoloads.el --- automatically extracted autoloads
+;;; biblio-core-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -18,7 +18,11 @@ inserted.
 
 \(fn &optional BACKEND QUERY)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-core" '("biblio-")))
+(register-definition-prefixes "biblio-core" '("biblio-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("biblio-core-pkg.el") (0 0 0 0))
 
 ;;;***
 

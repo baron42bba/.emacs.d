@@ -1,4 +1,4 @@
-;;; biblio-autoloads.el --- automatically extracted autoloads
+;;; biblio-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -24,7 +24,7 @@ Start an arXiv search for QUERY, prompting if needed.
 
 (defalias 'arxiv-lookup 'biblio-arxiv-lookup)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-arxiv" '("biblio-arxiv-")))
+(register-definition-prefixes "biblio-arxiv" '("biblio-arxiv-"))
 
 ;;;***
 
@@ -47,7 +47,7 @@ Start a CrossRef search for QUERY, prompting if needed.
 
 (defalias 'crossref-lookup 'biblio-crossref-lookup)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-crossref" '("biblio-crossref-")))
+(register-definition-prefixes "biblio-crossref" '("biblio-crossref-"))
 
 ;;;***
 
@@ -69,7 +69,7 @@ Start a DBLP search for QUERY, prompting if needed.
 
 (defalias 'dblp-lookup 'biblio-dblp-lookup)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-dblp" '("biblio-dblp--")))
+(register-definition-prefixes "biblio-dblp" '("biblio-dblp--"))
 
 ;;;***
 
@@ -87,25 +87,23 @@ Interactively, or if CLEANUP is non-nil, pass DOI through
 (defalias 'dissemin-lookup 'biblio-dissemin-lookup)
 
 (autoload 'biblio-dissemin--register-action "biblio-dissemin" "\
-Add Dissemin to list of `biblio-selection-mode' actions.
-
-\(fn)" nil nil)
+Add Dissemin to list of `biblio-selection-mode' actions." nil nil)
 
 (add-hook 'biblio-selection-mode-hook #'biblio-dissemin--register-action)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-dissemin" '("biblio-dissemin--")))
+(register-definition-prefixes "biblio-dissemin" '("biblio-dissemin--"))
 
 ;;;***
 
 ;;;### (autoloads nil "biblio-doi" "biblio-doi.el" (0 0 0 0))
 ;;; Generated autoloads from biblio-doi.el
 
-(autoload 'doi-insert-bibtex "biblio-doi" "\
+(autoload 'biblio-doi-insert-bibtex "biblio-doi" "\
 Insert BibTeX entry matching DOI.
 
 \(fn DOI)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-doi" '("biblio-doi-")))
+(register-definition-prefixes "biblio-doi" '("biblio-doi-" "doi-insert-bibtex"))
 
 ;;;***
 
@@ -114,13 +112,11 @@ Insert BibTeX entry matching DOI.
 ;;; Generated autoloads from biblio-download.el
 
 (autoload 'biblio-download--register-action "biblio-download" "\
-Add download to list of `biblio-selection-mode' actions.
-
-\(fn)" nil nil)
+Add download to list of `biblio-selection-mode' actions." nil nil)
 
 (add-hook 'biblio-selection-mode-hook #'biblio-download--register-action)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-download" '("biblio-download-")))
+(register-definition-prefixes "biblio-download" '("biblio-download-"))
 
 ;;;***
 
@@ -142,7 +138,7 @@ Start a HAL search for QUERY, prompting if needed.
 
 (defalias 'hal-lookup 'biblio-hal-lookup)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-hal" '("biblio-hal--")))
+(register-definition-prefixes "biblio-hal" '("biblio-hal--"))
 
 ;;;***
 
@@ -164,7 +160,7 @@ Start a IEEE search for QUERY, prompting if needed.
 
 (defalias 'ieee-lookup 'biblio-ieee-lookup)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "biblio-ieee" '("biblio-ieee--")))
+(register-definition-prefixes "biblio-ieee" '("biblio-ieee--"))
 
 ;;;***
 

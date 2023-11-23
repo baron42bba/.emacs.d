@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -80,7 +80,7 @@ more details."
 
 (defun biblio-crossref--url (query)
   "Create a CrossRef url to look up QUERY."
-  (format "http://api.crossref.org/works?query=%s%s"
+  (format "https://api.crossref.org/works?query=%s%s"
           (url-encode-url query)
           (if biblio-crossref-user-email-address
               (format "&mailto=%s" (url-encode-url biblio-crossref-user-email-address)) "")))

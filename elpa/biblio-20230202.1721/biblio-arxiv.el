@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -84,7 +84,7 @@ primaryClass = {%s}}"
 (defun biblio-arxiv--pdf-url (id)
   "Extract PDF url from ID of an arXiv entry."
   (when id
-    (concat "http://arxiv.org/pdf/" id)))
+    (concat "https://arxiv.org/pdf/" id)))
 
 (defun biblio-arxiv--extract-interesting-fields (entry)
   "Prepare an arXiv search result ENTRY for display."
@@ -116,7 +116,7 @@ primaryClass = {%s}}"
 
 (defun biblio-arxiv--url (query)
   "Create an arXiv url to look up QUERY."
-  (format "http://export.arxiv.org/api/query?search_query=%s"
+  (format "https://export.arxiv.org/api/query?search_query=%s"
           (url-encode-url query)))
 
 ;;;###autoload

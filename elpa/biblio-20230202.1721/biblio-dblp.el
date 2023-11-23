@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -38,8 +38,7 @@
                               (lambda () ;; No allowed errors, so no arguments
                                 "Parse DBLP BibTeX results."
                                 (funcall forward-to
-                                         (biblio-format-bibtex
-                                          (biblio-response-as-utf-8))))))))
+                                         (biblio-response-as-utf-8)))))))
 
 (defun biblio-dblp--extract-interesting-fields (item)
   "Prepare a DBLP search result ITEM for display."
@@ -66,7 +65,7 @@
 
 (defun biblio-dblp--url (query)
   "Create a DBLP url to look up QUERY."
-  (format "http://dblp.uni-trier.de/search/publ/api?q=%s&format=xml" (url-encode-url query)))
+  (format "https://dblp.uni-trier.de/search/publ/api?q=%s&format=xml" (url-encode-url query)))
 
 ;;;###autoload
 (defun biblio-dblp-backend (command &optional arg &rest more)

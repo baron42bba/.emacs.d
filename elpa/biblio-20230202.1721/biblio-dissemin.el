@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -69,7 +69,7 @@
   (insert "\n\nDid you write this paper? ")
   (biblio-with-fontification '(:weight bold)
     (insert
-     (biblio-make-url-button (format "http://dissem.in/%s" doi) "upload it")))
+     (biblio-make-url-button (format "https://dissem.in/%s" doi) "upload it")))
   (insert "!\n"))
 
 (defun biblio-dissemin--pretty-print (paper doi)
@@ -114,7 +114,7 @@
 
 (defun biblio-dissemin--url (doi)
   "Create a DBLP url to look up DOI."
-  (format "http://dissem.in/api/%s" (url-encode-url doi)))
+  (format "https://dissem.in/api/%s" (url-encode-url doi)))
 
 (defun biblio-dissemin--callback (doi)
   "Generate a callback to parse Dissemin results for DOI."

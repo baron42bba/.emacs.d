@@ -3,11 +3,10 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; Version: 0.2
-;; Package-Version: 20190624.1408
+;; Version: 0.3
 ;; Package-Requires: ((emacs "24.3") (let-alist "1.0.4") (seq "1.11") (dash "2.12.1"))
 ;; Keywords: bib, tex, convenience, hypermedia
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,7 +19,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;; A framework for browsing bibliographic search results.  This is the core
@@ -105,8 +104,7 @@ Also see `biblio-cleanup-bibtex-function'.")
 DIALECT is `BibTeX' or `biblatex'.  AUTOKEY: see `biblio-format-bibtex'."
   (let ((bibtex-entry-format biblio--bibtex-entry-format)
         (bibtex-align-at-equal-sign t)
-        (bibtex-autokey-edit-before-use nil)
-        (bibtex-autokey-year-title-separator ":"))
+        (bibtex-autokey-edit-before-use nil))
     ;; Use biblatex to allow for e.g. @Online
     ;; Use BibTeX to allow for e.g. @TechReport
     (bibtex-set-dialect dialect t)
@@ -114,7 +112,7 @@ DIALECT is `BibTeX' or `biblatex'.  AUTOKEY: see `biblio-format-bibtex'."
 
 (defun biblio--cleanup-bibtex (autokey)
   "Default value of `biblio-cleanup-bibtex-function'.
-AUTOKEY: See biblio-format-bibtex."
+AUTOKEY: See `biblio-format-bibtex'."
   (save-excursion
     (when (search-forward "@data{" nil t)
       (replace-match "@misc{")))
@@ -140,10 +138,10 @@ With non-nil AUTOKEY, automatically generate a key for BIBTEX."
     (bibtex-mode)
     (save-excursion
       (insert (biblio-strip bibtex)))
-    (when (functionp biblio-cleanup-bibtex-function)
-      (funcall biblio-cleanup-bibtex-function autokey))
     (if (fboundp 'font-lock-ensure) (font-lock-ensure)
       (with-no-warnings (font-lock-fontify-buffer)))
+    (when (functionp biblio-cleanup-bibtex-function)
+      (funcall biblio-cleanup-bibtex-function autokey))
     (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun biblio--beginning-of-response-body ()
@@ -215,7 +213,7 @@ URL and CALLBACK; see `url-queue-retrieve'"
   (if biblio-synchronous
       (with-current-buffer (url-retrieve-synchronously url)
         (funcall callback nil))
-    (setq url-queue-timeout 1)
+    (setq url-queue-timeout 5)
     (url-queue-retrieve url callback)))
 
 (defun biblio-strip (str)
@@ -294,7 +292,7 @@ non-sparse keymaps."
                               "Return a list of bindings in V, prefixed by K."
                               (biblio--flatten-map v (biblio--as-list k)))
                             keymap)))))
-    ;; This breaks if keymap is a symbol whose function cell is a keymap
+    ;; FIXME This breaks if keymap is a symbol whose function cell is a keymap
     ((symbolp keymap)
      (list (cons prefix keymap))))))
 
@@ -329,12 +327,14 @@ That is, if two key map to `eq' values, they are grouped."
 
 (defun biblio--help-with-major-mode-1 (keyseqs-command)
   "Print help on KEYSEQS-COMMAND to standard output."
-  ;; (biblio-with-fontification 'font-lock-function-name-face
-  (insert (format "%s (%S)\n"
-                  (biblio--quote-keys (car keyseqs-command))
-                  (cdr keyseqs-command)))
-  (biblio-with-fontification 'font-lock-doc-face
-    (insert (format "  %s\n\n" (biblio--brief-docs (cdr keyseqs-command))))))
+  (insert (biblio--quote-keys (car keyseqs-command)) " ")
+  (insert (propertize "\t" 'display '(space :align-to 10)))
+  (insert-text-button (format "%S" (cdr keyseqs-command)))
+  (insert "\n")
+  (biblio-with-fontification '(font-lock-comment-face (:height 0.95))
+    (insert (format "  %s\n" (biblio--brief-docs (cdr keyseqs-command)))))
+  (biblio-with-fontification '(:height 0.3)
+    (insert "\n")))
 
 (defun biblio--help-with-major-mode ()
   "Display help with current major mode."
@@ -444,6 +444,13 @@ Uses .url, and .doi as a fallback."
   (or (get-text-property (point) 'biblio-metadata)
       (user-error "No entry at point")))
 
+(defcustom biblio-bibtex-use-autokey nil
+  "Whether to generate new BibTeX keys for inserted entries."
+  :type '(choice (const :tag "Keep original BibTeX keys" nil)
+                 (const :tag "Generate new BibTeX keys" t))
+  :group 'biblio
+  :package-version '(biblio . "0.2.1"))
+
 (defun biblio--selection-forward-bibtex (forward-to &optional quit)
   "Retrieve BibTeX for entry at point and pass it to FORWARD-TO.
 If QUIT is set, also kill the results buffer."
@@ -454,7 +461,10 @@ If QUIT is set, also kill the results buffer."
                'forward-bibtex metadata
                (lambda (bibtex)
                  (with-current-buffer results-buffer
-                   (funcall forward-to (biblio-format-bibtex bibtex) metadata))))
+                   (funcall
+                    forward-to
+                    (biblio-format-bibtex bibtex biblio-bibtex-use-autokey)
+                    metadata))))
       (when quit (quit-window)))))
 
 (defun biblio--selection-change-buffer (buffer-name)
@@ -473,7 +483,10 @@ will be called with the metadata of the current item.")
 
 (defun biblio--completing-read-function ()
   "Return ido, unless user picked another completion package."
-  (if (eq completing-read-function #'completing-read-default)
+  (if (and (eq completing-read-function #'completing-read-default)
+           (not (catch 'advised ;; https://github.com/cpitclaudel/biblio.el/issues/55
+                  (advice-mapc (lambda (&rest _args) (throw 'advised t))
+                               'completing-read-default))))
       #'ido-completing-read
     completing-read-function))
 
@@ -520,8 +533,10 @@ Interactively, query for ACTION from
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<up>") #'biblio--selection-previous)
     (define-key map (kbd "C-p") #'biblio--selection-previous)
+    (define-key map (kbd "p") #'biblio--selection-previous)
     (define-key map (kbd "<down>") #'biblio--selection-next)
     (define-key map (kbd "C-n") #'biblio--selection-next)
+    (define-key map (kbd "n") #'biblio--selection-next)
     (define-key map (kbd "RET") #'biblio--selection-browse)
     (define-key map (kbd "<C-return>") #'biblio--selection-browse-direct)
     (define-key map (kbd "C-RET") #'biblio--selection-browse-direct)
@@ -550,10 +565,16 @@ Interactively, query for ACTION from
                       (buffer-name biblio--target-buffer))
             "")))
 
+(defface biblio-highlight-extend-face `((t (:inherit highlight
+						     ,@(and (>= emacs-major-version 27) '(:extend t)))))
+  "Face used for highlighting lines."
+  :group 'biblio-faces)
+
 (define-derived-mode biblio-selection-mode fundamental-mode biblio--selection-mode-name-base
   "Browse bibliographic search results.
 \\{biblio-selection-mode-map}"
-  (hl-line-mode)
+  (setq-local hl-line-face 'biblio-highlight-extend-face)
+  (hl-line-mode 1)
   (visual-line-mode)
   (setq-local truncate-lines nil)
   (setq-local cursor-type nil)
@@ -647,6 +668,15 @@ With non-nil LABEL, use that instead of URL to label the button."
                           'action #'biblio--browse-url)
       (buffer-string))))
 
+(defun biblio--references-redundant-p (references url)
+  "Check whether REFERENCES are all containted in URL.
+
+This is commonly the case with DOIs, which don't need to be
+displayed if they are already in the `dx.doi.org' url."
+  (and (stringp url)
+       (seq-every-p (lambda (ref) (string-match-p (regexp-quote ref) url))
+                    references)))
+
 (defun biblio-insert-result (item &optional no-sep)
   "Print a (prepared) bibliographic search result ITEM.
 With NO-SEP, do not add space after the record.
@@ -684,7 +714,13 @@ provide examples of how to build such a result."
         (biblio--insert-detail "  Type: " .type t)
         (biblio--insert-detail "  Category: " .category t)
         (biblio--insert-detail "  Publisher: " .publisher t)
-        (biblio--insert-detail "  References: " .references t)
+        ;; (-when-let* ((year (and (numberp .year) (number-to-string .year))))
+        ;;   (if .publisher
+        ;;       (insert (format " (%s)" year))
+        ;;     (biblio--insert-detail "  Publication date: " year t)))
+        (let ((references (remq nil .references)))
+          (unless (biblio--references-redundant-p references .url)
+            (biblio--insert-detail "  References: " references t)))
         (biblio--insert-detail "  Open Access: " .open-access-status t)
         (biblio--insert-detail "  URL: " (list (biblio-make-url-button .url)
                                          (biblio-make-url-button .direct-url))

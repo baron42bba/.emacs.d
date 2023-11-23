@@ -3,10 +3,10 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; Version: 0.2
-;; Package-Requires: ((emacs "24.3") (biblio-core "0.2"))
+;; Version: 0.3
+;; Package-Requires: ((emacs "24.3") (biblio-core "0.3"))
 ;; Keywords: bib, tex, convenience, hypermedia
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;; # biblio.el: An extensible Emacs package for browsing and fetching references
@@ -61,7 +61,7 @@
 ;;
 ;; ## Examples
 ;;
-;; * To insert a clean BibTeX entry for http://doi.org/10.1145/2676726.2677006
+;; * To insert a clean BibTeX entry for https://doi.org/10.1145/2676726.2677006
 ;;   in the current buffer, use
 ;;
 ;;         M-x crossref-lookup RET fiat deductive delaware RET i
@@ -71,14 +71,14 @@
 ;;
 ;; * To find publications by computer scientist Leslie Lamport, use ‘M-x
 ;;   dblp-lookup RET author:Lamport RET’ (see more info about DBLP's syntax at
-;;   <http://dblp.uni-trier.de/search/>)
+;;   <https://dblp.uni-trier.de/search/>)
 ;;
 ;; * To check whether an article is freely available online, use ‘x’ in the list
 ;;   of results.  For example ‘M-x crossref-lookup RET Emacs stallman RET’
 ;;   followed by ‘x Dissemin RET’ will help you find open access copies of
-;;   Stallman's paper on EMACS (spoiler: http://hdl.handle.net/1721.1/5736).
+;;   Stallman's paper on EMACS (spoiler: https://hdl.handle.net/1721.1/5736).
 ;;
-;; See http://github.com/cpitclaudel/biblio.el for more information, including
+;; See https://github.com/cpitclaudel/biblio.el for more information, including
 ;; documentation on extending this framework.
 
 ;;; Code:

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; URL: http://github.com/cpitclaudel/biblio.el
+;; URL: https://github.com/cpitclaudel/biblio.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 ;;; Commentary:
@@ -35,17 +35,17 @@
 
 (defun biblio-doi--dx-url (doi)
   "Create a doi.org url for DOI."
-  (format "http://doi.org/%s" doi))
+  (format "https://doi.org/%s" doi))
 
 (defun biblio-doi--crosscite-url (doi)
   "Create a crosscite URL to use as a fallback for DOI.
 Not all content providers provide BibTeX formatted entries, so
 instead of failing reroute the request through crosscite, which
 requests a generic format and crates the BibTeX on its own."
-  (format "http://crosscite.org/citeproc/format?doi=%s&style=bibtex&lang=en-US" doi))
+  (format "https://crosscite.org/citeproc/format?doi=%s&style=bibtex&lang=en-US" doi))
 
 (defconst biblio-doi--dx-mime-accept
-  ;; “Accept:” header; Zenodo recognize x-bibtex but not text/bibliography
+  ;; “Accept:” header; Zenodo recognizes x-bibtex but not text/bibliography
   "text/bibliography;style=bibtex, application/x-bibtex")
 
 (defun biblio-doi--set-mime-accept ()
@@ -68,9 +68,7 @@ requests a generic format and crates the BibTeX on its own."
 (defun biblio-doi--generic-url-callback-1 (errors forward-to)
   "Helper function for `biblio-doi--generic-url-callback'.
 ERRORS, FORWARD-TO: see there."
-  (funcall forward-to
-           (unless errors
-             (biblio-format-bibtex (biblio-response-as-utf-8)))))
+  (funcall forward-to (unless errors (biblio-response-as-utf-8))))
 
 (defun biblio-doi--generic-url-callback (cleanup-fn forward-to)
   "Make an URL-ready callback.
@@ -111,13 +109,18 @@ FORWARD-TO is the callback to call with the results of the search."
            (biblio-doi--forward-bibtex-crosscite doi forward-to)))))
 
 ;;;###autoload
-(defun doi-insert-bibtex (doi)
+(defun biblio-doi-insert-bibtex (doi)
   "Insert BibTeX entry matching DOI."
   (interactive "MDOI: ")
   (let ((target-buffer (current-buffer)))
     (biblio-doi-forward-bibtex
      (biblio-cleanup-doi doi)
-     (lambda (result) (biblio-doi--insert result target-buffer)))))
+     (lambda (result)
+       (biblio-doi--insert
+        (biblio-format-bibtex result biblio-bibtex-use-autokey)
+        target-buffer)))))
+
+(defalias 'doi-insert-bibtex 'biblio-doi-insert-bibtex)
 
 (provide 'biblio-doi)
 ;;; biblio-doi.el ends here
