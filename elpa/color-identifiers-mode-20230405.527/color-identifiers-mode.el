@@ -1,10 +1,9 @@
-;;; color-identifiers-mode.el --- Color identifiers based on their names
+;;; color-identifiers-mode.el --- Color identifiers based on their names -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014 Ankur Dave
 
 ;; Author: Ankur Dave <ankurdave@gmail.com>
 ;; Url: https://github.com/ankurdave/color-identifiers-mode
-;; Package-Version: 20200129.144
 ;; Created: 24 Jan 2014
 ;; Version: 1.1
 ;; Keywords: faces, languages
@@ -39,8 +38,9 @@
 (require 'advice)
 (require 'color)
 (require 'dash)
-(require 'python)
 (require 'cl-lib)
+(require 'rx)
+(require 'subr-x)
 
 (defgroup color-identifiers nil "Color identifiers based on their names."
   :group 'faces)
@@ -48,32 +48,22 @@
 (defvar color-identifiers:timer nil
   "Timer for running `color-identifiers:refresh'.")
 
-;;;###autoload
-(define-minor-mode color-identifiers-mode
-  "Color the identifiers in the current buffer based on their names."
-  :init-value nil
-  :lighter " ColorIds"
-  (if color-identifiers-mode
-      (progn
-        (color-identifiers:regenerate-colors)
-        (color-identifiers:refresh)
-        (add-to-list 'font-lock-extra-managed-props 'color-identifiers:fontified)
-        (font-lock-add-keywords nil '((color-identifiers:colorize . default)) t)
-        (unless color-identifiers:timer
-          (setq color-identifiers:timer
-                (run-with-idle-timer 5 t 'color-identifiers:refresh)))
-        (ad-activate 'enable-theme))
-    (when color-identifiers:timer
-      (cancel-timer color-identifiers:timer))
-    (setq color-identifiers:timer nil)
-    (font-lock-remove-keywords nil '((color-identifiers:colorize . default)))
-    (ad-deactivate 'enable-theme)
-    (run-hooks 'color-identifiers-mode-hook))
-  (color-identifiers:refontify))
+(defvar color-identifiers:recoloring-delay 2
+  "The delay before running `color-identifiers:refresh'.")
 
-;;;###autoload
-(define-global-minor-mode global-color-identifiers-mode
-  color-identifiers-mode color-identifiers-mode-maybe)
+(defun color-identifiers:enable-timer ()
+  (if color-identifiers:timer
+      ;; Someone set the timer. Activate in case we cancelled it.
+      (unless (memq color-identifiers:timer timer-idle-list)
+        (timer-activate-when-idle color-identifiers:timer))
+    (setq color-identifiers:timer
+          (run-with-idle-timer color-identifiers:recoloring-delay t 'color-identifiers:refresh)))
+  )
+
+(defvar-local color-identifiers:colorize-behavior nil
+  "For internal use. Stores the element of
+`color-identifiers:modes-alist' that is relevant to the current
+major mode")
 
 (defadvice enable-theme (after color-identifiers:regen-on-theme-change)
   "Regenerate colors for color-identifiers-mode on theme change."
@@ -100,11 +90,13 @@ error colors etc."
 
 (defvar color-identifiers:modes-alist nil
   "Alist of major modes and the ways to distinguish identifiers in those modes.
-The value of each cons cell provides four constraints for finding identifiers.
-A word must match all four constraints to be colored as an identifier.  The
-value has the form (IDENTIFIER-CONTEXT-RE IDENTIFIER-RE IDENTIFIER-FACES
+The value of each cons cell provides four constraints for finding
+identifiers.  A word must match all four constraints to be
+colored as an identifier.  The cons cell has the form (MAJOR-MODE
+IDENTIFIER-CONTEXT-RE IDENTIFIER-RE IDENTIFIER-FACES
 IDENTIFIER-EXCLUSION-RE).
 
+MAJOR-MODE is the name of the mode in which this rule should be used.
 IDENTIFIER-CONTEXT-RE is a regexp matching the text that must precede an
 identifier.
 IDENTIFIER-RE is a regexp whose first capture group matches identifiers.
@@ -143,6 +135,12 @@ Modify this variable using
 (defvar color-identifiers-mode-hook nil
   "List of functions to run every time the mode enabled")
 
+(defvar color-identifiers:re-not-inside-class-access
+  (rx (or (not (any ".")) line-start)
+      (zero-or-more space))
+  "This regexp matches anything except inside a class instance
+  access, like foo.bar" )
+
 (defun color-identifiers:set-declaration-scan-fn (mode scan-fn)
   "Register SCAN-FN as the declaration scanner for MODE.
 SCAN-FN must scan the entire current buffer and return the
@@ -158,75 +156,74 @@ SCAN-FN."
       (add-to-list 'color-identifiers:mode-to-scan-fn-alist
                    (cons mode scan-fn)))))
 
+(defsubst color-identifiers:curr-identifier-faces ()
+  (if (functionp (nth 3 color-identifiers:colorize-behavior))
+      (funcall (nth 3 color-identifiers:colorize-behavior))
+    (nth 3 color-identifiers:colorize-behavior)))
+
 ;;; MAJOR MODE SUPPORT =========================================================
 
-;; Scala
-(add-to-list
- 'color-identifiers:modes-alist
- `(scala-mode . ("[^.][[:space:]]*"
-                 "\\_<\\([[:lower:]]\\([_]??[[:lower:][:upper:]\\$0-9]+\\)*\\(_+[#:<=>@!%&*+/?\\\\^|~-]+\\|_\\)?\\)"
-                 (nil scala-font-lock:var-face font-lock-variable-name-face))))
-
-;; C/C++
-(defun color-identifiers:cc-mode-get-declarations ()
-  "Extract a list of identifiers declared in the current buffer.
-For cc-mode support within color-identifiers-mode."
-  (let ((result nil))
-    ;; Variables that cc-mode highlighted with font-lock-variable-name-face
+(defun color-identifiers:get-declarations ()
+  "Extract a list of identifiers declared in the current buffer."
+  (let ((result (make-hash-table :test 'equal))
+        (identifier-faces (color-identifiers:curr-identifier-faces)))
+    ;; Entities that major mode highlighted as variables
     (save-excursion
-      (goto-char (point-min))
-      (catch 'end-of-file
-        (while t
-          (let ((next-change (next-property-change (point))))
-            (if (not next-change)
-                (throw 'end-of-file nil)
-              (goto-char next-change)
-              (when (or (eq (get-text-property (point) 'face) 'font-lock-variable-name-face)
-                        ;; If we fontified it in the past, assume it should
-                        ;; continue to be fontified. This avoids alternating
-                        ;; between fontified and unfontified.
-                        (get-text-property (point) 'color-identifiers:fontified))
-                (push (substring-no-properties (symbol-name (symbol-at-point))) result)))))))
-    (delete-dups result)
-    result))
+      (let ((next-change (next-property-change (point-min))))
+        (while next-change
+          (goto-char next-change)
+          (let ((face-at-point (get-text-property (point) 'face)))
+            (when (or (and face-at-point (memq face-at-point identifier-faces))
+                      ;; If we fontified X in the past, keep X in the list for
+                      ;; consistency. Otherwise `scan-identifiers' will stop
+                      ;; colorizing new Xes while older ones remain colorized.
+                      (get-text-property (point) 'color-identifiers:fontified))
+              (puthash (substring-no-properties (symbol-name (symbol-at-point))) t result)))
+          (setq next-change (next-property-change (point))))))
+    (hash-table-keys result)))
 
-(dolist (maj-mode '(c-mode c++-mode java-mode rust-mode meson-mode))
-  (color-identifiers:set-declaration-scan-fn
-   maj-mode 'color-identifiers:cc-mode-get-declarations)
+(dolist (maj-mode '(c-mode c++-mode java-mode rust-mode rust-ts-mode rustic-mode meson-mode typescript-mode cuda-mode tsx-ts-mode typescript-ts-mode))
   (add-to-list
    'color-identifiers:modes-alist
    `(,maj-mode . (""
                   "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
-                  (nil font-lock-variable-name-face)))))
+                  (nil font-lock-variable-name-face tree-sitter-hl-face:variable)))))
+
+;; Scala
+(add-to-list
+ 'color-identifiers:modes-alist
+ `(scala-mode . (,color-identifiers:re-not-inside-class-access
+                 "\\_<\\([[:lower:]]\\([_]??[[:lower:][:upper:]\\$0-9]+\\)*\\(_+[#:<=>@!%&*+/?\\\\^|~-]+\\|_\\)?\\)"
+                 (nil scala-font-lock:var-face font-lock-variable-name-face tree-sitter-hl-face:variable))))
 
 ;;; JavaScript
 (add-to-list
  'color-identifiers:modes-alist
- `(js-mode . ("[^.][[:space:]]*"
+ `(js-mode . (,color-identifiers:re-not-inside-class-access
               "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
               (nil font-lock-variable-name-face))))
 
 (add-to-list
  'color-identifiers:modes-alist
- `(js2-mode . ("[^.][[:space:]]*"
+ `(js2-mode . (,color-identifiers:re-not-inside-class-access
                "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
                (nil font-lock-variable-name-face js2-function-param))))
 
 (add-to-list
  'color-identifiers:modes-alist
- `(js3-mode . ("[^.][[:space:]]*"
+ `(js3-mode . (,color-identifiers:re-not-inside-class-access
                "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
                (nil font-lock-variable-name-face js3-function-param-face))))
 
 (add-to-list
  'color-identifiers:modes-alist
- `(js-jsx-mode . ("[^.][[:space:]]*"
+ `(js-jsx-mode . (,color-identifiers:re-not-inside-class-access
                   "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
                   (nil font-lock-variable-name-face js2-function-param))))
 
 (add-to-list
  'color-identifiers:modes-alist
- `(js2-jsx-mode . ("[^.][[:space:]]*"
+ `(js2-jsx-mode . (,color-identifiers:re-not-inside-class-access
                    "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
                    (nil font-lock-variable-name-face js2-function-param))))
 
@@ -235,7 +232,7 @@ For cc-mode support within color-identifiers-mode."
 ;; (add-hook 'coffee-mode-hook (lambda () (modify-syntax-entry ?\@ "_"))) in .emacs
 (add-to-list
  'color-identifiers:modes-alist
- `(coffee-mode . ("[^.][[:space:]]*" "\\_<\\([a-zA-Z_$@]\\(?:\\s_\\|\\sw\\)*\\)" (nil font-lock-variable-name-face))))
+ `(coffee-mode . (,color-identifiers:re-not-inside-class-access "\\_<\\([a-zA-Z_$@]\\(?:\\s_\\|\\sw\\)*\\)" (nil font-lock-variable-name-face))))
 
 ;; Sgml mode and the like
 (dolist (maj-mode '(sgml-mode html-mode jinja2-mode))
@@ -248,22 +245,24 @@ For cc-mode support within color-identifiers-mode."
 ;; Ruby
 (add-to-list
  'color-identifiers:modes-alist
- `(ruby-mode . ("[^.][[:space:]]*" "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)" (nil))))
+ `(ruby-mode . (,color-identifiers:re-not-inside-class-access
+                "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
+                (nil tree-sitter-hl-face:variable))))
 
 ;; R
 (add-to-list
  'color-identifiers:modes-alist
- `(R-mode . ("[^.][[:space:]]*" "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)" (nil))))
+ `(R-mode . (,color-identifiers:re-not-inside-class-access "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)" (nil))))
 
 ;; SQL
 (add-to-list
  'color-identifiers:modes-alist
- `(sql-mode . ("[^.][[:space:]]*" "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)" (nil))))
+ `(sql-mode . (,color-identifiers:re-not-inside-class-access "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)" (nil))))
 
 ;; Groovy
 (add-to-list
  'color-identifiers:modes-alist
- `(groovy-mode . ("[^.][[:space:]]*"
+ `(groovy-mode . (,color-identifiers:re-not-inside-class-access
                   "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
                   (nil font-lock-variable-name-face))))
 
@@ -278,112 +277,110 @@ For cc-mode support within color-identifiers-mode."
 ;; Golang
 (add-to-list
  'color-identifiers:modes-alist
- `(go-mode . ("[^.][[:space:]]*"
+ `(go-mode . (,color-identifiers:re-not-inside-class-access
               "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
-              (nil font-lock-variable-name-face))))
+              (nil font-lock-variable-name-face tree-sitter-hl-face:variable))))
 
 ;; Python
-(when (fboundp 'python-nav-forward-defun)
-  (defun color-identifiers:python-get-declarations ()
-    "Extract a list of identifiers declared in the current buffer.
+(cl-eval-when 'compile (require 'python))
+(defun color-identifiers:python-get-declarations ()
+  "Extract a list of identifiers declared in the current buffer.
 For Python support within color-identifiers-mode.  Supports
 function arguments and variable assignment, but not yet lambda
 arguments, loops (for .. in), or for comprehensions."
-    (let ((result nil))
-      ;; Function arguments
-      (save-excursion
-        (goto-char (point-min))
-        (while (python-nav-forward-defun)
-          (condition-case nil
-              (let ((arglist (sexp-at-point)))
-                (when (and arglist (listp arglist))
-                  (let* ((first-arg (car arglist))
-                         (rest (cdr arglist))
-                         (rest-args
-                          (-map (lambda (token) (cadr token))
-                                (-filter (lambda (token) (and (listp token) (eq (car token) '\,))) rest)))
-                         (args-filtered (cons first-arg rest-args))
-                         (params (-map (lambda (token)
-                                         (car (split-string (symbol-name token) "=")))
-                                       args-filtered)))
-                    (setq result (append params result)))))
-            (wrong-type-argument nil))))
-      ;; Variables that python-mode highlighted with font-lock-variable-name-face
-      (save-excursion
-        (goto-char (point-min))
-        (catch 'end-of-file
-          (while t
-            (let ((next-change (next-property-change (point))))
-              (if (not next-change)
-                  (throw 'end-of-file nil)
-                (goto-char next-change)
-                (when (or (eq (get-text-property (point) 'face) 'font-lock-variable-name-face)
-                          ;; If we fontified it in the past, assume it should
-                          ;; continue to be fontified. This avoids alternating
-                          ;; between fontified and unfontified.
-                          (get-text-property (point) 'color-identifiers:fontified))
-                  (push (substring-no-properties (symbol-name (symbol-at-point))) result)))))))
-      (delete-dups result)
-      result))
-  (color-identifiers:set-declaration-scan-fn
-   'python-mode 'color-identifiers:python-get-declarations))
+  (let ((result (make-hash-table :test 'equal))
+        (identifier-faces (color-identifiers:curr-identifier-faces)))
+    ;; Function arguments
+    (save-excursion
+      (goto-char (point-min))
+      (while (and (python-nav-forward-defun) (not (input-pending-p)))
+        (condition-case nil
+            (let ((arglist (sexp-at-point)))
+              (when (and arglist (listp arglist))
+                (let* ((first-arg (car arglist))
+                       (rest (cdr arglist))
+                       (rest-args
+                        (-map (lambda (token) (cadr token))
+                              (-filter (lambda (token) (and (listp token) (eq (car token) '\,))) rest)))
+                       (args-filtered (cons first-arg rest-args))
+                       (params (-map (lambda (token)
+                                       (car (split-string (symbol-name token) "[=:]")))
+                                     args-filtered)))
+                  (dolist (param params) (puthash param t result)))))
+          (wrong-type-argument nil)))
+      ;; Entities that python-mode highlighted as variables
+      (let ((next-change (next-property-change (point-min))))
+        (while next-change
+          (goto-char next-change)
+          (let ((face-at-point (get-text-property (point) 'face)))
+            (when (or (and face-at-point (memq face-at-point identifier-faces))
+                      ;; If we fontified it in the past, assume it should
+                      ;; continue to be fontified. This avoids alternating
+                      ;; between fontified and unfontified.
+                      (get-text-property (point) 'color-identifiers:fontified))
+              (puthash (substring-no-properties (symbol-name (symbol-at-point))) t result)))
+          (setq next-change (next-property-change (point))))))
+    (hash-table-keys result)))
+(color-identifiers:set-declaration-scan-fn
+ 'python-mode 'color-identifiers:python-get-declarations)
 
 (add-to-list
  'color-identifiers:modes-alist
- `(python-mode . ("[^.][[:space:]]*"
+ `(python-mode . (,color-identifiers:re-not-inside-class-access
                   "\\_<\\([a-zA-Z_$]\\(?:\\s_\\|\\sw\\)*\\)"
-                  (nil font-lock-type-face font-lock-variable-name-face))))
+                  (nil font-lock-variable-name-face tree-sitter-hl-face:variable))))
 
 ;; Emacs Lisp
-(defun color-identifiers:elisp-declarations-in-sexp (sexp)
-  "Extract a list of identifiers declared in SEXP.
+(defun color-identifiers:elisp-declarations-in-sexp (sexp result)
+  "Extract a list of identifiers declared in SEXP. Mutates SEXP.
 For Emacs Lisp support within color-identifiers-mode."
-  (pcase sexp
-    ((or `(let . ,rest) `(let* . ,rest))
-     ;; VARLIST of let/let* could be like ((a 1) b c (d "foo")).
-     (append (when (listp (car rest))
-               (mapcar (lambda (var) (if (symbolp var) var (car var))) (car rest)))
-             (color-identifiers:elisp-declarations-in-sexp rest)))
-    ((or `(defun ,- ,args . ,rest) `(lambda ,args . ,rest))
-     (append (when (listp args) args)
-             (color-identifiers:elisp-declarations-in-sexp rest)))
-    (`nil nil)
-    ((pred consp)
-     (let ((cons sexp)
-           (result nil))
-       (while (consp cons)
-         (let ((ids (color-identifiers:elisp-declarations-in-sexp (car cons))))
-           (when ids
-             (setq result (append ids result))))
-         (setq cons (cdr cons)))
-       (when cons
-         ;; `cons' is non-nil but also non-cons
-         (let ((ids (color-identifiers:elisp-declarations-in-sexp cons)))
-           (when ids
-             (setq result (append ids result)))))
-       result))
-    (other-object nil)))
+  (let ((stack `(,sexp)))
+    (while (and stack (not (input-pending-p)))
+      (let ((current (pop stack)))
+        (when (consp current)
+          (pcase current
+            ((or `(let . ,rest) `(let* . ,rest))
+             ;; VARLIST of let/let* could be like ((a 1) b c (d "foo")).
+             (when (listp (car rest))
+               (dolist (var (car rest))
+                 (let ((arg (if (consp var) (car var) var)))
+                   (when (symbolp arg)
+                     (puthash (symbol-name arg)
+                              t result)))))
+             (push rest stack))
+            ((or `(defun ,_ ,args . ,rest) `(lambda ,args . ,rest))
+             (when (listp args)
+               (dolist (arg args)
+                 (when (symbolp arg)
+                   (puthash (symbol-name arg)
+                            t result))))
+             (push rest stack))
+            (_
+             (let ((cons current))
+               ;; Note: a cons is not necessarily a list, so can't rewrite this with a
+               ;; `dolist'. The difference is, a `(cdr cons)' of a list is required to either
+               ;; be another cons or `nil'. An example of the opposite is `(1 . 2)', the
+               ;; `dolist' will fail on that.
+               (while (consp cons)
+                 (push (car cons) stack)
+                 (setq cons (cdr cons)))
+               (when cons ;; `cons' is non-nil but also non-cons
+                 (push cons stack))))))))))
 
 (defun color-identifiers:elisp-get-declarations ()
   "Extract a list of identifiers declared in the current buffer.
 For Emacs Lisp support within color-identifiers-mode."
-  (let ((result nil))
+  (let ((result (make-hash-table :test 'equal)))
     (save-excursion
       (goto-char (point-min))
       (condition-case nil
           (while t
             (condition-case nil
-                (let* ((sexp (read (current-buffer)))
-                       (ids (color-identifiers:elisp-declarations-in-sexp sexp))
-                       (strs (-filter 'identity
-                                      (mapcar (lambda (id)
-                                                (when (symbolp id) (symbol-name id)))
-                                              ids))))
-                  (setq result (append strs result)))
+                (let ((sexp (read (current-buffer))))
+                  (color-identifiers:elisp-declarations-in-sexp sexp result))
               (invalid-read-syntax nil)))
         (end-of-file nil)))
-    (delete-dups result)
-    result))
+    (hash-table-keys result)))
 
 (color-identifiers:set-declaration-scan-fn
  'emacs-lisp-mode 'color-identifiers:elisp-get-declarations)
@@ -444,9 +441,9 @@ For Clojure support within color-identifiers-mode. "
        (append params (color-identifiers:clojure-declarations-in-sexp rest))))
     ;; (defn name doc-string? attr-map? [binding-form*] body)
     ;; (defn name doc-string? attr-map? ([binding-form*] body)+)
-    ((or `(defn ,- . ,rest)
-         `(defn- ,- . ,rest)
-         `(defmacro ,- . ,rest))
+    ((or `(defn ,_ . ,rest)
+         `(defn- ,_ . ,rest)
+         `(defmacro ,_ . ,rest))
      (let ((params (-mapcat (lambda (params+body)
                               (when (color-identifiers:clojure-contains-binding-forms-p params+body)
                                 (color-identifiers:clojure-extract-params params+body)))
@@ -468,8 +465,7 @@ For Clojure support within color-identifiers-mode. "
              (setq result (append ids result)))))
        result))
     ((pred arrayp)
-     (apply 'append (mapcar 'color-identifiers:clojure-declarations-in-sexp sexp)))
-    (other-object nil)))
+     (apply 'append (mapcar 'color-identifiers:clojure-declarations-in-sexp sexp)))))
 
 (defun color-identifiers:clojure-get-declarations ()
   "Extract a list of identifiers declared in the current buffer.
@@ -505,9 +501,13 @@ incompatible with Emacs Lisp syntax, such as reader macros (#)."
                    "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
                    (nil))))
 
+(add-to-list
+ 'color-identifiers:modes-alist
+ `(clojurescript-mode . (""
+                         "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
+                         (nil))))
+
 (dolist (maj-mode '(tuareg-mode sml-mode))
-  (color-identifiers:set-declaration-scan-fn
-   maj-mode 'color-identifiers:cc-mode-get-declarations)
   (add-to-list
    'color-identifiers:modes-alist
    `(,maj-mode . (""
@@ -532,23 +532,22 @@ incompatible with Emacs Lisp syntax, such as reader macros (#)."
       (setq result (concat result (substring-no-properties str pos nextpos))))
     result))
 
-  (defun color-identifiers:r-get-args (lend)
-    "Extract a list of function arg names. LEND is the point at
+(defun color-identifiers:r-get-args (lend)
+  "Extract a list of function arg names. LEND is the point at
 the left parenthesis, after `function' keyword."
-    (let* ((rend (save-excursion
-                  (goto-char lend)
-                  (forward-sexp)
-                  (point)))
-           (str (color-identifiers:remove-string-or-comment
-                 (buffer-substring (1+ lend) (1- rend))))
-           (result))
-      (mapcar (lambda (s) (replace-regexp-in-string "\\s *=.*" "" s))
-              (split-string str "," t " "))))
+  (let* ((rend (save-excursion
+                 (goto-char lend)
+                 (forward-sexp)
+                 (point)))
+         (str (color-identifiers:remove-string-or-comment
+               (buffer-substring (1+ lend) (1- rend)))))
+    (mapcar (lambda (s) (replace-regexp-in-string "\\s *=.*" "" s))
+            (split-string str "," t " "))))
 
-  (defun color-identifiers:r-get-declarations ()
-    "Extract a list of identifiers declared in the current buffer.
+(defun color-identifiers:r-get-declarations ()
+  "Extract a list of identifiers declared in the current buffer.
 For Emacs Lisp support within color-identifiers-mode."
-    (let ((result nil))
+  (let ((result nil))
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward "\\(\\(?:\\w\\|\\s_\\)*\\)\\s *<<?-\\s *\\(function\\s *\\)?" nil t)
@@ -560,23 +559,23 @@ For Emacs Lisp support within color-identifiers-mode."
                                    result))
             (let ((var-name (match-string-no-properties 1)))
               (unless (string= var-name "")
-                (add-to-list 'result var-name)))))))
+                (cl-pushnew var-name result)))))))
     (delete-dups result)
     result))
 
-  (color-identifiers:set-declaration-scan-fn
-   'ess-mode 'color-identifiers:r-get-declarations)
+(color-identifiers:set-declaration-scan-fn
+ 'ess-mode 'color-identifiers:r-get-declarations)
 
-  (add-to-list
-   'color-identifiers:modes-alist
-   `(ess-mode "[^$][[:space:]]*" "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
-                   (nil)))
+(add-to-list
+ 'color-identifiers:modes-alist
+ `(ess-mode "[^$][[:space:]]*" "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
+            (nil)))
 
 
 ;;; PACKAGE INTERNALS ==========================================================
 
 (defvar color-identifiers:colors nil
-  "List of generated hex colors for internal use.")
+  "Vector of generated hex colors for internal use.")
 
 (defun color-identifiers:get-declaration-scan-fn (mode)
   "See `color-identifiers:set-declaration-scan-fn'."
@@ -603,12 +602,12 @@ Colors are output to `color-identifiers:colors'."
     ;; converted to LAB
     (dotimes (h n)
       (dotimes (s n)
-        (add-to-list
-         'candidates
+        (cl-pushnew
          (apply 'color-srgb-to-lab
                 (color-hsl-to-rgb (/ h n-1)
                                   (+ min-saturation (* (/ s n-1) saturation-range))
-                                  luminance)))))
+                                  luminance))
+         candidates)))
     (let ((choose-candidate (lambda (candidate)
                               (delq candidate candidates)
                               (push candidate chosens))))
@@ -625,24 +624,53 @@ Colors are output to `color-identifiers:colors'."
                (best (-max-by (lambda (x y) (> (cdr x) (cdr y))) min-dists)))
           (funcall choose-candidate (car best))))
       (setq color-identifiers:colors
-            (-map (lambda (lab)
-                    (let* ((srgb (apply 'color-lab-to-srgb lab))
-                           (rgb (mapcar 'color-clamp srgb)))
-                      (apply 'color-rgb-to-hex rgb)))
-                  chosens)))))
+            (vconcat (-map (lambda (lab)
+                             (let* ((srgb (apply 'color-lab-to-srgb lab))
+                                    (rgb (mapcar 'color-clamp srgb)))
+                               (apply 'color-rgb-to-hex rgb)))
+                           chosens))))))
 
-(defvar color-identifiers:color-index-for-identifier nil
-  "Alist of identifier-index pairs for internal use.
+(defvar-local color-identifiers:color-index-for-identifier nil
+  "Hashtable of identifier-index pairs for internal use.
 The index refers to `color-identifiers:colors'. Only used when
 `color-identifiers-coloring-method' is `sequential'.")
-(make-variable-buffer-local 'color-identifiers:color-index-for-identifier)
 
-(defvar color-identifiers:identifiers nil
+(defvar-local color-identifiers:identifiers nil
   "Set of identifiers in the current buffer.
 Only used when `color-identifiers-coloring-method' is `hash' and
 a declaration scan function is registered for the current major
 mode. This variable memoizes the result of the declaration scan function.")
-(make-variable-buffer-local 'color-identifiers:identifiers)
+
+;;;###autoload
+(define-minor-mode color-identifiers-mode
+  "Color the identifiers in the current buffer based on their names."
+  :init-value nil
+  :lighter " ColorIds"
+  (if color-identifiers-mode
+      (progn
+        (setq color-identifiers:colorize-behavior
+              (assoc major-mode color-identifiers:modes-alist))
+        (if (not color-identifiers:colorize-behavior)
+            (progn
+              (print "Major mode is not supported by color-identifiers, disabling")
+              (color-identifiers-mode -1))
+          (color-identifiers:regenerate-colors)
+          (when (null color-identifiers:color-index-for-identifier)
+            (setq color-identifiers:color-index-for-identifier (make-hash-table :test 'equal)))
+          (color-identifiers:refresh)
+          (add-to-list 'font-lock-extra-managed-props 'color-identifiers:fontified)
+          (font-lock-add-keywords nil '((color-identifiers:colorize . default)) t)
+          (color-identifiers:enable-timer)
+          (ad-activate 'enable-theme)))
+    (when color-identifiers:timer
+      (cancel-timer color-identifiers:timer))
+    (font-lock-remove-keywords nil '((color-identifiers:colorize . default)))
+    (ad-deactivate 'enable-theme))
+  (color-identifiers:refontify))
+
+;;;###autoload
+(define-global-minor-mode global-color-identifiers-mode
+  color-identifiers-mode color-identifiers-mode-maybe)
 
 (defun color-identifiers:attribute-luminance (attribute)
   "Find the HSL luminance of the specified ATTRIBUTE on the default face."
@@ -680,16 +708,15 @@ major mode, identifiers are saved to
   (when color-identifiers-mode
     (cond
      ((eq color-identifiers-coloring-method 'sequential)
-      (setq color-identifiers:color-index-for-identifier
-            (append (-map-indexed
-                     (lambda (i identifier)
-                       ;; to make sure subsequently added vars aren't colorized the same add a (point)
-                       (cons identifier (% (+ (point) i) color-identifiers:num-colors)))
-                     (-filter (lambda (e)
-                                (cl-notany (lambda (d) (equal e (car d)))
-                                           color-identifiers:color-index-for-identifier))
-                              (color-identifiers:list-identifiers)))
-                    color-identifiers:color-index-for-identifier)))
+      (let ((i 0)
+            ;; to make sure subsequently added vars aren't colorized the same add a (point)
+            (randomize-subseq-calls (point)))
+        (dolist (identifier (color-identifiers:list-identifiers))
+          (unless (gethash identifier color-identifiers:color-index-for-identifier)
+            (puthash identifier
+                     (% (+ randomize-subseq-calls i) color-identifiers:num-colors)
+                     color-identifiers:color-index-for-identifier)
+            (setq i (1+ i))))))
      ((and (eq color-identifiers-coloring-method 'hash)
            (color-identifiers:get-declaration-scan-fn major-mode))
       (setq color-identifiers:identifiers
@@ -701,24 +728,14 @@ major mode, identifiers are saved to
   (if (color-identifiers:get-declaration-scan-fn major-mode)
       (funcall (color-identifiers:get-declaration-scan-fn major-mode))
     ;; When no scan function is registered, fall back to
-    ;; `color-identifiers:scan-identifiers', which returns all identifiers
-    (save-excursion
-      (goto-char (point-min))
-      (catch 'input-pending
-        (let ((result nil))
-          (color-identifiers:scan-identifiers
-           (lambda (start end)
-             (push (buffer-substring-no-properties start end) result))
-           (point-max)
-           (lambda () (if (input-pending-p) (throw 'input-pending nil) t)))
-          (delete-dups result)
-          result)))))
+    ;; `color-identifiers:get-declarations', which returns all identifiers
+    (color-identifiers:get-declarations)))
 
 (defun color-identifiers:refontify ()
   "Refontify the buffer using font-lock."
-  (if (fboundp 'font-lock-flush)
-      (font-lock-flush)
-    (when font-lock-mode
+  (when font-lock-mode
+    (if (fboundp 'font-lock-flush)
+        (font-lock-flush)
       (with-no-warnings
         (font-lock-fontify-buffer)))))
 
@@ -727,9 +744,9 @@ major mode, identifiers are saved to
 be colored."
   (cond
    ((eq color-identifiers-coloring-method 'sequential)
-    (let ((entry (assoc-string identifier color-identifiers:color-index-for-identifier)))
-      (when entry
-        (nth (cdr entry) color-identifiers:colors))))
+    (let ((index (gethash identifier color-identifiers:color-index-for-identifier)))
+      (when index
+        (aref color-identifiers:colors index))))
    ((eq color-identifiers-coloring-method 'hash)
     ;; If there is a declaration scan function for this major mode, the
     ;; candidate identifier should only be colored if it is in the memoized list
@@ -740,44 +757,37 @@ be colored."
 
 (defun color-identifiers:hash-identifier (identifier)
   "Return a color for IDENTIFIER based on its hash."
-  (nth (% (abs (sxhash identifier)) color-identifiers:num-colors)
-       color-identifiers:colors))
+  (aref color-identifiers:colors
+        (% (abs (sxhash identifier)) color-identifiers:num-colors)))
 
-(defun color-identifiers:scan-identifiers (fn limit &optional continue-p)
+(defun color-identifiers:scan-identifiers (fn limit)
   "Run FN on all candidate identifiers from point up to LIMIT.
 Candidate identifiers are defined by
 `color-identifiers:modes-alist'. Declaration scan functions are
 not applied. If supplied, iteration only continues if CONTINUE-P
 evaluates to true."
-  (let ((entry (assoc major-mode color-identifiers:modes-alist)))
-    (when entry
-      (let ((identifier-context-re (nth 1 entry))
-            (identifier-re (nth 2 entry))
-            (identifier-faces
-             (if (functionp (nth 3 entry))
-                 (funcall (nth 3 entry))
-               (nth 3 entry)))
-            (identifier-exclusion-re (nth 4 entry)))
-        ;; Skip forward to the next identifier that matches all four conditions
-        (condition-case nil
-            (while (and (< (point) limit)
-                        (if continue-p (funcall continue-p) t))
-              (if (not (or (memq (get-text-property (point) 'face) identifier-faces)
-                           (let ((flface-prop (get-text-property (point) 'font-lock-face)))
-                             (and flface-prop (memq flface-prop identifier-faces)))
-                           (get-text-property (point) 'color-identifiers:fontified)))
-                  (goto-char (next-property-change (point) nil limit))
-                (if (not (and (looking-back identifier-context-re (line-beginning-position))
-                              (or (not identifier-exclusion-re) (not (looking-at identifier-exclusion-re)))
-                              (looking-at identifier-re)))
-                    (progn
-                      (forward-char)
-                      (re-search-forward identifier-re limit)
-                      (goto-char (match-beginning 0)))
-                  ;; Found an identifier. Run `fn' on it
-                  (funcall fn (match-beginning 1) (match-end 1))
-                  (goto-char (match-end 1)))))
-          (search-failed nil))))))
+  (let ((identifier-context-re (nth 1 color-identifiers:colorize-behavior))
+        (identifier-re (nth 2 color-identifiers:colorize-behavior))
+        (identifier-faces (color-identifiers:curr-identifier-faces))
+        (identifier-exclusion-re (nth 4 color-identifiers:colorize-behavior)))
+    ;; Skip forward to the next identifier that matches all four conditions
+    (condition-case nil
+        (while (< (point) limit)
+          (if (or (memq (get-text-property (point) 'face) identifier-faces)
+                  (let ((flface-prop (get-text-property (point) 'font-lock-face)))
+                    (and flface-prop (memq flface-prop identifier-faces))))
+              (if (and (looking-back identifier-context-re (line-beginning-position))
+                       (or (not identifier-exclusion-re) (not (looking-at identifier-exclusion-re)))
+                       (looking-at identifier-re))
+                  (progn
+                    ;; Found an identifier. Run `fn' on it
+                    (funcall fn (match-beginning 1) (match-end 1))
+                    (goto-char (match-end 1)))
+                (forward-char)
+                (re-search-forward identifier-re limit)
+                (goto-char (match-beginning 0)))
+            (goto-char (next-property-change (point) nil limit))))
+      (search-failed nil))))
 
 (defun color-identifiers:colorize (limit)
   (color-identifiers:scan-identifiers

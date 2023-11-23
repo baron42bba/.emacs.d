@@ -1,2 +1,0 @@
-;;; -*- no-byte-compile: t -*-
-(define-package "color-identifiers-mode" "20200129.144" "Color identifiers based on their names" '((dash "2.5.0") (emacs "24")) :commit "923ed4789c5ab66369ac4dda7eedb910951684a6" :keywords '("faces" "languages") :authors '(("Ankur Dave" . "ankurdave@gmail.com")) :maintainer '("Ankur Dave" . "ankurdave@gmail.com") :url "https://github.com/ankurdave/color-identifiers-mode")
