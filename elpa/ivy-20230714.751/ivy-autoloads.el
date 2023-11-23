@@ -1,15 +1,27 @@
-;;; ivy-autoloads.el --- automatically extracted autoloads
+;;; ivy-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "ivy" "ivy.el" (23994 46406 460075 945000))
+;;;### (autoloads nil "colir" "colir.el" (0 0 0 0))
+;;; Generated autoloads from colir.el
+
+(register-definition-prefixes "colir" '("colir-"))
+
+;;;***
+
+;;;### (autoloads nil "ivy" "ivy.el" (0 0 0 0))
 ;;; Generated autoloads from ivy.el
 
 (autoload 'ivy-resume "ivy" "\
-Resume the last completion session.
+Resume the last completion session, or SESSION if non-nil.
+With a prefix arg, try to restore a recorded completion session,
+if one exists.
 
-\(fn)" t nil)
+\(fn &optional SESSION)" t nil)
 
 (autoload 'ivy-read "ivy" "\
 Read a string in the minibuffer, with completion.
@@ -24,7 +36,7 @@ PREDICATE is applied to filter out the COLLECTION immediately.
 This argument is for compatibility with `completing-read'.
 
 When REQUIRE-MATCH is non-nil, only members of COLLECTION can be
-selected.
+selected. In can also be a lambda.
 
 If INITIAL-INPUT is non-nil, then insert that input in the
 minibuffer initially.
@@ -70,8 +82,8 @@ list of candidates, and returns the list of matching candidates.
 DYNAMIC-COLLECTION is a boolean specifying whether the list of
 candidates is updated after each input by calling COLLECTION.
 
-EXTRA-PROPS can be used to store collection-specific
-session-specific data.
+EXTRA-PROPS is a plist that can be used to store
+collection-specific session-specific data.
 
 CALLER is a symbol to uniquely identify the caller to `ivy-read'.
 It is used, along with COLLECTION, to determine which
@@ -88,7 +100,7 @@ This interface conforms to `completing-read' and can be used for
 PROMPT is a string that normally ends in a colon and a space.
 COLLECTION is either a list of strings, an alist, an obarray, or a hash table.
 PREDICATE limits completion to a subset of COLLECTION.
-REQUIRE-MATCH is a boolean value.  See `completing-read'.
+REQUIRE-MATCH is a boolean value or a symbol.  See `completing-read'.
 INITIAL-INPUT is a string inserted into the minibuffer initially.
 HISTORY is a list of previously selected inputs.
 DEF is the default value.
@@ -97,7 +109,7 @@ INHERIT-INPUT-METHOD is currently ignored.
 \(fn PROMPT COLLECTION &optional PREDICATE REQUIRE-MATCH INITIAL-INPUT HISTORY DEF INHERIT-INPUT-METHOD)" nil nil)
 
 (defvar ivy-mode nil "\
-Non-nil if Ivy mode is enabled.
+Non-nil if ivy mode is enabled.
 See the `ivy-mode' command
 for a description of this minor mode.
 Setting this variable directly does not take effect;
@@ -121,24 +133,27 @@ Minibuffer bindings:
 \(fn &optional ARG)" t nil)
 
 (autoload 'ivy-switch-buffer "ivy" "\
-Switch to another buffer.
-
-\(fn)" t nil)
+Switch to another buffer." t nil)
 
 (autoload 'ivy-switch-view "ivy" "\
-Switch to one of the window views stored by `ivy-push-view'.
-
-\(fn)" t nil)
+Switch to one of the window views stored by `ivy-push-view'." t nil)
 
 (autoload 'ivy-switch-buffer-other-window "ivy" "\
-Switch to another buffer in another window.
+Switch to another buffer in another window." t nil)
 
-\(fn)" t nil)
+(register-definition-prefixes "ivy" '("ivy-" "with-ivy-window"))
 
 ;;;***
 
-;;;### (autoloads nil nil ("colir.el" "elpa.el" "ivy-overlay.el"
-;;;;;;  "ivy-pkg.el") (23994 46406 459175 652000))
+;;;### (autoloads nil "ivy-overlay" "ivy-overlay.el" (0 0 0 0))
+;;; Generated autoloads from ivy-overlay.el
+
+(register-definition-prefixes "ivy-overlay" '("ivy-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("elpa.el" "ivy-faces.el" "ivy-pkg.el")
+;;;;;;  (0 0 0 0))
 
 ;;;***
 
@@ -146,5 +161,6 @@ Switch to another buffer in another window.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; ivy-autoloads.el ends here
