@@ -5,9 +5,8 @@
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Version: 0.0.1
-;; Package-Version: 20181114.1723
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
 ;; Keywords: files
 
 ;; This program is free software; you can redistribute it and/or
@@ -107,15 +106,14 @@ exit minibuffer and call `dired-narrow-exit-action'."
   :group 'dired-narrow)
 
 (defcustom dired-narrow-enable-blinking t
-  "If set to true highlight the chosen file shortly.
-This feature works only when `dired-narrow-exit-when-one-left' is true."
+  "If non-nil, highlight the chosen file shortly.
+Only works when `dired-narrow-exit-when-one-left' is non-nil."
   :type 'boolean
   :group 'dired-narrow)
 
 (defcustom dired-narrow-blink-time 0.2
-  "How long should be highlighted a chosen file.
-Units are seconds."
-  :type 'float
+  "How many seconds should a chosen file be highlighted."
+  :type 'number
   :group 'dired-narrow)
 
 (defface dired-narrow-blink
@@ -242,7 +240,14 @@ read from minibuffer."
         (progn
           (dired-narrow-mode 1)
           (add-to-invisibility-spec :dired-narrow)
-          (setq disable-narrow (read-from-minibuffer "Filter: " nil dired-narrow-map))
+          (setq disable-narrow (read-from-minibuffer
+                                (pcase dired-narrow-filter-function
+                                  ('dired-narrow--regexp-filter
+                                   "Regex Filter:\s")
+                                  ('dired-narrow--fuzzy-filter
+                                   "Fuzzy Filter:\s")
+                                  (t "Filter:\s"))
+                                nil dired-narrow-map))
           (let ((inhibit-read-only t))
             (dired-narrow--remove-text-with-property :dired-narrow))
           ;; If the file no longer exists, we can't do anything, so

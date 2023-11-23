@@ -5,10 +5,9 @@
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
 ;; Keywords: files
-;; Package-Version: 20190522.950
 ;; Version: 0.0.1
 ;; Created: 14th February 2014
-;; Package-requires: ((dash "2.5.0"))
+;; Package-Requires: ((dash "2.5.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -48,11 +47,11 @@
   :group 'dired
   :prefix "dired-hacks-")
 
-(defcustom dired-hacks-file-size-formatter 'file-size-human-readable
+(defcustom dired-hacks-file-size-formatter #'file-size-human-readable
   "The function used to format file sizes.
 
 See `dired-utils-format-file-sizes'."
-  :type 'symbol
+  :type 'function
   :group 'dired-hacks)
 
 (defcustom dired-hacks-datetime-regexp
@@ -66,7 +65,7 @@ followed by at least one space character.  You should only use
 shy groups (prefixed with ?:) because the first group is used by
 the font-lock to determine what portion of the name should be
 colored."
-  :type 'string
+  :type 'regexp
   :group 'dired-hacks)
 
 (defalias 'dired-utils--string-trim
@@ -182,7 +181,7 @@ Each car in ALIST is a string representing file extension
     (forward-line)
     (let ((inhibit-read-only t)
           (limit (line-end-position)))
-      (while (re-search-forward "\\(?:directory\\|available\\) \\(\\<[0-9]+\\>\\)" nil t)
+      (while (re-search-forward "\\(?:directory\\|available\\) \\(\\<[0-9]+$\\>\\)" nil t)
         (replace-match
          (save-match-data
            (propertize (dired-utils--string-trim

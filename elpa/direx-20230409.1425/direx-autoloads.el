@@ -1,4 +1,4 @@
-;;; direx-autoloads.el --- automatically extracted autoloads
+;;; direx-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -9,34 +9,22 @@
 ;;;### (autoloads nil "direx" "direx.el" (0 0 0 0))
 ;;; Generated autoloads from direx.el
 
-(autoload 'direx:jump-to-directory "direx" "\
+(autoload 'direx:jump-to-directory "direx" nil t nil)
 
+(autoload 'direx:jump-to-directory-other-window "direx" nil t nil)
 
-\(fn)" t nil)
-
-(autoload 'direx:jump-to-directory-other-window "direx" "\
-
-
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "direx" '("direx:")))
+(register-definition-prefixes "direx" '("direx:"))
 
 ;;;***
 
 ;;;### (autoloads nil "direx-project" "direx-project.el" (0 0 0 0))
 ;;; Generated autoloads from direx-project.el
 
-(autoload 'direx-project:jump-to-project-root "direx-project" "\
+(autoload 'direx-project:jump-to-project-root "direx-project" nil t nil)
 
+(autoload 'direx-project:jump-to-project-root-other-window "direx-project" nil t nil)
 
-\(fn)" t nil)
-
-(autoload 'direx-project:jump-to-project-root-other-window "direx-project" "\
-
-
-\(fn)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "direx-project" '("direx-project:")))
+(register-definition-prefixes "direx-project" '("direx-project:"))
 
 ;;;***
 
