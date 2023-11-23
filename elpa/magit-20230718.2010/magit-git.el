@@ -41,8 +41,6 @@
 (declare-function magit-get-mode-buffer "magit-mode"
                   (mode &optional value frame))
 (declare-function magit-refresh "magit-mode" ())
-(defvar magit-buffer-gitdir)
-(defvar magit-buffer-topdir)
 (defvar magit-buffer-diff-type)
 (defvar magit-buffer-diff-args)
 (defvar magit-buffer-file-name)
@@ -684,7 +682,7 @@ needs at least MINIMAL, otherwise it defaults to \"Magit\"."
     (let* ((host (file-remote-p default-directory))
            (msg (format-spec
                  (cond (host "\
-%w requires Git %m or greater, but on %h the version is %m.
+%w requires Git %m or greater, but on %h the version is %v.
 
 If multiple Git versions are installed on the host, then the
 problem might be that TRAMP uses the wrong executable.
@@ -844,29 +842,19 @@ Also see `magit-git-config-p'."
 (defun magit-gitdir (&optional directory)
   "Return the absolute and resolved path of the .git directory.
 
-As a special-case, if the `GIT_DIR' environment variable is set,
-return its value.  It is usually a bad idea to set this variable
-when using Magit.
-
-Otherwise if `magit-buffer-gitdir' is set, return that.  The
-value of this buffer-local variable is set to the value returned
-by this function, when a Magit buffer is first created.  So this
-effectively memorizes the value returned by this function.
-
+If the `GIT_DIR' environment variable is define then return that.
 Otherwise return the .git directory for DIRECTORY, or if that is
 nil, then for `default-directory' instead.  If the directory is
 not located inside a Git repository, then return nil."
-  (or (getenv "GIT_DIR")
-      magit-buffer-gitdir
-      (let ((default-directory (or directory default-directory)))
-        (magit--with-refresh-cache (list default-directory 'magit-gitdir)
-          (magit--with-safe-default-directory nil
-            (and-let* ((dir (magit-rev-parse-safe "--git-dir"))
-                       (dir (file-name-as-directory
-                             (magit-expand-git-file-name dir))))
-              (if (file-remote-p dir)
-                  dir
-                (concat (file-remote-p default-directory) dir))))))))
+  (let ((default-directory (or directory default-directory)))
+    (magit--with-refresh-cache (list default-directory 'magit-gitdir)
+      (magit--with-safe-default-directory nil
+        (and-let*
+            ((dir (magit-rev-parse-safe "--git-dir"))
+             (dir (file-name-as-directory (magit-expand-git-file-name dir))))
+          (if (file-remote-p dir)
+              dir
+            (concat (file-remote-p default-directory) dir)))))))
 
 (defvar magit--separated-gitdirs nil)
 
@@ -895,14 +883,10 @@ tree.  As a special case, from within a bare repository return
 the control directory instead.  When called outside a repository
 then return nil.
 
-When `magit-buffer-toplevel' is non-nil, then return its value,
-unless DIRECTORY is non-nil, or `default-directory' was let-bound
-to another directory, while another buffer was current.
-
 When optional DIRECTORY is non-nil then return the toplevel for
 that directory instead of the one for `default-directory'.
 
-Try to respect the option `find-file-visit-truename', i.e.  when
+Try to respect the option `find-file-visit-truename', i.e.,  when
 the value of that option is nil, then avoid needlessly returning
 the truename.  When a symlink to a sub-directory of the working
 tree is involved, or when called from within a sub-directory of
@@ -910,12 +894,6 @@ the gitdir or from the toplevel of a gitdir, which itself is not
 located within the working tree, then it is not possible to avoid
 returning the truename."
   (or
-   (and magit-buffer-topdir
-        (not directory)
-        (equal (expand-file-name default-directory)
-               (expand-file-name
-                (buffer-local-value 'default-directory (current-buffer))))
-        magit-buffer-topdir)
    (magit--with-refresh-cache
        (cons (or directory default-directory) 'magit-toplevel)
      (magit--with-safe-default-directory directory
@@ -980,11 +958,8 @@ returning the truename."
                  ;; working tree.
                  (file-name-directory (directory-file-name gitdir))))))))))))
 
-(defun magit--toplevel-safe (&optional nocache)
-  (or (if nocache
-          (let ((magit-buffer-topdir nil))
-            (magit-toplevel))
-        (magit-toplevel))
+(defun magit--toplevel-safe ()
+  (or (magit-toplevel)
       (magit--not-inside-repository-error)))
 
 (defmacro magit-with-toplevel (&rest body)
@@ -1097,8 +1072,12 @@ tracked file."
                       (directory-file-name (file-name-directory file))))))
       (file-relative-name file dir))))
 
+(defun magit-file-ignored-p (file)
+  (magit-git-string-p "ls-files" "--others" "--ignored" "--exclude-standard"
+                      "--" file))
+
 (defun magit-file-tracked-p (file)
-  (magit-git-success "ls-files" "--error-unmatch" file))
+  (magit-git-success "ls-files" "--error-unmatch" "--" file))
 
 (defun magit-list-files (&rest args)
   (apply #'magit-git-items "ls-files" "-z" "--full-name" args))
@@ -1709,7 +1688,7 @@ Otherwise UPSTREAM has to be an existing branch."
 It BRANCH is nil, then return the upstream of the current branch,
 if any, nil otherwise.  If the upstream is not configured, the
 configured remote is an url, or the named branch does not exist,
-then return nil.  I.e.  return an existing local or
+then return nil.  I.e.,  return an existing local or
 remote-tracking branch ref."
   (and-let* ((branch (or branch (magit-get-current-branch))))
     (magit-ref-fullname (concat branch "@{upstream}"))))
@@ -1719,7 +1698,7 @@ remote-tracking branch ref."
 It BRANCH is nil, then return the upstream of the current branch
 if any, nil otherwise.  If the upstream is not configured, the
 configured remote is an url, or the named branch does not exist,
-then return nil.  I.e. return the name of an existing local or
+then return nil.  I.e., return the name of an existing local or
 remote-tracking branch.  The returned string is colorized
 according to the branch type."
   (magit--with-refresh-cache

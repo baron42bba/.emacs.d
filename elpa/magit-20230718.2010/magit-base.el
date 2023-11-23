@@ -183,7 +183,7 @@ so we don't use the command names but more generic symbols.
 
 Applying changes:
 
-  `discard' Discarding one or more changes (i.e. hunks or the
+  `discard' Discarding one or more changes (i.e., hunks or the
   complete diff for a file) loses that change, obviously.
 
   `reverse' Reverting one or more changes can usually be undone
@@ -387,15 +387,15 @@ Messages which can currently be suppressed using this option are:
 (defcustom magit-verbose-messages nil
   "Whether to make certain prompts and messages more verbose.
 
-Occationally a user suggests that a certain prompt or message
-should be more verbose, but I would refer to keep it as-is
+Occasionally a user suggests that a certain prompt or message
+should be more verbose, but I would prefer to keep it as-is
 because I don't think that the fact that that one user did not
 understand the existing prompt/message means that a large number
 of users would have the same difficulty, and that making it more
-verbose would actually do a disservice to user who understand
+verbose would actually do a disservice to users who understand
 the shorter prompt well enough.
 
-Going forward I will start offing both messages when I feel the
+Going forward I will start offering both messages when I feel the
 suggested longer message is reasonable enough, and the value of
 this option decides which will be used.  Note that changing the
 value of this option affects all such messages and that I do not
@@ -974,7 +974,7 @@ with the text area."
 
 This combines the benefits of `buffer-string', `buffer-substring'
 and `buffer-substring-no-properties' into one function that is
-not as painful to use as the latter.  I.e. you can write
+not as painful to use as the latter.  I.e., you can write
   (magit--buffer-string)
 instead of
   (buffer-substring-no-properties (point-min)

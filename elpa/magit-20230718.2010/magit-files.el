@@ -289,37 +289,50 @@ directory, while reading the FILENAME."
 When invoked outside a file-visiting buffer, then fall back
 to `magit-dispatch'."
   :info-manual "(magit) Minor Mode for Buffers Visiting Files"
-  ["Actions"
-   [("s" "Stage"      magit-stage-file)
-    ("u" "Unstage"    magit-unstage-file)
-    ("c" "Commit"     magit-commit)
-    ("e" "Edit line"  magit-edit-line-commit)]
-   [("D" "Diff..."    magit-diff)
-    ("d" "Diff"       magit-diff-buffer-file)
-    ("g" "Status"     magit-status-here)]
-   [("L" "Log..."     magit-log)
+  [:if magit-file-relative-name
+   ["File actions"
+    ("  s" "Stage"    magit-stage-buffer-file)
+    ("  u" "Unstage"  magit-unstage-buffer-file)
+    (", x" "Untrack"  magit-file-untrack)
+    (", r" "Rename"   magit-file-rename)
+    (", k" "Delete"   magit-file-delete)
+    (", c" "Checkout" magit-file-checkout)]
+   ["Inspect"
+    ("D" "Diff..."    magit-diff)
+    ("d" "Diff"       magit-diff-buffer-file)]
+   [""
+    ("L" "Log..."     magit-log)
     ("l" "Log"        magit-log-buffer-file)
     ("t" "Trace"      magit-log-trace-definition)
     (7 "M" "Merged"   magit-log-merged)]
-   [("B" "Blame..."   magit-blame)
+   [""
+    ("B" "Blame..."   magit-blame)
     ("b" "Blame"      magit-blame-addition)
     ("r" "...removal" magit-blame-removal)
     ("f" "...reverse" magit-blame-reverse)
     ("m" "Blame echo" magit-blame-echo)
     ("q" "Quit blame" magit-blame-quit)]
-   [("p" "Prev blob"  magit-blob-previous)
-    ("n" "Next blob"  magit-blob-next)
-    ("v" "Goto blob"  magit-find-file)
-    ("V" "Goto file"  magit-blob-visit-file)]
-   [(5 "C-c r" "Rename file"   magit-file-rename)
-    (5 "C-c d" "Delete file"   magit-file-delete)
-    (5 "C-c u" "Untrack file"  magit-file-untrack)
-    (5 "C-c c" "Checkout file" magit-file-checkout)]]
-  (interactive)
-  (transient-setup
-   (if (magit-file-relative-name)
-       'magit-file-dispatch
-     'magit-dispatch)))
+   ["Navigate"
+    ("p" "Prev blob"   magit-blob-previous)
+    ("n" "Next blob"   magit-blob-next)
+    ("v" "Goto blob"   magit-find-file)
+    ("V" "Goto file"   magit-blob-visit-file)
+    ("g" "Goto status" magit-status-here)
+    ("G" "Goto magit"  magit-display-repository-buffer)]
+   ["More actions"
+    ("c" "Commit"     magit-commit)
+    ("e" "Edit line"  magit-edit-line-commit)]]
+  [:if-not magit-file-relative-name
+   ["File actions"
+    ("s" "Stage"    magit-stage-file)
+    ("u" "Unstage"  magit-unstage-file)
+    ("x" "Untrack"  magit-file-untrack)
+    ("r" "Rename"   magit-file-rename)
+    ("k" "Delete"   magit-file-delete)
+    ("c" "Checkout" magit-file-checkout)]
+   ["Navigate"
+    ("g" "Goto status" magit-status-here :if-not-mode magit-status-mode)
+    ("G" "Goto magit"  magit-display-repository-buffer)]])
 
 ;;; Blob Mode
 
@@ -486,13 +499,15 @@ Git, then fallback to using `delete-file'."
      (car (member (or default (magit-current-file)) files)))))
 
 (defun magit-read-file (prompt &optional tracked-only)
-  (let ((choices (nconc (magit-list-files)
-                        (unless tracked-only (magit-untracked-files)))))
-    (magit-completing-read
-     prompt choices nil t nil nil
-     (car (member (or (magit-section-value-if '(file submodule))
-                      (magit-file-relative-name nil tracked-only))
-                  choices)))))
+  (magit-with-toplevel
+    (let ((choices (nconc (magit-list-files)
+                          (and (not tracked-only)
+                               (magit-untracked-files)))))
+      (magit-completing-read
+       prompt choices nil t nil nil
+       (car (member (or (magit-section-value-if '(file submodule))
+                        (magit-file-relative-name nil tracked-only))
+                    choices))))))
 
 (defun magit-read-tracked-file (prompt)
   (magit-read-file prompt t))

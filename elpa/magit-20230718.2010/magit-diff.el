@@ -495,7 +495,7 @@ repositories known to contain bad commit messages.
 
 The body of the message is left alone because (a) most people who
 write excessively long summary lines usually don't add a body and
-(b) even people who have the decency to wrap their lines may have
+\(b) even people who have the decency to wrap their lines may have
 a good reason to include a long line in the body sometimes."
   :package-version '(magit . "2.90.0")
   :group 'magit-revision
@@ -982,11 +982,12 @@ and `:slant'."
   :multi-value t)
 
 (defun magit-read-files (prompt initial-input history &optional list-fn)
-  (magit-completing-read-multiple prompt
-                                  (funcall (or list-fn #'magit-list-files))
-                                  nil nil
-                                  (or initial-input (magit-file-at-point))
-                                  history))
+  (magit-with-toplevel
+    (magit-completing-read-multiple prompt
+                                    (funcall (or list-fn #'magit-list-files))
+                                    nil nil
+                                    (or initial-input (magit-file-at-point))
+                                    history)))
 
 (transient-define-argument magit-diff:-U ()
   :description "Context lines"
@@ -1534,14 +1535,14 @@ Visit the worktree version of the appropriate file.  The location
 of point inside the diff determines which file is being visited.
 The visited version depends on what changes the diff is about.
 
-1. If the diff shows uncommitted changes (i.e. stage or unstaged
-   changes), then visit the file in the working tree (i.e. the
+1. If the diff shows uncommitted changes (i.e., stage or unstaged
+   changes), then visit the file in the working tree (i.e., the
    same \"real\" file that `find-file' would visit.  In all other
-   cases visit a \"blob\" (i.e. the version of a file as stored
+   cases visit a \"blob\" (i.e., the version of a file as stored
    in some commit).
 
 2. If point is on a removed line, then visit the blob for the
-   first parent of the commit that removed that line, i.e. the
+   first parent of the commit that removed that line, i.e., the
    last commit where that line still exists.
 
 3. If point is on an added or context line, then visit the blob
@@ -3054,7 +3055,7 @@ Do not confuse this with `magit-diff-scope' (which see)."
                    ((equal const "--cached")
                     (if (magit-rev-head-p range)
                         'staged
-                      'undefined)) ; i.e. committed and staged
+                      'undefined)) ; i.e., committed and staged
                    (t 'committed))))
           ((derived-mode-p 'magit-status-mode)
            (let ((stype (oref it type)))
@@ -3091,7 +3092,7 @@ If optional SECTION is non-nil, then return the scope of that,
 ignoring the sections selected by the region.  Otherwise return
 the scope of the current section, or if the region is active and
 selects a valid group of diff related sections, the type of these
-sections, i.e. `hunks' or `files'.  If SECTION, or if that is nil
+sections, i.e., `hunks' or `files'.  If SECTION, or if that is nil
 the current section, is a `hunk' section; and the region region
 starts and ends inside the body of a that section, then the type
 is `region'.  If the region is empty after a mouse click, then

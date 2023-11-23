@@ -298,23 +298,37 @@ at point, stage the file but not its content."
     (call-interactively #'magit-stage-file)))
 
 ;;;###autoload
-(defun magit-stage-file (file)
-  "Stage all changes to FILE.
-With a prefix argument or when there is no file at point ask for
-the file to be staged.  Otherwise stage the file at point without
-requiring confirmation."
-  (interactive
-   (let* ((atpoint (magit-section-value-if 'file))
-          (current (magit-file-relative-name))
-          (choices (nconc (magit-unstaged-files)
-                          (magit-untracked-files)))
-          (default (car (member (or atpoint current) choices))))
-     (list (if (or current-prefix-arg (not default))
-               (magit-completing-read "Stage file" choices
-                                      nil t nil nil default)
-             default))))
+(defun magit-stage-buffer-file ()
+  "Stage all changes to the file being visited in the current buffer."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Not visiting a file"))
   (magit-with-toplevel
-    (magit-stage-1 nil (list file))))
+    (magit-stage-1 (and (magit-file-ignored-p buffer-file-name)
+                        (if (y-or-n-p "Visited file is ignored; stage anyway?")
+                            "--force"
+                          (user-error "Abort")))
+                   (list (magit-file-relative-name)))))
+
+;;;###autoload
+(defun magit-stage-file (files)
+  "Read one or more files and stage all changes in those files.
+With a prefix argument offer ignored files for completion."
+  (interactive
+   (let* ((choices (if current-prefix-arg
+                       (magit-ignored-files)
+                     (nconc (magit-unstaged-files)
+                            (magit-untracked-files))))
+          (default (or (magit-section-value-if 'file)
+                       (magit-file-relative-name)))
+          (default (car (member default choices))))
+     (list (magit-completing-read-multiple
+            (if current-prefix-arg "Stage ignored file,s: " "Stage file,s: ")
+            choices nil t nil nil default))))
+  (magit-with-toplevel
+    ;; For backward compatibility, and because of
+    ;; the function's name, don't require a list.
+    (magit-stage-1 nil (if (listp files) files (list files)))))
 
 ;;;###autoload
 (defun magit-stage-modified (&optional all)
@@ -383,7 +397,10 @@ ignored) files."
     (magit-wip-commit-after-apply files " after stage")))
 
 (defvar magit-post-stage-hook-commands
-  '(magit-stage magit-stage-file magit-stage-modified))
+  '(magit-stage
+    magit-stage-buffer-file
+    magit-stage-file
+    magit-stage-modified))
 
 (defun magit-run-post-stage-hook ()
   (when (memq this-command magit-post-stage-hook-commands)
@@ -417,22 +434,28 @@ ignored) files."
       (`(undefined     ,_  ,_) (user-error "Cannot unstage this change")))))
 
 ;;;###autoload
-(defun magit-unstage-file (file)
-  "Unstage all changes to FILE.
-With a prefix argument or when there is no file at point ask for
-the file to be unstaged.  Otherwise unstage the file at point
-without requiring confirmation."
-  (interactive
-   (let* ((atpoint (magit-section-value-if 'file))
-          (current (magit-file-relative-name))
-          (choices (magit-staged-files))
-          (default (car (member (or atpoint current) choices))))
-     (list (if (or current-prefix-arg (not default))
-               (magit-completing-read "Unstage file" choices
-                                      nil t nil nil default)
-             default))))
+(defun magit-unstage-buffer-file ()
+  "Unstage all changes to the file being visited in the current buffer."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Not visiting a file"))
   (magit-with-toplevel
-    (magit-unstage-1 (list file))))
+    (magit-unstage-1 (list (magit-file-relative-name)))))
+
+;;;###autoload
+(defun magit-unstage-file (files)
+  "Read one or more files and unstage all changes to those files."
+  (interactive
+   (let* ((choices (magit-staged-files))
+          (default (or (magit-section-value-if 'file)
+                       (magit-file-relative-name)))
+          (default (car (member default choices))))
+     (list (magit-completing-read-multiple "Unstage file,s: " choices
+                                           nil t nil nil default))))
+  (magit-with-toplevel
+    ;; For backward compatibility, and because of
+    ;; the function's name, don't require a list.
+    (magit-unstage-1 (if (listp files) files (list files)))))
 
 (defun magit-unstage-1 (files)
   (magit-wip-commit-before-change files " before unstage")
@@ -461,7 +484,10 @@ without requiring confirmation."
   (magit-wip-commit-after-apply nil " after unstage"))
 
 (defvar magit-post-unstage-hook-commands
-  '(magit-unstage magit-unstage-file magit-unstage-all))
+  '(magit-unstage
+    magit-unstage-buffer-file
+    magit-unstage-file
+    magit-unstage-all))
 
 (defun magit-run-post-unstage-hook ()
   (when (memq this-command magit-post-unstage-hook-commands)
