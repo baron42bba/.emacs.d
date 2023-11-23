@@ -1,6 +1,6 @@
 ;;; editorconfig-conf-mode.el --- Major mode for editing .editorconfig files  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2011-2020 EditorConfig Team
+;; Copyright (C) 2011-2023 EditorConfig Team
 
 ;; Author: EditorConfig Team <editorconfig@googlegroups.com>
 
@@ -36,6 +36,10 @@
     (modify-syntax-entry ?\; "<" table)
     table)
   "Syntax table in use in `editorconfig-conf-mode' buffers.")
+
+(defvar editorconfig-conf-mode-abbrev-table nil
+  "Abbrev table in use in `editorconfig-conf-mode' buffers.")
+(define-abbrev-table 'editorconfig-conf-mode-abbrev-table ())
 
 ;;;###autoload
 (define-derived-mode editorconfig-conf-mode conf-unix-mode "Conf[EditorConfig]"
@@ -73,25 +77,19 @@
 
     ;; Highlight all key values
     (dolist (key-value key-value-list)
-      (push
-       `(,(format "[=:][ \t]*\\(%s\\)\\([ \t]\\|$\\)" key-value)
-         1 font-lock-constant-face)
-       font-lock-value
-       ))
+      (push `(,(format "[=:][ \t]*\\(%s\\)\\([ \t]\\|$\\)" key-value)
+              1 font-lock-constant-face)
+            font-lock-value))
     ;; Highlight all key properties
     (dolist (key-property key-property-list)
-      (push
-       `(,(format "^[ \t]*\\(%s\\)[ \t]*[=:]" key-property)
-         1 font-lock-builtin-face)
-       font-lock-value
-       ))
+      (push `(,(format "^[ \t]*\\(%s\\)[ \t]*[=:]" key-property)
+              1 font-lock-builtin-face)
+            font-lock-value))
 
     (conf-mode-initialize "#" font-lock-value)))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist
-             '("\\.editorconfig\\'" . editorconfig-conf-mode))
+(add-to-list 'auto-mode-alist '("\\.editorconfig\\'" . editorconfig-conf-mode))
 
 (provide 'editorconfig-conf-mode)
-
 ;;; editorconfig-conf-mode.el ends here
