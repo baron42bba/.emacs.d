@@ -1,10 +1,12 @@
-;;; paradox-autoloads.el --- automatically extracted autoloads
+;;; paradox-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "paradox" "paradox.el" (23994 46387 773446
-;;;;;;  457000))
+;;;### (autoloads nil "paradox" "paradox.el" (0 0 0 0))
 ;;; Generated autoloads from paradox.el
 
 (autoload 'paradox-list-packages "paradox" "\
@@ -43,9 +45,7 @@ not prevent downloading the actual packages (obviously).
 \(fn &optional NO-FETCH)" t nil)
 
 (autoload 'paradox-enable "paradox" "\
-Enable paradox, overriding the default package-menu.
-
-\(fn)" t nil)
+Enable paradox, overriding the default package-menu." t nil)
 
 (autoload 'paradox-require "paradox" "\
 Like `require', but also install FEATURE if it is absent.
@@ -64,11 +64,49 @@ empty.  Passing a non-nil REFRESH argument forces this update.
 
 \(fn FEATURE &optional FILENAME NOERROR PACKAGE REFRESH)" nil nil)
 
+(register-definition-prefixes "paradox" '("paradox-"))
+
 ;;;***
 
-;;;### (autoloads nil nil ("paradox-commit-list.el" "paradox-core.el"
-;;;;;;  "paradox-execute.el" "paradox-github.el" "paradox-menu.el"
-;;;;;;  "paradox-pkg.el") (23994 46387 774569 56000))
+;;;### (autoloads nil "paradox-commit-list" "paradox-commit-list.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from paradox-commit-list.el
+
+(register-definition-prefixes "paradox-commit-list" '("paradox-"))
+
+;;;***
+
+;;;### (autoloads nil "paradox-core" "paradox-core.el" (0 0 0 0))
+;;; Generated autoloads from paradox-core.el
+
+(register-definition-prefixes "paradox-core" '("paradox-"))
+
+;;;***
+
+;;;### (autoloads nil "paradox-execute" "paradox-execute.el" (0 0
+;;;;;;  0 0))
+;;; Generated autoloads from paradox-execute.el
+
+(register-definition-prefixes "paradox-execute" '("paradox-"))
+
+;;;***
+
+;;;### (autoloads nil "paradox-github" "paradox-github.el" (0 0 0
+;;;;;;  0))
+;;; Generated autoloads from paradox-github.el
+
+(register-definition-prefixes "paradox-github" '("paradox-"))
+
+;;;***
+
+;;;### (autoloads nil "paradox-menu" "paradox-menu.el" (0 0 0 0))
+;;; Generated autoloads from paradox-menu.el
+
+(register-definition-prefixes "paradox-menu" '("paradox-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("paradox-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -76,5 +114,6 @@ empty.  Passing a non-nil REFRESH argument forces this update.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; paradox-autoloads.el ends here
