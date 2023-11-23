@@ -225,7 +225,6 @@ Keep track of your important stuff!
           (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git commit -a -m 'autocommit'")
           (shell-command "git --work-tree ~/workorg/ --git-dir ~/workorg/.git push origin")
           ))
-    (setq twittering-cert-file nil)
     (kill-emacs)
     )
 
@@ -903,25 +902,6 @@ Use our default socket files
          :engines (list (gts-bing-engine) (gts-google-engine))
          :render (gts-buffer-render)))
 #+end_src
-
-* [[http://www.twmode.sourceforge.net/][twitter]]
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/twittering-mode-20181121.1402")
-  (require 'twittering-mode)
-  (cond
-   ((string-equal system-type "gnu/linux")
-    (progn
-      (setq twittering-cert-file "/etc/ssl/certs/ca-bundle.crt") )
-    )
-  )
-
-  (setq twittering-use-master-password t)
-
-  (if (getenv "http_proxy")
-      (twittering-toggle-proxy))
-
-#+END_SRC
 
 * [[http://www.mew.org][mew]] email
 
@@ -2599,7 +2579,6 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "S" 'synonyms)
   (define-key bba/launcher "\C-s" 'helm-swoop)
   (define-key bba/launcher "t" 'git-timemachine)
-  (define-key bba/launcher "T" 'twittering-mode)
   (define-key bba/launcher "v" 'vterm)
 
   (define-prefix-command 'bba/keyboard-maestro)
