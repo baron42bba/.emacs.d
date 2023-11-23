@@ -1,4 +1,4 @@
-;;; avy-autoloads.el --- automatically extracted autoloads
+;;; avy-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -8,6 +8,14 @@
 
 ;;;### (autoloads nil "avy" "avy.el" (0 0 0 0))
 ;;; Generated autoloads from avy.el
+
+(autoload 'avy-process "avy" "\
+Select one of CANDIDATES using `avy-read'.
+Use OVERLAY-FN to visualize the decision overlay.
+CLEANUP-FN should take no arguments and remove the effects of
+multiple OVERLAY-FN invocations.
+
+\(fn CANDIDATES &optional OVERLAY-FN CLEANUP-FN)" nil nil)
 
 (autoload 'avy-goto-char "avy" "\
 Jump to the currently visible CHAR.
@@ -47,9 +55,7 @@ When ARG is non-nil, do the opposite of `avy-all-windows'.
 \(fn CHAR1 CHAR2 &optional ARG)" t nil)
 
 (autoload 'avy-isearch "avy" "\
-Jump to one of the current isearch candidates.
-
-\(fn)" t nil)
+Jump to one of the current isearch candidates." t nil)
 
 (autoload 'avy-goto-word-0 "avy" "\
 Jump to a word start.
@@ -139,9 +145,7 @@ The case of CHAR is ignored.
 
 (autoload 'avy-goto-word-or-subword-1 "avy" "\
 Forward to `avy-goto-subword-1' or `avy-goto-word-1'.
-Which one depends on variable `subword-mode'.
-
-\(fn)" t nil)
+Which one depends on variable `subword-mode'." t nil)
 
 (autoload 'avy-goto-line "avy" "\
 Jump to a line start in current buffer.
@@ -198,9 +202,7 @@ The window scope is determined by `avy-all-windows' or
 \(fn ARG)" t nil)
 
 (autoload 'avy-move-region "avy" "\
-Select two lines and move the text between them above the current line.
-
-\(fn)" t nil)
+Select two lines and move the text between them above the current line." t nil)
 
 (autoload 'avy-kill-region "avy" "\
 Select two lines and kill the region between them.
@@ -249,9 +251,7 @@ newline.
 \(fn ARG)" t nil)
 
 (autoload 'avy-setup-default "avy" "\
-Setup the default shortcuts.
-
-\(fn)" nil nil)
+Setup the default shortcuts." nil nil)
 
 (autoload 'avy-goto-char-timer "avy" "\
 Read one or many consecutive chars and jump to the first one.
@@ -259,7 +259,14 @@ The window scope is determined by `avy-all-windows' (ARG negates it).
 
 \(fn &optional ARG)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "avy" '("avy-")))
+(autoload 'avy-transpose-lines-in-region "avy" "\
+Transpose lines in the active region." t nil)
+
+(register-definition-prefixes "avy" '("avy-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("avy-pkg.el") (0 0 0 0))
 
 ;;;***
 
