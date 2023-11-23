@@ -316,8 +316,8 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20220623.1523")
-        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20210826.1149")
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20230529.1017")
+        (add-to-list 'load-path "~/.emacs.d/elpa/dash-20230714.723")
         (require 'smartparens)
         (smartparens-global-mode 1)
         (defmacro def-pairs (pairs)
