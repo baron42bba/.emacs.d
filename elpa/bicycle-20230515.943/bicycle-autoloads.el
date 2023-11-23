@@ -34,6 +34,10 @@ Cycle visibility of all sections.
 
 ;;;***
 
+;;;### (autoloads nil nil ("bicycle-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
