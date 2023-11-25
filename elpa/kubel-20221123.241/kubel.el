@@ -22,8 +22,6 @@
 ;; USA
 
 ;; Version: 1.0
-;; Package-Version: 20220723.1655
-;; Package-Commit: 161f8f60cfe7f59cacd38127f7fd21b08c516bc3
 ;; Author: Adrien Brochard
 ;; Keywords: kubernetes k8s tools processes
 ;; URL: https://github.com/abrochard/kubel
@@ -118,29 +116,100 @@
   '("NAME" . nil)
   "Sort table on this key.")
 
-(defconst kubel--status-colors
-  '(("Running" . "green")
-    ("Healthy" . "green")
-    ("Active" . "green")
-    ("Ready" . "green")
-    ("True" . "green")
-    ("Unknown" . "orange")
-    ("Error" . "red")
-    ("Evicted" . "red")
-    ("MemoryPressure" . "red")
-    ("PIDPressure" . "red")
-    ("DiskPressure" . "red")
-    ("RevisionMissing" . "red")
-    ("RevisionFailed" . "red")
-    ("NetworkUnavailable" . "red")
-    ("Completed" . "yellow")
-    ("CrashLoopBackOff" . "red")
-    ("Terminating" . "blue"))
-  "Associative list of status to color.")
+(defface kubel-status-running
+  '((default . (:inherit success)))
+  "The face to use for the Running status.")
+
+(defface kubel-status-healthy
+  '((default . (:inherit success)))
+  "The face to use for the Healthy status.")
+
+(defface kubel-status-active
+  '((default . (:inherit success)))
+  "The face to use for the Active status.")
+
+(defface kubel-status-ready
+  '((default . (:inherit success)))
+  "The face to use for the Ready status.")
+
+(defface kubel-status-true
+  '((default . (:inherit success)))
+  "The face to use for the True status.")
+
+(defface kubel-status-unknown
+  '((default . (:inherit warning)))
+  "The face to use for the Unknown status.")
+
+(defface kubel-status-error
+  '((default . (:inherit error)))
+  "The face to use for the Error status.")
+
+(defface kubel-status-evicted
+  '((default . (:inherit error)))
+  "The face to use for the Evicted status.")
+
+(defface kubel-status-memory-pressure
+  '((default . (:inherit error)))
+  "The face to use for the Memory Pressure status.")
+
+(defface kubel-status-pid-pressure
+  '((default . (:inherit error)))
+  "The face to use for the PID Pressure status.")
+
+(defface kubel-status-disk-pressure
+  '((default . (:inherit error)))
+  "The face to use for the Disk Pressure status.")
+
+(defface kubel-status-revision-missing
+  '((default . (:inherit error)))
+  "The face to use for the Revision Missing status.")
+
+(defface kubel-status-revision-failed
+  '((default . (:inherit error)))
+  "The face to use for the Revision Failed status.")
+
+(defface kubel-status-network-unavailable
+  '((default . (:inherit error)))
+  "The face to use for the Network Unavailable status.")
+
+(defface kubel-status-completed
+  '((default . (:foreground "yellow")))
+  "The face to use for the Completed status.")
+
+(defface kubel-status-crash-loop-backoff
+  '((default . (:inherit error)))
+  "The face to use for the Crash Loop Backoff status.")
+
+(defface kubel-status-terminating
+  '((default . (:foreground "blue")))
+  "The face to use for the Terminating status.")
+
+(defcustom kubel-status-faces
+  '(("Running" . kubel-status-running)
+    ("Healthy" . kubel-status-healthy)
+    ("Active" . kubel-status-active)
+    ("Ready" . kubel-status-ready)
+    ("True" . kubel-status-true)
+    ("Unknown" . kubel-status-unknown)
+    ("Error" . kubel-status-error)
+    ("Evicted" . kubel-status-evicted)
+    ("MemoryPressure" . kubel-status-memory-pressure)
+    ("PIDPressure" . kubel-status-pid-pressure)
+    ("DiskPressure" . kubel-status-disk-pressure)
+    ("RevisionMissing" . kubel-status-revision-missing)
+    ("RevisionFailed" . kubel-status-revision-failed)
+    ("NetworkUnavailable" . kubel-status-network-unavailable)
+    ("Completed" . kubel-status-completed)
+    ("CrashLoopBackOff" . kubel-status-crash-loop-backoff)
+    ("Terminating" . kubel-status-terminating))
+  "Associative list of status to face."
+  :type '(alist :key-type string
+                :value-type face)
+  :group 'kubel)
 
 (defcustom kubel-kubectl "kubectl"
   "Kubectl binary path."
-  :type 'string
+  :type '(file :must-match t)
   :group 'kubel)
 
 (defconst kubel--process-buffer "*kubel-process*"
@@ -159,12 +228,14 @@
 (defcustom kubel-use-namespace-list 'auto
   "Control behavior for namespace completion.
 
-auto - default, use `kubectl auth can-i list namespace` to determine if we can list namespaces
-on - always assume we can list namespaces
-off - always assume we cannot list namespaces"
-  :type 'symbol
-  :group 'kubel
-  :options '('auto 'on 'off))
+auto - default, use `kubectl auth can-i list namespace` to determine if we can
+       list namespaces
+on   - always assume we can list namespaces
+off  - always assume we cannot list namespaces"
+  :type '(choice (const :tag "Auto" auto)
+                 (const :tag "On" on)
+                 (const :tag "Off" off))
+  :group 'kubel)
 
 (defun kubel--append-to-process-buffer (str)
   "Append string STR to the process buffer."
@@ -190,7 +261,9 @@ CMD is the kubectl command as a list."
 
 CMD is the command string to run."
   (kubel--log-command "kubectl-command" cmd)
-  (shell-command-to-string cmd))
+  (with-output-to-string
+    (with-current-buffer standard-output
+      (shell-command cmd t "*kubel stderr*"))))
 
 (defvar kubel-namespace "default"
   "Current namespace.")
@@ -208,9 +281,6 @@ CMD is the command string to run."
 
 (defvar kubel-selector ""
   "Label selector for resources.")
-
-(defvar kubel--line-number nil
-  "Store the current line number to jump back after a refresh.")
 
 (defvar kubel-namespace-history '()
   "List of previously used namespaces.")
@@ -364,7 +434,7 @@ ENTRYLIST is the output of the parsed body."
   "Parse the body of kubectl get resource call into a list.
 
 BODY is the raw output of kubectl get resource."
-  (let* ((lines (nbutlast (split-string body "\n")))
+  (let* ((lines (or (nbutlast (split-string body "\n")) '("")))
          (header (car lines))
          ;; Cronjobs have a "LAST SCHEDULE" column, so need to split on 2+ whitespace chars.
          (starts (cl-loop for start = 0 then (match-end 0)
@@ -418,12 +488,12 @@ If MAX is the end of the line, dynamically adjust."
   "Return the status in proper font color.
 
 STATUS is the pod status string."
-  (let ((pair (cdr (assoc status kubel--status-colors)))
+  (let ((status-face (cdr (assoc status kubel-status-faces)))
         (match (or (equal kubel-resource-filter "") (string-match-p kubel-resource-filter status)))
         (selected (and (kubel--items-selected-p) (-contains? kubel--selected-items status))))
-    (cond (pair (propertize status 'font-lock-face `(:foreground ,pair)))
+    (cond (status-face (propertize status 'face status-face))
           (selected (propertize (concat "*" status) 'face 'dired-marked))
-          ((not match) (propertize status 'font-lock-face '(:foreground "darkgrey")))
+          ((not match) (propertize status 'face 'shadow))
           (t status))))
 
 (defun kubel--pop-to-buffer (name)
@@ -479,8 +549,9 @@ READONLY If true buffer will be in readonly mode(view-mode)."
 (defun kubel--get-resource-under-cursor ()
   "Utility function to get the name of the resource under the cursor.
 Strip the `*` prefix if the resource is selected"
-  (replace-regexp-in-string
-   "^\*" "" (aref (tabulated-list-get-entry) 0)))
+  (string-remove-suffix " (default)" ;; see https://github.com/abrochard/kubel/issues/106
+                        (replace-regexp-in-string
+                         "^\*" "" (aref (tabulated-list-get-entry) 0))))
 
 (defun kubel--get-context-namespace ()
   "Utility function to return the proper context and namespace arguments."
@@ -590,18 +661,6 @@ TYPENAME is the resource type/name."
    (kubel--is-deployment-view)
    (-contains? '("ReplicaSets" "replicasets" "replicasets.apps") kubel-resource)
    (-contains? '("StatefulSets" "statefulsets" "statefulsets.apps") kubel-resource)))
-
-(defun kubel--save-line ()
-  "Save the current line number if the view is unchanged."
-  (if (equal (buffer-name (current-buffer))
-             (kubel--buffer-name))
-      (setq kubel--line-number (+ 1 (count-lines 1 (point))))
-    (setq kubel--line-number nil)))
-
-(defun kubel--jump-back-to-line ()
-  "Jump back to the last cached line number."
-  (when kubel--line-number
-    (goto-line kubel--line-number)))
 
 ;; interactive
 (define-minor-mode kubel-yaml-editing-mode
@@ -743,8 +802,8 @@ ARGS is the arguments list from transient."
            (unless kubel--can-get-namespace-cached
              (setq kubel--can-get-namespace-cached
                    (string-match-p "yes\n"
-                          (kubel--exec-to-string
-                           (format "%s --context %s auth can-i list namespaces" kubel-kubectl kubel-context))))))
+                                   (kubel--exec-to-string
+                                    (format "%s --context %s auth can-i list namespaces" kubel-kubectl kubel-context))))))
          kubel--can-get-namespace-cached)))
 
 (defun kubel--get-namespace ()
@@ -891,14 +950,19 @@ P can be a single number or a localhost:container port pair."
                       (completing-read "Select container: " containers))))
     (cons container pod)))
 
+(defun kubel--dir-prefix ()
+  "Return the current directory prefix for a TRAMP connection."
+  (or
+   (when (tramp-tramp-file-p default-directory)
+     (with-parsed-tramp-file-name default-directory nil
+       (format "%s%s:%s@%s|" (or hop "") method user host)))
+   ""))
+
 (defun kubel-exec-pod ()
   "Exec into the pod under the cursor -> `find-file."
   (interactive)
   (kubel-setup-tramp)
-  (let* ((dir-prefix (or
-                      (when (tramp-tramp-file-p default-directory)
-                        (with-parsed-tramp-file-name default-directory nil
-                          (format "%s%s:%s@%s|" (or hop "") method user host)))""))
+  (let* ((dir-prefix (kubel--dir-prefix))
          (con-pod (kubel--get-container-under-cursor)))
     (find-file (format "/%skubectl:%s@%s:/" dir-prefix (car con-pod) (cdr con-pod)))))
 
@@ -906,10 +970,7 @@ P can be a single number or a localhost:container port pair."
   "Exec into the pod under the cursor -> shell."
   (interactive)
   (kubel-setup-tramp)
-  (let* ((dir-prefix (or
-                      (when (tramp-tramp-file-p default-directory)
-                        (with-parsed-tramp-file-name default-directory nil
-                          (format "%s%s:%s@%s|" (or hop "") method user host))) ""))
+  (let* ((dir-prefix (kubel--dir-prefix))
          (con-pod (kubel--get-container-under-cursor))
          (container (car con-pod))
          (pod (cdr con-pod))
@@ -920,10 +981,7 @@ P can be a single number or a localhost:container port pair."
   "Exec into the pod under the cursor -> eshell."
   (interactive)
   (kubel-setup-tramp)
-  (let* ((dir-prefix (or
-                      (when (tramp-tramp-file-p default-directory)
-                        (with-parsed-tramp-file-name default-directory nil
-                          (format "%s%s:%s@%s|" (or hop "") method user host))) ""))
+  (let* ((dir-prefix (kubel--dir-prefix))
          (con-pod (kubel--get-container-under-cursor))
          (container (car con-pod))
          (pod (cdr con-pod))
@@ -933,19 +991,23 @@ P can be a single number or a localhost:container port pair."
 
 (defun kubel-exec-vterm-pod ()
   "Exec into the pod under the cursor -> vterm."
-  (require 'vterm)
   (interactive)
   (kubel-setup-tramp)
-  (let* ((dir-prefix (or
-                      (when (tramp-tramp-file-p default-directory)
-                        (with-parsed-tramp-file-name default-directory nil
-                          (format "%s%s:%s@%s|" (or hop "") method user host))) ""))
+  (let* ((dir-prefix (kubel--dir-prefix))
          (con-pod (kubel--get-container-under-cursor))
          (container (car con-pod))
          (pod (cdr con-pod))
          (default-directory (format "/%skubectl:%s@%s:/" dir-prefix container pod))
-         (vterm-buffer-name (format "*kubel - vterm - %s@%s*" container pod)))
-  (vterm)))
+         (vterm-buffer-name (format "*kubel - vterm - %s@%s*" container pod))
+         (vterm-shell "/bin/sh"))
+    (vterm)))
+
+;;;###autoload
+(defun kubel-vterm-setup ()
+  "Adds a vterm enty to the KUBEL-EXEC-POP."
+  (require 'vterm)
+  (transient-append-suffix 'kubel-exec-popup "e"
+    '("v" "Vterm" kubel-exec-vterm-pod)))
 
 (defun kubel-exec-ansi-term-pod ()
   "Exec into the pod under the cursor -> `ansi-term'."
@@ -1108,7 +1170,6 @@ RESET is to be called if the search is nil after the first attempt."
    ("!" "Shell command" kubel-exec-pod-by-shell-command)
    ("d" "Dired" kubel-exec-pod)
    ("e" "Eshell" kubel-exec-eshell-pod)
-   ("v" "Vterm" kubel-exec-vterm-pod)
    ("a" "Ansi-term" kubel-exec-ansi-term-pod)
    ("s" "Shell" kubel-exec-shell-pod)])
 
@@ -1218,7 +1279,17 @@ RESET is to be called if the search is nil after the first attempt."
     map)
   "Keymap for `kubel-mode'.")
 
-(defvar kubel-last-position nil)
+;;;###autoload
+(defun kubel-open (context &optional namespace resource directory)
+  "Open kubel pointing to CONTEXT and NAMESPACE.
+
+NAMEPACE is optional, will default to \"default\".
+RESOURCE is optional, will default to pods.
+DIRECTORY is optional for TRAMP support."
+  (setq kubel-context context)
+  (setq kubel-namespace (or namespace "default"))
+  (setq kubel-resource (or resource "Pods"))
+  (kubel directory))
 
 ;;;###autoload
 (defun kubel (&optional directory)
@@ -1226,7 +1297,6 @@ RESET is to be called if the search is nil after the first attempt."
 
 DIRECTORY is optional for TRAMP support."
   (interactive)
-  (kubel--save-line)
   (kubel--pop-to-buffer (kubel--buffer-name))
   (when directory (setq default-directory directory))
   (kubel-mode)
@@ -1246,11 +1316,16 @@ DIRECTORY is optional for TRAMP support."
   (setq tabulated-list-sort-key kubel--list-sort-key)
   (setq tabulated-list-sort-key nil)
   (tabulated-list-init-header)
-  (tabulated-list-print)
+  (let ((line-num (line-number-at-pos (point)))
+        (current-id (tabulated-list-get-id)))
+    (tabulated-list-print t)
+    (unless (string-equal current-id (tabulated-list-get-id))
+      ;; tabulated-list could not follow the current entry, then fallback on
+      ;; keeping the same line.
+      (goto-char (point-min))
+      (forward-line (1- line-num))))
   (hl-line-mode 1)
   (run-mode-hooks 'kubel-mode-hook))
-
-(add-hook 'kubel-mode-hook #'kubel--jump-back-to-line)
 
 (provide 'kubel)
 ;;; kubel.el ends here
