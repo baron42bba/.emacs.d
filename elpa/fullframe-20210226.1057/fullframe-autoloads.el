@@ -1,4 +1,4 @@
-;;; fullframe-autoloads.el --- automatically extracted autoloads
+;;; fullframe-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -10,14 +10,10 @@
 ;;; Generated autoloads from fullframe.el
 
 (autoload 'fullframe/current-buffer-window-config "fullframe" "\
-Return the window-configuration stored for the current buffer.
-
-\(fn)" nil nil)
+Return the window-configuration stored for the current buffer." nil nil)
 
 (autoload 'fullframe/erase-current-buffer-window-config "fullframe" "\
-Forget the window config associated with the current buffer.
-
-\(fn)" nil nil)
+Forget the window config associated with the current buffer." nil nil)
 
 (autoload 'fullframe/set-current-buffer-window-config "fullframe" "\
 Associate the current buffer with the window-configuration WCONF.
@@ -51,7 +47,11 @@ the window it generated is the only one in in the frame.
 
 \(fn COMMAND-ON COMMAND-OFF &optional KILL-ON-COFF AFTER-COMMAND-ON-FUNC)" nil t)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "fullframe" '("fullframe/")))
+(register-definition-prefixes "fullframe" '("fullframe/"))
+
+;;;***
+
+;;;### (autoloads nil nil ("fullframe-pkg.el") (0 0 0 0))
 
 ;;;***
 
