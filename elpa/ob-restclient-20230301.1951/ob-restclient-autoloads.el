@@ -1,4 +1,4 @@
-;;; ob-restclient-autoloads.el --- automatically extracted autoloads
+;;; ob-restclient-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -15,7 +15,16 @@ This function is called by `org-babel-execute-src-block'
 
 \(fn BODY PARAMS)" nil nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ob-restclient" '("org-babel-")))
+(autoload 'org-babel-variable-assignments:restclient "ob-restclient" "\
+Return a list of restclient statements assigning the block's variables specified in PARAMS.
+
+\(fn PARAMS)" nil nil)
+
+(register-definition-prefixes "ob-restclient" '("org-babel-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("ob-restclient-pkg.el") (0 0 0 0))
 
 ;;;***
 
