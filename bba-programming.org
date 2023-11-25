@@ -127,7 +127,7 @@ for C-c T you can use a file like this one:
 combine key strokes to access commands even faster.
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20160227.1238")
+  (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-20230522.223")
 
   (require 'key-chord)
   (key-chord-mode 1)
