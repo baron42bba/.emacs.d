@@ -3580,6 +3580,7 @@ Amazon instance ID at point.
 [2022-12-09 Fri 18:09]
 
 #+begin_src emacs-lisp
+  (require 'f)
   (defvar bba-emacs-files (flatten-list
 			   `("bba-shell.org"
 			     "bba-orgmode.org"
