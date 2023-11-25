@@ -495,7 +495,7 @@ For example, both \"C-x r\" and \"\\C-xr\" are converted to [24 114]"
     (when (> (setq fkey-list-len (length fkey-list)) 0)
       ;; fontify following keys as string
       (setq fkey-str-list
-            (loop for (key space command) in fkey-list
+            (cl-loop for (key space command) in fkey-list
                   collect (guide-key/fontified-string key space command regexp)))
       ;; insert a few following keys per line
       (guide-key/insert-following-key fkey-str-list
@@ -518,7 +518,7 @@ is popped up at left or right."
             (floor (/ (frame-width)
                       (* (apply 'max (mapcar 'length fkey-str-list)) scale))))))
     ;; Insert following keys by columns per line.
-    (loop for fkey-str in fkey-str-list
+    (cl-loop for fkey-str in fkey-str-list
           for column from 1
           do (insert fkey-str (if (= (mod column columns) 0) "\n" " ")))
     (align-regexp (point-min) (point-max) "\\(\\s-*\\) \\[" 1 1 t)))
@@ -546,7 +546,7 @@ appropriate face is not found."
              (when (string-match regexp string)
                'guide-key/highlight-command-face))
             ((listp regexp)
-             (loop for elm in regexp
+             (cl-loop for elm in regexp
                    if (cond ((stringp elm)
                              (when (string-match elm string)
                                'guide-key/highlight-command-face))
