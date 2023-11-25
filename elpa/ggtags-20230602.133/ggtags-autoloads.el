@@ -55,6 +55,10 @@ A function suitable for `hippie-expand-try-functions-list'.
 
 ;;;***
 
+;;;### (autoloads nil nil ("ggtags-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

@@ -4,8 +4,6 @@
 
 ;; Author: Leo Liu <sdl.web@gmail.com>
 ;; Version: 0.9.0
-;; Package-Version: 20211020.354
-;; Package-Commit: 8e16861392d7499bf3a212db1f5e9e0ef2e4fba9
 ;; Keywords: tools, convenience
 ;; Created: 2013-01-29
 ;; URL: https://github.com/leoliu/ggtags
@@ -1978,10 +1976,9 @@ ggtags: history match invalid, jump to first match instead")
     (and buffer-file-name ggtags-update-on-save
          (ggtags-update-tags-single buffer-file-name 'nowait))))
 
-(defun ggtags-global-output (buffer cmds callback &optional cutoff sync)
+(defun ggtags-global-output (buffer cmds callback &optional cutoff)
   "Asynchronously pipe the output of running CMDS to BUFFER.
-When finished invoke CALLBACK in BUFFER with process exit status.
-If SYNC is non-nil, synchronously run CMDS and call CALLBACK."
+When finished invoke CALLBACK in BUFFER with process exit status."
   (or buffer (error "Output buffer required"))
   (when (get-buffer-process (get-buffer buffer))
     ;; Notice running multiple processes in the same buffer so that we
@@ -1995,7 +1992,6 @@ If SYNC is non-nil, synchronously run CMDS and call CALLBACK."
                                            (with-current-buffer buffer
                                              (line-number-at-pos (point-max)))
                                          0))))
-         (proc (apply #'start-file-process program buffer program args))
          (filter (lambda (proc string)
                    (and (buffer-live-p (process-buffer proc))
                         (with-current-buffer (process-buffer proc)
@@ -2011,17 +2007,30 @@ If SYNC is non-nil, synchronously run CMDS and call CALLBACK."
                      (when (memq (process-status proc) '(exit signal))
                        (with-current-buffer (process-buffer proc)
                          (set-process-buffer proc nil)
-                         (unwind-protect
-                             (funcall callback (process-exit-status proc))
-                           (process-put proc :callback-done t)))))))
+                         (funcall callback (process-exit-status proc))))))
+         (proc (apply #'start-file-process program buffer program args)))
+    (set-process-sentinel proc sentinel)
     (set-process-query-on-exit-flag proc nil)
     (and cutoff (set-process-filter proc filter))
-    (set-process-sentinel proc sentinel)
-    (process-put proc :callback-done nil)
     (process-put proc :nlines 0)
-    (if sync (while (not (process-get proc :callback-done))
-               (accept-process-output proc 1))
-      proc)))
+    proc))
+
+(defun ggtags-global-output-sync (buffer cmds callback)
+  "Synchronously run CMDS and show output in BUFFER.
+When finished invoke CALLBACK in BUFFER with process exit status."
+  ;; Same as `ggtags-global-output'
+  (or buffer (error "Output buffer required"))
+  (when (get-buffer-process (get-buffer buffer))
+    ;; Notice running multiple processes in the same buffer so that we
+    ;; can fix the caller. See for example `ggtags-eldoc-function'.
+    (message "Warning: detected %S already running in %S; interrupting..."
+             (get-buffer-process buffer) buffer)
+    (interrupt-process (get-buffer-process buffer)))
+  (let* ((program (car cmds))
+         (args (cdr cmds))
+         (status (apply #'call-process program nil buffer nil args)))
+    (with-current-buffer buffer
+      (funcall callback status))))
 
 (cl-defun ggtags-fontify-code (code &optional (mode major-mode))
   (cl-check-type mode function)
@@ -2452,12 +2461,13 @@ Return the list of xrefs for TAG."
                               (ggtags-project-has-color project))))
             (kill-buffer (current-buffer)))))
     (ggtags-with-current-project
-      (ggtags-global-output
-       (get-buffer-create " *ggtags-xref*")
-       (append
-        (split-string (ggtags-global-build-command cmd))
-        (list "--" (shell-quote-argument tag)))
-       collect ggtags--xref-limit 'sync)
+      (let ((default-directory (ggtags-current-project-root)))
+        (ggtags-global-output-sync
+         (get-buffer-create " *ggtags-xref*")
+         (append
+          (split-string (ggtags-global-build-command cmd))
+          (list "--" (shell-quote-argument tag)))
+         collect))
       xrefs)))
 
 (cl-defmethod xref-backend-definitions ((_backend (eql ggtags)) tag)
