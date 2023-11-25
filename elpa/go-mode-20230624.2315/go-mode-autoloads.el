@@ -1,10 +1,12 @@
-;;; go-mode-autoloads.el --- automatically extracted autoloads
+;;; go-mode-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "go-mode" "go-mode.el" (23994 46478 910207
-;;;;;;  727000))
+;;;### (autoloads nil "go-mode" "go-mode.el" (0 0 0 0))
 ;;; Generated autoloads from go-mode.el
 
 (autoload 'go-mode "go-mode" "\
@@ -28,7 +30,6 @@ The following extra functions are defined:
 - `gofmt'
 - `godoc' and `godoc-at-point'
 - `go-import-add'
-- `go-remove-unused-imports'
 - `go-goto-arguments'
 - `go-goto-docstring'
 - `go-goto-function'
@@ -40,11 +41,9 @@ The following extra functions are defined:
 - `go-download-play'
 - `godef-describe' and `godef-jump'
 - `go-coverage'
-- `go-set-project'
-- `go-reset-gopath'
 
 If you want to automatically run `gofmt' before saving a file,
-add the following hook to your emacs configuration:
+add the following hook to your Emacs configuration:
 
 \(add-hook 'before-save-hook #'gofmt-before-save)
 
@@ -79,9 +78,7 @@ Add this to .emacs to run gofmt on the current buffer when saving:
 \(add-hook 'before-save-hook 'gofmt-before-save).
 
 Note that this will cause ‘go-mode’ to get loaded the first time
-you save any file, kind of defeating the point of autoloading.
-
-\(fn)" t nil)
+you save any file, kind of defeating the point of autoloading." t nil)
 
 (autoload 'godoc "go-mode" "\
 Show Go documentation for QUERY, much like \\<go-mode-map>\\[man].
@@ -101,11 +98,25 @@ A major mode for editing go.mod files.
 
 (add-to-list 'auto-mode-alist '("go\\.mod\\'" . go-dot-mod-mode))
 
+(autoload 'go-dot-work-mode "go-mode" "\
+A major mode for editor go.work files.
+
+\(fn)" t nil)
+
+(add-to-list 'auto-mode-alist '("go\\.work\\'" . go-dot-work-mode))
+
+(register-definition-prefixes "go-mode" '("go-" "god" "gofmt"))
+
+;;;***
+
+;;;### (autoloads nil nil ("go-mode-pkg.el") (0 0 0 0))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; go-mode-autoloads.el ends here
