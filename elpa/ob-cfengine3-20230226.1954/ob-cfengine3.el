@@ -21,14 +21,16 @@
 
 ;; Author: Nick Anderson <nick@cmdln.org>
 ;; Keywords: tools, convenience
-;; Package-Version: 20191011.1721
 ;; URL: https://github.com/nickanderson/ob-cfengine3
+;; Package-Requires: ((emacs "24.1"))
 ;; Version: 0.0.7
 
 ;;; Commentary:
 ;; Execute CFEngine 3 policy inside org-mode src blocks.
 
 ;;; Code:
+
+(require 'ob-tangle)
 
 (defvar ob-cfengine3-command "cf-agent"
   "Name of command to use for executing cfengine policy.")
@@ -42,9 +44,8 @@ Note that --file will be appended to the options.")
 It is useful to inject into an example source block before execution.")
 
 (defvar ob-cfengine3-wrap-with-main-template "bundle agent __main__\n{\n%s\n}\n"
-  "Template to use to wrap the contents of the source block in a
-  'main' bundle. Must contain exactly one '%s', where the body
-  will be inserted.")
+  "Template to wrap source block in a 'main' bundle.
+Must contain exactly one '%s', where the body will be inserted.")
 
 (defconst ob-cfengine3-header-args-cfengine3
   '(
@@ -69,29 +70,27 @@ It is useful to inject into an example source block before execution.")
   "CFEngine specific header arguments.")
 
 (defun ob-cfengine3-header-arg (pname params)
-  "Returns the value of header argument PNAME, extracted from PARAMS."
+  "Return value of header argument PNAME, extracted from PARAMS."
   (cdr (assq pname params)))
 
 (defun ob-cfengine3-bool (str)
-  "Convert string to boolean. Strings `yes', `YES', `true',
-`TRUE' and `t' are considered true, anything else is false."
-  (or (string-equal str "yes")
-      (string-equal str "true")
-      (string-equal str "t")
-      (string-equal str "YES")
-      (string-equal str "TRUE")))
+  "Convert STR to boolean.
+
+Strings \"yes\", \"YES\", \"true\", \"TRUE\" and \"t\" are
+considered true, anything else is false."
+  (member str '("yes" "YES" "true" "TRUE" "t")))
 
 (defun ob-cfengine3-bool-arg (pname params)
-  "Returns the boolean value of header argument PNAME, extracted from PARAMS."
+  "Return boolean value of header argument PNAME, extracted from PARAMS."
   (ob-cfengine3-bool (ob-cfengine3-header-arg pname params)))
 
 (defun ob-cfengine3-tangle-file (&optional tangle-value)
   "Return the filename to use for tangling a CFEngine code block.
 
 TANGLE-VALUE must be the value of the `:tangle' header
-argument. If `\"yes\"', returns the basename of the current
-buffer with the `.cf' extension. If `\"no\"' or `nil', returns
-`nil'. If any other string, it is returned as-is."
+argument. If \"yes\", returns the basename of the current
+buffer with the `.cf' extension. If \"no\" or nil, returns
+nil. If any other string, it is returned as-is."
   (cond
    ((string= "yes" tangle-value)
     (concat (file-name-sans-extension (buffer-file-name)) "."
@@ -100,18 +99,17 @@ buffer with the `.cf' extension. If `\"no\"' or `nil', returns
    ((> (length tangle-value) 0) tangle-value)))
 
 (defun ob-cfengine3-option (long short flag)
-  "Returns either the LONG or the SHORT option, depending on the
-  value of FLAG (if FLAG is true, the short option is used)."
+  "Return LONG if FLAG is false, SHORT otherwise."
   (if flag (concat "-" short) (concat "--" long)))
 
 (defun org-babel-execute:cfengine3 (body params)
-  "Actuate a block of CFEngine 3 policy.
+  "Execute a block of CFEngine 3 policy.
 This function is called by `org-babel-execute-src-block'.
 
-  A temporary file is constructed containing
-  `ob-cfengine3-file-control-stdlib and the BODY of the src
-  block. `ob-cfengine3-command' is used to execute the
-  temporary file."
+A temporary file is constructed containing
+`ob-cfengine3-file-control-stdlib' and the BODY of the src block.
+`ob-cfengine3-command' is used to execute the temporary file.
+PARAMS contains the parameters of the src block."
   (let* ((temporary-file-directory ".")
          (debug                                 (ob-cfengine3-bool-arg :debug params))
          (info                                  (ob-cfengine3-bool-arg :info params))
@@ -136,7 +134,7 @@ This function is called by `org-babel-execute-src-block'.
          (run-with-main                         (or (ob-cfengine3-bool-arg :run-with-main params) auto-main))
          (short-opt                             (ob-cfengine3-bool-arg :short-options params))
          (command-in-result-prompt-plus-command (concat command-in-result-prompt command-in-result-command " ")))
-    (defun build-command-args (filename &optional sep)
+    (defun ob-cfengine3-build-command-args (filename &optional sep)
       (let ((sep (or sep " ")))
         (mapconcat 'identity
                    (delq nil
@@ -161,8 +159,8 @@ This function is called by `org-babel-execute-src-block'.
           (insert body)))
     (unwind-protect
         (let* ((multiline-sep (concat " \\\n" (make-string (length command-in-result-prompt-plus-command) ?\s)))
-               (single-line-cmd (build-command-args command-in-result-filename))
-               (multi-line-cmd (build-command-args command-in-result-filename multiline-sep))
+               (single-line-cmd (ob-cfengine3-build-command-args command-in-result-filename))
+               (multi-line-cmd (ob-cfengine3-build-command-args command-in-result-filename multiline-sep))
                (command-args
                 (if command-in-result-multiline multi-line-cmd
                   (if (and command-in-result-auto-ml (> (+ (length single-line-cmd) (length command-in-result-prompt-plus-command)) command-in-result-maxlen))
@@ -180,7 +178,7 @@ This function is called by `org-babel-execute-src-block'.
                      "\n"))
            ;; Execute command and return output
            (shell-command-to-string
-            (concat command " " (build-command-args tempfile)))))
+            (concat command " " (ob-cfengine3-build-command-args tempfile)))))
       (delete-file tempfile))))
 
 (add-to-list 'org-src-lang-modes '("cfengine3" . cfengine3))
@@ -200,10 +198,11 @@ This function is called by `org-babel-execute-src-block'.
   "Expand a block of CFEngine 3 policy before tangling.
 This function is called by `org-babel-tangle-single-block'.
 
-  If the `:tangle-with-main'' or `:auto-main' header arguments
-  are `yes', `true' or `t', the BODY is formatted according to
-  the template in `ob-cfengine3-wrap-with-main-template`,
-  otherwise it is returned as-is."
+If the `:tangle-with-main'' or `:auto-main' header arguments are
+`yes', `true' or t, the BODY is formatted according to the
+template in `ob-cfengine3-wrap-with-main-template`, otherwise it
+is returned as-is. PARAMS contains the parameters of the src
+block."
   (let* ((auto-main (ob-cfengine3-bool-arg :auto-main params))
          (tangle-with-main (or (ob-cfengine3-bool-arg :tangle-with-main params) auto-main))
          (pro (ob-cfengine3-header-arg :prologue params))
