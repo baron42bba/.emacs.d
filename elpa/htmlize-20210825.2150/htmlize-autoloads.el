@@ -1,4 +1,4 @@
-;;; htmlize-autoloads.el --- automatically extracted autoloads
+;;; htmlize-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -69,7 +69,11 @@ HTMLize dired-marked files.
 
 \(fn ARG &optional TARGET-DIRECTORY)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "htmlize" '("htmlize-")))
+(register-definition-prefixes "htmlize" '("htmlize-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("htmlize-pkg.el") (0 0 0 0))
 
 ;;;***
 
