@@ -2,16 +2,14 @@
 
 ;; Author: Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/Fanael/edit-indirect
-;; Package-Version: 20211201.1541
-;; Package-Commit: 7fffd87ac3b027d10a26e8492629da01a4cd7633
-;; Version: 0.1.6
+;; Version: 0.1.10
 ;; Package-Requires: ((emacs "24.3"))
 
 ;; This file is NOT part of GNU Emacs.
 
 ;; SPDX-License-Identifier: BSD-2-clause
 ;;
-;; Copyright (c) 2014-2020, Fanael Linithien
+;; Copyright (c) 2014-2022, Fanael Linithien
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
@@ -121,6 +119,7 @@ end of the changed region."
 
 (defvar edit-indirect--overlay)
 (defvar edit-indirect--should-quit-window nil)
+(put 'edit-indirect--should-quit-window 'permanent-local t)
 
 ;;;###autoload
 (defun edit-indirect-region (beg end &optional display-buffer)
@@ -141,6 +140,8 @@ properties, which happens surprisingly often when the font-lock
 mode is used.
 
 Edit-indirect buffers use the `edit-indirect-mode-map' keymap.
+Regions with active edit-indirect buffers use the
+`edit-indirect-overlay-map' keymap.
 
 If there's already an edit-indirect buffer for BEG..END, use that.
 If there's already an edit-indirect buffer active overlapping any
@@ -158,14 +159,12 @@ In any case, return the edit-indirect buffer."
      (user-error "No region")))
   (let ((buffer (edit-indirect--get-edit-indirect-buffer beg end)))
     (when display-buffer
-      (with-current-buffer buffer
-        (setq-local edit-indirect--should-quit-window t))
-      (select-window (display-buffer buffer)))
+      (edit-indirect--display-buffer buffer))
     buffer))
 
 (defvar edit-indirect-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-x C-s") #'edit-indirect-save)
+    (define-key map [remap save-buffer] #'edit-indirect-save)
     (define-key map (kbd "C-c '") #'edit-indirect-commit)
     (define-key map (kbd "C-c C-c") #'edit-indirect-commit)
     (define-key map (kbd "C-c C-k") #'edit-indirect-abort)
@@ -173,6 +172,14 @@ In any case, return the edit-indirect buffer."
   "Keymap for edit-indirect buffers.
 
 \\{edit-indirect-mode-map}")
+
+(defvar edit-indirect-overlay-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "RET") #'edit-indirect-display-active-buffer)
+    map)
+  "Keymap for regions with active edit-indirect buffers.
+
+\\{edit-indirect-overlay-map}")
 
 (defun edit-indirect-commit ()
   "Commit the modifications done in an edit-indirect buffer.
@@ -221,6 +228,16 @@ BUFFER defaults to the current buffer."
 It's done by calling `normal-mode'."
   (normal-mode))
 
+(defun edit-indirect-display-active-buffer ()
+  "Display the active edit-indirect buffer of the region the point is in."
+  (interactive)
+  (let ((overlay
+         (let ((p (point)))
+           (edit-indirect--search-for-edit-indirect p (1+ p)))))
+    (unless overlay
+      (signal 'edit-indirect-not-indirect '()))
+    (edit-indirect--display-buffer (overlay-get overlay 'edit-indirect-buffer))))
+
 (defvar edit-indirect--overlay nil
   "The overlay spanning the region of the parent buffer being edited.
 
@@ -239,6 +256,13 @@ OVERLAY is the value to set `edit-indirect--overlay' to."
 (with-no-warnings
   (add-minor-mode
    'edit-indirect--overlay " indirect" edit-indirect-mode-map nil #'ignore))
+
+(defun edit-indirect--display-buffer (buffer)
+  "Display the given BUFFER in some window and select it."
+  (with-current-buffer buffer
+    (setq-local edit-indirect--should-quit-window t))
+  (select-window (display-buffer buffer))
+  nil)
 
 (defun edit-indirect--get-edit-indirect-buffer (beg end)
   "Return an edit-indirect buffer for the region BEG..END.
@@ -281,6 +305,7 @@ VARIABLE shall be a symbol."
 
 BEG..END is the parent buffer region to insert.
 OVERLAY is the overlay, see `edit-indirect--overlay'."
+  (add-hook 'after-change-major-mode-hook #'edit-indirect--rebind-save-hooks)
   (let ((buffer (generate-new-buffer (format "*edit-indirect %s*" (buffer-name))))
         (parent-buffer (current-buffer)))
     (overlay-put overlay 'edit-indirect-buffer buffer)
@@ -316,6 +341,7 @@ BEG and END specify the region the overlay should encompass."
     (overlay-put overlay 'face 'edit-indirect-edited-region)
     (overlay-put overlay 'modification-hooks '(edit-indirect--barf-read-only))
     (overlay-put overlay 'insert-in-front-hooks '(edit-indirect--barf-read-only))
+    (overlay-put overlay 'keymap edit-indirect-overlay-map)
     overlay))
 
 (defvar edit-indirect--inhibit-read-only nil
@@ -351,7 +377,8 @@ No error is signaled if `inhibit-read-only' or
           (edit-indirect--run-hook-with-positions
            'edit-indirect-after-commit-functions beg-marker (point))
           (set-marker beg-marker nil)
-          (set-marker end-marker nil))))))
+          (set-marker end-marker nil))))
+    (set-buffer-modified-p nil)))
 
 (defun edit-indirect--run-hook-with-positions (hook beg end)
   "Run HOOK with the specified positions BEG and END.
@@ -383,6 +410,19 @@ called with updated positions."
   (if edit-indirect--should-quit-window
       (quit-window t)
     (kill-buffer)))
+
+(defun edit-indirect--rebind-save-hooks ()
+  "Bind our `save-buffer' hooks in the current buffer.
+Does nothing if the current buffer is not an edit-indirect buffer."
+  (when (edit-indirect-buffer-indirect-p)
+    (setq buffer-offer-save t)
+    (add-hook 'write-contents-functions #'edit-indirect--commit-on-save nil t)))
+
+(defun edit-indirect--commit-on-save ()
+  "Commit the indirect edit.
+Should only be called from `write-contents-functions'."
+  (edit-indirect--commit)
+  t)
 
 (defun edit-indirect--abort-on-kill-buffer ()
   "Abort indirect edit.
