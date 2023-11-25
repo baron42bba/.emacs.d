@@ -7,8 +7,7 @@
 ;; Keywords: literate programming, interactive shell, tmux
 ;; URL: https://github.com/ahendriksen/ob-tmux
 ;; Version: 0.1.5
-;; Package-Version: 20190708.1202
-;; Package-X-Original-version: 0.1.5
+;; Package-version: 0.1.5
 ;; Package-Requires: ((emacs "25.1") (seq "2.3") (s "1.9.0"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -93,6 +92,9 @@ Argument PARAMS the org parameters of the code block."
   (save-window-excursion
     (let* ((org-session (cdr (assq :session params)))
 	   (org-header-terminal (cdr (assq :terminal params)))
+	   (vars (mapcar
+                  (lambda (y) (format "%s=\"%s\"" (cadr y) (cddr y)))
+                  (seq-filter (lambda (x) (eq :var (car x))) params)))
 	   (terminal (or org-header-terminal org-babel-tmux-terminal))
 	   (socket (cdr (assq :socket params)))
 	   (socket (when socket (expand-file-name socket)))
@@ -110,7 +112,7 @@ Argument PARAMS the org parameters of the code block."
       ;; Disable window renaming from within tmux
       (ob-tmux--disable-renaming ob-session)
       (ob-tmux--send-body
-       ob-session (org-babel-expand-body:generic body params))
+       ob-session (org-babel-expand-body:generic body params vars))
       ;; Warn that setting the terminal from the org source block
       ;; header arguments is going to be deprecated.
       (message "ob-tmux terminal: %s" org-header-terminal)
