@@ -1,4 +1,4 @@
-;;; keyfreq-autoloads.el --- automatically extracted autoloads
+;;; keyfreq-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -24,6 +24,20 @@ Keyfreq mode records number of times each command was
 called making it possible to access usage statistics through
 various keyfreq-* functions.
 
+This is a minor mode.  If called interactively, toggle the
+`Keyfreq mode' mode.  If the prefix argument is positive, enable
+the mode, and if it is zero or negative, disable the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `(default-value \\='keyfreq-mode)'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
 \(fn &optional ARG)" t nil)
 
 (defvar keyfreq-autosave-mode nil "\
@@ -41,14 +55,31 @@ Keyfreq Autosave mode automatically saves
 `keyfreq-table' every `keyfreq-autosave-timeout' seconds
 and when emacs is killed.
 
+This is a minor mode.  If called interactively, toggle the
+`Keyfreq-Autosave mode' mode.  If the prefix argument is
+positive, enable the mode, and if it is zero or negative, disable
+the mode.
+
+If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
+the mode if ARG is nil, omitted, or is a positive number.
+Disable the mode if ARG is a negative number.
+
+To check whether the minor mode is enabled in the current buffer,
+evaluate `(default-value \\='keyfreq-autosave-mode)'.
+
+The mode's hook is called both when the mode is enabled and when
+it is disabled.
+
 \(fn &optional ARG)" t nil)
 
 (autoload 'keyfreq-save-now "keyfreq" "\
-Save keyfreq data now.
+Save keyfreq data now." t nil)
 
-\(fn)" t nil)
+(register-definition-prefixes "keyfreq" '("keyfreq-"))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "keyfreq" '("keyfreq-")))
+;;;***
+
+;;;### (autoloads nil nil ("keyfreq-pkg.el") (0 0 0 0))
 
 ;;;***
 
