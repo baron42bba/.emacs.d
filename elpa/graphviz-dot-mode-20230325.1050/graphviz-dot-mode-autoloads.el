@@ -1,4 +1,4 @@
-;;; graphviz-dot-mode-autoloads.el --- automatically extracted autoloads
+;;; graphviz-dot-mode-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -6,32 +6,23 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
-;;;### (autoloads nil "company-graphviz-dot" "company-graphviz-dot.el"
-;;;;;;  (0 0 0 0))
-;;; Generated autoloads from company-graphviz-dot.el
-
-(autoload 'company-graphviz-dot-backend "company-graphviz-dot" "\
-Company backend for `graphviz-dot-mode'.
-In the signature, COMMAND, ARG and IGNORED are mandated by `company-mode'.
-
-\(fn COMMAND &optional ARG &rest IGNORED)" t nil)
-
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "company-graphviz-dot" '("company-g")))
-
-;;;***
-
 ;;;### (autoloads nil "graphviz-dot-mode" "graphviz-dot-mode.el"
 ;;;;;;  (0 0 0 0))
 ;;; Generated autoloads from graphviz-dot-mode.el
 
 (autoload 'graphviz-dot-mode "graphviz-dot-mode" "\
-Major mode for the dot language. \\<graphviz-dot-mode-map>
-TAB indents for graph lines.
+Major mode for the dot language.
 
-\\[graphviz-dot-indent-graph]	- Indentation function.
-\\[graphviz-dot-preview]	- Previews graph in a buffer.
-\\[graphviz-dot-view]	- Views graph in an external viewer.
-\\[graphviz-dot-indent-line]	- Indents current line of code.
+Functionallity specific to this mode:
+
+  `indent-for-tab-command'    \\[indent-for-tab-command]
+        Indents a single line.
+  `graphviz-dot-preview'      \\[graphviz-dot-preview]
+        Previews graph in a buffer.
+  `graphviz-dot-view'         \\[graphviz-dot-view]
+        Views graph in an external viewer.
+  `graphviz-dot-indent-line'  \\[graphviz-dot-indent-line]
+        Indents current line of code.
 
 Variables specific to this mode:
 
@@ -49,7 +40,12 @@ Variables specific to this mode:
 \(fn)" t nil)
 
 (autoload 'graphviz-dot-preview "graphviz-dot-mode" "\
-Compile the graph and preview it in an other buffer." t nil)
+Compile the graph between BEGIN and END and preview it in an other buffer.
+BEGIN (resp. END) is a number defaulting to `point-min' (resp. `point-max')
+representing the current buffer's point where the graph definition starts
+\(resp. stops).
+
+\(fn &optional BEGIN END)" t nil)
 
 (autoload 'graphviz-turn-on-live-preview "graphviz-dot-mode" "\
 Turn on live preview.
@@ -63,7 +59,7 @@ Saving the file will no longer also update the preview." t nil)
 
 (add-to-list 'auto-mode-alist '("\\.gv\\'" . graphviz-dot-mode))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "graphviz-dot-mode" '("dot-menu" "graphviz-")))
+(register-definition-prefixes "graphviz-dot-mode" '("dot-menu" "graphviz-"))
 
 ;;;***
 
