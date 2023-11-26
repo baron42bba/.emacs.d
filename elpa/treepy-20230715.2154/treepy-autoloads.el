@@ -1,4 +1,4 @@
-;;; treepy-autoloads.el --- automatically extracted autoloads
+;;; treepy-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -9,7 +9,11 @@
 ;;;### (autoloads nil "treepy" "treepy.el" (0 0 0 0))
 ;;; Generated autoloads from treepy.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "treepy" '("treepy-")))
+(register-definition-prefixes "treepy" '("treepy-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("treepy-pkg.el") (0 0 0 0))
 
 ;;;***
 
