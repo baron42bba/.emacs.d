@@ -1,4 +1,4 @@
-;;; sicp-autoloads.el --- automatically extracted autoloads
+;;; sicp-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
