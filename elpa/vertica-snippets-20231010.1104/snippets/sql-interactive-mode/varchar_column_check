@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: varchar_column_check
+# key: varchar_column_check
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+\t
+SELECT 'SELECT columnname, MAX(MAX), SUM(data_type_length) AS data_type_length FROM (' AS query FROM dual
+UNION ALL
+SELECT 'SELECT ''' || COLUMN_NAME || ''' AS columnname, MAX(CHAR_LENGTH(' || COLUMN_NAME || ')), NULL AS data_type_length FROM $1.$2 UNION' AS query
+FROM v_catalog.columns
+WHERE table_schema = '$1'
+  AND TABLE_NAME = '$2'
+  AND data_type LIKE 'varchar%'
+  UNION ALL
+  SELECT 'SELECT COLUMN_NAME AS columnname, NULL AS MAX, data_type_length FROM v_catalog.columns WHERE table_schema = ''$1'' AND TABLE_NAME = ''$2'' AND data_type LIKE ''varchar%'' )a GROUP BY 1 ORDER BY 1;' AS query FROM dual;$0

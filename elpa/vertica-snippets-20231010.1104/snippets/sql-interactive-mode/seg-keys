@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: seg-keys
+# key: sk_
+# group: vertica
+# condition: (if (string-equal sql-product 'vertica)t)
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+#
+# https://www.vertica.com/blog/determining-candidate-segmentation-keys-quick-tip/
+#
+# --
+SELECT FLOOR(HASH(${1:Candidate-Keys-Separated-by-Comma})/((9223372036854775807/${2:Cluster-Node-Count}) + 1)) AS Node,
+       COUNT(*) AS row_count
+  FROM ${3:Table-Schema.Table-Name}
+ GROUP BY 1
+ ORDER BY 1;$0

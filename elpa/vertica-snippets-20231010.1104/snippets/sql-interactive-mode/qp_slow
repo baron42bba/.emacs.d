@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: qp_slow
+# key: qp_slow
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# https://www.vertica.com/kb/System-Tables-For-Performance/Content/BestPractices/System-Tables-For-Performance.htm
+# --
+SELECT DATE_TRUNC('second',query_start::TIMESTAMP),
+       session_id,
+       transaction_id,
+       statement_id,
+       node_name,
+       LEFT(query,100),
+       ROUND((query_duration_us/1000000)::NUMERIC(10,3),3) duration_sec
+  FROM query_profiles
+ WHERE query ILIKE '%$1%'
+   AND query_start BETWEEN TIMESTAMPADD( HOUR, -4, STATEMENT_TIMESTAMP())::VARCHAR AND STATEMENT_TIMESTAMP()::VARCHAR
+ ORDER BY duration_sec DESC;$0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dc_refresh_columns
+# key: dc_refresh_columns
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT * FROM dc_refresh_columns where tablenames='$1' ORDER BY time DESC LIMIT 2;$0

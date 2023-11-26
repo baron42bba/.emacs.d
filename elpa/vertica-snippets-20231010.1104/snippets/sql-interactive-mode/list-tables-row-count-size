@@ -6,8 +6,8 @@
 # --
 SELECT tbl.table_schema AS "Schema Name",
        tbl.table_name AS "Table Name",
-       to_char(sum(prs.ros_row_count)/count(DISTINCT prs.projection_name), '999G999G999G999') AS "No Of Rows",
-       to_char(sum(prs.ros_used_bytes)/count(DISTINCT prs.projection_name), '999G999G999G999G999') AS "Size In Bytes"
+       to_char(sum(prs.row_count)/count(DISTINCT prs.projection_name), '999G999G999G999') AS "No Of Rows",
+       to_char(sum(prs.used_bytes)/count(DISTINCT prs.projection_name), '999G999G999G999G999') AS "Size In Bytes"
 FROM TABLES tbl
 JOIN projections prj ON tbl.table_id = prj.anchor_table_id
 JOIN projection_storage prs ON prj.projection_name = prs.projection_name
