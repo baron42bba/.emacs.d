@@ -1,4 +1,4 @@
-;;; ox-clip-autoloads.el --- automatically extracted autoloads
+;;; ox-clip-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -24,7 +24,11 @@ images. Currently only works on Linux.
 
 \(fn &optional SCALE)" t nil)
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "ox-clip" '("ox-clip-")))
+(register-definition-prefixes "ox-clip" '("ox-clip-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("ox-clip-pkg.el") (0 0 0 0))
 
 ;;;***
 

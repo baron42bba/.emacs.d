@@ -1,10 +1,10 @@
+
 ;;; ox-clip.el --- Cross-platform formatted copying for org-mode
 
-;; Copyright(C) 2016 John Kitchin
+;; Copyright(C) 2016-2021 John Kitchin
 
 ;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
 ;; URL: https://github.com/jkitchin/ox-clip
-;; Package-Version: 20191122.237
 ;; Version: 0.3
 ;; Keywords: org-mode
 ;; Package-Requires: ((org "8.2") (htmlize "0"))
@@ -66,19 +66,26 @@
 	   "html-clip-w32.py"
 	   (file-name-directory (or load-file-name (locate-library "ox-clip")))))
   "Absolute path to html-clip-w32.py."
-  :group 'ox-clip)
+  :group 'ox-clip
+  :type 'string)
 
 
 (defcustom ox-clip-osx-cmd
   "textutil -inputencoding UTF-8 -stdin -format html -convert rtf -stdout | pbcopy"
   "Command to copy formatted text on osX."
-  :group 'ox-clip)
+  ;; This may work better on Chrome and Slack
+  ;; "hexdump -ve '1/1 \"%.2x\"' | xargs printf \"set the clipboard to {text:\\\" \\\", «class HTML»:«data HTML%s»}\" | osascript -"
+  :group 'ox-clip
+  :type 'string)
 
 
 (defcustom ox-clip-linux-cmd
-  "xclip -verbose -i /tmp/ox-clip-org.html -t text/html -selection clipboard"
-  "Command to copy formatted text on linux."
-  :group 'ox-clip)
+  "xclip -verbose -i \"%f\" -t text/html -selection clipboard"
+  "Command to copy formatted text on linux.
+You must include %f. It will be converted to a generated
+temporary filename later."
+  :group 'ox-clip
+  :type 'string)
 
 (defvar ox-clip-w32-py "#!/usr/bin/env python
 # Adapted from http://code.activestate.com/recipes/474121-getting-html-from-the-windows-clipboard/
@@ -353,9 +360,10 @@ if __name__ == '__main__':
   "Windows Python Script for copying formatted text.")
 
 (defcustom ox-clip-default-latex-scale 3
-  "Default scale to use in `org-format-latex-options' when
-  creating preview images for copying."
-  :group 'ox-clip)
+  "Default scale to use in `org-format-latex-options'.
+Used when creating preview images for copying."
+  :group 'ox-clip
+  :type 'number)
 
 ;; Create the windows python script if needed.
 (when (and (eq system-type 'windows-nt)
@@ -394,11 +402,14 @@ R1 and R2 define the selected region."
                ox-clip-osx-cmd)))
            ((eq system-type 'gnu/linux)
             ;; For some reason shell-command on region does not work with xclip.
-            (with-temp-file "/tmp/ox-clip-org.html"
-              (insert (with-current-buffer buf (buffer-string))))
-            (apply
-             'start-process "ox-clip" "*ox-clip*"
-             (split-string ox-clip-linux-cmd " "))))
+	    (let* ((tmpfile (make-temp-file "ox-clip-" nil ".html"
+					    (with-current-buffer buf (buffer-string))))
+		   (proc (apply
+			  'start-process "ox-clip" "*ox-clip*"
+			  (split-string-and-unquote
+			   (format-spec ox-clip-linux-cmd
+					`((?f . ,tmpfile))) " "))))
+	      (set-process-query-on-exit-flag proc nil))))
           (kill-buffer buf)))
     ;; Use htmlize when not in org-mode.
     (let ((html (htmlize-region-for-paste r1 r2)))
@@ -418,14 +429,20 @@ R1 and R2 define the selected region."
            (point-max)
            ox-clip-osx-cmd)))
        ((eq system-type 'gnu/linux)
-        (with-temp-file "/tmp/ox-clip-org.html"
-          (insert html))
-        (apply
-         'start-process "ox-clip" "*ox-clip*"
-         (split-string ox-clip-linux-cmd " ")))))))
+	(let* ((tmpfile (make-temp-file "ox-clip-" nil ".html" html))
+	       (proc (apply
+		      'start-process "ox-clip" "*ox-clip*"
+		      (split-string-and-unquote
+		       (format-spec ox-clip-linux-cmd
+				    `((?f . ,tmpfile))) " "))))
+	  (set-process-query-on-exit-flag proc nil)))))))
 
 
 ;; * copy images / latex fragments to the clipboard
+(defun ox-clip-ov-at ()
+  "Get overlay at point.  A helper to avoid dependency on ov.el."
+  (car (overlays-at (point))))
+
 ;;;###autoload
 (defun ox-clip-image-to-clipboard (&optional scale)
   "Copy the image file or latex fragment at point to the clipboard as an image.
@@ -438,17 +455,17 @@ images. Currently only works on Linux."
 	 (image-file (cond
 		      ;; on a latex fragment
 		      ((eq 'latex-fragment (org-element-type el))
-		       (when (ov-at) (org-toggle-latex-fragment))
+		       (when (ox-clip-ov-at) (org-latex-preview))
 
 		       ;; should be no image, so we rebuild one
 		       (let ((current-scale (plist-get org-format-latex-options :scale))
 			     ov display file relfile)
 			 (plist-put org-format-latex-options :scale
 				    (or scale ox-clip-default-latex-scale))
-			 (org-toggle-latex-fragment)
+			 (org-latex-preview)
 			 (plist-put org-format-latex-options :scale current-scale)
 
-			 (setq ov (ov-at)
+			 (setq ov (ox-clip-ov-at)
 			       display (overlay-get ov 'display)
 			       file (plist-get (cdr display) :file))
 			 (file-relative-name file)))
@@ -458,14 +475,20 @@ images. Currently only works on Linux."
 			    (string-match (cdr (assoc "file" org-html-inline-image-rules))
 					  (org-element-property :path el)))
 		       (file-relative-name (org-element-property :path el)))
-		      ;; at an overlay with a display that is an image
-		      ((and (ov-at)
-			    (overlay-get (ov-at) 'display)
-			    (plist-get (cdr (overlay-get (ov-at) 'display)) :file)
+		      ;; At a link of an image (which is an attachment)
+		      ((and (eq 'link (org-element-type el))
+			    (string= "attachment" (org-element-property :type el))
 			    (string-match (cdr (assoc "file" org-html-inline-image-rules))
-					  (plist-get (cdr (overlay-get (ov-at) 'display))
+					  (org-element-property :path el)))
+		       (file-relative-name (org-attach-expand (org-element-property :path el))))
+		      ;; at an overlay with a display that is an image
+		      ((and (ox-clip-ov-at)
+			    (overlay-get (ox-clip-ov-at) 'display)
+			    (plist-get (cdr (overlay-get (ox-clip-ov-at) 'display)) :file)
+			    (string-match (cdr (assoc "file" org-html-inline-image-rules))
+					  (plist-get (cdr (overlay-get (ox-clip-ov-at) 'display))
 						     :file)))
-		       (file-relative-name (plist-get (cdr (overlay-get (ov-at) 'display))
+		       (file-relative-name (plist-get (cdr (overlay-get (ox-clip-ov-at) 'display))
 						      :file)))
 		      ;; not sure what else we can do here.
 		      (t
