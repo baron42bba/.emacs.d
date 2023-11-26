@@ -20,6 +20,19 @@ With [[https://github.com/fniessen/org-html-themes.git][org html themes]] it's e
              (define-key org-mode-map (kbd "C-c g") 'org-mac-link-get-link)))
 #+END_SRC
 
+#+begin_src emacs-lisp
+  (defun bba-jira-safari-get-ticket ()
+    (interactive)
+      "fetch ticket id and description from open Jira page in Safari."
+    (let* ((safari (replace-regexp-in-string "\\[\\[\\(.*\\)\\]\\[\\(.*\\)\\]\\]" "\\2" (org-mac-link-safari-get-frontmost-url)))
+           (ticket (replace-regexp-in-string "\\[\\(.*\\)\\] .*" "\\1" safari))
+           (description (replace-regexp-in-string "\\[.*\\] \\(.*\\)" "\\1" safari))
+
+                  )
+      (insert "[[jira:" ticket "]] " description)))
+  (global-set-key (kbd "<f9> J") 'bba-jira-safari-get-ticket)
+#+end_src
+
 ** org-eldoc
 [2017-01-06 Fri 14:23]
 
@@ -34,7 +47,7 @@ Some extra functionality from the org package repository.
 #+BEGIN_SRC emacs-lisp :tangle no
     (if (>= emacs-major-version 24)
         (progn
-          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20191028" t)
+          (add-to-list 'load-path "~/.emacs.d/elpa/org-plus-contrib-20200127" t)
           ))
 
 #+END_SRC
@@ -637,6 +650,7 @@ Your notes are more useful if you can easily search them!
      (perl . t)
      (sql . t)
      (tmux . sh)
+     (cfengine3 . t)
      ))
 
   ;;(setq org-html-preamble nil
@@ -1051,6 +1065,22 @@ Still some work to do on the shell counterpart.
           (delete-process process)))))
 #+END_SRC
 
+** org-babel ansi
+[2023-05-19 Fri 12:17]
+
+#+begin_src emacs-lisp
+  (require 'ansi-color)
+  (defun bba-babel-ansi ()
+    (when-let ((beg (org-babel-where-is-src-block-result nil nil)))
+      (save-excursion
+        (goto-char beg)
+        (when (looking-at org-babel-result-regexp)
+          (let ((end (org-babel-result-end))
+                (ansi-color-context-region nil))
+            (ansi-color-apply-on-region beg end))))))
+  (add-hook 'org-babel-after-execute-hook 'bba-babel-ansi)
+#+end_src
+
 ** tmux capture-pane
 [2016-10-08 Sat 13:43]
 
@@ -1159,6 +1189,16 @@ and call this function.
   )
 #+END_SRC
 
+** insert org header
+[2023-09-07 Thu 14:37]
+
+#+begin_src emacs-lisp
+  (defun bba-insert-org-heading()
+      "insert current heading at point."
+    (interactive)
+    (insert (nth 4 (org-heading-components))))
+  (define-key global-map (kbd "s-o") 'bba-insert-org-heading)
+#+end_src
 ** Define some shortcuts to access major org files.
 
 #+BEGIN_SRC emacs-lisp
@@ -1692,10 +1732,13 @@ current ticket number.
     "Assume we are clocked into a ticket.
   Insert ticket number at point."
     (interactive)
-    (insert (first (s-split " " (car (last (split-string org-clock-heading ":"))))))
-    )
+    (insert (car (last (split-string (car (split-string org-clock-heading " ")) ":")))))
 
   (global-set-key (kbd "<f9> j") 'bba-insert-ticketnumber)
+#+end_src
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "<f9> <f9>") 'org-clock-goto)
 #+end_src
 
 ** clocktable
@@ -1806,7 +1849,7 @@ Use =C-c M= to send a multipart email with .org as text and exported
 html.
 
 #+BEGIN_SRC emacs-lisp
-  (load-file "~/.emacs.d/elpa/org-mime-20191226.2309/org-mime.el")
+  (load-file "~/.emacs.d/elpa/org-mime-20230321.2341/org-mime.el")
   (add-hook 'org-mode-hook
             (lambda()
               (define-key org-mode-map "\C-c\S-m" 'org-mime-org-buffer-htmlize)))
@@ -1904,7 +1947,7 @@ file.
 [2017-04-26 Wed 13:09]
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20191117.549" t)
+  (add-to-list 'load-path "~/.emacs.d/elpa/org-sticky-header-20201223.143" t)
   (add-hook 'org-mode-hook
 	      (lambda ()(org-sticky-header-mode 1))
 	    )
