@@ -596,7 +596,7 @@ From http://emacswiki.org/emacs/Yasnippet
           "Use helm to select a snippet. Put this into `yas/prompt-functions.'"
           (interactive)
           (setq display-fn (or display-fn 'identity))
-          (if (require 'helm-config)
+          (if (require 'helm-misc)
               (let (tmpsource cands result rmap)
                 (setq cands (mapcar (lambda (x) (funcall display-fn x)) choices))
                 (setq rmap (mapcar (lambda (x) (cons (funcall display-fn x) x)) choices))
@@ -707,6 +707,17 @@ SQL:
 
 #+begin_src sh :tangle never
   gem install --user-install sqlint
+#+end_src
+
+#+begin_src sh :eval never
+  sudo port install mmark
+#+end_src
+
+#+begin_src emacs-lisp
+  (eval-after-load 'flycheck
+    '(add-hook 'flycheck-mode-hook #'flycheck-mmark-setup))
+  (eval-after-load 'markdown
+    '(add-hook 'markdown-mode-hook #'flycheck-mode))
 #+end_src
 
 * [[https://github.com/kai2nenobu/guide-key][guide-key]]
@@ -1232,7 +1243,7 @@ cpan only has Version 2.0.2.
 thus installed via github.
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (require 'lsp-mode)
   (require 'lsp-ui)
   (setq lsp-keymap-prefix "s-l")
@@ -2153,56 +2164,55 @@ the clipboard content before executing it.
 With some code from http://howardism.org/Technical/Emacs/beep-for-emacs.html
 
 #+begin_src emacs-lisp
-  (require 'log4e)
-  (require 'alert)
+  (if (string-equal system-type "darwin")
+      (progn
+        (require 'log4e)
+        (require 'alert)
 
-  (setq alert-default-style 'osx-notifier)
+        (setq alert-default-style 'osx-notifier)
 
-  (defvar beep-speech-executable "say %s"
-    "An OS-dependent shell string to speak. Replaces `%s' with a phrase.")
+        (defvar beep-speech-executable "say %s"
+          "An OS-dependent shell string to speak. Replaces `%s' with a phrase.")
 
-  (defvar beep-alert-sound-file
-    (expand-file-name "/System/Library/Sounds/Submarine.aiff")
-    "A WAV or AU file used at the completion of a function.")
+        (defvar beep-alert-sound-file
+          (expand-file-name "/System/Library/Sounds/Submarine.aiff")
+          "A WAV or AU file used at the completion of a function.")
 
-  (defun beep--beep ()
-    "Play a default notification sound file.
+        (defun beep--beep ()
+          "Play a default notification sound file.
   Customize the variable, `beep-alert-sound-file' to adjust the sound."
-    (play-sound-file beep-alert-sound-file))
+          (play-sound-file beep-alert-sound-file))
 
-  (defun beep--speak (phrase)
-    "Call a program to speak the string, PHRASE.
+        (defun beep--speak (phrase)
+          "Call a program to speak the string, PHRASE.
   Customize the variable, `beep-speech-executable'."
-    (let ((command (format beep-speech-executable phrase))
-          (inhibit-message t))
-      (shell-command command)))
+          (let ((command (format beep-speech-executable phrase))
+                (inhibit-message t))
+            (shell-command command)))
 
-  (defun beep--when-finished (phrase)
-    "Notify us with string, PHRASE, to grab our attention.
+        (defun beep--when-finished (phrase)
+          "Notify us with string, PHRASE, to grab our attention.
   Useful after a long process has completed, but use sparingly,
   as this can be pretty distracting."
-    (message phrase)
-    (alert phrase :title "Completed")
-    (beep--beep)
-    (beep--speak phrase))
+          (message phrase)
+          (alert phrase :title "Completed")
+          (beep--beep)
+          (beep--speak phrase))
 
-  (defun bba-notify-hook(beg end _)
-    "notify after changes and remove hook."
-    (beep--when-finished "The command has completed")
-    (remove-hook 'after-change-functions 'bba-notify-hook t)
-   )
+        (defun bba-notify-hook(beg end _)
+          "notify after changes and remove hook."
+          (beep--when-finished "The command has completed")
+          (remove-hook 'after-change-functions 'bba-notify-hook t)
+          )
 
-  (defun bba-add-notify-hook()
-    "add notify hook."
-    (interactive)
-    (if (buffer-file-name)
-        (save-buffer)
-      (set-buffer-modified-p nil)) ;; set buffer as unmodified
-    (make-local-variable 'after-change-functions)
-    (add-hook 'after-change-functions 'bba-notify-hook nil t)
-    )
-
-
+        (defun bba-add-notify-hook()
+          "add notify hook."
+          (interactive)
+          (if (buffer-file-name)
+              (save-buffer)
+            (set-buffer-modified-p nil)) ;; set buffer as unmodified
+          (make-local-variable 'after-change-functions)
+          (add-hook 'after-change-functions 'bba-notify-hook nil t))))
 #+end_src
 
 * bba lookup dictionary
@@ -2319,9 +2329,9 @@ If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20211020.354" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/ggtags-20230602.133" t)
         (require 'ggtags)
-        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20170116.529" t)
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-gtags-20200602.1610" t)
         (require 'helm-gtags)
         (add-hook 'puppet-mode-hook
                   (lambda()
@@ -2355,7 +2365,7 @@ Some links you might check out:
   (if (>= emacs-major-version 24)
       (progn
 	(add-to-list 'load-path
-                     "~/.emacs.d/elpa/helm-20220616.1004")
+                     "~/.emacs.d/elpa/helm-20230719.1306")
 	(require 'helm)
 	(helm-mode 1)
 	(global-set-key (kbd "M-y") 'helm-show-kill-ring)
@@ -2402,7 +2412,7 @@ Some links you might check out:
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20180429.1456")
+        (add-to-list 'load-path "~/.emacs.d/elpa/helm-descbinds-20190501.935")
         (require 'helm-descbinds)
         (define-key global-map (kbd "C-h b") 'helm-descbinds)
         )
