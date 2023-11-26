@@ -1,4 +1,4 @@
-;;; parsebib-autoloads.el --- automatically extracted autoloads
+;;; parsebib-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -9,7 +9,11 @@
 ;;;### (autoloads nil "parsebib" "parsebib.el" (0 0 0 0))
 ;;; Generated autoloads from parsebib.el
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "parsebib" '("parsebib-")))
+(register-definition-prefixes "parsebib" '("parsebib-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("parsebib-pkg.el") (0 0 0 0))
 
 ;;;***
 
