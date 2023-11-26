@@ -11,8 +11,10 @@
  '(aws-snippets-regions '("us-east-1" "eu-west-1" "ap-southeast-1" "cn-north-1"))
  '(bmkp-last-as-first-bookmark-file "~/workorg/bookmarks")
  '(cfengine-parameters-indent '(promise pname 2))
+ '(custom-enabled-themes '(bba1))
  '(custom-safe-themes
-   '("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" default))
+   '("8c6bc3959bb049983f4c76b1a0b78a3a28629370558e1d7bd45d7b54bf671a88" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" default))
+ '(custom-theme-directory "~/.emacs.d/themes/")
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(grep-template "grep -i <X> <C> -nH -e <R> <F>")
  '(helm-comint-mode-list '(comint-mode slime-repl-mode sql-interactive-mode))
