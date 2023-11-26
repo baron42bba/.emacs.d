@@ -436,7 +436,7 @@ is used as MAJOR-MODE-SYMBOL argument."
 
 (defun keyfreq-file-owner ()
   "Return the PID of the Emacs process that owns the table file lock file."
-  (let (owner)
+  (let ((owner))
     (and (file-exists-p keyfreq-file-lock)
 	 (ignore-errors
 	   (with-temp-buffer
@@ -480,7 +480,7 @@ does nothing if the table cannot be saved."
 
   ;; Avoid adding nothing to the file
   (if (> (hash-table-count table) 0)
-    (let (done)
+    (let ((done))
       ;; Check that the lock file doesn't exist
       (while (not done)
 	(when (keyfreq-file-is-unlocked)

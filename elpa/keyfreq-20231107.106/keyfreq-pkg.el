@@ -1,6 +1,6 @@
-(define-package "keyfreq" "20220607.1613" "track command frequencies"
+(define-package "keyfreq" "20231107.106" "track command frequencies"
   '((cl-lib "0.5"))
-  :commit "dd88193cd7a91a92113121191573758ea2a3ceb1" :authors
+  :commit "c6955162307f37c2ac631d9daf118781009f8dda" :authors
   '(("Ryan Yeske, Michal Nazarewicz (mina86/AT/mina86.com)"))
   :maintainers
   '(("David Capello, Xah lee"))
