@@ -308,7 +308,7 @@ contextual information."
          (tag (let ((tag (org-element-property :tag item)))
                 (when tag
                   (org-export-data tag info))))
-         (checkbox (case (org-element-property :checkbox item)
+         (checkbox (cl-case (org-element-property :checkbox item)
                      (on "(/)")
                      (off "(x)")
                      (trans "(i)"))))
