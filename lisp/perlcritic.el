@@ -418,7 +418,7 @@ warnings those are displayed in a separate buffer."
           (err-buf (get-buffer-create "*perlcritic*")))
 
       (set-buffer src-buf)
-      (let ((perlcritic-args (loop for p in (list
+      (let ((perlcritic-args (cl-loop for p in (list
                                              ;; Add new bin/perlcritic
                                              ;; parameters here!
 					     (perlcritic--param-profile)
