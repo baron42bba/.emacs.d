@@ -1,4 +1,4 @@
-;;; neotree-autoloads.el --- automatically extracted autoloads
+;;; neotree-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -22,24 +22,16 @@ Usage:
     (setq projectile-switch-project-action 'neotree-projectile-action).
 
 When running `projectile-switch-project' (C-c p p), `neotree' will change root
-automatically.
-
-\(fn)" t nil)
+automatically." t nil)
 
 (autoload 'neotree-toggle "neotree" "\
-Toggle show the NeoTree window.
-
-\(fn)" t nil)
+Toggle show the NeoTree window." t nil)
 
 (autoload 'neotree-show "neotree" "\
-Show the NeoTree window.
-
-\(fn)" t nil)
+Show the NeoTree window." t nil)
 
 (autoload 'neotree-hide "neotree" "\
-Close the NeoTree window.
-
-\(fn)" t nil)
+Close the NeoTree window." t nil)
 
 (autoload 'neotree-dir "neotree" "\
 Show the NeoTree window, and change root to PATH.
@@ -49,7 +41,7 @@ Show the NeoTree window, and change root to PATH.
 (defalias 'neotree 'neotree-show "\
 Show the NeoTree window.")
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "neotree" '("neo" "off-p")))
+(register-definition-prefixes "neotree" '("neo" "off-p"))
 
 ;;;***
 
