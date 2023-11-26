@@ -1,10 +1,10 @@
 ;;; rainbow-mode.el --- Colorize color names in buffers
 
-;; Copyright (C) 2010-2018 Free Software Foundation, Inc
+;; Copyright (C) 2010-2020 Free Software Foundation, Inc
 
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: faces
-;; Version: 1.0.1
+;; Version: 1.0.6
 
 ;; This file is part of GNU Emacs.
 
@@ -29,9 +29,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
-
+(require 'cl-lib)
 (require 'regexp-opt)
 (require 'faces)
 (require 'color)
@@ -47,9 +45,9 @@
 ;;; Hexadecimal colors
 
 (defvar rainbow-hexadecimal-colors-font-lock-keywords
-  '(("[^&]\\(#\\(?:[0-9a-fA-F]\\{3\\}\\)+\\{1,4\\}\\)"
+  '(("[^&]\\(#\\(?:[0-9a-fA-F]\\{3\\}\\)\\{1,4\\}\\)\\b"
      (1 (rainbow-colorize-itself 1)))
-    ("^\\(#\\(?:[0-9a-fA-F]\\{3\\}\\)+\\{1,4\\}\\)"
+    ("^\\(#\\(?:[0-9a-fA-F]\\{3\\}\\)\\{1,4\\}\\)\\b"
      (0 (rainbow-colorize-itself)))
     ("[Rr][Gg][Bb]:[0-9a-fA-F]\\{1,4\\}/[0-9a-fA-F]\\{1,4\\}/[0-9a-fA-F]\\{1,4\\}"
      (0 (rainbow-colorize-itself)))
@@ -1060,7 +1058,7 @@ If the percentage value is above 100, it's converted to 100."
         (s (/ (string-to-number (match-string-no-properties 2)) 100.0))
         (l (/ (string-to-number (match-string-no-properties 3)) 100.0)))
     (rainbow-colorize-match
-     (multiple-value-bind (r g b)
+     (cl-destructuring-bind (r g b)
          (color-hsl-to-rgb h s l)
        (format "#%02X%02X%02X" (* r 255) (* g 255) (* b 255))))))
 
@@ -1116,12 +1114,12 @@ If the percentage value is above 100, it's converted to 100."
       (rainbow-colorize-match color))))
 
 (defun rainbow-color-luminance (red green blue)
-  "Calculate the luminance of color composed of RED, GREEN and BLUE.
+  "Calculate the relative luminance of color composed of RED, GREEN and BLUE.
 Return a value between 0 and 1."
-  (/ (+ (* .2126 red) (* .7152 green) (* .0722 blue)) 256))
+  (/ (+ (* .2126 red) (* .7152 green) (* .0722 blue)) 255))
 
 (defun rainbow-x-color-luminance (color)
-  "Calculate the luminance of a color string (e.g. \"#ffaa00\", \"blue\").
+  "Calculate the relative luminance of a color string (e.g. \"#ffaa00\", \"blue\").
 Return a value between 0 and 1."
   (let* ((values (x-color-values color))
          (r (/ (car values) 256.0))
@@ -1132,7 +1130,7 @@ Return a value between 0 and 1."
 ;;; Mode
 
 (defun rainbow-turn-on ()
-  "Turn on raibow-mode."
+  "Turn on rainbow-mode."
   (font-lock-add-keywords nil
                           rainbow-hexadecimal-colors-font-lock-keywords
                           t)
@@ -1190,129 +1188,27 @@ Return a value between 0 and 1."
      ,@rainbow-html-colors-font-lock-keywords
      ,@rainbow-html-rgb-colors-font-lock-keywords)))
 
+(defvar rainbow-keywords-hook nil
+  "Hook used to add additional font-lock keywords.
+This hook is called by `rainbow-mode' before it re-enables
+`font-lock-mode'.  Hook functions must only add additional
+keywords when `rainbow-mode' is non-nil.  When that is nil,
+then they must remove those additional keywords again.")
+
 ;;;###autoload
 (define-minor-mode rainbow-mode
   "Colorize strings that represent colors.
 This will fontify with colors the string like \"#aabbcc\" or \"blue\"."
   :lighter " Rbow"
-  (progn
-    (if rainbow-mode
-        (rainbow-turn-on)
-      (rainbow-turn-off))
-    ;; Call font-lock-mode to refresh the buffer when used e.g. interactively
-    (font-lock-mode 1)))
-
-;;;; ChangeLog:
-
-;; 2018-05-21  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	* rainbow-mode/rainbow-mode.el: do not fail if face-property is a symbol
-;; 
-;; 	It turns out there are cases when `face-property' can be just a symbol
-;; 	and we need to protect our selves from that, i.e. `car' should not fail.
-;; 	Hence,
-;; 	`car-safe' is there and if it's `nil', then fall back to `face-property'
-;; 	as is.
-;; 
-;; 	See https://github.com/tarsius/hl-todo/issues/17
-;; 
-;; 2018-03-26  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: release 1.0
-;; 
-;; 2018-03-26  Jonas Bernoulli  <jonas@bernoul.li>
-;; 
-;; 	Allow outline-minor-mode to find section headings
-;; 
-;; 2018-03-26  Jonas Bernoulli  <jonas@bernoul.li>
-;; 
-;; 	Set type of customizable options
-;; 
-;; 2018-03-26  Jonas Bernoulli  <jonas@bernoul.li>
-;; 
-;; 	Enforce use of spaces for indentation
-;; 
-;; 	Also untabify some code added by a contributor who, unlike you, has not
-;; 	globally set `indent-tabs-mode' to nil.
-;; 
-;; 2017-05-29  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	Fix `rainbow-color-luminance' docstring
-;; 
-;; 2015-10-12  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow: add font-lock at the end
-;; 
-;; 	See https://github.com/fxbois/web-mode/issues/612
-;; 
-;; 2015-03-06  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow: fix font-lock-mode refresh
-;; 
-;; 2014-10-15  Stefan Monnier  <monnier@iro.umontreal.ca>
-;; 
-;; 	* packages/rainbow-mode/rainbow-mode.el (ansi-color-context)
-;; 	(xterm-color-current): Declare.
-;; 
-;; 2014-09-07  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: support float in CSS and limit to 100%
-;; 
-;; 2013-08-05  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: 0.9, allow spaces in LaTeX colors
-;; 
-;; 2013-05-03  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: add support for R, bump version to 0.8
-;; 
-;; 	Signed-off-by: Julien Danjou <julien@danjou.info>
-;; 
-;; 2013-02-26  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: version 0.7
-;; 
-;; 	* rainbow-mode.el: don't activate font-lock-mode
-;; 
-;; 2012-12-11  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	* rainbow-mode: update to 0.6, add support for ANSI coloring
-;; 
-;; 2012-11-26  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: fix some LaTex docstrings
-;; 
-;; 2012-11-14  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: version 0.5
-;; 
-;; 	* rainbow-mode.el: fix syntax error on
-;; 	 `rainbow-hexadecimal-colors-font-lock-keywords'.
-;; 
-;; 2012-11-09  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode: version 0.4
-;; 
-;; 	* rainbow-mode.el: Use functions from color package to colorize HSL
-;; 	rather
-;; 	 than our own copy.
-;; 
-;; 2012-11-09  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	rainbow-mode 0.3
-;; 
-;; 	* rainbow-mode.el: avoid colorizing HTML entities
-;; 
-;; 2011-09-23  Julien Danjou  <julien@danjou.info>
-;; 
-;; 	Update rainbow-mode to version 0.2
-;; 
-;; 2011-07-01  Chong Yidong  <cyd@stupidchicken.com>
-;; 
-;; 	Give every package its own directory in packages/ including single-file
-;; 	packages.
-;; 
-
+  (if rainbow-mode
+      (rainbow-turn-on)
+    (rainbow-turn-off))
+  ;; We cannot use `rainbow-mode-hook' because this has
+  ;; to be done before `font-lock-mode' is re-enabled.
+  (run-hooks 'rainbow-keywords-hook)
+  ;; Call `font-lock-mode' to refresh the buffer when used
+  ;; e.g. interactively.
+  (font-lock-mode 1))
 
 (provide 'rainbow-mode)
 
