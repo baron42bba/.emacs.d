@@ -34,6 +34,10 @@ it is disabled.
 
 ;;;***
 
+;;;### (autoloads nil nil ("outline-minor-faces-pkg.el") (0 0 0 0))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
