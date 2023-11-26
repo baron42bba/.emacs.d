@@ -678,7 +678,7 @@ Probably the best help to keep track of the not every day used keybindings.
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20150315.1300")
+        (add-to-list 'load-path "~/.emacs.d/elpa/popwin-20210215.1849")
         (add-to-list 'load-path "~/.emacs.d/elpa/guide-key-20150108.635")
         (require 'guide-key)
         (setq guide-key/guide-key-sequence '("C-x" "C-x C-k" "C-x 4" "C-c" "C-h" "C-x l" "<ESC>" "<f9>" "s-l"))
