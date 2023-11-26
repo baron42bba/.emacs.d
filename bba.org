@@ -1809,6 +1809,12 @@ Bound to =C-X l !=
       (eshell-send-input)))
 #+END_SRC
 
+https://fuco1.github.io/2017-10-08-Using-bookmarks-with-eshell-and-docker-tramp.html
+
+#+begin_src emacs-lisp
+  (add-hook 'eshell-mode-hook 'eshell-bookmark-setup)
+#+end_src
+
 * [[http://stackoverflow.com/questions/3035337/in-emacs-can-you-evaluate-an-emacs-lisp-expression-and-replace-it-with-the-resul][eval emacs lisp expression and replace it]]
     [2014-11-02 Sun 18:21]
 
