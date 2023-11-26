@@ -521,7 +521,7 @@ snippets for =aws cli= are awesome!
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path
-               "~/.emacs.d/elpa/yasnippet-20191222.2206")
+               "~/.emacs.d/elpa/yasnippet-20230914.1400")
   (require 'yasnippet)
 
   (if (equal "work" (getenv "SYSENV"))
