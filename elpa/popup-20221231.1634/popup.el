@@ -1,12 +1,14 @@
 ;;; popup.el --- Visual Popup User Interface
 
 ;; Copyright (C) 2009-2015  Tomohiro Matsuyama
+;; Copyright (c) 2020-2023 Jen-Chieh Shen
 
 ;; Author: Tomohiro Matsuyama <m2ym.pub@gmail.com>
+;; Maintainer: Shen, Jen-Chieh <jcs090218@gmail.com>
+;; URL: https://github.com/auto-complete/popup-el
 ;; Keywords: lisp
-;; Package-Version: 20160709.1429
-;; Version: 0.5.3
-;; Package-Requires: ((cl-lib "0.5"))
+;; Version: 0.5.9
+;; Package-Requires: ((emacs "24.3"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,7 +25,7 @@
 
 ;;; Commentary:
 
-;; popup.el is a visual popup user interface library for Emacs. This
+;; popup.el is a visual popup user interface library for Emacs.  This
 ;; provides a basic API and common UI widgets such as popup tooltips
 ;; and popup menus.
 ;; See README.markdown for more information.
@@ -31,16 +33,17 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'mule)
 
-(defconst popup-version "0.5.3")
+(defconst popup-version "0.5.9")
 
 
 
 ;;; Utilities
 
 (defun popup-calculate-max-width (max-width)
-  "Determines whether the width desired is
-character or window proportion based, And returns the result."
+  "Determines whether the width with MAX-WIDTH desired is character or window
+proportion based, And return the result."
   (cl-typecase max-width
     (integer max-width)
     (float (* (ceiling (/ (round (* max-width (window-width))) 10.0)) 10))))
@@ -62,7 +65,7 @@ If there is a problem, please set it nil.")
      (when it ,@body)))
 
 (defun popup-x-to-string (x)
-  "Convert any object to string effeciently.
+  "Convert any object to string efficiently.
 This is faster than `prin1-to-string' in many cases."
   (cl-typecase x
     (string x)
@@ -151,6 +154,8 @@ untouched."
 
 (defun popup-vertical-motion (column direction)
   "A portable version of `vertical-motion'."
+  (when (bound-and-true-p display-line-numbers-mode)
+    (setq column (- column (line-number-display-width 'columns))))
   (if (>= emacs-major-version 23)
       (vertical-motion (cons column direction))
     (vertical-motion direction)
@@ -233,6 +238,21 @@ existed value with `nil' property."
 ITEM is not string."
   (if (stringp item)
       (get-text-property 0 property item)))
+
+(defun popup-replace-displayable (str &optional rep)
+  "Replace non-displayable character from STR.
+
+Optional argument REP is the replacement string of
+non-displayable character."
+  (let ((rep (or rep ""))
+        (results (list)))
+    (dolist (string (split-string str ""))
+      (let* ((char (string-to-char string))
+             (string (if (char-displayable-p char)
+                         string
+                       rep)))
+        (push string results)))
+    (string-join (reverse results))))
 
 (cl-defun popup-make-item (name
                            &key
@@ -437,7 +457,7 @@ usual."
   "Return a proper direction when displaying a popup on this
 window. HEIGHT is the a height of the popup, and ROW is a line
 number at the point."
-  (let* ((remaining-rows (- (max 1 (- (window-height)
+  (let* ((remaining-rows (- (max 1 (- (window-text-height)
                                       (if mode-line-format 1 0)
                                       (if header-line-format 1 0)))
                             (count-lines (window-start) (point))))
@@ -877,7 +897,7 @@ Pages up through POPUP."
 
 (defvar popup-isearch-keymap
   (let ((map (make-sparse-keymap)))
-    ;(define-key map "\r"        'popup-isearch-done)
+    ;;(define-key map "\r"        'popup-isearch-done)
     (define-key map "\C-g"      'popup-isearch-cancel)
     (define-key map "\C-b"      'popup-isearch-close)
     (define-key map [left]      'popup-isearch-close)
@@ -1032,6 +1052,8 @@ HELP-DELAY is a delay of displaying helps."
                      nowait
                      nostrip
                      prompt
+                     face
+                     &allow-other-keys
                      &aux tip lines)
   "Show a tooltip of STRING at POINT. This function is
 synchronized unless NOWAIT specified. Almost all arguments are
@@ -1045,13 +1067,17 @@ tooltip instance without entering event loop.
 
 If `NOSTRIP` is non-nil, `STRING` properties are not stripped.
 
-PROMPT is a prompt string when reading events during event loop."
+PROMPT is a prompt string when reading events during event loop.
+
+If FACE is non-nil, it will be used instead of face `popup-tip-face'."
   (if (bufferp string)
       (setq string (with-current-buffer string (buffer-string))))
 
   (unless nostrip
     ;; TODO strip text (mainly face) properties
     (setq string (substring-no-properties string)))
+
+  (setq string (popup-replace-displayable string))
 
   (and (eq margin t) (setq margin 1))
   (or margin-left (setq margin-left margin))
@@ -1068,7 +1094,7 @@ PROMPT is a prompt string when reading events during event loop."
                           :margin-left margin-left
                           :margin-right margin-right
                           :scroll-bar scroll-bar
-                          :face 'popup-tip-face
+                          :face (or face 'popup-tip-face)
                           :parent parent
                           :parent-offset parent-offset))
 
@@ -1329,6 +1355,7 @@ PROMPT is a prompt string when reading events during event loop."
                        (isearch-keymap popup-isearch-keymap)
                        isearch-callback
                        initial-index
+                       &allow-other-keys
                        &aux menu event)
   "Show a popup menu of LIST at POINT. This function returns a
 value of the selected item. Almost all arguments are the same as in
