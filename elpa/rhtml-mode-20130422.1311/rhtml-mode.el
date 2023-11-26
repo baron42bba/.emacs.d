@@ -81,14 +81,14 @@ will have a dash added. If MODE is `auto' or nil then ERb blocks which are
 followed by a newline will have a dash added while all other blocks will
 have the dash removed."
   (interactive "cDashize mode: s) strip, a) add, x) auto (default)")
-  (let ((real-mode (case mode
+  (let ((real-mode (cl-case mode
                      ((?s strip) 'strip)
                      ((?a add) 'add))))
     (mapc (lambda (i)
             (let ((end (nth 2 i)))
               (save-excursion
                 (goto-char (- end 2))
-                (case (or real-mode
+                (cl-case (or real-mode
                           (if (eq (char-after end) ?\n)
                               'add
                             'strip))

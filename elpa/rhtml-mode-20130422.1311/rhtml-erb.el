@@ -100,7 +100,7 @@ I don't think this has any restrictions.")
 
 (defun rhtml-erb-delim-type (start-delim)
   "Return `exec', `out', `comment' or nil dependin on the type of delimeter this is."
-  (flet ((match? (regex)
+  (cl-flet ((match? (regex)
                  (eq (string-match regex start-delim) 0)))
     (cond ((match? rhtml-erb-exec-tag-open-re)
            'exec)
@@ -241,7 +241,7 @@ If POINT is specified it will be used instead of (POINT)."
             (throw 'done regions))
           ;; erb tag
           (push (list
-                 (case (char-after (+ tag-start 2))
+                 (cl-case (char-after (+ tag-start 2))
                    (?= 'out) (?# 'comment) (t 'exec))
                  tag-start (point))
                 regions))))))
@@ -274,7 +274,7 @@ If POINT is specified it will be used instead of (POINT)."
 
           ;; erb tag
           (push (list
-                 (case (char-after (+ tag-start 2))
+                 (cl-case (char-after (+ tag-start 2))
                    (?= 'out) (?# 'comment) (t 'exec))
                  tag-start (point))
                 regions))))))

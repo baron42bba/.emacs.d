@@ -239,7 +239,7 @@ LCON is the lexical context, if any."
 	   (save-excursion (goto-char (cdr lcon)) (looking-at "<!--")))
       (setq lcon (cons 'comment (+ (cdr lcon) 2))))
 
-  (case (car lcon)
+  (cl-case (car lcon)
 
     (string
      ;; Go back to previous non-empty line.
@@ -412,7 +412,7 @@ Leave point at the beginning of the tag."
                 ;; /PST
 		(point)))
 	(goto-char (1+ tag-start))
-	(case (char-after)
+	(cl-case (char-after)
 	  (?!				; declaration
 	   (setq tag-type 'decl))
 	  (??				; processing-instruction
