@@ -376,7 +376,7 @@ Otherwise delete stored info."
     "tell application \"AppleScript Runner\" to do script \"%s\"" f/s)))
 
 (defun apples-parse-error (result)
-  (destructuring-bind
+  (cl-destructuring-bind
       (err-ov (actual-beg . err-buf)
               &aux err-beg err-end err-type err-msg err-num unknown)
       (values (apples-plist-get :err-ov) (apples-plist-get :run-info))
@@ -408,18 +408,18 @@ If error has occurred, display the error.
 In that case, if executed script is same as current buffer or in it,
 also highlight the error region and go to the beginning of it if
 `apples-follow-error-position' is non-nil."
-  (block nil
+  (cl-block nil
     (apples-plist-put :last-raw-result result)
     (apples-display-result
      (replace-regexp-in-string
       "%" "%%"                          ; %-sequence => %
       (if (= status 1)
           ;; error
-          (multiple-value-bind (unknown beg end type msg num buf ov)
+          (cl-multiple-value-bind (unknown beg end type msg num buf ov)
               (apples-parse-error result)
             ;; -1713
             (when (eq num -1713)
-              (return (apples-error--1713-workaround f/s)))
+              (cl-return (apples-error--1713-workaround f/s)))
             (when (and beg buf)
               ;; highlight and move
               (when apples-follow-error-position
@@ -507,7 +507,7 @@ apples: Process is still running; kill it? ")
 (defun apples-compile (&optional filename output)
   "Compile FILENAME into OUTPUT."
   (interactive)
-  (labels ((read (file prompt default)
+  (cl-labels ((read (file prompt default)
                  (expand-file-name
                   (or file (read-file-name prompt default default)))))
     (lexical-let* ((filename (read filename "File: " buffer-file-name))
@@ -539,7 +539,7 @@ apples: Process is still running; kill it? ")
 (defun apples-handle-decompile (script filename)
   "Default function to handle decompiled script.
 To specify the default query, set `apples-decompile-query'."
-  (case (or apples-decompile-query
+  (cl-case (or apples-decompile-query
             (ignore-errors
               (read-char
                (apply #'format
@@ -724,7 +724,7 @@ To specify the default query, set `apples-decompile-query'."
     (?3 . 20) (?4 . 21) (?5 . 23) (?6 . 22) (?7 . 26) (?8 . 28) (?9 . 25)
     (f1 . 122) (f2 . 120) (f3 . 99) (f4 . 118) (f5 . 96) (f6 . 97) (f7 . 98)
     (f8 . 100) (f9 . 101) (f10 . 109) (f11 . 103) (f12 . 111) (escape . 53)
-    (tab . 48) (?  . 49) (return  . 36) (backspace . 51) (left . 123)
+    (tab . 48) (?  . 49) (cl-return  . 36) (backspace . 51) (left . 123)
     (right . 124) (down . 125) (up . 126))
   "Index of key codes. Each element has the form (CHAR-OR-SYMBOL . KEY-CODE).")
 
@@ -832,7 +832,7 @@ whitespaces are deleted."
                     (apples-ideal-prev-bol)))
         (cchar-re (concat (apples-continuation-char) "$"))
         prev-indent prev-lword prev-lstr pprev-bol prev-cchar-p pprev-cchar-p)
-    (flet ((cchar? (lstr) (string-match cchar-re lstr)))
+    (cl-flet ((cchar? (lstr) (string-match cchar-re lstr)))
       (when prev-bol
         (save-excursion
           (goto-char prev-bol)
@@ -860,14 +860,14 @@ whitespaces are deleted."
          (pos (point))
          indent)
     (unless bol-is-in-string
-      (multiple-value-bind
+      (cl-multiple-value-bind
           (cur-col cur-indent cur-lword prev-bol prev-indent
                    prev-lword prev-lstr prev-cchar-p pprev-cchar-p)
           (apples-parse-lines)
         (if bol-is-in-comment
             (setq indent (or prev-indent 0))
           ;; bol is neither in string nor in comment
-          (flet ((match? (regs str) (and regs str (apples-string-match regs str)))
+          (cl-flet ((match? (regs str) (and regs str (apples-string-match regs str)))
                  (member? (str lst) (and str lst (member str lst))))
             (let* ((cchar-indent?   (and prev-cchar-p (not pprev-cchar-p)))
                    (prev-indent?    (match? apples-indent-regexps prev-lstr))
@@ -908,7 +908,7 @@ whitespaces are deleted."
   "Toggle indentation."
   (interactive "^")
   (unless (apples-in-string-p (point-at-bol))
-    (multiple-value-bind
+    (cl-multiple-value-bind
         (cur-col cur-indent _1 prev? prev-indent _2 _3 prev-cchar-p pprev-cchar-p)
         (apples-parse-lines)
       (let* ((pos (point))
@@ -946,7 +946,7 @@ whitespaces are deleted."
 (defun apples-parse-statement ()
   "Parse the current statement block and return the values
 \(BOL-WHERE-STATEMENT-STARTS BEG-WORD-OF-STATEMENT END-WORD-OF-STATEMENT)."
-  (destructuring-bind (min count nils &aux bol lstr)
+  (cl-destructuring-bind (min count nils &aux bol lstr)
       (values (point-min) 1 (values nil nil nil))
     (if (apples-in-string/comment-p)
         nils
@@ -959,12 +959,12 @@ whitespaces are deleted."
                 (goto-char bol)
                 (setq lstr (apples-line-string))
                 (if (string-match "^end\\>" lstr)
-                    (incf count)
+                    (cl-incf count)
                   (cl-loop for (beg . end) in apples-statements
                         when (and (string-match (concat "^" beg "\\>") lstr)
                                   (not (apples-string-match apples-noindent-regexps
                                                             lstr)))
-                        do (if (zerop (decf count))
+                        do (if (zerop (cl-decf count))
                                (throw 'val (values bol beg end))
                              (throw 'cl-loop nil))
                         finally
@@ -975,7 +975,7 @@ whitespaces are deleted."
                                                  lstr)
                                    (setq end (match-string-no-properties 1 lstr))
                                    (not (string= end "error"))
-                                   (zerop (decf count)))
+                                   (zerop (cl-decf count)))
                           (throw 'val (values bol
                                               (concat "on " end)
                                               end)))))))))))))
@@ -984,7 +984,7 @@ whitespaces are deleted."
   "Insert `end + current-statement-name'. If `apples-end-completion-hl' is
 specified, also highlight the matching statement."
   (interactive "^")
-  (multiple-value-bind (bol bword eword)
+  (cl-multiple-value-bind (bol bword eword)
       (apples-parse-statement)
     (when eword
       (insert "end " eword)
@@ -992,14 +992,14 @@ specified, also highlight the matching statement."
         (apples-end-completion-hl bol bword eword)))))
 
 (defun apples-end-completion-hl (bol bword eword)
-  (destructuring-bind ((bov . eov) beg pos)
+  (cl-destructuring-bind ((bov . eov) beg pos)
       (values (apples-plist-get :end-ovs)
               (save-excursion
                 (goto-char bol)
                 (skip-chars-forward " \t")
                 (point))
               (point))
-    (case apples-end-completion-hl
+    (cl-case apples-end-completion-hl
       (region (move-overlay bov beg pos))
       (words  (move-overlay bov beg (+ beg (length bword)))
               (move-overlay eov (- pos (length eword) 4) pos)))
@@ -1207,7 +1207,7 @@ specified, also highlight the matching statement."
 
 (defvar apples-font-lock-keywords
   (let ((i apples-identifier))
-    (flet ((kws (type) (apples-replace-re-space->spaces
+    (cl-flet ((kws (type) (apples-replace-re-space->spaces
                         (regexp-opt (apples-keywords type) 'words)))
            (cat (&rest s) (apples-replace-re-comma->spaces (apply #'concat s))))
       `(
@@ -1270,7 +1270,7 @@ See also `font-lock-defaults' and `font-lock-keywords'.")
           ["Key Code => Key" apples-lookup-key-code->key])
          ("path to..."
           ,@(cl-loop for folder in (nreverse (apples-keywords 'standard-folders))
-                  collect (multiple-value-bind (path posix)
+                  collect (cl-multiple-value-bind (path posix)
                               (with-temp-buffer
                                 (insert folder)
                                 (let ((pos (point-min)))
