@@ -439,7 +439,7 @@ search the web on your fingertips. C-c /.
           :keybinding "P")
 
         (defengine vertica
-          "https://www.vertica.com/docs/latest/HTML/Content/Search/search.php?zoom_query=%s"
+          "https://docs.vertica.com/23.3.x/en/searchResults.html?search=%s"
           :keybinding "v")
 
         (defengine wikipedia
