@@ -2579,7 +2579,7 @@ From Lisp, non-nil optional arg MSG-P means show progress messages."
                            (error (throw 'bmkp-bmenu-read-filter-input nil)))
                     (unless (or (not (fboundp 'characterp))  (characterp char)) ; E.g. `M-x', `M-:'
                       (throw 'bmkp-bmenu-read-filter-input nil))
-                    (case char
+                    (cl-case char
                       ((?\e ?\r)  (throw 'bmkp-bmenu-read-filter-input nil)) ; Break and exit.
                       (?\C-g      (setq inhibit-quit  nil)
                                   (throw 'bmkp-bmenu-read-filter-input 'QUIT)) ; Quit.
@@ -4494,7 +4494,7 @@ Save the command definition in `bmkp-bmenu-commands-file'."
             (print-level            nil)
             (print-circle           bmkp-propertize-bookmark-names-flag)
             (print-gensym           bmkp-propertize-bookmark-names-flag)
-            (version-control        (case bookmark-version-control
+            (version-control        (cl-case bookmark-version-control
                                       ((nil)      nil)
                                       (never      'never)
                                       (nospecial  version-control)
@@ -4559,7 +4559,7 @@ Use the command at any time to restore them."
             (print-level            nil)
             (print-circle           bmkp-propertize-bookmark-names-flag)
             (print-gensym           bmkp-propertize-bookmark-names-flag)
-            (version-control        (case bookmark-version-control
+            (version-control        (cl-case bookmark-version-control
                                       ((nil)      nil)
                                       (never      'never)
                                       (nospecial  version-control)
@@ -4661,7 +4661,7 @@ the omit list and the sort & filter information."
             (print-level            nil)
             (print-circle           bmkp-propertize-bookmark-names-flag)
             (print-gensym           bmkp-propertize-bookmark-names-flag)
-            (version-control        (case bookmark-version-control
+            (version-control        (cl-case bookmark-version-control
                                       ((nil)      nil)
                                       (never      'never)
                                       (nospecial  version-control)
@@ -4788,7 +4788,7 @@ If you use this function non-interactively, be sure to load library
             (print-level            nil)
             (print-circle           bmkp-propertize-bookmark-names-flag)
             (print-gensym           bmkp-propertize-bookmark-names-flag)
-            (version-control        (case bookmark-version-control
+            (version-control        (cl-case bookmark-version-control
                                       ((nil)      nil)
                                       (never      'never)
                                       (nospecial  version-control)

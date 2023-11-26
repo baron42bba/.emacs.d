@@ -2769,7 +2769,7 @@ From Lisp code:
            (bookmark-store bname (cdr record) (consp parg) no-refresh-p (not interactivep))
            (when (and interactivep  bmkp-prompt-for-tags-flag)
              (bmkp-add-tags bname (bmkp-read-tags-completing) 'NO-UPDATE-P)) ; Do not update here.
-           (case (and (boundp 'bmkp-auto-light-when-set)  bmkp-auto-light-when-set)
+           (cl-case (and (boundp 'bmkp-auto-light-when-set)  bmkp-auto-light-when-set)
              (autonamed-bookmark       (when (bmkp-autonamed-bookmark-p bname)
                                          (bmkp-light-bookmark bname)))
              (non-autonamed-bookmark   (unless (bmkp-autonamed-bookmark-p bname)
@@ -2885,7 +2885,7 @@ DISPLAY-FUNCTION is as in `bookmark-jump'."
       (when (and (bmkp-autonamed-bookmark-for-buffer-p bookmark (buffer-name))
                  (not bmkp-use-w32-browser-p))
         (setq bookmark  (bmkp-update-autonamed-bookmark bookmark)))
-      (case (and (boundp 'bmkp-auto-light-when-jump)  bmkp-auto-light-when-jump)
+      (cl-case (and (boundp 'bmkp-auto-light-when-jump)  bmkp-auto-light-when-jump)
         (autonamed-bookmark       (when (bmkp-autonamed-bookmark-p bookmark)
                                     (bmkp-light-bookmark bookmark nil nil nil 'USE-POINT)))
         (non-autonamed-bookmark   (unless (bmkp-autonamed-bookmark-p bookmark)
@@ -3585,7 +3585,7 @@ contain a `%s' construct, so that it can be passed along with FILE to
         (when start (delete-region 1 (1- start))) ; Delete old header.
         (goto-char 1)
         (bookmark-insert-file-format-version-stamp coding-system-for-write))
-      (let ((version-control        (case bookmark-version-control
+      (let ((version-control        (cl-case bookmark-version-control
                                       ((nil)      nil)
                                       (never      'never)
                                       (nospecial  version-control)
@@ -5508,7 +5508,7 @@ Non-interactively, optional arg MSG-P means display progress messages."
               (print-level            nil)
               (print-circle           bmkp-propertize-bookmark-names-flag)
               (print-gensym           bmkp-propertize-bookmark-names-flag)
-              (version-control        (case bookmark-version-control
+              (version-control        (cl-case bookmark-version-control
                                         ((nil)      nil)
                                         (never      'never)
                                         (nospecial  version-control)
@@ -6456,7 +6456,7 @@ and return only the tags for the currently loaded bookmarks."
         bmk-tags)
     (when (or (eq opt-tags 'current)  current-only-p)  (setq opt-tags '(current)))
     (dolist (entry  opt-tags)
-      (typecase entry
+      (cl-typecase entry
         (cons                           ; A bookmark file
          (when (eq 'bmkfile (car entry))
            (setq entry  (cdr entry)
@@ -7227,10 +7227,10 @@ Optional arg TEST is the test function.  If nil, test with `equal'.
 See `make-hash-table' for possible values of TEST."
       (setq test  (or test  #'equal))
       (let ((htable  (make-hash-table :test test)))
-        (loop for elt in sequence
+        (cl-loop for elt in sequence
               unless (gethash elt htable)
               do     (puthash elt elt htable)
-              finally return (loop for i being the hash-values in htable collect i))))
+              finally return (cl-loop for i being the hash-values in htable collect i))))
 
   (defun bmkp-remove-dups (list &optional use-eq)
     "Copy of LIST with duplicate elements removed.
@@ -10954,7 +10954,7 @@ BOOKMARK is a bookmark name or a bookmark record."
   (let* ((man-args           (bookmark-prop-get bookmark 'man-args))
          ;; `Man-notify-method' binding needs to be in effect during the calls to both
          ;; `Man-getpage-in-background' and `accept-process-output'.
-         (Man-notify-method  (case bmkp-jump-display-function
+         (Man-notify-method  (cl-case bmkp-jump-display-function
                                ((nil display-buffer)             'quiet)
                                (bmkp--pop-to-buffer-same-window  'pushy)
                                ((bmkp-select-buffer-other-window
@@ -11023,7 +11023,7 @@ BOOKMARK is a bookmark name or a bookmark record."
         (switches     (bookmark-prop-get bookmark 'dired-switches))
         (subdirs      (bookmark-prop-get bookmark 'dired-subdirs))
         (hidden-dirs  (bookmark-prop-get bookmark 'dired-hidden-dirs)))
-    (case bmkp-jump-display-function
+    (cl-case bmkp-jump-display-function
       ((nil bmkp--pop-to-buffer-same-window display-buffer)
        (dired dir switches))
       ((bmkp-select-buffer-other-window pop-to-buffer switch-to-buffer-other-window)
@@ -13874,7 +13874,7 @@ The first arg is a cons as returned by `bmkp-get-external-annotation'.
 I MSG-P is non-nil then echo the annotation type."
   (let ((ann   (car annotation.type))
         (type  (cdr annotation.type)))
-    (case type
+    (cl-case type
       (FILE       (find-file-other-window     ann))
       (URL        (browse-url                 ann))
       (BOOKMARK   (bookmark-jump-other-window ann))

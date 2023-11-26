@@ -126,7 +126,7 @@
   "Set prefix key option SYMBOL to key-sequence VALUE."
   (set pref-keys-option keys)
   (let* ((g-map     (current-global-map))
-         (b-map     (case pref-keys-option
+         (b-map     (cl-case pref-keys-option
                       (bmkp-bookmark-map-prefix-keys          'bookmark-map)
                       (bmkp-jump-map-prefix-keys              'bmkp-jump-map)
                       (bmkp-jump-other-window-map-prefix-keys 'bmkp-jump-other-window-map))))

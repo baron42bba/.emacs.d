@@ -1431,7 +1431,7 @@ If STYLE is `none' then:
     (when (and (< emacs-major-version 22)  (not (rassq style bmkp-light-styles-alist)))
       (message "Fringe styles not supported before Emacs 22 - changing to `line' style")
       (setq style 'line))
-    (case style
+    (cl-case style
       (region        (and (bmkp-region-bookmark-p bookmark)
                           (let ((end  (bmkp-get-end-position bookmark)))
                             (if (not ov)
