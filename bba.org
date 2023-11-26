@@ -407,7 +407,6 @@ search the web on your fingertips. C-c /.
 
         (defengine cfengine
           "https://docs.cfengine.com/latest/search.html?q=%s"
-          :browser 'eww-browse-url
           :keybinding "c")
 
         (defengine github
