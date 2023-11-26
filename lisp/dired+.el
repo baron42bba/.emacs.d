@@ -3153,7 +3153,7 @@ Return value depends on the number of plain `C-u' used:
  * `all-files'         if 4"
   (and (consp arg)
        (> (prefix-numeric-value arg) 4)
-       (case (prefix-numeric-value arg)
+       (cl-case (prefix-numeric-value arg)
          (16   'all-files-no-dirs)      ; `C-u C-u'
          (64   'all-files-no-dots)      ; `C-u C-u C-u'
          (256  'all-files)              ; `C-u C-u C-u C-u'
@@ -6083,7 +6083,7 @@ DETAILS is passed to `diredp-list-files', to show details about FILES."
                                                              prompt
                                                            (concat "Please answer y or n.  " prompt)))))))
                             (setq answer  (lookup-key query-replace-map (vector key) t))
-                            (case answer
+                            (cl-case answer
                               ((skip  act)              nil)
                               (recenter                 (recenter) t)
                               (show                     (diredp-list-files files nil list-buf predicate details)
@@ -6839,7 +6839,7 @@ When called from Lisp, optional arg DETAILS is passed to
                     (message "Thumb could not be created for file %s" curr-file)
                   (image-dired-insert-thumbnail thumb-name curr-file dired-buf)))
               files))
-      (case image-dired-line-up-method
+      (cl-case image-dired-line-up-method
         (dynamic      (image-dired-line-up-dynamic))
         (fixed        (image-dired-line-up))
         (interactive  (image-dired-line-up-interactive))
@@ -13154,7 +13154,7 @@ When called from Lisp:
                                                        "UNmark"
                                                      "Mark")
                                                    (format " files (regexp matching %s): "
-                                                           (case type
+                                                           (cl-case type
                                                              ((nil)   "names with default dir")
                                                              (no-dir  "relative names - no dir")
                                                              (t       "absolute names")))))
@@ -13164,7 +13164,7 @@ When called from Lisp:
   (let ((dired-marker-char  (or marker-char  dired-marker-char)))
     (diredp-mark-if (and (not (diredp-looking-at-p dired-re-dot))
                          (not (eolp))   ; Empty line
-                         (let ((fn  (dired-get-filename (case name-form
+                         (let ((fn  (dired-get-filename (cl-case name-form
                                                           ((nil)   t)
                                                           (no-dir  'no-dir)
                                                           (t       nil))
