@@ -1,4 +1,4 @@
-;;; restclient.el --- An interactive HTTP client for Emacs
+;;; restclient.el --- An interactive HTTP client for Emacs  -*- lexical-binding: t; -*-
 ;;
 ;; Public domain.
 
@@ -6,7 +6,6 @@
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
 ;; Keywords: http
-;; Package-Version: 20191009.1208
 
 ;; This file is not part of GNU Emacs.
 ;; This file is public domain software. Do what you want.
@@ -22,6 +21,11 @@
 (require 'url)
 (require 'json)
 (require 'outline)
+(eval-when-compile (require 'subr-x))
+(eval-when-compile
+  (if (version< emacs-version "26")
+      (require 'cl)
+    (require 'cl-lib)))
 
 (defgroup restclient nil
   "An interactive HTTP client for Emacs."
@@ -42,6 +46,19 @@
   :group 'restclient
   :type 'string)
 
+(defcustom restclient-response-size-threshold 100000
+  "Size of the response restclient can display without performance impact."
+  :group 'restclient
+  :type 'integer)
+
+(defvar restclient-threshold-multiplier 10
+  "In how many times size-threshold should be exceed to use fundamental mode.")
+
+(defcustom restclient-info-buffer-name "*Restclient Info*"
+  "Name for info buffer."
+  :group 'restclient
+  :type 'string)
+
 (defcustom restclient-inhibit-cookies nil
   "Inhibit restclient from sending cookies implicitly."
   :group 'restclient
@@ -59,6 +76,11 @@
   "An association list mapping content types to buffer modes"
   :group 'restclient
   :type '(alist :key-type string :value-type symbol))
+
+(defcustom restclient-response-body-only nil
+  "When parsing response, only return its body."
+  :group 'restclient
+  :type 'boolean)
 
 (defgroup restclient-faces nil
   "Faces used in Restclient Mode"
@@ -115,10 +137,37 @@
   "Face for HTTP header value."
   :group 'restclient-faces)
 
+(defface restclient-request-hook-face
+  '((t (:inherit font-lock-preprocessor-face)))
+  "Face for single request hook indicator."
+  :group 'restclient-faces)
+
+(defface restclient-request-hook-name-face
+  '((t (:inherit font-lock-function-name-face)))
+  "Face for single request hook type names."
+  :group 'restclient-faces)
+
+(defface restclient-request-hook-args-face
+  '((t (:inherit font-lock-string-face)))
+  "Face for single request hook type arguments."
+  :group 'restclient-faces)
+
+
 (defvar restclient-within-call nil)
 
 (defvar restclient-request-time-start nil)
 (defvar restclient-request-time-end nil)
+
+(defvar restclient-var-overrides nil
+  "An alist of vars that will override any set in the file,
+  also where dynamic vars set on callbacks are stored.")
+
+(defvar restclient-result-handlers '()
+  "A registry of available completion hooks.
+   Stored as an alist of name -> (hook-creation-func . description)")
+
+(defvar restclient-curr-request-functions nil
+  "A list of functions to run once when the next request is loaded")
 
 (defvar restclient-response-loaded-hook nil
   "Hook run after response buffer is formatted.")
@@ -165,6 +214,9 @@
 
 (defconst restclient-content-type-regexp
   "^Content-[Tt]ype: \\(\\w+\\)/\\(?:[^\\+\r\n]*\\+\\)*\\([^;\r\n]+\\)")
+
+(defconst restclient-response-hook-regexp
+  "^\\(->\\) \\([^[:space:]]+\\) +\\(.*\\)$")
 
 ;; The following disables the interactive request for user name and
 ;; password should an API call encounter a permission-denied response.
@@ -251,7 +303,23 @@
         (when guessed-mode
           (delete-region start (point))
           (unless (eq guessed-mode 'image-mode)
-            (apply guessed-mode '())
+            (cond ((and restclient-response-size-threshold
+                        (> (buffer-size) (* restclient-response-size-threshold
+                                            restclient-threshold-multiplier)))
+                   (fundamental-mode)
+                   (setq comment-start (let ((guessed-mode guessed-mode))
+                                         (with-temp-buffer
+                                           (apply  guessed-mode '())
+                                           comment-start)))
+                   (message
+                    "Response is too huge, using fundamental-mode to display it!"))
+                  ((and restclient-response-size-threshold
+                        (> (buffer-size) restclient-response-size-threshold))
+                   (delay-mode-hooks (apply guessed-mode '()))
+                   (message
+                    "Response is too big, using bare %s to display it!" guessed-mode))
+                  (t
+                   (apply guessed-mode '())))
             (if (fboundp 'font-lock-flush)
                 (font-lock-flush)
               (with-no-warnings
@@ -282,11 +350,12 @@
 
           (goto-char (point-max))
           (or (eq (point) (point-min)) (insert "\n"))
-          (let ((hstart (point)))
-            (insert method " " url "\n" headers)
-            (insert (format "Request duration: %fs\n" (float-time (time-subtract restclient-request-time-end restclient-request-time-start))))
-            (unless (member guessed-mode '(image-mode text-mode))
-              (comment-region hstart (point)))))))))
+	  (unless restclient-response-body-only
+            (let ((hstart (point)))
+              (insert method " " url "\n" headers)
+              (insert (format "Request duration: %fs\n" (float-time (time-subtract restclient-request-time-end restclient-request-time-start))))
+              (unless (member guessed-mode '(image-mode text-mode))
+		(comment-region hstart (point))))))))))
 
 (defun restclient-prettify-json-unicode ()
   (save-excursion
@@ -403,7 +472,7 @@ The buffer contains the raw HTTP response sent by the server."
               (should-eval (> (length (match-string 2)) 0))
               (value (or (restclient-chop (match-string-no-properties 4)) (match-string-no-properties 3))))
           (setq vars (cons (cons name (if should-eval (restclient-eval-var value) value)) vars))))
-      vars)))
+      (append restclient-var-overrides vars))))
 
 (defun restclient-eval-var (string)
   (with-output-to-string (princ (eval (read string)))))
@@ -430,16 +499,62 @@ The buffer contains the raw HTTP response sent by the server."
       (restclient-read-file (match-string 1 entity))
     (restclient-replace-all-in-string vars entity)))
 
+(defun restclient-parse-hook (cb-type args-offset args)
+  (if-let ((handler (assoc cb-type restclient-result-handlers)))
+      (funcall (cadr handler) args args-offset)
+    `(lambda ()
+       (message "Unknown restclient hook type %s" ,cb-type))))
+
+(defun restclient-register-result-func (name creation-func description)
+  (let ((new-cell (cons name (cons creation-func description))))
+    (setq restclient-result-handlers (cons new-cell restclient-result-handlers))))
+
+(defun restclient-remove-var (var-name)
+  (setq restclient-var-overrides (assoc-delete-all var-name restclient-var-overrides)))
+
+(defun restclient-set-var (var-name value)
+  (restclient-remove-var var-name)
+  (setq restclient-var-overrides (cons (cons var-name value) restclient-var-overrides)))
+
+(defun restclient-get-var-at-point (var-name buffer-name buffer-pos)
+  (message (format "getting var %s form %s at %s" var-name buffer-name buffer-pos))
+  (let* ((vars-at-point  (save-excursion
+			   (switch-to-buffer buffer-name)
+			   (goto-char buffer-pos)
+			   ;; if we're called from a restclient buffer we need to lookup vars before the current hook or evar
+			   ;; outside a restclient buffer only globals are available so moving the point wont matter
+			   (re-search-backward "^:\\|->" (point-min) t)
+			   (restclient-find-vars-before-point))))
+    (restclient-replace-all-in-string vars-at-point (cdr (assoc var-name vars-at-point)))))
+
+(defmacro restclient-get-var (var-name)
+  (let ((buf-name (buffer-name (current-buffer)))
+		(buf-point (point)))
+    `(restclient-get-var-at-point ,var-name ,buf-name ,buf-point)))
+
+(defun restclient-single-request-function ()
+  (dolist (f restclient-curr-request-functions)
+    (ignore-errors
+      (funcall f)))  
+  (setq restclient-curr-request-functions nil)
+  (remove-hook 'restclient-response-loaded-hook 'restclient-single-request-function))
+
+
 (defun restclient-http-parse-current-and-do (func &rest args)
   (save-excursion
     (goto-char (restclient-current-min))
     (when (re-search-forward restclient-method-url-regexp (point-max) t)
       (let ((method (match-string-no-properties 1))
-            (url (match-string-no-properties 2))
+            (url (string-trim (match-string-no-properties 2)))
             (vars (restclient-find-vars-before-point))
             (headers '()))
         (forward-line)
         (while (cond
+		((looking-at restclient-response-hook-regexp)
+		 (when-let (hook-function (restclient-parse-hook (match-string-no-properties 2)
+								 (match-end 2)
+								 (match-string-no-properties 3)))
+		   (push hook-function restclient-curr-request-functions)))
                 ((and (looking-at restclient-header-regexp) (not (looking-at restclient-empty-line-regexp)))
                  (setq headers (cons (restclient-replace-all-in-header vars (restclient-make-header)) headers)))
                 ((looking-at restclient-use-var-regexp)
@@ -447,6 +562,8 @@ The buffer contains the raw HTTP response sent by the server."
           (forward-line))
         (when (looking-at restclient-empty-line-regexp)
           (forward-line))
+	(when restclient-curr-request-functions
+	  (add-hook 'restclient-response-loaded-hook 'restclient-single-request-function))
         (let* ((cmax (restclient-current-max))
                (entity (restclient-parse-body (buffer-substring (min (point) cmax) cmax) vars))
                (url (restclient-replace-all-in-string vars url)))
@@ -472,6 +589,20 @@ The buffer contains the raw HTTP response sent by the server."
                                                (list "-d" entity)))
                                      " "))))
       (message "curl command copied to clipboard."))))
+
+
+(defun restclient-elisp-result-function (args offset)
+  (goto-char offset)
+  (let ((form (macroexpand-all (read (current-buffer)))))
+    (lambda ()
+      (eval form))))
+
+(restclient-register-result-func
+ "run-hook" #'restclient-elisp-result-function
+ "Call the provided (possibly multi-line) elisp when the result
+  buffer is formatted. Equivalent to a restclient-response-loaded-hook
+  that only runs for this request.
+  eg. -> on-response (message \"my hook called\")" )
 
 ;;;###autoload
 (defun restclient-http-send-current (&optional raw stay-in-window)
@@ -529,6 +660,59 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
   (backward-char 1)
   (setq deactivate-mark nil))
 
+(defun restclient-show-info ()  
+  ;; restclient-info-buffer-name
+  (interactive)
+  (let ((vars-at-point (restclient-find-vars-before-point)))
+    (cl-labels ((non-overidden-vars-at-point ()
+					     (seq-filter (lambda (v)
+							   (null (assoc (car v) restclient-var-overrides)))
+							 vars-at-point))
+		(sanitize-value-cell (var-value)
+		     (replace-regexp-in-string "\n" "|\n| |"
+			       (replace-regexp-in-string "\|" "\\\\vert{}"
+					 (restclient-replace-all-in-string vars-at-point var-value))))
+		(var-row (var-name var-value)
+			 (insert "|" var-name "|" (sanitize-value-cell var-value) "|\n"))
+		(var-table (table-name)
+			   (insert (format "* %s \n|--|\n|Name|Value|\n|---|\n" table-name)))
+		(var-table-footer ()
+				  (insert "|--|\n\n")))
+      
+      (with-current-buffer (get-buffer-create restclient-info-buffer-name)
+	;; insert our info
+	(erase-buffer)
+
+	(insert "\Restclient Info\ \n\n")
+       
+	(var-table "Dynamic Variables")
+	(dolist (dv restclient-var-overrides)
+	  (var-row (car dv) (cdr dv)))
+	(var-table-footer)
+
+	;;    (insert ":Info:\n Dynamic vars defined by request hooks or with calls to restclient-set-var\n:END:")
+
+	(var-table "Vars at current position")
+	(dolist (dv (non-overidden-vars-at-point))
+	  (var-row (car dv) (cdr dv)))
+	(var-table-footer)
+
+
+	;; registered callbacks
+	(var-table "Registered request hook types")
+	(dolist (handler-name (delete-dups (mapcar 'car restclient-result-handlers)))
+	       (var-row handler-name (cddr (assoc handler-name restclient-result-handlers))))
+    	(var-table-footer)
+
+	(insert "\n\n'q' to exit\n")
+	(org-mode)
+	(org-toggle-pretty-entities)
+	(org-table-iterate-buffer-tables)
+	(outline-show-all)
+	(restclient-response-mode)
+	(goto-char (point-min))))
+    (switch-to-buffer-other-window restclient-info-buffer-name)))
+
 (defun restclient-narrow-to-current ()
   "Narrow to region of current request"
   (interactive)
@@ -569,7 +753,9 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
         (list restclient-use-var-regexp '(1 'restclient-variable-usage-face))
         (list restclient-file-regexp '(0 'restclient-file-upload-face))
         (list restclient-header-regexp '(1 'restclient-header-name-face t) '(2 'restclient-header-value-face t))
-        ))
+	(list restclient-response-hook-regexp '(1 ' restclient-request-hook-face t)
+	      '(2 'restclient-request-hook-name-face t)
+	      '(3 'restclient-request-hook-args-face t))))
 
 (defconst restclient-mode-syntax-table
   (let ((table (make-syntax-table)))
@@ -587,6 +773,7 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
     (define-key map (kbd "C-c C-.") 'restclient-mark-current)
     (define-key map (kbd "C-c C-u") 'restclient-copy-curl-command)
     (define-key map (kbd "C-c n n") 'restclient-narrow-to-current)
+    (define-key map (kbd "C-c C-i") 'restclient-show-info)   
     map)
   "Keymap for restclient-mode.")
 
@@ -627,5 +814,8 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
 
 (eval-after-load 'helm
   '(ignore-errors (require 'restclient-helm)))
+
+(eval-after-load 'jq-mode
+  '(ignore-errors (require 'restclient-jq)))
 
 ;;; restclient.el ends here
