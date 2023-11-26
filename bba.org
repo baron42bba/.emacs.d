@@ -1809,6 +1809,12 @@ Bound to =C-X l !=
       (eshell-send-input)))
 #+END_SRC
 
+Run commands via vterm
+
+#+begin_src emacs-lisp
+  (defalias 'eshell/v 'eshell-exec-visual)
+#+end_src
+
 https://fuco1.github.io/2017-10-08-Using-bookmarks-with-eshell-and-docker-tramp.html
 
 #+begin_src emacs-lisp
