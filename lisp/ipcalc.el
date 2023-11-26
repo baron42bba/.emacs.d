@@ -111,7 +111,7 @@
         (max (- cidr-default 1)))
     (while (< count max)
       (aset ip count ?1)
-      (setq count(incf count)))
+      (setq count(cl-incf count)))
     ip))
 
 (defun hosts/net (num)
@@ -149,7 +149,7 @@
                  `(,1st-octet ,2nd-octet ,3rd-octet ,4th-octet))))
     (while (< count 3)
       (setq full-ip (concat full-ip (nth count octets) "."))
-      (setq count (incf count)))
+      (setq count (cl-incf count)))
     (concat full-ip (car (last octets)))))
 
 (defun ipcalc (ip/cidr)
