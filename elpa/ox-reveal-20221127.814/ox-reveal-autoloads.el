@@ -1,10 +1,12 @@
-;;; ox-reveal-autoloads.el --- automatically extracted autoloads
+;;; ox-reveal-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "ox-reveal" "ox-reveal.el" (23994 46390 928438
-;;;;;;  537000))
+;;;### (autoloads nil "ox-reveal" "ox-reveal.el" (0 0 0 0))
 ;;; Generated autoloads from ox-reveal.el
 
 (autoload 'org-reveal-publish-to-reveal "ox-reveal" "\
@@ -18,11 +20,18 @@ Return output file name.
 
 \(fn PLIST FILENAME PUB-DIR)" nil nil)
 
+(register-definition-prefixes "ox-reveal" '("frag-" "if-format" "org-reveal-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("ox-reveal-pkg.el") (0 0 0 0))
+
 ;;;***
 
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; ox-reveal-autoloads.el ends here
