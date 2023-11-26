@@ -4,8 +4,6 @@
 
 ;; Author: wolray <wolray@foxmail.com>
 ;; Version: 4.1
-;; Package-Version: 20230503.1051
-;; Package-Commit: 72ff963a0f44497b6cc688607357ee65c68ecc84
 ;; URL: https://github.com/wolray/symbol-overlay/
 ;; Keywords: faces, matching
 ;; Package-Requires: ((emacs "24.3") (seq "2.2"))
@@ -390,7 +388,8 @@ If KEYWORD is non-nil, remove it then use its color on new overlays."
   (when symbol-overlay-temp-symbol
     (symbol-overlay-remove-temp))
   (let* ((case-fold-search nil)
-         (face (or (car (cl-set-difference
+         (face (or (symbol-overlay-maybe-remove keyword)
+                   (car (cl-set-difference
                          symbol-overlay-faces
                          (mapcar #'cddr symbol-overlay-keywords-alist)))
                    ;; If we have exhausted the available faces, then just
