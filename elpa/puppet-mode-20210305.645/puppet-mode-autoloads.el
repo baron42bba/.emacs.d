@@ -1,4 +1,4 @@
-;;; puppet-mode-autoloads.el --- automatically extracted autoloads
+;;; puppet-mode-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
 
@@ -16,7 +16,11 @@
 
 (add-to-list 'auto-mode-alist '("\\.pp\\'" . puppet-mode))
 
-(if (fboundp 'register-definition-prefixes) (register-definition-prefixes "puppet-mode" '("puppet-")))
+(register-definition-prefixes "puppet-mode" '("puppet-"))
+
+;;;***
+
+;;;### (autoloads nil nil ("puppet-mode-pkg.el") (0 0 0 0))
 
 ;;;***
 

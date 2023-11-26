@@ -4,15 +4,17 @@
 ;; Copyright (C) 2013, 2014  Bozhidar Batsov <bozhidar@batsov.com>
 ;; Copyright (C) 2011  Puppet Labs Inc
 
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; Author: Vox Pupuli <voxpupuli@groups.io>
+;;     Bozhidar Batsov <bozhidar@batsov.com>
 ;;     Sebastian Wiesner <swiesner@lunaryorn.com>
 ;;     Russ Allbery <rra@stanford.edu>
-;; Maintainer: Bozhidar Batsov <bozhidar@batsov.com>
+;; Maintainer: Vox Pupuli <voxpupuli@groups.io>
+;;     Bozhidar Batsov <bozhidar@batsov.com>
 ;;     Sebastian Wiesner <swiesner@lunaryorn.com>
+;;     Tim Meusel <tim@bastelfreak.de>
 ;; URL: https://github.com/voxpupuli/puppet-mode
-;; Package-Version: 20180813.1947
 ;; Keywords: languages
-;; Version: 0.4-cvs
+;; Version: 0.4
 ;; Package-Requires: ((emacs "24.1") (pkg-info "0.4"))
 
 ;; This file is not part of GNU Emacs.
@@ -147,7 +149,7 @@ buffer-local wherever it is set."
   :type 'boolean
   :group 'puppet
   :safe 'booleanp
-  :package-version '(puppet-mode . "0.3"))
+  :package-version '(puppet-mode . "0.4"))
 
 (defcustom puppet-validate-command "puppet parser validate --color=false"
   "Command to validate the syntax of a Puppet manifest."
@@ -161,13 +163,13 @@ buffer-local wherever it is set."
   "Command to lint a Puppet manifest."
   :type 'string
   :group 'puppet
-  :package-version '(puppet-mode . "0.3"))
+  :package-version '(puppet-mode . "0.4"))
 
 (defcustom puppet-apply-command "puppet apply --verbose --noop"
   "Command to apply a Puppet manifest."
   :type 'string
   :group 'puppet
-  :package-version '(puppet-mode . "0.3"))
+  :package-version '(puppet-mode . "0.4"))
 
 (defcustom puppet-repl-command "puppet debugger"
   "The Puppet REPL command used to interact with code."
@@ -191,13 +193,13 @@ buffer-local wherever it is set."
   '((t :inherit font-lock-constant-face))
   "Face for regular expression literals in Puppet."
   :group 'puppet
-  :package-version '(puppet-mode . "0.3"))
+  :package-version '(puppet-mode . "0.4"))
 
 (defface puppet-escape-sequence
   '((t :inherit font-lock-constant-face))
   "Face for escape sequences in double-quoted strings-consed literals in Puppet."
   :group 'puppet
-  :package-version '(puppet-mode . "0.3"))
+  :package-version '(puppet-mode . "0.4"))
 
 
 ;;; Version information
@@ -311,31 +313,41 @@ Return nil, if there is no special context at POS, or one of
                                (not (any "/" "\\" "\n"))
                                ;; Any escaped character
                                (and "\\" not-newline)))))
-      ;; http://docs.puppetlabs.com/puppet/latest/reference/lang_reserved.html#reserved-words
-      (keyword . ,(rx (or "and" "application" "attr" "case" "class" "consumes"
-                          "default" "define" "else" "elsif" "environment"
-                          "false" "function" "if" "import" "in" "inherits"
-                          "node" "or" "private" "produces" "site" "true"
-                          "type" "undef" "unless"
+      ;; https://puppet.com/docs/puppet/latest/lang_reserved.html
+      (keyword . ,(rx (or "and" "application" "attr" "case" "class" "component"
+                          "consumes" "default" "define" "else" "elsif"
+                          "environment" "false" "function" "if" "import" "in"
+                          "inherits" "node" "or" "private" "produces" "regexp"
+                          "site" "true" "type" "undef" "unit" "unless"
                           ;; Bolt
                           ;; https://puppet.com/docs/bolt/0.x/writing_plans.html
                           "plan"
                           )))
-      ;; http://docs.puppetlabs.com/references/latest/function.html
-      (builtin-function . ,(rx (or "alert" "assert_type" "binary_file" "break"
-                                   "contain" "create_resources" "crit" "debug"
-                                   "defined" "dig" "digest" "each" "emerg"
-                                   "epp" "err" "fail" "file" "filter"
-                                   "find_file" "fqdn_rand" "generate" "hiera"
-                                   "hiera_array" "hiera_hash" "hiera_include"
-                                   "include" "info" "inline_epp"
-                                   "inline_template" "lest" "lookup" "map"
-                                   "match" "md5" "new" "next" "notice"
-                                   "realize" "reduce" "regsubst" "require"
-                                   "return" "reverse_each" "scanf" "sha1"
-                                   "shellquote" "slice" "split" "sprintf"
-                                   "step" "strftime" "tag" "tagged" "template"
-                                   "then" "type" "versioncmp" "warning" "with"
+      ;; https://puppet.com/docs/puppet/latest/function.html
+      (builtin-function . ,(rx (or "abs" "alert" "all" "annotate" "any"
+                                   "assert_type" "binary_file" "break" "call"
+                                   "camelcase" "capitalize" "ceiling" "chomp"
+                                   "chop" "compare" "contain" "convert_to"
+                                   "create_resources" "crit" "debug" "defined"
+                                   "dig" "digest" "downcase" "each" "emerg"
+                                   "empty" "epp" "err" "eyaml_lookup_key"
+                                   "fail" "file" "filter" "find_file"
+                                   "find_template" "flatten" "floor"
+                                   "fqdn_rand" "generate" "get" "getvar"
+                                   "group_by" "hiera" "hiera_array"
+                                   "hiera_hash" "hiera_include" "hocon_data"
+                                   "import" "include" "info" "inline_epp"
+                                   "inline_template" "join" "json_data" "keys"
+                                   "length" "lest" "lookup" "lstrip" "map"
+                                   "match" "max" "md5" "min" "new" "next"
+                                   "notice" "partition" "realize" "reduce"
+                                   "regsubst" "require" "return" "reverse_each"
+                                   "round" "rstrip" "scanf" "sha1" "sha256"
+                                   "shellquote" "size" "slice" "split"
+                                   "sprintf" "step" "strftime" "strip" "tag"
+                                   "tagged" "template" "tree_each" "then"
+                                   "type" "unique" "unwrap" "upcase" "values"
+                                   "versioncmp" "warning" "with" "yaml_data"
                                    ;; Bolt
                                    ;; https://puppet.com/docs/bolt/0.x/plan_functions.html
                                    ;; https://puppet.com/docs/bolt/0.x/writing_plans.html#concept-4926
@@ -666,100 +678,112 @@ of the initial include plus puppet-include-indent."
 (defun puppet-indent-line ()
   "Indent current line as puppet code."
   (interactive)
-  (beginning-of-line)
-  (if (bobp)
-      (indent-line-to 0)                ; First line is always non-indented
-    (let ((not-indented t)
-          (arglist-start (puppet-in-argument-list))
-          (array-start (puppet-in-array))
-          (include-start (puppet-in-include))
-          (block-indent (puppet-block-indent))
-          cur-indent)
-      (cond
-       (array-start (setq cur-indent (puppet-indent-array array-start)))
-       (arglist-start (setq cur-indent (puppet-indent-arglist arglist-start)))
-       (include-start
-        (setq cur-indent include-start))
+  (let ((pos (- (point-max) (point))))
+    (beginning-of-line)
+    (if (bobp)
+        (indent-line-to 0)              ; First line is always non-indented
+      (let ((not-indented t)
+            (arglist-start (puppet-in-argument-list))
+            (array-start (puppet-in-array))
+            (include-start (puppet-in-include))
+            (block-indent (puppet-block-indent))
+            cur-indent)
+        (cond
+         (array-start (setq cur-indent (puppet-indent-array array-start)))
+         (arglist-start (setq cur-indent (puppet-indent-arglist arglist-start)))
+         (include-start
+          (setq cur-indent include-start))
 
-       ((and (looking-at "^\\s-*}.*$") block-indent)
-        ;; This line contains a closing brace and we're at the inner
-        ;; block, so we should indent it matching the indentation of
-        ;; the opening brace of the block.
-        (setq cur-indent block-indent))
-       (t
-        ;; Otherwise, we did not start on a block-ending-only line.
-        (save-excursion
-          ;; Iterate backwards until we find an indentation hint
-          (while not-indented
-            (forward-line -1)
-            (cond
-             ;; Comment lines are ignored unless we're at the start of the
-             ;; buffer.
-             ((or (eq (puppet-syntax-context) 'comment)
-                  (save-excursion (end-of-line)
-                                  (eq (puppet-syntax-context) 'comment)))
-              (if (bobp)
-                  (setq not-indented nil)))
+         ((and (looking-at "^\\s-*}.*$") block-indent)
+          ;; This line contains a closing brace and we're at the inner
+          ;; block, so we should indent it matching the indentation of
+          ;; the opening brace of the block.
+          (setq cur-indent block-indent))
+         (t
+          ;; Otherwise, we did not start on a block-ending-only line.
+          (save-excursion
+            ;; Iterate backwards until we find an indentation hint
+            (while not-indented
+              (forward-line -1)
+              (cond
+               ;; Comment lines are ignored unless we're at the start of the
+               ;; buffer.
+               ((or (eq (puppet-syntax-context) 'comment)
+                    (save-excursion (end-of-line)
+                                    (eq (puppet-syntax-context) 'comment)))
+                (if (bobp)
+                    (setq not-indented nil)))
 
-             ;; Closing paren. Use indentation based on start of
-             ;; argument list
-             ((or (looking-at "^\\s-*\)\\s-*$")
-                  (looking-at "^[^\n\(]*[\)],?\\s-*$"))
-              (goto-char (puppet-in-argument-list))
-              (setq cur-indent (current-indentation))
-              (setq not-indented nil))
+               ;; Closing paren. Use indentation based on start of
+               ;; argument list
+               ((or (looking-at "^\\s-*\)\\s-*$")
+                    (looking-at "^[^\n\(]*[\)],?\\s-*$"))
+                (goto-char (puppet-in-argument-list))
+                (setq cur-indent (current-indentation))
+                (setq not-indented nil))
 
-             ;; Brace (possibly followed by a comma) or paren on a
-             ;; line by itself will already be indented to the right
-             ;; level, so we can cheat and stop there.
-             ((looking-at "^\\s-*[\)}]\\(,\\|\\s-*[-~]>\\)?\\s-*\s?$")
-              (setq cur-indent (current-indentation))
-              (setq not-indented nil))
+               ;; Closing bracket. Use indentation based on start of
+               ;; array.
+               ((looking-at "^[^[\n]*],?\\s-*$")
+                (goto-char (puppet-in-array))
+                (setq cur-indent (current-indentation))
+                (setq not-indented nil))
 
-             ;; Brace (possibly followed by a comma) or paren not on a line by
-             ;; itself will be indented one level too much, but don't catch
-             ;; cases where the block is started and closed on the same line.
-             ((looking-at "^[^\n\({]*[\)}],?\\s-*$")
-              (setq cur-indent (- (current-indentation) puppet-indent-level))
-              (setq not-indented nil))
+               ;; Brace, paren or bracket (possibly followed by a comma)
+               ;; on a line by itself will already be indented to the
+               ;; right level, so we can cheat and stop there.
+               ((looking-at "^\\s-*[])}]\\(,\\|\\s-*[-~]>\\)?\\s-*\s?$")
+                (setq cur-indent (current-indentation))
+                (setq not-indented nil))
 
-             ;; Indent by one level more than the start of our block.  We lose
-             ;; if there is more than one block opened and closed on the same
-             ;; line but it's still unbalanced; hopefully people don't do that.
-             ((looking-at "^.*{[^\n}]*$")
-              (setq cur-indent (+ (current-indentation) puppet-indent-level))
-              (setq not-indented nil))
+               ;; Brace (possibly followed by a comma) or paren not on a line by
+               ;; itself will be indented one level too much, but don't catch
+               ;; cases where the block is started and closed on the same line.
+               ((looking-at "^[^\n\({]*[\)}],?\\s-*$")
+                (setq cur-indent (- (current-indentation) puppet-indent-level))
+                (setq not-indented nil))
 
-             ;; Indent by one level if the line ends with an open paren.
-             ((looking-at "^.*\(\\s-*$")
-              (setq cur-indent (+ (current-indentation) puppet-indent-level))
-              (setq not-indented nil))
+               ;; Indent by one level more than the start of our block.  We lose
+               ;; if there is more than one block opened and closed on the same
+               ;; line but it's still unbalanced; hopefully people don't do that.
+               ((looking-at "^.*{[^\n}]*$")
+                (setq cur-indent (+ (current-indentation) puppet-indent-level))
+                (setq not-indented nil))
 
-             ;; Semicolon ends a block for a resource when multiple resources
-             ;; are defined in the same block, but try not to get the case of
-             ;; a complete resource on a single line wrong.
-             ((looking-at "^\\([^'\":\n]\\|\"[^\n\"]*\"\\|'[^\n']*'\\)*;\\s-*$")
-              (setq cur-indent (- (current-indentation) puppet-indent-level))
-              (setq not-indented nil))
+               ;; Indent by one level if the line ends with an open paren.
+               ((looking-at "^.*\(\\s-*$")
+                (setq cur-indent (+ (current-indentation) puppet-indent-level))
+                (setq not-indented nil))
 
-             ;; Indent an extra level after : since it introduces a resource.
-             ((looking-at "^.*:\\s-*$")
-              (setq cur-indent (+ (current-indentation) puppet-indent-level))
-              (setq not-indented nil))
+               ;; Semicolon ends a block for a resource when multiple resources
+               ;; are defined in the same block, but try not to get the case of
+               ;; a complete resource on a single line wrong.
+               ((looking-at "^\\([^'\":\n]\\|\"[^\n\"]*\"\\|'[^\n']*'\\)*;\\s-*$")
+                (setq cur-indent (- (current-indentation) puppet-indent-level))
+                (setq not-indented nil))
 
-             ;; Start of buffer.
-             ((bobp)
-              (setq not-indented nil)))))
+               ;; Indent an extra level after : since it introduces a resource.
+               ((looking-at "^.*:\\s-*$")
+                (setq cur-indent (+ (current-indentation) puppet-indent-level))
+                (setq not-indented nil))
 
-        ;; If this line contains only a closing paren, we should lose one
-        ;; level of indentation.
-        (if (looking-at "^\\s-*\)\\s-*$")
-            (setq cur-indent (- cur-indent puppet-indent-level)))))
+               ;; Start of buffer.
+               ((bobp)
+                (setq not-indented nil)))))
 
-      ;; We've figured out the indentation, so do it.
-      (if (and cur-indent (> cur-indent 0))
-          (indent-line-to cur-indent)
-        (indent-line-to 0)))))
+          ;; If this line contains only a closing paren, we should lose one
+          ;; level of indentation.
+          (if (looking-at "^\\s-*\)\\s-*$")
+              (setq cur-indent (- cur-indent puppet-indent-level)))))
+
+        ;; We've figured out the indentation, so do it.
+        (if (and cur-indent (> cur-indent 0))
+            (indent-line-to cur-indent)
+          (indent-line-to 0))))
+    ;; If initial point was within line's indentation,
+    ;; position after the indentation.  Else stay at same point in text.
+    (if (> (- (point-max) pos) (point))
+        (goto-char (- (point-max) pos)))))
 
 
 ;;; Font locking
