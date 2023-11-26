@@ -24,3 +24,8 @@ apples-tmp-dir
 /network-security.data
 /transient
 /type-break
+/org-persist/*
+/.cache/*
+/request/*
+/.org-id-locations
+/.#type-break
