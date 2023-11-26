@@ -1,15 +1,16 @@
-;;; sesman-autoloads.el --- automatically extracted autoloads
+;;; sesman-autoloads.el --- automatically extracted autoloads  -*- lexical-binding: t -*-
 ;;
 ;;; Code:
-(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
+
+(add-to-list 'load-path (directory-file-name
+                         (or (file-name-directory #$) (car load-path))))
+
 
-;;;### (autoloads nil "sesman" "sesman.el" (23997 31641 490594 106000))
+;;;### (autoloads nil "sesman" "sesman.el" (0 0 0 0))
 ;;; Generated autoloads from sesman.el
 
 (autoload 'sesman-start "sesman" "\
-Start a Sesman session.
-
-\(fn)" t nil)
+Start a Sesman session." t nil)
 
 (autoload 'sesman-restart "sesman" "\
 Restart sesman session.
@@ -67,26 +68,30 @@ buffer.
 \(fn &optional SESSION)" t nil)
 
 (autoload 'sesman-unlink "sesman" "\
-Break any of the previously created links.
+Break sesman LINKS.
+If LINKS is nil, ask interactively for a link. With a prefix argument break all
+links.
 
-\(fn)" t nil)
+\(fn &optional LINKS)" t nil)
  (autoload 'sesman-map "sesman" "Session management prefix keymap." t 'keymap)
+
+(register-definition-prefixes "sesman" '("sesman-"))
 
 ;;;***
 
-;;;### (autoloads nil "sesman-browser" "sesman-browser.el" (23997
-;;;;;;  31641 489204 100000))
+;;;### (autoloads nil "sesman-browser" "sesman-browser.el" (0 0 0
+;;;;;;  0))
 ;;; Generated autoloads from sesman-browser.el
 
 (autoload 'sesman-browser "sesman-browser" "\
 Display an interactive session browser.
-See `sesman-browser-mode' for more details.
+See `sesman-browser-mode' for more details." t nil)
 
-\(fn)" t nil)
+(register-definition-prefixes "sesman-browser" '("sesman-"))
 
 ;;;***
 
-;;;### (autoloads nil nil ("sesman-pkg.el") (23997 31641 487487 99000))
+;;;### (autoloads nil nil ("sesman-pkg.el") (0 0 0 0))
 
 ;;;***
 
@@ -94,5 +99,6 @@ See `sesman-browser-mode' for more details.
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
+;; coding: utf-8
 ;; End:
 ;;; sesman-autoloads.el ends here
