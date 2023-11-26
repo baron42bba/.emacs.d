@@ -172,6 +172,45 @@ from bash.
             (push "/opt/local/share/info" Info-directory-list)))
 #+END_SRC
 
+* bba open safari url in eww
+[2023-05-09 Tue 16:25]
+
+[[file:elpa/org-mac-link-20220616.2340/org-mac-link.el::(org-mac-link-paste-applescript-links][org-mac-link]]
+
+#+begin_src emacs-lisp :tangle never
+  (defun bba-open-safari-in-eww ()
+    "AppleScript to get the links to the frontmost window of the Safari.app and open in eww."
+    (interactive)
+    (let* ((noquote-as-link-list
+            (if (string-prefix-p "\"" as-link-list)
+                (substring as-link-list 1 -1)
+              as-link-list))
+           (link-list
+            (mapcar (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x)
+                                    (setq x (match-string 1 x)))
+                      x)
+                    (split-string noquote-as-link-list "[\r\n]+")))
+           split-link URL description orglink rtn orglink-list)
+      (while link-list
+        (setq split-link (split-string (pop link-list) "::split::"))
+        (setq URL (car split-link))
+        (setq description (cadr split-link))
+        (when (not (string= URL ""))
+          (setq orglink (org-link-make-string URL description))
+          (push orglink orglink-list)))
+      (setq rtn (mapconcat #'identity orglink-list "\n"))
+      (kill-new rtn)
+      rtn)
+    (org-mac-link-do-applescript
+     (concat
+      "tell application \"Safari\"\n"
+      "	set theUrl to URL of document 1\n"
+      "	set theName to the name of the document 1\n"
+      "	return theUrl & \"::split::\" & theName & \"\n\"\n"
+      "end tell\n")))
+#+end_src
+
+
 * [[https://github.com/leoliu/play-sound-osx][play sound on osx]]
 [2021-01-22 Fri 11:58]
 
