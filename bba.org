@@ -478,7 +478,7 @@ search the web on your fingertips. C-c /.
           :keybinding "P")
 
         (defengine vertica
-          "https://docs.vertica.com/23.3.x/en/searchResults.html?search=%s"
+          "https://docs.vertica.com/23.4.x/en/searchResults.html?search=%s"
           :keybinding "v")
 
         (defengine wikipedia
