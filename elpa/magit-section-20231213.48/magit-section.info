@@ -85,7 +85,7 @@ File: magit-section.info,  Node: Creating Sections,  Next: Core Functions,  Prev
      slot, and insert the section at point.  CLASS is a subclass of
      ‘magit-section’ or has the form ‘(eval FORM)’, in which case FORM
      is evaluated at runtime and should return a subclass.  In other
-     places a sections class is oftern referred to as its "type".
+     places a sections class is often referred to as its "type".
 
      Many commands behave differently depending on the class of the
      current section and sections of a certain class can have their own
@@ -296,8 +296,8 @@ Tag Table:
 Node: Top788
 Node: Introduction2076
 Node: Creating Sections2846
-Node: Core Functions7355
-Node: Matching Functions10407
+Node: Core Functions7354
+Node: Matching Functions10406
 
 End Tag Table
 
