@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: setrole
+# key: sr_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SET ROLE ${1:$$(yas-choose-value '("PSEUDOSUPERUSER" "DEFAULT"))};$0
