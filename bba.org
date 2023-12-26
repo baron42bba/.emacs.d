@@ -3217,8 +3217,7 @@ Set default indentation, end of line, trailing whitespaces etc for the
 whole team. No matter what editor gets used.
 
 #+BEGIN_SRC emacs-lisp
-  (if (equal "work" (getenv "SYSENV"))
-      (editorconfig-mode '1))
+  (editorconfig-mode '1)
 
 #+END_SRC
 * set theme bba1
