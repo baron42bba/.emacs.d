@@ -1,9 +1,9 @@
-(define-package "org-jira" "20230413.441" "Syncing between Jira and Org-mode."
+(define-package "org-jira" "20230915.57" "Syncing between Jira and Org-mode."
   '((emacs "24.5")
     (cl-lib "0.5")
     (request "0.2.0")
     (dash "2.14.1"))
-  :commit "63a74d4458f512f0825e9f55491baad3ee4e9c4b" :maintainers
+  :commit "295b01ede42952c848bd8d76bc8c456a87876cbc" :maintainers
   '(("Matthew Carter" . "m@ahungry.com"))
   :maintainer
   '("Matthew Carter" . "m@ahungry.com")
