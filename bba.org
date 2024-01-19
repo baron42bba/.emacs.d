@@ -232,15 +232,12 @@ If trash is missing you might want to run
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (if (string-equal system-type "darwin")
-  (if (file-exists-p "/opt/local/bin/trash")
-      (progn
-	(defun system-move-file-to-trash (file)
-      "Use osx port trash to move files to trash"
-      (call-process "trash" nil nil nil file)
-	)
-      )
-  )
-  )
+      (if (file-exists-p "/opt/local/bin/trash")
+          (progn
+            (defun system-move-file-to-trash (file)
+              "Use osx port trash to move files to trash"
+              (call-process "trash" nil nil nil file)
+              ))))
 #+END_SRC
 
 With trash you can recover files to it's original location.
@@ -290,6 +287,7 @@ Keep track of your important stuff!
         ;; (package-initialize)
         (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
         (add-to-list 'package-archives '("elpa" . "https://elpa.gnu.org/packages/"))
+        (setq package-install-upgrade-built-in t)
         ))
 #+END_SRC
 
@@ -2452,8 +2450,9 @@ switch default browser between eww and default.
 
 
 #+BEGIN_SRC emacs-lisp
-  (setq type-break-keystroke-threshold '(3600 . 18000))
-  (type-break-mode t)
+  (if (string-equal system-type "darwin")
+      (setq type-break-keystroke-threshold '(3600 . 18000))
+    (type-break-mode t))
 #+END_SRC
 
 * aliases
@@ -2489,7 +2488,7 @@ character before any spaces."
 * key bindings
 
 #+BEGIN_SRC emacs-lisp
-  (if (>= emacs-major-version 28)
+  (if (string-equal system-type "darwin")
       (progn (setq mac-command-modifier 'super)
              (setq mac-option-modifier 'meta)))
 
@@ -3296,10 +3295,11 @@ whole team. No matter what editor gets used.
 https://github.com/IBM/plex/releases
 
 #+begin_src emacs-lisp :tangle no
-  (seq-filter (lambda (font)
-              (when-let ((info (font-info font)))
-                (string-match-p "spacing=100" (aref info 1))))
-            (font-family-list))
+  (if (string-equal system-type "darwin")
+      (seq-filter (lambda (font)
+                    (when-let ((info (font-info font)))
+                      (string-match-p "spacing=100" (aref info 1))))
+                  (font-family-list)))
 
 #+end_src
 
