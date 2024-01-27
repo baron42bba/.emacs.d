@@ -425,58 +425,98 @@ copy-mode and set to nil on leaving."
 
 (defface vterm-color-black
   `((t :inherit term-color-black))
-  "Face used to render black color code.
-The foreground color is used as ANSI color 0 and the background
-color is used as ANSI color 8."
+  "Face used to render black color code."
   :group 'vterm)
 
 (defface vterm-color-red
   `((t :inherit term-color-red))
-  "Face used to render red color code.
-The foreground color is used as ANSI color 1 and the background
-color is used as ANSI color 9."
+  "Face used to render red color code."
   :group 'vterm)
 
 (defface vterm-color-green
   `((t :inherit term-color-green))
-  "Face used to render green color code.
-The foreground color is used as ANSI color 2 and the background
-color is used as ANSI color 10."
+  "Face used to render green color code."
   :group 'vterm)
 
 (defface vterm-color-yellow
   `((t :inherit term-color-yellow))
-  "Face used to render yellow color code.
-The foreground color is used as ANSI color 3 and the background
-color is used as ANSI color 11."
+  "Face used to render yellow color code."
   :group 'vterm)
 
 (defface vterm-color-blue
   `((t :inherit term-color-blue))
-  "Face used to render blue color code.
-The foreground color is used as ANSI color 4 and the background
-color is used as ANSI color 12."
+  "Face used to render blue color code."
   :group 'vterm)
 
 (defface vterm-color-magenta
   `((t :inherit term-color-magenta))
-  "Face used to render magenta color code.
-The foreground color is used as ansi color 5 and the background
-color is used as ansi color 13."
+  "Face used to render magenta color code."
   :group 'vterm)
 
 (defface vterm-color-cyan
   `((t :inherit term-color-cyan))
-  "Face used to render cyan color code.
-The foreground color is used as ansi color 6 and the background
-color is used as ansi color 14."
+  "Face used to render cyan color code."
   :group 'vterm)
 
 (defface vterm-color-white
   `((t :inherit term-color-white))
-  "Face used to render white color code.
-The foreground color is used as ansi color 7 and the background
-color is used as ansi color 15."
+  "Face used to render white color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-black
+  `((t :inherit ,(if (facep 'term-color-bright-black)
+                     'term-color-bright-black
+                   'term-color-black)))
+  "Face used to render bright black color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-red
+  `((t :inherit ,(if (facep 'term-color-bright-red)
+                     'term-color-bright-red
+                   'term-color-red)))
+  "Face used to render bright red color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-green
+  `((t :inherit ,(if (facep 'term-color-bright-green)
+                     'term-color-bright-green
+                   'term-color-green)))
+  "Face used to render bright green color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-yellow
+  `((t :inherit ,(if (facep 'term-color-bright-yellow)
+                     'term-color-bright-yellow
+                   'term-color-yellow)))
+  "Face used to render bright yellow color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-blue
+  `((t :inherit ,(if (facep 'term-color-bright-blue)
+                     'term-color-bright-blue
+                   'term-color-blue)))
+  "Face used to render bright blue color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-magenta
+  `((t :inherit ,(if (facep 'term-color-bright-magenta)
+                     'term-color-bright-magenta
+                   'term-color-magenta)))
+  "Face used to render bright magenta color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-cyan
+  `((t :inherit ,(if (facep 'term-color-bright-cyan)
+                     'term-color-bright-cyan
+                   'term-color-cyan)))
+  "Face used to render bright cyan color code."
+  :group 'vterm)
+
+(defface vterm-color-bright-white
+  `((t :inherit ,(if (facep 'term-color-bright-white)
+                     'term-color-bright-white
+                   'term-color-white)))
+  "Face used to render bright white color code."
   :group 'vterm)
 
 (defface vterm-color-underline
@@ -501,7 +541,15 @@ Only background is used."
    vterm-color-blue
    vterm-color-magenta
    vterm-color-cyan
-   vterm-color-white]
+   vterm-color-white
+   vterm-color-bright-black
+   vterm-color-bright-red
+   vterm-color-bright-green
+   vterm-color-bright-yellow
+   vterm-color-bright-blue
+   vterm-color-bright-magenta
+   vterm-color-bright-cyan
+   vterm-color-bright-white]
   "Color palette for the foreground and background.")
 
 (defvar-local vterm--term nil
@@ -1606,29 +1654,27 @@ If N is negative backward-line from end of buffer."
       (when raw-pwd
         (vterm--get-directory raw-pwd)))))
 
-(defun vterm--get-color (index)
-  "Get color by index from `vterm-color-palette'.
-Argument INDEX index of the terminal color.
-Special values for INDEX are:
--11 foreground for cells with underline attribute, foreground of
-the `vterm-color-underline' face is used in this case.
--12 background for cells with inverse video attribute, background
-of the `vterm-color-inverse-video' face is used in this case."
-  (cond
-   ((and (>= index 0) (< index 8))
-    (face-foreground
-     (elt vterm-color-palette index)
-     nil 'default))
-   ((and (>= index 8) (< index 16))
-    (face-background
-     (elt vterm-color-palette (% index 8))
-     nil 'default))
-   ((= index -11)
-    (face-foreground 'vterm-color-underline nil 'default))
-   ((= index -12)
-    (face-background 'vterm-color-inverse-video nil 'default))
-   (t
-    nil)))
+(defun vterm--get-color (index &rest args)
+  "Get color by INDEX from `vterm-color-palette'.
+
+Special INDEX of -1 is used to represent default colors.  ARGS
+may optionally contain `:underline' or `:inverse-video' for cells
+with underline or inverse video attribute.  If ARGS contains
+`:foreground', use foreground color of the respective face
+instead of background."
+  (let ((foreground    (member :foreground args))
+        (underline     (member :underline args))
+        (inverse-video (member :inverse-video args)))
+    (funcall (if foreground #'face-foreground #'face-background)
+             (cond
+              ((and (>= index 0) (< index 16))
+               (elt vterm-color-palette index))
+              ((and (= index -1) foreground underline)
+               'vterm-color-underline)
+              ((and (= index -1) (not foreground) inverse-video)
+               'vterm-color-inverse-video)
+              (t 'default))
+             nil 'default)))
 
 (defun vterm--eval (str)
   "Check if string STR is `vterm-eval-cmds' and execute command.
