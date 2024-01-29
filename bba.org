@@ -2505,7 +2505,7 @@ character before any spaces."
   (define-key global-map "\C-c\S-t" 'visit-tags-table)
   (define-key global-map "\C-cf" 'tags-search)
 
-  (define-key global-map (kbd "s-c") '(lambda () "insertwhichfunc" (interactive)(insert (which-function))))
+  (define-key global-map (kbd "s-c") #'(lambda () "insertwhichfunc" (interactive)(insert (which-function))))
   (define-key global-map (kbd "s-b") 'clone-indirect-buffer)
   (define-key global-map (kbd "s-m") 'toggle-maximize-buffer)
    (define-key global-map (kbd "M-s-m") 'maximize-window)
@@ -2552,12 +2552,12 @@ easy access to secrets.
 #+BEGIN_SRC emacs-lisp
   (define-prefix-command 'bba/pw)
   (define-key global-map "\C-xp" bba/pw)
-  (define-key bba/pw "p" '(lambda () "awsprod" (interactive)(bba-pw-lookup "0DA39906-79C8-4468-AB0A-C72DB613C529")))
-  (define-key bba/pw "t" '(lambda () "awstest" (interactive)(bba-pw-lookup "D0518F8B-C724-45B8-8D85-C568DCDD5913")))
-  (define-key bba/pw "c" '(lambda () "awscn" (interactive)(bba-pw-lookup "53D5B091-0295-42BA-9D91-4A36055E554B")))
-  (define-key bba/pw "s" '(lambda () "sys" (interactive)(bba-pw-lookup "FABC2AFA-E966-4AC3-AEEB-2883DE790DE4")))
-  (define-key bba/pw "S" '(lambda () "ssh" (interactive)(bba-pw-lookup "BF852AE1-57B7-4C7F-BE02-F73095D4CD52")))
-  (define-key bba/pw "i" '(lambda () "it" (interactive)(bba-pw-lookup "83752B2C-5DE4-4B2F-A306-B191348A2E26")))
+  (define-key bba/pw "p" #'(lambda () "awsprod" (interactive)(bba-pw-lookup "0DA39906-79C8-4468-AB0A-C72DB613C529")))
+  (define-key bba/pw "t" #'(lambda () "awstest" (interactive)(bba-pw-lookup "D0518F8B-C724-45B8-8D85-C568DCDD5913")))
+  (define-key bba/pw "c" #'(lambda () "awscn" (interactive)(bba-pw-lookup "53D5B091-0295-42BA-9D91-4A36055E554B")))
+  (define-key bba/pw "s" #'(lambda () "sys" (interactive)(bba-pw-lookup "FABC2AFA-E966-4AC3-AEEB-2883DE790DE4")))
+  (define-key bba/pw "S" #'(lambda () "ssh" (interactive)(bba-pw-lookup "BF852AE1-57B7-4C7F-BE02-F73095D4CD52")))
+  (define-key bba/pw "i" #'(lambda () "it" (interactive)(bba-pw-lookup "83752B2C-5DE4-4B2F-A306-B191348A2E26")))
 
 
   (defun bba-pw-lookup (id)
@@ -2617,7 +2617,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "d" 'ediff-buffers)
   (define-key bba/launcher "e" 'eshell)
   (define-key bba/launcher "E" 'elfeed)
-  (define-key bba/launcher "g" '(lambda()"epa-file-encrypt-to"(interactive) (describe-variable 'epa-file-encrypt-to)))
+  (define-key bba/launcher "g" #'(lambda()"epa-file-encrypt-to"(interactive) (describe-variable 'epa-file-encrypt-to)))
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
   (define-key bba/launcher "l" 'magit-log-buffer-file)
@@ -2653,7 +2653,7 @@ function to convert groups of spaces to hard tabs.
   (define-key global-map "\C-c\C-w" 'fixup-whitespace)
 
   (define-key global-map "\M-g\M-d" 'magit-diff-unstaged)
-  (define-key global-map "\M-g\S-d" '(lambda()
+  (define-key global-map "\M-g\S-d" #'(lambda()
                                      (interactive)
                                      (call-interactively 'magit-file-delete)
                                      (kill-buffer)

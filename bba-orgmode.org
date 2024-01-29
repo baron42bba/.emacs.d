@@ -492,7 +492,7 @@ remove duplicates in modes like sqli.
 
 #+begin_src emacs-lisp
   (add-hook 'comint-mode-hook
-            '(lambda () (setq comint-input-ignoredups t)))
+            #'(lambda () (setq comint-input-ignoredups t)))
 #+end_src
 
 ** comint-write-buffer
@@ -1204,25 +1204,25 @@ and call this function.
 #+BEGIN_SRC emacs-lisp
 
 
-  (global-set-key (kbd "C-c <f5>") '(lambda () (interactive) (find-file "~/org/notes.org")))
+  (global-set-key (kbd "C-c <f5>") #'(lambda () (interactive) (find-file "~/org/notes.org")))
 
-  (global-set-key (kbd "C-c <f7>") '(lambda () (interactive) (find-file "~/org/todo.org")))
-  (global-set-key (kbd "C-c <f8>") '(lambda () (interactive) (find-file "~/org/workhours.org")))
+  (global-set-key (kbd "C-c <f7>") #'(lambda () (interactive) (find-file "~/org/todo.org")))
+  (global-set-key (kbd "C-c <f8>") #'(lambda () (interactive) (find-file "~/org/workhours.org")))
   (if (equal "work" (getenv "SYSENV"))
       (progn
-        (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/workorg/work.org")))
-        (global-set-key (kbd "C-c S-<f6>") '(lambda () (interactive) (find-file "~/workorg/work_archive.org")))
-        (global-set-key (kbd "C-c C-<f6>") '(lambda () (interactive) (org-id-goto "0C6EAD45-9046-4A56-96C3-3B378A444263")))
+        (global-set-key (kbd "C-c <f6>") #'(lambda () (interactive) (find-file "~/workorg/work.org")))
+        (global-set-key (kbd "C-c S-<f6>") #'(lambda () (interactive) (find-file "~/workorg/work_archive.org")))
+        (global-set-key (kbd "C-c C-<f6>") #'(lambda () (interactive) (org-id-goto "0C6EAD45-9046-4A56-96C3-3B378A444263")))
         )
     (progn
-      (global-set-key (kbd "C-c <f6>") '(lambda () (interactive) (find-file "~/org/work.org")))
+      (global-set-key (kbd "C-c <f6>") #'(lambda () (interactive) (find-file "~/org/work.org")))
       ))
 
-  (global-set-key (kbd "C-c <f9>") '(lambda () (interactive)
+  (global-set-key (kbd "C-c <f9>") #'(lambda () (interactive)
                                       ( if (file-exists-p "~/org/emacs.org")
                                           (find-file "~/org/emacs.org")
                                         (find-file "~/.emacs.d/org/emacs.org"))))
-  (global-set-key (kbd "C-c <f10>") '(lambda () (interactive) (find-file "~/.emacs.d/bba.org")))
+  (global-set-key (kbd "C-c <f10>") #'(lambda () (interactive) (find-file "~/.emacs.d/bba.org")))
 
 #+END_SRC
 
@@ -1676,7 +1676,7 @@ TODO: this block should be splitted and moved to the right org files.
                     (auto-fill-mode)
                     (which-function-mode)
                     (flyspell-mode -1)
-                    (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
+                    (define-key org-mode-map "\C-h\C-y" #'(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org")))
                     (when (display-graphic-p)
                       (progn
                         (rainbow-delimiters-mode))
@@ -1711,7 +1711,7 @@ TODO: this block should be splitted and moved to the right org files.
       (add-hook 'org-mode-hook
                 (lambda ()
                   (auto-fill-mode)
-                  (define-key org-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org"))))
+                  (define-key org-mode-map "\C-h\C-y" #'(lambda () (interactive) (find-file "~/.emacs.d/snippets/org-mode.org"))))
                 ))
 
     )

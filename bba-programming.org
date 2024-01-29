@@ -71,7 +71,7 @@
          (define-key cfengine3-mode-map "\C-c," (lambda()
                                                    (interactive)
                                                    (browse-url (concat "https://docs.cfengine.com/latest/search.html?q=" (word-at-point)))))
-           (define-key cfengine3-mode-map "\C-h\C-y" '(lambda () (interactive) (find-file "~/.emacs.d/snippets/cfengine3-mode.org")))
+           (define-key cfengine3-mode-map "\C-h\C-y" #'(lambda () (interactive) (find-file "~/.emacs.d/snippets/cfengine3-mode.org")))
          ))
 
 
