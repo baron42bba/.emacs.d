@@ -3215,6 +3215,8 @@ whole team. No matter what editor gets used.
 #+BEGIN_SRC emacs-lisp
   (if (display-graphic-p)
       (progn
+        (setq custom-theme-directory "~/.emacs.d/themes/")
+        (load-theme 'bba1 t)
         (when (>= emacs-major-version 27)
           (with-eval-after-load 'org
             (dolist (face '(org-block

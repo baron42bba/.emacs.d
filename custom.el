@@ -11,7 +11,6 @@
  '(aws-snippets-regions '("us-east-1" "eu-west-1" "ap-southeast-1" "cn-north-1"))
  '(bmkp-last-as-first-bookmark-file "~/workorg/bookmarks")
  '(cfengine-parameters-indent '(promise pname 2))
- '(custom-enabled-themes '(bba1))
  '(custom-safe-themes
    '("8c6bc3959bb049983f4c76b1a0b78a3a28629370558e1d7bd45d7b54bf671a88" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" default))
  '(custom-theme-directory "~/.emacs.d/themes/")
@@ -89,24 +88,5 @@
 ;;  '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
 ;;  '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
 ;;  '(stripes-face ((t :background "gray0"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
- '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))))
- '(org-block-end-line ((t (:inherit org-block-begin-line))))
- '(org-document-title ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.5 :underline nil))))
- '(org-level-1 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.6))))
- '(org-level-2 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.4))))
- '(org-level-3 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.25))))
- '(org-level-4 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.1))))
- '(org-level-5 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(org-level-6 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(org-level-7 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(org-level-8 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
- '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
- '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
- '(stripes-face ((t :background "gray0"))))
+
 
