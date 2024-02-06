@@ -78,6 +78,14 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
   (setq eshell-history-size 5000)
 #+end_src
 
+** [[https://codeberg.org/akib/emacs-eat/][eat]]
+[2024-02-05 Mon 12:10]
+
+#+begin_src elisp
+  (add-hook 'eshell-load-hook #'eat-eshell-mode)
+  (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode)
+#+end_src
+
 
 ** Most of this stolen from the great [[https://github.com/howardabrams/hamacs/blob/main/ha-eshell.org][Howard Abrams]]!
 [2022-12-08 Thu 17:43]
