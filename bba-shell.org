@@ -78,6 +78,25 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
   (setq eshell-history-size 5000)
 #+end_src
 
+#+begin_src elisp
+  (defun tramp-aware-woman (man-page-path)
+    (interactive)
+    (let ((dir (eshell/pwd)))
+      (woman-find-file
+       (if (file-remote-p dir)
+           (let ((vec (tramp-dissect-file-name dir)))
+             (tramp-make-tramp-file-name
+              (tramp-file-name-method vec)
+              (tramp-file-name-user vec)
+              nil
+              (tramp-file-name-host vec)
+              nil
+              man-page-path))
+         man-page-path))))
+
+  ;; (defalias 'eshell/man "tramp-aware-woman ${*man -w $1}")
+  :: (defalias 'man "woman-find-file ${*man --path $1}")
+#+end_src
 ** [[https://codeberg.org/akib/emacs-eat/][eat]]
 [2024-02-05 Mon 12:10]
 

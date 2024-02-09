@@ -1,0 +1,7 @@
+alias ll ls -AlohG --color=always
+alias cls clear 1
+alias d dired $1
+alias find echo 'Please use fd <pattern> <paths> instead.'
+alias less view-file $1
+alias ll /opt/local/bin/gls -AlohG --color=always
+alias man tramp-aware-woman ${*man -w $1}

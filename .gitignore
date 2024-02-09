@@ -10,7 +10,8 @@ archive-contents
 /cache
 /elpa/archives/*
 /eln-cache
-/eshell/*
+/eshell/history
+/eshell/lastdir
 /history
 /mthesaur.txt.cache
 /org-clock-save.el*
@@ -29,3 +30,4 @@ apples-tmp-dir
 /request/*
 /.org-id-locations
 /.#type-break
+/elpa/vterm*/build
