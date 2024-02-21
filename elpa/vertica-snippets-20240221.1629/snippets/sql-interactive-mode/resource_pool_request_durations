@@ -1,0 +1,29 @@
+# -*- mode: snippet -*-
+# name: resource_pool_request_durations
+# key: rrd_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT ra.pool_name,
+       qr.request_type,
+       CASE WHEN UPPER(REGEXP_SUBSTR(qr.request, '\w+', 1, 1, 'b')::CHAR(8)) = 'WITH' THEN 'SELECT'
+       ELSE UPPER(REGEXP_SUBSTR(qr.request, '\w+', 1, 1, 'b')::CHAR(8))
+       END AS qtype,
+       SUM(CASE WHEN qr.request_duration_ms < 1000 then 1 else 0 end) AS 'less1s',
+       SUM(CASE WHEN qr.request_duration_ms >= 1000 AND qr.request_duration_ms < 2000 THEN 1 ELSE 0 END) AS '1to2s',
+       SUM(CASE WHEN qr.request_duration_ms >= 2000 AND qr.request_duration_ms < 5000 THEN 1 ELSE 0 END) AS '2to5s',
+       SUM(CASE WHEN qr.request_duration_ms >= 5000 AND qr.request_duration_ms < 10000 THEN 1 ELSE 0 END) AS '5to10s',
+       SUM(CASE WHEN qr.request_duration_ms >= 10000 AND qr.request_duration_ms < 20000 THEN 1 ELSE 0 END) AS '10to20s',
+       SUM(CASE WHEN qr.request_duration_ms >= 20000 AND qr.request_duration_ms < 60000 THEN 1 ELSE 0 END) AS '20to60s',
+       SUM(CASE WHEN qr.request_duration_ms >= 60000 AND qr.request_duration_ms < 120000 THEN 1 ELSE 0 END) AS '1to2m',
+       SUM(CASE WHEN qr.request_duration_ms >= 120000 AND qr.request_duration_ms < 300000 THEN 1 ELSE 0 END) AS '2to5m',
+       SUM(CASE WHEN qr.request_duration_ms >= 300000 AND qr.request_duration_ms < 600000 THEN 1 ELSE 0 END) AS '5to10m',
+       SUM(CASE WHEN qr.request_duration_ms >= 600000 AND qr.request_duration_ms < 6000000 THEN 1 ELSE 0 END) AS '10to60m',
+       SUM(CASE WHEN qr.request_duration_ms >= 6000000 THEN 1 ELSE 0 END) AS 'more1h'
+  FROM v_monitor.query_requests qr
+	 INNER JOIN v_internal.dc_resource_acquisitions ra
+	     USING(transaction_id, statement_id)
+ WHERE NOT is_executing
+   AND start_timestamp::DATE BETWEEN '${1:`(insert (format-time-string "%Y-%m-%d"))`}' AND '${2:`(insert (format-time-string "%Y-%m-%d"))`}'
+ GROUP BY 1, 2, 3
+ ORDER BY 1, 2, 3;$0

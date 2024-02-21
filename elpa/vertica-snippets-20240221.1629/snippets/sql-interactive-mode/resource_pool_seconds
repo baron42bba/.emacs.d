@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: resource_pool_seconds
+# key: rps_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT pool_name,
+       seconds_bucket,
+       COUNT(*) AS count
+  FROM (
+    SELECT ra.pool_name, 
+           1 + qr.request_duration_ms // 1000 AS seconds_bucket
+      FROM v_monitor.query_requests qr
+             INNER JOIN v_internal.dc_resource_acquisitions ra
+                 USING(transaction_id, statement_id)
+     WHERE qr.request_type = 'QUERY' 
+       AND qr.start_timestamp::DATE BETWEEN '${1:`(insert (format-time-string "%Y-%m-%d"))`}' AND '${2:`(insert (format-time-string "%Y-%m-%d"))`}'
+       AND qr.request_duration_ms IS NOT NULL
+       AND ( UPPER(REGEXP_SUBSTR(qr.request, '\w+', 1, 1, 'b')::CHAR(8)) = 'WITH' OR
+            UPPER(REGEXP_SUBSTR(qr.request, '\w+', 1, 1, 'b')::CHAR(8)) = 'SELECT' )
+    ) x 
+GROUP BY 1, 2
+ORDER BY 1, 2;$0
