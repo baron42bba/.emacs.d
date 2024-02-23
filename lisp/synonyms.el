@@ -4,17 +4,17 @@
 ;; Description: Look up synonyms for a word or phrase in a thesaurus.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 2005-2014, Drew Adams, all rights reserved.
+;; Copyright (C) 2005-2022, Drew Adams, all rights reserved.
 ;; Created: Tue Dec 20 14:39:26 2005
 ;; Version: 0
 ;; Package-Requires: ()
-;; Last-Updated: Thu Dec 26 09:51:41 2013 (-0800)
+;; Last-Updated: Sat Mar 26 08:31:59 2022 (-0700)
 ;;           By: dradams
-;;     Update #: 2518
-;; URL: http://www.emacswiki.org/synonyms.el
-;; Doc URL: http://www.emacswiki.org/ThesauriAndSynonyms
+;;     Update #: 2570
+;; URL: https://www.emacswiki.org/emacs/download/synonyms.el
+;; Doc URL: https://www.emacswiki.org/emacs/Synonyms
 ;; Keywords: text, dictionary, thesaurus, spelling, apropos, help
-;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x
+;; Compatibility: GNU Emacs: 20.x, 21.x, 22.x, 23.x, 24.x, 25.x, 26.x
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -33,7 +33,7 @@
 ;;  To use library Synonyms, you will need the Moby Thesaurus II file,
 ;;  `mthesaur.txt', available here:
 ;;
-;;    ftp://ibiblio.org/pub/docs/books/gutenberg/etext02/mthes10.zip
+;;    https://archive.org/details/mobythesauruslis03202gut
 ;;
 ;;  Put this in your initialization file (~/.emacs):
 ;;
@@ -199,7 +199,7 @@
 ;;  library `Icicles to complete a partial word in a text buffer into a
 ;;  word or phrase in the thesaurus.  If you use both libraries then
 ;;  load Icicles after Synonyms.  For more information on Icicles, see
-;;  `http://www.emacswiki.org/Icicles'.
+;;  `https://www.emacswiki.org/emacs/Icicles'.
 ;;
 ;;  ** Minibuffer Input Completion **
 ;;
@@ -408,13 +408,14 @@
 ;;
 ;;    `synonyms-action', `synonyms-add-history-links',
 ;;    `synonyms-default-regexp', `synonyms-define-cache-file',
-;;    `synonyms-define-synonyms-file', `synonyms-format-entries',
+;;    `synonyms-define-synonyms-file', `synonyms-file-readable-p',
+;;    `synonyms-file-writable-p', `synonyms-format-entries',
 ;;    `synonyms-format-entry', `synonyms-format-finish',
 ;;    `synonyms-format-synonyms',
 ;;    `synonyms-hack-backslashes-if-cygwin', `synonyms-lookup',
-;;    `synonyms-nearest-word', `synonyms-file-readable-p',
+;;    `synonyms-nearest-word', `synonyms-p',
 ;;    `synonyms-search-entries', `synonyms-search-synonyms',
-;;    `synonyms-show-synonyms', `synonyms-file-writable-p'.
+;;    `synonyms-show-synonyms'.
 ;;
 ;;  Internal variables defined here -
 ;;
@@ -460,7 +461,7 @@
 ;;     filtering by part of speech (verb vs adjective etc.), and so
 ;;     on.  A good example of what I'd really like to have is provided
 ;;     by the free Windows program WordWeb (available here:
-;;     http://wordweb.info/).  Combining that functionality with
+;;     https://wordweb.info/).  Combining that functionality with
 ;;     Icicles completion features would provide a great tool, IMO.
 ;;
 ;;     `synonyms-definition*' goes a long way toward providing this,
@@ -471,6 +472,12 @@
 ;;
 ;;; Change Log:
 ;;
+;; 2022/03/26 dadams
+;;     Added synonyms-p.
+;; 2015/09/19 dadams
+;;     synonyms-action: Added args APPENDP and MOREP.
+;;     synonyms, synonyms-history-(backward|forward): Pass APPENDP and MOREP to synonyms-action.
+;;     synonyms-no-read: Use synonyms-action (same code, factored out).
 ;; 2012/08/21 dadams
 ;;     Call tap-put-thing-at-point-props after load thingatpt+.el.
 ;; 2012/08/18 dadams
@@ -594,14 +601,7 @@
   (tap-define-aliases-wo-prefix)
   (tap-put-thing-at-point-props))
 
-;; Quiet the byte-compiler.
-(defvar appendp)                        ; Here.
-(defvar morep)                          ; Here.
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
  
 ;;; Faces (alphabetical) -----------------------------------
 
@@ -616,9 +616,9 @@ synonyms.el bug: \
 &body=Describe bug here, starting with `emacs -q'.  \
 Don't forget to mention your Emacs and library versions."))
   :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
-  :link '(url-link :tag "Download" "http://www.emacswiki.org/cgi-bin/wiki/synonyms.el")
-  :link '(url-link :tag "Description" "http://www.emacswiki.org/cgi-bin/wiki/Synonyms")
+          "https://www.emacswiki.org/emacs/DrewsElispLibraries")
+  :link '(url-link :tag "Download" "https://www.emacswiki.org/emacs/download/synonyms.el")
+  :link '(url-link :tag "Description" "https://www.emacswiki.org/emacs/Synonyms")
   :link '(emacs-commentary-link :tag "Commentary" "synonyms"))
 
 ;;;###autoload
@@ -716,14 +716,14 @@ See also `synonyms-dictionaries-url'."
   :type 'string :group 'Synonyms)
 
 ;;;###autoload
-(defcustom synonyms-dictionary-alternate-url "http://www.onelook.com/?ls=b&w="
+(defcustom synonyms-dictionary-alternate-url "https://www.onelook.com/?ls=b&w="
   "*URL of a Web dictionary lookup.  Text to look up is appended to this.
 The default value, \"http://www.onelook.com/?ls=b&w=\" lets you use `?'
 and `*' as wildcards in the terms you look up.  These are not used as
 regexp wildcards, however.  `?' stands for any single character, and
 `*' stands for any sequence of characters.  In terms of regexp syntax,
 `?' here is equivalent to the regexp `.', and `*' is equivalent to the
-regexp `.*'.  See http://www.onelook.com/?c=faq#patterns for more
+regexp `.*'.  See https://www.onelook.com/?c=faq#patterns for more
 information on the allowed wildcard patterns.
 See also `synonyms-dictionary-url'."
   :type 'string :group 'Synonyms)
@@ -771,7 +771,7 @@ See also `synonyms-dictionary-url'."
     (define-key map [synonyms-next]        '("Show Next" . synonyms-history-forward))
     (put 'synonyms-history-forward 'menu-enable 'synonyms-history-forward)
     (define-key map [synonyms-previous]    '("Show Previous" . synonyms-history-backward))
-    (put 'synonyms-history-backward 'menu-enable '(and synonyms-history (cdr synonyms-history)))
+    (put 'synonyms-history-backward 'menu-enable '(and synonyms-history  (cdr synonyms-history)))
     (define-key map [synonyms-separator]   '("--"))
     (define-key map [synonyms-more-append]
       '("Find (Max), Append Results" . synonyms-match-more+append-result))
@@ -916,11 +916,11 @@ This does nothing if the obarray is already complete."
 
 (defun synonyms-file-readable-p (file)
   "Return non-nil if FILE (a string) names a readable file."
-  (and (not (string= "" file)) (file-readable-p file) (not (file-directory-p file))))
+  (and (not (string= "" file))  (file-readable-p file)  (not (file-directory-p file))))
 
 (defun synonyms-file-writable-p (file)
   "Return non-nil if FILE (a string) names a writable file."
-  (and (not (string= "" file)) (file-writable-p file) (not (file-directory-p file))))
+  (and (not (string= "" file))  (file-writable-p file)  (not (file-directory-p file))))
 
 (defun synonyms (&optional arg regexp)
   "Show synonyms that match a regular expression (e.g. a word or phrase).
@@ -954,24 +954,22 @@ to match (no prompting)."
          (morep                (eq synonyms-match-more-flag (atom arg)))
          (appendp              (eq synonyms-append-result-flag (and (wholenump num-arg)
                                                                     (/= 16 num-arg))))
-         (default-search-text  (or regexp (synonyms-default-regexp)))
-         (search-text          (or regexp
-                                   (let ((case-fold-search  t)) ; Case-insensitive completion.
-                                     (completing-read
-                                      "Show synonyms for word or phrase (regexp): "
-                                      synonyms-obarray nil nil nil 'synonyms-history
-                                      default-search-text)))))
-    (synonyms-action search-text)))
+         (default-search-text  (or regexp  (synonyms-default-regexp)))
+         (search-text          (or regexp  (let ((case-fold-search  t)) ; Case-insensitive completion.
+                                             (completing-read
+                                              "Show synonyms for word or phrase (regexp): "
+                                              synonyms-obarray nil nil nil 'synonyms-history
+                                              default-search-text)))))
+    (synonyms-action search-text appendp morep)))
 
-(defun synonyms-action (search-text)
-  "Helper function for command `synonyms'.
-APPENDP and MOREP are free here."
+(defun synonyms-action (search-text appendp morep)
+  "Helper function for `synonyms*' commands."
   (setq synonyms-search-text  search-text) ; Save it.
   (when (string= "" search-text) (error "No text to look up"))
   (unless (member search-text synonyms-history) (push search-text synonyms-history))
   ;; Change `.' to `[^,]' in `search-text', so we don't mix terms.
   (setq search-text  (replace-regexp-in-string "\\." "[^,]" search-text nil t))
-  (synonyms-lookup search-text (and (boundp 'appendp) appendp) (and (boundp 'morep) morep)))
+  (synonyms-lookup search-text appendp morep))
 
 ;;;###autoload
 (defun synonyms-no-read (arg)
@@ -979,39 +977,34 @@ APPENDP and MOREP are free here."
   (interactive "P")
   (let* ((num-arg      (prefix-numeric-value arg))
          (morep        (eq synonyms-match-more-flag (atom arg)))
-         (appendp      (eq synonyms-append-result-flag (and (wholenump num-arg) (/= 16 num-arg))))
+         (appendp      (eq synonyms-append-result-flag (and (wholenump num-arg)  (/= 16 num-arg))))
          (search-text  (synonyms-default-regexp)))
-    (setq synonyms-search-text  search-text) ; Save it.
-    (when (string= "" search-text) (error "No text to look up"))
-    (unless (member search-text synonyms-history) (push search-text synonyms-history))
-    ;; Change `.' to `[^,]' in `search-text', so we don't mix terms.
-    (setq search-text  (replace-regexp-in-string "\\." "[^,]" search-text nil t))
-    (synonyms-lookup search-text appendp morep)))
+    (synonyms-action search-text appendp morep)))
 
 ;;;###autoload
 (defun synonyms-match-more ()
-  "Same as using `synonyms' with `synonyms-match-more-flag' = t."
+  "Same as command `synonyms' with `synonyms-match-more-flag' = t."
   (interactive)
   (let ((synonyms-match-more-flag  t))
     (synonyms)))
 
 ;;;###autoload
 (defun synonyms-match-more-no-read (arg)
-  "Same as using `synonyms' with `synonyms-match-more-flag' = t."
+  "Same as `synonyms-no-read' with `synonyms-match-more-flag' = t."
   (interactive "P")
   (let ((synonyms-match-more-flag  t))
     (synonyms-no-read arg)))
 
 ;;;###autoload
 (defun synonyms-append-result ()
-  "Same as using `synonyms' with `synonyms-append-result-flag' = t."
+  "Same as command `synonyms' with `synonyms-append-result-flag' = t."
   (interactive)
   (let ((synonyms-append-result-flag  t))
     (synonyms)))
 
 ;;;###autoload
 (defun synonyms-append-result-no-read (arg)
-  "Same as using `synonyms' with `synonyms-append-result-flag' = t."
+  "Same as `synonyms-no-read' with `synonyms-append-result-flag' = t."
   (interactive "P")
   (let ((synonyms-append-result-flag  t))
     (synonyms-no-read arg)))
@@ -1061,7 +1054,7 @@ results are revisited."
     (goto-char (posn-point (event-end event)))
     (cond ((get-text-property (point) 'back-link) (synonyms-history-backward nil))
           ((get-text-property (point) 'forward-link) (synonyms-history-forward nil))
-          (t (if (and active (> (point) beg) (< (point) end))
+          (t (if (and active  (> (point) beg)  (< (point) end))
                  (goto-char end)
                (deactivate-mark))       ; User did not click inside region, so deactivate it.
              (synonyms-no-read arg)))))
@@ -1095,20 +1088,20 @@ Else, if this is *Synonyms* buffer, use the synonym under the cursor.
 Else use the word nearest the cursor.
 
 An active region has no effect except in `transient-mark-mode'."
-  (if (and mark-active transient-mark-mode) ; Use region text, if active.
+  (if (and mark-active  transient-mark-mode) ; Use region text, if active.
       (buffer-substring-no-properties (point) (mark))
     (if (eq major-mode 'synonyms-mode)  ; Use mouse-face text, if in synonyms-mode.
         (let (beg end)
-          (when (and (not (eobp)) (get-text-property (point) 'mouse-face))
+          (when (and (not (eobp))  (get-text-property (point) 'mouse-face))
             (setq end  (point)
                   beg  (1+ (point))))
-          (when (and (not (bobp)) (get-text-property (1- (point)) 'mouse-face))
+          (when (and (not (bobp))  (get-text-property (1- (point)) 'mouse-face))
             (setq end  (1- (point))
                   beg  (point)))
           (if (null beg)
               (synonyms-nearest-word)   ; Punt - no mouse-face, for some reason.
             (setq beg  (previous-single-property-change beg 'mouse-face)
-                  end  (or (next-single-property-change end 'mouse-face) (point-max)))
+                  end  (or (next-single-property-change end 'mouse-face)  (point-max)))
             (replace-regexp-in-string   ; Replace newlines with spaces, except at the
              "\\(^ \\| $\\)" ""         ; beginning and end.
              (replace-regexp-in-string "[\n]" " " (buffer-substring-no-properties beg end) nil t)
@@ -1139,10 +1132,10 @@ MORE-P non-nil means additional thesaurus entries can be matched."
                (buffer-disable-undo)    ; Make sure (should already be, because of *Temp* name).
                (erase-buffer)
                (let ((entry-p  (synonyms-search-entries search-text temp-buf morep)))
-                 ;; For `morep' search, we don't stop even if we find an entry.
+                 ;; For MOREP search, we don't stop even if we find an entry.
                  (unless (if morep
-                             (or (synonyms-search-synonyms search-text temp-buf t) entry-p)
-                           (or entry-p (synonyms-search-synonyms search-text temp-buf nil)))
+                             (or (synonyms-search-synonyms search-text temp-buf t)  entry-p)
+                           (or entry-p  (synonyms-search-synonyms search-text temp-buf nil)))
                    (pop synonyms-history) ; Remove it from search history, so we don't try again.
                    (error "No synonyms found for `%s'" search-text))
                  (let ((results-buf  (get-buffer-create "*Synonyms*")))
@@ -1181,8 +1174,8 @@ Emacs 20 or there are no spaces in STRING, then double any backslashes
 in STRING.
 
 This is an ugly hack made necessary because of bugs in Emacs C code."
-  (when (and synonyms-use-cygwin-flag
-             (or (= emacs-major-version 20) (not (string-match " " string))))
+  (when (and synonyms-use-cygwin-flag  (or (= emacs-major-version 20)
+                                           (not (string-match " " string))))
     (setq string  (replace-regexp-in-string "[\\]" "\\\\" string nil t)))
   string)
 
@@ -1333,14 +1326,14 @@ A prefix argument has the same meaning as for command `synonyms'."
   (push (pop synonyms-history) synonyms-history-forward) ; Put current on forward list.
   (let* ((num-arg  (prefix-numeric-value arg))
          (morep    (eq synonyms-match-more-flag (atom arg)))
-         (appendp  (eq synonyms-append-result-flag (and (wholenump num-arg) (/= 16 num-arg)))))
+         (appendp  (eq synonyms-append-result-flag (and (wholenump num-arg)  (/= 16 num-arg)))))
 
     ;; Visit last.  If *Synonyms* has appended search results, go to the previous one, from (point).
     (if (not (get-buffer "*Synonyms*"))
-        (synonyms-action (car synonyms-history))
+        (synonyms-action (car synonyms-history) appendp morep)
       (let ((divider  (with-current-buffer "*Synonyms*" (re-search-backward "^___" nil t))))
         (if (not divider)
-            (synonyms-action (car synonyms-history))
+            (synonyms-action (car synonyms-history) appendp morep)
           (set-buffer "*Synonyms*")
           (goto-char divider)
           (unless (re-search-backward "^Synonyms for \\([^:]+\\):" nil t)
@@ -1358,14 +1351,14 @@ A prefix argument has the same meaning as for command `synonyms'."
   (push (pop synonyms-history-forward) synonyms-history) ; Put current on backward list.
   (let* ((num-arg  (prefix-numeric-value arg))
          (morep    (eq synonyms-match-more-flag (atom arg)))
-         (appendp  (eq synonyms-append-result-flag (and (wholenump num-arg) (/= 16 num-arg)))))
+         (appendp  (eq synonyms-append-result-flag (and (wholenump num-arg)  (/= 16 num-arg)))))
 
     ;; Visit current.  If *Synonyms* has appended search results, go to the next one, from (point).
     (if (not (get-buffer "*Synonyms*"))
-        (synonyms-action (car synonyms-history))
+        (synonyms-action (car synonyms-history) appendp morep)
       (let ((divider  (with-current-buffer "*Synonyms*" (re-search-forward "^___" nil t))))
         (if (not divider)
-            (synonyms-action (car synonyms-history))
+            (synonyms-action (car synonyms-history) appendp morep)
           (set-buffer "*Synonyms*")
           (goto-char divider)
           (unless (re-search-forward "^Synonyms for \\([^:]+\\):" nil t)
@@ -1413,10 +1406,22 @@ With prefix arg, look up the definition in the alternate dictionary,
     (goto-char (posn-point (event-end event)))
     (cond ((get-text-property (point) 'back-link) (synonyms-history-backward nil))
           ((get-text-property (point) 'forward-link) (synonyms-history-forward nil))
-          (t (if (and active (> (point) beg) (< (point) end))
+          (t (if (and active  (> (point) beg)  (< (point) end))
                  (goto-char end)
                (deactivate-mark))       ; User did not click inside region, so deactivate it.
              (synonyms-definition (synonyms-default-regexp) alternate-p)))))
+
+;; Simple synonym test function.
+;;
+(defun synonyms-p (word test-word)
+  "Return non-nil if WORD is in the thesaurus with synonym TEST-WORD."
+  (let ((buf  (get-buffer-create (format " *%s*" word))))
+    (call-process "grep" nil buf nil "-i"
+                  (synonyms-hack-backslashes-if-cygwin (format "^%s," word))
+                  (expand-file-name synonyms-file))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (search-forward test-word nil t))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
