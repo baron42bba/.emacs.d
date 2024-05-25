@@ -97,6 +97,14 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
   ;; (defalias 'eshell/man "tramp-aware-woman ${*man -w $1}")
   :: (defalias 'man "woman-find-file ${*man --path $1}")
 #+end_src
+
+#+begin_src elisp
+  (defalias 'pull '(lambda ()
+                    (shell-command "git stash")
+                    (shell-command "git pull --rebase origin ")
+                    (shell-command "git stash pop")))
+#+end_src
+
 ** [[https://codeberg.org/akib/emacs-eat/][eat]]
 [2024-02-05 Mon 12:10]
 
