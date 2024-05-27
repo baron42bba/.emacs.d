@@ -429,7 +429,7 @@ contextual information."
                             (org-count-lines code))
                          "true" "false")))
       (concat
-       (format "{code:title=%s|language=%s|collapse=%s}" title lang collapse)
+       (format "{code:language=%s}" lang)
        code
        "{code}"))))
 
