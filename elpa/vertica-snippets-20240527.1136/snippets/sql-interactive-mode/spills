@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: spills
+# key: spills_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT
+    time,
+    transaction_id,
+    statement_id,
+    request_id,
+    event_type,
+    event_description
+FROM v_internal.dc_execution_engine_events
+WHERE (NOW() - time) < '24 hours'
+    AND event_type ILIKE '%SPILL%'
+ORDER BY time DESC LIMIT 50;$0

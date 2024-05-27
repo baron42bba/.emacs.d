@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: export_objects
+# key: obj_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT EXPORT_OBJECTS('','$1');$0

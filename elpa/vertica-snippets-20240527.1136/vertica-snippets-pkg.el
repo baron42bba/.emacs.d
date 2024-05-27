@@ -1,6 +1,6 @@
-(define-package "vertica-snippets" "20240221.1629" "Yasnippets for Vertica"
+(define-package "vertica-snippets" "20240527.1136" "Yasnippets for Vertica"
   '((yasnippet "0.6.1"))
-  :commit "efaf893698358a305b1c52fd22a6842b59940855" :authors
+  :commit "d764a25bfba01b542d6bc24a5cd3f07d394c1657" :authors
   '(("Andreas Gerler" . "baron@bundesbrandschatzamt.de"))
   :maintainers
   '(("Andreas Gerler" . "baron@bundesbrandschatzamt.de"))

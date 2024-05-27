@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: disk_usage_column
+# key: duc_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT node_name,
+       to_char(sum(disk_space_bytes)/1024/1024/1024, '999g999g999g990d99') AS disk_space_gbytes
+  FROM v_monitor.partition_columns
+ WHERE TABLE_NAME = '$1'
+   AND COLUMN_NAME = '$2'
+   AND statistics_type = 'FULL'
+ GROUP BY 1
+ ORDER BY 1
+ LIMIT 50;$0
