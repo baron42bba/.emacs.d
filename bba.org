@@ -1255,6 +1255,14 @@ thus installed via github.
 * sql
 [2016-11-27 Sun 17:56]
 
+#+begin_src emacs-lisp
+  (load-file (expand-file-name "~/.emacs.d/lisp/sql.el"))
+
+
+  (setq sql-imenu-generic-expression
+        (append sql-imenu-generic-expression '(("Projections" "^\\s-*create\\s-+\\(?:\\w+\\s-+\\)*\\(?:projection\\)\\s-+?\\(\\(?:\\w+\\s-*[_.]\\s-*\\)*\\w+\\)" 1))))
+#+end_src
+
 thanks to https://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client
 
 have a look in [[file:/Applications/Emacs.app/Contents/Resources/lisp/progmodes/sql.el.gz::(let%20((connect-set%20(assoc-string%20connection%20sql-connection-alist%20t)))][sql.el]] and extract the sql-product and set it before
