@@ -114,6 +114,7 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
 #+end_src
 
 #+begin_src elisp
+  (require 'em-term)
   (add-to-list 'eshell-visual-commands "ec2")
 #+end_src
 ** Most of this stolen from the great [[https://github.com/howardabrams/hamacs/blob/main/ha-eshell.org][Howard Abrams]]!
