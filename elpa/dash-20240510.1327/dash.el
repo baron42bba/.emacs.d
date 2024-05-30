@@ -1,6 +1,6 @@
 ;;; dash.el --- A modern list library for Emacs  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2024 Free Software Foundation, Inc.
 
 ;; Author: Magnar Sveen <magnars@gmail.com>
 ;; Version: 2.19.1
@@ -2108,7 +2108,7 @@ last item in second form, etc."
 
 Insert X at the position signified by the symbol `it' in the first
 form.  If there are more forms, insert the first form at the position
-signified by `it' in in second form, etc."
+signified by `it' in the second form, etc."
   (declare (debug (form body)))
   `(-as-> ,x it ,@forms))
 
@@ -3298,6 +3298,8 @@ Return the sorted list.  LIST is NOT modified by side effects.
 COMPARATOR is called with two elements of LIST, and should return non-nil
 if the first element should sort before the second."
   (declare (important-return-value t))
+  ;; Not yet worth changing to (sort list :lessp comparator);
+  ;; still seems as fast or slightly faster.
   (sort (copy-sequence list) comparator))
 
 (defmacro --sort (form list)
