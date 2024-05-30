@@ -113,7 +113,9 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
   (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode)
 #+end_src
 
-
+#+begin_src elisp
+  (add-to-list 'eshell-visual-commands "ec2")
+#+end_src
 ** Most of this stolen from the great [[https://github.com/howardabrams/hamacs/blob/main/ha-eshell.org][Howard Abrams]]!
 [2022-12-08 Thu 17:43]
 *** Aliases
@@ -143,6 +145,7 @@ For instance, while I would like to have the following, the real solution is to 
 #+begin_src shell :tangle ~/.emacs.d/eshell/alias
   alias less view-file $1
 #+end_src
+
 
 Third,  you want more /control/, you can use the help:eshell/alias function, but it doesn’t honor =$1= and other parameters, so we could create conditionally create function that we add to the [[help:eshell-mode-hook][eshell-mode-hook]], for instance:
 #+begin_src emacs-lisp :tangle no
