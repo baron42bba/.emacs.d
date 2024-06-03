@@ -540,7 +540,7 @@ file.  Since that is a plaintext file, this could be dangerous."
      :prompt-cont-regexp "^[[:alnum:]_]*[-(][#>] "
      :statement sql-vertica-statement-starters
      :input-filter sql-remove-tabs-filter
-     :syntax-alist ((?_ . "w"))
+     ;; :syntax-alist ((?_ . "w"))
      )
     )
   "An alist of product specific configuration settings.
@@ -2733,7 +2733,7 @@ you define your own `sql-mode-db2-font-lock-keywords'.")
 "array_nullsafe" "ascii" "asin" "asinh" "atan" "atan2" "atanh"
 "audit" "audit_flex" "audit_length" "audit_license_size" "audit_license_term"
 "autoregressor" "avg" "avg_all_columns_local" "azure_token_cache_clear"
-"background_depot_warming" "balance" "barrier" "basename" "binary"
+"background_depot_warming" "balance" "barrier" "basename"
 "binary_and" "binary_cat" "binary_eq" "binary_ge" "binary_gt"
 "binary_le" "binary_lt" "binary_ne" "binary_not" "binary_nullsafe" "binary_or"
 "binary_xor" "bisecting_kmeans" "bisecting_kmeans_init_model" "bit_and"
@@ -3114,80 +3114,49 @@ you define your own `sql-mode-db2-font-lock-keywords'.")
 
      ;; Vertica non-reserved words
      (sql-font-lock-keywords-builder 'font-lock-builtin-face nil
-"abort" "absolute" "access" "action" "add" "admin" "after" "aggregate"
-"also" "alter" "always" "assertion" "assignment" "at" "attribute" "backward"
-"before" "begin" "between" "by" "cache" "called" "cascade" "cascaded"
-"catalog" "chain" "characteristics" "checkpoint" "class" "close"
-"cluster" "coalesce" "comment" "comments" "commit" "committed"
-"configuration" "connection" "constraints" "content" "continue"
-"conversion" "copy" "cost" "createdb" "createrole" "createuser" "csv"
-"current" "cursor" "cycle" "data" "database" "day" "deallocate" "dec"
-"declare" "defaults" "deferred" "definer" "delete" "delimiter"
-"delimiters" "dictionary" "disable" "discard" "document" "domain"
-"drop" "each" "enable" "encoding" "encrypted" "enum" "escape"
-"exclude" "excluding" "exclusive" "execute" "exists" "explain"
-"extension" "external" "extract" "family" "first" "float" "following" "force"
-"forward" "function" "functions" "global" "granted" "greatest"
-"handler" "header" "hold" "hour" "identity" "if" "immediate"
-"immutable" "implicit" "including" "increment" "index" "indexes"
-"inherit" "inherits" "inline" "inout" "input" "insensitive" "insert"
-"instead" "invoker" "isolation" "key" "label" "language" "large" "last"
-"lc_collate" "lc_ctype" "leakproof" "least" "level" "listen" "load" "local"
-"location" "lock" "login" "mapping" "match" "maxvalue" "minute"
-"minvalue" "mode" "month" "move" "names" "national" "nchar"
-"next" "no" "nocreatedb" "nocreaterole" "nocreateuser" "noinherit"
-"nologin" "none"  "noreplication" "nosuperuser" "nothing" "notify" "nowait" "nullif"
-"nulls" "object" "of" "off" "oids" "operator" "option" "options" "out"
-"overlay" "owned" "owner" "parser" "partial" "partition" "passing" "password"
-"plans" "position" "preceding" "precision" "prepare" "prepared" "preserve" "prior"
-"privileges" "procedural" "procedure" "quote" "range" "read"
-"reassign" "recheck" "recursive" "ref" "reindex" "relative" "release"
-"rename" "repeatable" "replace" "replica" "replication" "reset" "restart" "restrict"
-"returns" "revoke" "role" "rollback" "row" "rows" "rule" "savepoint"
-"schema" "scroll" "search" "second" "security" "sequence"
-"serializable" "server" "session" "set" "setof" "share" "show"
-"simple" "snapshot" "stable" "standalone" "start" "statement" "statistics"
-"stdin" "stdout" "storage" "strict" "strip" "substring" "superuser"
-"sysid" "system" "tables" "tablespace" "temp" "template" "temporary"
-"transaction" "treat" "trim" "truncate" "trusted" "type" "types"
-"unbounded" "uncommitted" "unencrypted" "unlisten" "unlogged" "until"
-"update" "vacuum" "valid" "validate" "validator" "value" "values" "varying" "version"
-"view" "volatile" "whitespace" "without" "work" "wrapper" "write"
-"xmlattributes" "xmlconcat" "xmlelement" "xmlexists" "xmlforest" "xmlparse"
-"xmlpi" "xmlroot" "xmlserialize" "year" "yes" "zone"
+"abort" "absolute" "access" "also" "always" "attribute" "backward"
+"cache" "characteristics" "checkpoint" "cluster" "comment" "comments"
+"configuration" "content" "conversion" "copy" "cost" "createdb"
+"createrole" "createuser" "csv" "database" "dec" "defaults" "delimiter"
+"delimiters" "disable" "discard" "document" "enable" "encoding"
+"encrypted" "enum" "exclude" "excluding" "exclusive" "exists" "explain"
+"extension" "family" "following" "force" "forward" "functions" "greatest"
+"handler" "header" "if" "immutable" "implicit" "including" "increment"
+"index" "indexes" "inherit" "inherits" "inline" "instead" "label"
+"lc_collate" "lc_ctype" "leakproof" "least" "listen" "load" "location"
+"lock" "login" "mapping" "maxvalue" "minvalue" "mode" "move" "nocreatedb"
+"nocreaterole" "nocreateuser" "noinherit" "nologin" "noreplication"
+"nosuperuser" "nothing" "notify" "nowait" "nulls" "oids" "operator"
+"overlay" "owned" "owner" "parser" "partition" "passing" "password"
+"plans" "preceding" "prepared" "procedural" "quote" "range"
+"reassign" "recheck" "reindex" "release" "rename" "replace" "replica"
+"replication" "reset" "restart" "rule" "server" "setof" "share" "show"
+"snapshot" "stable" "standalone" "statistics" "stdin" "stdout"
+"storage" "strict" "strip" "superuser" "sysid" "tables"
+"tablespace" "temp" "template" "truncate" "trusted" "types"
+"unbounded" "unencrypted" "unlisten" "unlogged" "until" "vacuum"
+"valid" "validate" "validator" "version" "volatile" "whitespace"
+"wrapper" "xmlattributes" "xmlconcat" "xmlelement" "xmlexists"
+"xmlforest" "xmlparse" "xmlpi" "xmlroot" "xmlserialize" "yes"
 )
 
      ;; Vertica Reserved
      (sql-font-lock-keywords-builder 'font-lock-keyword-face nil
-"all" "analyse" "analyze" "and" "array" "asc" "as" "asymmetric"
-"binary" "both" "case" "cast" "check" "collate" "column" "constraint"
-"create" "cross" "current_date" "current_role" "current_schema"
-"current_time" "current_timestamp" "current_user" "default"
-"deferrable" "desc" "distinct" "do" "else" "end" "except" "false"
-"fetch" "foreign" "for" "freeze" "from" "full" "grant" "group"
-"having" "ilike" "initially" "inner" "in" "intersect" "into" "isnull"
-"is" "join" "leading" "left" "like" "limit" "localtime"
-"localtimestamp" "natural" "notnull" "not" "null" "offset"
-"only" "on" "order" "or" "outer" "overlaps" "over" "placing" "primary"
-"projection" "references" "returning" "right" "select" "session_user"
-"similar" "some" "symmetric" "table" "then" "to" "trailing" "true"
-"union" "unique" "user" "using" "variadic" "verbose" "when" "where"
-"window" "with"
+"analyse" "analyze" "current_schema" "do" "freeze" "isnull" "notnull"
+"over" "projection" "returning" "variadic" "verbose" "window"
 )
 
      ;; Vertica PL/pgSQL
      (sql-font-lock-keywords-builder 'font-lock-keyword-face nil
-"assign" "if" "case" "loop" "while" "for" "foreach" "exit" "elsif" "return"
-"raise" "execsql" "dynexecute" "perform" "getdiag" "open" "fetch" "move" "close"
+"assign" "if" "loop" "while" "foreach" "exit" "elsif" "return"
+"raise" "execsql" "dynexecute" "perform" "getdiag" "fetch" "move"
 )
 
      ;; Vertica Data Types
      (sql-font-lock-keywords-builder 'font-lock-type-face nil
- "binary" "varbinary" "bytea" "raw" "boolean" "char" "varchar" "date"
-"time" "timestamp" "datetime" "smalldatetime" "interval" "float"
-"float8" "real" "integer" "int" "bigint" "int8" "smallint" "tinyint"
-"decimal" "numeric" "number" "money" "geometry" "geography" "uuid"
-"array" "row" "set")))
+"varbinary" "bytea" "raw" "datetime" "smalldatetime" "float8" "real"
+"bigint" "int8" "tinyint" "money" "geometry" "geography" "uuid"
+)))
 
   "Vertica SQL keywords used by font-lock.
 
