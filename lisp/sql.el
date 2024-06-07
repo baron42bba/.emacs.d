@@ -2666,6 +2666,33 @@ regular expressions are created during compilation by calling the
 function `regexp-opt'.  Therefore, take a look at the source before
 you define your own `sql-mode-db2-font-lock-keywords'.")
 
+(defun sql--vertica-show-reserved-words ()
+  ;; This function is for use by the maintainer of SQL.EL only.
+  (if (or (and (not (derived-mode-p 'sql-mode))
+               (not (derived-mode-p 'sql-interactive-mode)))
+          (not sql-buffer)
+          (not (eq sql-product 'oracle)))
+      (user-error "Not an Oracle buffer")
+
+    (let ((b "*RESERVED WORDS*"))
+      (sql-execute sql-buffer b
+                   (concat "SELECT "
+                           "  keyword "
+                           ", reserved AS \"Res\" "
+                           ", res_type AS \"Type\" "
+                           ", res_attr AS \"Attr\" "
+                           ", res_semi AS \"Semi\" "
+                           ", duplicate AS \"Dup\" "
+                           "FROM v_catalog.standard_keywords"
+			   "WHERE reserved = 'R'"
+                           "AND SUBSTR(keyword, 1, 1) BETWEEN 'A' AND 'Z' "
+                           "ORDER BY 2 DESC, 3 DESC, 4 DESC, 5 DESC, 6 DESC, 1;")
+                   nil nil)
+      (with-current-buffer b
+        (setq-local sql-product 'oracle)
+        (sql-product-font-lock t nil)
+        (font-lock-mode +1)))))
+
 (defvar sql-mode-vertica-font-lock-keywords
   (eval-when-compile
     (list
