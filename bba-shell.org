@@ -31,6 +31,14 @@ Some of my favorite bash aliases, can be even more helpful in Eshell. Like ‘ll
                   (add-to-list 'eshell-command-aliases-list (list "ll" (concat ls " -AlohG --color=always") )))))
   #+END_SRC
 
+
+  #+begin_src elisp
+    (add-hook 'eshell-mode-hook
+              (lambda ()
+                (setq-local imenu-generic-expression
+                      '(("Prompt" ".*$ \\(.*\\)" 1)))))
+  #+end_src
+
 What about =gd= to call the Diff command?
 
    #+BEGIN_SRC elisp
