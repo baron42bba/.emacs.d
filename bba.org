@@ -3318,7 +3318,9 @@ https://github.com/IBM/plex/releases
 
 #+BEGIN_SRC emacs-lisp
   (if (string-equal system-type "darwin")
-    (set-frame-font "IBM Plex Mono 15"))
+      (if (eql 203 (aref (car (cdr (network-interface-info '"en0"))) 2))
+          (set-frame-font "IBM Plex Mono 12" nil 't)
+        (set-frame-font "IBM Plex Mono 15" nil 't)))
 #+END_SRC
 
 * dns-mode
