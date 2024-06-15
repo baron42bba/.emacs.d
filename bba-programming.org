@@ -221,7 +221,9 @@ in the end use magit-stash.
        (setq cperl-indent-parens-as-block t)
        (setq cperl-tab-always-indent t)
        (perlcritic-mode)
-       (which-function-mode)))))
+       (which-function-mode)
+       (git-gutter-mode)))
+       (define-key cperl-mode-map (kbd "s-o") #'(lambda () "insert-function-name" (interactive)(insert (which-function))))))
 
 #+END_SRC
 
