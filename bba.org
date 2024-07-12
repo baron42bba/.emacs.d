@@ -3071,14 +3071,6 @@ Guess copy target. If split window use others current directory.
   (setq dired-dwim-target t)
 #+END_SRC
 
-Dired isn't very colourful by default, but `dired+' has helpful
-highlighting.
-
-#+BEGIN_SRC emacs-lisp
-  (setq diredp-hide-details-initially-flag nil)
-  (load-file (expand-file-name "~/.emacs.d/lisp/dired+.el"))
-#+END_SRC
-
 #+BEGIN_SRC emacs-lisp
   (setq ediff-split-window-function 'split-window-horizontally)
 #+END_SRC
