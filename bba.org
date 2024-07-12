@@ -1736,6 +1736,12 @@ Now we can again do strange, dark org-babel magic like:
   (interactive)
   (insert (format-time-string "%B %e, %Y")))
 
+  (defun bba-insert-sql-date ()
+  "Insert the current date as sql"
+  (interactive)
+  (insert (format-time-string "'%Y-%m-%d'")))
+
+
   (defun bba-insert-timestamp ()
   "Insert the current timestamp"
   (interactive)
@@ -2529,6 +2535,8 @@ character before any spaces."
   (define-key global-map "\C-cf" 'tags-search)
 
   (define-key global-map (kbd "s-c") #'(lambda () "insertwhichfunc" (interactive)(insert (which-function))))
+  (define-key sql-mode-map (kbd "s-D") 'bba-insert-sql-date)
+  (define-key sql-interactive-mode-map (kbd "s-D") 'bba-insert-sql-date)
   (define-key global-map (kbd "s-b") 'clone-indirect-buffer)
   (define-key global-map (kbd "s-m") 'toggle-maximize-buffer)
    (define-key global-map (kbd "M-s-m") 'maximize-window)
