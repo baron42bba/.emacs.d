@@ -110,6 +110,15 @@ for C-c T you can use a file like this one:
   =cut
 #+END_SRC
 
+* Erlang
+[2024-02-09 Fri 12:15]
+
+#+begin_src emacs-lisp
+  (if (string-equal system-type "darwin")
+      (require 'erlang)
+    (setq erlang-root-dir "/opt/local/lib/erlang"))
+#+end_src
+
 * Go
 [2019-09-12 Thu 16:00]
 
