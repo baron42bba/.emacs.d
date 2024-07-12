@@ -2671,25 +2671,20 @@ you define your own `sql-mode-db2-font-lock-keywords'.")
   (if (or (and (not (derived-mode-p 'sql-mode))
                (not (derived-mode-p 'sql-interactive-mode)))
           (not sql-buffer)
-          (not (eq sql-product 'oracle)))
-      (user-error "Not an Oracle buffer")
+          (not (eq sql-product 'vertica)))
+      (user-error "Not a Vertica buffer")
 
     (let ((b "*RESERVED WORDS*"))
       (sql-execute sql-buffer b
                    (concat "SELECT "
                            "  keyword "
-                           ", reserved AS \"Res\" "
-                           ", res_type AS \"Type\" "
-                           ", res_attr AS \"Attr\" "
-                           ", res_semi AS \"Semi\" "
-                           ", duplicate AS \"Dup\" "
-                           "FROM v_catalog.standard_keywords"
+                           "FROM v_catalog.standard_keywords "
 			   "WHERE reserved = 'R'"
                            "AND SUBSTR(keyword, 1, 1) BETWEEN 'A' AND 'Z' "
-                           "ORDER BY 2 DESC, 3 DESC, 4 DESC, 5 DESC, 6 DESC, 1;")
+                           "GROUP BY 1 ORDER BY 1;")
                    nil nil)
       (with-current-buffer b
-        (setq-local sql-product 'oracle)
+        (setq-local sql-product 'vertica)
         (sql-product-font-lock t nil)
         (font-lock-mode +1)))))
 
