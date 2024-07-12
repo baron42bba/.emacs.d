@@ -172,6 +172,21 @@ from bash.
             (push "/opt/local/share/info" Info-directory-list)))
 #+END_SRC
 
+
+* testing steampipe
+[2023-04-05 Wed 13:18]
+
+#+begin_src emacs-lisp :tangle never
+  (defun bba-steampipe()
+    "set sql connection for steampipe"
+    (interactive)
+    (setq sql-postgres-login-params nil)
+    (let (foo (shell-command-to-string "steampipe service start")))
+    (add-to-list 'sql-connection-alist
+                 `(steampipe (sql-product 'postgres)
+                             (sql-database ,(shell-command-to-string "steampipe service status --show-password | grep \"Connection string\" | awk '{print $3}' | tr -d '\n'")))))
+#+end_src
+
 * bba open safari url in eww
 [2023-05-09 Tue 16:25]
 
