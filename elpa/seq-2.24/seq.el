@@ -1,10 +1,10 @@
 ;;; seq.el --- Sequence manipulation functions  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2014-2023 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Petton <nicolas@petton.fr>
 ;; Keywords: sequences
-;; Version: 2.23
+;; Version: 2.24
 ;; Package: seq
 
 ;; Maintainer: emacs-devel@gnu.org
@@ -37,6 +37,17 @@
 ;; function as argument take the function as their first argument and
 ;; the sequence as their second argument.  All other functions take
 ;; the sequence as their first argument.
+;;
+;; seq.el can be extended to support new type of sequences.  Here are
+;; the generic functions that must be implemented by new seq types:
+;; - `seq-elt'
+;; - `seq-length'
+;; - `seq-do'
+;; - `seqp'
+;; - `seq-subseq'
+;; - `seq-into-sequence'
+;; - `seq-copy'
+;; - `seq-into'
 
 ;;; Code:
 
