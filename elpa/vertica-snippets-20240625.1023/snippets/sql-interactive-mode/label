@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: label
+# key: label_
+# group: Vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+/*+LABEL($1)*/ $0

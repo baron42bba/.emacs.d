@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: node_resources
+# key: nr_
+# group: Vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT node_name,
+       TO_CHAR( process_size_bytes/1024/1024/1024, '999g999g999g990d99') AS process_size_gbytes,
+       TO_CHAR( process_resident_set_size_bytes/1024/1024/1024, '999g999g999g990d99') AS process_resident_set_size_gbytes,
+       TO_CHAR( process_shared_memory_size_bytes/1024/1024/1024, '999g999g999g990d99') AS process_shared_memory_size_gbytes,
+       TO_CHAR( process_text_memory_size_bytes/1024/1024/1024, '999g999g999g990d99') AS process_text_memory_size_gbytes,
+       TO_CHAR( process_data_memory_size_bytes/1024/1024/1024, '999g999g999g990d99') AS process_data_memory_size_gbytes
+  FROM v_monitor.node_resources;$0
