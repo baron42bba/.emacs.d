@@ -1,11 +1,11 @@
-;;; ob-restclient.el --- org-babel functions for restclient-mode
+;;; ob-restclient.el --- org-babel functions for restclient-mode -*- lexical-binding: t -*-
 
 ;; Copyright (C) Alf Lervåg
 
 ;; Author: Alf Lervåg
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://github.com/alf/ob-restclient.el
-;; Version: 0.02
+;; Version: 0.03
 ;; Package-Requires: ((restclient "0"))
 
 ;;; License:
@@ -37,6 +37,7 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
+(require 'org-table)
 (require 'restclient)
 
 (defvar org-babel-default-header-args:restclient
@@ -44,7 +45,9 @@
   "Default arguments for evaluating a restclient block.")
 
 (defcustom org-babel-restclient--jq-path "jq"
-  "The path to `jq', for post-processing. Uses the PATH by default")
+  "The path to `jq', for post-processing. Uses the PATH by default"
+  :type '(string)
+  :group 'org-babel)
 
 ;;;###autoload
 (defun org-babel-execute:restclient (body params)
@@ -56,6 +59,8 @@ This function is called by `org-babel-execute-src-block'"
           (restclient-same-buffer-response t)
           (restclient-response-body-only (org-babel-restclient--should-hide-headers-p params))
           (restclient-same-buffer-response-name (buffer-name))
+	  (raw-only (org-babel-restclient--raw-payload-p params))
+	  (suppress-response-buffer (fboundp #'restclient-http-send-current-suppress-response-buffer))
           (display-buffer-alist
            (cons
             '("\\*temp\\*" display-buffer-no-window (allow-no-window . t))
@@ -63,17 +68,14 @@ This function is called by `org-babel-execute-src-block'"
 
       (insert (buffer-name))
       (with-temp-buffer
-        (dolist (p params)
-          (let ((key (car p))
-                (value (cdr p)))
-            (when (eql key :var)
-              (insert (format ":%s = <<\n%s\n#\n" (car value) (cdr value))))))
-        (insert body)
+	(insert
+	 (org-babel-expand-body:generic
+	  body params
+	  (org-babel-variable-assignments:restclient params)))
         (goto-char (point-min))
         (delete-trailing-whitespace)
         (goto-char (point-min))
-        (restclient-http-parse-current-and-do
-         'restclient-http-do (org-babel-restclient--raw-payload-p params) t))
+        (restclient-http-parse-current-and-do 'restclient-http-do raw-only t suppress-response-buffer))
 
       (while restclient-within-call
         (sleep-for 0.05))
@@ -91,28 +93,54 @@ This function is called by `org-babel-execute-src-block'"
          (format "%s %s--args %s" org-babel-restclient--jq-path
 		 (if (assq :jq-args params) (format "%s " jq-args) "")
                  (shell-quote-argument (cdr jq-header)))
-         (current-buffer)
+         results-buffer
          t))
 
-       ;; widen if jq but not pure payload
+      ;; widen if jq but not pure payload
       (when (and (assq :jq params)
                  (not (assq :noheaders params))
                  (not (org-babel-restclient--return-pure-payload-result-p params)))
         (widen))
 
-      (when (not (org-babel-restclient--return-pure-payload-result-p params))
-        (org-babel-restclient--wrap-result))
-
-      (buffer-string))))
+      (if (member "table" (cdr (assoc :result-params params)))
+          (let* ((separator '(4))
+	         (result
+	          (condition-case err
+		      (let ((pmax (point-max)))
+		        ;; If the buffer is empty, don't bother trying to
+		        ;; convert the table.
+		        (when (> pmax 1)
+		          (org-table-convert-region (point-min) pmax separator)
+		          (delq nil
+			        (mapcar (lambda (row)
+				          (and (not (eq row 'hline))
+					       (mapcar #'org-babel-string-read row)))
+				        (org-table-to-lisp)))))
+		    (error
+		     (display-warning 'org-babel
+				      (format "Error reading results: %S" err)
+				      :error)
+		     nil))))
+	    (pcase result
+	      (`((,scalar)) scalar)
+	      (`((,_ ,_ . ,_)) result)
+	      (`(,scalar) scalar)
+	      (_ result)))
+        (when (not (org-babel-restclient--return-pure-payload-result-p params))
+          (org-babel-restclient--wrap-result))
+        (buffer-string)))))
 
 ;;;###autoload
 (defun org-babel-variable-assignments:restclient (params)
-  "Return a list of restclient statements assigning the block's variables specified in PARAMS."
+  "Return a list of statements assigning variables specified in PARAMS."
   (mapcar
    (lambda (pair)
      (let ((name (car pair))
-           (value (cdr pair)))
-       (format ":%s = %s" name value)))
+           (value (cdr pair))
+	   (format-string ":%s = %s\n"))
+       (when (string-match-p "\n" value)
+	 (setq format-string ":%s = <<\n%s\n#\n"))
+       (format format-string name value)))
    (org-babel--get-vars params)))
 
 (defun org-babel-restclient--wrap-result ()
@@ -120,6 +148,8 @@ This function is called by `org-babel-execute-src-block'"
   (let ((mode-name (substring (symbol-name major-mode) 0 -5)))
     (insert (format "#+BEGIN_SRC %s\n" mode-name))
     (goto-char (point-max))
+    (unless (and (bolp) (eolp))
+      (insert "\n"))
     (insert "#+END_SRC\n")))
 
 (defun org-babel-restclient--should-hide-headers-p (params)
@@ -134,12 +164,16 @@ This function is called by `org-babel-execute-src-block'"
     (when result-type
       (string-match "value\\|table" result-type))))
 
+(defun org-babel-prep-session:restclient (_session _params)
+  "Return an error because restclient does not support sessions."
+  (error "Restclient does not support sessions"))
 
 (defun org-babel-restclient--raw-payload-p (params)
   "Return t if the `:results' key in PARAMS contain `file'."
   (let ((result-type (cdr (assoc :results params))))
     (when result-type
-      (string-match "file" result-type))))
+      (and (not (org-babel-restclient--should-hide-headers-p params))
+           (string-match "file" result-type)))))
 
 (provide 'ob-restclient)
 ;;; ob-restclient.el ends here

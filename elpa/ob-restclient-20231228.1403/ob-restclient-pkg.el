@@ -1,6 +1,6 @@
-(define-package "ob-restclient" "20230301.1951" "org-babel functions for restclient-mode"
+(define-package "ob-restclient" "20231228.1403" "org-babel functions for restclient-mode"
   '((restclient "0"))
-  :commit "ded3b7eb7b0592328a7a08ecce6f25278cba4a1d" :authors
+  :commit "8183f8af08838854cf145ca4855b373f3e7c44b0" :authors
   '(("Alf Lervåg"))
   :maintainers
   '(("Alf Lervåg"))
