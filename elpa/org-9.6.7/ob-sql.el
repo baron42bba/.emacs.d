@@ -124,7 +124,7 @@ corresponding :engine source block header argument."
 	 (list (when host     (concat "-h" host))
 	       (when port     (format "-P%d" port))
 	       (when user     (concat "-u" user))
-	       (when password (concat "-p" password))
+	       (when password (concat "-p'" password "'"))
 	       (when database (concat "-D" database))))))
 
 (defun org-babel-sql-dbstring-postgresql (host port user database)
