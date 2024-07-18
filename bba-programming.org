@@ -270,6 +270,11 @@ Vagrant files are Ruby, so use ruby-mode for them:
   )
 #+END_SRC
 
+#+begin_src emacs-lisp
+  (if (string-equal system-type "darwin")
+      (require 'eglot)
+    (add-to-list 'eglot-server-programs '(sql-mode . (eglot-sqls "sqls"))))
+#+end_src
 * TemplateToolkit
 
 #+BEGIN_SRC emacs-lisp
