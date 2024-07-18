@@ -3,7 +3,7 @@
 ;; This is free and unencumbered software released into the public domain.
 
 ;; Author: Christopher Wellons <wellons@nullprogram.com>
-;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
+;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/emacsql
 
 ;; Package-Version: 3.1.1.50-git
@@ -66,7 +66,7 @@ used.")
          ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=60872#11.
          (coding-system-for-write 'utf-8)
          (coding-system-for-read 'utf-8)
-         (file (slot-value connection 'file))
+         (file (oref connection file))
          (buffer (generate-new-buffer " *emacsql-sqlite*"))
          (fullfile (if file (expand-file-name file) ":memory:"))
          (process (start-process

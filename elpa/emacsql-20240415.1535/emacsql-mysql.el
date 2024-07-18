@@ -3,7 +3,7 @@
 ;; This is free and unencumbered software released into the public domain.
 
 ;; Author: Christopher Wellons <wellons@nullprogram.com>
-;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
+;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/emacsql
 
 ;; Package-Version: 3.1.1.50-git
@@ -126,7 +126,7 @@ http://dev.mysql.com/doc/refman/5.5/en/reserved-words.html")
                collect (read) into row
                when (looking-at "\n")
                collect row into rows
-               and do (setf row ())
+               and do (setq row ())
                and do (forward-char)
                finally (cl-return rows)))))
 

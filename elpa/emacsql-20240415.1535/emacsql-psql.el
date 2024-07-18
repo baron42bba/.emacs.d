@@ -3,7 +3,7 @@
 ;; This is free and unencumbered software released into the public domain.
 
 ;; Author: Christopher Wellons <wellons@nullprogram.com>
-;; Maintainer: Jonas Bernoulli <jonas@bernoul.li>
+;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/emacsql
 ;; Package-Version: 3.1.1.50-git
 ;; Package-Requires: ((emacs "25.1") (emacsql "20230220"))
@@ -77,7 +77,7 @@ http://www.postgresql.org/docs/7.3/static/sql-keywords-appendix.html")
     (when hostname
       (push "-h" args)
       (push hostname args))
-    (setf args (nreverse args))
+    (setq args (nreverse args))
     (let* ((buffer (generate-new-buffer " *emacsql-psql*"))
            (psql emacsql-psql-executable)
            (command (mapconcat #'shell-quote-argument (cons psql args) " "))
@@ -117,9 +117,9 @@ http://www.postgresql.org/docs/7.3/static/sql-keywords-appendix.html")
 (cl-defmethod emacsql-waiting-p ((connection emacsql-psql-connection))
   (with-current-buffer (emacsql-buffer connection)
     (cond ((= (buffer-size) 1) (string= "]" (buffer-string)))
-          ((> (buffer-size) 1) (string= "\n]"
-                                        (buffer-substring
-                                         (- (point-max) 2) (point-max)))))))
+          ((> (buffer-size) 1) (string= "\n]" (buffer-substring
+                                               (- (point-max) 2)
+                                               (point-max)))))))
 
 (cl-defmethod emacsql-check-error ((connection emacsql-psql-connection))
   (with-current-buffer (emacsql-buffer connection)
@@ -139,7 +139,7 @@ http://www.postgresql.org/docs/7.3/static/sql-keywords-appendix.html")
                collect (read) into row
                when (looking-at "\n")
                collect row into rows
-               and do (progn (forward-char 1) (setf row ()))
+               and do (progn (forward-char 1) (setq row ()))
                finally (cl-return rows)))))
 
 (provide 'emacsql-psql)
