@@ -1,6 +1,6 @@
 ;;; compat-macs.el --- Compatibility Macros -*- lexical-binding: t; no-byte-compile: t; -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,12 +17,13 @@
 
 ;;; Commentary:
 
-;; This file provides *internal* macros, which are used by Compat to
-;; facilitate the definition of compatibility functions, macros and
-;; variables.  The `compat-macs' feature should never be loaded at
-;; runtime in your Emacs and will only be used during byte
-;; compilation.  Every definition provided here should be considered
-;; internal and may change any time between Compat releases.
+;; WARNING: This file provides *internal* macros.  The macros are used
+;; by Compat to facilitate the definition of compatibility functions,
+;; compatibility macros and compatibility variables.  The
+;; `compat-macs' feature should never be loaded at runtime in your
+;; Emacs and will only be used during byte compilation.  Every
+;; definition provided here is internal, may change any time between
+;; Compat releases and must not be used by other packages.
 
 ;;; Code:
 
@@ -110,10 +111,9 @@ REST are attributes and the function BODY."
       ;; Remove unsupported declares.  It might be possible to set these
       ;; properties otherwise.  That should be looked into and implemented
       ;; if it is the case.
-      (when (and (listp (car-safe body)) (eq (caar body) 'declare))
-        (when (<= emacs-major-version 25)
-          (delq (assq 'side-effect-free (car body)) (car body))
-          (delq (assq 'pure (car body)) (car body))))
+      (when (and (listp (car-safe body)) (eq (caar body) 'declare) (<= emacs-major-version 25))
+        (setcar body (assq-delete-all 'pure (assq-delete-all
+                                             'side-effect-free (car body)))))
       ;; Use `:extended' name if the function is already defined.
       (let* ((defname (if (and extended (fboundp name))
                           (intern (format "compat--%s" name))
@@ -142,7 +142,7 @@ REST are attributes and the function BODY."
 (defmacro compat-guard (cond &rest rest)
   "Guard definition with a runtime COND and a version check.
 The runtime condition must make sure that no definition is
-overriden.  REST is an attribute plist followed by the definition
+overridden.  REST is an attribute plist followed by the definition
 body.  The attributes specify the conditions under which the
 definition is generated.
 
@@ -240,7 +240,8 @@ definition is generated.
       ;; The boundp check is performed at runtime to make sure that we never
       ;; redefine an existing definition if Compat is loaded on a newer Emacs
       ;; version.
-      `((unless (boundp ',name)
+      `((defvar ,name)
+        (unless (boundp ',name)
           (,(if constant 'defconst 'defvar)
            ,name ,initval
            ,(compat-macs--docstring 'variable name docstring))

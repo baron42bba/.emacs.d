@@ -1,6 +1,6 @@
 ;;; compat-25.el --- Functionality added in Emacs 25.1 -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ usage: (bool-vector &rest OBJECTS)"
         (aset seq i (car p))
         (setq i (1+ i) p (cdr p)))
       (apply #'vector list)))
-   ((signal 'wrong-type-argument 'list-or-vector-p))))
+   (t (signal 'wrong-type-argument (list 'list-or-vector-p seq)))))
 
 ;;;; Defined in editfns.c
 
