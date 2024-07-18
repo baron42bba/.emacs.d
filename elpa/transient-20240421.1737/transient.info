@@ -1,7 +1,7 @@
 This is transient.info, produced by makeinfo version 6.7 from
 transient.texi.
 
-     Copyright (C) 2018–2023 Free Software Foundation, Inc.
+     Copyright (C) 2018–2024 Free Software Foundation, Inc.
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -24,36 +24,17 @@ File: transient.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Transient User and Developer Manual
 ***********************************
 
-Taking inspiration from prefix keys and prefix arguments, Transient
-implements a similar abstraction involving a prefix command, infix
-arguments and suffix commands.  We could call this abstraction a
-“transient command”, but because it always involves at least two
-commands (a prefix and a suffix) we prefer to call it just a
-“transient”.
+Transient is the library used to implement the keyboard-driven “menus”
+in Magit.  It is distributed as a separate package, so that it can be
+used to implement similar menus in other packages.
 
-   When the user calls a transient prefix command, a transient
-(temporary) keymap is activated, which binds the transient’s infix and
-suffix commands, and functions that control the transient state are
-added to ‘pre-command-hook’ and ‘post-command-hook’.  The available
-suffix and infix commands and their state are shown in a popup buffer
-until the transient is exited by invoking a suffix command.
+   This manual can be bit hard to digest when getting started.  A useful
+resource to get over that hurdle is Psionic K’s interactive tutorial,
+available at <https://github.com/positron-solutions/transient-showcase>.
 
-   Calling an infix command causes its value to be changed, possibly by
-reading a new value in the minibuffer.
+This manual is for Transient version 0.6.0.
 
-   Calling a suffix command usually causes the transient to be exited
-but suffix commands can also be configured to not exit the transient.
-
-     The second part of this manual, which describes how to modify
-     existing transients and create new transients from scratch, can be
-     hard to digest if you are just getting started.  A useful resource
-     to get over that hurdle is Psionic K’s interactive tutorial,
-     available at
-     <https://github.com/positron-solutions/transient-showcase>.
-
-This manual is for Transient version 0.4.1.
-
-     Copyright (C) 2018–2023 Free Software Foundation, Inc.
+     Copyright (C) 2018–2024 Free Software Foundation, Inc.
 
      You can redistribute this document and/or modify it under the terms
      of the GNU General Public License as published by the Free Software
@@ -72,7 +53,6 @@ This manual is for Transient version 0.4.1.
 * Modifying Existing Transients::
 * Defining New Commands::
 * Classes and Methods::
-* Related Abstractions and Packages::
 * FAQ::
 * Keystroke Index::
 * Command and Function Index::
@@ -96,6 +76,7 @@ Usage
 
 Defining New Commands
 
+* Technical Introduction::
 * Defining Transients::
 * Binding Suffix and Infix Commands::
 * Defining Suffix and Infix Commands::
@@ -125,11 +106,6 @@ Suffix Methods
 * Suffix Format Methods::
 
 
-Related Abstractions and Packages
-
-* Comparison With Prefix Keys and Prefix Arguments::
-* Comparison With Other Packages::
-
 
 
 File: transient.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
@@ -137,112 +113,72 @@ File: transient.info,  Node: Introduction,  Next: Usage,  Prev: Top,  Up: Top
 1 Introduction
 **************
 
-Taking inspiration from prefix keys and prefix arguments, Transient
-implements a similar abstraction involving a prefix command, infix
-arguments and suffix commands.  We could call this abstraction a
-“transient command”, but because it always involves at least two
-commands (a prefix and a suffix) we prefer to call it just a
-“transient”.
+Transient is the library used to implement the keyboard-driven “menus”
+in Magit.  It is distributed as a separate package, so that it can be
+used to implement similar menus in other packages.
 
-     Transient keymaps are a feature provided by Emacs.  Transients as
-     implemented by this package involve the use of transient keymaps.
+   This manual can be bit hard to digest when getting started.  A useful
+resource to get over that hurdle is Psionic K’s interactive tutorial,
+available at <https://github.com/positron-solutions/transient-showcase>.
 
-     Emacs provides a feature that it calls “prefix commands”.  When we
-     talk about “prefix commands” in this manual, then we mean our own
-     kind of “prefix commands”, unless specified otherwise.  To avoid
-     ambiguity we sometimes use the terms “transient prefix command” for
-     our kind and “regular prefix command” for Emacs’ kind.
+Some things that Transient can do
+=================================
 
-   When the user calls a transient prefix command, a transient
-(temporary) keymap is activated, which binds the transient’s infix and
-suffix commands, and functions that control the transient state are
-added to ‘pre-command-hook’ and ‘post-command-hook’.  The available
-suffix and infix commands and their state are shown in a popup buffer
-until the transient state is exited by invoking a suffix command.
+   • Display current state of arguments
+   • Display and manage lifecycle of modal bindings
+   • Contextual user interface
+   • Flow control for wizard-like composition of interactive forms
+   • History & persistence
+   • Rendering arguments for controlling CLI programs
 
-   Calling an infix command causes its value to be changed.  How that is
-done depends on the type of the infix command.  The simplest case is an
-infix command that represents a command-line argument that does not take
-a value.  Invoking such an infix command causes the switch to be toggled
-on or off.  More complex infix commands may read a value from the user,
-using the minibuffer.
+Complexity in CLI programs
+==========================
 
-   Calling a suffix command usually causes the transient to be exited;
-the transient keymaps and hook functions are removed, the popup buffer
-no longer shows information about the (no longer bound) suffix commands,
-the values of some public global variables are set, while some internal
-global variables are unset, and finally the command is actually called.
-Suffix commands can also be configured to not exit the transient.
+Complexity tends to grow with time.  How do you manage the complexity of
+commands?  Consider the humble shell command ‘ls’.  It now has over
+_fifty_ command line options.  Some of these are boolean flags (‘ls
+-l’).  Some take arguments (‘ls --sort=s’).  Some have no effect unless
+paired with other flags (‘ls -lh’).  Some are mutually exclusive.  Some
+shell commands even have so many options that they introduce
+_subcommands_ (‘git branch’, ‘git commit’), each with their own rich set
+of options (‘git branch -f’).
 
-   A suffix command can, but does not have to, use the infix arguments
-in much the same way any command can choose to use or ignore the prefix
-arguments.  For a suffix command that was invoked from a transient, the
-variable ‘transient-current-suffixes’ and the function ‘transient-args’
-serve about the same purpose as the variables ‘prefix-arg’ and
-‘current-prefix-arg’ do for any command that was called after the prefix
-arguments have been set using a command such as ‘universal-argument’.
+Using Transient for composing interactive commands
+==================================================
 
-   The information shown in the popup buffer while a transient is active
-looks a bit like this:
+What about Emacs commands used interactively?  How do these handle
+options?  One solution is to make many versions of the same command, so
+you don’t need to!  Consider: ‘delete-other-windows’ vs.
+‘delete-other-windows-vertically’ (among many similar examples).
 
-     ,-----------------------------------------
-     |Arguments
-     | -f Force (--force)
-     | -a Annotate (--annotate)
-     |
-     |Create
-     | t tag
-     | r release
-     `-----------------------------------------
+   Some Emacs commands will simply prompt you for the next "argument"
+(‘M-x switch-to-buffer’).  Another common solution is to use prefix
+arguments which usually start with ‘C-u’.  Sometimes these are sensibly
+numerical in nature (‘C-u 4 M-x forward-paragraph’ to move forward 4
+paragraphs).  But sometimes they function instead as boolean "switches"
+(‘C-u C-SPACE’ to jump to the last mark instead of just setting it, ‘C-u
+C-u C-SPACE’ to unconditionally set the mark).  Since there aren’t many
+standards for the use of prefix options, you have to read the command’s
+documentation to find out what the possibilities are.
 
-     This is a simplified version of ‘magit-tag’.  Info manuals do not
-     support images or colored text, so the above “screenshot” lacks
-     some information; in practice you would be able to tell whether the
-     arguments ‘--force’ and ‘--annotate’ are enabled or not based on
-     their color.
-
-   Transient can be used to implement simple “command dispatchers”.  The
-main benefit then is that the user can see all the available commands in
-a popup buffer.  That is useful by itself because it frees the user from
-having to remember all the keys that are valid after a certain prefix
-key or command.  Magit’s ‘magit-dispatch’ (on ‘C-x M-g’) command is an
-example of using Transient to merely implement a command dispatcher.
-
-   In addition to that, Transient also allows users to interactively
-pass arguments to commands.  These arguments can be much more complex
-than what is reasonable when using prefix arguments.  There is a limit
-to how many aspects of a command can be controlled using prefix
-arguments.  Furthermore, what a certain prefix argument means for
-different commands can be completely different, and users have to read
-documentation to learn and then commit to memory what a certain prefix
-argument means to a certain command.
-
-   Transient suffix commands, on the other hand, can accept dozens of
-different arguments without the user having to remember anything.  When
-using Transient, one can call a command with arguments that are just as
-complex as when calling the same function non-interactively from Lisp.
-
-   Invoking a transient command with arguments is similar to invoking a
-command in a shell with command-line completion and history enabled.
-One benefit of the Transient interface is that it remembers history not
-only on a global level (“this command was invoked using these arguments,
-and previously it was invoked using those other arguments”), but also
-remembers the values of individual arguments independently.  See *note
-Using History::.
-
-   After a transient prefix command is invoked, ‘C-h KEY’ can be used to
-show the documentation for the infix or suffix command that KEY is bound
-to (see *note Getting Help for Suffix Commands::), and infixes and
-suffixes can be removed from the transient using ‘C-x l KEY’.  Infixes
-and suffixes that are disabled by default can be enabled the same way.
-See *note Enabling and Disabling Suffixes::.
-
-   Transient ships with support for a few different types of specialized
-infix commands.  A command that sets a command line option, for example,
-has different needs than a command that merely toggles a boolean flag.
-Additionally, Transient provides abstractions for defining new types,
-which the author of Transient did not anticipate (or didn’t get around
-to implementing yet).
+   But when an Emacs command grows to have a truly large set of options
+and arguments, with dependencies between them, lots of option values,
+etc., these simple approaches just don’t scale.  Transient is designed
+to solve this issue.  Think of it as the humble prefix argument ‘C-u’,
+_raised to the power of 10_.  Like ‘C-u’, it is key driven.  Like the
+shell, it supports boolean "flag" options, options that take arguments,
+and even "sub-commands", with their own options.  But instead of
+searching through a man page or command documentation, well-designed
+transients _guide_ their users to the relevant set of options (and even
+their possible values!)  directly, taking into account any important
+pre-existing Emacs settings.  And while for shell commands like ‘ls’,
+there is only one way to "execute" (hit ‘Return’!), transients can
+"execute" using multiple different keys tied to one of many
+self-documenting _actions_ (imagine having 5 different colored return
+keys on your keyboard!).  Transients make navigating and setting large,
+complex groups of command options and arguments easy.  Fun even.  Once
+you’ve tried it, it’s hard to go back to the ‘C-u what can I do here
+again?’ way.
 
 
 File: transient.info,  Node: Usage,  Next: Modifying Existing Transients,  Prev: Introduction,  Up: Top
@@ -319,7 +255,7 @@ use the latter, then you can later resume the stack of transients using
 
    Transient’s predecessor bound ‘q’ instead of ‘C-g’ to the quit
 command.  To learn how to get that binding back see
-‘transient-bind-q-to-quit’’s doc string.
+‘transient-bind-q-to-quit’’s documentation string.
 
 ‘C-q’ (‘transient-quit-all’)
      This command quits the currently active incomplete key sequence, if
@@ -488,8 +424,8 @@ provides access to the documentation directly from the active transient.
 defined.  For infix commands that represent command-line arguments this
 ideally shows the appropriate manpage.  ‘transient-help’ then tries to
 jump to the correct location within that.  Info manuals are also
-supported.  The fallback is to show the command’s doc string, for
-non-infix suffixes this is usually appropriate.
+supported.  The fallback is to show the command’s documentation string,
+for non-infix suffixes this is usually appropriate.
 
 
 File: transient.info,  Node: Enabling and Disabling Suffixes,  Next: Other Commands,  Prev: Getting Help for Suffix Commands,  Up: Usage
@@ -557,6 +493,11 @@ if the user lowers the transient level.
 
      Therefore, to control which suffixes are available given a certain
      state, you have to make sure that that state is currently active.
+
+‘C-x a’ (‘transient-toggle-level-limit’)
+     This command toggle whether suffixes that are on levels higher than
+     the level specified by ‘transient-default-level’ are temporarily
+     available anyway.
 
 
 File: transient.info,  Node: Other Commands,  Next: Configuration,  Prev: Enabling and Disabling Suffixes,  Up: Usage
@@ -690,26 +631,30 @@ Auxiliary Options
      displayed right above the echo area, then this probably is not a
      good value.
 
-     If ‘line’ (the default), then the buffer also has no mode-line, but
-     a thin line is drawn instead, using the background color of the
-     face ‘transient-separator’.  Text-mode frames cannot display thin
-     lines, and therefore fall back to treating ‘line’ like ‘nil’.
+     If ‘line’ (the default) or a natural number, then the buffer has no
+     mode-line, but a line is drawn is drawn in its place.  If a number
+     is used, that specifies the thickness of the line.  On termcap
+     frames we cannot draw lines, so there ‘line’ and numbers are
+     synonyms for ‘nil’.
+
+     The color of the line is used to indicate if non-suffixes are
+     allowed and whether they exit the transient.  The foreground color
+     of ‘transient-key-noop’ (if non-suffix are disallowed),
+     ‘transient-key-stay’ (if allowed and transient stays active), or
+     ‘transient-key-exit’ (if allowed and they exit the transient) is
+     used to draw the line.
 
      Otherwise this can be any mode-line format.  See *note (elisp)Mode
      Line Format::, for details.
 
  -- User Option: transient-semantic-coloring
-     This option controls whether prefixes and suffixes are colored in a
-     Hydra-like fashion.
+     This option controls whether colors are used to indicate the
+     transient behavior of commands.
 
      If non-‘nil’, then the key binding of each suffix is colorized to
      indicate whether it exits the transient state or not.  The color of
      the prefix is indicated using the line that is drawn when the value
      of ‘transient-mode-line-format’ is ‘line’.
-
-     For more information about how Hydra uses colors see
-     <https://github.com/abo-abo/hydra#color> and
-     <https://oremacs.com/2015/02/19/hydra-colors-reloaded>.
 
  -- User Option: transient-highlight-mismatched-keys
      This option controls whether key bindings of infix commands that do
@@ -907,6 +852,7 @@ File: transient.info,  Node: Defining New Commands,  Next: Classes and Methods, 
 
 * Menu:
 
+* Technical Introduction::
 * Defining Transients::
 * Binding Suffix and Infix Commands::
 * Defining Suffix and Infix Commands::
@@ -914,9 +860,109 @@ File: transient.info,  Node: Defining New Commands,  Next: Classes and Methods, 
 * Transient State::
 
 
-File: transient.info,  Node: Defining Transients,  Next: Binding Suffix and Infix Commands,  Up: Defining New Commands
+File: transient.info,  Node: Technical Introduction,  Next: Defining Transients,  Up: Defining New Commands
 
-4.1 Defining Transients
+4.1 Technical Introduction
+==========================
+
+Taking inspiration from prefix keys and prefix arguments, Transient
+implements a similar abstraction involving a prefix command, infix
+arguments and suffix commands.
+
+   When the user calls a transient prefix command, a transient
+(temporary) keymap is activated, which binds the transient’s infix and
+suffix commands, and functions that control the transient state are
+added to ‘pre-command-hook’ and ‘post-command-hook’.  The available
+suffix and infix commands and their state are shown in a popup buffer
+until the transient state is exited by invoking a suffix command.
+
+   Calling an infix command causes its value to be changed.  How that is
+done depends on the type of the infix command.  The simplest case is an
+infix command that represents a command-line argument that does not take
+a value.  Invoking such an infix command causes the switch to be toggled
+on or off.  More complex infix commands may read a value from the user,
+using the minibuffer.
+
+   Calling a suffix command usually causes the transient to be exited;
+the transient keymaps and hook functions are removed, the popup buffer
+no longer shows information about the (no longer bound) suffix commands,
+the values of some public global variables are set, while some internal
+global variables are unset, and finally the command is actually called.
+Suffix commands can also be configured to not exit the transient.
+
+   A suffix command can, but does not have to, use the infix arguments
+in much the same way any command can choose to use or ignore the prefix
+arguments.  For a suffix command that was invoked from a transient, the
+variable ‘transient-current-suffixes’ and the function ‘transient-args’
+serve about the same purpose as the variables ‘prefix-arg’ and
+‘current-prefix-arg’ do for any command that was called after the prefix
+arguments have been set using a command such as ‘universal-argument’.
+
+   Transient can be used to implement simple “command dispatchers”.  The
+main benefit then is that the user can see all the available commands in
+a popup buffer, which can be thought of as a “menus”.  That is useful by
+itself because it frees the user from having to remember all the keys
+that are valid after a certain prefix key or command.  Magit’s
+‘magit-dispatch’ (on ‘C-x M-g’) command is an example of using Transient
+to merely implement a command dispatcher.
+
+   In addition to that, Transient also allows users to interactively
+pass arguments to commands.  These arguments can be much more complex
+than what is reasonable when using prefix arguments.  There is a limit
+to how many aspects of a command can be controlled using prefix
+arguments.  Furthermore, what a certain prefix argument means for
+different commands can be completely different, and users have to read
+documentation to learn and then commit to memory what a certain prefix
+argument means to a certain command.
+
+   Transient suffix commands, on the other hand, can accept dozens of
+different arguments without the user having to remember anything.  When
+using Transient, one can call a command with arguments that are just as
+complex as when calling the same function non-interactively from Lisp.
+
+   Invoking a transient suffix command with arguments is similar to
+invoking a command in a shell with command-line completion and history
+enabled.  One benefit of the Transient interface is that it remembers
+history not only on a global level (“this command was invoked using
+these arguments, and previously it was invoked using those other
+arguments”), but also remembers the values of individual arguments
+independently.  See *note Using History::.
+
+   After a transient prefix command is invoked, ‘C-h KEY’ can be used to
+show the documentation for the infix or suffix command that ‘KEY’ is
+bound to (see *note Getting Help for Suffix Commands::), and infixes and
+suffixes can be removed from the transient using ‘C-x l KEY’.  Infixes
+and suffixes that are disabled by default can be enabled the same way.
+See *note Enabling and Disabling Suffixes::.
+
+   Transient ships with support for a few different types of specialized
+infix commands.  A command that sets a command line option, for example,
+has different needs than a command that merely toggles a boolean flag.
+Additionally, Transient provides abstractions for defining new types,
+which the author of Transient did not anticipate (or didn’t get around
+to implementing yet).
+
+   Note that suffix commands also support regular prefix arguments.  A
+suffix command may even be called with both infix and prefix arguments
+at the same time.  If you invoke a command as a suffix of a transient
+prefix command, but also want to pass prefix arguments to it, then first
+invoke the prefix command, and only after doing that invoke the prefix
+arguments, before finally invoking the suffix command.  If you instead
+began by providing the prefix arguments, then those would apply to the
+prefix command, not the suffix command.  Likewise, if you want to change
+infix arguments before invoking a suffix command with prefix arguments,
+then change the infix arguments before invoking the prefix arguments.
+In other words, regular prefix arguments always apply to the next
+command, and since transient prefix, infix and suffix commands are just
+regular commands, the same applies to them.  (Regular prefix keys behave
+differently because they are not commands at all, instead they are just
+incomplete key sequences, and those cannot be interrupted with prefix
+commands.)
+
+
+File: transient.info,  Node: Defining Transients,  Next: Binding Suffix and Infix Commands,  Prev: Technical Introduction,  Up: Defining New Commands
+
+4.2 Defining Transients
 =======================
 
 A transient consists of a prefix command and at least one suffix
@@ -971,7 +1017,7 @@ that is used to invoke that transient.
 
 File: transient.info,  Node: Binding Suffix and Infix Commands,  Next: Defining Suffix and Infix Commands,  Prev: Defining Transients,  Up: Defining New Commands
 
-4.2 Binding Suffix and Infix Commands
+4.3 Binding Suffix and Infix Commands
 =====================================
 
 The macro ‘transient-define-prefix’ is used to define a transient.  This
@@ -980,7 +1026,7 @@ Transients::) and adds the transient’s infix and suffix bindings, as
 described below.
 
    Users and third-party packages can add additional bindings using
-functions such as ‘transient-insert-suffix’ (See *note Modifying
+functions such as ‘transient-insert-suffix’ (see *note Modifying
 Existing Transients::).  These functions take a “suffix specification”
 as one of their arguments, which has the same form as the specifications
 used in ‘transient-define-prefix’.
@@ -993,7 +1039,7 @@ used in ‘transient-define-prefix’.
 
 File: transient.info,  Node: Group Specifications,  Next: Suffix Specifications,  Up: Binding Suffix and Infix Commands
 
-4.2.1 Group Specifications
+4.3.1 Group Specifications
 --------------------------
 
 The suffix and infix commands of a transient are organized in groups.
@@ -1065,9 +1111,19 @@ constructor of that class.
      prefix’s ‘transient--layout’ property, but it is often more
      convenient to use the same form as understood by
      ‘transient-define-prefix’, described below.  If you use the latter
-     approach, you can use the ‘transient-parse-child’ and
-     ‘transient-parse-children’ functions to transform them from the
+     approach, you can use the ‘transient-parse-suffixes’ and
+     ‘transient-parse-suffix’ functions to transform them from the
      convenient to the expected form.
+
+     If you explicitly specify children and then transform them using
+     ‘:setup-chilren’, then the class of the group is determined as
+     usual, based on explicitly specified children.
+
+     If you do not explicitly specify children and thus rely solely on
+     ‘:setup-children’, then you must specify the class using ‘:class’.
+     For backward compatibility, if you fail to do so,
+     ‘transient-column’ is used and a warning is displayed.  This
+     warning will eventually be replaced with an error.
 
    • The boolean ‘:pad-keys’ argument controls whether keys of all
      suffixes contained in a group are right padded, effectively
@@ -1079,10 +1135,10 @@ subgroups with commands at the same level, though in principle there is
 nothing that prevents that.)
 
    If the ELEMENTs are not subgroups, then they can be a mixture of
-lists that specify commands and strings.  Strings are inserted verbatim
-into the buffer.  The empty string can be used to insert gaps between
-suffixes, which is particularly useful if the suffixes are outlined as a
-table.
+lists, which specify commands, and strings.  Strings are inserted
+verbatim into the buffer.  The empty string can be used to insert gaps
+between suffixes, which is particularly useful if the suffixes are
+outlined as a table.
 
    Inside group specifications, including inside contained suffix
 specifications, nothing has to be quoted and quoting anyway is invalid.
@@ -1094,7 +1150,7 @@ This feature is experimental and should be avoided.
 
 File: transient.info,  Node: Suffix Specifications,  Prev: Group Specifications,  Up: Binding Suffix and Infix Commands
 
-4.2.2 Suffix Specifications
+4.3.2 Suffix Specifications
 ---------------------------
 
 A transient’s suffix and infix commands are bound when the transient
@@ -1128,10 +1184,11 @@ transient.
    • KEY is the key binding, either a vector or key description string.
 
    • DESCRIPTION is the description, either a string or a function that
-     returns a string.  The function should be a lambda expression to
-     avoid ambiguity.  In some cases a symbol that is bound as a
-     function would also work but to be safe you should use
-     ‘:description’ in that case.
+     takes zero or one arguments (the suffix object) and returns a
+     string.  The function should be a lambda expression to avoid
+     ambiguity.  In some cases a symbol that is bound as a function
+     would also work but to be safe you should use ‘:description’ in
+     that case.
 
    The next element is either a command or an argument.  This is the
 only argument that is mandatory in all cases.
@@ -1187,7 +1244,7 @@ Slots::.
 
 File: transient.info,  Node: Defining Suffix and Infix Commands,  Next: Using Infix Arguments,  Prev: Binding Suffix and Infix Commands,  Up: Defining New Commands
 
-4.3 Defining Suffix and Infix Commands
+4.4 Defining Suffix and Infix Commands
 ======================================
 
 Note that an infix is a special kind of suffix.  Depending on context
@@ -1218,16 +1275,12 @@ Note that an infix is a special kind of suffix.  Depending on context
      reserved for future use.  DOCSTRING is the documentation string and
      is optional.
 
-     The keyword-value pairs are mandatory.  All transient infix
-     commands are ‘equal’ to each other (but not ‘eq’), so it is
-     meaningless to define an infix command without also setting at
-     least ‘:class’ and one other keyword (which it is depends on the
-     used class, usually ‘:argument’ or ‘:variable’).
-
-     Each keyword has to be a keyword symbol, either ‘:class’ or a
-     keyword argument supported by the constructor of that class.  The
-     ‘transient-switch’ class is used if the class is not specified
-     explicitly.
+     At least one key-value pair is required.  All transient infix
+     commands are ‘equal’ to each other (but not ‘eq’).  It is
+     meaningless to define an infix command, without providing at least
+     one keyword argument (usually ‘:argument’ or ‘:variable’, depending
+     on the class).  The suffix class defaults to ‘transient-switch’ and
+     can be set using the ‘:class’ keyword.
 
      The function definition is always:
 
@@ -1257,7 +1310,7 @@ Note that an infix is a special kind of suffix.  Depending on context
 
 File: transient.info,  Node: Using Infix Arguments,  Next: Transient State,  Prev: Defining Suffix and Infix Commands,  Up: Defining New Commands
 
-4.4 Using Infix Arguments
+4.5 Using Infix Arguments
 =========================
 
 The functions and the variables described below allow suffix commands to
@@ -1318,7 +1371,7 @@ function, which for infix arguments serves about the same purpose as
 
 File: transient.info,  Node: Transient State,  Prev: Using Infix Arguments,  Up: Defining New Commands
 
-4.5 Transient State
+4.6 Transient State
 ===================
 
 Invoking a transient prefix command “activates” the respective
@@ -1338,53 +1391,51 @@ transient’s infix and suffix commands.
      transient keymap is disallowed and trying to do so results in a
      warning.  This does not “deactivate” the transient.
 
-   But these are just the defaults.  Whether a certain command
-deactivates or “exits” the transient is configurable.  There is more
-than one way in which a command can be “transient” or “non-transient”;
-the exact behavior is implemented by calling a so-called “pre-command”
-function.  Whether non-suffix commands are allowed to be called is
-configurable per transient.
+   The behavior can be changed for all suffixes of a particular prefix
+and/or for individual suffixes.  The values should nearly always be
+booleans, but certain functions, called “pre-commands”, can also be
+used.  These functions are named ‘transient--do-VERB’, and the symbol
+‘VERB’ can be used as a shorthand.
 
-   • The transient-ness of suffix commands (including infix commands) is
-     controlled by the value of their ‘transient’ slot, which can be set
-     either when defining the command or when adding a binding to a
-     transient while defining the respective transient prefix command.
+   A boolean is interpreted as answering the question "does the
+transient stay active, when this command is invoked?"  ‘t’ means that
+the transient stays active, while ‘nil’ means that invoking the command
+exits the transient.
 
-     Valid values are booleans and the pre-commands described below.
+   Note that when the suffix is a “sub-prefix”, invoking that command
+always activates that sub-prefix, causing the outer prefix to no longer
+be active and displayed.  Here ‘t’ means that when you exit the inner
+prefix, then the outer prefix becomes active again, while ‘nil’ means
+that all outer prefixes are exited at once.
 
-        • ‘t’ is equivalent to ‘transient--do-stay’.
-        • ‘nil’ is equivalent to ‘transient--do-exit’.
-        • If ‘transient’ is unbound (and that is actually the default
-          for non-infix suffixes) then the value of the prefix’s
-          ‘transient-suffix’ slot is used instead.  The default value of
-          that slot is ‘nil’, so the suffix’s ‘transient’ slot being
-          unbound is essentially equivalent to it being ‘nil’.
+   • The behavior for non-suffixes can be set for a particular prefix,
+     by the prefix’s ‘transient-non-suffix’ slot to a boolean, a
+     suitable pre-command function, or a shorthand for such a function.
+     See *note Pre-commands for Non-Suffixes::.
 
-   • A suffix command can be a prefix command itself, i.e., a
-     “sub-prefix”.  While a sub-prefix is active we nearly always want
-     ‘C-g’ to take the user back to the “super-prefix”.  However in rare
-     cases this may not be desirable, and that makes the following
-     complication necessary:
+   • The common behavior for the suffixes of a particular prefix can be
+     set using the prefix’s ‘transient-suffixes’ slot.
 
-     For ‘transient-suffix’ objects the ‘transient’ slot is unbound.  We
-     can ignore that for the most part because, as stated above, ‘nil’
-     and the slot being unbound are equivalent, and mean “do exit”.
-     That isn’t actually true for suffixes that are sub-prefixes though.
-     For such suffixes unbound means “do exit but allow going back”,
-     which is the default, while ‘nil’ means “do exit permanently”,
-     which requires that slot to be explicitly set to that value.
+     The value specified in this slot does *not* affect infixes.
+     Because it affects both regular suffixes as well as sub-prefixes,
+     which have different needs, it is best to avoid explicitly
+     specifying a function.
 
-   • The transient-ness of certain built-in suffix commands is specified
-     using ‘transient-predicate-map’.  This is a special keymap, which
-     binds commands to pre-commands (as opposed to keys to commands) and
-     takes precedence over the ‘transient’ slot.
+   • The behavior of an individual suffix can be changed using its
+     ‘transient’ slot.  While it is usually best to use a boolean, for
+     this slot it can occasionally make sense to specify a function
+     explicitly.
 
-   The available pre-command functions are documented below.  They are
-called by ‘transient--pre-command’, a function on ‘pre-command-hook’ and
-the value that they return determines whether the transient is exited.
-To do so the value of one of the constants ‘transient--exit’ or
-‘transient--stay’ is used (that way we don’t have to remember if ‘t’
-means “exit” or “stay”).
+     Note that this slot can be set when defining a suffix command using
+     ‘transient-define-suffix’ and/or in the definition of the prefix.
+     If set in both places, then the latter takes precedence, as usual.
+
+   The available pre-command functions are documented in the following
+sub-sections.  They are called by ‘transient--pre-command’, a function
+on ‘pre-command-hook’, and the value that they return determines whether
+the transient is exited.  To do so the value of one of the constants
+‘transient--exit’ or ‘transient--stay’ is used (that way we don’t have
+to remember if ‘t’ means “exit” or “stay”).
 
    Additionally, these functions may change the value of ‘this-command’
 (which explains why they have to be called using ‘pre-command-hook’),
@@ -1392,11 +1443,35 @@ call ‘transient-export’, ‘transient--stack-zap’ or
 ‘transient--stack-push’; and set the values of ‘transient--exitp’,
 ‘transient--helpp’ or ‘transient--editp’.
 
+   For completeness sake, some notes about complications:
+
+   • The transient-ness of certain built-in suffix commands is specified
+     using ‘transient-predicate-map’.  This is a special keymap, which
+     binds commands to pre-commands (as opposed to keys to commands) and
+     takes precedence over the prefix’s ‘transient-suffix’ slot, but not
+     the suffix’s ‘transient’ slot.
+
+   • While a sub-prefix is active we nearly always want ‘C-g’ to take
+     the user back to the “super-prefix”, even when the other suffixes
+     don’t do that.  However, in rare cases this may not be desirable,
+     and that makes the following complication necessary:
+
+     For ‘transient-suffix’ objects the ‘transient’ slot is unbound.  We
+     can ignore that for the most part because ‘nil’ and the slot being
+     unbound are treated as equivalent, and mean “do exit”.  That isn’t
+     actually true for suffixes that are sub-prefixes though.  For such
+     suffixes unbound means “do exit but allow going back”, which is the
+     default, while ‘nil’ means “do exit permanently”, which requires
+     that slot to be explicitly set to that value.
+
 Pre-commands for Infixes
 ------------------------
 
 The default for infixes is ‘transient--do-stay’.  This is also the only
-function that makes sense for infixes.
+function that makes sense for infixes, which is why this predicate is
+used even if the value of the prefix’s ‘transient-suffix’ slot is ‘t’.
+In extremely rare cases, one might want to use something else, which can
+be done by setting the infix’s ‘transient’ slot directly.
 
  -- Function: transient--do-stay
      Call the command without exporting variables and stay transient.
@@ -1406,31 +1481,25 @@ Pre-commands for Suffixes
 
 By default, invoking a suffix causes the transient to be exited.
 
-   If you want a different default behavior for a certain transient
-prefix command, then set its ‘:transient-suffix’ slot.  The value can be
-a boolean, answering the question "does the transient stay active, when
-a suffix command is invoked?"  ‘t’ means that the transient stays
-active, while ‘nil’ means that invoking a suffix exits the transient.
-In either case, the exact behavior depends on whether the suffix is
-itself a prefix (i.e., a sub-prefix), an infix or a regular suffix.
-
    The behavior for an individual suffix command can be changed by
-setting its ‘transient’ slot to one of the following pre-commands.
+setting its ‘transient’ slot to a boolean (which is highly recommended),
+or to one of the following pre-commands.
 
  -- Function: transient--do-exit
      Call the command after exporting variables and exit the transient.
 
  -- Function: transient--do-return
-     Call the command after exporting variables and return to parent
+     Call the command after exporting variables and return to the parent
      prefix.  If there is no parent prefix, then call
      ‘transient--do-exit’.
 
  -- Function: transient--do-call
      Call the command after exporting variables and stay transient.
 
-   The following pre-commands are suitable for sub-prefixes.  Only the
-first should ever explicitly be set as the value of the ‘transient’
-slot.
+   The following pre-commands are only suitable for sub-prefixes.  It is
+not necessary to explicitly use these predicates because the correct
+predicate is automatically picked based on the value of the ‘transient’
+slot for the sub-prefix itself.
 
  -- Function: transient--do-recurse
      Call the transient prefix command, preparing for return to active
@@ -1438,14 +1507,23 @@ slot.
 
      Whether we actually return to the parent transient is ultimately
      under the control of each invoked suffix.  The difference between
-     this pre-command and ‘transient--do-replace’ is that it changes the
-     value of the ‘transient-suffix’ slot to ‘transient--do-return’.
+     this pre-command and ‘transient--do-stack’ is that it changes the
+     value of the ‘transient-suffix’ slot to ‘t’.
 
      If there is no parent transient, then only call this command and
      skip the second step.
 
+ -- Function: transient--do-stack
+     Call the transient prefix command, stacking the active transient.
+     Push the active transient to the transient stack.
+
+     Unless ‘transient--do-recurse’ is explicitly used, this pre-command
+     is automatically used for suffixes that are prefixes themselves,
+     i.e., for sub-prefixes.
+
  -- Function: transient--do-replace
      Call the transient prefix command, replacing the active transient.
+     Do not push the active transient to the transient stack.
 
      Unless ‘transient--do-recurse’ is explicitly used, this pre-command
      is automatically used for suffixes that are prefixes themselves,
@@ -1465,18 +1543,17 @@ By default, non-suffixes (commands that are bound in other keymaps
 beside the transient keymap) cannot be invoked.  Trying to invoke such a
 command results in a warning and the transient stays active.
 
-   If you want a different behavior, then set the
-‘:transient-non-suffix’ slot of the transient prefix command.  The value
-can be a boolean, answering the question, "is it allowed to invoke
-non-suffix commands?"
+   If you want a different behavior, then set the ‘transient-non-suffix’
+slot of the transient prefix command.  The value should be a boolean,
+answering the question, "is it allowed to invoke non-suffix commands?, a
+pre-command function, or a shorthand for such a function.
 
-   If the value is ‘t’ or ‘transient--do-stay’, then non-suffixes can be
-invoked, when it is ‘nil’ or ‘transient--do-warn’ (the default) then
-they cannot be invoked.
+   If the value is ‘t’, then non-suffixes can be invoked, when it is
+‘nil’ (the default) then they cannot be invoked.
 
-   The only other recommended value is ‘transient--do-leave’.  If that
-is used, then non-suffixes can be invoked, but if one is invoked, then
-that exits the transient.
+   The only other recommended value is ‘leave’.  If that is used, then
+non-suffixes can be invoked, but if one is invoked, then that exits the
+transient.
 
  -- Function: transient--do-warn
      Call ‘transient-undefined’ and stay transient.
@@ -1507,7 +1584,7 @@ Special Pre-Commands
      This is used when the user pressed ‘C-z’.
 
 
-File: transient.info,  Node: Classes and Methods,  Next: Related Abstractions and Packages,  Prev: Defining New Commands,  Up: Top
+File: transient.info,  Node: Classes and Methods,  Next: FAQ,  Prev: Defining New Commands,  Up: Top
 
 5 Classes and Methods
 *********************
@@ -1706,6 +1783,21 @@ File: transient.info,  Node: Suffix Classes,  Next: Suffix Methods,  Prev: Prefi
    • Classes used for infix commands that represent variables should
      derived from the abstract ‘transient-variable’ class.
 
+   • The ‘transient-information’ class is special in that suffixes that
+     use this class are not associated with a command and thus also not
+     with any key binding.  Such suffixes are only used to display
+     arbitrary information, and that anywhere a suffix can appear.
+     Display-only suffix specifications take this form:
+
+          ([LEVEL] :info DESCRIPTION [KEYWORD VALUE]...)
+
+     The ‘:info’ keyword argument replaces the ‘:description’ keyword
+     used for other suffix classes.  Other keyword arguments that you
+     might want to set, include ‘:face’, predicate keywords (such as
+     ‘:if’), and ‘:format’.  By default the value of ‘:format’ includes
+     ‘%k’, which for this class is replaced with the empty string or
+     spaces, if keys are being padded in the containing group.
+
    Magit defines additional classes, which can serve as examples for the
 fancy things you can do without modifying Transient.  Some of these
 classes will likely get generalized and added to Transient.  For now
@@ -1823,12 +1915,12 @@ File: transient.info,  Node: Suffix Format Methods,  Prev: Suffix Value Methods,
      For prefixes, show the info manual, if that is specified using the
      ‘info-manual’ slot.  Otherwise, show the manpage if that is
      specified using the ‘man-page’ slot.  Otherwise, show the command’s
-     doc string.
+     documentation string.
 
-     For suffixes, show the command’s doc string.
+     For suffixes, show the command’s documentation string.
 
      For infixes, show the manpage if that is specified.  Otherwise show
-     the command’s doc string.
+     the command’s documentation string.
 
 
 File: transient.info,  Node: Prefix Slots,  Next: Suffix Slots,  Prev: Suffix Methods,  Up: Classes and Methods
@@ -1850,10 +1942,23 @@ File: transient.info,  Node: Prefix Slots,  Next: Suffix Slots,  Prev: Suffix Me
      remains active/transient when a suffix or arbitrary non-suffix
      command is invoked.  See *note Transient State::.
 
+   • ‘refresh-suffixes’ Normally suffix objects and keymaps are only
+     setup once, when the prefix is invoked.  Setting this to ‘t’,
+     causes them to be recreated after every command.  This is useful
+     when using ‘:if...’ predicates, and those need to be rerun for some
+     reason.  Doing this is somewhat costly, and there is a risk of
+     losing state, so this is disabled by default and still considered
+     experimental.
+
    • ‘incompatible’ A list of lists.  Each sub-list specifies a set of
      mutually exclusive arguments.  Enabling one of these arguments
      causes the others to be disabled.  An argument may appear in
-     multiple sub-lists.
+     multiple sub-lists.  Arguments must me given in the same form as
+     used in the ‘argument’ or ‘argument-format’ slot of the respective
+     suffix objects, usually something like ‘--switch’ or ‘--option=%s’.
+     For options and ‘transient-switches’ suffixes it is also possible
+     to match against a specific value, as returned by
+     ‘transient-infix-value’, for example, ‘--option=one’.
 
    • ‘scope’ For some transients it might be necessary to have a sort of
      secondary value, called a “scope”.  See ‘transient-define-prefix’.
@@ -1917,8 +2022,14 @@ Slots of ‘transient-suffix’
         • ‘%v’ For the infix value.  Non-infix suffixes don’t have a
           value.
 
-   • ‘description’ The description, either a string or a function that
-     is called with no argument and returns a string.
+   • ‘description’ The description, either a string or a function, which
+     is called with zero or one argument (the suffix object), and
+     returns a string.
+
+   • ‘face’ Face used for the description.  In simple cases it is easier
+     to use this instead of using a function as ‘description’ and adding
+     the styling there.  ‘face’ is appended using
+     ‘add-face-text-property’.
 
    • ‘show-help’ A function used to display help for the suffix.  If
      unspecified, the prefix controls how help is displayed for its
@@ -1994,8 +2105,10 @@ They are defined here anyway to allow sharing certain methods.
      a function that takes the object as the only argument and which
      returns a prompt string.
 
-   • ‘choices’ A list of valid values.  How exactly that is used depends
-     on the class of the object.
+   • ‘choices’ A list of valid values, or a function that returns such a
+     list.  The latter is not implemented for ‘transient-switches’,
+     because I couldn’t think of a use-case.  How exactly the choices
+     are used varies depending on the class of the suffix.
 
 Slots of ‘transient-variable’
 -----------------------------
@@ -2031,6 +2144,10 @@ happens if you use more than one.
    • ‘if-derived’ Enable if major-mode derives from value.
    • ‘if-not-derived’ Enable if major-mode does not derive from value.
 
+   By default these predicates run when the prefix command is invoked,
+but this can be changes, using the ‘refresh-suffixes’ prefix slot.  See
+*note Prefix Slots::.
+
    One more slot is shared between group and suffix classes, ‘level’.
 Like the slots documented above, it is a predicate, but it is used for a
 different purpose.  The value has to be an integer between 1 and 7.
@@ -2039,311 +2156,7 @@ depending on user preference.  See *note Enabling and Disabling
 Suffixes::.
 
 
-File: transient.info,  Node: Related Abstractions and Packages,  Next: FAQ,  Prev: Classes and Methods,  Up: Top
-
-6 Related Abstractions and Packages
-***********************************
-
-* Menu:
-
-* Comparison With Prefix Keys and Prefix Arguments::
-* Comparison With Other Packages::
-
-
-File: transient.info,  Node: Comparison With Prefix Keys and Prefix Arguments,  Next: Comparison With Other Packages,  Up: Related Abstractions and Packages
-
-6.1 Comparison With Prefix Keys and Prefix Arguments
-====================================================
-
-While transient commands were inspired by regular prefix keys and prefix
-arguments, they are also quite different and much more complex.
-
-   The following diagrams illustrate some of the differences.
-
-   • ‘(c)’ represents a return to the command loop.
-   • ‘(+)’ represents the user’s choice to press one key or another.
-   • ‘{WORD}’ are possible behaviors.
-   • ‘{NUMBER}’ is a footnote.
-
-Regular Prefix Commands
------------------------
-
-See *note (elisp)Prefix Keys::.
-
-                                       ,--> command1 --> (c)
-                                       |
-     (c)-(+)-> prefix command or key --+--> command2 --> (c)
-                                       |
-                                       `--> command3 --> (c)
-
-Regular Prefix Arguments
-------------------------
-
-See *note (elisp)Prefix Command Arguments::.
-
-             ,----------------------------------,
-             |                                  |
-             v                                  |
-     (c)-(+)---> prefix argument command --(c)-(+)-> any command --> (c)
-                    |                                        ^        |
-                    |                                        |        |
-                    `-- sets or changes --, ,-- maybe used --'        |
-                                          | |                         |
-                                          v |                         |
-                               prefix argument state                  |
-                                           ^                          |
-                                           |                          |
-                                           `-------- discards --------'
-
-Transients
-----------
-
-(∩｀-´)⊃━☆ﾟ.*･｡ﾟ
-
-   This diagram ignores the infix value and external state:
-
-     (c)
-      |        ,- {stay} ------<-,-<------------<-,-<---,
-     (+)       |                 |                |     |
-      |        |                 |                |     |
-      |        |   ,--> infix1 --|                |     |
-      |        |   |             |                |     |
-      |        |   |--> infix2 --|                |     |
-      v        v   |             |                |     |
-      prefix -(c)-(+)-> infix3 --'                ^     |
-                   |                              |     |
-                   |---------------> suffix1 -->--|     |
-                   |                              |     |
-                   |---------------> suffix2 ----{1}------> {exit} --> (c)
-                   |                                    |
-                   |---------------> suffix3 -------------> {exit} --> (c)
-                   |                                    |
-                   `--> any command --{2}-> {warn} -->--|
-                                       |                |
-                                       |--> {noop} -->--|
-                                       |                |
-                                       |--> {call} -->--'
-                                       |
-                                       `------------------> {exit} --> (c)
-
-   This diagram takes the infix value into account to an extend, while
-still ignoring external state:
-
-     (c)
-      |        ,- {stay} ------<-,-<------------<-,-<---,
-     (+)       |                 |                |     |
-      |        |                 |                |     |
-      |        |   ,--> infix1 --|                |     |
-      |        |   |    |        |                |     |
-      |        |   ,--> infix2 --|                |     |
-      v        v   |    |        |                |     |
-      prefix -(c)-(+)-> infix3 --'                |     |
-                   |    |                         ^     |
-                   |    |                         |     |
-                   |---------------> suffix1 -->--|     |
-                   |    |             ^           |     |
-                   |    |             |           |     |
-                   |---------------> suffix2 ----{1}------> {exit} --> (c)
-                   |    |             ^                 |     |
-                   |    |             |                 |     v
-                   |    |             |                 |     |
-                   |---------------> suffix3 -------------> {exit} --> (c)
-                   |    |             ^                 |     |
-                   | sets             |                 |     v
-                   |    |             maybe             |     |
-                   |    |             used              |     |
-                   |    |             |                 |     |
-                   |    |     infix --'                 |     |
-                   |    `---> value                     |     |
-                   |           ^                        |     |
-                   |           |                        |     |
-                   |       hides                        |     |
-                   |           |                        |     |
-                   |           `--------------------------<---|
-                   |                                    |     |
-                   `--> any command --{2}-> {warn} -->--|     |
-                                       |                |     |
-                                       |--> {noop} -->--|     |
-                                       |                |     |
-                                       |--> {call} -->--'     ^
-                                       |                      |
-                                       `------------------> {exit} --> (c)
-
-   This diagram provides more information about the infix value and also
-takes external state into account.
-
-                                            ,----sets--- "anything"
-                                            |
-                                            v
-                           ,---------> external
-                           |           state
-                           |            | |
-                           |  initialized |                      ☉‿⚆
-                        sets         from |
-                           |            | maybe
-                           | ,----------' used
-                           | |            |
-     (c)                   | |            v
-      |        ,- {stay} --|---<-,-<------|-----<-,-<---,
-     (+)       |           | |   |        |       |     |
-      |        |           | v   |        |       |     |
-      |        |   ,--> infix1 --|        |       |     |
-      |        |   |       | |   |        |       |     |
-      |        |   |       | v   |        |       |     |
-      |        |   ,--> infix2 --|        |       |     |
-      |        |   |    | ^      |        |       |     |
-      v        v   |    | |      |        |       |     |
-      prefix -(c)-(+)-> infix3 --'        |       |     |
-                   |    | ^               |       ^     |
-                   |    | |               v       |     |
-                   |---------------> suffix1 -->--|     |
-                   |    | |            ^  |       |     |
-                   |    | |            |  v       |     |
-                   |---------------> suffix2 ----{1}------> {exit} --> (c)
-                   |    | |            ^  |             |     |
-                   |    | |            |  |             |     v
-                   |    | |            |  v             |     |
-                   |---------------> suffix3 -------------> {exit} --> (c)
-                   |    | |            ^                |     |
-                   | sets |            |                |     v
-                   |    | initialized  maybe            |     |
-                   |    | from         used             |     |
-                   |    | |            |                |     |
-                   |    | `-- infix ---'                |     |
-                   |    `---> value -----------------------------> persistent
-                   |           ^ ^                      |     |    across
-                   |           | |                      |     |    invocations -,
-                   |       hides |                      |     |                 |
-                   |           | `----------------------------------------------'
-                   |           |                        |     |
-                   |           `--------------------------<---|
-                   |                                    |     |
-                   `--> any command --{2}-> {warn} -->--|     |
-                                       |                |     |
-                                       |--> {noop} -->--|     |
-                                       |                |     |
-                                       |--> {call} -->--'     ^
-                                       |                      |
-                                       `------------------> {exit} --> (c)
-
-   • ‘{1}’ Transients can be configured to be exited when a suffix
-     command is invoked.  The default is to do so for all suffixes
-     except for those that are common to all transients and which are
-     used to perform tasks such as providing help and saving the value
-     of the infix arguments for future invocations.  The behavior can
-     also be specified for individual suffix commands and may even
-     depend on state.
-
-   • ‘{2}’ Transients can be configured to allow the user to invoke
-     non-suffix commands.  The default is to not allow that and instead
-     warn the user.
-
-   Despite already being rather complex, even the last diagram leaves
-out many details.  Most importantly it implies that the decision whether
-to remain transient is made later than it actually is made (for the most
-part a function on ‘pre-command-hook’ is responsible).  But such
-implementation details are of little relevance to users and are covered
-elsewhere.
-
-
-File: transient.info,  Node: Comparison With Other Packages,  Prev: Comparison With Prefix Keys and Prefix Arguments,  Up: Related Abstractions and Packages
-
-6.2 Comparison With Other Packages
-==================================
-
-Magit-Popup
------------
-
-Transient is the successor to Magit-Popup (see *note
-(magit-popup)Top::).
-
-   One major difference between these two implementations of the same
-ideas is that while Transient uses transient keymaps and embraces the
-command-loop, Magit-Popup implemented an inferior mechanism that does
-not use transient keymaps and that instead of using the command-loop
-implements a naive alternative based on ‘read-char’.
-
-   Magit-Popup does not use classes and generic functions and defining a
-new command type is near impossible as it involves adding hard-coded
-special-cases to many functions.  Because of that only a single new type
-was added, which was not already part of Magit-Popup’s initial release.
-
-   A lot of things are hard-coded in Magit-Popup.  One random example is
-that the key bindings for switches must begin with ‘-’ and those for
-options must begin with ‘=’.
-
-Hydra
------
-
-Hydra (see <https://github.com/abo-abo/hydra>) is another package that
-provides features similar to those of Transient.
-
-   Both packages use transient keymaps to make a set of commands
-temporarily available and show the available commands in a popup buffer.
-
-   A Hydra “body” is equivalent to a Transient “prefix” and a Hydra
-“head” is equivalent to a Transient “suffix”.  Hydra has no equivalent
-of a Transient “infix”.
-
-   Both hydras and transients can be used as simple command dispatchers.
-Used like this they are similar to regular prefix commands and prefix
-keys, except that the available commands are shown in the popup buffer.
-
-   (Another package that does this is ‘which-key’.  It does so
-automatically for any incomplete key sequence.  The advantage of that
-approach is that no additional work is necessary; the disadvantage is
-that the available commands are not organized semantically.)
-
-   Both Hydra and Transient provide features that go beyond simple
-command dispatchers:
-
-   • Invoking a command from a hydra does not necessarily exit the
-     hydra.  That makes it possible to invoke the same command again,
-     but using a shorter key sequence (i.e., the key that was used to
-     enter the hydra does not have to be pressed again).
-
-     Transient supports that too, but for now this feature is not a
-     focus and the interface is a bit more complicated.  A very basic
-     example using the current interface:
-
-          (transient-define-prefix outline-navigate ()
-            :transient-suffix     'transient--do-stay
-            :transient-non-suffix 'transient--do-warn
-            [("p" "previous visible heading" outline-previous-visible-heading)
-             ("n" "next visible heading" outline-next-visible-heading)])
-
-   • Transient supports infix arguments; values that are set by infix
-     commands and then consumed by the invoked suffix command(s).
-
-     To my knowledge, Hydra does not support that.
-
-   Both packages make it possible to specify how exactly the available
-commands are outlined:
-
-   • With Hydra this is often done using an explicit format string,
-     which gives authors a lot of flexibility and makes it possible to
-     do fancy things.
-
-     The downside of this is that it becomes harder for a user to add
-     additional commands to an existing hydra and to change key
-     bindings.
-
-   • Transient allows the author of a transient to organize the commands
-     into groups and the use of generic functions allows authors of
-     transients to control exactly how a certain command type is
-     displayed.
-
-     However while Transient supports giving sections a heading it does
-     not currently support giving the displayed information more
-     structure by, for example, using box-drawing characters.
-
-     That could be implemented by defining a new group class, which lets
-     the author specify a format string.  It should be possible to
-     implement that without modifying any existing code, but it does not
-     currently exist.
-
-
-File: transient.info,  Node: FAQ,  Next: Keystroke Index,  Prev: Related Abstractions and Packages,  Up: Top
+File: transient.info,  Node: FAQ,  Next: Keystroke Index,  Prev: Classes and Methods,  Up: Top
 
 Appendix A FAQ
 **************
@@ -2356,16 +2169,28 @@ Yes, see ‘transient-display-buffer-action’ in *note Configuration::.
 A.2 How can I copy text from the popup buffer?
 ==============================================
 
-To be able to mark text in any transient popup buffer using the mouse,
-you have to add the following binding.  Note that the region won’t be
-visualized, while doing so.  After you have quit the transient popup,
-you will be able to yank it another buffer.
+To be able to mark text in Transient’s popup buffer using the mouse, you
+have to add the below binding.  Note that for technical reasons, the
+region won’t be visualized, while doing so.  After you have quit the
+transient popup, you will be able to yank it in another buffer.
 
      (keymap-set transient-predicate-map
                  "<mouse-set-region>"
                  #'transient--do-stay)
 
-A.3 Why did some of the key bindings change?
+A.3 How does Transient compare to prefix keys and universal arguments?
+======================================================================
+
+See
+<https://github.com/magit/transient/wiki/Comparison-with-prefix-keys-and-universal-arguments>.
+
+A.4 How does Transient compare to Magit-Popup and Hydra?
+========================================================
+
+See
+<https://github.com/magit/transient/wiki/Comparison-with-other-packages>.
+
+A.5 Why did some of the key bindings change?
 ============================================
 
 You may have noticed that the bindings for some of the common commands
@@ -2408,7 +2233,7 @@ and also using that for a common command would prevent me from doing so.
 
    (Also see the next question.)
 
-A.4 Why does ‘q’ not quit popups anymore?
+A.6 Why does ‘q’ not quit popups anymore?
 =========================================
 
 I agree that ‘q’ is a good binding for commands that quit something.
@@ -2427,7 +2252,7 @@ for ‘q’.
    If you want to get ‘q’’s old binding back then you can do so.  Doing
 that is a bit more complicated than changing a single key binding, so I
 have implemented a function, ‘transient-bind-q-to-quit’ that makes the
-necessary changes.  See its doc string for more information.
+necessary changes.  See its documentation string for more information.
 
 
 File: transient.info,  Node: Keystroke Index,  Next: Command and Function Index,  Prev: FAQ,  Up: Top
@@ -2448,6 +2273,8 @@ Appendix B Keystroke Index
 * C-M-p:                                 Using History.        (line 13)
 * C-q:                                   Aborting and Resuming Transients.
                                                                (line 36)
+* C-x a:                                 Enabling and Disabling Suffixes.
+                                                               (line 68)
 * C-x C-k:                               Saving Values.        (line 29)
 * C-x C-s:                               Saving Values.        (line 25)
 * C-x l:                                 Enabling and Disabling Suffixes.
@@ -2469,19 +2296,20 @@ Appendix C Command and Function Index
  [index ]
 * Menu:
 
-* transient--do-call:                    Transient State.     (line 110)
-* transient--do-exit:                    Transient State.     (line 102)
-* transient--do-leave:                   Transient State.     (line 169)
-* transient--do-quit-all:                Transient State.     (line 181)
-* transient--do-quit-one:                Transient State.     (line 176)
-* transient--do-recurse:                 Transient State.     (line 117)
-* transient--do-replace:                 Transient State.     (line 129)
-* transient--do-return:                  Transient State.     (line 105)
-* transient--do-stay:                    Transient State.     (line  83)
-* transient--do-stay <1>:                Transient State.     (line 166)
-* transient--do-suspend:                 Transient State.     (line 136)
-* transient--do-suspend <1>:             Transient State.     (line 186)
-* transient--do-warn:                    Transient State.     (line 163)
+* transient--do-call:                    Transient State.     (line 125)
+* transient--do-exit:                    Transient State.     (line 117)
+* transient--do-leave:                   Transient State.     (line 193)
+* transient--do-quit-all:                Transient State.     (line 205)
+* transient--do-quit-one:                Transient State.     (line 200)
+* transient--do-recurse:                 Transient State.     (line 133)
+* transient--do-replace:                 Transient State.     (line 153)
+* transient--do-return:                  Transient State.     (line 120)
+* transient--do-stack:                   Transient State.     (line 145)
+* transient--do-stay:                    Transient State.     (line 105)
+* transient--do-stay <1>:                Transient State.     (line 190)
+* transient--do-suspend:                 Transient State.     (line 161)
+* transient--do-suspend <1>:             Transient State.     (line 210)
+* transient--do-warn:                    Transient State.     (line 187)
 * transient--history-init:               Prefix Classes.      (line  10)
 * transient--insert-group:               Group Methods.       (line  19)
 * transient-append-suffix:               Modifying Existing Transients.
@@ -2491,7 +2319,7 @@ Appendix C Command and Function Index
 * transient-args:                        Using Infix Arguments.
                                                               (line  22)
 * transient-define-argument:             Defining Suffix and Infix Commands.
-                                                              (line  61)
+                                                              (line  57)
 * transient-define-infix:                Defining Suffix and Infix Commands.
                                                               (line  26)
 * transient-define-prefix:               Defining Transients. (line  13)
@@ -2555,6 +2383,8 @@ Appendix C Command and Function Index
                                                               (line  41)
 * transient-toggle-common:               Common Suffix Commands.
                                                               (line  18)
+* transient-toggle-level-limit:          Enabling and Disabling Suffixes.
+                                                              (line  68)
 
 
 File: transient.info,  Node: Variable Index,  Next: Concept Index,  Prev: Command and Function Index,  Up: Top
@@ -2565,7 +2395,7 @@ Appendix D Variable Index
  [index ]
 * Menu:
 
-* transient-align-variable-pitch:        Configuration.       (line 181)
+* transient-align-variable-pitch:        Configuration.       (line 185)
 * transient-current-command:             Using Infix Arguments.
                                                               (line  57)
 * transient-current-prefix:              Using Infix Arguments.
@@ -2574,25 +2404,25 @@ Appendix D Variable Index
                                                               (line  44)
 * transient-default-level:               Enabling and Disabling Suffixes.
                                                               (line  33)
-* transient-detect-key-conflicts:        Configuration.       (line 206)
+* transient-detect-key-conflicts:        Configuration.       (line 210)
 * transient-display-buffer-action:       Configuration.       (line  51)
 * transient-enable-popup-navigation:     Configuration.       (line  36)
-* transient-force-fixed-pitch:           Configuration.       (line 194)
+* transient-force-fixed-pitch:           Configuration.       (line 198)
 * transient-force-single-column:         Configuration.       (line  93)
-* transient-hide-during-minibuffer-read: Configuration.       (line 177)
-* transient-highlight-higher-levels:     Configuration.       (line 219)
-* transient-highlight-mismatched-keys:   Configuration.       (line 131)
+* transient-hide-during-minibuffer-read: Configuration.       (line 181)
+* transient-highlight-higher-levels:     Configuration.       (line 223)
+* transient-highlight-mismatched-keys:   Configuration.       (line 135)
 * transient-history-file:                Using History.       (line  33)
 * transient-history-limit:               Using History.       (line  37)
 * transient-levels-file:                 Enabling and Disabling Suffixes.
                                                               (line  38)
 * transient-mode-line-format:            Configuration.       (line 102)
-* transient-read-with-initial-input:     Configuration.       (line 170)
-* transient-semantic-coloring:           Configuration.       (line 118)
+* transient-read-with-initial-input:     Configuration.       (line 174)
+* transient-semantic-coloring:           Configuration.       (line 126)
 * transient-show-common-commands:        Common Suffix Commands.
                                                               (line  23)
 * transient-show-popup:                  Configuration.       (line  15)
-* transient-substitute-key-function:     Configuration.       (line 149)
+* transient-substitute-key-function:     Configuration.       (line 153)
 * transient-values-file:                 Saving Values.       (line  31)
 
 
@@ -2607,7 +2437,8 @@ Appendix E Concept Index
 * aborting transients:                   Aborting and Resuming Transients.
                                                                (line  6)
 * classes and methods:                   Classes and Methods.  (line  6)
-* command dispatchers:                   Introduction.         (line 70)
+* command dispatchers:                   Technical Introduction.
+                                                               (line 39)
 * common suffix commands:                Common Suffix Commands.
                                                                (line  6)
 * defining infix commands:               Defining Suffix and Infix Commands.
@@ -2634,7 +2465,6 @@ Appendix E Concept Index
 * scope of a transient:                  Defining Transients.  (line 43)
 * suffix specifications:                 Suffix Specifications.
                                                                (line  6)
-* transient prefix command:              Introduction.         (line 13)
 * transient state:                       Transient State.      (line  6)
 * transient-level:                       Enabling and Disabling Suffixes.
                                                                (line 15)
@@ -3360,69 +3190,67 @@ please read <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
 Tag Table:
 Node: Top763
-Node: Introduction4070
-Node: Usage9912
-Node: Invoking Transients10280
-Node: Aborting and Resuming Transients11359
-Node: Common Suffix Commands13970
-Node: Saving Values15806
-Ref: Saving Values-Footnote-117177
-Node: Using History17370
-Node: Getting Help for Suffix Commands18944
-Node: Enabling and Disabling Suffixes20312
-Node: Other Commands23380
-Node: Configuration24356
-Ref: Essential Options24636
-Ref: Accessibility Options28297
-Ref: Auxiliary Options28620
-Ref: Developer Options33347
-Node: Modifying Existing Transients34595
-Node: Defining New Commands38787
-Node: Defining Transients39123
-Node: Binding Suffix and Infix Commands41559
-Node: Group Specifications42417
-Node: Suffix Specifications46986
-Node: Defining Suffix and Infix Commands51142
-Node: Using Infix Arguments54348
-Node: Transient State57182
-Ref: Pre-commands for Infixes61145
-Ref: Pre-commands for Suffixes61416
-Ref: Pre-commands for Non-Suffixes63837
-Ref: Special Pre-Commands64981
-Node: Classes and Methods65489
-Node: Group Classes67703
-Node: Group Methods69630
-Node: Prefix Classes70883
-Node: Suffix Classes71974
-Node: Suffix Methods74220
-Node: Suffix Value Methods74541
-Node: Suffix Format Methods77299
-Node: Prefix Slots78748
-Ref: Internal Prefix Slots80028
-Node: Suffix Slots81285
-Ref: Slots of transient-suffix81653
-Ref: Slots of transient-infix82507
-Ref: Slots of transient-variable85633
-Ref: Slots of transient-switches85735
-Node: Predicate Slots86098
-Node: Related Abstractions and Packages87363
-Node: Comparison With Prefix Keys and Prefix Arguments87650
-Ref: Regular Prefix Commands88335
-Ref: Regular Prefix Arguments88683
-Ref: Transients89652
-Node: Comparison With Other Packages97923
-Ref: Magit-Popup98154
-Ref: Hydra99061
-Node: FAQ102117
-Ref: Can I control how the popup buffer is displayed?102260
-Ref: How can I copy text from the popup buffer?102441
-Ref: Why did some of the key bindings change?102913
-Ref: Why does q not quit popups anymore?105266
-Node: Keystroke Index106359
-Node: Command and Function Index108077
-Node: Variable Index114449
-Node: Concept Index116722
-Node: GNU General Public License119466
+Node: Introduction2976
+Ref: Some things that Transient can do3504
+Ref: Complexity in CLI programs3857
+Ref: Using Transient for composing interactive commands4458
+Node: Usage6700
+Node: Invoking Transients7068
+Node: Aborting and Resuming Transients8147
+Node: Common Suffix Commands10768
+Node: Saving Values12604
+Ref: Saving Values-Footnote-113975
+Node: Using History14168
+Node: Getting Help for Suffix Commands15742
+Node: Enabling and Disabling Suffixes17120
+Node: Other Commands20408
+Node: Configuration21384
+Ref: Essential Options21664
+Ref: Accessibility Options25325
+Ref: Auxiliary Options25648
+Ref: Developer Options30611
+Node: Modifying Existing Transients31859
+Node: Defining New Commands36051
+Node: Technical Introduction36414
+Node: Defining Transients42115
+Node: Binding Suffix and Infix Commands44582
+Node: Group Specifications45440
+Node: Suffix Specifications50541
+Node: Defining Suffix and Infix Commands54754
+Node: Using Infix Arguments57802
+Node: Transient State60636
+Ref: Pre-commands for Infixes65451
+Ref: Pre-commands for Suffixes65971
+Ref: Pre-commands for Non-Suffixes68425
+Ref: Special Pre-Commands69561
+Node: Classes and Methods70069
+Node: Group Classes72253
+Node: Group Methods74180
+Node: Prefix Classes75433
+Node: Suffix Classes76524
+Node: Suffix Methods79611
+Node: Suffix Value Methods79932
+Node: Suffix Format Methods82690
+Node: Prefix Slots84169
+Ref: Internal Prefix Slots86304
+Node: Suffix Slots87561
+Ref: Slots of transient-suffix87929
+Ref: Slots of transient-infix89066
+Ref: Slots of transient-variable92362
+Ref: Slots of transient-switches92464
+Node: Predicate Slots92827
+Node: FAQ94262
+Ref: Can I control how the popup buffer is displayed?94391
+Ref: How can I copy text from the popup buffer?94572
+Ref: How does Transient compare to prefix keys and universal arguments?95066
+Ref: How does Transient compare to Magit-Popup and Hydra?95309
+Ref: Why did some of the key bindings change?95503
+Ref: Why does q not quit popups anymore?97856
+Node: Keystroke Index98959
+Node: Command and Function Index100824
+Node: Variable Index107416
+Node: Concept Index109689
+Node: GNU General Public License112425
 
 End Tag Table
 
