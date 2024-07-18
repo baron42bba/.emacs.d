@@ -1,12 +1,12 @@
 ;;; with-editor.el --- Use the Emacsclient as $EDITOR  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2014-2023 The Magit Project Contributors
+;; Copyright (C) 2014-2024 The Magit Project Contributors
 
-;; Author: Jonas Bernoulli <jonas@bernoul.li>
+;; Author: Jonas Bernoulli <emacs.with-editor@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/with-editor
 ;; Keywords: processes terminals
 
-;; Package-Version: 3.3.0
+;; Package-Version: 3.3.2
 ;; Package-Requires: ((emacs "25.1") (compat "29.1.4.1"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -41,10 +41,10 @@
 ;; `$GIT_EDITOR'.  To always use these variants add this to your init
 ;; file:
 ;;
-;;   (define-key (current-global-map)
-;;     [remap async-shell-command] #'with-editor-async-shell-command)
-;;   (define-key (current-global-map)
-;;     [remap shell-command] #'with-editor-shell-command)
+;;   (keymap-global-set "<remap> <async-shell-command>"
+;;                      #'with-editor-async-shell-command)
+;;   (keymap-global-set "<remap> <shell-command>"
+;;                      #'with-editor-shell-command)
 
 ;; Alternatively use the global `shell-command-with-editor-mode',
 ;; which always sets `$EDITOR' for all Emacs commands which ultimately
@@ -117,9 +117,10 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
   (let* ((version-lst (cl-subseq (split-string emacs-version "\\.") 0 depth))
          (version-reg (concat "^" (mapconcat #'identity version-lst "\\."))))
     (or (locate-file
-         (if (equal (downcase invocation-name) "remacs")
-             "remacsclient"
-           "emacsclient")
+         (cond ((equal (downcase invocation-name) "remacs")
+                "remacsclient")
+               ((bound-and-true-p emacsclient-program-name))
+               ("emacsclient"))
          path
          (cl-mapcan
           (lambda (v) (cl-mapcar (lambda (e) (concat v e)) exec-suffixes))
