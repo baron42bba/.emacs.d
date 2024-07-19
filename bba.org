@@ -1112,9 +1112,8 @@ list who can decrypt a file:
     (let ((bba-epa-filename (buffer-file-name))
       (bba-epa-packets-buffer (generate-new-buffer "*Packets*")))
       (set-buffer bba-epa-packets-buffer)
-      (insert (shell-command-to-string (concat "gpg --batch --list-packets " bba-epa-filename))
-      ;; (epg--start context "--list-packets ")
-      )
+      (insert (shell-command-to-string (concat "gpg --batch --list-packets " bba-epa-filename)))
+      (display-buffer bba-epa-packets-buffer)
    ))
 #+END_SRC
 
