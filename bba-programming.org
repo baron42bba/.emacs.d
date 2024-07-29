@@ -231,7 +231,7 @@ in the end use magit-stash.
        (setq cperl-tab-always-indent t)
        (perlcritic-mode)
        (which-function-mode)
-       (git-gutter-mode)))
+       (git-gutter-mode '1)))
        (define-key cperl-mode-map (kbd "s-o") #'(lambda () "insert-function-name" (interactive)(insert (which-function))))))
 
 #+END_SRC
@@ -270,10 +270,18 @@ Vagrant files are Ruby, so use ruby-mode for them:
   )
 #+END_SRC
 
+* sql
+[2023-02-22 Wed 10:36]
 #+begin_src emacs-lisp
   (if (string-equal system-type "darwin")
       (require 'eglot)
     (add-to-list 'eglot-server-programs '(sql-mode . (eglot-sqls "sqls"))))
+#+end_src
+
+#+begin_src emacs-lisp
+  (eval-after-load "sql"
+    '(progn
+      (add-hook 'sql-mode-hook' (lambda() (git-gutter-mode '1)))))
 #+end_src
 * TemplateToolkit
 
