@@ -740,7 +740,7 @@ See info node `(magit)Debugging Tools' for more information."
         (key (string-join keys ".")))
     (if (and magit--refresh-cache (not arg))
         (magit-config-get-from-cached-list key)
-      (magit-git-items "config" arg "-z" "--get-all" key))))
+      (magit-git-items "config" arg "-z" "--get-all" "--include" key))))
 
 (defun magit-get-boolean (&rest keys)
   "Return the boolean value of the Git variable specified by KEYS.
@@ -751,7 +751,7 @@ Also see `magit-git-config-p'."
         (key (string-join keys ".")))
     (equal (if magit--refresh-cache
                (car (last (magit-config-get-from-cached-list key)))
-             (magit-git-str "config" arg "--bool" key))
+             (magit-git-str "config" arg "--bool" "--include" key))
            "true")))
 
 (defun magit-set (value &rest keys)
@@ -2421,8 +2421,6 @@ and this option only controls what face is used.")
         (point-min) (point-max) buffer-file-name t nil nil t)
        ,@body)))
 
-(defvar magit-tramp-process-environment nil)
-
 (defmacro magit-with-temp-index (tree arg &rest body)
   (declare (indent 2) (debug (form form body)))
   (let ((file (cl-gensym "file")))
@@ -2436,13 +2434,8 @@ and this option only controls what face is used.")
                (unless (magit-git-success "read-tree" ,arg tree
                                           (concat "--index-output=" ,file))
                  (error "Cannot read tree %s" tree)))
-             (if (file-remote-p default-directory)
-                 (let ((magit-tramp-process-environment
-                        (cons (concat "GIT_INDEX_FILE=" ,file)
-                              magit-tramp-process-environment)))
-                   ,@body)
-               (with-environment-variables (("GIT_INDEX_FILE" ,file))
-                 ,@body)))
+             (with-environment-variables (("GIT_INDEX_FILE" ,file))
+               ,@body))
          (ignore-errors
            (delete-file (concat (file-remote-p default-directory) ,file)))))))
 
@@ -2652,7 +2645,7 @@ and this option only controls what face is used.")
                  prompt
                  (cl-union (and local-branch
                                 (if remote
-                                    (concat remote "/" local-branch)
+                                    (list local-branch)
                                   (--map (concat it "/" local-branch)
                                          (magit-list-remotes))))
                            (magit-list-remote-branch-names remote t)

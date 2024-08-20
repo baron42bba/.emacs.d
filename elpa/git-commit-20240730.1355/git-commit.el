@@ -14,10 +14,10 @@
 ;; Package-Version: 3.3.0.50-git
 ;; Package-Requires: (
 ;;     (emacs "26.1")
-;;     (compat "29.1.4.5")
+;;     (compat "30.0.0.0")
 ;;     (seq "2.24")
-;;     (transient "0.6.0")
-;;     (with-editor "3.3.2"))
+;;     (transient "0.7.2")
+;;     (with-editor "3.3.4"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -697,7 +697,7 @@ used."
 (defun git-commit-ensure-comment-gap ()
   "Separate initial empty line from initial comment.
 If the buffer begins with an empty line followed by a comment, insert
-an additional newline inbetween, so that once the users start typing,
+an additional newline in between, so that once the users start typing,
 the input isn't tacked to the comment."
   (save-excursion
     (goto-char (point-min))
@@ -1235,9 +1235,8 @@ Added to `font-lock-extend-region-functions'."
                       ;; because in repositories have thousands of
                       ;; branches that would be very slow.  See #4353.
                       (format "\\(\\(?:%s\\)\\|\\)\\([^']+\\)"
-                              (mapconcat #'identity
-                                         (magit-list-local-branch-names)
-                                         "\\|")))
+                              (string-join (magit-list-local-branch-names)
+                                           "\\|")))
                   "\\([^']*\\)"))
     (setq-local font-lock-multiline t)
     (add-hook 'font-lock-extend-region-functions
@@ -1260,11 +1259,9 @@ Added to `font-lock-extend-region-functions'."
                 (delete-region (point) (point-max)))))
            (let ((diff-default-read-only nil))
              (diff-mode))
-           (let (font-lock-verbose font-lock-support-mode)
-             (if (fboundp 'font-lock-ensure)
-                 (font-lock-ensure)
-               (with-no-warnings
-                 (font-lock-fontify-buffer))))
+           (let ((font-lock-verbose nil)
+                 (font-lock-support-mode nil))
+             (font-lock-ensure))
            (let ((pos (point-min)))
              (while-let ((next (next-single-property-change pos 'face)))
                (put-text-property pos next 'font-lock-face
