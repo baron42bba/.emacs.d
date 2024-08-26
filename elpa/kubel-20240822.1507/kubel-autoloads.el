@@ -14,24 +14,11 @@
 (autoload 'kubel-yaml-editing-mode "kubel" "\
 Kubel Yaml editing mode.
 
-Use C-c C-c to kubectl apply the current yaml buffer.
+Allows simple apply of the changes made.
 
-This is a minor mode.  If called interactively, toggle the
-`Kubel-Yaml-Editing mode' mode.  If the prefix argument is
-positive, enable the mode, and if it is zero or negative, disable
-the mode.
+\\{kubel-yaml-editing-mode-map}
 
-If called from Lisp, toggle the mode if ARG is `toggle'.  Enable
-the mode if ARG is nil, omitted, or is a positive number.
-Disable the mode if ARG is a negative number.
-
-To check whether the minor mode is enabled in the current buffer,
-evaluate `kubel-yaml-editing-mode'.
-
-The mode's hook is called both when the mode is enabled and when
-it is disabled.
-
-(fn &optional ARG)" t)
+(fn)" t)
 (autoload 'kubel-vterm-setup "kubel" "\
 Adds a vterm enty to the KUBEL-EXEC-POP.")
 (autoload 'kubel-refresh "kubel" "\

@@ -226,6 +226,15 @@
   :type 'integer
   :group 'kubel)
 
+(defcustom kubel-list-wide nil
+  "Control whether list views show additional colums.
+
+true   - use '-o wide' for list views to show additional columns
+false  - do not use '-o wide' for list views, hiding additional columns"
+  :type 'boolean
+  :group 'kubel)
+
+
 (defcustom kubel-use-namespace-list 'auto
   "Control behavior for namespace completion.
 
@@ -251,6 +260,12 @@ with information about the shell's connection. The following
 %n: The current namespace
 %C: The current context"
   :type 'string
+  :group 'kubel)
+
+(defcustom kubel-kill-buffer-query t
+  "Non-nil means that killing a modified resource buffer has to be confirmed.
+This is used by `kubel-kill-buffer'."
+  :type 'boolean
   :group 'kubel)
 
 (defun kubel--append-to-process-buffer (str)
@@ -330,7 +345,7 @@ CMD is the command string to run."
 
 (defun kubel--populate-list ()
   "Return a list with a tabulated list format and \"tabulated-list-entries\"."
-  (let*  ((body (kubel--exec-to-string (concat (kubel--get-command-prefix) " get " kubel-resource)))
+  (let*  ((body (kubel--exec-to-string (concat (kubel--get-command-prefix) " get " kubel-resource (if kubel-list-wide " -o wide" ""))))
           (entrylist (kubel--parse-body body)))
     (when (string-prefix-p "No resources found" body)
       (message "No resources found"))  ;; TODO exception here
@@ -590,12 +605,13 @@ NAME is the string name of the resource to decribe.
 DESCRIBE is boolean to describe instead of get resource details"
   (let* ((resource (kubel--select-resource name))
          (process-name (format "kubel - %s - %s" name resource))
-         (callback (lambda () (goto-char (point-min)))))
+         (callback (lambda ()
+                     (set-buffer-modified-p nil)
+                     (goto-char (point-min)))))
     (if describe
         (kubel--exec process-name (list "describe" name resource) nil callback)
       (kubel--exec process-name (list "get" name "-o" kubel-output resource) nil callback))
     (when (string-equal kubel-output "yaml")
-      (yaml-mode)
       (kubel-yaml-editing-mode))))
 
 (defun kubel--show-rollout-revision (type name)
@@ -640,15 +656,29 @@ TYPENAME is the resource type/name."
    (-contains? '("ReplicaSets" "replicasets" "replicasets.apps") kubel-resource)
    (-contains? '("StatefulSets" "statefulsets" "statefulsets.apps") kubel-resource)))
 
+(defun kubel-kill-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (when (or (not (buffer-modified-p))
+	    (not kubel-kill-buffer-query)
+	    (yes-or-no-p "Resource modified; kill anyway? "))
+    (kill-buffer (current-buffer))))
+
+(defvar kubel-yaml-editing-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c") #'kubel-apply)
+    (define-key map (kbd "C-c C-k") #'kubel-kill-buffer)
+    map)
+  "Keymap used in `kubel-yaml-editing-mode' buffers.")
+
 ;; interactive
 ;;;###autoload
-(define-minor-mode kubel-yaml-editing-mode
+(define-derived-mode kubel-yaml-editing-mode yaml-mode "kubel/e"
   "Kubel Yaml editing mode.
-Use C-c C-c to kubectl apply the current yaml buffer."
-  :init-value nil
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "C-c C-c") #'kubel-apply)
-            map))
+
+Allows simple apply of the changes made.
+
+\\{kubel-yaml-editing-mode-map}")
 
 (defun kubel-apply ()
   "Save the current buffer to a temp file and try to kubectl apply it."
@@ -659,7 +689,8 @@ Use C-c C-c to kubectl apply the current yaml buffer."
                         (format "/%s%s:%s@%s:" (or hop "") method user host)))
                     ""))
   (let* ((filename-without-tramp-prefix (format "/tmp/kubel/%s-%s.yaml"
-                                                (replace-regexp-in-string "\*\\| " "" (buffer-name))
+                                                (replace-regexp-in-string "/" "_"
+                                                                          (replace-regexp-in-string "\*\\| " "" (buffer-name)))
                                                 (floor (float-time))))
          (filename (format "%s%s" dir-prefix filename-without-tramp-prefix)))
     (when (y-or-n-p "Apply the changes? ")
@@ -678,12 +709,13 @@ Use C-c C-c to kubectl apply the current yaml buffer."
          (ns kubel-namespace)
          (res kubel-resource)
          (process-name (format "kubel - %s - %s" kubel-resource resource))
-         (callback (lambda () (goto-char (point-min)))))
+         (callback (lambda ()
+                     (set-buffer-modified-p nil)
+                     (goto-char (point-min)))))
     (if describe
         (kubel--exec process-name (list "describe" kubel-resource (kubel--get-resource-under-cursor)) nil callback)
       (kubel--exec process-name (list "get" kubel-resource (kubel--get-resource-under-cursor) "-o" kubel-output) nil callback))
     (when (or (string-equal kubel-output "yaml") (transient-args 'kubel-describe-popup))
-      (yaml-mode)
       (kubel-yaml-editing-mode)
       (setq kubel-context ctx)
       (setq kubel-namespace ns)
