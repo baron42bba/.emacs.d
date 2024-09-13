@@ -2650,6 +2650,7 @@ function to convert groups of spaces to hard tabs.
   (define-key bba/launcher "g" #'(lambda()"epa-file-encrypt-to"(interactive) (describe-variable 'epa-file-encrypt-to)))
   (define-key bba/launcher "i" 'ielm)
   (define-key bba/launcher "k" 'bba/keyboard-maestro)
+  (define-key bba/launcher "K" 'kubel)
   (define-key bba/launcher "l" 'magit-log-buffer-file)
   (define-key bba/launcher "m" 'bba/multiple-cursors)
   (define-key bba/launcher "n" 'neotree)
