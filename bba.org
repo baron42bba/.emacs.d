@@ -1293,7 +1293,7 @@ starting sql-connect.
                        )))
       (message connection)
       (if current-prefix-arg
-          (sql-connect connection connection)
+          (progn (let ((conname (sql-generate-unique-sqli-buffer-name (cdr (car (alist-get 'sql-product (assoc 'smaatotst sql-connection-alist)))) connection )))(sql-connect connection conname)))
         (sql-connect connection))))
   (global-set-key (kbd "s-s") 'my-sql-connect)))
 #+END_SRC
