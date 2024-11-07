@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: select_count
+# key: sc_
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT COUNT(*) FROM $0;
