@@ -1,10 +1,12 @@
-;;; json-mode.el --- Major mode for editing JSON files
+;;; json-mode.el --- Major mode for editing JSON files -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2011-2014 Josh Johnston
+;; Copyright (C) 2011-2023 Josh Johnston, taku0
 
 ;; Author: Josh Johnston
+;;         taku0
 ;; URL: https://github.com/joshwnj/json-mode
-;; Version: 1.6.0
+;; Package-Version: 20240427.1245
+;; Package-Revision: 77125b01c0dd
 ;; Package-Requires: ((json-snatcher "1.0.0") (emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -124,7 +126,15 @@ This function calls `json-mode--update-auto-mode' to change the
     (modify-syntax-entry ?\" "\"" st)
     ;; Comments
     (modify-syntax-entry ?\n ">" st)
+    ;; Dot in floating point number literal.
+    (modify-syntax-entry ?. "_" st)
     st))
+
+(defvar json-mode--string-syntax-table
+  (let ((st (copy-syntax-table json-mode-syntax-table)))
+    (modify-syntax-entry ?. "." st)
+    st)
+  "Syntax table for strings.")
 
 (defvar jsonc-mode-syntax-table
   (let ((st (copy-syntax-table json-mode-syntax-table)))
@@ -135,13 +145,19 @@ This function calls `json-mode--update-auto-mode' to change the
     (modify-syntax-entry ?* ". 23bn" st)
     st))
 
+(defvar jsonc-mode--string-syntax-table
+  (let ((st (copy-syntax-table jsonc-mode-syntax-table)))
+    (modify-syntax-entry ?. "." st)
+    st)
+  "Syntax table for strings and comments.")
+
 (defun json-mode--syntactic-face (state)
   "Return syntactic face function for the position represented by STATE.
 STATE is a `parse-partial-sexp' state, and the returned function is the
 json font lock syntactic face function."
   (cond
    ((nth 3 state)
-      ;; This might be a string or a name
+    ;; This might be a string or a name
     (let ((startpos (nth 8 state)))
       (save-excursion
         (goto-char startpos)
@@ -150,6 +166,29 @@ json font lock syntactic face function."
           font-lock-string-face))))
    ((nth 4 state) font-lock-comment-face)))
 
+(defun json-mode-forward-sexp (&optional arg)
+  "Move point forward an atom or balanced bracket.
+
+See `forward-sexp for ARG."
+  (interactive "p")
+  (unless arg
+    (setq arg 1))
+  (let ((forward-sexp-function nil)
+        (sign (if (< arg 0) -1 1))
+        state)
+    (while (not (zerop arg))
+      (setq state (syntax-ppss))
+      (if (nth 8 state)
+          ;; Inside a string or comment.
+          (progn
+            (with-syntax-table
+                (if (eq major-mode 'jsonc-mode)
+                    jsonc-mode--string-syntax-table
+                  json-mode--string-syntax-table)
+              (forward-sexp sign)))
+        (forward-sexp sign))
+      (setq arg (- arg sign)))))
+
 ;;;###autoload
 (define-derived-mode json-mode javascript-mode "JSON"
   "Major mode for editing JSON files."
@@ -157,13 +196,13 @@ json font lock syntactic face function."
   (setq font-lock-defaults
         '(json-font-lock-keywords-1
           nil nil nil nil
-          (font-lock-syntactic-face-function . json-mode--syntactic-face))))
+          (font-lock-syntactic-face-function . json-mode--syntactic-face)))
+  (setq-local forward-sexp-function #'json-mode-forward-sexp))
 
 ;;;###autoload
 (define-derived-mode jsonc-mode json-mode "JSONC"
   "Major mode for editing JSON files with comments."
   :syntax-table jsonc-mode-syntax-table)
-  (setq font-lock-defaults '(json-font-lock-keywords-1 t))
 
 ;; Well formatted JSON files almost always begin with “{” or “[”.
 ;;;###autoload
@@ -233,7 +272,7 @@ If the region is not active, beautify the entire buffer ."
      ((setq symbol (bounds-of-thing-at-point 'symbol))
       (cond
        ((looking-at-p "null"))
-       ((save-excursion (skip-chars-backward "[-0-9.]") (looking-at json-mode-number-re))
+       ((save-excursion (skip-chars-backward "-0-9.") (looking-at json-mode-number-re))
         (kill-region (match-beginning 0) (match-end 0))
         (insert "null"))
        (t (kill-region (car symbol) (cdr symbol)) (insert "null"))))
@@ -248,7 +287,7 @@ If the region is not active, beautify the entire buffer ."
 (defun json-increment-number-at-point (&optional delta)
   "Add DELTA to the number at point; DELTA defaults to 1."
   (interactive "P")
-  (when (save-excursion (skip-chars-backward "[-0-9.]") (looking-at json-mode-number-re))
+  (when (save-excursion (skip-chars-backward "-0-9.") (looking-at json-mode-number-re))
     (let ((num (+ (or delta 1)
                   (string-to-number (buffer-substring-no-properties (match-beginning 0) (match-end 0)))))
           (pt (point)))
