@@ -954,15 +954,12 @@ Use our default socket files
 #+begin_src emacs-lisp
   (require 'go-translate)
 
-  (setq gts-translate-list '(("en" "de")))
+  (setq gt-translate-list '(("en" "de")))
 
-  ;; (setq gts-default-translator (gts-translator :engines (gts-bing-engine)))
-
-  (setq gts-default-translator
-        (gts-translator
-         :picker (gts-prompt-picker)
-         :engines (list (gts-bing-engine) (gts-google-engine))
-         :render (gts-buffer-render)))
+  (setq gt-default-translator
+        (gt-translator
+         :engines (list (gt-bing-engine) (gt-google-engine))
+         :render (gt-buffer-render)))
 #+end_src
 
 * [[http://www.mew.org][mew]] email
