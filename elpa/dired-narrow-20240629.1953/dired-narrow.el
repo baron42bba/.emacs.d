@@ -4,10 +4,12 @@
 
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
-;; Version: 0.0.1
+;; Package-Version: 20240629.1953
+;; Package-Revision: e9e408e8571a
 ;; Created: 14th February 2014
-;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1"))
+;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1") (emacs "24"))
 ;; Keywords: files
+;; URL: https://github.com/Fuco1/dired-hacks
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -95,8 +97,10 @@
 
 Function takes no argument and is called with point over the file
 we should act on."
-  :type '(choice (const :tag "Open file under point" dired-narrow-find-file)
-                 (function :tag "Use custom function."))
+  :type '(choice
+          (const :tag "Do nothing" ignore)
+          (const :tag "Open file under point" dired-narrow-find-file)
+          (function :tag "Use custom function"))
   :group 'dired-narrow)
 
 (defcustom dired-narrow-exit-when-one-left nil
@@ -147,7 +151,8 @@ when `dired-narrow-exit-when-one-left' and `dired-narrow-enable-blinking' are tr
 
 (defun dired-narrow--update (filter)
   "Make the files not matching the FILTER invisible.
- Return the count of visible files that are left after update."
+
+Return the count of visible files that are left after update."
 
   (let ((inhibit-read-only t)
         (visible-files-cnt 0))
@@ -258,13 +263,15 @@ read from minibuffer."
         (unless disable-narrow (dired-narrow-mode -1))
         (remove-from-invisibility-spec :dired-narrow)
         (dired-narrow--restore))
-      (when (and disable-narrow
-                 dired-narrow--current-file
-                 dired-narrow-exit-action)
-        (funcall dired-narrow-exit-action))
       (cond
        ((equal disable-narrow "dired-narrow-enter-directory")
-        (dired-narrow--internal filter-function))))))
+        (dired-narrow-find-file)
+        (dired-narrow--internal filter-function))
+       (t
+        (when (and disable-narrow
+                   dired-narrow--current-file
+                   dired-narrow-exit-action)
+          (funcall dired-narrow-exit-action)))))))
 
 
 ;; Interactive
