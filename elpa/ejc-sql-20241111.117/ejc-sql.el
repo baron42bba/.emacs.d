@@ -5,7 +5,8 @@
 ;; Author: Kostafey <kostafey@gmail.com>
 ;; URL: https://github.com/kostafey/ejc-sql
 ;; Keywords: sql, jdbc
-;; Version: 0.4.1
+;; Package-Version: 20241111.117
+;; Package-Revision: 1fc5a38d974a
 ;; Package-Requires: ((emacs "26.3")(clomacs "0.0.5")(dash "2.16.0")(spinner "1.7.3"))
 
 ;; This file is not part of GNU Emacs.
@@ -397,18 +398,19 @@ If the current mode is `sql-mode' prepare buffer to operate as `ejc-sql-mode'."
                  (concat "ejc-sql is enabled, ignore source block connection"
                          " header arguments and use ejc-sql to execute it? ")))))
       (funcall orig-fun body params)
-    (cl-multiple-value-bind (beg end) (save-mark-and-excursion
-                                        (org-babel-mark-block)
-                                        (list (point) (mark)))
-      (ejc-eval-user-sql-at-point
-       :beg beg
-       :end end
+    (let* ((info (org-babel-get-src-block-info 'no-eval))
+           (expanded-body (if (org-babel-noweb-p (nth 2 info) :eval)
+                              (org-babel-expand-noweb-references info)
+                            (nth 1 info))))
+      (ejc-eval-user-sql
+       expanded-body
        :sync ejc-org-mode-show-results
        :display-result (not ejc-org-mode-show-results))
       (if ejc-org-mode-show-results
           (with-temp-buffer
             (insert-file-contents (ejc-get-result-file-path))
-            (buffer-string))))))
+            (or (org-babel-read-table)
+                (buffer-string)))))))
 
 (defun ejc-org-edit-special (orig-fun &rest args)
   (if (and (equal "sql" (car (org-babel-get-src-block-info)))
