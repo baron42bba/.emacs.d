@@ -4,8 +4,9 @@
 ;;         Justin Burkett <justin@burkett.cc>
 ;; Maintainer: Titus von der Malsburg <malsburg@posteo.de>
 ;; URL: https://github.com/tmalsburg/helm-bibtex
-;; Version: 1.0.0
-;; Package-Requires: ((parsebib "1.0") (s "1.9.0") (dash "2.6.0") (f "0.16.2") (cl-lib "0.5") (biblio "0.2") (emacs "26.1"))
+;; Package-Version: 20241116.726
+;; Package-Revision: 6064e8625b29
+;; Package-Requires: ((parsebib "6.0") (s "1.9.0") (dash "2.6.0") (f "0.16.2") (cl-lib "0.5") (biblio "0.2") (emacs "26.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -77,6 +78,20 @@ composed of the BibTeX-key plus a \".pdf\" suffix."
   :group 'bibtex-completion
   :type '(choice directory (repeat directory)))
 
+;; From https://github.com/mwlodarczak/helm-bibtex/commit/4a421cae9b7d4cdb4a0933080633564b1774addb
+(defcustom bibtex-completion-watch-bibliography t
+  "If non-nil (the default) the bibliography is reloaded
+proactively every time any of the BibTeX files changes.
+Changing the value of this variable after you load helm-bibtex
+has no effect: if you load helm-bibtex with this variable
+set to t and then decide you do not want to proactively reload the
+bibliography, you have to restart Emacs with the new setting
+(and likewise for loading helm-bibtex with the variable set to nil
+and later deciding you want to proactively reload the bibliography)."
+  :group 'bibtex-completion
+  :type 'boolean)
+
+
 (defcustom bibtex-completion-pdf-open-function 'find-file
   "The function used for opening PDF files.
 This can be an arbitrary function that takes one argument: the
@@ -114,6 +129,7 @@ This should be a single character."
 (defcustom bibtex-completion-format-citation-functions
   '((org-mode      . bibtex-completion-format-citation-ebib)
     (latex-mode    . bibtex-completion-format-citation-cite)
+    (LaTeX-mode    . bibtex-completion-format-citation-cite)    
     (markdown-mode . bibtex-completion-format-citation-pandoc-citeproc)
     (python-mode   . bibtex-completion-format-citation-sphinxcontrib-bibtex)
     (rst-mode      . bibtex-completion-format-citation-sphinxcontrib-bibtex)
@@ -280,6 +296,7 @@ browser in `helm-browse-url-default-browser-alist'"
 "Autocite" "autocite*" "Autocite*" "citeauthor" "Citeauthor"
 "citeauthor*" "Citeauthor*" "citetitle" "citetitle*" "citeyear"
 "citeyear*" "citedate" "citedate*" "citeurl" "nocite" "fullcite"
+"citet" "citep" "citet*" "citep*"
 "footfullcite" "notecite" "Notecite" "pnotecite" "Pnotecite"
 "fnotecite")
   "The list of LaTeX cite commands.
@@ -414,15 +431,16 @@ Also sets `bibtex-completion-display-formats-internal'."
   ;; watches for automatic reloading of the bibliography when a file
   ;; is changed:
   (mapc (lambda (file)
-          (if (f-file? file)
-              (let ((watch-descriptor
-                     (file-notify-add-watch file
-                                            '(change)
-                                            (lambda (event) (bibtex-completion-candidates)))))
-                (setq bibtex-completion-file-watch-descriptors
-                      (cons watch-descriptor bibtex-completion-file-watch-descriptors)))
+          (if  (f-file? file)
+              (if bibtex-completion-watch-bibliography
+                  (let ((watch-descriptor
+                         (file-notify-add-watch file
+                                                '(change)
+                                                (lambda (event) (bibtex-completion-candidates)))))
+                    (setq bibtex-completion-file-watch-descriptors
+                          (cons watch-descriptor bibtex-completion-file-watch-descriptors))))
             (user-error "Bibliography file %s could not be found" file)))
-            (bibtex-completion-normalize-bibliography))
+        (bibtex-completion-normalize-bibliography))
 
   ;; Pre-calculate minimal widths needed by the format strings for
   ;; various entry types:
@@ -477,9 +495,10 @@ for string replacement."
                    for entry-type = (parsebib-find-next-item)
                    while entry-type
                    if (string= (downcase entry-type) "string")
-                   collect (let ((entry (parsebib-read-string (point) ht)))
+                   collect (let ((entry (parsebib-read-string ht)))
                              (puthash (car entry) (cdr entry) ht)
-                             entry))))
+                             entry)
+                   else do (forward-line 1))))
     (-filter (lambda (x) x) strings)))
 
 (defun bibtex-completion-update-strings-ht (ht strings)
@@ -667,8 +686,8 @@ If HT-STRINGS is provided it is assumed to be a hash table."
                                bibtex-completion-additional-search-fields))
    for entry-type = (parsebib-find-next-item)
    while entry-type
-   unless (member-ignore-case entry-type '("preamble" "string" "comment"))
-   collect (let* ((entry (parsebib-read-entry entry-type (point) ht-strings))
+   if (not (member-ignore-case entry-type '("preamble" "string" "comment")))
+   collect (let* ((entry (parsebib-read-entry nil ht-strings))
                   (fields (append
                            (list (if (assoc-string "author" entry 'case-fold)
                                      "author"
@@ -679,7 +698,8 @@ If HT-STRINGS is provided it is assumed to be a hash table."
                            fields)))
              (-map (lambda (it)
                      (cons (downcase (car it)) (cdr it)))
-                   (bibtex-completion-prepare-entry entry fields)))))
+                   (bibtex-completion-prepare-entry entry fields)))
+   else do (forward-line 1)))
 
 (defun bibtex-completion-get-entry (entry-key)
   "Given a BibTeX key this function scans all bibliographies listed in `bibtex-completion-bibliography' and returns an alist of the record with that key.
@@ -698,9 +718,10 @@ Fields from crossreferenced entries are appended to the requested entry."
                                      "\\)[[:space:]]*[\(\{][[:space:]]*"
                                      (regexp-quote entry-key) "[[:space:]]*,")
                              nil t)
-          (let ((entry-type (match-string 1)))
+          (progn
+            (goto-char (match-beginning 0))
             (reverse (bibtex-completion-prepare-entry
-                      (parsebib-read-entry entry-type (point) bibtex-completion-string-hash-table) nil do-not-find-pdf)))
+                      (parsebib-read-entry nil bibtex-completion-string-hash-table) nil do-not-find-pdf)))
         (progn
           (display-warning :warning (concat "Bibtex-completion couldn't find entry with key \"" entry-key "\"."))
           nil)))))
@@ -1185,9 +1206,6 @@ string if FIELD is not present in ENTRY and DEFAULT is nil."
      ("editor-abbrev"
       (when-let ((value (bibtex-completion-get-value "editor" entry)))
         (bibtex-completion-apa-format-editors-abbrev value)))
-     ((or "journal" "journaltitle")
-      (or (bibtex-completion-get-value "journal" entry)
-          (bibtex-completion-get-value "journaltitle" entry)))
      (_
       ;; Real fields:
       (let ((value (bibtex-completion-get-value field entry)))
@@ -1214,14 +1232,21 @@ string if FIELD is not present in ENTRY and DEFAULT is nil."
                            "\\(^[^{]*{\\)\\|\\(}[^{]*{\\)\\|\\(}.*$\\)\\|\\(^[^{}]*$\\)"
                            (lambda (x) (downcase (s-replace "\\" "\\\\" x)))
                            value)))))
-              ("booktitle" value)
+              ("journal"
+               (replace-regexp-in-string "[{}]" "" value))
+              ("booktitle"
+               (replace-regexp-in-string "[{}]" "" value))
               ;; Maintain the punctuation and capitalization that is used by
               ;; the journal in its title.
               ("pages" (s-join "–" (s-split "[^0-9]+" value t)))
               ("doi" (s-concat " http://dx.doi.org/" value))
-              ("year" (or value
-                          (car (split-string (bibtex-completion-get-value "date" entry "") "-"))))
-              (_ value))))))
+              ("year" value)
+              (_ value))
+          ;; If field does not exist, try to retrieve value from
+          ;; alternative field (possibly a biblatex field):
+          (pcase field
+            ("year" (car (split-string (bibtex-completion-get-value "date" entry "") "-")))
+            ("journal" (bibtex-completion-get-value "journaltitle" entry "")))))))
    default ""))
 
 (defun bibtex-completion-apa-format-authors (value &optional abbrev)
@@ -1301,18 +1326,9 @@ When ABBREV is non-nil, format in abbreviated APA style instead."
   (bibtex-completion-apa-format-editors value t))
 
 (defun bibtex-completion-get-value (field entry &optional default)
-  "Return the value for FIELD in ENTRY or DEFAULT if the value is not defined.
-Surrounding curly braces are stripped."
+  "Return the value for FIELD in ENTRY or DEFAULT if the value is not defined."
   (let ((value (cdr (assoc-string field entry 'case-fold))))
-    (if value
-        (replace-regexp-in-string
-         "\\(^[[:space:]]*[\"{][[:space:]]*\\)\\|\\([[:space:]]*[\"}][[:space:]]*$\\)"
-         ""
-         ;; Collapse whitespaces when the content is not a path:
-         (if (equal bibtex-completion-pdf-field field)
-             value
-           (s-collapse-whitespace value)))
-      default)))
+    (or value default)))
 
 (defun bibtex-completion-insert-key (keys)
   "Insert BibTeX KEYS at point."
