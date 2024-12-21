@@ -1,10 +1,10 @@
 ;;; csv-mode.el --- Major mode for editing comma/char separated values  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2003-2023  Free Software Foundation, Inc
+;; Copyright (C) 2003-2024  Free Software Foundation, Inc
 
 ;; Author: "Francis J. Wright" <F.J.Wright@qmul.ac.uk>
 ;; Maintainer: emacs-devel@gnu.org
-;; Version: 1.22
+;; Version: 1.27
 ;; Package-Requires: ((emacs "27.1") (cl-lib "0.5"))
 ;; Keywords: convenience
 
@@ -107,9 +107,32 @@
 
 ;;; News:
 
+;; Since 1.27:
+;; - `csv-end-of-field' no longer errors out in the presence of
+;;    unclosed quotes.
+
+;; Since 1.26:
+;; - `csv-guess-separator' will no longer guess the comment-start
+;;    character as a potential separator character.
+
+;; Since 1.25:
+;; - The ASCII control character 31 Unit Separator can now be
+;;   recognized as a CSV separator by `csv-guess-separator'.
+
+;; Since 1.24:
+;; - New function `csv--unquote-value'.
+;; - New function `csv-parse-current-row'.
+
 ;; Since 1.21:
 ;; - New command `csv-insert-column'.
 ;; - New config var `csv-align-min-width' for `csv-align-mode'.
+;; - New option `csv-confirm-region'.
+
+;; Since 1.20:
+;; - New command `csv-guess-set-separator' that automatically guesses
+;;   and sets the CSV separator of the current buffer.
+;; - New command `csv-set-separator' for setting the CSV separator
+;;   manually.
 
 ;; Since 1.9:
 ;; - `csv-align-mode' auto-aligns columns dynamically (on screen).
@@ -269,6 +292,10 @@ after separators."
 
 (defcustom csv-invisibility-default t
   "If non-nil, make separators in aligned records invisible."
+  :type 'boolean)
+
+(defcustom csv-confirm-region t
+  "If non-nil, confirm that region is OK in interactive commands."
   :type 'boolean)
 
 (defface csv-separator-face
@@ -557,9 +584,10 @@ The default field when read interactively is the current field."
 		    (exchange-point-and-mark)
 		    (sit-for 1)
 		    (exchange-point-and-mark))
-		  (or (y-or-n-p "Region OK? ")
-		      (error "Action aborted by user"))
-		  (message nil)		; clear y-or-n-p message
+                  (when csv-confirm-region
+                    (or (y-or-n-p "Region OK? ")
+                        (error "Action aborted by user"))
+                    (message nil))      ; clear y-or-n-p message
 		  (list (region-beginning) (region-end))))
 	    ;; Use region set by user:
 	    (list (region-beginning) (region-end)))))
@@ -709,7 +737,7 @@ point or marker arguments, BEG and END, delimiting the region."
   (when (eq (char-syntax (following-char)) ?\")
     (forward-char)
     (let ((ended nil))
-      (while (not ended)
+      (while (and (not ended) (not (eolp)))
 	(cond ((not (eq (char-syntax (following-char)) ?\"))
 	       (forward-char 1))
 	      ;; According to RFC-4180 (sec 2.7), quotes inside quoted strings
@@ -1394,6 +1422,26 @@ point is assumed to be at the beginning of the line."
 	      (forward-char)))
 	(nreverse fields)))))
 
+(defun csv--unquote-value (value)
+  "Remove quotes around VALUE.
+If VALUE contains escaped quote characters, un-escape them.  If
+VALUE is not quoted, return it unchanged."
+  (save-match-data
+    (let ((quote-regexp (apply #'concat `("[" ,@csv-field-quotes "]"))))
+      (if-let (((string-match (concat "^\\(" quote-regexp "\\)\\(.*\\)\\(" quote-regexp "\\)$") value))
+               (quote-char (match-string 1 value))
+               ((equal quote-char (match-string 3 value)))
+               (unquoted (match-string 2 value)))
+          (replace-regexp-in-string (concat quote-char quote-char) quote-char unquoted)
+        value))))
+
+(defun csv-parse-current-row ()
+  "Parse the current CSV line.
+Return the field values as a list."
+  (save-mark-and-excursion
+    (goto-char (line-beginning-position))
+    (mapcar #'csv--unquote-value (csv--collect-fields (line-end-position)))))
+
 (defvar-local csv--header-line nil)
 (defvar-local csv--header-hscroll nil)
 (defvar-local csv--header-string nil)
@@ -1860,7 +1908,9 @@ When CUTOFF is passed, look only at the first CUTOFF number of characters."
                   text)))
       (when (and (not (gethash c chars))
                  (or (= c ?\t)
+                     (= c ?\C-_)
                      (and (not (member c '(?. ?/ ?\" ?')))
+                          (not (= c (string-to-char csv-comment-start)))
                           (not (member (get-char-code-property c 'general-category)
                                        '(Lu Ll Lt Lm Lo Nd Nl No Ps Pe Cc Co))))))
         (puthash c t chars)))

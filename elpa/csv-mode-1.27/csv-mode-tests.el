@@ -52,6 +52,21 @@
     (should (equal (buffer-substring (point-min) (point))
                    "aaa,\"b,b\""))))
 
+(ert-deftest csv-tests-end-of-field-unclosed-quotes ()
+  (with-temp-buffer
+    (csv-mode)
+    (insert "a,b,c
+1,2,3
+1,2,\"
+\"1,
+\"")
+    (goto-char (point-min))
+    (while (not (eobp))
+      ;; Should not error
+      (csv-end-of-field)
+      (unless (eobp)
+        (forward-char)))))
+
 (ert-deftest csv-tests-beginning-of-field ()
   (with-temp-buffer
     (csv-mode)
@@ -143,6 +158,42 @@
   (should (= (csv--separator-score ?\; csv-tests--data)
              (csv--separator-score ?\; csv-tests--data
                                    (length csv-tests--data)))))
+
+(ert-deftest csv-tests-unquote-value ()
+  (should (equal (csv--unquote-value "Hello, World")
+                 "Hello, World"))
+  (should (equal (csv--unquote-value "\"Hello, World\"")
+                 "Hello, World"))
+  (should (equal (csv--unquote-value "Hello, \"\"World")
+                 "Hello, \"\"World"))
+  (should (equal (csv--unquote-value "\"Hello, \"\"World\"\"\"")
+                 "Hello, \"World\""))
+  (should (equal (csv--unquote-value "'Hello, World'")
+                 "'Hello, World'"))
+  (should (equal (let ((csv-field-quotes '("\"" "'")))
+                   (csv--unquote-value "\"Hello, World'"))
+                 "\"Hello, World'"))
+  (should (equal (let ((csv-field-quotes '("\"" "'")))
+                   (csv--unquote-value "'Hello, World'"))
+                 "Hello, World"))
+  (should (equal (let ((csv-field-quotes '("\"" "'")))
+                   (csv--unquote-value "'Hello, ''World'''"))
+                 "Hello, 'World'"))
+  (should (equal (let ((csv-field-quotes '("\"" "'")))
+                   (csv--unquote-value "'Hello, \"World\"'"))
+                 "Hello, \"World\""))
+  (should (equal (csv--unquote-value "|Hello, World|")
+                 "|Hello, World|")))
+
+(ert-deftest csv-tests-guess-separator-avoid-comment ()
+  ;; bug#71042
+  (let ((testdata "###
+###
+Foo;Bar;Quux
+123;456;blah, blah
+"))
+    (message "Guessed separator: %c" (csv-guess-separator testdata))
+    (should-not (equal (csv-guess-separator testdata) ?#))))
 
 (provide 'csv-mode-tests)
 ;;; csv-mode-tests.el ends here
