@@ -5,9 +5,10 @@
 ;; Author: Ankur Dave <ankurdave@gmail.com>
 ;; Url: https://github.com/ankurdave/color-identifiers-mode
 ;; Created: 24 Jan 2014
-;; Version: 1.1
+;; Package-Version: 20241023.2217
+;; Package-Revision: 89343c624ae6
 ;; Keywords: faces, languages
-;; Package-Requires: ((dash "2.5.0") (emacs "24"))
+;; Package-Requires: ((dash "2.5.0") (emacs "24.4"))
 
 ;; This file is not a part of GNU Emacs.
 
@@ -35,7 +36,7 @@
 
 ;;; Code:
 
-(require 'advice)
+(require 'nadvice)
 (require 'color)
 (require 'dash)
 (require 'cl-lib)
@@ -65,7 +66,7 @@
 `color-identifiers:modes-alist' that is relevant to the current
 major mode")
 
-(defadvice enable-theme (after color-identifiers:regen-on-theme-change)
+(defun color-identifiers:regen-on-theme-change(_)
   "Regenerate colors for color-identifiers-mode on theme change."
   (color-identifiers:regenerate-colors))
 
@@ -87,6 +88,13 @@ across buffers."
 color should be avoided when generating colors, this can be warning colors,
 error colors etc."
   :type '(repeat face))
+
+(defcustom color-identifiers:extra-face-attributes nil
+  "Extra face attributes to apply to identifiers. Can be used to make
+identifiers bold or italic, but avoid changing `:foreground'
+because it is the color determined by the mode."
+  :type 'plist
+  :group 'color-identifiers)
 
 (defvar color-identifiers:modes-alist nil
   "Alist of major modes and the ways to distinguish identifiers in those modes.
@@ -654,18 +662,26 @@ mode. This variable memoizes the result of the declaration scan function.")
             (progn
               (print "Major mode is not supported by color-identifiers, disabling")
               (color-identifiers-mode -1))
-          (color-identifiers:regenerate-colors)
+          (unless color-identifiers:colors
+            ;; When GUI emacs is used and additionally terminal-based `emacsclient'
+            ;; gets launched, that may cause colors for identifiers change globally.
+            ;; This is not a good user experience. Ideally we should keep two
+            ;; separate vectors, for graphics and terminal versions of colors. But
+            ;; it's unclear how that should communicate with theme changes, so unless
+            ;; there's demand, let's for now just make sure we don't toggle colors
+            ;; back and forth everywhere.
+            (color-identifiers:regenerate-colors))
           (when (null color-identifiers:color-index-for-identifier)
             (setq color-identifiers:color-index-for-identifier (make-hash-table :test 'equal)))
           (color-identifiers:refresh)
           (add-to-list 'font-lock-extra-managed-props 'color-identifiers:fontified)
           (font-lock-add-keywords nil '((color-identifiers:colorize . default)) t)
           (color-identifiers:enable-timer)
-          (ad-activate 'enable-theme)))
+          (advice-add 'enable-theme :after #'color-identifiers:regen-on-theme-change)))
     (when color-identifiers:timer
       (cancel-timer color-identifiers:timer))
     (font-lock-remove-keywords nil '((color-identifiers:colorize . default)))
-    (ad-deactivate 'enable-theme))
+    (advice-remove 'enable-theme #'color-identifiers:regen-on-theme-change))
   (color-identifiers:refontify))
 
 ;;;###autoload
@@ -731,13 +747,13 @@ major mode, identifiers are saved to
     ;; `color-identifiers:get-declarations', which returns all identifiers
     (color-identifiers:get-declarations)))
 
-(defun color-identifiers:refontify ()
-  "Refontify the buffer using font-lock."
-  (when font-lock-mode
-    (if (fboundp 'font-lock-flush)
-        (font-lock-flush)
+(defalias 'color-identifiers:refontify
+  (if (fboundp 'font-lock-flush)
+      'font-lock-flush
+    (lambda ()
+      "Refontify the buffer using font-lock."
       (with-no-warnings
-        (font-lock-fontify-buffer)))))
+        (and font-lock-mode (font-lock-fontify-buffer))))))
 
 (defun color-identifiers:color-identifier (identifier)
   "Return the hex color for IDENTIFIER, or nil if it should not
@@ -777,7 +793,7 @@ evaluates to true."
                   (let ((flface-prop (get-text-property (point) 'font-lock-face)))
                     (and flface-prop (memq flface-prop identifier-faces))))
               (if (and (looking-back identifier-context-re (line-beginning-position))
-                       (or (not identifier-exclusion-re) (not (looking-at identifier-exclusion-re)))
+                       (or (not identifier-exclusion-re) (not (looking-at-p identifier-exclusion-re)))
                        (looking-at identifier-re))
                   (progn
                     ;; Found an identifier. Run `fn' on it
@@ -795,15 +811,23 @@ evaluates to true."
      (let* ((identifier (buffer-substring-no-properties start end))
             (hex (color-identifiers:color-identifier identifier)))
        (when hex
-         (put-text-property start end 'face `(:foreground ,hex))
-         (put-text-property start end 'color-identifiers:fontified t))))
-   limit))
+         (let ((face-spec (append `(:foreground ,hex) color-identifiers:extra-face-attributes)))
+           (put-text-property start end 'face face-spec)
+           (put-text-property start end 'color-identifiers:fontified t)))))
+     limit))
 
 (defun color-identifiers-mode-maybe ()
-  "Enable `color-identifiers-mode' in the current buffer if desired.
-When `major-mode' is listed in `color-identifiers:modes-alist', then
-`color-identifiers-mode' will be enabled."
-  (when (assoc major-mode color-identifiers:modes-alist)
+  "Potentially enable `color-identifiers-mode' in the current buffer.
+
+Specifically, when `major-mode' is listed in
+`color-identifiers:modes-alist', and the buffer isn't temporary."
+  ;; Avoid running in temp buffers created by `with-temp-buffer'. Most notably,
+  ;; package installation process is known to create one and then enable
+  ;; `emacs-lisp-mode' for the purpose of parsing autoloads, which in turn triggers
+  ;; color-identifers-mode for no reason. During a huge upgrade this may add up,
+  ;; especially given our ad hoc ELisp parsing code isn't the fastest.
+  (when (and (not (string-prefix-p " *temp" (buffer-name)))
+             (assoc major-mode color-identifiers:modes-alist))
     (color-identifiers-mode 1)))
 
 (provide 'color-identifiers-mode)
