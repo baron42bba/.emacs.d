@@ -1,12 +1,14 @@
 ;;; bicycle.el --- Cycle outline and code visibility  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2018-2023 Jonas Bernoulli
+;; Copyright (C) 2018-2024 Jonas Bernoulli
 
-;; Author: Jonas Bernoulli <jonas@bernoul.li>
+;; Author: Jonas Bernoulli <emacs.bicycle@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/tarsius/bicycle
 ;; Keywords: outlines
 
-;; Package-Requires: ((emacs "25.1") (compat "29.1.4.1"))
+;; Package-Version: 20240831.2208
+;; Package-Revision: 04c3e44eb103
+;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -92,15 +94,24 @@ Without a prefix argument call `bicycle-cycle-local'."
 (defun bicycle-cycle-global ()
   "Cycle visibility of all sections.
 
-1. OVERVIEW: Show only top-level heading.
-2. TOC:      Show all headings, without treating top-level
-             code blocks as sections.
-3. TREES:    Show all headings, treaing top-level code blocks
-             as sections (i.e. their first line is treated as
-             a heading).
-4. ALL:      Show everything, except code blocks that have been
-             collapsed individually (using a `hideshow' command
-             or function)."
+1. OVERVIEW: Show only top-level headings.
+
+(2. There is equivalent of `bicycle-cycle-local's CHILDREN state.)
+
+3. TOC:      Recursively show all headings,
+             without treating code blocks as sections.
+
+4. TREES:    Recursively show all headings,
+             treating code blocks as sections
+             (i.e., their first line is treated as a heading).
+
+5. ALL:      Show everything, including code blocks,
+             empty lines and comments.
+             However, do not expand code blocks that were
+             previously collapsed individually.
+
+In situations when cycling to a state makes no difference compared
+to the previous state, then immediately continue to the next state."
   (interactive)
   (setq deactivate-mark t)
   (save-excursion
@@ -108,25 +119,17 @@ Without a prefix argument call `bicycle-cycle-local'."
     (unless (re-search-forward outline-regexp nil t)
       (user-error "Found no heading"))
     (cond
-     ((eq last-command 'outline-cycle-overview)
-      (outline-map-region
-       (lambda ()
-         (when (and (bicycle--top-level-p)
-                    (bicycle--non-code-children-p))
-           (bicycle--show-children nil t)))
-       (point-min)
-       (point-max))
-      (bicycle--message "TOC")
-      (setq this-command 'outline-cycle-toc))
-     ((eq last-command 'outline-cycle-toc)
-      (outline-map-region
-       (lambda ()
-         (when (bicycle--top-level-p)
-           (outline-show-branches)))
-       (point-min)
-       (point-max))
-      (bicycle--message "TREES")
-      (setq this-command 'outline-cycle-trees))
+     ((bicycle--maybe-cycle 'outline-cycle-overview 'outline-cycle-toc
+        (lambda () (and (bicycle--top-level-p) (bicycle--non-code-children-p)))
+        (lambda ()
+          (bicycle--show-children
+           (- outline-code-level (bicycle--top-level) 1)
+           t)))
+      (bicycle--message "TOC"))
+     ((bicycle--maybe-cycle 'outline-cycle-toc 'outline-cycle-trees
+        (lambda () (cdr (bicycle--child-types)))
+        #'outline-show-branches)
+      (bicycle--message "TREES"))
      ((eq last-command 'outline-cycle-trees)
       (outline-show-all)
       (bicycle--message "ALL"))
@@ -149,22 +152,30 @@ If point is within an outline heading line, then rotate the
 visibility of that subtree through these four states:
 
 1. FOLDED:   Show only the current heading.
-2. CHILDREN: Show the current heading and recursively those
-             of all subsections, without treating top-level
-             code blocks as sections.
-3. BRANCHES: Show the current heading and recursively those
-             of all subsections, treating top-level code
-             block as sections (i.e. their first line is
-             treated as a heading).
-4. SUBTREE:  Show the entire subtree, including code blocks,
-             empty lines and comments.  Do not expand code
-             blocks that have been collapsed individually.
-             (using a `hideshow' command or function).
+
+2. CHILDREN: Show headings of children,
+             treating top-level code block as sections
+             (i.e., their first line is treated as a heading).
+
+3. HEADINGS: Recursively show headings of all subsections,
+             without treating top-level code blocks as sections.
+
+3. BRANCHES: Recursively show headings of all subsections,
+             treating top-level code block as sections
+             (i.e., their first line is treated as a heading).
+
+5. SUBTREE:  Show the entire subtree, including code blocks,
+             empty lines and comments.
+             However, do not expand code blocks that were
+             previously collapsed individually.
 
 If the section has no children then toggle between HIDE and SHOW.
+This also works for code blocks.  This is one way to collapsed a
+code block \"individually\", with has the side-effect mentioned
+above.
+
 If the section has no body (not even empty lines), then there is
-only one state, EMPTY, and cycling does nothing.  If the section
-has no subsections but it contains code, then skip BRANCHES."
+only one state, EMPTY, and cycling does nothing."
   (let ((eol (save-excursion (end-of-visible-line)    (point)))
         (eoh (save-excursion (outline-end-of-heading) (point)))
         (eos (save-excursion (outline-end-of-subtree) (point))))
@@ -193,7 +204,7 @@ has no subsections but it contains code, then skip BRANCHES."
         (backward-char))))
      ((save-excursion
         (beginning-of-line 1)
-        (not (looking-at outline-regexp)))
+        (not (outline-on-heading-p t)))
       (outline-back-to-heading)
       (when (bicycle--code-level-p)
         (outline-up-heading 1)))
@@ -219,14 +230,20 @@ has no subsections but it contains code, then skip BRANCHES."
         (bicycle--show-children)
         (bicycle--message "CHILDREN")
         (setq this-command 'outline-cycle-children))
-       ((and (eq last-command 'outline-cycle-children)
-             (not (derived-mode-p 'outline-mode))
-             (or (bicycle--non-code-children-p)
-                 (prog1 nil
-                   (setq last-command 'outline-cycle-branches))))
-        (outline-show-branches)
-        (bicycle--message "BRANCHES")
-        (setq this-command 'outline-cycle-branches))
+       ((and (not (derived-mode-p 'outline-mode))
+             (bicycle--maybe-cycle
+               'outline-cycle-children 'outline-cycle-headings
+               #'bicycle--non-code-children-p
+               #'outline-show-children
+               eoh eos))
+        (bicycle--message "HEADINGS"))
+       ((and (not (derived-mode-p 'outline-mode))
+             (bicycle--maybe-cycle
+               'outline-cycle-headings 'outline-cycle-branches
+               (lambda () (not (bicycle--code-level-p)))
+               #'outline-show-branches
+               eoh eos))
+        (bicycle--message "BRANCHES"))
        ((eq last-command 'outline-cycle-branches)
         (outline-show-subtree)
         (bicycle--message "SUBTREE"))
@@ -235,6 +252,21 @@ has no subsections but it contains code, then skip BRANCHES."
         (bicycle--message "FOLDED")))))))
 
 ;;; Utilities
+
+(defun bicycle--maybe-cycle (last-cmd this-cmd pred cycle &optional beg end)
+  (declare (indent defun))
+  (and (eq last-command last-cmd)
+       (let ((noop t))
+         (outline-map-region (lambda ()
+                               (when (funcall pred)
+                                 (funcall cycle)
+                                 (setq noop nil)))
+                             (or beg (point-min))
+                             (or end (point-max)))
+         (if noop
+             (setq last-command this-cmd)
+           (setq this-command this-cmd))
+         (not noop))))
 
 (defun bicycle--show-children (&optional level nocode)
   "Show all direct subheadings of this heading.
@@ -270,12 +302,12 @@ is not considered to be a sublevel."
           (outline-map-region #'outline-show-heading (point) eoc))))))
 
 (defun bicycle--level ()
-  "Like `outline-level' but with fewer assumptions.
-The assumptions this function does not make are
-those mentioned in `outline-level's doc-string."
-  (save-excursion
-    (beginning-of-line)
-    (and (looking-at outline-regexp)
+  "Return the depth to which a statement is nested in the outline.
+Point must be on a header line (but unlike for `outline-level',
+not necessarily at its beginning)."
+  (and (outline-on-heading-p t)
+       (save-excursion
+         (beginning-of-line)
          (funcall outline-level))))
 
 (defvar-local bicycle--top-level nil)
