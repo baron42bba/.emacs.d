@@ -2,13 +2,14 @@
 
 ;; Copyright (C) 2016-2020 Syohei YOSHIDA <syohex@gmail.com>
 ;; Copyright (C) 2020-2022 Neil Okamoto <neil.okamoto+melpa@gmail.com>
-;; Copyright (C) 2020-2022 Shen, Jen-Chieh <jcs090218@gmail.com>
+;; Copyright (C) 2020-2024 Shen, Jen-Chieh <jcs090218@gmail.com>
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Maintainer: Neil Okamoto <neil.okamoto+melpa@gmail.com>
 ;;             Shen, Jen-Chieh <jcs090218@gmail.com>
 ;; URL: https://github.com/emacsorphanage/git-gutter
-;; Version: 0.92
+;; Package-Version: 20241212.1415
+;; Package-Revision: 3bdead17db7b
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -250,8 +251,8 @@ Argument TEST is the case before BODY execution."
 (defun git-gutter:in-git-repository-p ()
   (when (executable-find "git" t)
     (with-temp-buffer
-      (when-let ((exec-result (git-gutter:execute-command
-                               "git" t "rev-parse" "--is-inside-work-tree")))
+      (when-let* ((exec-result (git-gutter:execute-command
+                                "git" t "rev-parse" "--is-inside-work-tree")))
         (when (zerop exec-result)
           (goto-char (point-min))
           (looking-at-p "true"))))))
@@ -1143,7 +1144,7 @@ start revision."
           (delete-file original))))))
 
 ;; for linum-user
-(when (and (bound-and-true-p global-linum-mode) (not (boundp 'git-gutter-fringe)))
+(when (and (and (boundp 'global-linum-mode) global-linum-mode) (not (boundp 'git-gutter-fringe)))
   (git-gutter:linum-setup))
 
 (defun git-gutter:all-hunks ()

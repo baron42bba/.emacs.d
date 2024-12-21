@@ -62,7 +62,7 @@
      (add-hook 'cfengine3-mode-hook
        (lambda ()
          (which-function-mode)
-
+         (git-gutter-mode)
          (define-key cfengine3-mode-map "\C-c\S-t" (lambda()
                                                      (interactive)
                                                      (shell-command "~/bin/cfengine_update_testing.sh" )))
