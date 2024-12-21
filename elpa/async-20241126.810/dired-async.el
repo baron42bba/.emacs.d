@@ -81,6 +81,10 @@ or rename for `dired-async-skip-fast'."
   :risky t
   :type 'integer)
 
+(defcustom dired-async-large-file-warning-threshold large-file-warning-threshold
+  "Same as `large-file-warning-threshold' but for dired-async."
+  :type 'integer)
+
 (defface dired-async-message
     '((t (:foreground "yellow")))
   "Face used for mode-line message.")
@@ -115,9 +119,9 @@ or rename for `dired-async-skip-fast'."
     (sit-for 3)
     (force-mode-line-update)))
 
-(defun dired-async-processes ()
+(defun dired-async-processes (&optional propname)
   (cl-loop for p in (process-list)
-           when (process-get p 'dired-async-process)
+           when (process-get p (or propname 'dired-async-process))
            collect p))
 
 (defun dired-async-kill-process ()
@@ -242,6 +246,14 @@ cases if `dired-async-skip-fast' is non-nil."
       (funcall old-func file-creator operation
                (nreverse quick-list) name-constructor marker-char))))
 
+(defun dired-async--abort-if-file-too-large (size op-type filename)
+  "Warn when FILENAME larger than `dired-async-large-file-warning-threshold'.
+Same as `abort-if-file-too-large' but without user-error."
+  (when (and dired-async-large-file-warning-threshold size
+	     (> size dired-async-large-file-warning-threshold))
+    (files--ask-user-about-large-file
+     size op-type filename nil)))
+
 (defvar overwrite-query)
 (defun dired-async-create-files (file-creator operation fn-list name-constructor
                                               &optional _marker-char)
@@ -299,14 +311,22 @@ ESC or `q' to not overwrite any of the remaining files,
                    (file-in-directory-p destname from)
                    (error "Cannot copy `%s' into its subdirectory `%s'"
                           from to)))
-            (if overwrite
-                (or (and dired-overwrite-confirmed
-                         (push (cons from to) async-fn-list))
-                    (progn
-                      (push (dired-make-relative from) failures)
-                      (dired-log "%s `%s' to `%s' failed\n"
-                                 operation from to)))
-              (push (cons from to) async-fn-list)))))
+            ;; Skip file if it is too large.
+            (if (and (member operation '("Copy" "Rename"))
+                     (eq (dired-async--abort-if-file-too-large
+                          (file-attribute-size
+                           (file-attributes (file-truename from)))
+                          (downcase operation) from)
+                         'abort))
+                (push from skipped)
+              (if overwrite
+                  (or (and dired-overwrite-confirmed
+                           (push (cons from to) async-fn-list))
+                      (progn
+                        (push (dired-make-relative from) failures)
+                        (dired-log "%s `%s' to `%s' failed\n"
+                                   operation from to)))
+                (push (cons from to) async-fn-list))))))
       ;; Fix tramp issue #80 with emacs-26, use "-q" only when needed.
       (setq async-quiet-switch
             (if (and (boundp 'tramp-cache-read-persistent-data)
@@ -361,10 +381,14 @@ ESC or `q' to not overwrite any of the remaining files,
        (async-start `(lambda ()
                        (require 'cl-lib) (require 'dired-aux) (require 'dired-x)
                        ,(async-inject-variables dired-async-env-variables-regexp)
+                       (advice-add #'files--ask-user-about-large-file
+                                   :override (lambda (&rest args) nil))
                        (let ((dired-recursive-copies (quote always))
                              (dired-copy-preserve-time
                               ,dired-copy-preserve-time)
-                             (dired-create-destination-dirs ',create-dir))
+                             (dired-create-destination-dirs ',create-dir)
+                             (dired-vc-rename-file ,dired-vc-rename-file)
+                             auth-source-save-behavior)
                          (setq overwrite-backup-query nil)
                          ;; Inline `backup-file' as long as it is not
                          ;; available in emacs.

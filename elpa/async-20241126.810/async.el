@@ -6,7 +6,8 @@
 ;; Maintainer: Thierry Volpiatto <thievol@posteo.net>
 
 ;; Created: 18 Jun 2012
-;; Version: 1.9.7
+;; Package-Version: 20241126.810
+;; Package-Revision: b99658e831bc
 ;; Package-Requires: ((emacs "24.4"))
 
 ;; Keywords: async
@@ -34,6 +35,8 @@
 
 (eval-when-compile (require 'cl-lib))
 
+(defvar tramp-password-prompt-regexp)
+
 (defgroup async nil
   "Simple asynchronous processing in Emacs"
   :group 'lisp)
@@ -41,6 +44,19 @@
 (defcustom async-variables-noprops-function #'async--purecopy
   "Default function to remove text properties in variables."
   :type 'function)
+
+(defcustom async-prompt-for-password t
+  "Prompt for password in parent Emacs if needed when non nil.
+When this is nil child Emacs will hang forever when a user interaction
+for password is required unless a password is stored in a \".authinfo\" file."
+  :type 'boolean)
+
+(defvar async-process-noquery-on-exit nil
+  "Used as the :noquery argument to `make-process'.
+
+Intended to be let-bound around a call to `async-start' or
+`async-start-process'.  If non-nil, the child Emacs process will
+be silently killed if the user exits the parent Emacs.")
 
 (defvar async-debug nil)
 (defvar async-send-over-pipe t)
@@ -102,14 +118,17 @@ is returned unmodified."
                   collect elm))
         (t object)))
 
+(defvar async-inject-variables-exclude-regexps '("-syntax-table\\'")
+  "A list of regexps that `async-inject-variables' should ignore.")
+
 (defun async-inject-variables
     (include-regexp &optional predicate exclude-regexp noprops)
   "Return a `setq' form that replicates part of the calling environment.
 
 It sets the value for every variable matching INCLUDE-REGEXP and
 also PREDICATE.  It will not perform injection for any variable
-matching EXCLUDE-REGEXP (if present) or representing a `syntax-table'
-i.e. ending by \"-syntax-table\".
+matching EXCLUDE-REGEXP (if present) and variables matching one of
+`async-inject-variables-exclude-regexps'.
 When NOPROPS is non nil it tries to strip out text properties of each
 variable's value with `async-variables-noprops-function'.
 
@@ -128,14 +147,16 @@ It is intended to be used as follows:
     ,@(let (bindings)
         (mapatoms
          (lambda (sym)
-           (let* ((sname (and (boundp sym) (symbol-name sym)))
-                  (value (and sname (symbol-value sym))))
+           (let ((sname (and (boundp sym) (symbol-name sym)))
+                 value)
              (when (and sname
                         (or (null include-regexp)
                             (string-match include-regexp sname))
                         (or (null exclude-regexp)
                             (not (string-match exclude-regexp sname)))
-                        (not (string-match "-syntax-table\\'" sname)))
+                        (cl-loop for re in async-inject-variables-exclude-regexps
+                                 never (string-match-p re sname)))
+               (setq value (symbol-value sym))
                (unless (or (stringp value)
                            (memq value '(nil t))
                            (numberp value)
@@ -207,7 +228,7 @@ It is intended to be used as follows:
                              (process-name proc) (process-exit-status proc))))
           (set (make-local-variable 'async-callback-value-set) t))))))
 
-(defun async-read-from-client (proc string)
+(defun async-read-from-client (proc string &optional prompt-for-pwd)
   "Process text from client process.
 
 The string chunks usually arrive in maximum of 4096 bytes, so a
@@ -217,8 +238,18 @@ function.
 We use a marker `async-read-marker' to track the position of the
 lasts complete line.  Every time we get new input, we try to look
 for newline, and if found, process the entire line and bump the
-marker position to the end of this next line."
+marker position to the end of this next line.
+
+Argument PROMPT-FOR-PWD allow binding lexically the value of
+`async-prompt-for-password', if unspecified its global value
+is used."
   (with-current-buffer (process-buffer proc)
+    (when (and prompt-for-pwd
+               (boundp 'tramp-password-prompt-regexp)
+               tramp-password-prompt-regexp
+               (string-match tramp-password-prompt-regexp string))
+      (process-send-string
+       proc (concat (read-passwd (match-string 0 string)) "\n")))
     (goto-char (point-max))
     (save-excursion
       (insert string))
@@ -350,7 +381,7 @@ its FINISH-FUNC is nil."
        (plist-get value :async-message)))
 
 (defun async-send (process-or-key &rest args)
-  "Send the given message to the asychronous child or parent Emacs.
+  "Send the given message to the asynchronous child or parent Emacs.
 
 To send messages from the parent to a child, PROCESS-OR-KEY is
 the child process object.  ARGS is a plist.  Example:
@@ -402,12 +433,14 @@ finished.  Set DEFAULT-DIRECTORY to change PROGRAM's current
 working directory."
   (let* ((buf (generate-new-buffer (concat "*" name "*")))
          (buf-err (generate-new-buffer (concat "*" name ":err*")))
+         (prt-for-pwd async-prompt-for-password)
          (proc (let ((process-connection-type nil))
                  (make-process
                   :name name
                   :buffer buf
                   :stderr buf-err
-                  :command (cons program program-args)))))
+                  :command (cons program program-args)
+                  :noquery async-process-noquery-on-exit))))
     (set-process-sentinel
      (get-buffer-process buf-err)
      (lambda (proc _change)
@@ -418,9 +451,12 @@ working directory."
       (set (make-local-variable 'async-read-marker)
            (set-marker (make-marker) (point-min) buf))
       (set-marker-insertion-type async-read-marker nil)
-
       (set-process-sentinel proc #'async-when-done)
-      (set-process-filter proc #'async-read-from-client)
+      ;; Pass the value of `async-prompt-for-password' to the process
+      ;; filter fn through the lexical local var prt-for-pwd (Issue#182).
+      (set-process-filter proc (lambda (proc string)
+                                 (async-read-from-client
+                                  proc string prt-for-pwd)))
       (unless (string= name "emacs")
         (set (make-local-variable 'async-callback-for-process) t))
       proc)))
@@ -431,11 +467,20 @@ Can be one of \"-Q\" or \"-q\".
 Default is \"-Q\" but it is sometimes useful to use \"-q\" to have a
 enhanced config or some more variables loaded.")
 
+(defvar async-library nil
+  "Cache async library path.
+It is useful only when you run multiple async processes in a loop, to
+avoid calling many times `locate-library' which is costly.
+This variable should be let bound around an `async-start' call and not
+used globally.  Should be found with `locate-library'.")
+
 (defun async--emacs-program-args (&optional sexp)
   "Return a list of arguments for invoking the child Emacs."
   ;; Using `locate-library' ensure we use the right file
-  ;; when the .elc have been deleted.
-  (let ((args (list async-quiet-switch "-l" (locate-library "async"))))
+  ;; when the .elc have been deleted, its result can be cached in
+  ;; `async-library' see Issue#193.
+  (let ((args (list async-quiet-switch "-l" (or async-library
+                                                (locate-library "async")))))
     (when async-child-init
       (setq args (append args (list "-l" async-child-init))))
     (append args (list "-batch" "-f" "async-batch-invoke"
