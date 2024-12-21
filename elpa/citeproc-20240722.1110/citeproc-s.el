@@ -27,11 +27,7 @@
 
 (require 'thingatpt)
 (require 's)
-
-;; Handle the unavailability of `string-replace' in early Emacs versions
-(if (fboundp 'string-replace)
-    (defalias 'citeproc-s-replace #'string-replace)
-  (defalias 'citeproc-s-replace #'s-replace))
+(require 'compat)
 
 (defun citeproc-s-camelcase-p (s)
   "Return whether string S is in camel case."
@@ -151,12 +147,12 @@ first word is not in lowercase then return S."
 	(buffer-string))
     s))
 
-(defun citeproc-s-sentence-case-title (s omit-nocase)
+(defun citeproc-s-sentence-case-title (s &optional omit-nocase)
   "Return a sentence-cased version of title string S.
 If optional OMIT-NOCASE is non-nil then omit the nocase tags from the output."
   (if (s-blank-p s) s
     (let ((sliced (citeproc-s-slice-by-matches
-		   s "\\(<span class=\"nocase\">\\|</span>\\|: +\\w\\)"))
+		   s "\\(<span class=\"nocase\">\\|</span>\\|: +[\"'“‘]*[[:alpha:]]\\)"))
 	  (protect-level 0)
 	  (first t)
 	  result)
@@ -165,13 +161,18 @@ If optional OMIT-NOCASE is non-nil then omit the nocase tags from the output."
 	 (pcase slice
 	   ("<span class=\"nocase\">" (cl-incf protect-level) (if omit-nocase nil slice))
 	   ("</span>" (cl-decf protect-level) (if omit-nocase nil slice))
-	   ;; Don't touch the first letter after a colon since it is probably a subtitle.
-	   ((pred (string-match-p "^:")) slice)
+	   ;; Don't touch the first letter after a colon since it probably
+	   ;; starts a subtitle.
+	   ((pred (string-match-p "^: +[\"'“‘]*[[:alpha:]]")) (setq first nil) slice)
 	   (_ (cond ((< 0 protect-level) (setq first nil) slice)
 		    ((not first) (downcase slice))
 		    (t (setq first nil)
-		       (concat (upcase (substring slice 0 1))
-			       (downcase (substring slice 1)))))))
+		       ;; We upcase the first letter and downcase the rest.
+		       (let ((pos (string-match "[[:alpha:]]" slice)))
+			 (if pos (concat (substring slice 0 pos)
+					 (upcase (substring slice pos (1+ pos)))
+					 (downcase (substring slice (1+ pos))))
+			   slice))))))
 	 result))
       (apply #'concat (nreverse result)))))
 
@@ -232,7 +233,7 @@ OQ is the opening quote, CQ is the closing quote to use."
 REPLACEMENTS is an alist with (FROM . TO) elements."
   (let ((result s))
     (pcase-dolist (`(,from . ,to) replacements)
-      (setq result (citeproc-s-replace from to result)))
+      (setq result (string-replace from to result)))
     result))
 
 (defun citeproc-s-replace-all-sim (s regex replacements)

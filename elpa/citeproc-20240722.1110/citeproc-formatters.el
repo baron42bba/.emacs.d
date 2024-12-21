@@ -33,8 +33,11 @@
 (require 's)
 (require 'cl-lib)
 
-  (cl-defstruct (citeproc-formatter (:constructor citeproc-formatter-create))
-    "Output formatter struct with slots RT, CITE, BIB-ITEM and BIB.
+(require 'citeproc-s)
+(require 'citeproc-rt)
+
+(cl-defstruct (citeproc-formatter (:constructor citeproc-formatter-create))
+  "Output formatter struct with slots RT, CITE, BIB-ITEM and BIB.
 RT is a one-argument function mapping a rich-text to its
   formatted version,
 CITE is a one-argument function mapping the output of RT for a
@@ -48,9 +51,9 @@ BIB is a two-argument function mapping a list of formatted
   bibliography,
 NO-EXTERNAL-LINKS is non-nil if the formatter doesn't support
   external linking."
-    rt (cite #'identity) (bib-item (lambda (x _) x))
-    (bib (lambda (x _) (mapconcat #'identity x "\n\n")))
-    (no-external-links nil))
+  rt (cite #'identity) (bib-item (lambda (x _) x))
+  (bib (lambda (x _) (mapconcat #'identity x "\n\n")))
+  (no-external-links nil))
 
 (defun citeproc-formatter-fun-create (fmt-alist)
   "Return a rich-text formatter function based on FMT-ALIST.
@@ -164,13 +167,18 @@ Performs finalization by removing unnecessary zero-width spaces."
       (setq result (citeproc-s-replace-all-seq
 		    result '((" ​" . " ") ("​ " . " ") ("​," . ",") ("​;" . ";")
 			     ("​:" . ":") ("​." . "."))))
-      ;; Starting and ending z-w spaces are also removed, but not before an
-      ;; asterisk to avoid creating an Org heading.
+      ;; Starting and ending z-w spaces are also removed, but not before an asterisk
+      ;; to avoid creating an Org heading.
       (when (and (= (aref result 0) 8203)
 		 (not (= (aref result 1) ?*)))
 	(setq result (substring result 1)))
       (when (= (aref result (- (length result) 1)) 8203)
-	(setq result (substring result 0 -1))))
+	(setq result (substring result 0 -1)))
+      ;; Prepend a zero width no-break space when the text starts with
+      ;; superscript to make Org parse it correctly.
+      ;; NOTE: This is a workaround, ideally should be fixed in Org.
+      (when (= (aref result 0) ?^)
+	(setq result (concat "﻿" result))))
     result))
 
 ;; HTML
@@ -257,11 +265,16 @@ CSL tests."
   "Return the LaTeX-escaped version of string S."
   (replace-regexp-in-string citeproc-fmt--latex-esc-regex "\\\\\\&" s))
 
+(defconst citeproc-fmt--latex-uri-esc-regex
+  (regexp-opt '("#" "%"))
+  "Regular expression matching characters to be escaped in URIs for LaTeX output.")
+
 (defun citeproc-fmt--latex-href (text uri)
-  (let ((escaped-uri (replace-regexp-in-string "%" "\\\\%" uri)))
-   (if (string-prefix-p "http" text)
-       (concat "\\url{" escaped-uri "}")
-     (concat "\\href{" escaped-uri "}{" text "}"))))
+  (let ((escaped-uri (replace-regexp-in-string
+		      citeproc-fmt--latex-uri-esc-regex "\\\\\\&" uri)))
+    (if (string-prefix-p "http" text)
+	(concat "\\url{" escaped-uri "}")
+      (concat "\\href{" escaped-uri "}{" text "}"))))
 
 (defconst citeproc-fmt--latex-alist
   `((unformatted . ,#'citeproc-fmt--latex-escape)

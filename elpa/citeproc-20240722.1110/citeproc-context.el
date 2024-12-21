@@ -168,16 +168,6 @@ TYPED RTS is a list of (RICH-TEXT . TYPE) pairs"
   "Return the first text associated with TERM in CONTEXT."
   (citeproc-term-text-from-terms term (citeproc-context-terms context)))
 
-(defun citeproc-term-inflected-text (term form number context)
-  "Return the text associated with TERM having FORM and NUMBER."
-  (let ((matches
-	 (--select (string= term (citeproc-term-name it))
-		   (citeproc-context-terms context))))
-    (cond ((not matches) nil)
-	  ((= (length matches) 1)
-	   (citeproc-term-text (car matches)))
-	  (t (citeproc-term--inflected-text-1 matches form number)))))
-
 (defconst citeproc--term-form-fallback-alist
   '((verb-short . verb)
     (symbol . short)
@@ -185,17 +175,21 @@ TYPED RTS is a list of (RICH-TEXT . TYPE) pairs"
     (short . long))
   "Alist containing the fallback form for each term form.")
 
-(defun citeproc-term--inflected-text-1 (matches form number)
-  (let ((match (--first (and (eq form (citeproc-term-form it))
-			     (or (not (citeproc-term-number it))
-				 (eq number (citeproc-term-number it))))
-			matches)))
-    (if match
-	(citeproc-term-text match)
-      (citeproc-term--inflected-text-1
-       matches
-       (alist-get form citeproc--term-form-fallback-alist)
-       number))))
+(defun citeproc-term-inflected-text (term form number context)
+  "Return the text associated with TERM having FORM and NUMBER."
+  (let ((matches
+	 (--select (string= term (citeproc-term-name it))
+		   (citeproc-context-terms context))))
+    (if (not matches) nil
+      (let (match)
+	(while (and (not match) form)
+	  (setq match (--first (and (eq form (citeproc-term-form it))
+				    (or (not (citeproc-term-number it))
+					(eq number (citeproc-term-number it))))
+			       matches))
+	  (unless match
+	    (setq form (alist-get form citeproc--term-form-fallback-alist))))
+	(when match (citeproc-term-text match))))))
 
 (defun citeproc-term-get-gender (term context)
   "Return the gender of TERM or nil if none is given."
@@ -223,6 +217,20 @@ no internal links should be produced."
 	  (if (eq cite-pos 'first) 'bib-item-no 'cited-item-no)
 	;; Else link each cite to the corresponding bib item.
 	(if (eq mode 'cite) 'cited-item-no 'bib-item-no)))))
+
+(defun citeproc-context-maybe-stop-rendering
+    (trigger context result &optional var)
+  "Stop rendering if a (`stop-rendering-at'. TRIGGER) pair is present in CONTEXT.
+In case of stopping return with RESULT. If the optional VAR
+symbol is non-nil then rendering is stopped only if VAR is eq to
+TRIGGER."
+  (if (and (eq trigger (alist-get 'stop-rendering-at (citeproc-context-vars context)))
+	   (or (not var) (eq var trigger))
+	   (eq (cdr result) 'present-var))
+      (let ((rt-result (car result)))
+	(push '(stopped-rendering . t) (car rt-result))
+	(throw 'stop-rendering (citeproc-rt-render-affixes rt-result)))
+    result))
 
 (defun citeproc-render-varlist-in-rt (var-alist style mode render-mode &optional
 						internal-links no-external-links)
@@ -263,7 +271,7 @@ external links."
 		       (citeproc-context-int-link-attrval
 			style internal-links mode (alist-get 'position var-alist)))
 		      (cite-no-attr-val (cons cite-no-attr
-					     (alist-get 'citation-number var-alist))))
+					      (alist-get 'citation-number var-alist))))
 	    (cond ((consp rendered) (setf (car rendered)
 					  (-snoc (car rendered) cite-no-attr-val)))
 		  ((stringp rendered) (setq rendered

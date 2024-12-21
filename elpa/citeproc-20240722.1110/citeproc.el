@@ -1,13 +1,14 @@
 ;;; citeproc.el --- A CSL 1.0.2 Citation Processor -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2023 András Simonyi
+;; Copyright (C) 2017-2024 András Simonyi
 
 ;; Author: András Simonyi <andras.simonyi@gmail.com>
 ;; Maintainer: András Simonyi <andras.simonyi@gmail.com>
 ;; URL: https://github.com/andras-simonyi/citeproc-el
 ;; Keywords: bib
-;; Package-Requires: ((emacs "26") (dash "2.13.0") (s "1.12.0") (f "0.18.0") (queue "0.2") (string-inflection "1.0") (org "9") (parsebib "2.4"))
-;; Version: 0.9.3
+;; Package-Requires: ((emacs "26") (dash "2.13.0") (s "1.12.0") (f "0.18.0") (queue "0.2") (string-inflection "1.0") (org "9") (parsebib "2.4")(compat "28.1"))
+;; Package-Version: 20240722.1110
+;; Package-Revision: 54184baaff55
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -87,10 +88,12 @@ CITATIONS is a list of `citeproc-citation' structures."
 	   (new-ids (--remove (gethash it itemdata) uniq-ids)))
       ;; Add all new items in one pass
       (citeproc-proc-put-items-by-id proc new-ids)
-      ;; Add itemdata to the cite structs and add them to the cite queue.
+      ;; Internalize the cites dealing with locator-extra if present, add itemdata to
+      ;; the cite structs and add them to the cite queue.
       (dolist (citation citations)
 	(setf (citeproc-citation-cites citation)
-	      (--map (cons (cons 'itd (gethash (alist-get 'id it) itemdata)) it)
+	      (--map (cons (cons 'itd (gethash (alist-get 'id it) itemdata))
+			   (citeproc-cite--internalize-locator it))
 		     (citeproc-citation-cites citation)))
 	(queue-append (citeproc-proc-citations proc) citation))
       (setf (citeproc-proc-finalized proc) nil))))
@@ -239,8 +242,12 @@ formatting parameters keyed to the parameter names as symbols:
 			 raw-bib)
 		raw-bib))
 	     ;; Calculate formatting params.
-	     (max-offset (if (alist-get 'second-field-align bib-opts)
-			     (citeproc-rt-max-offset itemdata)
+	     ;; NOTE: This is the only place where we check whether there are
+	     ;; bibliography items in the processor, even though the empty case
+	     ;; could be handled way more efficiently. 
+	     (max-offset (if (and (alist-get 'second-field-align bib-opts)
+				  (not (hash-table-empty-p itemdata)))
+			     (citeproc-proc-max-offset itemdata)
 			   0))
 	     (format-params (cons (cons 'max-offset max-offset)
 				  (citeproc-style-bib-opts-to-formatting-params bib-opts)))
