@@ -2,11 +2,10 @@
 
 ;; Copyright (c) 2013 Spotify AB
 ;; Package-Requires: ((emacs "24"))
-;; Package-Version: 20220822.2021
-;; Package-Commit: 52c6c00da1d31c0b6c29c74335b3af63ed6bf06c
 ;; Homepage: https://github.com/spotify/dockerfile-mode
 ;; URL: https://github.com/spotify/dockerfile-mode
-;; Version: 1.7
+;; Package-Version: 20240914.1549
+;; Package-Revision: 4d893bd2da15
 ;; Keywords: docker languages processes tools
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -71,6 +70,17 @@ Each element of the list will be passed as a separate
 
 (defcustom dockerfile-build-progress "auto"
   "Type of --progress output (auto, plain, tty) of docker build."
+  :group 'dockerfile
+  :type 'string)
+
+(defcustom dockerfile-build-extra-options nil
+  "Extra command-line options to send to docker build.
+
+Use this variable to add custom command-line switches not covered by
+existing dockerfile-build-* variables.
+
+Example:
+(setq-default dockerfile-build-extra-options \"--network host\")"
   :group 'dockerfile
   :type 'string)
 
@@ -158,19 +168,16 @@ Lines beginning with a keyword are ignored, and any others are
 indented by one `dockerfile-indent-offset'. Functionality toggled
 by `dockerfile-enable-auto-indent'."
   (when dockerfile-enable-auto-indent
-    (unless (member (get-text-property (point-at-bol) 'face)
+    (unless (member (get-text-property (line-beginning-position) 'face)
              '(font-lock-comment-delimiter-face font-lock-keyword-face))
      (save-excursion
        (beginning-of-line)
-       (skip-chars-forward "[ \t]" (point-at-eol))
-       (unless (equal (point) (point-at-eol)) ; Ignore empty lines.
-         ;; Delete existing whitespace.
-         (delete-char (- (point-at-bol) (point)))
-         (indent-to dockerfile-indent-offset))))))
+       (unless (looking-at-p "\\s-*$") ; Ignore empty lines.
+         (indent-line-to dockerfile-indent-offset))))))
 
 (defun dockerfile-build-arg-string ()
   "Create a --build-arg string for each element in `dockerfile-build-args'."
-  (mapconcat (lambda (arg) (concat "--build-arg " (shell-quote-argument arg)))
+  (mapconcat (lambda (arg) (concat "--build-arg="  (replace-regexp-in-string "\\\\=" "=" (shell-quote-argument arg))))
              dockerfile-build-args " "))
 
 (defun dockerfile-standard-filename (file)
@@ -224,7 +231,7 @@ The shell command used to build the image is:
   (save-buffer)
     (compilation-start
         (format
-            "%s%s%s build %s %s %s %s %s --progress %s -f %s %s"
+            "%s%s%s build %s %s %s %s %s --progress %s %s -f %s %s"
             (if dockerfile-use-buildkit "DOCKER_BUILDKIT=1 " "")
             (if dockerfile-use-sudo "sudo " "")
             dockerfile-mode-command
@@ -234,6 +241,7 @@ The shell command used to build the image is:
             (dockerfile-tag-string image-name)
             (dockerfile-build-arg-string)
             dockerfile-build-progress
+            (or dockerfile-build-extra-options "")
             (shell-quote-argument (dockerfile-standard-filename
 				   (or (file-remote-p (buffer-file-name) 'localname)
 				       (buffer-file-name))))
