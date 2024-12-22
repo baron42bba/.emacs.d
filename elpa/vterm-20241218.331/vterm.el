@@ -3,7 +3,8 @@
 ;; Copyright (C) 2017-2020 by Lukas Fürmetz & Contributors
 ;;
 ;; Author: Lukas Fürmetz <fuermetz@mailbox.org>
-;; Version: 0.0.2
+;; Package-Version: 20241218.331
+;; Package-Revision: f64729ed8b59
 ;; URL: https://github.com/akermu/emacs-libvterm
 ;; Keywords: terminals
 ;; Package-Requires: ((emacs "25.1"))
@@ -172,11 +173,26 @@ the executable."
   :type 'string
   :group 'vterm)
 
-(defcustom vterm-tramp-shells '(("docker" "/bin/sh"))
+(defcustom vterm-tramp-shells
+  '(("ssh" login-shell) ("scp" login-shell) ("docker" "/bin/sh"))
   "The shell that gets run in the vterm for tramp.
 
 `vterm-tramp-shells' has to be a list of pairs of the format:
-\(TRAMP-METHOD SHELL)"
+\(TRAMP-METHOD SHELL)
+
+Use t as TRAMP-METHOD to specify a default shell for all methods.
+Specific methods always take precedence over t.
+
+Set SHELL to \\='login-shell to use the user's login shell on the host.
+The login-shell detection currently works for POSIX-compliant remote
+hosts that have the getent command (regular GNU/Linux distros, *BSDs,
+but not MacOS X unfortunately).
+
+You can specify an additional second SHELL command as a fallback
+that is used when the login-shell detection fails, e.g.,
+\\='((\"ssh\" login-shell \"/bin/bash\") ...)
+If no second SHELL command is specified with \\='login-shell, vterm will
+fall back to tramp's shell."
   :type '(alist :key-type string :value-type string)
   :group 'vterm)
 
@@ -813,16 +829,72 @@ Exceptions are defined by `vterm-keymap-exceptions'."
   (vterm--set-pty-name vterm--term (process-tty-name vterm--process))
   (process-put vterm--process 'adjust-window-size-function
                #'vterm--window-adjust-process-window-size)
+
+  ;; Set the truncation slot for 'buffer-display-table' to the ASCII code for a
+  ;; space character (32) to make the vterm buffer display a space instead of
+  ;; the default truncation character ($) when a line is truncated.
+  (let* ((display-table (or buffer-display-table (make-display-table))))
+    (set-display-table-slot display-table 'truncation 32)
+    (setq buffer-display-table display-table))
+
   ;; Support to compilation-shell-minor-mode
   ;; Is this necessary? See vterm--compilation-setup
   (setq next-error-function 'vterm-next-error-function)
   (setq-local bookmark-make-record-function 'vterm--bookmark-make-record))
 
+(defun vterm--tramp-get-shell (method)
+  "Get the shell for a remote location as specified in `vterm-tramp-shells'.
+The argument METHOD is the method string (as used by tramp) to get the shell
+for, or t to get the default shell for all methods."
+  (let* ((specs (cdr (assoc method vterm-tramp-shells)))
+         (first (car specs))
+         (second (cadr specs)))
+    ;; Allow '(... login-shell) or '(... 'login-shell).
+    (if (or (eq first 'login-shell)
+            (and (consp first) (eq (cadr first) 'login-shell)))
+        ;; If the first element is 'login-shell, try to determine the user's
+        ;; login shell on the remote host.  This should work for all
+        ;; POSIX-compliant systems with the getent command in PATH.  This
+        ;; includes regular GNU/Linux distros, *BSDs, but not MacOS X.  If
+        ;; the login-shell determination fails at any point, the second
+        ;; element in the shell spec is used (if present, otherwise nil is
+        ;; returned).
+        (let* ((entry (ignore-errors
+                        (with-output-to-string
+                          (with-current-buffer standard-output
+                            ;; The getent command returns the passwd entry
+                            ;; for the specified user independently of the
+                            ;; used name service (i.e., not only for static
+                            ;; passwd files, but also for LDAP, etc).
+                            ;;
+                            ;; Use a shell command here to get $LOGNAME.
+                            ;; Using the tramp user does not always work as
+                            ;; it can be nil, e.g., with ssh host configs.
+                            ;; $LOGNAME is defined in all POSIX-compliant
+                            ;; systems.
+                            (unless (= 0 (process-file-shell-command
+                                          "getent passwd $LOGNAME"
+                                          nil (current-buffer) nil))
+                              (error "Unexpected return value"))
+                            ;; If we have more than one line, the output is
+                            ;; not the expected single passwd entry.
+                            ;; Most likely, $LOGNAME is not set.
+                            (when (> (count-lines (point-min) (point-max)) 1)
+                              (error "Unexpected output"))))))
+               (shell (when entry
+                        ;; The returned Unix passwd entry is a colon-
+                        ;; separated line.  The 6th (last) element specifies
+                        ;; the user's shell.
+                        (nth 6 (split-string entry ":" nil "[ \t\n\r]+")))))
+          (or shell second))
+      first)))
+
 (defun vterm--get-shell ()
   "Get the shell that gets run in the vterm."
   (if (ignore-errors (file-remote-p default-directory))
       (with-parsed-tramp-file-name default-directory nil
-        (or (cadr (assoc method vterm-tramp-shells))
+        (or (vterm--tramp-get-shell method)
+            (vterm--tramp-get-shell t)
             (with-connection-local-variables shell-file-name)
             vterm-shell))
     vterm-shell))
@@ -872,7 +944,8 @@ it to the bookmarked directory if needed."
 `'compilation-shell-minor-mode' would change the value of local
 variable `next-error-function', so we should call this function in
 `compilation-shell-minor-mode-hook'."
-  (when (eq major-mode 'vterm-mode)
+  (when (or (eq major-mode 'vterm-mode)
+            (derived-mode-p 'vterm-mode))
     (setq next-error-function 'vterm-next-error-function)))
 
 (add-hook 'compilation-shell-minor-mode-hook #'vterm--compilation-setup)
@@ -928,7 +1001,8 @@ A conventient way to exit `vterm-copy-mode' is with
   :group 'vterm
   :lighter " VTermCopy"
   :keymap vterm-copy-mode-map
-  (if (equal major-mode 'vterm-mode)
+  (if (or (equal major-mode 'vterm-mode)
+          (derived-mode-p 'vterm-mode))
       (if vterm-copy-mode
           (vterm--enter-copy-mode)
         (vterm--exit-copy-mode))
@@ -1522,7 +1596,7 @@ Then triggers a redraw from the module."
                                                       (- count 1 partial)))
                                   'eight-bit))
                     (cl-incf partial))
-                  (when (> count partial 0)
+                  (when (> (1+ count) partial 0)
                     (setq vterm--undecoded-bytes
                           (substring decoded-substring (- partial)))
                     (setq decoded-substring
@@ -1549,7 +1623,8 @@ Argument EVENT process event."
 (defun vterm--text-scale-mode (&optional _argv)
   "Fix `line-number' height for scaled text."
   (and text-scale-mode
-       (equal major-mode 'vterm-mode)
+       (or (equal major-mode 'vterm-mode)
+           (derived-mode-p 'vterm-mode))
        (boundp 'display-line-numbers)
        (let ((height (expt text-scale-mode-step
                            text-scale-mode-amount)))
