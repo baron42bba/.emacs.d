@@ -41,17 +41,12 @@ A prefix argument causes the SQL to be printed into the current buffer.
 
 ;;; Generated autoloads from emacsql-sqlite.el
 
-(register-definition-prefixes "emacsql-sqlite" '("emacsql-sqlite-"))
+(register-definition-prefixes "emacsql-sqlite" '("emacsql-"))
 
 
 ;;; Generated autoloads from emacsql-sqlite-builtin.el
 
 (register-definition-prefixes "emacsql-sqlite-builtin" '("emacsql-sqlite-builtin-connection"))
-
-
-;;; Generated autoloads from emacsql-sqlite-common.el
-
-(register-definition-prefixes "emacsql-sqlite-common" '("emacsql-"))
 
 
 ;;; Generated autoloads from emacsql-sqlite-module.el

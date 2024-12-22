@@ -4,13 +4,14 @@
 
 ;; Author: Christopher Wellons <wellons@nullprogram.com>
 ;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
-;; Homepage: https://github.com/magit/emacsql
 
 ;; SPDX-License-Identifier: Unlicense
 
 ;;; Code:
 
 (require 'cl-lib)
+
+(eval-when-compile (require 'subr-x))
 
 ;;; Error symbols
 
@@ -507,8 +508,7 @@ Only use within `emacsql-with-params'!"
                  (emacsql-escape-scalar item))))
              into parts
              do (setq last item)
-             finally (cl-return
-                      (mapconcat #'identity parts " ")))))
+             finally (cl-return (string-join parts " ")))))
 
 (defun emacsql-prepare (sql)
   "Expand SQL (string or sexp) into a prepared statement."

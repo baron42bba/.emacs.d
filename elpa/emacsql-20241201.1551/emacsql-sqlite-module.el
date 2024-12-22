@@ -3,10 +3,8 @@
 ;; This is free and unencumbered software released into the public domain.
 
 ;; Author: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
-;; Homepage: https://github.com/magit/emacsql
+;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
 
-;; Package-Version: 3.1.1.50-git
-;; Package-Requires: ((emacs "25") (emacsql "20230220") (sqlite3 "0.16"))
 ;; SPDX-License-Identifier: Unlicense
 
 ;;; Commentary:
@@ -16,13 +14,12 @@
 
 ;;; Code:
 
-(require 'emacsql)
-(require 'emacsql-sqlite-common)
+(require 'emacsql-sqlite)
 
 (require 'sqlite3 nil t)
-(declare-function sqlite3-open "sqlite3-api")
-(declare-function sqlite3-exec "sqlite3-api")
-(declare-function sqlite3-close "sqlite3-api")
+(declare-function sqlite3-open "ext:sqlite3-api")
+(declare-function sqlite3-exec "ext:sqlite3-api")
+(declare-function sqlite3-close "ext:sqlite3-api")
 (defvar sqlite-open-readwrite)
 (defvar sqlite-open-create)
 
@@ -38,9 +35,7 @@
         (sqlite3-open (or (oref connection file) ":memory:")
                       sqlite-open-readwrite
                       sqlite-open-create))
-  (when emacsql-global-timeout
-    (emacsql connection [:pragma (= busy-timeout $s1)]
-             (/ (* emacsql-global-timeout 1000) 2)))
+  (emacsql-sqlite-set-busy-timeout connection)
   (emacsql connection [:pragma (= foreign-keys on)])
   (emacsql-register connection))
 
@@ -66,14 +61,19 @@ buffer. This is for debugging purposes."
 (cl-defmethod emacsql-send-message
   ((connection emacsql-sqlite-module-connection) message)
   (condition-case err
-      (let (rows)
+      (let ((include-header emacsql-include-header)
+            (rows ()))
         (sqlite3-exec (oref connection handle)
                       message
-                      (lambda (_ row __)
-                        (push (mapcar (lambda (col)
-                                        (cond ((null col) nil)
-                                              ((equal col "") "")
-                                              (t (read col))))
+                      (lambda (_ row header)
+                        (when include-header
+                          (push header rows)
+                          (setq include-header nil))
+                        (push (mapcan (lambda (col)
+                                        (cond
+                                         ((null col)     (list nil))
+                                         ((equal col "") (list ""))
+                                         ((emacsql-sqlite-read-column col))))
                                       row)
                               rows)))
         (nreverse rows))

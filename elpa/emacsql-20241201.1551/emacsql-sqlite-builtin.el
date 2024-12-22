@@ -3,10 +3,8 @@
 ;; This is free and unencumbered software released into the public domain.
 
 ;; Author: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
-;; Homepage: https://github.com/magit/emacsql
+;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
 
-;; Package-Version: 3.1.1.50-git
-;; Package-Requires: ((emacs "29") (emacsql "20230220"))
 ;; SPDX-License-Identifier: Unlicense
 
 ;;; Commentary:
@@ -16,8 +14,7 @@
 
 ;;; Code:
 
-(require 'emacsql)
-(require 'emacsql-sqlite-common)
+(require 'emacsql-sqlite)
 
 (require 'sqlite nil t)
 (declare-function sqlite-open "sqlite")
@@ -34,9 +31,7 @@
   (require (quote sqlite))
   (oset connection handle
         (sqlite-open (oref connection file)))
-  (when emacsql-global-timeout
-    (emacsql connection [:pragma (= busy-timeout $s1)]
-             (/ (* emacsql-global-timeout 1000) 2)))
+  (emacsql-sqlite-set-busy-timeout connection)
   (emacsql connection [:pragma (= foreign-keys on)])
   (emacsql-register connection))
 
@@ -62,14 +57,18 @@ buffer. This is for debugging purposes."
 (cl-defmethod emacsql-send-message
   ((connection emacsql-sqlite-builtin-connection) message)
   (condition-case err
-      (mapcar (lambda (row)
-                (mapcar (lambda (col)
-                          (cond ((null col) nil)
-                                ((equal col "") "")
-                                ((numberp col) col)
-                                (t (read col))))
-                        row))
-              (sqlite-select (oref connection handle) message nil nil))
+      (let ((headerp emacsql-include-header))
+        (mapcar (lambda (row)
+                  (cond
+                   (headerp (setq headerp nil) row)
+                   ((mapcan (lambda (col)
+                              (cond ((null col)     (list nil))
+                                    ((equal col "") (list ""))
+                                    ((numberp col)  (list col))
+                                    ((emacsql-sqlite-read-column col))))
+                            row))))
+                (sqlite-select (oref connection handle) message nil
+                               (and emacsql-include-header 'full))))
     ((sqlite-error sqlite-locked-error)
      (if (stringp (cdr err))
          (signal 'emacsql-error (list (cdr err)))
