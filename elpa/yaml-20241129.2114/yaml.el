@@ -1,16 +1,15 @@
 ;;; yaml.el --- YAML parser for Elisp -*- lexical-binding: t -*-
 
-;; Copyright © 2021 Zachary Romero <zkry@posteo.org>
+;; Copyright © 2021-2024  Free Software Foundation, Inc.
 
 ;; Author: Zachary Romero <zkry@posteo.org>
-;; Version: 0.5.1
+;; Package-Version: 20241129.2114
+;; Package-Revision: cd3edfc02cb1
 ;; Homepage: https://github.com/zkry/yaml.el
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: tools
 
 ;; yaml.el requires at least GNU Emacs 25.1
-
-;; This file is not part of GNU Emacs
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -305,9 +304,9 @@ This flag is intended for development purposes.")
    ((string-match "^[-+]?[0-9]+$" scalar)
     (string-to-number scalar))
    ((string-match "^0o[0-7]+$" scalar)
-    (string-to-number scalar 8))
+    (string-to-number (substring scalar 2) 8))
    ((string-match "^0x[0-9a-fA-F]+$" scalar)
-    (string-to-number scalar 16))
+    (string-to-number (substring scalar 2) 16))
    ;; tag:yaml.org,2002:float
    ((string-match
      "^[-+]?\\(\\.[0-9]+\\|[0-9]+\\(\\.[0-9]*\\)?\\)\\([eE][-+]?[0-9]+\\)?$"
@@ -2765,6 +2764,9 @@ Rules for this function are defined by the yaml-spec JSON file."
   "Encode OBJECT to a YAML string."
   (with-temp-buffer
     (yaml--encode-object object 0)
+    (goto-char (point-min))
+    (while (looking-at-p "\n")
+      (delete-char 1))
     (buffer-string)))
 
 (defun yaml--encode-object (object indent &optional auto-indent)
