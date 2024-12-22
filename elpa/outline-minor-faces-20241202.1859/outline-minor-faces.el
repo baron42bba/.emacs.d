@@ -1,12 +1,14 @@
 ;;; outline-minor-faces.el --- Highlight only section headings  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2018-2023 Jonas Bernoulli
+;; Copyright (C) 2018-2024 Jonas Bernoulli
 
-;; Author: Jonas Bernoulli <jonas@bernoul.li>
+;; Author: Jonas Bernoulli <emacs.outline-minor-faces@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/tarsius/outline-minor-faces
 ;; Keywords: faces outlines
 
-;; Package-Requires: ((emacs "25.1") (compat "29.1.4.1"))
+;; Package-Version: 20241202.1859
+;; Package-Revision: 41de0cd1633c
+;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -39,7 +41,7 @@
 ;;                       #'outline-minor-faces-mode))
 
 ;; For non-lisp major modes the highlighting provided by this package
-;; and by the built-in support is essentiall the same, i.e., the first
+;; and by the built-in support is essentially the same, i.e., the first
 ;; lines of top-level expressions *are* highlighted.
 
 ;; This package also defines separate faces for use in the minor mode.
@@ -117,7 +119,9 @@
    outline-minor-5 outline-minor-6 outline-minor-7 outline-minor-8])
 
 (defvar outline-minor-faces--lisp-modes
-  '(lisp-data-mode lisp-mode emacs-lisp-mode
+  '(lisp-data-mode
+    lisp-mode
+    emacs-lisp-mode
     clojure-mode
     scheme-mode))
 
@@ -181,14 +185,10 @@ string."
       (font-lock-add-keywords nil outline-minor-faces--font-lock-keywords t)
     (font-lock-remove-keywords nil outline-minor-faces--font-lock-keywords))
   (when font-lock-mode
-    (if (and (fboundp 'font-lock-flush)
-             (fboundp 'font-lock-ensure))
-        (save-restriction
-          (widen)
-          (font-lock-flush)
-          (font-lock-ensure))
-      (with-no-warnings
-        (font-lock-fontify-buffer)))))
+    (save-restriction
+      (widen)
+      (font-lock-flush)
+      (font-lock-ensure))))
 
 (defun outline-minor-faces--get-face ()
   (save-excursion
@@ -203,8 +203,10 @@ string."
 
 (defun outline-minor-faces--level ()
   (save-excursion
-    (beginning-of-line)
-    (and (looking-at outline-regexp)
+    (and (if (bound-and-true-p outline-search-function)
+             (funcall outline-search-function nil nil nil t)
+           (beginning-of-line)
+           (looking-at outline-regexp))
          (funcall outline-level))))
 
 (defun outline-minor-faces--top-level ()
