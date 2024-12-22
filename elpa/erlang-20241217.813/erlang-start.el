@@ -3,7 +3,6 @@
 ;; Copyright (C) 1998  Ericsson Telecom AB
 
 ;; Author:   Anders Lindgren
-;; Version:  2.3
 ;; Keywords: erlang, languages, processes
 ;; Created:  1996-09-18
 ;; Date:     1998-03-16
