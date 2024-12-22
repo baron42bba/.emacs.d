@@ -21,7 +21,8 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 ;; USA
 
-;; Version: 1.0
+;; Package-Version: 20241110.1456
+;; Package-Revision: 52d1bbdb74fd
 ;; Author: Adrien Brochard
 ;; Keywords: kubernetes k8s tools processes
 ;; URL: https://github.com/abrochard/kubel
@@ -949,7 +950,7 @@ P can be a single number or a localhost:container port pair."
   (add-to-list 'tramp-methods
                `("kubectl"
                  (tramp-login-program      ,kubel-kubectl)
-                 (tramp-login-args         (,(kubel--get-context-namespace) ("exec" "-it") ("-c" "%u") ("%h") ("--") ("sh")))
+                 (tramp-login-args         (,(kubel--get-context-namespace) ("exec" "-it") ("-c" "%u") ("%h") ("sh")))
                  (tramp-remote-shell       "sh")
                  (tramp-remote-shell-args  ("-i" "-c"))))) ;; add the current context/namespace to tramp methods
 
@@ -1050,6 +1051,20 @@ the variables `kubel-namespace' and `kubel-context', respectively."
          (command (format "%s exec %s -c %s -i -t -- /usr/bin/env sh" (kubel--get-command-prefix) pod container)))
     (with-current-buffer (ansi-term "bash" (kubel--shell-buffer-name "ansi-term" container pod))
       (process-send-string (current-buffer) (format "%s\n" command)))))
+
+(defun kubel-exec-eat-pod ()
+  "Exec into the pod under the cursor -> eat."
+  (interactive)
+  (unless (fboundp 'eat-other-window)
+    (user-error "This command requires the `eat' package."))
+  (kubel-setup-tramp)
+  (let* ((dir-prefix (kubel--dir-prefix))
+         (con-pod (kubel--get-container-under-cursor))
+         (container (car con-pod))
+         (pod (cdr con-pod))
+         (default-directory (format "/%skubectl:%s@%s:/" dir-prefix container pod))
+         (eat-buffer-name (format "*eat:%s" default-directory)))
+    (eat-other-window)))
 
 (defun kubel-exec-pod-by-shell-command ()
   "Prompt shell with kubectl exec command at pod under cursor."
@@ -1227,6 +1242,7 @@ When called interactively, prompts for a buffer belonging to kubel."
    ("d" "Dired" kubel-exec-pod)
    ("e" "Eshell" kubel-exec-eshell-pod)
    ("a" "Ansi-term" kubel-exec-ansi-term-pod)
+   ("t" "eat" kubel-exec-eat-pod)
    ("s" "Shell" kubel-exec-shell-pod)])
 
 (transient-define-prefix kubel-log-popup ()
