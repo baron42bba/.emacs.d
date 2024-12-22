@@ -5,6 +5,8 @@
 ;; Author: Pavel Kurnosov <pashky@gmail.com>
 ;; Maintainer: Pavel Kurnosov <pashky@gmail.com>
 ;; Created: 01 Apr 2012
+;; Package-Version: 20231010.1327
+;; Package-Revision: e2a2b13482d7
 ;; Keywords: http
 
 ;; This file is not part of GNU Emacs.
@@ -363,7 +365,7 @@
     (while (re-search-forward "\\\\[Uu]\\([0-9a-fA-F]\\{4\\}\\)" nil t)
       (replace-match (char-to-string (decode-char 'ucs (string-to-number (match-string 1) 16))) t nil))))
 
-(defun restclient-http-handle-response (status method url bufname raw stay-in-window)
+(defun restclient-http-handle-response (status method url bufname raw stay-in-window suppress-response-buffer)
   "Switch to the buffer returned by `url-retreive'.
 The buffer contains the raw HTTP response sent by the server."
   (setq restclient-within-call nil)
@@ -381,9 +383,10 @@ The buffer contains the raw HTTP response sent by the server."
         (buffer-enable-undo)
 	(restclient-response-mode)
         (run-hooks 'restclient-response-loaded-hook)
-        (if stay-in-window
-            (display-buffer (current-buffer) t)
-          (switch-to-buffer-other-window (current-buffer)))))))
+        (unless suppress-response-buffer
+          (if stay-in-window
+              (display-buffer (current-buffer) t)
+            (switch-to-buffer-other-window (current-buffer))))))))
 
 (defun restclient-decode-response (raw-http-response-buffer target-buffer-name same-name)
   "Decode the HTTP response using the charset (encoding) specified in the Content-Type header. If no charset is specified, default to UTF-8."
@@ -488,6 +491,17 @@ The buffer contains the raw HTTP response sent by the server."
       (setq headers (cons (restclient-make-header string) headers)
             start (match-end 0)))
     headers))
+
+(defun restclient-get-response-headers ()
+  "Returns alist of current response headers. Works *only* with with
+hook called from `restclient-http-send-current-raw', usually
+bound to C-c C-r."
+  (let ((start (point-min))
+         (headers-end (+ 1 (string-match "\n\n" (buffer-substring-no-properties (point-min) (point-max))))))
+         (restclient-parse-headers (buffer-substring-no-properties start headers-end))))
+
+(defun restclient-set-var-from-header (var header)
+  (restclient-set-var var (cdr (assoc header (restclient-get-response-headers)))))
 
 (defun restclient-read-file (path)
   (with-temp-buffer
@@ -605,12 +619,12 @@ The buffer contains the raw HTTP response sent by the server."
   eg. -> on-response (message \"my hook called\")" )
 
 ;;;###autoload
-(defun restclient-http-send-current (&optional raw stay-in-window)
+(defun restclient-http-send-current (&optional raw stay-in-window suppress-response-buffer)
   "Sends current request.
 Optional argument RAW don't reformat response if t.
 Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
   (interactive)
-  (restclient-http-parse-current-and-do 'restclient-http-do raw stay-in-window))
+  (restclient-http-parse-current-and-do 'restclient-http-do raw stay-in-window suppress-response-buffer))
 
 ;;;###autoload
 (defun restclient-http-send-current-raw ()
@@ -623,6 +637,12 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
   "Send current request and keep focus in request window."
   (interactive)
   (restclient-http-send-current nil t))
+
+;;;###autoload
+(defun restclient-http-send-current-suppress-response-buffer ()
+  "Send current request but don't show response buffer."
+  (interactive)
+  (restclient-http-send-current nil nil t))
 
 (defun restclient-jump-next ()
   "Jump to next request in buffer."
@@ -768,6 +788,7 @@ Optional argument STAY-IN-WINDOW do not move focus to response buffer if t."
     (define-key map (kbd "C-c C-c") 'restclient-http-send-current)
     (define-key map (kbd "C-c C-r") 'restclient-http-send-current-raw)
     (define-key map (kbd "C-c C-v") 'restclient-http-send-current-stay-in-window)
+    (define-key map (kbd "C-c C-b") 'restclient-http-send-current-suppress-response-buffer)
     (define-key map (kbd "C-c C-n") 'restclient-jump-next)
     (define-key map (kbd "C-c C-p") 'restclient-jump-prev)
     (define-key map (kbd "C-c C-.") 'restclient-mark-current)
