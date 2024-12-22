@@ -3342,6 +3342,15 @@ whole team. No matter what editor gets used.
 
 #+end_src
 
+To prevent Emacs from storing faces we have to overwrite the default
+function:
+
+#+begin_src emacs-lisp
+  (defun custom-set-faces (&rest args)
+  "Overwrite default function to return just nil as we handle faces in orgmode."
+  nil  )
+#+end_src
+
 * transparent window
 [2018-03-07 Wed 10:42]
 
