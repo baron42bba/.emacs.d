@@ -39,7 +39,7 @@
 
 (define-error 'ghub-graphql-error "GraphQL Error" 'ghub-error)
 
-(defvar ghub-graphql-items-per-request 100
+(defvar ghub-graphql-items-per-request 50
   "Number of GraphQL items to query for entities that return a collection.
 
 Adjust this value if you're hitting query timeouts against larger
@@ -454,7 +454,7 @@ See Info node `(ghub)GraphQL Support'."
           (setq loc (treepy-next loc)))))))
 
 (defun ghub--graphql-handle-response (status req)
-  (let ((buffer (current-buffer)))
+  (let ((buf (current-buffer)))
     (unwind-protect
         (progn
           (set-buffer-multibyte t)
@@ -468,8 +468,8 @@ See Info node `(ghub)GraphQL Support'."
                 (ghub--graphql-handle-failure
                  req (or err errors) headers status)
               (ghub--graphql-walk-response req (assq 'data payload)))))
-      (when (buffer-live-p buffer)
-        (kill-buffer buffer)))))
+      (when (buffer-live-p buf)
+        (kill-buffer buf)))))
 
 (defun ghub--graphql-handle-failure (req errors headers status)
   (if-let ((errorback (ghub--req-errorback req)))
