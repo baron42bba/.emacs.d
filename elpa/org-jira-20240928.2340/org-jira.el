@@ -9,7 +9,8 @@
 ;;
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/org-jira
-;; Version: 4.3.3
+;; Package-Version: 20240928.2340
+;; Package-Revision: 5f591f5f4abd
 ;; Keywords: ahungry jira org bug tracker
 ;; Package-Requires: ((emacs "24.5") (cl-lib "0.5") (request "0.2.0") (dash "2.14.1"))
 
@@ -37,6 +38,9 @@
 ;; issue servers.
 
 ;;; News:
+
+;;;; Changes in 4.4.2
+;; - Fix for org-insert-subheading behavior change in org 9.7+ in render-issues
 
 ;;;; Changes in 4.4.1
 ;; - Fix tag (4.3.3 was out of order - we had a 4.4.0 on repo)
@@ -136,7 +140,7 @@
 (require 'jiralib)
 (require 'org-jira-sdk)
 
-(defconst org-jira-version "4.3.1"
+(defconst org-jira-version "4.4.2"
   "Current version of org-jira.el.")
 
 (defgroup org-jira nil
@@ -328,6 +332,11 @@ See `org-default-priority' for more info."
   "Set to nil if you don't want to update comments during issue rendering."
   :group 'org-jira
   :type 'boolean)
+
+(defcustom org-jira-update-issue-details-include-reporter t
+  "For Jira Cloud API we will get an error if `reporter' is sent with an update request."
+  :group 'org-jira
+  :type 'string)
 
 (defvar org-jira-serv nil
   "Parameters of the currently selected blog.")
@@ -545,6 +554,7 @@ See `org-default-priority' for more info."
     (define-key org-jira-map (kbd "C-c ih") 'org-jira-get-issues-headonly)
     ;;(define-key org-jira-map (kbd "C-c if") 'org-jira-get-issues-from-filter-headonly)
     ;;(define-key org-jira-map (kbd "C-c iF") 'org-jira-get-issues-from-filter)
+    (define-key org-jira-map (kbd "C-c il") 'org-jira-update-issue-labels)
     (define-key org-jira-map (kbd "C-c iu") 'org-jira-update-issue)
     (define-key org-jira-map (kbd "C-c iw") 'org-jira-progress-issue)
     (define-key org-jira-map (kbd "C-c in") 'org-jira-progress-issue-next)
@@ -1172,6 +1182,7 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                                                      (if (org-goto-first-child)
                                                          (org-insert-heading)
                                                        (goto-char (point-max))
+                                                       (open-line 1)
                                                        (org-insert-subheading t))
                                                      (org-jira-insert entry-heading "\n"))
 
@@ -1681,6 +1692,16 @@ purpose of wiping an old subtree."
   (ensure-on-issue
     (org-jira-get-issues-headonly (jiralib-do-jql-search (format "parent = %s" (org-jira-parse-issue-id))))))
 
+;;;###autoload
+(defun org-jira-update-issue-labels ()
+  "Update jira issue labels."
+  (interactive)
+  (let* ((labels (org-jira-parse-issue-labels))
+         (updated-labels (org-jira-read-labels (format "%s, " labels)))
+         (updated-labels-string (mapconcat 'identity updated-labels ", ")))
+    (org-set-property "labels" updated-labels-string)
+    (org-jira-update-issue)))
+
 (defvar org-jira-project-read-history nil)
 (defvar org-jira-boards-read-history nil)
 (defvar org-jira-sprints-read-history nil)
@@ -1798,6 +1819,7 @@ that should be bound to an issue."
          (jira-users (org-jira-get-assignable-users project))
          (user (completing-read "Assignee: " (mapcar 'car jira-users)))
          (priority (car (rassoc (org-jira-read-priority) (jiralib-get-priorities))))
+         (labels (org-jira-read-labels))
          (ticket-struct
           `((fields
              (project (key . ,project))
@@ -1811,6 +1833,7 @@ that should be bound to an issue."
                                    "")))
              (description . ,description)
              (priority (id . ,priority))
+             (labels . ,labels)
              ;; accountId should be nil if Unassigned, not the key slot.
              (assignee (accountId . ,(or (cdr (assoc user jira-users)) nil)))))))
     ticket-struct))
@@ -1916,6 +1939,15 @@ that should be bound to an issue."
     (or
      (car (rassoc action actions))
      (user-error "You specified an empty action, the valid actions are: %s" (mapcar 'cdr actions)))))
+
+(defun org-jira-read-labels (&optional current-labels)
+  "Pick multiple labels which will be added or updating existing
+CURRENT-LABELS and save with the jira issue."
+  (unless current-labels (setq current-labels nil))
+  (if jiralib-labels-cache
+      (completing-read-multiple "Labels: " jiralib-labels-cache nil nil current-labels)
+    (jiralib-get-labels)
+    (completing-read-multiple "Labels: " jiralib-labels-cache nil nil current-labels)))
 
 (defvar org-jira-fields-history nil)
 (defun org-jira-read-field (fields)
@@ -2213,11 +2245,14 @@ otherwise it should return:
                                                        (jiralib-get-priorities)))
                    (cons 'description org-issue-description)
                    (cons 'assignee (list (cons 'id (jiralib-get-user-account-id project org-issue-assignee))))
-                   (cons 'reporter (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))
                    (cons 'summary (org-jira-strip-priority-tags (org-jira-get-issue-val-from-org 'summary)))
                    (cons 'issuetype `((id . ,org-issue-type-id)
       (name . ,org-issue-type))))))
 
+        (if org-jira-update-issue-details-include-reporter
+            (setq update-fields
+                  (append update-fields
+                          (list (cons 'reporter (list (cons 'id (jiralib-get-user-account-id project org-issue-reporter))))))))
 
         ;; If we enable duedate sync and we have a deadline present
         (when (and org-jira-deadline-duedate-sync-p
@@ -2269,6 +2304,18 @@ otherwise it should return:
         (unless (and continue (org-up-heading-safe))
           (setq continue nil)))
       filename)))
+
+(defun org-jira-parse-issue-labels ()
+  "Get issue labels from org text."
+  (save-excursion
+    (let ((continue t)
+          labels)
+      (while continue
+        (when (setq labels (org-entry-get (point) "labels"))
+          (setq continue nil))
+        (unless (and continue (org-up-heading-safe))
+          (setq continue nil)))
+      labels)))
 
 (defun org-jira-get-from-org (type entry)
   "Get an org property from the current item.
