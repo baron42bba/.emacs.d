@@ -1,4 +1,4 @@
-This is ess.info, produced by makeinfo version 6.7 from ess.texi.
+This is ess.info, produced by makeinfo version 6.8 from ess.texi.
 
 INFO-DIR-SECTION Emacs
 START-INFO-DIR-ENTRY
@@ -14,7 +14,7 @@ File: ess.info,  Node: Top,  Next: Introduction,  Up: (dir)
 ESS: Emacs Speaks Statistics
 ****************************
 
-ESS version 18.10.3snapshot
+ESS version 24.01.1
 
      by  A.J. Rossini,
          R.M. Heiberger,
@@ -249,7 +249,41 @@ File: ess.info,  Node: New features,  Next: Credits,  Prev: Features,  Up: Intro
 1.2 New features in ESS
 =======================
 
-Changes and New Features in 19.04 (unreleased):
+Changes and New Features in 24.12.0:
+
+   * polymode: In our transition from literate libraries (such as noweb
+     documented below with respect to 19.04), we now recommend the
+     polymode packages as a more suitable replacement.  Furthermore, we
+     suggest the related polymodes including poly-noweb, poly-markdown
+     and poly-R. The package polymode itself, as well as the polymodes
+     packages, are all on MELPA rather than ELPA. Therefore, you need to
+     add MELPA to the list of installation archives as follows.
+     '(add-to-list 'package-archives '("melpa-stable" .
+     "https://stable.melpa.org/packages/"))' for 'M-x package-install'
+
+   * ESS[R]: The shorthand notation for lambda functions and the
+     question mark are now fontified as keywords.  Contributed by Maxime
+     Pettinger.
+
+   * ESS[SAS]: Developed new comprehensive lists of PROCs and functions
+     for syntax highlighting.  See 'etc/proc.sas' and 'etc/func.sas'.
+
+   Changes and New Features in 24.01.1:
+
+   * Revert a bug introduced with the 'ess-request-a-process' change
+
+   Changes and New Features in 24.01.0:
+
+   * fix docstring warnings in ess-custom
+
+   * :package-version is now set to "VERSION" in ess-custom.  By make
+     this is replaced with "24.01.0" (or similar).
+
+   * Better "collaboration" with org-mode.  Now 'ess-request-a-process'
+     obeys 'ess-gen-proc-buffer-name-function', thanks to Ihor
+     Radchenko.
+
+   Changes and New Features in 19.04 (unreleased):
 
    * ESS[R]: When a background command is interrupted with C-g, ESS now
      asks the user if they want to disable background evaluations
@@ -511,7 +545,7 @@ documentation for more detail:
    * 'Makefile' fixes, notably for 'make install' and including full
      docs in the tarballs.
 
-   Bug Fixes in 18.10-1:
+   Bug Fixes in 18.10.1:
    * New functions 'ess-eval-line-visibly-and-step' ('C-c C-n' and
      'ess-eval-region-or-line-visibly-and-step' ('C-RET') which behave
      as the old versions of 'ess-eval-line-and-step' and
@@ -4276,7 +4310,7 @@ File: ess.info,  Node: iESS(SAS)--Common problems,  Next: ESS(SAS)--Graphics,  P
 
   1. iESS[SAS] does not work on Windows.  In order to run SAS inside an
      emacs buffer, it is necessary to start SAS with the '-stdio'
-     option. SAS does not support the '-stdio' option on Windows.
+     option.  SAS does not support the '-stdio' option on Windows.
   2. If 'M-x SAS' gives errors upon startup, check the following:
         * you are running Windows: see 1.
         * 'ess-sas-sh-command' (from the ESS 'etc' directory) needs to
@@ -4836,7 +4870,7 @@ Variable index
 * ess-function-template:                 Edit buffer.          (line 17)
 * ess-handy-commands:                    Handy commands.       (line  6)
 * ess-handy-commands <1>:                Handy commands.       (line  9)
-* ess-indent-with-fancy-comments:        Indenting.            (line 27)
+* ess-indent-with-fancy-comments:        Indenting.            (line 28)
 * ess-keep-dump-files:                   Source Files.         (line 26)
 * ess-plain-first-buffername:            Multiple ESS processes.
                                                                (line 14)
@@ -5021,109 +5055,109 @@ Concept Index
 
 Tag Table:
 Node: Top268
-Node: Introduction2914
-Node: Features5668
-Node: Current Features6494
-Node: New features9945
-Node: Credits35243
-Node: Manual38860
-Node: Installation41526
-Node: Installing from a third-party repository42463
-Node: Installing from source43410
-Node: Activating and Loading ESS45002
-Node: Check Installation46076
-Node: Interactive ESS46296
-Node: Starting up47141
-Node: Multiple ESS processes47885
-Node: ESS processes on Remote Computers48966
-Node: Customizing startup53069
-Node: Controlling buffer display55959
-Node: Entering commands58580
-Node: Command-line editing59738
-Node: Transcript60971
-Node: Last command62740
-Node: Process buffer motion64166
-Node: Transcript resubmit65669
-Node: Saving transcripts67634
-Node: Command History69424
-Node: Saving History72833
-Node: History expansion73594
-Node: Hot keys76805
-Node: Statistical Process running in ESS?80875
-Node: Emacsclient82154
-Node: Other82946
-Node: Evaluating code83965
-Node: Transcript Mode87761
-Node: Resubmit88914
-Node: Clean89977
-Node: Editing objects90973
-Node: Edit buffer92091
-Node: Loading94137
-Node: Error Checking95164
-Node: Indenting96213
-Node: Styles99257
-Node: Other edit buffer commands101631
-Node: Source Files103287
-Node: Source Directories107891
-Node: Help111044
-Node: Completion115490
-Node: Object names115705
-Node: Function arguments118339
-Node: Minibuffer completion119282
-Node: Company119756
-Node: Icicles120143
-Node: Developing with ESS121463
-Node: ESS tracebug121909
-Node: Getting started with tracebug124916
-Node: Editing documentation127074
-Node: R documentation files127626
-Node: roxygen2131329
-Node: Namespaced Evaluation135740
-Node: Extras137738
-Node: ESS ElDoc138762
-Node: ESS Flymake140258
-Node: Handy commands141352
-Node: Highlighting142549
-Node: Parens143584
-Node: Graphics144060
-Node: printer144731
-Node: X11145487
-Node: winjava145826
-Node: Imenu146238
-Node: Toolbar147085
-Node: Xref147493
-Node: Rdired147821
-Node: Package listing148884
-Node: Org150268
-Node: Sweave and AUCTeX151222
-Node: ESS for R153774
-Node: ESS(R)--Editing files154074
-Node: iESS(R)--Inferior ESS processes154575
-Node: Philosophies for using ESS(R)157230
-Node: Example ESS usage158157
-Node: ESS for SAS159562
-Node: ESS(SAS)--Design philosophy160285
-Node: ESS(SAS)--Editing files161218
-Node: ESS(SAS)--TAB key163072
-Node: ESS(SAS)--Batch SAS processes164438
-Node: ESS(SAS)--Function keys for batch processing169466
-Node: iESS(SAS)--Interactive SAS processes178953
-Node: iESS(SAS)--Common problems182707
-Node: ESS(SAS)--Graphics184230
-Node: ESS(SAS)--Windows185013
-Node: ESS for BUGS185591
-Node: ESS for JAGS187347
-Node: Mailing lists/bug reports190699
-Node: Bugs190963
-Node: Reporting Bugs192587
-Node: Mailing Lists193480
-Node: Help with Emacs194207
-Node: Customization194739
-Node: Indices195513
-Node: Key index195688
-Node: Function and program index200820
-Node: Variable index210240
-Node: Concept index213801
+Node: Introduction2906
+Node: Features5660
+Node: Current Features6486
+Node: New features9937
+Node: Credits36661
+Node: Manual40278
+Node: Installation42944
+Node: Installing from a third-party repository43881
+Node: Installing from source44828
+Node: Activating and Loading ESS46420
+Node: Check Installation47494
+Node: Interactive ESS47714
+Node: Starting up48559
+Node: Multiple ESS processes49303
+Node: ESS processes on Remote Computers50384
+Node: Customizing startup54487
+Node: Controlling buffer display57377
+Node: Entering commands59998
+Node: Command-line editing61156
+Node: Transcript62389
+Node: Last command64158
+Node: Process buffer motion65584
+Node: Transcript resubmit67087
+Node: Saving transcripts69052
+Node: Command History70842
+Node: Saving History74251
+Node: History expansion75012
+Node: Hot keys78223
+Node: Statistical Process running in ESS?82293
+Node: Emacsclient83572
+Node: Other84364
+Node: Evaluating code85383
+Node: Transcript Mode89179
+Node: Resubmit90332
+Node: Clean91395
+Node: Editing objects92391
+Node: Edit buffer93509
+Node: Loading95555
+Node: Error Checking96582
+Node: Indenting97631
+Node: Styles100675
+Node: Other edit buffer commands103049
+Node: Source Files104705
+Node: Source Directories109309
+Node: Help112462
+Node: Completion116908
+Node: Object names117123
+Node: Function arguments119757
+Node: Minibuffer completion120700
+Node: Company121174
+Node: Icicles121561
+Node: Developing with ESS122881
+Node: ESS tracebug123327
+Node: Getting started with tracebug126334
+Node: Editing documentation128492
+Node: R documentation files129044
+Node: roxygen2132747
+Node: Namespaced Evaluation137158
+Node: Extras139156
+Node: ESS ElDoc140180
+Node: ESS Flymake141676
+Node: Handy commands142770
+Node: Highlighting143967
+Node: Parens145002
+Node: Graphics145478
+Node: printer146149
+Node: X11146905
+Node: winjava147244
+Node: Imenu147656
+Node: Toolbar148503
+Node: Xref148911
+Node: Rdired149239
+Node: Package listing150302
+Node: Org151686
+Node: Sweave and AUCTeX152640
+Node: ESS for R155192
+Node: ESS(R)--Editing files155492
+Node: iESS(R)--Inferior ESS processes155993
+Node: Philosophies for using ESS(R)158648
+Node: Example ESS usage159575
+Node: ESS for SAS160980
+Node: ESS(SAS)--Design philosophy161703
+Node: ESS(SAS)--Editing files162636
+Node: ESS(SAS)--TAB key164490
+Node: ESS(SAS)--Batch SAS processes165856
+Node: ESS(SAS)--Function keys for batch processing170884
+Node: iESS(SAS)--Interactive SAS processes180371
+Node: iESS(SAS)--Common problems184125
+Node: ESS(SAS)--Graphics185649
+Node: ESS(SAS)--Windows186432
+Node: ESS for BUGS187010
+Node: ESS for JAGS188766
+Node: Mailing lists/bug reports192118
+Node: Bugs192382
+Node: Reporting Bugs194006
+Node: Mailing Lists194899
+Node: Help with Emacs195626
+Node: Customization196158
+Node: Indices196932
+Node: Key index197107
+Node: Function and program index202239
+Node: Variable index211659
+Node: Concept index215220
 
 End Tag Table
 

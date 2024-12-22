@@ -1,6 +1,6 @@
 ;;; ess-custom.el --- Customize variables for ESS  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 1997-2020 Free Software Foundation, Inc.
+;; Copyright (C) 1997-2024 Free Software Foundation, Inc.
 
 ;; Author: Rodney Sparapani
 ;; Maintainer: ESS-help <ess-help@r-project.org>
@@ -141,7 +141,7 @@
   "Directory containing ess-site.el(c) and other ESS Lisp files."
   :group 'ess
   :type 'directory
-  :package-version '(ess . "19.04"))
+  :package-version '(ess . "24.01.1"))
 
 (defcustom ess-etc-directory
   ;; Try to detect the `etc' folder only if not already set up by distribution
@@ -156,7 +156,7 @@ The ESS etc directory stores various auxiliary files that are useful
 for ESS, such as icons."
   :group 'ess
   :type 'directory
-  :package-version '(ess . "19.04"))
+  :package-version '(ess . "24.01.1"))
 
 ;; Depending on how ESS is loaded the `load-path' might not contain
 ;; the `lisp' directory. For this reason we need to add it before we
@@ -192,7 +192,7 @@ See `ess-auto-width'. Be warned that ESS can set the width a
 lot."
   :group 'ess
   :type 'boolean
-  :package-version '(ess . "19.04"))
+  :package-version '(ess . "24.01.1"))
 
 (defcustom ess-auto-width nil
   "When non-nil, set the width option when the window configuration changes.
@@ -206,7 +206,7 @@ window's width minus that number. Anything else is treated as
                  (const :tag "Frame width" :value frame)
                  (const :tag "Window width" :value window)
                  (integer :tag "Integer value"))
-  :package-version '(ess . "19.04"))
+  :package-version '(ess . "24.01.1"))
 
 (defcustom ess-handy-commands '(("change-directory"     . ess-change-directory)
                                 ("install.packages"     . ess-install-library)
@@ -329,7 +329,7 @@ process. If a symbol, the symbol's value should be a directory.
 For example, the following setting would always start the process
 in the directory of the current file:
 
-   (setq ess-startup-directory 'default-directory)
+   (setq ess-startup-directory ''default-directory)
 
 If `ess-startup-directory' is nil (the default) and
 `ess-startup-directory-function' is non-nil, the value returned
@@ -380,7 +380,7 @@ processes buffers are always numbered (e.g. R:2:foo."
   'ess-use-inferior-program-name-in-buffer-name
   'ess-use-inferior-program-in-buffer-name "ESS 18.10")
 (defcustom ess-use-inferior-program-in-buffer-name nil
-  "For R, use e.g., 'R-2.1.0' or 'R-devel' (the program name) for buffer name.
+  "For R, use e.g., `R-2.1.0' or `R-devel' (the program name) for buffer name.
 Avoids the plain dialect name."
   :group 'ess
   :type 'boolean)
@@ -478,7 +478,7 @@ If \\='process, only check if the buffer has an inferior process."
   :type '(choice (const :tag "Always" t)
                  (const :tag "With running inferior process" process)
                  (const :tag "Never" nil))
-  :package-version '(ess . "18.10"))
+  :package-version '(ess . "24.01.1"))
 
 (defcustom ess-use-auto-complete t
   "If non-nil, activate auto-complete support.
@@ -562,7 +562,7 @@ contain spaces on either side."
   ;; them.
   :type '(repeat string)
   :group 'ess
-  :package-version '(ess "18.10"))
+  :package-version '(ess . "24.01.1"))
 (defvar ess-S-assign)
 (make-obsolete-variable 'ess-S-assign 'ess-assign-list "ESS 18.10")
 
@@ -584,7 +584,7 @@ This gets appended to `prettify-symbols-alist', so set it to nil
 if you want to disable R specific prettification."
   :group 'ess-R
   :type '(alist :key-type string :value-type symbol)
-  :package-version '(ess . "18.10"))
+  :package-version '(ess . "24.01.1"))
 
 ;;*;; Variables concerning editing behavior
 
@@ -751,7 +751,7 @@ is non-nil. Affects `ess-save-file'."
                  (const :tag "Use compilation-ask-about-save and auto-save-visited-mode."
                         :value auto)
                  (const :tag "Save without asking." :value t))
-  :package-version '(ess . "19.04"))
+  :package-version '(ess . "24.01.1"))
 
 ;;*;; Variables controlling editing
 
@@ -1317,7 +1317,7 @@ the same KEY before adding the new one."
 
 (defcustom ess-own-style-list (cdr (assoc 'RRR ess-style-alist))
   "Indentation variables for your own style.
-Set `ess-style' to 'OWN to use these values. To change
+Set `ess-style' to \='OWN to use these values. To change
 these values, use the customize interface. See the documentation
 of each variable for its meaning."
   :group 'ess-edit
@@ -1371,7 +1371,7 @@ This always dumps to a sub-directory (\".Src\") of the current ess
 working directory (i.e. first elt of search list)."
   :group 'ess-edit
   :type 'directory
-  :package-version '(ess . "18.10"))
+  :package-version '(ess . "24.01.1"))
 
 (defvar ess-dump-filename-template nil
   "Internal. Initialized by dialects.")
@@ -1404,7 +1404,7 @@ Currently this should not be used to interact with the inferior
 process because this hook runs too early, before the inferior
 mode had a chance to properly start up the process. To interact
 with the process, you must use a mode-specific hook like
-'ess-r-post-run-hook'."
+`ess-r-post-run-hook'."
   :group 'ess-hooks
   :type 'hook)
 
@@ -1427,19 +1427,21 @@ Used to decide highlighting and tag completion."
   :type '(repeat string))
 
 (defcustom ess-roxy-tags-param '("author" "aliases" "concept" "details"
-                                 "examples" "format" "keywords"
+                                 "example" "examples" "examplesIf"
+                                 "format" "keywords"
                                  "method" "exportMethod"
                                  "name" "note" "param"
-                                 "include" "references" "return"
+                                 "include" "references" "return" "returns"
                                  "seealso" "source" "docType"
                                  "title" "TODO" "usage" "import"
-                                 "exportClass" "exportPattern" "S3method"
+                                 "exportClass" "exportPattern"
+                                 "exportS3Method" "S3method"
                                  "inherit" "inheritParams" "inheritSection"
                                  "importFrom" "importClassesFrom"
                                  "importMethodsFrom" "useDynLib"
                                  "rawNamespace"
                                  "rdname" "section" "slot" "description"
-                                 "md" "eval" "family")
+                                 "md" "eval" "evalNamespace" "family")
   "The tags used in roxygen fields that require a parameter.
 Used to decide highlighting and tag completion."
   :group 'ess-roxy
@@ -1531,7 +1533,7 @@ there is no project root in the current directory."
                  (const :tag "*proc:project-root* or *proc*"     ess-gen-proc-buffer-name:project-or-simple)
                  (const :tag "*proc:project-root* or *proc:dir*" ess-gen-proc-buffer-name:project-or-directory)
                  function)
-  :package-version '(ess . "19.04"))
+  :package-version '(ess . "24.01.1"))
 
 
 (defcustom ess-kermit-command "gkermit -T"
@@ -1858,7 +1860,7 @@ This variable also affect the evaluation of input code in
 iESS. The effect is similar to the above. If t then ess waits for
 the process output, otherwise not."
   :group 'ess-proc
-  :package-version '(ess . "19.04")
+  :package-version '(ess . "24.01.1")
   :type '(choice (const t) (const nowait) (const nil)))
 
 (defcustom ess-eval-deactivate-mark (fboundp 'deactivate-mark); was nil till 2010-03-22
@@ -2052,6 +2054,15 @@ See also function `ess-create-object-name-db'.")
     "recover" "browser")
   "Reserved words or special functions in the R language.")
 
+(defvar ess-r--keystrings
+  '("\\" "\?")
+  "Reserved non-word strings or special functions whose names
+include special characters in the R language.
+
+Similar font-locking usage as `ess-R-keywords', but dedicated to
+strings that should not be treated as `words’ by `regexp-opt' in
+`ess-r--find-fl-keyword'.")
+
 (defvar ess-S-keywords
   (append ess-R-keywords '("terminate")))
 
@@ -2088,7 +2099,8 @@ See also function `ess-create-object-name-db'.")
 (defvar ess-R-function-name-regexp
   (concat "\\("      "\\sw+" "\\)"
           "[ \t]*"   "\\(<-\\)"
-          "[ \t\n]*" "function\\b"))
+          "[ \t\n]*" "\\(function\\b\\|\\(\\\\[ \t\n(]+\\)\\)"))
+;; "[ \t\n(]+" after "\\\\" since cannot use "\\b" to bound a non-word
 
 (defvar ess-S-function-name-regexp
   ess-R-function-name-regexp)
@@ -2317,7 +2329,7 @@ This defaults to `default-frame-alist' and is used only when
 the variable `ess-help-own-frame' is non-nil."
   :group 'ess-help
   :type 'alist
-  :package-version '(ess . "18.10"))
+  :package-version '(ess . "24.01.1"))
 
  ; Faces
 ;;;=====================================================
@@ -2463,7 +2475,7 @@ Created for each process."
 See also `ess-verbose'."
   :group 'ess-proc
   :type 'boolean
-  :package-version '(ess . "18.10"))
+  :package-version '(ess . "24.01.1"))
 
 (defcustom ess-verbose nil
   "Non-nil means write more information to `ess-dribble-buffer' than usual."

@@ -1,6 +1,6 @@
 ;; ess-rd.el --- Support for editing R documentation (Rd) source  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 1997-2022 Free Software Foundation, Inc.
+;; Copyright (C) 1997-2023 Free Software Foundation, Inc.
 ;; Author: KH <Kurt.Hornik@ci.tuwien.ac.at>
 ;; Created: 25 July 1997
 ;; Maintainer: ESS-core <ESS-core@r-project.org>
@@ -129,8 +129,9 @@ All Rd mode abbrevs start with a grave accent (`)."
     ;; "Alpha" "Gamma" "alpha" "beta" "epsilon" "lambda" "mu" "pi" "sigma"
     ;; "ge" "le" "left" "right"
     ;;
-    "RdOpts" "R" "S3method" "S4method" "Sexpr" "acronym"
-    "bold" "cite" "code" "command" "cr" "dQuote" "deqn" "dfn" "dontrun"
+    "RdOpts" "R" "S3method" "S4method" "Sexpr"
+    "abbr" "acronym"
+    "bold" "cite" "code" "command" "cr" "dQuote" "deqn" "dfn" "dontdiff" "dontrun"
     "dontshow" "donttest" "dots" "email" "emph" "enc" "env" "eqn" "figure" "file"
     "href"
     "ifelse" "if"
@@ -152,7 +153,7 @@ All Rd mode abbrevs start with a grave accent (`)."
     (concat "\\\\\\("
             (mapconcat #'identity Rd-section-names "\\|")
             "\\>\\)")
-    'font-lock-reference-face) ; Rd-bold-face
+    'font-lock-constant-face) ; Rd-bold-face
    (cons
     (concat "\\\\\\("
             (mapconcat #'identity Rd-keywords "\\|")
