@@ -1,13 +1,14 @@
-;;; popup.el --- Visual Popup User Interface
+;;; popup.el --- Visual Popup User Interface  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2015  Tomohiro Matsuyama
-;; Copyright (c) 2020-2023 Jen-Chieh Shen
+;; Copyright (c) 2020-2024 Jen-Chieh Shen
 
 ;; Author: Tomohiro Matsuyama <m2ym.pub@gmail.com>
 ;; Maintainer: Shen, Jen-Chieh <jcs090218@gmail.com>
 ;; URL: https://github.com/auto-complete/popup-el
 ;; Keywords: lisp
-;; Version: 0.5.9
+;; Package-Version: 20240101.830
+;; Package-Revision: 6fa7c440879a
 ;; Package-Requires: ((emacs "24.3"))
 
 ;; This program is free software; you can redistribute it and/or modify
