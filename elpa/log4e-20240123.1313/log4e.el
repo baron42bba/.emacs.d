@@ -4,10 +4,9 @@
 
 ;; Author: Hiroaki Otsu <ootsuhiroaki@gmail.com>
 ;; Keywords: log
-;; Package-Version: 20211019.948
-;; Package-Commit: 737d275eac28dbdfb0b26d28e99da148bfce9d16
 ;; URL: https://github.com/aki2o/log4e
-;; Version: 0.3.3
+;; Package-Version: 20240123.1313
+;; Package-Revision: 6d71462df9bf
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,52 +22,16 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
-;; This extension provides logging framework for elisp.
-
-;;; Dependency:
-;; 
-;; Nothing.
-
-;;; Installation:
 ;;
-;; Put this to your load-path.
-;; And put the following lines in your elisp file.
-;; 
-;; (require 'log4e)
-
-;;; Configuration:
-;; 
-;; See <https://github.com/aki2o/log4e/blob/master/README.md>
-;; Otherwise, eval following sexp.
-;; (describe-function 'log4e:deflogger)
-
-;;; API:
-;; 
-;; [EVAL] (autodoc-document-lisp-buffer :type 'command :prefix "log4e:" :docstring t)
-;; `log4e:next-log'
-;; Move to start of next log on log4e-mode.
-;; `log4e:previous-log'
-;; Move to start of previous log on log4e-mode.
-;; `log4e:insert-start-log-quickly'
-;; Insert logging statment for trace level log at start of current function/macro.
-;; 
-;;  *** END auto-documentation
-;; 
+;; This extension provides logging framework for elisp.
+;;
 ;; For detail, see <https://github.com/aki2o/log4e/blob/master/README.md>
-;; 
-;; [Note] Other than listed above, Those specifications may be changed without notice.
-
-;;; Tested On:
-;; 
-;; - Emacs ... GNU Emacs 23.3.1 (i386-mingw-nt5.1.2600) of 2011-08-15 on GNUPACK
-
-
+;;
 ;; Enjoy!!!
 
-
 ;;; Code:
-(eval-when-compile (require 'cl-lib))
+
+(require 'cl-lib)
 (require 'rx)
 
 
@@ -124,17 +87,19 @@
          ,(format "Do logging for %s level log.
 %sMSG/MSGARGS are passed to `format'."
                   (if suffix level "any")
-                  (if suffix "" "LEVEL is symbol as a log level in '(trace debug info warn error fatal).\n"))
+                  (if suffix "" "LEVEL is symbol that is one of trace debug info warn error fatal.\n"))
          (let ((log4e--current-msg-buffer ,msgbuff))
-           (apply 'log4e--logging ,buff ,codsys ,logtmpl ,timetmpl ,minlvl ,maxlvl ,logging-p ,(if suffix level 'level) msg msgargs)))
-       
+           ,(if suffix
+                `(apply 'log4e--logging ,buff ,codsys ,logtmpl ,timetmpl ,minlvl ,maxlvl ,logging-p ',level msg msgargs)
+              `(apply 'log4e--logging ,buff ,codsys ,logtmpl ,timetmpl ,minlvl ,maxlvl ,logging-p level msg msgargs))))
+
        ;; Define logging macro
        (defmacro ,(intern (concat prefix "--" (or suffix "log") "*")) ,argform
          ,(format "Do logging for %s level log.
 %sMSG/MSGARGS are passed to `format'.
 Evaluation of MSGARGS is invoked only if %s level log should be printed."
                   (if suffix level "any")
-                  (if suffix "" "LEVEL is symbol as a log level in '(trace debug info warn error fatal).\n")
+                  (if suffix "" "LEVEL is symbol that is one of trace debug info warn error fatal.\n")
                   (if suffix level "the"))
          (let (,@(if suffix (list `(level ',level)) '())
                (buff (log4e--make-symbol-log-buffer ,prefix))
@@ -147,8 +112,8 @@ Evaluation of MSGARGS is invoked only if %s level log should be printed."
                (logging-p (log4e--make-symbol-toggle-logging ,prefix)))
            `(let ((log4e--current-msg-buffer ,msgbuff))
               (when (and ,logging-p
-                         (log4e--logging-level-p ,minlvl ,maxlvl ,level))
-                (log4e--logging ,buff ,codsys ,logtmpl ,timetmpl ,minlvl ,maxlvl ,logging-p ,level ,msg ,@msgargs)))))
+                         (log4e--logging-level-p ,minlvl ,maxlvl ',level))
+                (log4e--logging ,buff ,codsys ,logtmpl ,timetmpl ,minlvl ,maxlvl ,logging-p ',level ,msg ,@msgargs)))))
        
        )))
 
@@ -274,8 +239,8 @@ Evaluation of MSGARGS is invoked only if %s level log should be printed."
   "Define the functions of logging for your elisp.
 
 Specification:
- After eval this, you can use the functions for supporting about logging. They are the following ...
- - do logging for each log level. Log level are trace, debug, info, warn, error and fatal.
+ The following features are provided by evaluating this.
+ - do logging for each log level.
  - set max and min log level.
  - switch logging.
  - switch debugging.
@@ -285,11 +250,11 @@ Specification:
 
 Argument:
  - PREFIX is string as your elisp prefix.
- - MSGTMPL is string as format of log. The following words has a special meaning.
-   - %t ... Replaced with time string. About it, see TIMETMPL argument.
-   - %l ... Replaced with log level. They are 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'.
-   - %m ... Replaced with log message that passed by you.
- - TIMETMPL is string as format of time. This value is passed to `format-time-string'.
+ - MSGTMPL is string as format of log.
+   - %t : Replaced with time string. About it, see TIMETMPL argument.
+   - %l : Replaced with log level that's TRACE, DEBUG, INFO, WARN, ERROR, FATAL.
+   - %m : Replaced with log message that passed by you.
+ - TIMETMPL is string as format of time that's passed to `format-time-string'.
  - LOG-FUNCTION-NAME-CUSTOM-ALIST is alist as the function name of logging.
    - If this value is nil, define the following functions.
       yourprefix--log-trace
@@ -297,7 +262,7 @@ Argument:
       ...
       yourprefix--log-fatal
    - If you want to custom the name of them, give like the following value.
-      '((fatal . \"fatal\")
+      \\='((fatal . \"fatal\")
         (error . \"error\")
         (warn  . \"warn\")
         (info  . \"info\")
@@ -343,9 +308,10 @@ Functions:
  #3 : This is command
 
 Example:
-;; If you develop elisp that has prefix \"hoge\", write and eval the following sexp in your elisp file.
+;; If you develop elisp that has prefix \"hoge\",
+;; write and eval the following sexp in your elisp file.
 
- (require 'log4e)
+ (require \\='log4e)
  (log4e:deflogger \"hoge\" \"%t [%l] %m\" \"%H:%M:%S\")
 
 ;; Eval the following
@@ -355,27 +321,27 @@ Example:
 
  (defun hoge-do-hoge (hoge)
    (if (not (stringp hoge))
-       (hoge--log-fatal \"failed do hoge : hoge is '%s'\" hoge)
-     (hoge--log-debug \"start do hoge about '%s'\" hoge)
+       (hoge--log-fatal \"failed do hoge : hoge is %s\" hoge)
+     (hoge--log-debug \"start do hoge about %s\" hoge)
      (message \"hoge!\")
-     (hoge--log-info \"done hoge about '%s'\" hoge)))
+     (hoge--log-info \"done hoge about %s\" hoge)))
 
 ;; Eval the following
  (hoge-do-hoge \"HOGEGE\")
 
 ;; Do M-x hoge--log-open-log
 ;; Open the buffer which name is \" *log4e-hoge*\". The buffer string is below
-12:34:56 [INFO ] done hoge about 'HOGEGE'
+12:34:56 [INFO ] done hoge about HOGEGE
 
 ;; Eval the following
- (hoge--log-set-level 'trace)
+ (hoge--log-set-level \\='trace)
  (hoge-do-hoge \"FUGAGA\")
 
 ;; Do M-x hoge--log-open-log
 ;; Open the buffer. its string is below
-12:34:56 [INFO ] done hoge about 'HOGEGE'
-12:35:43 [DEBUG] start do hoge about 'FUGAGA'
-12:35:43 [INFO ] done hoge about 'FUGAGA'
+12:34:56 [INFO ] done hoge about HOGEGE
+12:35:43 [DEBUG] start do hoge about FUGAGA
+12:35:43 [INFO ] done hoge about FUGAGA
  
 "
   (declare (indent 0))
@@ -421,8 +387,8 @@ Example:
          (defun ,(intern (concat prefix "--log-set-level")) (minlevel &optional maxlevel)
            "Set range for doing logging.
 
-MINLEVEL is symbol of lowest level for doing logging. its default is 'info.
-MAXLEVEL is symbol of highest level for doing logging. its default is 'fatal."
+MINLEVEL is symbol of lowest level for doing logging. its default is \\='info.
+MAXLEVEL is symbol of highest level for doing logging. its default is \\='fatal."
            (setq ,minlvlsym minlevel)
            (setq ,maxlvlsym maxlevel))
 
@@ -505,12 +471,12 @@ LOG-BUFFER is a buffer which name is \" *log4e-PREFIX*\"."
 
          ;; Define each level logging function
          (log4e--def-level-logger ,prefix nil nil)
-         (log4e--def-level-logger ,prefix ,(assoc-default 'fatal funcnm-alist) 'fatal)
-         (log4e--def-level-logger ,prefix ,(assoc-default 'error funcnm-alist) 'error)
-         (log4e--def-level-logger ,prefix ,(assoc-default 'warn  funcnm-alist) 'warn)
-         (log4e--def-level-logger ,prefix ,(assoc-default 'info  funcnm-alist) 'info)
-         (log4e--def-level-logger ,prefix ,(assoc-default 'debug funcnm-alist) 'debug)
-         (log4e--def-level-logger ,prefix ,(assoc-default 'trace funcnm-alist) 'trace)
+         (log4e--def-level-logger ,prefix ,(assoc-default 'fatal funcnm-alist) fatal)
+         (log4e--def-level-logger ,prefix ,(assoc-default 'error funcnm-alist) error)
+         (log4e--def-level-logger ,prefix ,(assoc-default 'warn  funcnm-alist) warn)
+         (log4e--def-level-logger ,prefix ,(assoc-default 'info  funcnm-alist) info)
+         (log4e--def-level-logger ,prefix ,(assoc-default 'debug funcnm-alist) debug)
+         (log4e--def-level-logger ,prefix ,(assoc-default 'trace funcnm-alist) trace)
          
          ))))
 
