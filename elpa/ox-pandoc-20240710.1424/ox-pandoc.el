@@ -9,7 +9,8 @@
 ;;         FENTON, Alex <a-fent@github>
 ;; Maintainer: FENTON, Alex <a-fent@github>
 ;; Created: 2014-07-20
-;; Version: 2.0
+;; Package-Version: 20240710.1424
+;; Package-Revision: 34e6ea97b586
 ;; Package-Requires: ((org "8.2") (emacs "24.4") (dash "2.8") (ht "2.0"))
 ;; Keywords: tools
 ;; URL: https://github.com/a-fent/ox-pandoc
@@ -98,6 +99,13 @@
 ;; not, as in other exporters, normalised to "NAME"
 (defconst org-pandoc-element-keyword-translation-alist
 	  (--remove (equal "LABEL" (car it) ) org-element-keyword-translation-alist))
+
+(defcustom org-pandoc-with-cite-processors t
+  "Non-nil means use built-in Org citation exporter.
+The default is different from `org-org-with-cite-processors' to
+maintain backwards compatibility."
+  :group 'org-pandoc
+  :type 'boolean)
 
 (defcustom org-pandoc-options '((standalone . t)) ;; (mathjax . t) (parse-raw . t)
   "Pandoc options."
@@ -220,6 +228,11 @@ version. If nil, no checks are performed and no warnings generated."
     ;;(?t "to texinfo." org-pandoc-export-to-texinfo)
     ;;(?t "to texinfo and open." org-pandoc-export-to-texinfo-and-open)
     ;;(?T "as texinfo." org-pandoc-export-as-texinfo)
+	;; (?, "to typst." org-pandoc-export-to-typst)
+    ;; (?, "to typst and open." org-pandoc-export-to-typst-and-open)
+    ;; (?, "as typst." org-pandoc-export-as-typst)
+    ;; (?< "to typst-pdf." org-pandoc-export-to-typst-pdf)
+    ;; (?< "to typst-pdf and open." org-pandoc-export-to-typst-pdf-and-open)
     ;;(?u "to dokuwiki." org-pandoc-export-to-dokuwiki)
     ;; (?u "to dokuwiki and open." org-pandoc-export-to-dokuwiki-and-open)
     ;; (?U "as dokuwiki." org-pandoc-export-as-dokuwiki)
@@ -277,7 +290,8 @@ version. If nil, no checks are performed and no warnings generated."
     (:epub-meta "EPUB_META" nil nil newline)
     (:epub-css "EPUB_CSS" nil nil newline)
     (:epub-rights "EPUB_RIGHTS" nil nil newline)
-    (:bibliography "BIBLIOGRAPHY")))
+    (:bibliography "BIBLIOGRAPHY")
+    (:with-cite-processors nil nil org-pandoc-with-cite-processors)))
 
 (defcustom org-pandoc-epub-rights
   (concat "Copyright " (format-time-string "%Y")
@@ -1434,6 +1448,46 @@ version. If nil, no checks are performed and no warnings generated."
   "Export as textile."
   (interactive) (org-pandoc-export 'textile a s v b e t))
 
+(defcustom org-pandoc-after-processing-typst-hook nil
+  "Hook called after processing typst."
+  :group 'org-pandoc
+  :type 'hook)
+
+(defcustom org-pandoc-options-for-typst nil
+  "Pandoc options for typst."
+  :group 'org-pandoc
+  :type org-pandoc-option-type)
+
+(defcustom org-pandoc-options-for-typst-pdf nil
+  "Pandoc options for typst-pdf."
+  :group 'org-pandoc
+  :type org-pandoc-option-type)
+
+;;;###autoload
+(defun org-pandoc-export-to-typst (&optional a s v b e)
+  "Export to typst."
+  (interactive) (org-pandoc-export 'typst a s v b e))
+
+;;;###autoload
+(defun org-pandoc-export-to-typst-and-open (&optional a s v b e)
+  "Export to typst and open."
+  (interactive) (org-pandoc-export 'typst a s v b e 0))
+
+;;;###autoload
+(defun org-pandoc-export-as-typst (&optional a s v b e)
+  "Export as typst."
+  (interactive) (org-pandoc-export 'typst a s v b e t))
+
+;;;###autoload
+(defun org-pandoc-export-to-typst-pdf (&optional a s v b e)
+  "Export to typst-pdf."
+  (interactive) (org-pandoc-export 'typst-pdf a s v b e))
+
+;;;###autoload
+(defun org-pandoc-export-to-typst-pdf-and-open (&optional a s v b e)
+  "Export to typst-pdf and open."
+  (interactive) (org-pandoc-export 'typst-pdf a s v b e 0))
+
 (defcustom org-pandoc-options-for-zimwiki nil
   "Pandoc options for zimwiki."
   :group 'org-pandoc
@@ -1468,19 +1522,22 @@ version. If nil, no checks are performed and no warnings generated."
 (defvar org-pandoc-epub-meta nil)
 (defvar org-pandoc-epub-css nil)
 
-(defun org-pandoc-export (format a s v b e &optional buf-or-open)
+(defun org-pandoc-export (format _a s v b e &optional buf-or-open)
   "General interface for Pandoc Export.
 If BUF-OR-OPEN is nil, output to file.  0, then open the file.
-t means output to buffer."
+t means output to buffer.
+FORMAT is an output format supported by Pandoc or FORMAT-pdf, to
+further export to pdf, after converting to FORMAT."
   (unless (derived-mode-p 'org-mode)
     (error "This command must be run on an org-mode buffer"))
   (unless (executable-find org-pandoc-command)
     (error "Pandoc (version 1.12.4 or later) can not be found"))
   (setq org-pandoc-format format)
   (let ((org-element-keyword-translation-alist org-pandoc-element-keyword-translation-alist))
-	(org-export-to-file 'pandoc (org-export-output-file-name
-									  (concat (make-temp-name ".tmp") ".org") s)
-		   a s v b e (lambda (f) (org-pandoc-run-to-buffer-or-file f format s buf-or-open)))))
+    (org-export-to-file 'pandoc (org-export-output-file-name
+				 (concat (make-temp-name ".tmp") ".org") s)
+      nil ;; Org mode's native async processing is explicitly disabled because we arrange pandoc running asynchronously all the time.
+      s v b e (lambda (f) (org-pandoc-run-to-buffer-or-file f format s buf-or-open)))))
 
 (defun org-pandoc--has-caption-p (element _info)
   "Non-nil when ELEMENT has a caption affiliated keyword.
@@ -1585,10 +1642,10 @@ INFO is a plist holding contextual information."
 (defun org-pandoc-link (link contents info)
   "Transcode a LINK object.
 
-The registered formatter for the 'pandoc backend is used. If none
-exists, transcode using the registered formatter for the 'org
-export backend. For fuzzy (internal) links, resolve the link
-destination in order to determine the appropriate reference
+The registered formatter for the \\='pandoc backend is used. If
+none exists, transcode using the registered formatter for the
+\\='org export backend. For fuzzy (internal) links, resolve the
+link destination in order to determine the appropriate reference
 number of the target Table/Figure/Equation etc. CONTENTS is the
 description of the link, as a string, or nil. INFO is a plist
 holding contextual information."
@@ -1656,7 +1713,7 @@ holding contextual information."
      ;; Otherwise, fallback to standard org-mode link format
      ((org-element-link-interpreter link contents)))))
 
-(defun org-pandoc-table (table contents info)
+(defun org-pandoc-table (table contents _info)
   "Transcode a TABLE element from Org to Pandoc.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
@@ -1725,7 +1782,7 @@ Option table is created in this stage."
         (funcall org-template contents info)
     contents)))
 
-(defun org-pandoc-paragraph (paragraph contents info)
+(defun org-pandoc-paragraph (paragraph contents _info)
   "Transcode a PARAGRAPH element from Org to Pandoc.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
@@ -1733,7 +1790,7 @@ the plist used as a communication channel."
   ;; preserves #+ATTR_* tags in the output.
   (org-export-expand paragraph contents t))
 
-(defun org-pandoc-src-block (src-block contents info)
+(defun org-pandoc-src-block (src-block contents _info)
   "Transcode a SRC-BLOCK element from Org to Pandoc.
 CONTENTS is the contents of the table. INFO is a plist holding
 contextual information."
@@ -1753,9 +1810,10 @@ holding contextual information."
 
 (defun org-pandoc-export-snippet (export-snippet contents info)
   "Transcode a @@format:snippet@@ from Org to Pandoc.
+
 If it is an output format, such as latex or html, the snippet is
 duplicated in full for pandoc to handle as Org's own exporters
-would. If the snippet specifies 'pandoc' as the format, the inner
+would. If the snippet specifies `pandoc' as the format, the inner
 content of the snippet is passed to pandoc. CONTENTS is the
 contents of the block. INFO is a plist holding contextual
 information."
