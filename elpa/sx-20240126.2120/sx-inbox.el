@@ -170,7 +170,7 @@ is an alist containing the elements:
        'face (if .is_unread 'sx-inbox-item-type-unread 'sx-inbox-item-type))
       (list
        (concat (sx-time-since .creation_date)
-               sx-question-list-ago-string)
+               sx-question-list-ago-string "\n")
        'face 'sx-question-list-date)
       (list
        (propertize " " 'display
@@ -207,7 +207,8 @@ With prefix NOTIFICATIONS, list notifications instead of inbox."
       (pop-to-buffer sx-inbox--buffer)
       (enlarge-window
        (- (+ fill-column 4) (window-width))
-       'horizontal))))
+       'horizontal)
+      (set-window-dedicated-p w t))))
 
 ;;;###autoload
 (defun sx-inbox-notifications ()

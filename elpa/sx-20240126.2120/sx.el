@@ -4,7 +4,8 @@
 
 ;; Author: Sean Allred <code@seanallred.com>
 ;; URL: https://github.com/vermiculus/sx.el/
-;; Version: 0.3
+;; Package-Version: 20240126.2120
+;; Package-Revision: 8c1c28f33d71
 ;; Keywords: help, hypermedia, tools
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5") (json "1.3") (markdown-mode "2.0") (let-alist "1.0.3"))
 
