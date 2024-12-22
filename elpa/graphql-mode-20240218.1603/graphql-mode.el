@@ -4,11 +4,10 @@
 
 ;; Author: David Vazquez Pua <davazp@gmail.com>
 ;; Keywords: languages
-;; Package-Version: 20230411.1943
-;; Package-Commit: 0ad4ae0160cabad46109dfbb394297a185eb2525
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "25.1"))
 ;; Homepage: https://github.com/davazp/graphql-mode
-;; Version: 1.0.0
+;; Package-Version: 20240218.1603
+;; Package-Revision: 2183895ea793
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -75,7 +74,7 @@
 (defcustom graphql-extra-headers '()
   "Headers to send to the graphql endpoint."
   :tag "GraphQL"
-  :type 'list
+  :type '(repeat sexp)
   :group 'graphql)
 
 (defun graphql-locate-config (dir)
@@ -227,11 +226,15 @@ Please install it and try again."))
             (define-key map (kbd "q") 'quit-window)
             map))
 
-(defun graphql-send-query ()
-  "Send the current GraphQL query/mutation/subscription to server."
-  (interactive)
-  (let* ((url (or graphql-url (read-string "GraphQL URL: " )))
-         (var (or graphql-variables-file (read-file-name "GraphQL Variables: "))))
+(defun graphql-send-query (&optional prompt)
+  "Send the current GraphQL query/mutation/subscription to server.
+With \\[universal-argument] PROMPT, prompt for
+`graphql-url'/`graphql-variables-file'."
+  (interactive "P")
+  (let* ((url (or (and (not prompt) graphql-url)
+                  (read-string "GraphQL URL: " graphql-url)))
+         (var (or (and (not prompt) graphql-variables-file)
+                  (read-file-name "GraphQL Variables: " nil graphql-variables-file))))
     (let ((graphql-url url)
           (graphql-variables-file var))
 
@@ -320,7 +323,7 @@ Please install it and try again."))
       (setq column (current-column)))
 
     (save-excursion
-      (let ((level (car (syntax-ppss (point-at-bol)))))
+      (let ((level (car (syntax-ppss (line-beginning-position)))))
 
         ;; Handle closing pairs
         (when (looking-at "\\s-*\\s)")
@@ -439,7 +442,7 @@ Open a buffer to edit `graphql-extra-headers'.  The contents of this
 buffer take precedence over the setting in `graphql-extra-headers'
 when sending a request."
   (interactive)
-  (unless (equal major-mode 'graphql-mode)
+  (unless (memq major-mode '(graphql-mode graphql-ts-mode))
     (error "Not in graphql-mode, cannot edit headers"))
   (let ((extra-headers-buffer-name
          (concat "*Graphql Headers for " (buffer-name) "*"))
