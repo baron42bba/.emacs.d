@@ -3,7 +3,8 @@
 ;; Copyright (C) 2017 wolray
 
 ;; Author: wolray <wolray@foxmail.com>
-;; Version: 4.1
+;; Package-Version: 20240913.1624
+;; Package-Revision: 6151f4279bd9
 ;; URL: https://github.com/wolray/symbol-overlay/
 ;; Keywords: faces, matching
 ;; Package-Requires: ((emacs "24.3") (seq "2.2"))
@@ -151,6 +152,11 @@
   :group 'symbol-overlay
   :type 'boolean)
 
+(defcustom symbol-overlay-temp-highlight-single nil
+  "When non-nil, also temporarily highlight symbols that occur only once."
+  :group 'symbol-overlay
+  :type 'boolean)
+
 (defcustom symbol-overlay-idle-time 0.5
   "Idle time after every command and before the temporary highlighting."
   :group 'symbol-overlay
@@ -175,6 +181,19 @@ For instance, such a function could use a major mode's font-lock
 definitions to prevent a language's keywords from getting highlighted."
   :group 'symbol-overlay
   :type '(repeat (cons (function :tag "Mode") function)))
+
+(defcustom symbol-overlay-priority nil
+  "Sets the priority of the overlays to a non-default value.
+When multiple overlays appear at the same point, the one with the
+highest priority receives keystrokes, so with this option you can
+prioritise `symbol-overlay' relative to `flymake' or other features."
+  :group 'symbol-overlay
+  :type 'integer)
+
+(defcustom symbol-overlay-jump-hook nil
+  "Hook to run after jumping to a symbol."
+  :group 'symbol-overlay
+  :type 'hook)
 
 ;;; Internal
 
@@ -237,7 +256,7 @@ If SYMBOL is non-nil, get the overlays that belong to it.
 DIR is an integer.
 If EXCLUDE is non-nil, get all overlays excluding those belong to SYMBOL."
   (let ((overlays (cond ((= dir 0) (overlays-in (point-min) (point-max)))
-                        ((< dir 0) (overlays-in (point-min) (point)))
+                        ((< dir 0) (nreverse (overlays-in (point-min) (point))))
                         ((> dir 0) (overlays-in
                                     (if (looking-at-p "\\_>") (1- (point)) (point))
                                     (point-max))))))
@@ -328,7 +347,7 @@ This only affects symbols in the current displayed window if
                 (while (re-search-forward re nil t)
                   (symbol-overlay-put-one symbol)
                   (or p (setq p t))))
-              (when p
+              (when (or symbol-overlay-temp-highlight-single p)
                 (symbol-overlay-put-one symbol)
                 (setq symbol-overlay-temp-symbol symbol)))))))))
 
@@ -377,6 +396,8 @@ Otherwise apply `symbol-overlay-default-face'."
                     (overlay-put ov 'symbol symbol))
       (overlay-put ov 'face 'symbol-overlay-default-face)
       (overlay-put ov 'symbol ""))
+    (when symbol-overlay-priority
+      (overlay-put ov 'priority symbol-overlay-priority))
     (dolist (fun symbol-overlay-overlay-created-functions)
       (funcall fun ov))))
 
@@ -613,8 +634,8 @@ When called interactively, then also reset
   "Put overlays on SYMBOL that is not highlighted in scope.
 KEYWORD provides the scope information."
   (when (and (cadr keyword)
-             (not (seq-find #'(lambda (ov)
-                                (string= (overlay-get ov 'symbol) symbol))
+             (not (seq-find (lambda (ov)
+                              (string= (overlay-get ov 'symbol) symbol))
                             (overlays-at
                              (car (bounds-of-thing-at-point 'symbol))))))
     (symbol-overlay-put-all symbol t keyword)))
@@ -637,6 +658,7 @@ DIR must be non-zero."
            (keyword (symbol-overlay-assoc symbol)))
       (push-mark nil t)
       (funcall jump-function symbol dir)
+      (run-hooks 'symbol-overlay-jump-hook)
       (when keyword
         (symbol-overlay-maybe-reput symbol keyword)
         (symbol-overlay-maybe-count keyword)))))
