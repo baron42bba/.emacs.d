@@ -1,12 +1,13 @@
 ;;; parsebib.el --- A library for parsing bib files  -*- lexical-binding: t -*-
 
-;; Copyright (c) 2014-2022 Joost Kremers
+;; Copyright (c) 2014-2024 Joost Kremers
 ;; All rights reserved.
 
 ;; Author: Joost Kremers <joostkremers@fastmail.fm>
 ;; Maintainer: Joost Kremers <joostkremers@fastmail.fm>
 ;; Created: 2014
-;; Version: 4.3
+;; Package-Version: 20241219.14
+;; Package-Revision: db2de6e30a4f
 ;; Keywords: text bibtex
 ;; URL: https://github.com/joostkremers/parsebib
 ;; Package-Requires: ((emacs "25.1"))
@@ -42,23 +43,31 @@
 
 (require 'bibtex)
 (require 'cl-lib)
-(eval-when-compile (require 'subr-x)) ; for `string-join'.
 (eval-and-compile (unless (fboundp 'json-parse-buffer)
-                    (require 'json)
-                    (defvar json-object-type)))
+                    (require 'json)))
+(defvar json-object-type)
 
 (declare-function json-read "json.el")
-
-(define-error 'parsebib-entry-type-error "[Parsebib] Illegal entry type at point" 'error)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; BibTeX / biblatex parser ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar parsebib-hashid-fields nil
   "List of fields used to create a hash id for each entry.
 Hash ids can only be created for BibTeX/biblatex files.  The hash
 id is stored in the entry in the special field `=hashid='.")
+
+;; Regexes describing BibTeX identifiers and keys.  Note that while $ ^ & are
+;; valid in BibTeX keys, they may nonetheless be problematic, because they are
+;; special for TeX.  The difference between `parsebib--bibtex-identifier' and
+;; `parsebib--bibtex-key-regexp' are the parentheses (), which are valid in keys.  It may in
+;; fact not be necessary (or desirable) to distinguish the two, but until
+;; someone complains, I'll keep it this way.
+(defconst parsebib--bibtex-identifier "[^\"@\\#%',={}() \t\n\f]+" "Regexp describing a licit BibTeX identifier.")
+(defconst parsebib--bibtex-key-regexp "[^\"@\\#%',={} \t\n\f]+" "Regexp describing a licit BibTeX key.")
+(defconst parsebib--bibtex-entry-start "^[ \t]*@" "Regexp describing the start of an entry.")
+
+(defvar parsebib-postprocessing-excluded-fields '("file"
+                                                  "url"
+                                                  "doi")
+  "List of fields that should not be post-processed.")
 
 (defvar parsebib--biblatex-inheritances '(;; Source                        Target
                                           ("all"                           "all"
@@ -169,341 +178,416 @@ combination, the field inherits from the same-name field in the
 cross-referenced entry.  If no inheritance should take place, the
 target field is set to the symbol `none'.")
 
-;; Regexes describing BibTeX identifiers and keys.  Note that while $ ^ & are
-;; valid in BibTeX keys, they may nonetheless be problematic, because they are
-;; special for TeX.  The difference between `parsebib--bibtex-identifier' and
-;; `parsebib--key-regexp' are the parentheses (), which are valid in keys.  It may in
-;; fact not be necessary (or desirable) to distinguish the two, but until
-;; someone complains, I'll keep it this way.
-(defconst parsebib--bibtex-identifier "[^\"@\\#%',={}() \t\n\f]+" "Regexp describing a licit BibTeX identifier.")
-(defconst parsebib--key-regexp "[^\"@\\#%',={} \t\n\f]+" "Regexp describing a licit key.")
-(defconst parsebib--entry-start "^[ \t]*@" "Regexp describing the start of an entry.")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; BibTeX / biblatex parser ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun parsebib--convert-tex-italics (str)
-  "Return STR with face property `italic'."
-  (propertize str 'face 'italic))
+;;; Parser primitives
+;;
+;; The parser is divided into a set of primitives, which do the actual
+;; reading, and a set of grammar rules, which describe the syntax of a
+;; BibTeX file.
+;;
+;; A few things to keep in mind:
+;;
+;; - The primitives are BibTeX-agnostic. They read specific chunks of the
+;;   source and return them.
+;;
+;; - The primitives can be parameterised; that is, the exact text that they
+;;   read may depend on arguments passed to them. The grammar rules do not
+;;   have any parameters.
+;;
+;; - The primitives are responsible for skipping whitespace.
 
-(defun parsebib--convert-tex-bold (str)
-  "Return STR with face property `bold'."
-  (propertize str 'face 'bold))
+(define-error 'parsebib-error "[Parsebib error]" 'error)
 
-(defun parsebib--convert-tex-small-caps (str)
-  "Return STR capitalised."
-  (upcase str))
+(defun parsebib--skip-whitespace ()
+  "Skip whitespace."
+  (skip-chars-forward " \n\r\t\f\v"))
 
-(defvar parsebib-TeX-command-replacement-alist
-  '(("ddag" . "\N{DOUBLE DAGGER}")
-    ("textdaggerdbl" . "\N{DOUBLE DAGGER}")
-    ("dag" . "\N{DAGGER}")
-    ("textdagger" . "\N{DAGGER}")
-    ("textpertenthousand" . "\N{PER TEN THOUSAND SIGN}")
-    ("textperthousand" . "\N{PER MILLE SIGN}")
-    ("textquestiondown" . "\N{INVERTED QUESTION MARK}")
-    ("P" . "\N{PILCROW SIGN}")
-    ("textdollar" . "$")
-    ("S" . "\N{SECTION SIGN}")
-    ("ldots" . "\N{HORIZONTAL ELLIPSIS}")
-    ("dots" . "\N{HORIZONTAL ELLIPSIS}")
-    ("textellipsis" . "\N{HORIZONTAL ELLIPSIS}")
-    ("textemdash" . "\N{EM DASH}")
-    ("textendash" . "\N{EN DASH}")
+(defun parsebib--char (chars &optional noerror)
+  "Read the character at point.
+CHARS is a list of characters.  If the character at point matches
+a character in CHARS, return it and move point, otherwise signal
+an error, unless NOERROR is non-nil, in which case return nil."
+  (parsebib--skip-whitespace)
+  (if (memq (char-after) chars)
+      (prog1
+          (char-after)
+        (forward-char 1))
+    (unless noerror
+      (signal 'parsebib-error (list (point)
+                                    "Expected one of %s, got `%c'"
+                                    (mapcar #'char-to-string chars)
+                                    (following-char))))))
 
-    ;; Non-ASCII Letters (Excluding Accented Letters)
-    ("AA" . "\N{LATIN CAPITAL LETTER A WITH RING ABOVE}")
-    ("AE" . "\N{LATIN CAPITAL LETTER AE}")
-    ("DH" . "\N{LATIN CAPITAL LETTER ETH}")
-    ("DJ" . "\N{LATIN CAPITAL LETTER ETH}")
-    ("L"  . "\N{LATIN CAPITAL LETTER L WITH STROKE}")
-    ("SS" . "\N{LATIN CAPITAL LETTER SHARP S}")
-    ("NG" . "\N{LATIN CAPITAL LETTER ENG}")
-    ("OE" . "\N{LATIN CAPITAL LIGATURE OE}")
-    ("O"  . "\N{LATIN CAPITAL LETTER O WITH STROKE}")
-    ("TH" . "\N{LATIN CAPITAL LETTER THORN}")
-
-    ("aa" . "\N{LATIN SMALL LETTER A WITH RING ABOVE}")
-    ("ae" . "\N{LATIN SMALL LETTER AE}")
-    ("dh" . "\N{LATIN SMALL LETTER ETH}")
-    ("dj" . "\N{LATIN SMALL LETTER ETH}")
-    ("l"  . "\N{LATIN SMALL LETTER L WITH STROKE}")
-    ("ss" . "\N{LATIN SMALL LETTER SHARP S}")
-    ("ng" . "\N{LATIN SMALL LETTER ENG}")
-    ("oe" . "\N{LATIN SMALL LIGATURE OE}")
-    ("o"  . "\N{LATIN SMALL LETTER O WITH STROKE}")
-    ("th" . "\N{LATIN SMALL LETTER THORN}")
-
-    ("ij" . "ij")
-    ("i" . "\N{LATIN SMALL LETTER DOTLESS I}")
-    ("j" . "\N{LATIN SMALL LETTER DOTLESS J}")
-    ;; Formatting Commands
-    ("textit" . parsebib--convert-tex-italics)
-    ("emph"   . parsebib--convert-tex-italics)
-    ("textbf" . parsebib--convert-tex-bold)
-    ("textsc" . parsebib--convert-tex-small-caps))
-  "An alist of <command>-<replacement> pairs for LaTeX commands.
-<command> is the name of a TeX or LaTeX command (without
-backslash), <replacement> is the string with which it is
-replaced.
-
-<replacement> can also be a function of one argument.  In this
-case, <command> must take at least one obligatory argument, which
-is passed as the first argument of the replacement function.  The
-return value of this function is used as the replacement string
-for <command>.
-
-See `parsebib-TeX-markup-replacement-alist' and the function
-`parsebib-clean-TeX-markup' to see how this variable is used.")
-
-(defvar parsebib-TeX-accent-replacement-alist
-  '(("\"" . "\N{COMBINING DIAERESIS}")
-    ("'" . "\N{COMBINING ACUTE ACCENT}")
-    ("." . "\N{COMBINING DOT ABOVE}")
-    ("=" . "\N{COMBINING MACRON}")
-    ("^" . "\N{COMBINING CIRCUMFLEX ACCENT}")
-    ("`" . "\N{COMBINING GRAVE ACCENT}")
-    ("b" . "\N{COMBINING MACRON BELOW}")
-    ("c" . "\N{COMBINING CEDILLA}")
-    ("d" . "\N{COMBINING DOT BELOW}")
-    ("H" . "\N{COMBINING DOUBLE ACUTE ACCENT}")
-    ("k" . "\N{COMBINING OGONEK}")
-    ("U" . "\N{COMBINING DOUBLE VERTICAL LINE ABOVE}")
-    ("u" . "\N{COMBINING BREVE}")
-    ("v" . "\N{COMBINING CARON}")
-    ("~" . "\N{COMBINING TILDE}")
-    ("|" . "\N{COMBINING COMMA ABOVE}")
-    ("f" . "\N{COMBINING INVERTED BREVE}")
-    ("G" . "\N{COMBINING DOUBLE GRAVE ACCENT}")
-    ("h" . "\N{COMBINING HOOK ABOVE}")
-    ("C" . "\N{COMBINING DOUBLE GRAVE ACCENT}")
-    ("r" . "\N{COMBINING RING ABOVE}") )
-"Alist of <command>-<accent> pairs for LaTeX diacritics.
-<command> is the name of a TeX or LaTeX command (without
-backslash), <accent> is the Unicode combining character for the
-diacritic that <command> generates.  Both <command> and <accent>
-must be strings.
-
-The replacement string for <command> is composed of its
-obligatory argument (usually a single character) and the
-combining diacritic.
-
-See `parsebib-TeX-markup-replacement-alist' and the function
-`parsebib-clean-TeX-markup' to see how this variable is used.")
-
-(defvar parsebib-TeX-literal-replacement-alist
-  ;; LaTeX2 Escapable "Special" Characters
-  `(("\\%" . "%") ("\\&" . "&") ("\\#" . "#") ("\\$" . "$")
-    ;; Quotes
-    ("``" . "\N{LEFT DOUBLE QUOTATION MARK}")
-    ("`"  . "\N{LEFT SINGLE QUOTATION MARK}")
-    ("''" . "\N{RIGHT DOUBLE QUOTATION MARK}")
-    ("'"  . "\N{RIGHT SINGLE QUOTATION MARK}")
-    ;; Dashes
-    ("---" . "\N{EM DASH}")
-    ("--" . "\N{EN DASH}")
-    ;; Remove all remaining {braces}
-    ("{" . "") ("}" . ""))
-  "Alist of <literal>-<replacement> pairs.  Both are strings.
-This variable contains characters that are special in LaTeX and
-single-character, non-ASCII LaTeX commands.
-
-Note that adding pairs to this variable has no effect unless
-`parsebib-TeX-markup-replacement-alist' is adjusted accordingly.
-For example, after adding a <literal>-<replacement> pair, the
-following code will ensure that <literal> gets replaced with
-<replacement>.
-
-  (cl-callf (lambda (regex) (rx (or <literal> (regexp regex))))
-     (alist-get (quote parsebib--replace-literal)
-                parsebib-TeX-markup-replacement-alist))
-
-See `parsebib-TeX-markup-replacement-alist' and the function
-`parsebib-clean-TeX-markup' to see how this variable is used.")
-
-(defvar parsebib-TeX-markup-replacement-alist
-  `((parsebib--replace-command-or-accent
-     ;; This regexp matches any latex command i.e. anything that
-     ;; starts with a backslash. The name of the command which
-     ;; is either a string of alphabetic characters or a single
-     ;; non-alphabetic character is captured by group 1. The command
-     ;; can have a mandatory argument enclosed by braces which is
-     ;; captured by group 2. If the command has no arguments in
-     ;; brackets or braces, the first non-white space letter after
-     ;; the command is captured in group 3. This is to be able to deal
-     ;; with accents.
-     ;; Note that the capturing of arguments in braces is imperfect,
-     ;; because doing it properly requires sexp parsing. It will fail
-     ;; for cases like \command{\anothercommand{an arg}some text}.
-     . ,(rx "\\" (group-n 1 (or (1+ letter) nonl))
-          (: (* blank) (opt (or (: (* (: "[" (* (not (any "]"))) "]"))
-                                 "{" (group-n 2 (0+ (not (any "}")))) (opt "}"))
-                                (group-n 3 letter))))))
-    (parsebib--replace-literal
-     . ,(rx-to-string `(or ,@(mapcar #'car parsebib-TeX-literal-replacement-alist)
-                           (1+ blank)))))
-  "Alist of replacements and strings for TeX markup.
-This is used in `parsebib-clean-TeX-markup' to make TeX markup more
-suitable for display.  Each item in the list consists of a replacement
-and a regexp.  The replacement can be a string (which will
-simply replace the match) or a function (the match will be
-replaced by the result of calling the function on the match
-string).  Earlier elements are evaluated before later ones, so if
-one string is a subpattern of another, the second must appear
-later (e.g. \"''\" is before \"'\").
-
-For the common cases of replacing a LaTeX command or a literal
-it is faster to use `parsebib-TeX-command-replacement-alist'
-and `parsebib-TeX-literal-replacement-alist' respectively.")
-
-(defvar parsebib-clean-TeX-markup-excluded-fields '("file"
-                                                    "url"
-                                                    "doi")
-  "List of fields that should not be passed to `parsebib-clean-TeX-markup'.")
-
-(defun parsebib--replace-command-or-accent (string)
-  "Return the replacement text for the command or accent matched by STRING."
-  (let* ((cmd (match-string 1 string))
-         ;; bar is the argument in braces.
-         (bar (match-string 2 string))
-         ;; If there is no argument in braces, consider the letter after
-         ;; the command as the argument. Clean this argument.
-         (arg (parsebib-clean-TeX-markup (or (if bar bar (match-string 3 string)) "")))
-         ;; Check if the cmd is an accent that needs to be replaced
-         ;; and get its replacement.
-         (acc (alist-get cmd parsebib-TeX-accent-replacement-alist nil nil #'equal))
-         ;; If it is not an accent, check if it is a command that needs to be replaced
-         ;; and get the replacement.
-         (rep (or acc (alist-get cmd parsebib-TeX-command-replacement-alist nil nil #'equal))))
-    (cond
-     ;; If replacement is a function call it with the argument.
-     ((functionp rep) (funcall rep arg))
-     ;; Otherwise combine the replacement with the argument. The order of combination
-     ;; depends on whether the command is an accent or not.
-     (rep (if acc (concat arg rep) (concat rep arg)))
-     ;; Now we handle the fallback cases. If there is a braced argument but no
-     ;; replacement for the command was found, consider the replacement to be
-     ;; empty.
-     ((and bar (not (equal "" bar))) bar)
-     ;; Otherwise clean any optional arguments by discarding them.
-     (t (replace-regexp-in-string (rx "[" (* (not (any "]"))) "]") "" string t t)))))
-
-(defun parsebib--replace-literal (string)
-  "Look up the replacement text for literal STRING."
-  (or (alist-get string parsebib-TeX-literal-replacement-alist nil nil #'equal)
-      " "))
-
-(defun parsebib-clean-TeX-markup (string)
-  "Return STRING without TeX markup.
-Any substring matching the car of a cell in
-`parsebib-TeX-markup-replace-alist' is replaced with the
-corresponding cdr (if the cdr is a string), or with the result of
-calling the cdr on the match (if it is a function).  This is done
-with `replace-regexp-in-string', which see for details."
-  (let ((case-fold-search nil))
-    (cl-loop for (replacement . pattern) in parsebib-TeX-markup-replacement-alist
-             do (setq string (replace-regexp-in-string
-                              pattern replacement string
-                              t t))
-             finally return string)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Matching and parsing stuff ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun parsebib--looking-at-goto-end (str &optional match)
-  "Like `looking-at' but move point to the end of the matching string STR.
-MATCH acts just like the argument to MATCH-END, and defaults to
-0. Comparison is done case-insensitively."
-  (or match (setq match 0))
+(defun parsebib--keyword (keywords &optional noerror)
+  "Read the keyword following point.
+KEYWORDS is a list of allowed keywords.  If the text following
+point matches one of KEYWORDS (case-insensitively), return it and
+move point.  Otherwise signal an error, unless NOERROR is
+non-nil, in which case return nil."
+  (parsebib--skip-whitespace)
   (let ((case-fold-search t))
-    (if (looking-at str)
-        (goto-char (match-end match)))))
+    (if (looking-at (regexp-opt keywords))
+        (let ((keyword (match-string-no-properties 0)))
+          (progn
+            (goto-char (match-end 0))
+            keyword))
+      (unless noerror
+        (signal 'parsebib-error (list (point)
+                                      "Expected one of %s, got `%c'"
+                                      keywords
+                                      (char-after)))))))
 
-(defun parsebib--match-paren-forward ()
-  "Move forward to the closing paren matching the opening paren at point.
-This function handles parentheses () and braces {}.  Return t if
-a matching parenthesis was found.  This function puts point
-immediately after the matching parenthesis."
-  (cond
-   ((eq (char-after) ?\{)
-    (parsebib--match-brace-forward))
-   ((eq (char-after) ?\()
-    (bibtex-end-of-entry))))
+(defun parsebib--symbol (regexp &optional noerror)
+  "Read a symbol and return it.
+REGEXP is a regular expression describing a licit symbol.  If a
+symbol is found, return it.  Otherwise signal an error, unless
+NOERROR is non-nil, in which case return nil."
+  (parsebib--skip-whitespace)
+  (if (looking-at regexp)
+      (progn
+        (goto-char (match-end 0))
+        (match-string-no-properties 0))
+    (unless noerror
+      (signal 'parsebib-error (list (point) "Illegal identifier")))))
 
-(defun parsebib--match-delim-forward ()
-  "Move forward to the closing delimiter matching the delimiter at point.
-This function handles braces {} and double quotes \"\". Return t
-if a matching delimiter was found."
-  (let ((result (cond
-                 ((eq (char-after) ?\{)
-                  (parsebib--match-brace-forward))
-                 ((eq (char-after) ?\")
-                  (parsebib--match-quote-forward)))))
-    result))
-
-(defun parsebib--match-brace-forward ()
-  "Move forward to the closing brace matching the opening brace at point."
-  (with-syntax-table bibtex-braced-string-syntax-table
-    (forward-sexp 1)
-    ;; If forward-sexp does not result in an error, we want to return t.
-    t))
-
-(defun parsebib--match-quote-forward ()
-  "Move to the closing double quote matching the quote at point."
-  (with-syntax-table bibtex-quoted-string-syntax-table
-    (forward-sexp 1)
-    ;; If forward-sexp does not result in an error, we want to return t.
-    t))
-
-(defun parsebib--parse-bib-value (limit &optional strings replace-TeX)
-  "Parse value at point.
-A value is either a field value or a @String expansion.  Return
-the value as a string.  No parsing is done beyond LIMIT, but note
-that parsing may stop well before LIMIT.
-
-STRINGS, if non-nil, is a hash table of @String definitions.
-@String abbrevs in the value to be parsed are then replaced with
-their expansions.  Additionally, newlines in field values are
-removed, white space is reduced to a single space and braces or
-double quotes around field values are removed.
-
-REPLACE-TEX indicates whether TeX markup should be replaced with
-ASCII/Unicode characters.  See the variable
-`parsebib-TeX-markup-replace-alist' for details."
-  (let (res)
-    (while (and (< (point) limit)
-                (not (looking-at-p ",")))
+(defun parsebib--seq-delim (open close esc)
+  "Read a delimited sequence.
+A delimited sequence is a sequence delimited by OPEN and CLOSE
+characters, which must be different (e.g., any kind of
+parentheses).  ESC is an escape character that can be used to
+escape OPEN and CLOSE inside the sequence.  OPEN and CLOSE can
+appear in the sequence unescaped as long as they are
+balanced.  (In other words, the sequence can contain nested
+sequences)."
+  (parsebib--skip-whitespace)
+  (let ((beg (point))
+        (n-braces 1)
+        (skip-chars (format "^%c%c" open close)))
+    (parsebib--char (list open))
+    (while (and (> n-braces 0)
+                (not (eobp)))
+      (skip-chars-forward skip-chars)
       (cond
-       ((looking-at-p "[{\"]")
-        (let ((beg (point)))
-          (parsebib--match-delim-forward)
-          (push (buffer-substring-no-properties beg (point)) res)))
-       ((looking-at parsebib--bibtex-identifier)
-        (push (buffer-substring-no-properties (point) (match-end 0)) res)
-        (goto-char (match-end 0)))
-       ((looking-at "[[:space:]]*#[[:space:]]*")
-        (goto-char (match-end 0)))
-       (t (forward-char 1)))) ; So as not to get stuck in an infinite loop.
-    (setq res (if strings
-                  (string-join (parsebib--expand-strings (nreverse res) strings))
-                (string-join (nreverse res) " # ")))
-    (if replace-TeX
-        (parsebib-clean-TeX-markup res)
-      res)))
+       ((eq (char-after) open)
+        (unless (eq (char-before) esc)
+          (setq n-braces (1+ n-braces))))
+       ((eq (char-after) close)
+        (unless (eq (char-before) esc)
+          (setq n-braces (1- n-braces)))))
+      (ignore-error 'end-of-buffer (forward-char 1)))
+    (if (= n-braces 0)
+        (buffer-substring-no-properties beg (point))
+      (goto-char beg) ; So we can determine line and column number.
+      (signal 'parsebib-error (list (point)
+                                    "Opening %c has no closing %c"
+                                    open
+                                    close)))))
 
-;;;;;;;;;;;;;;;;;;;;;
-;; Expanding stuff ;;
-;;;;;;;;;;;;;;;;;;;;;
+(defun parsebib--string (delim esc)
+  "Read a string delimited by DELIM.
+A string is a delimited sequence where the opening and closing
+delimiters are identical, e.g., \"...\".  ESC is the escape
+character."
+  (parsebib--skip-whitespace)
+  (let ((beg (point))
+        (continue t)
+        (skip-chars (format "^%c" delim)))
+    (parsebib--char (list delim))
+    (while (and continue
+                (not (eobp)))
+      (skip-chars-forward skip-chars)
+      (unless (eq (char-before) esc)
+        (setq continue nil))
+      (forward-char 1))
+    (if (not continue)
+        (buffer-substring-no-properties beg (point))
+      (goto-char beg) ; So we can determine line and column number.
+      (signal 'parsebib-error (list (point)
+                                    "Opening %c has no closing %c"
+                                    delim
+                                    delim)))))
 
-(defun parsebib--expand-strings (strings abbrevs)
-  "Expand strings in STRINGS using expansions in ABBREVS.
-STRINGS is a list of strings.  If a string in STRINGS has an
-expansion in hash table ABBREVS, replace it with its expansion.
-Otherwise, if the string is enclosed in braces {} or double
-quotes \"\", remove the delimiters.  In addition, newlines and
-multiple spaces in the string are replaced with a single space."
+(defun parsebib--comment-line ()
+  "Read a single-line comment and return it."
+  (prog1 (buffer-substring-no-properties (point) (pos-eol))
+    (forward-line 1)))
+
+(defun parsebib--match (rules &optional noerror)
+  "Check if a rule in RULES matches at point.
+Apply the first rule that matches and return the result.  If no
+rule matches, signal an error, unless NOERROR is non-nil, in
+which case return nil.
+
+RULES is a list of symbols, each naming a parsing rule."
+  (parsebib--skip-whitespace)
+  (let ((start-pos (point))
+        last-error)
+    (catch 'success
+      (dolist (rule rules)
+        (condition-case err
+            (let ((res (funcall rule)))
+              (parsebib--skip-whitespace)
+              (throw 'success res))
+          (parsebib-error
+           (goto-char start-pos)
+           (setq last-error err))))
+      (unless noerror
+        (signal (car last-error) (cdr last-error))))))
+
+;;; Parser rules
+
+;; Basic building blocks
+
+(defun parsebib--text ()
+  "Parse text.
+Text is anything that is between braces or double quotes that
+should be read literally."
+  (parsebib--match '(parsebib--braced-text
+                     parsebib--quoted-text)))
+
+(defun parsebib--braced-text ()
+  "Parse text in curly braces."
+  (parsebib--seq-delim ?\{ ?\} ?\\))
+
+(defun parsebib--quoted-text ()
+  "Parse text in double quotes."
+  (parsebib--string ?\" ?\\))
+
+(defun parsebib--identifier ()
+  "Parse a BibTeX identifier."
+  (parsebib--symbol parsebib--bibtex-identifier))
+
+(defun parsebib--value ()
+  "Parse a BibTeX value.
+A value is one component of a composed value (see
+`parsebib--composed-value') and can either be a piece of quoted
+text (i.e., text in double quotes or braces) or a @String
+abbreviation."
+  (or (parsebib--match '(parsebib--text
+                         parsebib--identifier)
+                       :noerror)
+      (signal 'parsebib-error (list (point) "Expected {, \" or identifier"))))
+
+(defun parsebib--composed-value ()
+  "Parse a BibTeX composed field value.
+A composed value consists of one or more values concatenated
+using the character `#'.  They typically appear after an equal
+sign as field values and in @String definitions as expansions."
+  (let ((val (list (parsebib--value))))
+    (while (and (parsebib--char '(?#) :noerror)
+                (not (eobp)))
+      (push (parsebib--value) val))
+    (nreverse val)))
+
+(defun parsebib--assignment ()
+  "Parse a BibTeX assignment.
+An assignment is the combination of an identifier, an equal sign
+and a composed value.  A @String definition has exactly one
+assignment, an entry has a potentially unlimited number."
+  (if-let* ((id (parsebib--identifier))
+            (_ (parsebib--char '(?=)))
+            (val (parsebib--composed-value)))
+      (cons id val)
+    (signal 'parsebib-error (list (point) "Malformed key=value assignment"))))
+
+(defun parsebib--fields ()
+  "Parse a set of BibTeX assignments.
+A set of assignments makes up the body of an entry."
+  (let ((fields (list (parsebib--assignment))))
+    (while (and (parsebib--char '(?,) :noerror)
+                (not (eobp)))
+      ;; There may be a comma after the final field of an entry. If that
+      ;; happens, reading another assignment will fail, so we capture the
+      ;; error here.
+      (ignore-error 'parsebib-error
+        (push (parsebib--assignment) fields)))
+    fields))
+
+;; BibTeX items
+
+(defun parsebib--@comment ()
+  "Parse a @Comment.
+Return the contents of the @Comment as a string."
+  (parsebib--char '(?@))
+  (parsebib--keyword '("comment"))
+  (or (parsebib--match '(parsebib--text
+                         parsebib--comment-line)
+                       :noerror)
+      (signal 'parsebib-error (list (point) "Malformed @Comment"))))
+
+(defun parsebib--@preamble ()
+  "Parse a @Preamble.
+Return the contents of the @Preamble as a string."
+  (parsebib--char '(?@))
+  (parsebib--keyword '("preamble"))
+  (or (parsebib--text)
+      (signal 'parsebib-error (list (point) "Malformed @Preamble"))))
+
+(defun parsebib--@string ()
+  "Parse an @String definition.
+Return the definition as a cons cell of the abbreviation and a
+composed value as a list."
+  (if-let* ((_ (parsebib--char '(?@)))
+            (_ (parsebib--keyword '("string")))
+            (open (parsebib--char '(?\{ ?\( )))
+            (definition (parsebib--assignment))
+            (_ (parsebib--char (alist-get open '((?\{ ?\}) (?\( ?\)))))))
+      definition
+    (signal 'parsebib-error (list (point) "Malformed @String definition"))))
+
+(defun parsebib--@entry ()
+  "Parse a BibTeX database entry.
+Return the entry as an alist of <field . value> pairs, where
+<field> is a string and <value> is a list of strings."
+  (if-let* ((_ (parsebib--char '(?@)))
+            (type (parsebib--identifier))
+            (open (parsebib--char '(?\{ ?\( )))
+            (key (parsebib--identifier))
+            (_ (parsebib--char '(?,)))
+            (fields (parsebib--fields))
+            (_ (parsebib--char (alist-get open '((?\{ ?\}) (?\( ?\)))))))
+      (progn (push (cons "=type=" (list type)) fields)
+             (push (cons "=key=" (list key)) fields)
+             fields)
+    (signal 'parsebib-error (list (point) "Malformed entry definition"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Low-level BibTeX/biblatex API ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun parsebib-find-next-item ()
+  "Find the first (potential) BibTeX item following point.
+This function simply searches for an @ at the start of a line,
+possibly preceded by spaces or tabs, followed by a string of
+characters as defined by `parsebib--bibtex-identifier'.
+
+If an item is found, position point at the start of the line and
+return the name of the item as a string, either \"Comment\",
+\"Preamble\" or \"String\", or the entry type (without the @).
+If no item is found, move point to the end of the buffer."
+  (when (re-search-forward parsebib--bibtex-entry-start nil 0)
+    (if (looking-at (concat "\\(" parsebib--bibtex-identifier "\\)" "[[:space:]]*[\(\{]?"))
+        (prog1
+            (match-string-no-properties 1)
+          (goto-char (pos-bol)))
+      (signal 'parsebib-error (list (point) "Search for BibTeX entry failed")))))
+
+(defun parsebib--get-hashid-string (fields)
+  "Create a string from the contents of FIELDS to compute a hash id."
+  (cl-loop
+   for field in parsebib-hashid-fields
+   collect (or
+            ;; Remove braces {}.
+            (replace-regexp-in-string "^{\\|}$" "" (cdr (assoc-string field fields 'case-fold)))
+            "")
+   into hashid-fields
+   finally return (mapconcat #'identity hashid-fields "")))
+
+(defun parsebib-read-entry (&optional fields strings replace-TeX)
+  "Read a BibTeX entry starting at point.
+Point should be positioned before the `@'-character that starts
+the entry, with possibly whitespace intervening.  Return an alist
+of (<field> .  <contents>) conses, or nil if no entry was found.
+The returned alist provides the entry key in the field \"=key=\"
+and the entry type in the field \"=type=\".
+
+If `parsebib-hashid-fields' is non-nil, a hash ID is added in the
+field \"=hashid=\".  The hash is computed on the basis of the
+contents of the fields listed in `parsebib-hashid-fields' using
+the function `secure-hash' and the `sha256' algorithm.
+
+FIELDS is a list of the field names (as strings) to be read and
+included in the result.  Fields not in the list are ignored.
+Case is ignored when comparing fields to the list in FIELDS.  If
+FIELDS is nil, all fields are returned.  Note that if FIELDS is
+non-nil, it should contain the field names \"=key=\" and
+\"=type=\".
+
+STRINGS and REPLACE-TEX are used to post-process field values.
+See the function `parsebib--post-process' for details."
+  (let ((entry (parsebib--@entry)))
+    (when fields
+      (setq entry (seq-filter (lambda (field)
+                                (member-ignore-case (car field) fields))
+                              entry)))
+    (setq entry (mapcar (lambda (field)
+                          (parsebib--post-process field strings replace-TeX))
+                        entry))
+    (when parsebib-hashid-fields
+      (push (cons "=hashid=" (secure-hash 'sha256 (parsebib--get-hashid-string fields))) entry))
+    entry))
+
+(defun parsebib-read-string (&optional strings)
+  "Read the @String definition beginning at point.
+Return the definition as a cons cell (<abbrev> . <expansion>).
+
+If STRINGS is provided, it should be a hash table with @String
+abbreviations, which are used to expand abbreviations in the
+string's expansion."
+  (let* ((definition (parsebib--@string))
+         (abbrev (car definition))
+         (expansion (cdr definition)))
+    (setq expansion (if strings
+                        (string-join (parsebib--post-process-strings expansion strings t))
+                      (string-join expansion " # ")))
+    (cons abbrev expansion)))
+
+(defalias 'parsebib-read-preamble 'parsebib--@preamble)
+(defalias 'parsebib-read-comment 'parsebib--@comment)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Post-processing stuff ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun parsebib--post-process (field strings replace-TeX)
+  "Post-process FIELD.
+FIELD is a cons cell consisting of the field name and the field
+value.  The field value is a list of strings.
+
+If STRINGS is provided, it should be a hash table with string
+definitions.  @String abbreviations in field values are then
+expanded using these definitions.  In addition, field values are
+unquoted, newlines are removed and sequences of whitespace are
+collapsed into a single space.
+
+If REPLACE-TEX is non-nil, TeX markup is cleaned up.  See the
+variable `parsebib-TeX-markup-replace-alist' for details.
+
+No post-processing is applied to fields listed in
+`parsebib-postprocessing-excluded-fields', with the exception of
+unquoting, which is always applied if STRINGS is non-nil.
+
+Finally, the strings in the field value are concatenated.  Return
+value is a cons cell of field name and field value, the value now
+being a single string."
+  (let* ((name (car field))
+         (value (cdr field))
+         (post-process (not (member-ignore-case name parsebib-postprocessing-excluded-fields))))
+    (setq value (if strings
+                    (string-join (parsebib--post-process-strings value strings post-process))
+                  (string-join value " # ")))
+    (when (and replace-TeX post-process)
+      (setq value (parsebib-clean-TeX-markup value)))
+    (cons name value)))
+
+(defun parsebib--post-process-strings (strings abbrevs post-process)
+  "Post-process the strings in STRINGS.
+STRINGS is a list of strings, ABBREVS a hash table with @String
+definitions.  Post-processing involves three changes: First,
+sequences of whitespace are collapsed into a single space.
+Second, if a string has an expansion in ABBREVS, it is replaced
+with the expansion.  Both these changes are only applied if
+POST-PROCESS is non-nil.  Lastly, if the string is enclosed in
+braces {} or double -quotes \"\", these are removed."
   (mapcar (lambda (str)
-            (setq str (replace-regexp-in-string "[ \t\n\f[:space:]]+" " " str))
+            (when post-process
+              (setq str (replace-regexp-in-string "[[:space:]\t\n\f]+" " " str)))
             (cond
-             ((gethash str abbrevs))
+             ((and post-process
+                   (gethash str abbrevs)))
              ((string-match "\\`[\"{]\\(.*?\\)[\"}]\\'" str)
               (match-string 1 str))
              (t str)))
@@ -523,7 +607,7 @@ details on the structure of such an inheritance schema."
   (maphash (lambda (key fields)
              (let ((xref (cdr (assoc-string "crossref" fields))))
                (when xref
-                 (if (string-match-p (concat "\\b[\"{]" parsebib--key-regexp "[\"}]\\b") xref)
+                 (if (string-match-p (concat "\\b[\"{]" parsebib--bibtex-key-regexp "[\"}]\\b") xref)
                      (setq xref (substring xref 1 -1)))
                  (let* ((source (gethash xref entries))
                         (updated-entry (parsebib--get-xref-fields fields source inheritance)))
@@ -584,197 +668,252 @@ for INHERITANCES to be nil."
       nil)
      (t target-field))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Low-level BibTeX/biblatex API ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Clean up TeX markup ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun parsebib-find-next-item (&optional pos)
-  "Find the first (potential) BibTeX item following POS.
-This function simply searches for an @ at the start of a line,
-possibly preceded by spaces or tabs, followed by a string of
-characters as defined by `parsebib--bibtex-identifier'.  When
-successful, point is placed right after the item's type, i.e.,
-generally on the opening brace or parenthesis following the entry
-type, \"@Comment\", \"@Preamble\" or \"@String\".
+(defvar parsebib-TeX-cleanup-target 'display
+  "Target for `parsebib-clean-TeX-markup'.
+This variable affects the output of the functions that convert
+LaTeX font commands \\textbf, \\textit, and \\emph.  Its value
+should be one of the symbols `display', `markdown', `org' or `plain'.
+See `parsebib--convert-tex-italics' and `parsebib--convert-tex-bold'
+for details.")
 
-The return value is the name of the item as a string, either
-\"Comment\", \"Preamble\" or \"String\", or the entry
-type (without the @). If an item name is found that includes an
-illegal character, an error of type `parsebib-entry-type-error'
-is raised. If no item is found, nil is returned and point is left
-at the end of the buffer.
+(defun parsebib--convert-tex-italics (str)
+  "Return STR converted to italic face.
+Depending on the value of `parsebib-TeX-cleanup-target', add a
+face property `italic' to STR, or return it with Markdown or Org
+markup for italic text."
+  (pcase parsebib-TeX-cleanup-target
+    ('display (propertize str 'face 'italic))
+    ('markdown (concat "*" str "*"))
+    ('org (concat "/" str "/"))
+    ('plain str)))
 
-POS can be a number or a marker and defaults to point."
-  (when pos (goto-char pos))
-  (when (re-search-forward parsebib--entry-start nil 0)
-    (if (parsebib--looking-at-goto-end (concat "\\(" parsebib--bibtex-identifier "\\)" "[[:space:]]*[\(\{]?") 1)
-        (match-string-no-properties 1)
-      (signal 'parsebib-entry-type-error (list (point))))))
+(defun parsebib--convert-tex-bold (str)
+  "Return STR converted to bold face.
+Depending on the value of `parsebib-TeX-cleanup-target', add a
+face property `bold' to STR, or return it with Markdown or Org
+markup for bold text."
+  (pcase parsebib-TeX-cleanup-target
+    ('display (propertize str 'face 'bold))
+    ('markdown (concat "**" str "**"))
+    ('org (concat "*" str "*"))
+    ('plain str)))
 
-(defun parsebib-read-comment (&optional pos)
-  "Read the @Comment beginning at the line POS is on.
-Return value is the text of the @Comment including the braces.
-For comments that last until the end of the line (i.e., comments
-that are not delimited by braces), the return value includes the
-whitespace between `@comment' and the actual comment text.
+(defun parsebib--convert-tex-small-caps (str)
+  "Return STR capitalised."
+  (upcase str))
 
-If no comment could be found, return nil.
+(defvar parsebib-TeX-command-replacement-alist
+  '(("ddag"               . "\N{DOUBLE DAGGER}")
+    ("textdaggerdbl"      . "\N{DOUBLE DAGGER}")
+    ("dag"                . "\N{DAGGER}")
+    ("textdagger"         . "\N{DAGGER}")
+    ("textpertenthousand" . "\N{PER TEN THOUSAND SIGN}")
+    ("textperthousand"    . "\N{PER MILLE SIGN}")
+    ("textquestiondown"   . "\N{INVERTED QUESTION MARK}")
+    ("P"                  . "\N{PILCROW SIGN}")
+    ("textdollar"         . "$")
+    ("S"                  . "\N{SECTION SIGN}")
+    ("ldots"              . "\N{HORIZONTAL ELLIPSIS}")
+    ("dots"               . "\N{HORIZONTAL ELLIPSIS}")
+    ("textellipsis"       . "\N{HORIZONTAL ELLIPSIS}")
+    ("textemdash"         . "\N{EM DASH}")
+    ("textendash"         . "\N{EN DASH}")
+    ("textbar"            . "|")
 
-POS can be a number or a marker.  It does not have to be at the
-beginning of a line, but the @Comment entry must start at the
-beginning of the line POS is on.  If POS is nil, it defaults to
-point."
-  (when pos (goto-char pos))
-  (beginning-of-line)
-  (when (parsebib--looking-at-goto-end (concat parsebib--entry-start "\\(comment\\)[[:space:]]*[\(\{]?") 1)
-    (let ((beg (point)))
-      (if (looking-at-p "[[:space:]]*[\(\{]")
-          (progn (skip-chars-forward "[:space:]")
-                 (parsebib--match-paren-forward))
-        (goto-char (line-end-position)))
-      (buffer-substring-no-properties beg (point)))))
+    ;; Non-ASCII Letters (Excluding Accented Letters)
+    ("AA" . "\N{LATIN CAPITAL LETTER A WITH RING ABOVE}")
+    ("AE" . "\N{LATIN CAPITAL LETTER AE}")
+    ("DH" . "\N{LATIN CAPITAL LETTER ETH}")
+    ("DJ" . "\N{LATIN CAPITAL LETTER ETH}")
+    ("L"  . "\N{LATIN CAPITAL LETTER L WITH STROKE}")
+    ("SS" . "\N{LATIN CAPITAL LETTER SHARP S}")
+    ("NG" . "\N{LATIN CAPITAL LETTER ENG}")
+    ("OE" . "\N{LATIN CAPITAL LIGATURE OE}")
+    ("O"  . "\N{LATIN CAPITAL LETTER O WITH STROKE}")
+    ("TH" . "\N{LATIN CAPITAL LETTER THORN}")
 
-(defun parsebib-read-string (&optional pos strings)
-  "Read the @String definition beginning at the line POS is on.
-If a proper abbreviation and expansion are found, they are
-returned as a cons cell (<abbrev> . <expansion>).  Otherwise, nil
-is returned.
+    ("aa" . "\N{LATIN SMALL LETTER A WITH RING ABOVE}")
+    ("ae" . "\N{LATIN SMALL LETTER AE}")
+    ("dh" . "\N{LATIN SMALL LETTER ETH}")
+    ("dj" . "\N{LATIN SMALL LETTER ETH}")
+    ("l"  . "\N{LATIN SMALL LETTER L WITH STROKE}")
+    ("ss" . "\N{LATIN SMALL LETTER SHARP S}")
+    ("ng" . "\N{LATIN SMALL LETTER ENG}")
+    ("oe" . "\N{LATIN SMALL LIGATURE OE}")
+    ("o"  . "\N{LATIN SMALL LETTER O WITH STROKE}")
+    ("th" . "\N{LATIN SMALL LETTER THORN}")
 
-POS can be a number or a marker.  It does not have to be at the
-beginning of a line, but the @String entry must start at the
-beginning of the line POS is on.  If POS is nil, it defaults to
-point.
+    ("ij" . "ij")
+    ("i"  . "\N{LATIN SMALL LETTER DOTLESS I}")
+    ("j"  . "\N{LATIN SMALL LETTER DOTLESS J}")
 
-If STRINGS is provided it should be a hash table with string
-abbreviations, which are used to expand abbrevs in the string's
-expansion."
-  (when pos (goto-char pos))
-  (beginning-of-line)
-  (when (parsebib--looking-at-goto-end (concat parsebib--entry-start "\\(string[[:space:]]*\\)[\(\{]") 1)
-    (let ((limit (save-excursion
-                   (parsebib--match-paren-forward)
-                   (point))))
-      (parsebib--looking-at-goto-end (concat "[({]\\(" parsebib--bibtex-identifier "\\)[[:space:]]*=[[:space:]]*"))
-      (let ((abbr (match-string-no-properties 1)))
-        (when (and abbr (> (length abbr) 0))            ; If we found an abbrev.
-          (let ((expansion (parsebib--parse-bib-value limit strings)))
-            (goto-char limit)
-            (cons abbr expansion)))))))
+    ;; Formatting Commands
+    ("textit" . parsebib--convert-tex-italics)
+    ("emph"   . parsebib--convert-tex-italics)
+    ("textbf" . parsebib--convert-tex-bold)
+    ("textsc" . parsebib--convert-tex-small-caps))
+  "An alist of <command>-<replacement> pairs for LaTeX commands.
+<command> is the name of a TeX or LaTeX command (without
+backslash), <replacement> is the string with which it is
+replaced.
 
-(defun parsebib-read-preamble (&optional pos)
-  "Read the @Preamble definition at the line POS is on.
-Return the preamble as a string (including the braces surrounding
-the preamble text), or nil if no preamble was found.
+<replacement> can also be a function of one argument.  In this
+case, <command> must take at least one obligatory argument, which
+is passed as the first argument of the replacement function.  The
+return value of this function is used as the replacement string
+for <command>.
 
-POS can be a number or a marker.  It does not have to be at the
-beginning of a line, but the @Preamble must start at the
-beginning of the line POS is on.  If POS is nil, it defaults to
-point."
-  (when pos (goto-char pos))
-  (beginning-of-line)
-  (when (parsebib--looking-at-goto-end (concat parsebib--entry-start "\\(preamble[[:space:]]*\\)[\(\{]") 1)
-    (let ((beg (point)))
-      (when (parsebib--match-paren-forward)
-        (buffer-substring-no-properties beg (point))))))
+See `parsebib-TeX-markup-replacement-alist' and the function
+`parsebib-clean-TeX-markup' to see how this variable is used.")
 
-(defun parsebib--get-hashid-string (fields)
-  "Create a string from the contents of FIELDS to compute a hash id."
-  (cl-loop
-   for field in parsebib-hashid-fields
-   collect (or
-            ;; Remove braces {}.
-            (replace-regexp-in-string "^{\\|}\\'" "" (cdr (assoc-string field fields 'case-fold)))
-            "")
-   into hashid-fields
-   finally return (mapconcat #'identity hashid-fields "")))
+(defvar parsebib-TeX-accent-replacement-alist
+  '(("\"" . "\N{COMBINING DIAERESIS}")
+    ("'"  . "\N{COMBINING ACUTE ACCENT}")
+    ("."  . "\N{COMBINING DOT ABOVE}")
+    ("="  . "\N{COMBINING MACRON}")
+    ("^"  . "\N{COMBINING CIRCUMFLEX ACCENT}")
+    ("`"  . "\N{COMBINING GRAVE ACCENT}")
+    ("b"  . "\N{COMBINING MACRON BELOW}")
+    ("c"  . "\N{COMBINING CEDILLA}")
+    ("d"  . "\N{COMBINING DOT BELOW}")
+    ("H"  . "\N{COMBINING DOUBLE ACUTE ACCENT}")
+    ("k"  . "\N{COMBINING OGONEK}")
+    ("U"  . "\N{COMBINING DOUBLE VERTICAL LINE ABOVE}")
+    ("u"  . "\N{COMBINING BREVE}")
+    ("v"  . "\N{COMBINING CARON}")
+    ("~"  . "\N{COMBINING TILDE}")
+    ("|"  . "\N{COMBINING COMMA ABOVE}")
+    ("f"  . "\N{COMBINING INVERTED BREVE}")
+    ("G"  . "\N{COMBINING DOUBLE GRAVE ACCENT}")
+    ("h"  . "\N{COMBINING HOOK ABOVE}")
+    ("C"  . "\N{COMBINING DOUBLE GRAVE ACCENT}")
+    ("r"  . "\N{COMBINING RING ABOVE}") )
+  "Alist of <command>-<accent> pairs for LaTeX diacritics.
+<command> is the name of a TeX or LaTeX command (without
+backslash), <accent> is the Unicode combining character for the
+diacritic that <command> generates.  Both <command> and <accent>
+must be strings.
 
-(defun parsebib-read-entry (type &optional pos strings fields replace-TeX)
-  "Read a BibTeX entry of type TYPE at the line POS is on.
-TYPE should be a string and should not contain the @
-sign.  The return value is the entry as an alist of (<field> .
-<contents>) cons pairs, or nil if no entry was found.  In this
-alist, the entry key is provided in the field \"=key=\" and the
-entry type in the field \"=type=\".
+The replacement string for <command> is composed of its
+obligatory argument (usually a single character) and the
+combining diacritic.
 
-If `parsebib-hashid-fields' is non-nil, a hash ID is added in the
-field \"=hashid=\".  The hash is computed on the basis of the
-contents of the fields listed in `parsebib-hashid-fields' using
-the function `secure-hash' and the `sha256' algorithm.
+See `parsebib-TeX-markup-replacement-alist' and the function
+`parsebib-clean-TeX-markup' to see how this variable is used.")
 
-POS can be a number or a marker.  It does not have to be at the
-beginning of a line, but the entry must start at the beginning of
-the line POS is on.  If POS is nil, it defaults to point.
+(defvar parsebib-TeX-literal-replacement-alist
+  ;; LaTeX2 Escapable "Special" Characters
+  `(("\\%" . "%") ("\\&" . "&") ("\\#" . "#") ("\\$" . "$")
+    ;; Quotes
+    ("``" . "\N{LEFT DOUBLE QUOTATION MARK}")
+    ("`"  . "\N{LEFT SINGLE QUOTATION MARK}")
+    ("''" . "\N{RIGHT DOUBLE QUOTATION MARK}")
+    ("'"  . "\N{RIGHT SINGLE QUOTATION MARK}")
+    ;; Dashes
+    ("---" . "\N{EM DASH}")
+    ("--"  . "\N{EN DASH}")
+    ;; Remove all remaining {braces}
+    ("{" . "") ("}" . ""))
+  "Alist of <literal>-<replacement> pairs.  Both are strings.
+This variable contains characters that are special in LaTeX and
+single-character, non-ASCII LaTeX commands.
 
-ENTRY should not be \"Comment\", \"Preamble\" or \"String\", but
-is otherwise not limited to any set of possible entry types.
+Note that adding pairs to this variable has no effect unless
+`parsebib-TeX-markup-replacement-alist' is adjusted accordingly.
+For example, after adding a <literal>-<replacement> pair, the
+following code will ensure that <literal> gets replaced with
+<replacement>.
 
-If STRINGS is provided, it should be a hash table with string
-abbreviations, which are used to expand abbrevs in the entry's
-fields.
+  (cl-callf (lambda (regex) (rx (or <literal> (regexp regex))))
+     (alist-get (quote parsebib--TeX-replace-literal)
+                parsebib-TeX-markup-replacement-alist))
 
-FIELDS is a list of the field names (as strings) to be read and
-included in the result.  Fields not in the list are ignored,
-except \"=key=\" and \"=type=\", which are always included.  Case
-is ignored when comparing fields to the list in FIELDS.  If
-FIELDS is nil, all fields are returned.
+See `parsebib-TeX-markup-replacement-alist' and the function
+`parsebib-clean-TeX-markup' to see how this variable is used.")
 
-REPLACE-TEX indicates whether TeX markup should be replaced with
-ASCII/Unicode characters.  See the variable
-`parsebib-TeX-markup-replace-alist' for details."
-  (unless (member-ignore-case type '("comment" "preamble" "string"))
-    (when pos (goto-char pos))
-    (beginning-of-line)
-    (when (parsebib--looking-at-goto-end (concat parsebib--entry-start type "[[:space:]]*[\(\{]"))
-      ;; Find the end of the entry and the beginning of the entry key.
-      (let* ((limit (save-excursion
-                      (backward-char)
-                      (parsebib--match-paren-forward)
-                      (point)))
-             (beg (progn
-                    (skip-chars-forward " \n\t\f") ; Note the space!
-                    (point)))
-             (key (when (parsebib--looking-at-goto-end (concat "\\(" parsebib--key-regexp "\\)[ \t\n\f]*,") 1)
-                    (buffer-substring-no-properties beg (point)))))
-        (or key (setq key "")) ; If no key was found, we pretend it's empty and try to read the entry anyway.
-        (skip-chars-forward "^," limit) ; Move to the comma after the entry key.
-        (let ((fields (cl-loop for field = (parsebib--parse-bibtex-field limit strings fields replace-TeX)
-                               while field
-                               if (consp field) collect field)))
-          (push (cons "=type=" type) fields)
-          (push (cons "=key=" key) fields)
-          (if parsebib-hashid-fields
-              (push (cons "=hashid=" (secure-hash 'sha256 (parsebib--get-hashid-string fields))) fields))
-          (nreverse fields))))))
+(defvar parsebib-TeX-markup-replacement-alist
+  `((parsebib--TeX-replace-command-or-accent
+     ;; This regexp matches any latex command i.e. anything that
+     ;; starts with a backslash. The name of the command which
+     ;; is either a string of alphabetic characters or a single
+     ;; non-alphabetic character is captured by group 1. The command
+     ;; can have a mandatory argument enclosed by braces which is
+     ;; captured by group 2. If the command has no arguments in
+     ;; brackets or braces, the first non-white space letter after
+     ;; the command is captured in group 3. This is to be able to deal
+     ;; with accents.
+     ;; Note that the capturing of arguments in braces is imperfect,
+     ;; because doing it properly requires sexp parsing. It will fail
+     ;; for cases like \command{\anothercommand{an arg}some text}.
+     . ,(rx "\\" (group-n 1 (or (1+ letter) nonl))
+            (: (* blank) (opt (or (: (* (: "[" (* (not (any "]"))) "]"))
+                                     "{" (group-n 2 (0+ (not (any "}")))) (opt "}"))
+                                  (group-n 3 letter))))))
+    (parsebib--TeX-replace-literal
+     . ,(rx-to-string `(or ,@(mapcar #'car parsebib-TeX-literal-replacement-alist)
+                           (1+ blank)))))
+  "Alist of replacements and strings for TeX markup.
+This is used in `parsebib-clean-TeX-markup' to make TeX markup more
+suitable for display.  Each item in the list consists of a replacement
+and a regexp.  The replacement can be a string (which will
+simply replace the match) or a function (the match will be
+replaced by the result of calling the function on the match
+string).  Earlier elements are evaluated before later ones, so if
+one string is a subpattern of another, the second must appear
+later (e.g. \"''\" is before \"'\").
 
-(defun parsebib--parse-bibtex-field (limit &optional strings fields replace-TeX)
-  "Parse the field starting at point.
-Do not search beyond LIMIT (a buffer position).  Return a
-cons (FIELD . VALUE), or nil if no field was found.
+For the common cases of replacing a LaTeX command or a literal
+it is faster to use `parsebib-TeX-command-replacement-alist'
+and `parsebib-TeX-literal-replacement-alist' respectively.")
 
-STRINGS is a hash table with string abbreviations, which are used
-to expand abbrevs in the field's value.
+(defun parsebib--TeX-replace-command-or-accent (string)
+  "Return the replacement text for the command or accent matched by STRING."
+  (let* ((cmd (match-string 1 string))
+         ;; bar is the argument in braces.
+         (bar (match-string 2 string))
+         ;; If there is no argument in braces, consider the letter after
+         ;; the command as the argument. Clean this argument.
+         (arg (parsebib-clean-TeX-markup (or (if bar bar (match-string 3 string)) "")))
+         ;; Check if the cmd is an accent that needs to be replaced
+         ;; and get its replacement.
+         (acc (alist-get cmd parsebib-TeX-accent-replacement-alist nil nil #'equal))
+         ;; If it is not an accent, check if it is a command that needs to be replaced
+         ;; and get the replacement.
+         (rep (or acc (alist-get cmd parsebib-TeX-command-replacement-alist nil nil #'equal))))
+    (cond
+     ;; If replacement is a function call it with the argument.
+     ((functionp rep) (funcall rep arg))
+     ;; Otherwise combine the replacement with the argument. The order of combination
+     ;; depends on whether the command is an accent or not.
+     (rep (if acc (concat arg rep) (concat rep arg)))
+     ;; Now we handle the fallback cases. If there is a braced argument but no
+     ;; replacement for the command was found, consider the replacement to be
+     ;; empty.
+     ((and bar (not (equal "" bar))) bar)
+     ;; Otherwise clean any optional arguments by discarding them.
+     (t (replace-regexp-in-string (rx "[" (* (not (any "]"))) "]") "" string t t)))))
 
-FIELDS is a list of the field names (as strings) to be read and
-included in the result.  Fields not in the list are ignored,
-except \"=key=\" and \"=type=\", which are always included.  Case
-is ignored when comparing fields to the list in FIELDS.  If
-FIELDS is nil, all fields are returned.
+(defun parsebib--TeX-replace-literal (string)
+  "Look up the replacement text for literal STRING."
+  (or (alist-get string parsebib-TeX-literal-replacement-alist nil nil #'equal)
+      " "))
 
-REPLACE-TEX indicates whether TeX markup should be replaced with
-ASCII/Unicode characters.  See the variable
-`parsebib-TeX-markup-replace-alist' for details."
-  (skip-chars-forward "\"#%'(),={} \n\t\f" limit) ; Move to the first char of the field name.
-  (unless (>= (point) limit)                      ; If we haven't reached the end of the entry.
-    (let ((beg (point)))
-      (if (parsebib--looking-at-goto-end (concat "\\(" parsebib--bibtex-identifier "\\)[[:space:]]*=[[:space:]]*") 1)
-          (let* ((field (buffer-substring-no-properties beg (point)))
-                 (replace-TeX (and replace-TeX
-                                   (not (member-ignore-case field parsebib-clean-TeX-markup-excluded-fields)))))
-            (if (or (not fields)
-                    (member-ignore-case field fields))
-                (cons field (parsebib--parse-bib-value limit strings replace-TeX))
-              (parsebib--parse-bib-value limit) ; Skip over the field value.
-              :ignore)))))) ; Ignore this field but keep the `cl-loop' in `parsebib-read-entry' going.
+(defun parsebib-clean-TeX-markup (string)
+  "Return STRING without TeX markup.
+Any substring matching the car of a cell in
+`parsebib-TeX-markup-replace-alist' is replaced with the
+corresponding cdr (if the cdr is a string), or with the result of
+calling the cdr on the match (if it is a function)."
+  (let ((case-fold-search nil))
+    (cl-loop for (replacement . pattern) in parsebib-TeX-markup-replacement-alist
+             do (setq string (replace-regexp-in-string
+                              pattern replacement string
+                              t t))
+             finally return string)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; High-level BibTeX/biblatex API ;;
@@ -789,7 +928,7 @@ Return a list of strings, each string a separate @Preamble."
       (cl-loop for item = (parsebib-find-next-item)
                while item do
                (when (cl-equalp item "preamble")
-                 (push (parsebib-read-preamble) res)))
+                 (push (parsebib--@preamble) res)))
       (nreverse res))))
 
 (defun parsebib-collect-comments ()
@@ -801,7 +940,7 @@ Return a list of strings, each string a separate @Comment."
       (cl-loop for item = (parsebib-find-next-item)
                while item do
                (when (cl-equalp item "comment")
-                 (push (parsebib-read-comment) res)))
+                 (push (parsebib--@comment) res)))
       (nreverse (delq nil res)))))
 
 (cl-defun parsebib-collect-strings (&key strings expand-strings)
@@ -821,7 +960,7 @@ STRINGS."
              for item = (parsebib-find-next-item)
              while item do
              (when (cl-equalp item "string")
-               (setq string (parsebib-read-string nil (if expand-strings strings)))
+               (setq string (parsebib-read-string (if expand-strings strings)))
                (puthash (car string) (cdr string) strings)))
     strings))
 
@@ -834,7 +973,14 @@ have to be empty.  It may contain entries from a previous parse.
 
 If STRINGS is non-nil, it should be a hash table of string
 definitions, which are used to expand abbreviations used in the
-entries.
+entries.  In addition, if STRINGS is set, sequences of whitespace
+in field values are collapsed into a single space, field values
+are unquoted (i.e., the double quotes or braces around them are
+removed), and TeX markup is prettified (see
+`parsebib-clean-TeX-markup' for details).  Note that @String
+expansion, collapsing of whitespace and prettifying TeX markup
+are not applied to fields listed in
+`parsebib-postprocessing-excluded-fields', but unquoting is.
 
 If INHERITANCE is non-nil, cross-references in the entries are
 resolved: if the crossref field of an entry points to an entry
@@ -863,18 +1009,27 @@ FIELDS is nil, all fields are returned."
       (setq inheritance (or (parsebib-find-bibtex-dialect)
                             bibtex-dialect
                             'BibTeX)))
-  (save-excursion
-    (goto-char (point-min))
-    (cl-loop with entry = nil
-             for entry-type = (parsebib-find-next-item)
-             while entry-type do
-             (unless (member-ignore-case entry-type '("preamble" "string" "comment"))
-               (setq entry (parsebib-read-entry entry-type nil strings fields))
-               (if entry
-                   (puthash (cdr (assoc-string "=key=" entry)) entry entries))))
-    (when inheritance
-      (parsebib-expand-xrefs entries inheritance))
-    entries))
+  ;; Ensure =key= and =type= are in `fields'.
+  (if fields
+      (setq fields (append (list "=key=" "=type=" fields))))
+  (condition-case err
+      (save-excursion
+        (goto-char (point-min))
+        (cl-loop with entry = nil
+                 for entry-type = (parsebib-find-next-item)
+                 while entry-type do
+                 (unless (member-ignore-case entry-type '("preamble" "string" "comment"))
+                   (setq entry (parsebib-read-entry fields strings (not (null strings))))
+                   (if entry
+                       (puthash (cdr (assoc-string "=key=" entry)) entry entries))))
+        (when inheritance
+          (parsebib-expand-xrefs entries inheritance))
+        entries)
+    (parsebib-error
+     (save-excursion
+       (goto-char (cadr err))
+       (signal (car err) (list (concat (apply #'format (cddr err))
+                                       (format " at position (%d,%d)" (line-number-at-pos) (current-column)))))))))
 
 (defun parsebib-find-bibtex-dialect ()
   "Find the BibTeX dialect of a file if one is set.
@@ -884,8 +1039,8 @@ file.  Return nil if no dialect is found."
   (save-excursion
     (goto-char (point-max))
     (let ((case-fold-search t))
-      (when (re-search-backward (concat parsebib--entry-start "comment") (- (point-max) 3000) t)
-        (let ((comment (parsebib-read-comment)))
+      (when (re-search-backward (concat parsebib--bibtex-entry-start "comment") (- (point-max) 3000) t)
+        (let ((comment (parsebib--@comment)))
           (when (and comment
                      (string-match-p "\\`{[ \n\t\r]*Local Variables:" comment)
                      (string-match-p "End:[ \n\t\r]*}\\'" comment)
@@ -906,7 +1061,12 @@ function `equal', the @String definitions are stored in it.
 
 If EXPAND-STRINGS is non-nil, abbreviations in the entries and
 @String definitions are expanded using the @String definitions
-already in STRINGS.
+already in STRINGS.  In addition, sequences of whitespace in
+field values are collapsed into a single space and field values
+are unquoted, i.e., the double quotes or braces around them are
+removed.  Note that @String expansion, collapsing of whitespace
+and prettifying TeX markup are not applied to fields listed in
+`parsebib-postprocessing-excluded-fields', but unquoting is.
 
 If INHERITANCE is non-nil, cross-references in the entries are
 resolved: if the crossref field of an entry points to an entry
@@ -932,35 +1092,44 @@ FIELDS is nil, all fields are returned.
 REPLACE-TEX indicates whether TeX markup should be replaced with
 ASCII/Unicode characters.  See the variable
 `parsebib-TeX-markup-replace-alist' for details."
-  (save-excursion
-    (goto-char (point-min))
-    (or (and (hash-table-p entries)
-             (eq (hash-table-test entries) 'equal))
-        (setq entries (make-hash-table :test #'equal)))
-    (or (and (hash-table-p strings)
-             (eq (hash-table-test strings) 'equal))
-        (setq strings (make-hash-table :test #'equal)))
-    (let ((dialect (or (parsebib-find-bibtex-dialect)
-                       bibtex-dialect
-                       'BibTeX))
-          preambles comments)
-      (cl-loop for item = (parsebib-find-next-item)
-               while item do
-               (cond
-                ((cl-equalp item "string") ; `cl-equalp' compares strings case-insensitively.
-                 (let ((string (parsebib-read-string nil (if expand-strings strings))))
-                   (if string
-                       (puthash (car string) (cdr string) strings))))
-                ((cl-equalp item "preamble")
-                 (push (parsebib-read-preamble) preambles))
-                ((cl-equalp item "comment")
-                 (push (parsebib-read-comment) comments))
-                ((stringp item)
-                 (let ((entry (parsebib-read-entry item nil (if expand-strings strings) fields replace-TeX)))
-                   (when entry
-                     (puthash (cdr (assoc-string "=key=" entry)) entry entries))))))
-      (when inheritance (parsebib-expand-xrefs entries (if (eq inheritance t) dialect inheritance)))
-      (list entries strings (nreverse preambles) (nreverse comments) dialect))))
+  (or (and (hash-table-p entries)
+           (eq (hash-table-test entries) 'equal))
+      (setq entries (make-hash-table :test #'equal)))
+  (or (and (hash-table-p strings)
+           (eq (hash-table-test strings) 'equal))
+      (setq strings (make-hash-table :test #'equal)))
+  ;; Ensure  =key= and =type= are in `fields'.
+  (if fields
+      (setq fields (append (list "=key=" "=type=") fields)))
+  (condition-case err
+      (let ((dialect (or (parsebib-find-bibtex-dialect)
+                         bibtex-dialect
+                         'BibTeX))
+            preambles comments)
+        (save-excursion
+          (goto-char (point-min))
+          (cl-loop for item = (parsebib-find-next-item)
+                   while item do
+                   (cond
+                    ((cl-equalp item "string") ; `cl-equalp' compares strings case-insensitively.
+                     (let ((string (parsebib-read-string (if expand-strings strings))))
+                       (if string
+                           (puthash (car string) (cdr string) strings))))
+                    ((cl-equalp item "preamble")
+                     (push (parsebib--@preamble) preambles))
+                    ((cl-equalp item "comment")
+                     (push (parsebib--@comment) comments))
+                    ((stringp item)
+                     (let ((entry (parsebib-read-entry fields (if expand-strings strings) replace-TeX)))
+                       (when entry
+                         (puthash (cdr (assoc-string "=key=" entry)) entry entries))))))
+          (when inheritance (parsebib-expand-xrefs entries (if (eq inheritance t) dialect inheritance)))
+          (list entries strings (nreverse preambles) (nreverse comments) dialect)))
+    (parsebib-error
+     (save-excursion
+       (goto-char (cadr err))
+       (signal (car err) (list (concat (apply #'format (cddr err))
+                                       (format " at position (%d,%d)" (line-number-at-pos) (current-column)))))))))
 
 ;;;;;;;;;;;;;;;;;;
 ;; CSL-JSON API ;;
@@ -988,7 +1157,7 @@ except `id' and `type', which are always included.  If FIELDS is
 nil, all fields are returned.
 
 If a JSON object is encountered that does not have an \"id\"
-field, a `parsebib-entry-type-error' is raised."
+field, a `parsebib-error' is raised."
   (or (and (hash-table-p entries)
            (eq (hash-table-test entries) 'equal))
       (setq entries (make-hash-table :test #'equal)))
@@ -1013,14 +1182,14 @@ field, a `parsebib-entry-type-error' is raised."
       ;; the first non-whitespace character in the file must be an opening
       ;; bracket;
       (if (not (looking-at-p "[\n\t ]*\\["))
-          (error "[Parsebib] Not a valid CSL-JSON file"))
+          (error "[Parsebib Error] Not a valid CSL-JSON file"))
       (let ((continue t))
         (while continue
           ;; We also know that the first non-whitespace character after that
           ;; must be an opening brace:
           (skip-chars-forward "^{")
-          (if-let ((entry (funcall parse))
-                   (id (alist-get 'id entry)))
+          (if-let* ((entry (funcall parse))
+                    (id (alist-get 'id entry)))
               (progn
                 (when fields
                   (setq entry (seq-filter (lambda (elt)
@@ -1030,11 +1199,12 @@ field, a `parsebib-entry-type-error' is raised."
                                 (parsebib-stringify-json entry year-only)
                               entry)
                          entries))
-            (signal 'parsebib-entry-type-error (list (point))))
+            (signal 'parsebib-error (list (format "Malformed JSON entry at position (%d,%d)"
+                                                  (line-number-at-pos) (current-column)))))
           ;; Parsing an entry moves point to the end of the entry.  The next
           ;; character must be a comma if there is another entry.  If we're not
           ;; seeing a comma, we've reached the end of the file:
-          (if (not (looking-at-p "[\n-t ]*,"))
+          (if (not (looking-at-p "[\n\t ]*,"))
               (setq continue nil))))))
   entries)
 
@@ -1159,9 +1329,9 @@ try to return only a year (in a date range, just the year of the
 first date).  If no year part is present, SHORT returns
 \"XXXX\"."
   (if short
-      (if-let ((date-parts (alist-get 'date-parts date))
-               (first-date (aref date-parts 0))
-               (year (aref first-date 0)))
+      (if-let* ((date-parts (alist-get 'date-parts date))
+                (first-date (aref date-parts 0))
+                (year (aref first-date 0)))
           (format "%s" year)
         "XXXX")
 
@@ -1169,7 +1339,7 @@ first date).  If no year part is present, SHORT returns
     (setq date (copy-sequence date))
 
     ;; Set start-date and end-date.
-    (when-let ((date-parts (alist-get 'date-parts date)))
+    (when-let* ((date-parts (alist-get 'date-parts date)))
       (let* ((start-date (aref date-parts 0))
              (end-date (if (= (length date-parts) 2)
                            (aref date-parts 1))))
@@ -1180,13 +1350,13 @@ first date).  If no year part is present, SHORT returns
                            (parsebib--json-stringify-date-part end-date)))))
 
     ;; Set season.
-    (when-let ((season (alist-get 'season date)))
+    (when-let* ((season (alist-get 'season date)))
       (if (numberp season)
           (setf (alist-get 'season date)
                 (aref ["Spring" "Summer" "Autumn" "Winter"] (1- season)))))
 
     ;; Set circa.
-    (when-let ((circa (alist-get 'circa date)))
+    (when-let* ((circa (alist-get 'circa date)))
       (setf (alist-get 'circa date) "ca."))
 
     ;; Now convert the date.
