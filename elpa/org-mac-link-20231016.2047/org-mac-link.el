@@ -8,7 +8,8 @@
 ;;         Daniil Frumin <difrumin@gmail.com>
 ;;         Alan Schmitt <alan.schmitt@polytechnique.org>
 ;;         Mike McLean <mike.mclean@pobox.com>
-;; Version: 1.9
+;; Package-Version: 20231016.2047
+;; Package-Revision: e30171a6e98d
 ;; Keywords: files, wp, url, org
 ;; Package-Requires: ((emacs "27.1"))
 ;; Maintainer: Aimé Bertrand <aime.bertrand@macowners.club>
@@ -51,11 +52,12 @@
 ;; Vimperator/Firefox.app - Grab the url of the frontmost tab in the frontmost window
 ;; Safari.app - Grab the url of the frontmost tab in the frontmost window
 ;; Google Chrome.app - Grab the url of the frontmost tab in the frontmost window
+;; Chromium.app - Grab the url of the frontmost tab in the frontmost window
 ;; Brave.app - Grab the url of the frontmost tab in the frontmost window
 ;; Together.app - Grab links to the selected items in the library list
 ;; Skim.app - Grab a link to the selected page in the topmost pdf document
 ;; Microsoft Outlook.app - Grab a link to the selected message in the message list
-;; DEVONthink Pro Office.app - Grab a link to the selected DEVONthink item(s); open DEVONthink item by reference
+;; DEVONthink*.app - Grab a link to the selected DEVONthink item(s); open DEVONthink item by reference
 ;; Evernote.app - Grab a link to the selected Evernote item(s); open Evernote item by ID
 ;; qutebrowser.app - Grab the url of the frontmost tab in the frontmost window
 ;;
@@ -85,6 +87,9 @@
 ;; customizing the group `org-mac-link'.  Changes take effect
 ;; immediately.
 ;;
+;; You can also add grab handlers for other apps, just by updating
+;; `org-mac-link-descriptors', for instance:
+;; `(push '("W" "ord" my-word-handler t) org-mac-link-descriptors)'
 ;;
 ;;; Code:
 
@@ -122,16 +127,10 @@ Do not escape spaces as the AppleScript call will quote this string."
   :type 'string)
 
 (defcustom org-mac-link-devonthink-app-p t
-  "Add menu option [d]EVONthink to grab links from DEVONthink Pro Office.app."
-  :tag "Grab DEVONthink Pro Office.app links"
+  "Add menu option [d]EVONthink to grab links from DEVONthink*.app."
+  :tag "Grab DEVONthink*.app links"
   :group 'org-mac-link
   :type 'boolean)
-
-(defcustom org-mac-link-devonthink-app-name "DEVONthink Pro"
-  "Name of DEVONthink Pro application."
-  :tag "Name of DEVONthink Pro application"
-  :group 'org-mac-link
-  :type 'string)
 
 (defcustom org-mac-link-addressbook-app-p t
   "Add menu option [a]ddressbook to grab links from AddressBook.app."
@@ -160,6 +159,12 @@ Do not escape spaces as the AppleScript call will quote this string."
 (defcustom org-mac-link-chrome-app-p t
   "Add menu option [c]hrome to grab links from Google Chrome.app."
   :tag "Grab Google Chrome.app links"
+  :group 'org-mac-link
+  :type 'boolean)
+
+(defcustom org-mac-link-chromium-app-p t
+  "Add menu option [C]hromium to grab links from Chromium.app."
+  :tag "Grab Chromium.app links"
   :group 'org-mac-link
   :type 'boolean)
 
@@ -237,6 +242,34 @@ Do not escape spaces as the AppleScript call will quote this string."
       (setq return (shell-command-to-string cmd))
       (concat "\"" (org-trim return) "\""))))
 
+
+;; List of lists representing grab menu items.
+;;
+;; Each element corresponds to one application, listing the menu shortcut,
+;; rest of the application name, grab handler function name, and
+;; predicate indicating whether that application should be shown in the menu.
+;;
+;; The predicates are customizable variables whose value is reloaded upon each
+;; invocation of the grab menu, see `org-mac-link-get-link'.
+(defvar org-mac-link-descriptors
+  `(("F" "inder" org-mac-link-finder-insert-selected org-mac-link-finder-app-p)
+    ("m" "ail" org-mac-link-mail-insert-selected org-mac-link-mail-app-p)
+    ("d" "EVONthink" org-mac-link-devonthink-item-insert-selected org-mac-link-devonthink-app-p)
+    ("o" "utlook" org-mac-link-outlook-message-insert-selected org-mac-link-outlook-app-p)
+    ("a" "ddressbook" org-mac-link-addressbook-item-insert-selected org-mac-link-addressbook-app-p)
+    ("s" "afari" org-mac-link-safari-insert-frontmost-url org-mac-link-safari-app-p)
+    ("f" "irefox" org-mac-link-firefox-insert-frontmost-url org-mac-link-firefox-app-p)
+    ("v" "imperator" org-mac-link-vimperator-insert-frontmost-url org-mac-link-firefox-vimperator-p)
+    ("c" "hrome" org-mac-link-chrome-insert-frontmost-url org-mac-link-chrome-app-p)
+    ("C" "hromium" org-mac-link-chromium-insert-frontmost-url org-mac-link-chromium-app-p)
+    ("b" "rave" org-mac-link-brave-insert-frontmost-url org-mac-link-brave-app-p)
+    ("e" "evernote" org-mac-link-evernote-note-insert-selected org-mac-link-evernote-app-p)
+    ("t" "ogether" org-mac-link-together-insert-selected org-mac-link-together-app-p)
+    ("S" "kim" org-mac-link-skim-insert-page org-mac-link-skim-app-p)
+    ("A" "crobat" org-mac-link-acrobat-insert-page org-mac-link-acrobat-app-p)
+    ("q" "utebrowser" org-mac-link-qutebrowser-insert-frontmost-url org-mac-link-qutebrowser-app-p)))
+
+
 ;;;###autoload
 (defun org-mac-link-get-link (&optional beg end)
   "Prompt for an application to grab a link from.
@@ -246,29 +279,13 @@ is active, that will be the link's description."
    (if (use-region-p)
        (list (region-beginning) (region-end))
        '()))
-  (let* ((descriptors
-	  `(("F" "inder" org-mac-link-finder-insert-selected ,org-mac-link-finder-app-p)
-	    ("m" "ail" org-mac-link-mail-insert-selected ,org-mac-link-mail-app-p)
-	    ("d" "EVONthink Pro Office" org-mac-link-devonthink-item-insert-selected
-	     ,org-mac-link-devonthink-app-p)
-	    ("o" "utlook" org-mac-link-outlook-message-insert-selected ,org-mac-link-outlook-app-p)
-	    ("a" "ddressbook" org-mac-link-addressbook-item-insert-selected ,org-mac-link-addressbook-app-p)
-	    ("s" "afari" org-mac-link-safari-insert-frontmost-url ,org-mac-link-safari-app-p)
-	    ("f" "irefox" org-mac-link-firefox-insert-frontmost-url ,org-mac-link-firefox-app-p)
-	    ("v" "imperator" org-mac-link-vimperator-insert-frontmost-url ,org-mac-link-firefox-vimperator-p)
-	    ("c" "hrome" org-mac-link-chrome-insert-frontmost-url ,org-mac-link-chrome-app-p)
-	    ("b" "rave" org-mac-link-brave-insert-frontmost-url ,org-mac-link-brave-app-p)
-        ("e" "evernote" org-mac-link-evernote-note-insert-selected ,org-mac-link-evernote-app-p)
-	    ("t" "ogether" org-mac-link-together-insert-selected ,org-mac-link-together-app-p)
-	    ("S" "kim" org-mac-link-skim-insert-page ,org-mac-link-skim-app-p)
-	    ("A" "crobat" org-mac-link-acrobat-insert-page ,org-mac-link-acrobat-app-p)
-	    ("q" "utebrowser" org-mac-link-qutebrowser-insert-frontmost-url ,org-mac-link-qutebrowser-app-p)))
+  (let* ((descriptors org-mac-link-descriptors)
          (menu-string (make-string 0 ?x))
          input)
 
     ;; Create the menu string for the keymap
     (mapc (lambda (descriptor)
-            (when (elt descriptor 3)
+            (when (eval (elt descriptor 3)) ;eval needed to reload latest predicate values
               (setf menu-string (concat menu-string
 					"[" (elt descriptor 0) "]"
 					(elt descriptor 1) " "))))
@@ -280,7 +297,7 @@ is active, that will be the link's description."
     (setq input (read-char-exclusive))
     (mapc (lambda (descriptor)
             (let ((key (elt (elt descriptor 0) 0))
-                  (active (elt descriptor 3))
+                  (active (eval (elt descriptor 3))) ;eval needed to reload latest predicate values
                   (grab-function (elt descriptor 2)))
               (when (and active (eq input key))
                 (if (and beg end)
@@ -457,6 +474,42 @@ The links are of the form <link>::split::<name>."
   "Insert the link to the frontmost window of the Chrome.app."
   (interactive)
   (insert (org-mac-link-chrome-get-frontmost-url)))
+
+
+
+;;; Handle links from Chromium.app
+;; Grab the frontmost url from Chromium. Same limitations as
+;; Firefox because Chrome doesn't publish an Applescript dictionary
+
+(defun org-mac-link-applescript-chromium-get-frontmost-url ()
+  "AppleScript to get the links to the frontmost window of the Chromium.app."
+  (let ((result
+         (org-mac-link-do-applescript
+          (concat
+           "set frontmostApplication to path to frontmost application\n"
+           "tell application \"Chromium\"\n"
+           "	set theUrl to get URL of active tab of first window\n"
+           "	set theResult to (get theUrl) & \"::split::\" & (get name of window 1)\n"
+           "end tell\n"
+           "activate application (frontmostApplication as text)\n"
+           "set links to {}\n"
+           "copy theResult to the end of links\n"
+           "return links as string\n"))))
+    (replace-regexp-in-string
+     "^\"\\|\"$" "" (car (split-string result "[\r\n]+" t)))))
+
+;;;###autoload
+(defun org-mac-link-chromium-get-frontmost-url ()
+  "Get the link to the frontmost window of the Chromium.app."
+  (interactive)
+  (message "Applescript: Getting Chromium url...")
+  (org-mac-link-paste-applescript-links (org-mac-link-applescript-chromium-get-frontmost-url)))
+
+;;;###autoload
+(defun org-mac-link-chromium-insert-frontmost-url ()
+  "Insert the link to the frontmost window of the Chromium.app."
+  (interactive)
+  (insert (org-mac-link-chromium-get-frontmost-url)))
 
 
 
@@ -923,20 +976,20 @@ note(s) in Evernote.app and make a link out of it/them."
 
 
 
-;;; Handle links from DEVONthink Pro Office.app
+;;; Handle links from DEVONthink*.app
 
 (org-link-set-parameters "x-devonthink-item" :follow #'org-mac-link-devonthink-item-open)
 
 (defun org-mac-link-devonthink-item-open (uid _)
-  "Open UID, which is a reference to an item in DEVONthink Pro Office."
+  "Open UID, which is a reference to an item in DEVONthink*.app."
   (shell-command (concat "open \"x-devonthink-item:" uid "\"")))
 
 (defun org-mac-link-applescript-get-selected-devonthink-item ()
-  "AppleScript to create links to selected items in DEVONthink Pro Office.app."
+  "AppleScript to create links to selected items in DEVONthink*.app."
   (org-mac-link-do-applescript
    (concat
     "set theLinkList to {}\n"
-    "tell application \"" org-mac-link-devonthink-app-name "\"\n"
+    "tell application id \"DNtp\" \n"
     "set selectedRecords to selection\n"
     "set selectionCount to count of selectedRecords\n"
     "if (selectionCount < 1) then\n"
@@ -953,18 +1006,18 @@ note(s) in Evernote.app and make a link out of it/them."
     "return theLinkList as string")))
 
 (defun org-mac-link-devonthink-get-links ()
-  "Create links to the item(s) currently selected in DEVONthink Pro Office.
+  "Create links to the item(s) currently selected in DEVONthink*.app.
 This will use AppleScript to get the `uuid' and the `name' of the
-selected items in DEVONthink Pro Office.app and make links out of it/them.
+selected items in DEVONthink*.app and make links out of it/them.
 This function will push the Org-syntax text to the kill ring, and return it."
   (message "Org Mac DEVONthink: looking for selected items...")
   (org-mac-link-paste-applescript-links (org-mac-link-applescript-get-selected-devonthink-item)))
 
 ;;;###autoload
 (defun org-mac-link-devonthink-item-insert-selected ()
-  "Insert a link to the item(s) currently selected in DEVONthink Pro Office.
+  "Insert a link to the item(s) currently selected in DEVONthink*.app.
 This will use AppleScript to get the `uuid'(s) and the name(s) of the
-selected items in DEVONthink Pro Office and make link(s) out of it/them."
+selected items in DEVONthink*.app and make link(s) out of it/them."
   (interactive)
   (insert (org-mac-link-devonthink-get-links)))
 
