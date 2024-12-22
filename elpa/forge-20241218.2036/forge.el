@@ -7,6 +7,22 @@
 ;; Homepage: https://github.com/magit/forge
 ;; Keywords: git tools vc
 
+;; Package-Version: 20241218.2036
+;; Package-Revision: 3b80ace32c23
+;; Package-Requires: (
+;;     (emacs "29.1")
+;;     (compat "30.0.0.0")
+;;     (closql "2.1.0")
+;;     (dash "2.19.1")
+;;     (emacsql "4.1.0")
+;;     (ghub "4.2.0")
+;;     (let-alist "1.0.6")
+;;     (magit "4.1.3")
+;;     (markdown-mode "2.6")
+;;     (seq "2.24")
+;;     (transient "0.8.0")
+;;     (yaml "0.5.5"))
+
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is free software: you can redistribute it and/or modify
@@ -66,12 +82,7 @@
   "Whether to add Forge's sections to `magit-status-sections-hook'.
 
 If you want to disable this, then you must set this to nil before
-`forge' is loaded.
-
-If this is nil, then `forge-toggle-display-in-status-buffer' can
-no longer do its job.  It might be better to set the global value
-of `forge-display-in-status-buffer' to nil instead.  That way you
-can still display topics on demand in the status buffer.")
+`forge' is loaded.")
 
 (when forge-add-default-sections
   (magit-add-section-hook 'magit-status-sections-hook #'forge-insert-pullreqs nil t)
@@ -109,15 +120,11 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
   (transient-insert-suffix 'magit-dispatch "o"
     '("N" "Forge" forge-dispatch))
 
-  (transient-append-suffix 'magit-fetch "m"
-    '("n" "forge topics" forge-pull))
-  (transient-append-suffix 'magit-fetch "n"
-    '("N" "forge notifications" forge-pull-notifications))
+  (transient-append-suffix 'magit-fetch "m" '("n" forge-pull))
+  (transient-append-suffix 'magit-fetch "n" '("N" forge-pull-notifications))
 
-  (transient-append-suffix 'magit-pull "m"
-    '("n" "forge topics" forge-pull))
-  (transient-append-suffix 'magit-pull "n"
-    '("N" "forge notifications" forge-pull-notifications))
+  (transient-append-suffix 'magit-pull  "m" '("n" forge-pull))
+  (transient-append-suffix 'magit-pull  "n" '("N" forge-pull-notifications))
 
   (transient-append-suffix 'magit-branch "w"
     '("f" "pull-request" forge-checkout-pullreq))

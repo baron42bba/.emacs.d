@@ -104,9 +104,10 @@
 
 (defconst forge--signal-no-entry '(:tracked :stub :insert!))
 
-(defun forge--get-remote (&optional warn)
+(defun forge--get-remote (&optional warn ignore-variable)
   (let* ((remotes (magit-list-remotes))
-         (config (magit-get "forge.remote"))
+         (config (and (not ignore-variable)
+                      (magit-get "forge.remote")))
          (remote (if (cdr remotes)
                      (or (car (member config remotes))
                          (car (member "upstream" remotes))
@@ -114,13 +115,19 @@
                    (car remotes))))
     (when (and warn config remote (not (equal config remote)))
       (message "Ignored forge.remote=%s; no such remote.\nSee %s." config
-               "https://magit.vc/manual/forge/Repository-Detection.html"))
+               "https://magit.vc/manual/forge/How-Forge-Detection-Works.html"))
     remote))
 
 (cl-defmethod forge-get-repository ((_(eql :id)) id)
   (closql-get (forge-db) (substring-no-properties id) 'forge-repository))
 
-(cl-defmethod forge-get-repository ((demand symbol) &optional remote)
+(cl-defmethod forge-get-repository ((_(eql :dir)) dir)
+  (let ((default-directory dir)
+        (forge-buffer-repository nil)
+        (forge-buffer-topic nil))
+    (forge-get-repository :stub? nil 'notatpt)))
+
+(cl-defmethod forge-get-repository ((demand symbol) &optional remote notatpt)
   "Return the current forge repository.
 
 First check if `forge-buffer-repository', or if that is nil, then
@@ -130,7 +137,10 @@ then return that repository.
 Otherwise return the repository for `default-directory', if that
 exists and satisfies DEMAND.  If that fails too, then return nil
 or signal an error, depending on DEMAND."
-  (or (and-let* ((repo (or (forge-buffer-repository)
+  (or (and-let* ((repo (and (not notatpt)
+                            (forge-repository-at-point))))
+        (forge-get-repository repo 'noerror demand))
+      (and-let* ((repo (or (forge-buffer-repository)
                            (and forge-buffer-topic
                                 (forge-get-repository forge-buffer-topic)))))
         (forge-get-repository repo 'noerror demand))
@@ -157,7 +167,8 @@ or signal an error, depending on DEMAND."
                                 config "that remote does not exist.")))
                      ((magit-list-remotes) "Cannot decide on remote to use.")
                      (t "No remote configured."))
-               "https://magit.vc/manual/forge/Repository-Detection.html")))))))
+               "https://magit.vc/manual/forge/How-Forge-Detection-Works.html"
+               )))))))
 
 (cl-defmethod forge-get-repository ((url string) &optional remote demand)
   "Return the repository at URL."
@@ -282,28 +293,6 @@ See `forge-alist' for valid Git hosts."
 (defun forge--get-repository:tracked? ()
   (forge-get-repository :tracked?))
 
-(defun forge-get-worktree (repo)
-  "Validate and return the worktree recorded for REPO.
-If no worktree is recorded, return nil.  If a worktree is recorded but
-that doesn't exist anymore, then discard the recorded value and return
-nil."
-  (and-let* ((worktree (oref repo worktree)))
-    (if (file-directory-p worktree)
-        worktree
-      (oset repo worktree nil)
-      nil)))
-
-;;;; Current
-
-(defun forge-current-repository (&optional demand)
-  "Return the repository at point or being visited.
-If there is no such repository and DEMAND is non-nil, then signal
-an error."
-  (or (forge-repository-at-point)
-      (forge-buffer-repository)
-      (forge-get-repository :known?)
-      (and demand (user-error "No current repository"))))
-
 (defun forge-repository-at-point (&optional demand)
   "Return the repository at point.
 If there is no such repository and DEMAND is non-nil, then signal
@@ -322,11 +311,36 @@ an error."
         (forge-get-repository topic))
       (and (not forge-buffer-unassociated-p)
            (or (forge-buffer-repository)
-               (forge-get-repository :known?)))))
+               (forge-get-repository :known? nil 'notatpt)))))
 
 (defun forge-buffer-repository ()
   (and-let* ((id forge-buffer-repository))
     (forge-get-repository :id id)))
+
+(defun forge-set-buffer-repository ()
+  "Initialize the value of variable `forge-buffer-repository'."
+  (unless forge-buffer-repository
+    (and-let* ((repo (forge-get-repository :known?)))
+      (setq forge-buffer-repository (oref repo id)))))
+
+(add-hook 'magit-mode-hook #'forge-set-buffer-repository)
+
+(defun forge-get-worktree (repo)
+  "Validate, remember and return a worktree for REPO.
+If `default-directory' is within one of REPO's worktrees, record that
+location in its `worktree' slot and return it.  Otherwise, if a worktree
+has been recorded before, validate that.  If it still is a worktree of
+REPO, return it, else set the slot to nil and return nil."
+  (if-let (((forge-repository-equal
+             repo (forge-get-repository :dir default-directory)))
+           (current-tree (magit-toplevel)))
+      (oset repo worktree current-tree)
+    (and-let* ((saved-tree (oref repo worktree)))
+      (and (file-accessible-directory-p saved-tree)
+           (if (forge-repository-equal
+                repo (forge-get-repository :dir saved-tree))
+               saved-tree
+             (oset repo worktree nil))))))
 
 ;;;; List
 
@@ -414,7 +428,7 @@ forges and hosts."
                          (forge-sql [:select [githost owner name]
                                      :from repository]))
                  nil t nil nil
-                 (and-let* ((default (forge-current-repository)))
+                 (and-let* ((default (forge-get-repository :stub?)))
                    (format "%s/%s @%s"
                            (oref default owner)
                            (oref default name)
@@ -474,11 +488,10 @@ forges and hosts."
      topic
      :callback (lambda ()
                  (forge-refresh-buffer)
-                 (when (and transient--showp
-                            (memq transient-current-command
-                                  '(forge-topic-menu
-                                    forge-topics-menu
-                                    forge-notifications-menu)))
+                 (when (transient-active-prefix
+                        '(forge-topic-menu
+                          forge-topics-menu
+                          forge-notifications-menu))
                    (transient--refresh-transient))))))
 
 (defvar forge--mode-line-buffer nil)

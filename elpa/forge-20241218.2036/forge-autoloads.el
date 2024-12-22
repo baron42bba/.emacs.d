@@ -29,16 +29,12 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
 
 ;;; Generated autoloads from forge-commands.el
 
- (autoload 'forge-dispatch "forge-commands" nil t)
- (autoload 'forge-configure "forge-commands" nil t)
-(autoload 'forge-pull "forge-commands" "\
-Pull forge topics for the current repository if it is already tracked.
-If the current repository is still untracked locally, or the current
-repository cannot be determined, instead invoke `forge-add-repository'." t)
-(autoload 'forge-pull-notifications "forge-commands" "\
-Fetch notifications for all repositories from the current forge." t)
- (autoload 'forge-pull-topic "forge-commands" nil t)
- (autoload 'forge-pull-this-topic "forge-commands" nil t)
+(autoload 'forge-dispatch "forge-commands" nil t)
+(autoload 'forge-configure "forge-commands" nil t)
+(autoload 'forge-pull "forge-commands" nil t)
+(autoload 'forge-pull-notifications "forge-commands" nil t)
+(autoload 'forge-pull-topic "forge-commands" nil t)
+(autoload 'forge-pull-this-topic "forge-commands" nil t)
 (autoload 'forge-browse-issues "forge-commands" "\
 Visit the current repository's issues using a browser." t)
 (autoload 'forge-browse-pullreqs "forge-commands" "\
@@ -77,7 +73,7 @@ Read a REMOTE and visit it using a browser.
 Read a REPOSITORY and visit it using a browser.
 
 (fn REPOSITORY)" t)
- (autoload 'forge-browse-this-topic "forge-commands" nil t)
+(autoload 'forge-browse-this-topic "forge-commands" nil t)
 (autoload 'forge-browse-this-repository "forge-commands" "\
 Visit the repository at point using a browser." t)
 (autoload 'forge-copy-url-at-point-as-kill "forge-commands" "\
@@ -86,24 +82,30 @@ Copy the url of the thing at point." t)
 Visit the thing at point using a browser." t)
 (autoload 'forge-visit-topic "forge-commands" "\
 Read a TOPIC and visit it.
-By default only offer open topics for completion;
-with a prefix argument also closed topics.
+By default only offer active topics for completion.  With a prefix
+argument offer all topics.  While completion is in progress, \\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts
+the limitation to active topics.
 
 (fn TOPIC)" t)
 (autoload 'forge-visit-issue "forge-commands" "\
 Read an ISSUE and visit it.
-By default only offer open topics for completion;
-with a prefix argument also closed topics.
+By default only offer active issues for completion.  With a prefix
+argument offer all topics.  While completion is in progress, \\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts
+the limitation to active issues.
 
 (fn ISSUE)" t)
 (autoload 'forge-visit-pullreq "forge-commands" "\
 Read a PULL-REQUEST and visit it.
-By default only offer open topics for completion;
-with a prefix argument also closed topics.
+By default only offer active pull-requests for completion.  With a
+prefix argument offer all topics.  While completion is in progress,
+\\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts the limitation to active pull-requests.
 
 (fn PULL-REQUEST)" t)
 (autoload 'forge-visit-this-topic "forge-commands" "\
-Visit the topic at point." t)
+Visit the topic at point.
+With prefix argument MENU, also show the topic menu.
+
+(fn &optional MENU)" t)
 (autoload 'forge-visit-this-repository "forge-commands" "\
 Visit the repository at point." t)
 (autoload 'forge-branch-pullreq "forge-commands" "\
@@ -116,6 +118,7 @@ Create, configure and checkout a new branch from a pull-request.
 Please see the manual for more information.
 
 (fn PULLREQ)" t)
+(autoload 'forge-checkout-this-pullreq "forge-commands" nil t)
 (autoload 'forge-checkout-worktree "forge-commands" "\
 Create, configure and checkout a new worktree from a pull-request.
 This is like `forge-checkout-pullreq', except that it also
@@ -129,25 +132,13 @@ If the fork already exists, then that isn't an error; the remote
 is added anyway.  Currently this only supports Github and Gitlab.
 
 (fn FORK REMOTE)" t)
-(autoload 'forge-merge "forge-commands" "\
-Merge the current pull-request using METHOD using the forge's API.
-
-If there is no current pull-request or with a prefix argument,
-then read pull-request PULLREQ to visit instead.
-
-Use of this command is discouraged.  Unless the remote repository
-is configured to disallow that, you should instead merge locally
-and then push the target branch.  Forges detect that you have
-done that and respond by automatically marking the pull-request
-as merged.
-
-(fn PULLREQ METHOD)" t)
+(autoload 'forge-merge "forge-commands" nil t)
 (autoload 'forge-rename-default-branch "forge-commands" "\
 Rename the default branch to NEWNAME.
-Change the name on the upstream remote and locally, and update
-the upstream remotes of local branches accordingly." t)
- (autoload 'forge-add-pullreq-refspec "forge-commands" nil t)
- (autoload 'forge-add-repository "forge-commands" nil t)
+Change the name on the upstream remotely and locally, and update the
+upstream remotes of local branches accordingly." t)
+(autoload 'forge-add-pullreq-refspec "forge-commands" nil t)
+(autoload 'forge-add-repository "forge-commands" nil t)
 (autoload 'forge-add-user-repositories "forge-commands" "\
 Add all of USER's repositories from HOST to the database.
 This may take a while.  Only Github is supported at the moment.
@@ -215,8 +206,7 @@ heavy development." t)
 
 ;;; Generated autoloads from forge-notify.el
 
-(autoload 'forge-list-notifications "forge-notify" "\
-List notifications." t)
+(autoload 'forge-list-notifications "forge-notify" nil t)
 (register-definition-prefixes "forge-notify" '("forge-"))
 
 
@@ -237,9 +227,9 @@ List notifications." t)
 
 ;;; Generated autoloads from forge-repos.el
 
- (autoload 'forge-repositories-menu "forge-repos" nil t)
- (autoload 'forge-list-repositories "forge-repos" nil t)
- (autoload 'forge-list-owned-repositories "forge-repos" nil t)
+(autoload 'forge-repositories-menu "forge-repos" nil t)
+(autoload 'forge-list-repositories "forge-repos" nil t)
+(autoload 'forge-list-owned-repositories "forge-repos" nil t)
 (register-definition-prefixes "forge-repos" '("forge-"))
 
 
@@ -255,36 +245,26 @@ List notifications." t)
 
 ;;; Generated autoloads from forge-tablist.el
 
-(register-definition-prefixes "forge-tablist" '("forge--"))
+(register-definition-prefixes "forge-tablist" '("forge--tab"))
 
 
 ;;; Generated autoloads from forge-topic.el
 
- (autoload 'forge-topic-menu "forge-topic" nil t)
- (autoload 'forge-topic-state-menu "forge-topic" nil t)
- (autoload 'forge-topic-status-menu "forge-topic" nil t)
+(autoload 'forge-topic-menu "forge-topic" nil t)
+(autoload 'forge-topic-state-menu "forge-topic" nil t)
+(autoload 'forge-topic-status-menu "forge-topic" nil t)
 (register-definition-prefixes "forge-topic" '("forge-"))
 
 
 ;;; Generated autoloads from forge-topics.el
 
- (autoload 'forge-topics-menu "forge-topics" nil t)
- (autoload 'forge-list-topics "forge-topics" nil t)
- (autoload 'forge-list-labeled-topics "forge-topics" nil t)
- (autoload 'forge-list-assigned-topics "forge-topics" nil t)
- (autoload 'forge-list-authored-topics "forge-topics" nil t)
- (autoload 'forge-list-owned-topics "forge-topics" nil t)
- (autoload 'forge-list-issues "forge-topics" nil t)
- (autoload 'forge-list-labeled-issues "forge-topics" nil t)
- (autoload 'forge-list-assigned-issues "forge-topics" nil t)
- (autoload 'forge-list-authored-issues "forge-topics" nil t)
- (autoload 'forge-list-owned-issues "forge-topics" nil t)
- (autoload 'forge-list-pullreqs "forge-topics" nil t)
- (autoload 'forge-list-labeled-pullreqs "forge-topics" nil t)
- (autoload 'forge-list-assigned-pullreqs "forge-topics" nil t)
- (autoload 'forge-list-requested-reviews "forge-topics" nil t)
- (autoload 'forge-list-authored-pullreqs "forge-topics" nil t)
- (autoload 'forge-list-owned-pullreqs "forge-topics" nil t)
+(autoload 'forge-topics-menu "forge-topics" nil t)
+(autoload 'forge-list-topics "forge-topics" nil t)
+(autoload 'forge-list-issues "forge-topics" nil t)
+(autoload 'forge-list-pullreqs "forge-topics" nil t)
+(autoload 'forge-list-global-topics "forge-topics" nil t)
+(autoload 'forge-list-global-issues "forge-topics" nil t)
+(autoload 'forge-list-global-pullreqs "forge-topics" nil t)
 (register-definition-prefixes "forge-topics" '("forge-"))
 
 ;;; End of scraped data

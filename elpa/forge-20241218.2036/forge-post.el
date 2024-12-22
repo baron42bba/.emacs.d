@@ -41,7 +41,7 @@
 (defcustom forge-buffer-draft-p nil
   "Whether new pull-requests start out as drafts by default.
 
-The buffer-local value is use to keep track of the draft status
+The buffer-local value is used to keep track of the draft status
 of the current pull-request."
   :package-version '(forge . "0.4.0")
   :group 'forge
@@ -99,7 +99,9 @@ an error."
   "<remap> <iswitchb-kill-buffer>"         #'forge-post-cancel
   "<remap> <evil-quit>"                    #'forge-post-cancel)
 
-(define-derived-mode forge-post-mode gfm-mode "Forge-Post" "")
+(define-derived-mode forge-post-mode gfm-mode "Forge-Post"
+  "Major mode for editing topic posts."
+  :interactive nil)
 
 (defvar-local forge--buffer-base-branch nil)
 (defvar-local forge--buffer-head-branch nil)

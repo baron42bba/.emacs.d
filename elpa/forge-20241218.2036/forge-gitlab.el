@@ -538,9 +538,7 @@
      `(mutation (mergeRequestSetDraft
                  [(input $input MergeRequestSetDraftInput!)]
                  (mergeRequest iid draft)))
-     `((input (projectPath . ,(format "%s/%s"
-                                      (oref repo owner)
-                                      (oref repo name)))
+     `((input (projectPath . ,(oref repo slug))
               (iid . ,(number-to-string (oref topic number)))
               (draft . ,value)))
      :host (oref (forge-get-repository topic) apihost)
@@ -554,7 +552,7 @@
 (cl-defmethod forge--set-topic-labels
   ((repo forge-gitlab-repository) topic labels)
   (forge--set-topic-field repo topic 'labels
-                          (mapconcat #'identity labels ",")))
+                          (string-join labels ",")))
 
 (cl-defmethod forge--set-topic-assignees
   ((repo forge-gitlab-repository) topic assignees)

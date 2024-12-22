@@ -52,76 +52,101 @@ Takes the pull-request as only argument and must return a directory."
 
 ;;; Dispatch
 
-;;;###autoload (autoload 'forge-dispatch "forge-commands" nil t)
+;;;###autoload(autoload 'forge-dispatch "forge-commands" nil t)
 (transient-define-prefix forge-dispatch ()
   "Dispatch a forge command."
-  [:if forge--get-repository:tracked?
-   ["Create"
-    ("c i" "issue"             forge-create-issue)
-    ("c p" "pull-request"      forge-create-pullreq)
-    ("c u" "pull-request from issue"
-     forge-create-pullreq-from-issue
-     :if forge--get-github-repository)
-    ("c f" "fork or remote"    forge-fork)]]
-  [:if forge--get-repository:tracked?
-   ["List"
-    ("t" "topics...         "  forge-topics-menu        :transient replace)
-    ("n" "notifications...  "  forge-notifications-menu :transient replace)
-    ("r" "repositories...   "  forge-repositories-menu  :transient replace)]
+  :transient-non-suffix #'transient--do-call
+  :refresh-suffixes t
+  :environment #'forge--menu-environment
+  :column-widths forge--topic-menus-column-widths
+  [forge--topic-menus-group
    ["Fetch"
-    ("f f" "all topics       " forge-pull)
-    ("f t" "one topic        " forge-pull-topic)
-    ("f n" "notifications    " forge-pull-notifications)]
-   ["Do"
+    ("f f" "all topics"     forge-pull)
+    ("f t" "one topic"      forge-pull-topic)
+    ("f n" "notifications"  forge-pull-notifications)]
+   ["Create"
     :if forge--get-repository:tracked?
-    ("C" "configure"       forge-configure)
-    ("M" "merge w/api"     forge-merge :level 7)]]
-  [:if forge--get-repository:tracked?
+    ("c i" "issue"          forge-create-issue)
+    ("c p" "pull-request"   forge-create-pullreq)
+    ("c u" "pr from issue"  forge-create-pullreq-from-issue)
+    ("c f" "fork or remote" forge-fork)]
+   [:description (lambda ()
+                   (cond
+                    ((forge--get-repository:tracked?) "Actions")
+                    ((or (magit-gitdir) (forge-repository-at-point))
+                     "Forge does not yet track this repository")
+                    ("Not inside a Git repository")))
+    ("/a" forge-add-repository
+     :description (lambda () (let ((repo (forge-get-repository :stub?)))
+                          (if (or (not repo)
+                                  (eq (oref repo condition) :tracked))
+                            "track some repo"
+                          "track this repository"))))
+    ("/M" "merge with api" forge-merge
+     :if forge--get-repository:tracked? :level 7)]]
+  [forge--lists-group
    ["Visit"
-    ("v t" "topic"         forge-visit-topic)
-    ("v i" "issue"         forge-visit-issue)
-    ("v p" "pull-request"  forge-visit-pullreq)]
+    :inapt-if-not forge--get-repository:tracked?
+    ("v t" "topic"          forge-visit-topic)
+    ("v i" "issue"          forge-visit-issue)
+    ("v p" "pull-request"   forge-visit-pullreq)]
    ["Browse"
-    ("b t" "topic"         forge-browse-topic)
-    ("b i" "issue"         forge-browse-issue)
-    ("b p" "pull-request"  forge-browse-pullreq)]
-   ["Browse"
-    ("b r" "remote"        forge-browse-remote)
-    ("b I" "issues"        forge-browse-issues)
-    ("b P" "pull-requests" forge-browse-pullreqs)]]
-  [[:description (lambda ()
-                   (if (magit-gitdir)
-                       "Forge doesn't know about this Git repository yet"
-                     "Not inside a Git repository"))
-    :if-not forge--get-repository:tracked?
-    ("a" "add repository to database" forge-add-repository)
-    ("f" "fetch notifications"        forge-pull-notifications)
-    ("l" "list notifications"         forge-list-notifications)]])
+    ("b t" "topic"          forge-browse-topic
+     :inapt-if-not forge--get-repository:tracked?)
+    ("b i" "issue"          forge-browse-issue
+     :inapt-if-not forge--get-repository:tracked?)
+    ("b p" "pull-request"   forge-browse-pullreq
+     :inapt-if-not forge--get-repository:tracked?)
+    ("b r" "remote"         forge-browse-remote)
+    ("b I" "issues"         forge-browse-issues)
+    ("b P" "pull-requests"  forge-browse-pullreqs)
+    ""]
+   ["Display"
+    ("-S" forge-toggle-display-in-status-buffer
+     :inapt-if-not forge--buffer-with-topics-sections-p)
+    ("-H" forge-toggle-topic-legend)]]
+  [forge--topic-legend-group])
 
-;;;###autoload (autoload 'forge-configure "forge-commands" nil t)
+(transient-augment-suffix forge-dispatch
+  :transient #'transient--do-replace
+  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-dispatch))
+  :inapt-face 'forge-suffix-active)
+
+;;;###autoload(autoload 'forge-configure "forge-commands" nil t)
 (transient-define-prefix forge-configure ()
   "Configure current repository and global settings."
-  [["Configure"
-    :if forge--get-repository:tracked?
-    ("a  " "add another repository to database" forge-add-some-repository)
+  :transient-non-suffix #'transient--do-call
+  :refresh-suffixes t
+  :environment #'forge--menu-environment
+  :column-widths forge--topic-menus-column-widths
+  [forge--topic-menus-group
+   ["Configure"
     ("R  " forge-add-pullreq-refspec)
     ("s r" forge-forge.remote)
-    ("s l" forge-forge.graphqlItemLimit)
-    ("s s" forge-toggle-display-in-status-buffer)
-    ("s c" forge-toggle-closed-visibility)]])
+    ("s l" forge-forge.graphqlItemLimit)]])
+
+(transient-augment-suffix forge-configure
+  :transient #'transient--do-replace
+  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-configure))
+  :inapt-face 'forge-suffix-active)
 
 ;;; Pull
 
-;;;###autoload
-(defun forge-pull ()
+;;;###autoload(autoload 'forge-pull "forge-commands" nil t)
+(transient-define-suffix forge-pull ()
   "Pull forge topics for the current repository if it is already tracked.
 If the current repository is still untracked locally, or the current
 repository cannot be determined, instead invoke `forge-add-repository'."
+  :description (lambda ()
+                 (if (forge-get-repository :tracked?)
+                     "forge topics"
+                   "new forge repository"))
+  (declare (interactive-only nil))
   (interactive)
   (if-let ((repo (forge-get-repository :tracked?)))
       (forge--pull repo)
     (transient-setup 'forge-add-repository nil nil
-                     :scope (forge-get-repository :stub))))
+                     :scope (forge-add-repository--scope))))
 
 (defun forge-read-date (prompt)
   (require (quote org) nil)
@@ -145,20 +170,22 @@ repository cannot be determined, instead invoke `forge-add-repository'."
   (magit-git-fetch (oref repo remote) (magit-fetch-arguments)))
 
 (defun forge--maybe-git-fetch (repo &optional buffer)
-  (if (and (buffer-live-p buffer)
-           (with-current-buffer buffer
-             (and (derived-mode-p 'magit-mode)
-                  (forge-repository-equal (forge-get-repository :stub?) repo))))
+  (if (buffer-live-p buffer)
       (with-current-buffer buffer
-        (magit-git-fetch (oref repo remote) (magit-fetch-arguments)))
+        (if (and (derived-mode-p 'magit-mode)
+                 (forge-repository-equal (forge-get-repository :stub?) repo)
+                 (magit-toplevel))
+            (magit-git-fetch (oref repo remote) (magit-fetch-arguments))
+          (magit-refresh-buffer)))
     (when-let ((worktree (forge-get-worktree repo)))
       (let ((default-directory worktree)
             (magit-inhibit-refresh t))
         (magit-git-fetch (oref repo remote) (magit-fetch-arguments))))))
 
-;;;###autoload
-(defun forge-pull-notifications ()
+;;;###autoload(autoload 'forge-pull-notifications "forge-commands" nil t)
+(transient-define-suffix forge-pull-notifications ()
   "Fetch notifications for all repositories from the current forge."
+  :description "forge notifications"
   (interactive)
   (if-let ((repo (forge-get-repository :stub?)))
       (let ((class (eieio-object-class repo)))
@@ -168,17 +195,18 @@ repository cannot be determined, instead invoke `forge-add-repository'."
                       (oref repo forge))))
     (forge--pull-notifications 'forge-github-repository "github.com")))
 
-;;;###autoload (autoload 'forge-pull-topic "forge-commands" nil t)
+;;;###autoload(autoload 'forge-pull-topic "forge-commands" nil t)
 (transient-define-suffix forge-pull-topic (number)
   "Read a topic TYPE and NUMBER pull data about it from its forge."
-  :inapt-if-not #'forge--get-github-repository
+  :inapt-if-not (lambda () (and (forge--get-repository:tracked?)
+                           (forge--get-github-repository)))
   (interactive
    (list (read-number "Pull topic: "
                       (and-let* ((topic (forge-current-topic)))
                         (oref topic number)))))
   (forge--pull-topic (forge-get-repository :tracked) number))
 
-;;;###autoload (autoload 'forge-pull-this-topic "forge-commands" nil t)
+;;;###autoload(autoload 'forge-pull-this-topic "forge-commands" nil t)
 (transient-define-suffix forge-pull-this-topic ()
   "Pull data about the topic at point from its forge."
   :inapt-if-not #'forge--get-github-repository
@@ -265,7 +293,7 @@ argument also offer closed pull-requests."
   (interactive (list (forge-read-repository "Browse repository")))
   (browse-url (forge-get-url repository)))
 
-;;;###autoload (autoload 'forge-browse-this-topic "forge-commands" nil t)
+;;;###autoload(autoload 'forge-browse-this-topic "forge-commands" nil t)
 (transient-define-suffix forge-browse-this-topic ()
   "Visit the topic at point using a browser."
   :description "browse"
@@ -313,7 +341,7 @@ argument also offer closed pull-requests."
       (forge-current-topic)
       (and magit-buffer-revision
            (forge-get-url :commit magit-buffer-revision))
-      (forge-current-repository)))
+      (forge-get-repository :stub?)))
 
 ;;;; Urls
 
@@ -334,7 +362,7 @@ argument also offer closed pull-requests."
     (unless (magit-list-containing-branches
              commit "-r" (concat (oref repo remote) "/*"))
       (if-let* ((branch (car (magit-list-containing-branches commit "-r")))
-                (remote (cdr (magit-split-branch-name branch))))
+                (remote (car (magit-split-branch-name branch))))
           (setq repo (forge-get-repository :stub remote))
         (message "%s does not appear to be available on any remote.  %s"
                  commit "You might have to push it first.")))
@@ -344,9 +372,7 @@ argument also offer closed pull-requests."
 (cl-defmethod forge-get-url ((_(eql :branch)) branch)
   (let (remote)
     (if (magit-remote-branch-p branch)
-        (let ((cons (magit-split-branch-name branch)))
-          (setq remote (car cons))
-          (setq branch (cdr cons)))
+        (pcase-setq `(,remote . ,branch) (magit-split-branch-name branch))
       (unless (setq remote (or (magit-get-push-remote branch)
                                (magit-get-upstream-remote branch)))
         (user-error "Cannot determine remote for %s" branch)))
@@ -372,32 +398,46 @@ argument also offer closed pull-requests."
 ;;;###autoload
 (defun forge-visit-topic (topic)
   "Read a TOPIC and visit it.
-By default only offer open topics for completion;
-with a prefix argument also closed topics."
+By default only offer active topics for completion.  With a prefix
+argument offer all topics.  While completion is in progress, \
+\\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts
+the limitation to active topics."
   (interactive (list (forge-read-topic "View topic")))
   (forge-topic-setup-buffer (forge-get-topic topic)))
 
 ;;;###autoload
 (defun forge-visit-issue (issue)
   "Read an ISSUE and visit it.
-By default only offer open topics for completion;
-with a prefix argument also closed topics."
+By default only offer active issues for completion.  With a prefix
+argument offer all topics.  While completion is in progress, \
+\\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts
+the limitation to active issues."
   (interactive (list (forge-read-issue "View issue")))
   (forge-topic-setup-buffer (forge-get-issue issue)))
 
 ;;;###autoload
 (defun forge-visit-pullreq (pull-request)
   "Read a PULL-REQUEST and visit it.
-By default only offer open topics for completion;
-with a prefix argument also closed topics."
+By default only offer active pull-requests for completion.  With a
+prefix argument offer all topics.  While completion is in progress,
+\\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] \
+lifts the limitation to active pull-requests."
   (interactive (list (forge-read-pullreq "View pull-request")))
   (forge-topic-setup-buffer (forge-get-pullreq pull-request)))
 
 ;;;###autoload
-(defun forge-visit-this-topic ()
-  "Visit the topic at point."
-  (interactive)
-  (forge-topic-setup-buffer (forge-topic-at-point)))
+(defun forge-visit-this-topic (&optional menu)
+  "Visit the topic at point.
+With prefix argument MENU, also show the topic menu."
+  (interactive (list current-prefix-arg))
+  (forge-topic-setup-buffer (forge-topic-at-point))
+  (cond
+   ((eq transient-current-command 'forge-topic-menu)
+    (setq forge--quit-keep-topic-menu t))
+   ((or menu
+        (memq transient-current-command
+              '(forge-topics-menu forge-notifications-menu)))
+    (transient-setup 'forge-topic-menu))))
 
 ;;;###autoload
 (defun forge-visit-this-repository ()
@@ -406,14 +446,17 @@ with a prefix argument also closed topics."
   (let* ((repo (forge-repository-at-point))
          (worktree (forge-get-worktree repo)))
     (cond
-     ((eq transient-current-command 'forge-repositories-menu)
-      (if-let ((buffer (forge-topic-get-buffer repo)))
-          (switch-to-buffer buffer)
-        (forge-list-topics repo))
-      (transient-setup 'forge-topics-menu))
+     ((and (eq transient-current-command 'forge-repositories-menu)
+           (forge-get-repository repo nil :tracked?))
+      (if-let ((buffer (get-buffer (forge-topics-buffer-name repo))))
+          (progn (switch-to-buffer buffer)
+                 (transient-setup 'forge-topics-menu))
+        (forge-list-topics repo)))
      (worktree
       (magit-status-setup-buffer worktree))
-     ((forge-list-topics repo)))))
+     ((forge-get-repository repo nil :tracked?)
+      (forge-list-topics repo))
+     ((user-error "Not tracked and location of clone is unknown")))))
 
 ;;; Create
 
@@ -450,9 +493,10 @@ with a prefix argument also closed topics."
   "Convert an existing ISSUE into a pull-request."
   :description "convert to pull-request"
   :if (lambda ()
-        (let ((issue (forge-current-issue)))
-          (and issue (eq (oref issue state) 'open)
-               issue)))
+        (and (forge--get-github-repository)
+             (let ((issue (forge-current-issue)))
+               (and issue (eq (oref issue state) 'open)
+                    issue))))
   (interactive (cons (forge-read-open-issue "Convert issue")
                      (forge-create-pullreq--read-args)))
   (setq issue (forge-get-issue issue))
@@ -558,17 +602,21 @@ point is currently on."
                   (propertize "none" 'face 'magit-dimmed)))
       "note"))
   (interactive)
-  (let* ((topic (forge-current-topic t))
-         (buf (forge--prepare-post-buffer
-               (forge--format topic "%i;note")
-               (forge--format topic "New note on #%i of %p"))))
-    (with-current-buffer buf
-      (setq forge--buffer-post-object topic)
-      (setq forge--submit-post-function #'forge--save-note)
-      (erase-buffer)
-      (when-let ((note (oref topic note)))
-        (save-excursion (insert note ?\n))))
-    (forge--display-post-buffer buf)))
+  (if-let* ((topic (forge-current-topic t))
+            (repo (forge-get-repository topic))
+            (default-directory (forge-get-worktree repo))
+            (buf (forge--prepare-post-buffer
+                  (forge--format topic "%i;note")
+                  (forge--format topic "New note on #%i of %p"))))
+      (progn
+        (with-current-buffer buf
+          (setq forge--buffer-post-object topic)
+          (setq forge--submit-post-function #'forge--save-note)
+          (erase-buffer)
+          (when-let ((note (oref topic note)))
+            (save-excursion (insert note ?\n))))
+        (forge--display-post-buffer buf))
+    (message "Cannot determine topic or worktree")))
 
 ;;; Delete
 
@@ -725,6 +773,16 @@ Please see the manual for more information."
   (magit--checkout (forge--branch-pullreq (forge-get-pullreq pullreq)))
   (forge-refresh-buffer))
 
+;;;###autoload(autoload 'forge-checkout-this-pullreq "forge-commands" nil t)
+(transient-define-suffix forge-checkout-this-pullreq ()
+  "Checkout the current pull-request.
+If the branch for that pull-request does not exist yet, then create and
+configure it first."
+  :description "checkout"
+  :inapt-if-not #'forge-current-pullreq
+  (interactive)
+  (forge-checkout-pullreq (forge-current-topic t)))
+
 ;;;###autoload
 (defun forge-checkout-worktree (path pullreq)
   "Create, configure and checkout a new worktree from a pull-request.
@@ -827,8 +885,8 @@ is added anyway.  Currently this only supports Github and Gitlab."
                                                (oref repo name))
                       (list "--fetch"))))
 
-;;;###autoload
-(defun forge-merge (pullreq method)
+;;;###autoload(autoload 'forge-merge "forge-commands" nil t)
+(transient-define-suffix forge-merge (pullreq method)
   "Merge the current pull-request using METHOD using the forge's API.
 
 If there is no current pull-request or with a prefix argument,
@@ -861,8 +919,8 @@ as merged."
 ;;;###autoload
 (defun forge-rename-default-branch ()
   "Rename the default branch to NEWNAME.
-Change the name on the upstream remote and locally, and update
-the upstream remotes of local branches accordingly."
+Change the name on the upstream remotely and locally, and update the
+upstream remotes of local branches accordingly."
   (interactive)
   (let* ((repo (forge-get-repository :tracked?))
          (_ (unless (forge-github-repository-p repo)
@@ -895,12 +953,21 @@ the upstream remotes of local branches accordingly."
 
 ;;; Configuration
 
-(transient-define-infix forge-forge.remote ()
+(transient-define-suffix forge-forge.remote ()
   "Change the local value of the `forge.remote' Git variable."
   :class 'magit--git-variable:choices
   :variable "forge.remote"
   :choices #'magit-list-remotes
-  :default (lambda (_) (forge--get-remote t)))
+  :default (lambda (_) (forge--get-remote t t))
+  (interactive)
+  (let ((obj (transient-suffix-object)))
+    (transient-infix-set obj (transient-infix-read obj)))
+  (if (and transient--prefix
+           (eq (oref transient--prefix command) 'forge-add-repository))
+      ;; Improvements to Transient will make this hack unnecessary.
+      (let ((scope (forge-add-repository--scope)))
+        (oset (transient-prefix-object) scope scope))
+    (transient--show)))
 
 (transient-define-infix forge-forge.graphqlItemLimit ()
   "Change the maximum number of GraphQL entities to pull at once."
@@ -912,44 +979,29 @@ the upstream remotes of local branches accordingly."
 
 (transient-define-suffix forge-toggle-display-in-status-buffer ()
   "Toggle whether to display topics in the current status buffer."
-  :inapt-if-not (lambda ()
-                  (and (eq major-mode 'magit-status-mode)
-                       (forge-get-repository :known?)))
+  :if-mode 'magit-status-mode
+  :inapt-if-not #'forge--buffer-with-topics-sections-p
   :description (lambda ()
-                 (if forge-display-in-status-buffer
-                     "hide all topics"
+                 (if (and forge--buffer-topics-spec
+                          (oref forge--buffer-topics-spec type))
+                     "hide topics"
                    "display topics"))
-  :transient t
   (interactive)
-  (setq forge-display-in-status-buffer (not forge-display-in-status-buffer))
+  (oset forge--buffer-topics-spec type
+        (if (oref forge--buffer-topics-spec type) nil 'topic))
   (forge-refresh-buffer))
 
-(transient-define-suffix forge-toggle-closed-visibility ()
-  "Toggle whether to display recently closed topics.
-This only affect the current status buffer."
-  :inapt-if-not (lambda ()
-                  (and forge-display-in-status-buffer
-                       (eq major-mode 'magit-status-mode)
-                       (forge-get-repository :known?)))
-  :description (lambda ()
-                 (if (or (atom forge-topic-list-limit)
-                         (> (cdr forge-topic-list-limit) 0))
-                     "hide closed topics"
-                   "display recently closed topics"))
-  :transient t
-  (interactive)
-  (make-local-variable 'forge-topic-list-limit)
-  (if (atom forge-topic-list-limit)
-      (setq forge-topic-list-limit (cons forge-topic-list-limit 5))
-    (setcdr forge-topic-list-limit (* -1 (cdr forge-topic-list-limit))))
-  (forge-refresh-buffer))
+(defun forge--buffer-with-topics-sections-p ()
+  (and forge--buffer-topics-spec
+       (not (eq major-mode 'forge-topics-mode))
+       (forge-get-repository :tracked?)))
 
-;;;###autoload (autoload 'forge-add-pullreq-refspec "forge-commands" nil t)
+;;;###autoload(autoload 'forge-add-pullreq-refspec "forge-commands" nil t)
 (transient-define-suffix forge-add-pullreq-refspec ()
   "Configure Git to fetch all pull-requests.
 This is done by adding \"+refs/pull/*/head:refs/pullreqs/*\"
 to the value of `remote.REMOTE.fetch', where REMOTE is the
-upstream remote.  Also fetch from REMOTE."
+upstream remote."
   :if-not 'forge--pullreq-refspec
   :description "add pull-request refspec"
   (interactive)
@@ -973,37 +1025,77 @@ upstream remote.  Also fetch from REMOTE."
 
 ;;; Add repositories
 
-;;;###autoload (autoload 'forge-add-repository "forge-commands" nil t)
+;;;###autoload(autoload 'forge-add-repository "forge-commands" nil t)
 (transient-define-prefix forge-add-repository (&optional repo limit)
   "Add a repository to the database."
+  :refresh-suffixes t
   [:class transient-subgroups
-   [:if (lambda () (forge-get-repository (transient-scope) nil :tracked?))
-    (:info
+
+   ;; Already tracked.
+   [:if (lambda () (forge--scope :tracked))
+    (:info*
      (lambda ()
        (format
         (propertize "%s is already being tracked" 'face 'transient-heading)
-        (propertize (forge-get-url (transient-scope)) 'face 'bold)))
+        (propertize (forge--scope 'url) 'face 'bold)))
      :format "%d")]
-   [:if-not (lambda () (forge-get-repository (transient-scope) nil :tracked?))
+
+   ;; Nothing to tracked.
+   [:if-not (lambda () (forge--scope 'topdir))
+    (:info*
+     (lambda ()
+       (format
+        (propertize "%s is not inside a Git repository" 'face 'transient-heading)
+        (propertize default-directory 'face 'bold)))
+     :format "%d")]
+
+   ;; Cannot track.
+   [:if (lambda () (and (not (forge--scope 'repo)) (forge--scope 'topdir)))
+    :description
+    (lambda ()
+      (concat
+       (format (propertize "Cannot determine forge host for %s\n"
+                           'face 'transient-heading)
+               (propertize (forge--scope 'topdir) 'face 'bold))
+       (if-let* ((remote (forge--get-remote))
+                 (url (magit-git-string "remote" "get-url" remote)))
+             (format (propertize "because %s is not on a host known to Forge."
+                                 'face 'transient-heading)
+                     (propertize url 'face 'bold))
+           (propertize "because no suitable remote was detected."
+                       'face 'transient-heading))))
+    ("r" forge-forge.remote :format " %k Try another %d %v" :face 'bold)
+    ("h" "Learn how to configure another Github host"
+     (lambda () (interactive) (info "(forge)Setup for Another Github Instance")))
+    ("l" "Learn how to configure another Gitlab host"
+     (lambda () (interactive) (info "(forge)Setup for Another Gitlab Instance")))
+    ("p" "Learn how to configure partially supported host"
+     (lambda () (interactive) (info "(forge)Setup a Partially Supported Host")))]
+
+   ;; Track it!
+   [:if (lambda () (forge--scope :untracked))
     :description
     (lambda ()
       (format
        (propertize "Adding %s to database," 'face 'transient-heading)
-       (propertize (forge-get-url (transient-scope)) 'face 'bold)))
+       (propertize (forge--scope 'url) 'face 'bold)))
+    ("r" forge-forge.remote :format " %k from %d %v," :face 'bold)
     ("a" "pulling all topics"
      (lambda (repo)
-       (interactive (list (transient-scope)))
+       (interactive (list (forge--scope 'repo)))
        (forge-add-repository repo)))
     ("s" "pulling only topics since <date>"
      (lambda (repo date)
        (interactive
-        (list (transient-scope)
+        (list (forge--scope 'repo)
               (forge-read-date "Limit pulling to topics updated since: ")))
        (forge-add-repository repo date)))
     ("i" "to allow pulling of individual topics"
      (lambda (repo)
-       (interactive (list (transient-scope)))
+       (interactive (list (forge--scope 'repo)))
        (forge-add-repository repo :selective)))]
+
+   ;; Pivot.
    [("o" "Add another repository" forge-add-some-repository)
     (7 "U" "Add all source repositories belonging to a user"
        forge-add-user-repositories)
@@ -1014,16 +1106,17 @@ upstream remote.  Also fetch from REMOTE."
   (cond
    ((not repo)
     (transient-setup 'forge-add-repository nil nil
-                     :scope (forge-get-repository :stub?)))
+                     :scope (forge-add-repository--scope)))
    ((stringp repo)
     (transient-setup 'forge-add-repository nil nil
-                     :scope (forge-get-repository repo nil :stub?)))
+                     :scope (forge-add-repository--scope repo)))
    (t
     (when-let*
         (((not (eq limit :selective)))
          ((magit-git-config-p "forge.autoPull" t))
          (remote  (oref repo remote))
          (refspec (oref repo pullreq-refspec))
+         (default-directory (forge-get-worktree repo))
          ((and (not (member refspec (magit-get-all "remote" remote "fetch")))
                (or (eq forge-add-pullreq-refspec t)
                    (and (eq forge-add-pullreq-refspec 'ask)
@@ -1035,7 +1128,30 @@ upstream remote.  Also fetch from REMOTE."
     (when (eq limit :selective)
       (oset repo selective-p t)
       (setq limit nil))
-    (forge--pull repo nil limit))))
+    (forge--pull repo
+                 (and (not (forge-get-worktree repo)) #'ignore)
+                 limit))))
+
+(defun forge-add-repository--scope (&optional directory)
+  (let* ((repo      (if directory
+                        (forge-get-repository directory nil :stub?)
+                      (forge-get-repository :stub?)))
+         (wtree     (and repo (forge-get-worktree repo)))
+         (condition (and repo (oref repo condition)))
+         (val
+          `((repo       . ,repo)
+            (wtree      . ,wtree)
+            (condition  . ,condition)
+            (:tracked   . ,(eq condition :tracked))
+            (:untracked . ,(memq condition '(:known :stub)))
+            (topdir     . ,(or wtree (magit-toplevel)))
+            (url        . ,(and repo (forge-get-url repo))))))
+    val))
+
+(defun forge--scope (&optional key)
+  ;; `transient-scope' itself probably offer optional KEY.
+  (let ((scope (transient-scope)))
+    (if key (alist-get key scope) scope)))
 
 (defun forge-add-some-repository (url)
   "Read a repository and add it to the database."

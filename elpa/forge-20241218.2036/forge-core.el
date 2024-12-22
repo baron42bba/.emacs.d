@@ -95,7 +95,7 @@ Each entry has the form (GITHOST APIHOST WEBHOST CLASS).
 - WEBHOST is the host used to access repositories on this forge using
   a browser.  The IDs used to identify repositories from the forge in
   the local database also derives from this value.
-  
+
 - CLASS is the class to be used for repositories from the forge.
 
 Complications:
@@ -122,8 +122,8 @@ Complications:
 
 (defmacro forge--childp (obj type)
   "Somewhat similar to `cl-typep' but only for (possibly unknown) classes.
-TYPE is evaluated at macro-expansion time but unlike with
-`cl-typep' the respective class does not have to be defined
+TYPE is evaluated at macro-expansion time but, unlike with
+`cl-typep', the respective class does not have to be defined
 at that time."
   (let ((fn (intern (concat (symbol-name (eval type)) "--eieio-childp"))))
     `(and (fboundp ',fn) (,fn ,obj))))
@@ -144,7 +144,7 @@ repository.  (Forge repositories are also Git repositories, but not the
 other way around.)
 
 A `:known' repository has an entry in the local database.  All other
-repositories are unknown.  `:known' repositories are devided into two
+repositories are unknown.  `:known' repositories are divided into two
 subgroups: `:tracked' and \"untracked\" repositories.
 
 A `:tracked' repository was previously explicitly added to the database
@@ -231,7 +231,7 @@ Entries have the form (GITHOST APIHOST WEBHOST CLASS).
 - If HOST matches a GITHOST, return the corresponding entry.
 - Else, if HOST is an ssh alias and the canonical hostname matches a
   GITHOST, return the corresponding entry.
-- Finally, if HOST matches a WEBHOST, return the corresponding entry
+- Finally, if HOST matches a WEBHOST, return the corresponding entry.
 
 If no entry matches, return nil, or signal an error if optional DEMAND
 is non-nil."
@@ -246,25 +246,39 @@ is non-nil."
       (and demand
            (error "No entry for \"%s\" in `forge-alist'" host))))
 
-(defun forge--split-forge-url (url)
+(defun forge--split-forge-url (url &optional relax)
   (save-match-data
-    (and (string-match
-          (concat "\\`"
-                  "\\(?:git://\\|"
-                  "[^/@]+@\\|"
-                  "\\(?:ssh\\|ssh\\+git\\|git\\+ssh\\)://\\(?:[^/@]+@\\)?\\|"
-                  "https?://\\(?:[^/@]+@\\)?\\)?"
-                  (regexp-opt (mapcar #'car forge-alist) t)
-                  "\\(?::[0-9]+\\)?"
-                  "\\(?:/\\|:/?\\)"
-                  "~?\\(.+?\\)/"
-                  "\\([^/]+?\\)"
-                  "\\(?:\\.git\\|/\\)?"
-                  "\\'")
-          url)
-         (list (caddr (forge--get-forge-host (match-string 1 url) t))
-               (match-string 2 url)
-               (match-string 3 url)))))
+    (cond
+     ((string-match
+       (concat "\\`"
+               "\\(?:git://\\|"
+               "[^/@]+@\\|"
+               "\\(?:ssh\\|ssh\\+git\\|git\\+ssh\\)://\\(?:[^/@]+@\\)?\\|"
+               "https?://\\(?:[^/@]+@\\)?\\)?"
+               (if relax
+                   "\\(?1:[^:/]+\\)"
+                 (regexp-opt (mapcar #'car forge-alist) t))
+               "\\(?::[0-9]+\\)?"
+               "\\(?:/\\|:/?\\)"
+               "~?\\(?2:.+?\\)/"
+               "\\(?3:[^/]+?\\)"
+               "\\(?:\\.git\\|/\\)?"
+               "\\'")
+       url)
+      (and-let* ((elt (forge--get-forge-host (match-string 1 url) (not relax))))
+        ;; Return the WEBHOST (not the GITHOST, URLs passed to this
+        ;; function usually contain a GITHOST) because the IDs used to
+        ;; identify a repository in the database are based on WEBHOSTs.
+        (list (caddr elt)
+              (match-string 2 url)
+              (match-string 3 url))))
+     ((not relax)
+      ;; The host part didn't match any GITHOST in `forge-alist', but it
+      ;; might be a ssh host alias.  We have to relax strictness; in the
+      ;; extremely unlikely case that there is a common path between the
+      ;; HOST and the OWNER for this forge, we would incorrectly end up
+      ;; making that path part of the owner.
+      (forge--split-forge-url url t)))))
 
 ;;; Identity
 
@@ -344,10 +358,11 @@ parent object (determined using `forge-get-parent')."
 
 (defun forge-refresh-buffer (&optional buffer)
   "Refresh the current buffer, if it is a Magit or Forge buffer.
-Refresh the buffer if its major-mode derives from `magit-mode',
-`forge-topic-list-mode' or `forge-repository-list-mode'.  If
-optional BUFFER is non-nil, then refresh that buffer, provided
-it is alive and satisfies the mode requirement."
+Refresh the buffer if its major-mode derives from `magit-mode'
+or `forge-repository-list-mode'.  If optional BUFFER is non-nil,
+then refresh that buffer, provided it is alive and satisfies
+the mode requirement."
+  (interactive)
   (cond (buffer
          (when (buffer-live-p buffer)
            (with-current-buffer buffer
@@ -356,8 +371,11 @@ it is alive and satisfies the mode requirement."
          (magit-refresh-buffer))
         ((derived-mode-p 'magit-mode)
          (magit-refresh-buffer))
-        ((derived-mode-p 'forge-topic-list-mode
-                         'forge-repository-list-mode)
+        ((and (derived-mode-p 'forge-topic-mode)
+              (boundp 'forge--buffer-topics-spec)
+              (oref forge--buffer-topics-spec global))
+         (revert-buffer))
+        ((derived-mode-p 'forge-repository-list-mode)
          (revert-buffer))))
 
 (defun forge--sanitize-string (string)

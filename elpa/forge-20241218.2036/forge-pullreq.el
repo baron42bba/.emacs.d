@@ -55,18 +55,18 @@
    (head-repo            :initarg :head-repo)
    (milestone            :initarg :milestone)
    (body                 :initarg :body)
-   (assignees            :closql-table (pullreq-assignee assignee))
+   (assignees            :closql-tables (pullreq-assignee assignee))
    (project-cards) ; projectsCards
    (commits)
    (edits) ; userContentEdits
-   (labels               :closql-table (pullreq-label label))
+   (labels               :closql-tables (pullreq-label label))
    (participants)
    (posts                :closql-class forge-pullreq-post)
    (reactions)
-   (review-requests      :closql-table (pullreq-review-request assignee))
+   (review-requests      :closql-tables (pullreq-review-request assignee))
    (reviews)
    (timeline)
-   (marks                :closql-table (pullreq-mark mark))
+   (marks                :closql-tables (pullreq-mark mark))
    (note                 :initarg :note :initform nil)
    (base-rev             :initarg :base-rev)
    (head-rev             :initarg :head-rev)
@@ -75,6 +75,38 @@
    (slug                 :initarg :slug)
    (saved-p              :initarg :saved-p :initform nil)
    ))
+
+(cl-defmethod closql-dref ((obj forge-pullreq) (_(eql assignees)))
+  (forge-sql-cdr
+   [:select assignee:* :from assignee
+    :join pullreq-assignee :on (= pullreq-assignee:id assignee:id)
+    :where (= pullreq-assignee:pullreq $s1)
+    :order-by [(asc login)]]
+   (closql--oref obj 'id)))
+
+(cl-defmethod closql-dref ((obj forge-pullreq) (_(eql labels)))
+  (forge-sql-cdr
+   [:select label:* :from label
+    :join pullreq-label :on (= pullreq-label:id label:id)
+    :where (= pullreq-label:pullreq $s1)
+    :order-by [(asc name)]]
+   (closql--oref obj 'id)))
+
+(cl-defmethod closql-dref ((obj forge-pullreq) (_(eql review-requests)))
+  (forge-sql-cdr
+   [:select assignee:* :from assignee
+    :join pullreq-review-request :on (= pullreq-review-request:id assignee:id)
+    :where (= pullreq-review-request:pullreq $s1)
+    :order-by [(asc login)]]
+   (closql--oref obj 'id)))
+
+(cl-defmethod closql-dref ((obj forge-pullreq) (_(eql marks)))
+  (forge-sql-cdr
+   [:select mark:* :from mark
+    :join pullreq-mark :on (= pullreq-mark:id mark:id)
+    :where (= pullreq-mark:pullreq $s1)
+    :order-by [(asc name)]]
+   (closql--oref obj 'id)))
 
 (defclass forge-pullreq-post (forge-post)
   ((closql-table         :initform 'pullreq-post)
@@ -111,7 +143,7 @@
               'forge-pullreq))
 
 (cl-defmethod forge-get-pullreq ((number integer))
-  (and-let* ((repo (forge-get-repository :tracked)))
+  (and-let* ((repo (forge-get-repository :tracked nil 'notatpt)))
     (forge-get-pullreq repo number)))
 
 (cl-defmethod forge-get-pullreq ((id string))
@@ -149,11 +181,6 @@ an error."
   (or (thing-at-point 'forge-pullreq)
       (magit-section-value-if 'pullreq)
       (forge-get-pullreq :branch)
-      (and (derived-mode-p 'forge-topic-list-mode)
-           (and-let* ((id (tabulated-list-get-id))
-                      (topic (forge-get-topic id)))
-             (and (forge-pullreq-p topic)
-                  topic)))
       (and demand (user-error "No pull-request at point"))))
 
 (put 'forge-pullreq 'thing-at-point #'forge-thingatpt--pullreq)
@@ -165,94 +192,13 @@ an error."
             "#\\([0-9]+\\)\\_>"))
          (forge-get-pullreq repo (string-to-number (match-string 1))))))
 
-;;;; List
-
-(defun forge--ls-recent-pullreqs (repo)
-  (forge-ls-recent-topics repo 'pullreq))
-
-(defun forge--ls-pullreqs (repo)
-  (forge--select-pullreqs repo
-    [:from pullreq :where (= pullreq:repository $s1)]))
-
-(defun forge--ls-active-pullreqs (repo)
-  (forge--select-pullreqs repo
-    [:from pullreq
-     :where (and (= pullreq:repository $s1)
-                 (or (= pullreq:state 'open)
-                     (in pullreq:status [pending unread])))]))
-
-(defun forge--ls-assigned-pullreqs (repo)
-  (forge--select-pullreqs repo
-    [:from pullreq
-     :join pullreq_assignee :on (= pullreq_assignee:pullreq pullreq:id)
-     :join assignee         :on (= pullreq_assignee:id      assignee:id)
-     :where (and (= pullreq:repository $s1)
-                 (= assignee:login     $s2)
-                 (isnull pullreq:closed))]
-    (ghub--username repo)))
-
-(defun forge--ls-requested-reviews (repo)
-  (forge--select-pullreqs repo
-    [:from pullreq
-     :join pullreq_review_request :on (= pullreq_review_request:pullreq pullreq:id)
-     :join assignee               :on (= pullreq_review_request:id      assignee:id)
-     :where (and (= pullreq:repository $s1)
-                 (= assignee:login     $s2)
-                 (isnull pullreq:closed))]
-    (ghub--username repo)))
-
-(defun forge--ls-authored-pullreqs (repo)
-  (forge--select-pullreqs repo
-    [:from [pullreq]
-     :where (and (= pullreq:repository $s1)
-                 (= pullreq:author     $s2)
-                 (isnull pullreq:closed))]
-    (ghub--username repo)))
-
-(defun forge--ls-labeled-pullreqs (repo label)
-  (forge--select-pullreqs repo
-    [:from pullreq
-     :join pullreq_label :on (= pullreq_label:pullreq pullreq:id)
-     :join label         :on (= pullreq_label:id      label:id)
-     :where (and (= pullreq:repository  $s1)
-                 (= label:name        $s2)
-                 (isnull pullreq:closed))]
-    label))
-
-(defun forge--ls-owned-pullreqs ()
-  (forge--select-pullreqs nil
-    [:from [pullreq repository]
-     :where (and (= pullreq:repository repository:id)
-                 (in repository:owner $v1)
-                 (not (in repository:name $v2))
-                 (isnull pullreq:closed))
-     :order-by [(asc repository:owner)
-                (asc repository:name)
-                (desc pullreq:number)]]
-    (vconcat (mapcar #'car forge-owned-accounts))
-    (vconcat forge-owned-ignored)))
-
-(defun forge--select-pullreqs (repo query &rest args)
-  (declare (indent 1))
-  (mapcar (let ((db (forge-db)))
-            (lambda (row)
-              (closql--remake-instance 'forge-pullreq db row)))
-          (apply #'forge-sql
-                 (vconcat [:select *]
-                          query
-                          (and (not (cl-find :order-by query))
-                               [:order-by [(desc updated)]]))
-                 (if repo
-                     (cons (oref repo id) args)
-                   args))))
-
 ;;; Read
 
 (defun forge-read-pullreq (prompt)
   "Read an active pull-request with completion using PROMPT.
 
 Open, unread and pending pull-requests are considered active.
-Default to the current pull-request even if it isn't active.
+Default to the current pull-request, even if it isn't active.
 
 \\<forge-read-topic-minibuffer-map>While completion is in \
 progress, \\[forge-read-topic-lift-limit] lifts the limit, extending
@@ -262,8 +208,8 @@ If `forge-limit-topic-choices' is nil, then all candidates
 can be selected from the start."
   (forge--read-topic prompt
                      #'forge-current-pullreq
-                     #'forge--ls-active-pullreqs
-                     #'forge--ls-pullreqs))
+                     (forge--topics-spec :type 'pullreq :active t)
+                     (forge--topics-spec :type 'pullreq :active nil :state nil)))
 
 ;;; Utilities
 
@@ -299,39 +245,31 @@ can be selected from the start."
 ;;; Insert
 
 (defvar-keymap forge-pullreqs-section-map
+  :parent forge-common-map
   "<remap> <magit-browse-thing>" #'forge-browse-pullreqs
   "<remap> <magit-visit-thing>"  #'forge-list-pullreqs
-  "C-c C-m"                      #'forge-topics-menu
+  "<remap> <forge--list-menu>"   #'forge-topics-menu
+  "<remap> <forge--item-menu>"   #'forge-topic-menu
   "C-c C-n"                      #'forge-create-pullreq)
 
 (defvar-keymap forge-pullreq-section-map
+  :parent forge-common-map
   "<remap> <magit-visit-thing>"  #'forge-visit-this-topic
-  "C-c C-m"                      #'forge-topic-menu)
+  "<remap> <forge--list-menu>"   #'forge-topics-menu
+  "<remap> <forge--item-menu>"   #'forge-topic-menu)
 
-(defun forge-insert-pullreqs ()
-  "Insert a list of mostly recent and/or open pull-requests.
-Also see option `forge-topic-list-limit'."
-  (forge--insert-pullreqs "Pull requests"
-                          #'forge--ls-recent-pullreqs))
-
-(defun forge-insert-assigned-pullreqs ()
-  "Insert a list of open pull-requests that are assigned to you."
-  (forge--insert-pullreqs "Assigned pull requests"
-                          #'forge--ls-assigned-pullreqs))
-
-(defun forge-insert-requested-reviews ()
-  "Insert a list of pull-requests that are awaiting your review."
-  (forge--insert-pullreqs "Pull requests awaiting review"
-                          #'forge--ls-requested-reviews))
-
-(defun forge-insert-authored-pullreqs ()
-  "Insert a list of open pullreqs that are authored by you."
-  (forge--insert-pullreqs "Authored pullreqs"
-                          #'forge--ls-authored-pullreqs))
-
-(defun forge--insert-pullreqs (heading getter)
-  (when-let ((repo (forge--assert-insert-topics-get-repository)))
-    (forge--insert-topics 'pullreqs heading (funcall getter repo))))
+(cl-defun forge-insert-pullreqs (&optional (spec nil sspec) heading)
+  "Insert a list of pull-requests, according to `forge--buffer-topics-spec'.
+Optional SPEC can be used to override that filtering specification,
+and optional HEADING to change the section heading."
+  (when-let (((forge-db t))
+             (repo (forge-get-repository :tracked?))
+             (spec (if sspec spec (forge--clone-buffer-topics-spec)))
+             ((memq (oref spec type) '(topic pullreq))))
+    (oset spec type 'pullreq)
+    (forge--insert-topics 'pullreqs
+                          (or heading "Pull requests")
+                          (forge--list-topics spec repo))))
 
 (defun forge--insert-pullreq-commits (pullreq &optional all)
   (cl-letf (((symbol-function #'magit-cancel-section) (lambda ())))
@@ -340,14 +278,14 @@ Also see option `forge-topic-list-limit'."
         ;; pr range may be out of sync.  Just show them all.
         (magit-insert-section-body
           (magit--insert-log nil
-           (delq nil (list (concat "^" (or (oref pullreq base-rev)
-                                           (concat (forge--get-remote) "/"
-                                                   (oref pullreq base-ref))))
-                           (forge--pullreq-ref pullreq)
-                           (forge--pullreq-branch-active pullreq)
-                           (and-let* ((branch (oref pullreq head-ref)))
-                             (and (magit-local-branch-p branch) branch))))
-           (seq-uniq (cons "--graph" magit-buffer-log-args))))
+            (delq nil (list (concat "^" (or (oref pullreq base-rev)
+                                            (concat (forge--get-remote) "/"
+                                                    (oref pullreq base-ref))))
+                            (forge--pullreq-ref pullreq)
+                            (forge--pullreq-branch-active pullreq)
+                            (and-let* ((branch (oref pullreq head-ref)))
+                              (and (magit-local-branch-p branch) branch))))
+            (seq-uniq (cons "--graph" magit-buffer-log-args))))
       (when-let ((range (forge--pullreq-range pullreq)))
         (magit-insert-section-body
           (magit--insert-log nil range magit-buffer-log-args)

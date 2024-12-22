@@ -62,13 +62,14 @@ and `:pad-right'."
 
 (defvar-keymap forge-repository-list-mode-map
   :doc "Local keymap for Forge-Repository-List mode buffers."
-  :parent tabulated-list-mode-map
-  "RET"      #'forge-visit-this-repository
-  "<return>" #'forge-visit-this-repository
-  "o"        #'forge-browse-this-repository
-  "C-c C-m"  #'forge-repositories-menu
-  "'"        #'forge-dispatch
-  "?"        #'magit-dispatch)
+  :parent (make-composed-keymap forge-common-map tabulated-list-mode-map)
+  "n"                          #'forge-dispatch
+  "RET"                        #'forge-visit-this-repository
+  "<return>"                   #'forge-visit-this-repository
+  "o"                          #'forge-browse-this-repository
+  "<remap> <forge--list-menu>" #'forge-repositories-menu)
+
+(defvar-local forge--buffer-list-filter nil)
 
 (defvar forge-repository-list-buffer-name "*forge-repositories*"
   "Buffer name to use for displaying lists of repositories.")
@@ -85,6 +86,7 @@ Must be set before `forge-list' is loaded.")
 (define-derived-mode forge-repository-list-mode tabulated-list-mode
   forge-repository-list-mode-name
   "Major mode for browsing a list of repositories."
+  :interactive nil
   (setq-local x-stretch-cursor nil)
   (setq tabulated-list-padding 0)
   (setq tabulated-list-sort-key (cons "Owner" nil)))
@@ -97,9 +99,7 @@ Must be set before `forge-list' is loaded.")
       (setq forge--tabulated-list-query fn)
       (cl-letf (((symbol-function #'tabulated-list-revert) #'ignore)) ; see #229
         (forge-repository-list-mode))
-      (setq forge--buffer-list-type 'repo)
       (setq forge--buffer-list-filter filter)
-      (setq forge--buffer-list-global t)
       (forge--tablist-refresh)
       (add-hook 'tabulated-list-revert-hook #'forge--tablist-refresh nil t)
       (tabulated-list-print)
@@ -120,64 +120,61 @@ Must be set before `forge-list' is loaded.")
     ('t   "*")
     ('nil " ")))
 
-;;; Menu
+;;; Commands
+;;;; Menu
 
-;;;###autoload (autoload 'forge-repositories-menu "forge-repos" nil t)
+;;;###autoload(autoload 'forge-repositories-menu "forge-repos" nil t)
 (transient-define-prefix forge-repositories-menu ()
-  "Control list of repositories and repository at point."
+  "Control list of repositories displayed in the current buffer."
   :transient-suffix t
-  :transient-non-suffix 'call
+  :transient-non-suffix #'transient--do-call
   :transient-switch-frame nil
   :refresh-suffixes t
+  :environment #'forge--menu-environment
+  :column-widths forge--topic-menus-column-widths
   [:hide always ("q" forge-menu-quit-list)]
-  [["Type"
-    ("t" "topics..."        forge-topics-menu       :transient replace)
-    ("n" "notifications..." forge-notifications-menu :transient replace)
-    ("r" "repositories"     forge-list-repositories)]
+  [forge--topic-menus-group
+   forge--lists-group
    ["Filter"
-    ("o" "owned" forge-list-owned-repositories)]]
+    ("o" "owned" forge-list-owned-repositories
+     :if-nil forge--buffer-list-filter)
+    ("o" "owned" forge-list-repositories
+     :face forge-suffix-active
+     :if-non-nil forge--buffer-list-filter
+     :inapt-if-mode nil)]]
   (interactive)
   (unless (derived-mode-p 'forge-repository-list-mode)
     (if-let ((buffer (get-buffer forge-repository-list-buffer-name)))
         (switch-to-buffer buffer)
-      (with-no-warnings ; "interactive use only"
-        (forge-list-repositories))))
+      (forge-list-repositories)))
   (transient-setup 'forge-repositories-menu))
 
-;;; Class
+(transient-augment-suffix forge-repositories-menu
+  :transient #'transient--do-replace
+  :if-mode 'forge-repository-list-mode
+  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-repositories-menu))
+  :inapt-face 'forge-suffix-active)
+
+;;;; List
 
 (defclass forge--repo-list-command (transient-suffix)
   ((type       :initarg :type   :initform nil)
    (filter     :initarg :filter :initform nil)
-   (global     :initarg :global :initform nil)
-   (inapt-if                    :initform 'forge--topic-list-inapt)
-   (inapt-face                  :initform nil)))
+   (global     :initarg :global :initform nil)))
 
-(defun forge--topic-list-inapt ()
-  (with-slots (type filter global) transient--pending-suffix
-    (and (eq type   forge--buffer-list-type)
-         (eq filter forge--buffer-list-filter)
-         (eq global forge--buffer-list-global))))
-
-(cl-defmethod transient-format-description ((obj forge--repo-list-command))
-  (with-slots (description type filter global) obj
-    (if (and (eq   type   forge--buffer-list-type)
-             (memq filter (list nil forge--buffer-list-filter))
-             (eq   global forge--buffer-list-global))
-        (propertize description 'face 'forge-active-suffix)
-      description)))
-
-;;; Commands
-
-;;;###autoload (autoload 'forge-list-repositories "forge-repos" nil t)
+;;;###autoload(autoload 'forge-list-repositories "forge-repos" nil t)
 (transient-define-suffix forge-list-repositories ()
   "List known repositories in a separate buffer.
 Here \"known\" means that an entry exists in the local database."
   :class 'forge--repo-list-command :type 'repo :global t
+  :inapt-if-mode 'forge-repository-list-mode
+  :inapt-face 'forge-suffix-active
+  (declare (interactive-only nil))
   (interactive)
-  (forge-repository-list-setup nil #'forge--ls-repos))
+  (forge-repository-list-setup nil #'forge--ls-repos)
+  (transient-setup 'forge-repositories-menu))
 
-;;;###autoload (autoload 'forge-list-owned-repositories "forge-repos" nil t)
+;;;###autoload(autoload 'forge-list-owned-repositories "forge-repos" nil t)
 (transient-define-suffix forge-list-owned-repositories ()
   "List your own known repositories in a separate buffer.
 Here \"known\" means that an entry exists in the local database
@@ -186,7 +183,8 @@ controls which repositories are considered to be owned by you.
 Only Github is supported for now."
   :class 'forge--repo-list-command :type 'repo :filter 'owned :global t
   (interactive)
-  (forge-repository-list-setup 'owned #'forge--ls-owned-repos))
+  (forge-repository-list-setup 'owned #'forge--ls-owned-repos)
+  (transient-setup 'forge-repositories-menu))
 
 ;;; _
 (provide 'forge-repos)

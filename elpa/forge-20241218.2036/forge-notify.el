@@ -25,14 +25,6 @@
 (require 'forge)
 (require 'forge-topic)
 
-;;; Options
-
-(defcustom forge-notifications-repo-slug-width 28
-  "Width of repository slugs in `forge-notifications-mode' buffers."
-  :package-version '(forge . "0.4.0")
-  :group 'forge
-  :type (if (>= emacs-major-version 28) 'natnum 'number))
-
 ;;; Class
 
 (defclass forge-notification (forge-object)
@@ -123,13 +115,14 @@ signal an error."
 
 (defvar-keymap forge-notifications-mode-map
   :doc "Keymap for `forge-notifications-mode'."
-  :parent magit-mode-map
-  "<remap> <magit-refresh>" #'magit-refresh-buffer
-  "C-c C-m"                 #'forge-notifications-menu)
+  :parent (make-composed-keymap forge-common-map magit-mode-map)
+  "<remap> <magit-refresh>"    #'magit-refresh-buffer
+  "<remap> <forge--list-menu>" #'forge-notifications-menu)
 
 (define-derived-mode forge-notifications-mode magit-mode "Forge Notifications"
-  "Mode for looking at forge notifications."
-  (hack-dir-local-variables-non-file-buffer))
+  "Major mode for looking at forge notifications."
+  :interactive nil
+  (magit-hack-dir-local-variables))
 
 (defun forge-notifications-setup-buffer ()
   (magit-setup-buffer-internal #'forge-notifications-mode nil
@@ -138,7 +131,17 @@ signal an error."
                                (get-buffer-create "*forge-notifications*")))
 
 (defun forge-notifications-refresh-buffer ()
+  (magit-set-header-line-format (forge-notifications-buffer-desc))
   (forge-insert-notifications))
+
+(defun forge-notifications-buffer-desc ()
+  (let ((status forge-notifications-selection))
+    (cond
+     ((not (listp status))
+      (format "%s notifications" (capitalize (symbol-name status))))
+     ((seq-set-equal-p status '(unread pending)) "Inbox")
+     ((seq-set-equal-p status '(unread pending done)) "All notifications")
+     ((format "Notifications %s" status)))))
 
 (defvar forge-notifications-display-style 'flat)
 (defvar forge-notifications-selection '(unread pending))
@@ -148,39 +151,44 @@ signal an error."
 (transient-define-prefix forge-notifications-menu ()
   "Control list of notifications and notification at point."
   :transient-suffix t
-  :transient-non-suffix t
+  :transient-non-suffix #'transient--do-call
   :transient-switch-frame nil
   :refresh-suffixes t
+  :environment #'forge--menu-environment
   :column-widths forge--topic-menus-column-widths
-  [:hide always
-   ("q"        forge-menu-quit-list)
-   ("RET"      forge-topic-menu)
-   ("<return>" forge-topic-menu)]
-  [["Type"
-    ("t"   "topics..."       forge-topics-menu       :transient replace)
-    (:info "notifications"   :face forge-suffix-active)
-    ("r"   "repositories..." forge-repositories-menu :transient replace)
-    ""]
+  [:hide always ("q" forge-menu-quit-list)]
+  [forge--topic-menus-group
    ["Selection"
     ("I" forge-notifications-display-inbox)
     ("S" forge-notifications-display-saved)
     ("D" forge-notifications-display-done)
     ("A" forge-notifications-display-all)]]
-  [forge--topic-set-state-group
-   ["Group"
-    ("f" forge-notifications-style-flat)
-    ("g" forge-notifications-style-nested)]]
-  [forge--topic-set-status-group]
+  [forge--lists-group
+   ["Display"
+    ("-F" forge-notifications-style-flat)
+    ("-G" forge-notifications-style-nested)
+    ("-H" forge-toggle-topic-legend)]]
+  [forge--topic-legend-group]
   (interactive)
   (unless (derived-mode-p 'forge-notifications-mode)
     (forge-list-notifications))
   (transient-setup 'forge-notifications-menu))
 
-;;;###autoload
-(defun forge-list-notifications ()
+(transient-augment-suffix forge-notifications-menu
+  :transient #'transient--do-replace
+  :if-mode 'forge-notifications-mode
+  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-notifications-menu))
+  :inapt-face 'forge-suffix-active)
+
+;;;###autoload(autoload 'forge-list-notifications "forge-notify" nil t)
+(transient-define-suffix forge-list-notifications ()
   "List notifications."
+  :inapt-if-mode 'forge-notifications-mode
+  :inapt-face 'forge-suffix-active
+  (declare (interactive-only nil))
   (interactive)
-  (forge-notifications-setup-buffer))
+  (forge-notifications-setup-buffer)
+  (transient-setup 'forge-notifications-menu))
 
 (transient-define-suffix forge-notifications-display-inbox ()
   "List unread and pending notifications."
@@ -228,7 +236,7 @@ signal an error."
 
 (transient-define-suffix forge-notifications-style-flat ()
   "Show a flat notification list."
-  :description "flat list"
+  :description "single list"
   :inapt-if (lambda () (eq forge-notifications-display-style 'flat))
   :inapt-face 'forge-suffix-active
   (interactive)
@@ -239,7 +247,7 @@ signal an error."
 
 (transient-define-suffix forge-notifications-style-nested ()
   "Group notifications by repository."
-  :description "by repository"
+  :description "group by repo"
   :inapt-if (lambda () (eq forge-notifications-display-style 'nested))
   :inapt-face 'forge-suffix-active
   (interactive)
@@ -262,37 +270,27 @@ signal an error."
   "<remap> <magit-visit-thing>"  #'forge-visit-this-repository)
 
 (defun forge-insert-notifications ()
-  (let* ((status forge-notifications-selection)
-         (notifs (forge--ls-notifications status)))
+  (let ((notifs (forge--ls-notifications forge-notifications-selection)))
     (magit-insert-section (notifications)
-      (magit-insert-heading
-        (cond
-         ((not (listp status))
-          (format "%s notifications" (capitalize (symbol-name status))))
-         ((seq-set-equal-p status '(unread pending)) "Inbox")
-         ((seq-set-equal-p status '(unread pending done)) "All notifications")
-         ((format "Notifications %s" status))))
-      (if (eq forge-notifications-display-style 'flat)
-          (magit-insert-section-body
-            (if (not notifs)
-                (insert "(empty)\n")
-              (dolist (notif notifs)
-                (forge-insert-notification notif))
-              (insert ?\n)))
-        (pcase-dolist (`(,_ . ,notifs)
+      (cond
+       ((not notifs)
+        (insert "(empty)\n"))
+       ((eq forge-notifications-display-style 'flat)
+        (magit-insert-section-body
+          (dolist (notif notifs)
+            (forge-insert-notification notif))
+          (insert ?\n)))
+       ((pcase-dolist (`(,_ . ,notifs)
                        (--group-by (oref it repository) notifs))
           (let ((repo (forge-get-repository (car notifs))))
             (magit-insert-section (forge-repo repo)
               (magit-insert-heading
-                (concat (propertize (format "%s/%s"
-                                            (oref repo owner)
-                                            (oref repo name))
-                                    'font-lock-face 'bold)
+                (concat (propertize (oref repo slug) 'font-lock-face 'bold)
                         (format " (%s)" (length notifs))))
               (magit-insert-section-body
                 (dolist (notif notifs)
                   (forge-insert-notification notif))
-                (insert ?\n)))))))))
+                (insert ?\n))))))))))
 
 (defun forge-insert-notification (notif)
   (with-slots (type title url) notif

@@ -23,6 +23,7 @@
 ;;; Code:
 
 (require 'bug-reference)
+(require 'eieio-custom)
 (require 'markdown-mode)
 (require 'parse-time)
 (require 'yaml)
@@ -33,36 +34,6 @@
 (defvar bug-reference-auto-setup-functions)
 
 ;;; Options
-
-(defcustom forge-topic-list-order '(updated . string>)
-  "Order of topics listed in the status buffer.
-
-The value has the form (SLOT . PREDICATE), where SLOT is a
-slot of issue or pullreq objects, and PREDICATE is a function
-used to order the topics by that slot.  Reasonable values
-include (number . >) and (updated . string>)."
-  :package-version '(forge . "0.1.0")
-  :group 'forge
-  :type '(cons (symbol   :tag "Slot")
-               (function :tag "Predicate")))
-
-(defcustom forge-topic-list-limit '(60 . 5)
-  "Limit the number of topics listed in the status buffer.
-
-All unread topics are always shown.  If the value of this option
-has the form (OPEN . CLOSED), then the integer OPEN specifies the
-maximal number of topics and CLOSED specifies the maximal number
-of closed topics.  IF CLOSED is negative then show no closed
-topics until the command `forge-toggle-closed-visibility' changes
-the sign.
-
-The value can also be an integer, in which case it limits the
-number of closed topics only."
-  :package-version '(forge . "0.1.0")
-  :group 'forge
-  :type '(choice (number :tag "Maximal number of closed topics")
-                 (cons (number :tag "Maximal number of open topics")
-                       (number :tag "Maximal number of closed topics"))))
 
 (defcustom forge-limit-topic-choices t
   "Whether to initially limit completion candidates to active topics."
@@ -88,6 +59,12 @@ The following %-sequences are supported:
   :group 'forge
   :type 'boolean)
 
+(defcustom forge-topic-repository-slug-width 28
+  "Width of repository slugs (i.e., \"OWNER/NAME\")."
+  :package-version '(forge . "0.4.0")
+  :group 'forge
+  :type 'natnum)
+
 (defcustom forge-bug-reference-hooks
   '(find-file-hook
     forge-post-mode-hook
@@ -102,10 +79,6 @@ This variable has to be customized before `forge' is loaded."
              git-commit-setup-hook
              magit-mode-hook)
   :type '(list :convert-widget custom-hook-convert-widget))
-
-(defvar-local forge-display-in-status-buffer t
-  "Whether to display topics in the current Magit status buffer.")
-(put 'forge-display-in-status-buffer 'permanent-local t)
 
 (defvar forge-format-avatar-function nil
   "Function used to insert avatars in certain locations.
@@ -125,8 +98,7 @@ does not inherit from `magit-dimmed'."
   :group 'forge-faces)
 
 (defface forge-topic-header-line
-  `((t :inherit magit-header-line
-       ,@(and (>= emacs-major-version 29) '(:foreground reset))))
+  '((t :inherit magit-header-line :foreground reset))
   "Face for the `header-line' in `forge-topic-mode' buffers."
   :group 'forge-faces)
 
@@ -163,32 +135,31 @@ were closed without being merged."
 ;;;;; Notifications
 
 (defface forge-topic-unread
-  `((t :weight bold
-       :box ( :line-width ,(if (>= emacs-major-version 28) (cons -1 -1) -1)
-              :style nil)))
+  '((t :weight bold
+       :box (:line-width (-1 . -1) :style nil)))
   "Face used for summaries of entities with unread notifications.
-This face is always used together with, and takes preference
-over, a `forge[-fancy]-{issue,pullreq}-STATE' face and should not
-specify any attribute that is specified by any of those faces.
-Likewise those faces should not set `:weight' or `:slant'."
+This face is always used together with, and takes preference over,
+a `forge-{issue,pullreq}-STATE' face and should not specify any
+attribute that is specified by any of those faces.  Likewise those
+faces should not set `:weight' or `:slant'."
   :group 'forge-faces)
 
 (defface forge-topic-pending
   '((t :weight bold))
   "Face used for summaries of entities with open notifications.
-This face is always used together with, and takes preference
-over, a `forge[-fancy]-{issue,pullreq}-STATE' face and should not
-specify any attribute that is specified by any of those faces.
-Likewise those faces should not set `:weight' or `:slant'."
+This face is always used together with, and takes preference over,
+a `forge-{issue,pullreq}-STATE' face and should not specify any
+attribute that is specified by any of those faces.  Likewise those
+faces should not set `:weight' or `:slant'."
   :group 'forge-faces)
 
 (defface forge-topic-done
-  '((t :slant italic))
+  '((t))
   "Face used for summaries of entities with no unread or open notification.
-This face is always used together with, and takes preference
-over, a `forge[-fancy]-{issue,pullreq}-STATE' face and should not
-specify any attribute that is specified by any of those faces.
-Likewise those faces should not set `:weight' or `:slant'."
+This face is always used together with, and takes preference over,
+a `forge-{issue,pullreq}-STATE' face and should not specify any
+attribute that is specified by any of those faces.  Likewise those
+faces should not set `:weight' or `:slant'."
   :group 'forge-faces)
 
 ;;;;; Issues
@@ -225,12 +196,19 @@ Likewise those faces should not set `:weight' or `:slant'."
   "Face used for summaries of closed pull-requests, that weren't merged."
   :group 'forge-faces)
 
+(defface forge-pullreq-draft
+  '((t :slant italic))
+  "Face used for summaries of draft pull-requests.
+A face attribute should be used that is not already used by any
+`forge-topic-STATUS' or `forge-{issue,pullreq}-STATE' face."
+  :group 'forge-faces)
+
 ;;;; Labels
 
 (defface forge-topic-label
-  `((t :box ( :line-width ,(if (>= emacs-major-version 28) (cons -1 -1) -1)
-              :style released-button)))
-  "Face used for topic labels."
+  '((t :inherit secondary-selection
+       :box (:line-width (-1 . -1) :style released-button)))
+  "Face used for topic labels, marks and milestones."
   :group 'forge-faces)
 
 ;;;; Post Details
@@ -333,14 +311,10 @@ an error."
 (defun forge-topic-at-point (&optional demand)
   "Return the topic at point.
 If there is no such topic and DEMAND is non-nil, then signal
-an error.  If NOT-THINGATPT is non-nil, then don't use
-`thing-at-point'."
+an error."
   (or (thing-at-point 'forge-topic)
       (magit-section-value-if '(issue pullreq))
       (forge-get-pullreq :branch)
-      (and (derived-mode-p 'forge-topic-list-mode)
-           (and-let* ((id (tabulated-list-get-id)))
-             (forge-get-topic id)))
       (and demand (user-error "No topic at point"))))
 
 (put 'forge-topic 'thing-at-point #'forge-thingatpt--topic)
@@ -356,73 +330,237 @@ an error.  If NOT-THINGATPT is non-nil, then don't use
                   repo (string-to-number (match-string-no-properties 1))))))
 
 (defun forge-region-topics ()
-  (cond
-   ((derived-mode-p 'forge-notifications-mode)
-    (magit-region-values '(issue pullreq)))
-   ((and (derived-mode-p 'forge-topic-list-mode)
-         (region-active-p))
-    (let ((beg (region-beginning))
-          (end (region-end))
-          (topics nil))
-      (save-excursion
-        (goto-char beg)
-        (while (< (point) end)
-          (when-let* ((id (tabulated-list-get-id)))
-            (push (forge-get-topic id) topics))
-          (forward-line 1))
-        (nreverse topics))))))
+  (magit-region-values '(issue pullreq)))
 
 ;;;; List
 
-(defun forge-ls-recent-topics (repo table)
-  (let* ((id (oref repo id))
-         (limit forge-topic-list-limit)
-         (open-limit   (if (consp limit) (car limit) limit))
-         (closed-limit (if (consp limit) (cdr limit) limit))
-         (topics (forge-sql [:select * :from $i1
-                             :where (and (= repository $s2)
-                                         (= status 'unread))]
-                            table id)))
-    (mapc (lambda (row)
-            (cl-pushnew row topics :test #'equal))
-          (if (consp limit)
-              (forge-sql [:select * :from $i1
-                          :where (and (= repository $s2)
-                                      (isnull closed))
-                          :order-by [(desc updated)]
-                          :limit $s3]
-                         table id open-limit)
-            (forge-sql [:select * :from $i1
-                        :where (and (= repository $s2)
-                                    (isnull closed))]
-                       table id)))
-    (when (> closed-limit 0)
-      (mapc (lambda (row)
-              (cl-pushnew row topics :test #'equal))
-            (forge-sql [:select * :from $i1
-                        :where (and (= repository $s2)
-                                    (notnull closed))
-                        :order-by [(desc updated)]
-                        :limit $s3]
-                       table id closed-limit)))
-    (cl-sort (mapcar (let ((class (if (eq table 'pullreq)
-                                      'forge-pullreq
-                                    'forge-issue)))
-                       (lambda (row)
-                         (closql--remake-instance class (forge-db) row)))
-                     topics)
-             (cdr forge-topic-list-order)
-             :key (lambda (it) (eieio-oref it (car forge-topic-list-order))))))
+(defvar-local forge--buffer-topics-spec nil)
+(put 'forge--buffer-topics-spec 'permanent-local t)
 
-(defun forge--ls-topics (repo)
-  (cl-sort (nconc (forge--ls-issues repo)
-                  (forge--ls-pullreqs repo))
-           #'> :key (-cut oref <> number)))
+(defun forge--init-buffer-topics-spec ()
+  (unless forge--buffer-topics-spec
+    (setq forge--buffer-topics-spec
+          (clone forge-status-buffer-default-topic-filters))))
+(add-hook 'magit-status-mode-hook #'forge--init-buffer-topics-spec)
 
-(defun forge--ls-active-topics (repo)
-  (cl-sort (nconc (forge--ls-active-issues repo)
-                  (forge--ls-active-pullreqs repo))
-           #'> :key (-cut oref <> number)))
+(defun forge--clone-buffer-topics-spec ()
+  (forge--init-buffer-topics-spec)
+  (clone forge--buffer-topics-spec))
+
+(defclass forge--topics-spec ()
+  ((type        :documentation "\
+Limit list based on topic type."
+                :initarg :type
+                :initform 'topic
+                :type (member topic issue pullreq nil)
+                :custom (choice
+                         (const topic)
+                         (const issue)
+                         (const pullreq)
+                         (const :tag "disable topic sections (nil)" nil)))
+   (active      :documentation "\
+Limit list to active topics.
+
+A topic is \"active\" if its state (public condition) is open and/or
+its status (private condition) is unread or pending.
+
+When this is t, then the value of the `state' and `status' slots are
+ignored."
+                :initarg :active
+                :initform t
+                :type boolean
+                :custom boolean)
+   (state       :documentation "\
+Limit list based on topic (public) state.
+
+State is the \"public condition\".  I.e., is the topic still open?"
+                :initarg :state
+                :initform 'open
+                :type (satisfies (lambda (val)
+                                   (member val '(open
+                                                 (completed merged)
+                                                 (unplanned rejected)
+                                                 nil))))
+                :custom (choice
+                         (const open)
+                         (const (completed merged))
+                         (const (unplanned rejected))
+                         (const :tag "all (nil)" nil)))
+   (status      :documentation "\
+Limit list based on topic (private) status.
+
+Status is the \"private condition\".  I.e., have you decided yet
+that *you* are done with the topic, and have others made changes,
+which *you* have not seen yet?
+
+`inbox' means \"`unread' or `pending'\"."
+                :initarg :status
+                :initform nil
+                :type (member inbox unread pending done nil)
+                :custom (choice
+                         (const inbox)
+                         (const unread)
+                         (const pending)
+                         (const done)
+                         (const :tag "all (nil)" nil)))
+   (updated     :documentation "\
+Date when topic was last updated."
+                :initarg :updated
+                :initform nil
+                :type (or string null))
+   (milestone   :documentation "\
+Limit list to topics assigned to given milestone."
+                :initarg :milestone
+                :initform nil
+                :type (or string null)
+                :custom string)
+   (labels      :documentation "\
+Limit list to topics with at least one of the given labels."
+                :initarg :labels
+                :initform nil
+                :type (list-of string)
+                :custom (repeat string))
+   (marks       :documentation "\
+Limit list to topics with at least one of the given marks.
+Marks are like labels, but they are private and local to the
+current Forge database."
+                :initarg :marks
+                :initform nil
+                :type (list-of string)
+                :custom (repeat string))
+   (saved       :documentation "Limit list to saved topics."
+                :initarg :saved
+                :initform nil
+                :type boolean
+                :custom boolean)
+   (author      :documentation "\
+Limit list to topics created by given user."
+                :initarg :author
+                :initform nil
+                :label "Author (username)"
+                :type (or string null)
+                :custom string)
+   (assignee    :documentation "\
+Limit list to topics assigned to given user."
+                :initarg :assignee
+                :initform nil
+                :label "Assignee (username)"
+                :type (or string null)
+                :custom string)
+   (reviewer    :documentation "\
+Limit list to topics for which a review by the given user was requested."
+                :initarg :reviewer
+                :initform nil
+                :label "Reviewer (username)"
+                :type (or string null)
+                :custom string)
+   (global      :documentation "Whether to list topics for all repositories."
+                :initarg :global
+                :initform nil
+                :type boolean)
+   (order       :documentation "Order in which topics are listed."
+                :initarg :order
+                :initform 'newest
+                :type (member newest oldest recently-updated anciently-updated)
+                :custom (choice (const newest)
+                                (const oldest)
+                                (const recently-updated)
+                                (const anciently-updated)))
+   (limit       :documentation "Number of topics to list at most."
+                :initarg :limit
+                :initform 200
+                :type integer
+                :custom natnum)
+   (grouped     :documentation "Whether to group topics by repository."
+                :initarg :grouped
+                :initform nil
+                :type boolean
+                :custom boolean)))
+
+(cl-defun forge--list-topics
+    (&optional (spec forge--buffer-topics-spec)
+               (repo (forge-get-repository :tracked?))
+               (type (oref spec type)))
+  (when (oref spec reviewer)
+    (setq type 'pullreq))
+  (if (eq type 'topic)
+      (pcase-let ((`(,pred ,slot) (pcase (oref spec order)
+                                    ('newest             '(> number))
+                                    ('oldest             '(< number))
+                                    ('recently-updated   '(> updated))
+                                    ('anciently-updated  '(< updated)))))
+        (cl-sort (nconc (forge--list-topics-1 spec repo 'issue)
+                        (forge--list-topics-1 spec repo 'pullreq))
+                 pred :key (lambda (obj) (eieio-oref obj slot))))
+    (forge--list-topics-1 spec repo type)))
+
+(defun forge--list-topics-1 (spec repo type)
+  (mapcar (apply-partially #'closql--remake-instance
+                           (if (eq type 'issue) 'forge-issue 'forge-pullreq)
+                           (forge-db))
+          (forge-sql (forge--list-topics-2 spec repo type))))
+
+(defun forge--list-topics-2 (spec repo type)
+  (pcase-let (((eieio active state status milestone labels marks
+                      saved author assignee reviewer global order limit)
+               spec))
+    (cond (active
+           (setq state 'open)
+           (setq status '(unread pending)))
+          ((eq status 'inbox)
+           (setq status '(unread pending))))
+    `[:select :distinct topic:*
+      :from [(as ,type topic)]
+      ,@(cond
+         (milestone
+          `[:join milestone :on (= milestone:title ,milestone)]))
+      ,@(cond
+         ((not labels) nil)
+         ((eq type 'issue)
+          [:join   issue-label :on (= issue-label:issue      topic:id)
+           :join         label :on (= label:id         issue-label:id)])
+         ([:join pullreq-label :on (= pullreq-label:pullreq  topic:id)
+           :join         label :on (= label:id       pullreq-label:id)]))
+      ,@(cond
+         ((not marks) nil)
+         ((eq type 'issue)
+          [:join   issue-mark :on (= issue-mark:issue      topic:id)
+           :join         mark :on (= mark:id         issue-mark:id)])
+         ([:join pullreq-mark :on (= pullreq-mark:pullreq  topic:id)
+           :join         mark :on (= mark:id       pullreq-mark:id)]))
+      ,@(cond
+         ((not assignee) nil)
+         ((eq type 'issue)
+          [:join   issue-assignee :on (= issue-assignee:issue      topic:id)
+           :join         assignee :on (= assignee:id      issue-assignee:id)])
+         ([:join pullreq-assignee :on (= pullreq-assignee:pullreq  topic:id)
+           :join         assignee :on (= assignee:id    pullreq-assignee:id)]))
+      ,@(cond
+         (reviewer
+          [:join (as pullreq-review-request r) :on (= r:pullreq  topic:id)
+           :join assignee                      :on (= assignee:id    r:id)]))
+      :where
+      (and
+       ,@(and (not global) repo `((= topic:repository ,(oref repo id))))
+       ,@(cond
+          ((and active state status)
+           `((or (in topic:state  ,(vconcat (ensure-list state)))
+                 (in topic:status ,(vconcat (ensure-list status))))))
+          (`(,@(and state  `((in topic:state  ,(vconcat (ensure-list state)))))
+             ,@(and status `((in topic:status ,(vconcat (ensure-list status))))))))
+       ,@(and milestone '((= topic:milestone milestone:id)))
+       ,@(and labels    `((or ,@(mapcar (lambda (l) `(= label:name ,l)) labels))))
+       ,@(and marks     `((or ,@(mapcar (lambda (m) `(=  mark:name ,m))  marks))))
+       ,@(and saved     '((= topic:saved-p  't)))
+       ,@(and author    `((= topic:author   ,author)))
+       ,@(and assignee  `((= assignee:login ,assignee)))
+       ,@(and reviewer  `((= assignee:login ,reviewer))))
+      :order-by [,(pcase order
+                    ('newest            '(desc topic:number))
+                    ('oldest            '(asc  topic:number))
+                    ('recently-updated  '(desc topic:updated))
+                    ('anciently-updated '(asc  topic:updated)))]
+      ,@(and limit `(:limit ,limit))]))
 
 ;;; Read
 
@@ -430,7 +568,7 @@ an error.  If NOT-THINGATPT is non-nil, then don't use
   "Read an active topic with completion using PROMPT.
 
 Open, unread and pending topics are considered active.
-Default to the current topic even if it isn't active.
+Default to the current topic, even if it isn't active.
 
 \\<forge-read-topic-minibuffer-map>While completion is in \
 progress, \\[forge-read-topic-lift-limit] lifts the limit, extending
@@ -440,16 +578,16 @@ If `forge-limit-topic-choices' is nil, then all candidates
 can be selected from the start."
   (forge--read-topic prompt
                      #'forge-current-topic
-                     #'forge--ls-active-topics
-                     #'forge--ls-topics))
+                     (forge--topics-spec :type 'topic :active t)
+                     (forge--topics-spec :type 'topic :active nil :state nil)))
 
 (defun forge--read-topic (prompt current active all)
   (let* ((current (funcall current))
          (repo    (forge-get-repository (or current :tracked)))
          (default (and current (forge--format-topic-line current)))
          (alist   (forge--topic-collection
-                   (funcall (if forge-limit-topic-choices active all)
-                            repo)))
+                   (forge--list-topics (if forge-limit-topic-choices active all)
+                                       repo)))
          (choices (mapcar #'car alist))
          (choices (cond ((and forge-limit-topic-choices
                               default
@@ -477,7 +615,8 @@ can be selected from the start."
                        (forge-limit-topic-choices choices)
                        (t
                         (forge--replace-minibuffer-prompt (concat prompt ": "))
-                        (setq alist (forge--topic-collection (funcall all repo)))
+                        (setq alist (forge--topic-collection
+                                     (forge--list-topics all repo)))
                         (setq all-choices (mapcar #'car alist)))))))
                  nil t nil nil default))
             (magit-completing-read prompt choices nil t nil nil default))))
@@ -570,31 +709,25 @@ can be selected from the start."
    nil t
    (and topic (forge--format-topic-milestone topic))))
 
-(defun forge-read-topic-label (&optional prompt repository)
-  (magit-completing-read (or prompt "Label")
-                         (forge--format-topic-label-choices
-                          (or repository (forge-get-repository :tracked)))
-                         nil t))
-
-(defun forge-read-topic-labels (&optional topic)
-  (let* ((repo (forge-get-repository (or topic :tracked)))
-         (crm-separator ","))
+(defun forge-read-topic-labels (&optional obj)
+  (let ((crm-separator ","))
     (magit-completing-read-multiple
      "Labels: "
-     (mapcar #'cadr (oref repo labels))
+     (forge--format-labels (and obj (forge-get-repository obj)))
      nil t
-     (and topic (mapconcat #'car (closql--iref topic 'labels) ",")))))
+     (and (forge-topic-p obj)
+          (forge--format-labels obj crm-separator)))))
 
-(defun forge-read-topic-marks (&optional topic)
-  (let ((marks (mapcar #'car (forge-sql [:select name :from mark])))
-        (crm-separator ","))
+(defun forge-read-topic-marks (&optional obj)
+  (let ((crm-separator ","))
     (magit-completing-read-multiple
-     "Marks: " marks nil t
-     (and topic (mapconcat #'car (closql--iref topic 'marks) ",")))))
+     "Marks: " (forge--format-marks) nil t
+     (and (forge-topic-p obj)
+          (forge--format-marks obj crm-separator)))))
 
 (defun forge-read-topic-assignees (&optional topic)
   (let* ((repo (forge-get-repository (or topic :tracked)))
-         (value (and topic (closql--iref topic 'assignees)))
+         (value (and topic (oref topic assignees)))
          (choices (mapcar #'cadr (oref repo assignees)))
          (crm-separator ","))
     (magit-completing-read-multiple
@@ -602,17 +735,17 @@ can be selected from the start."
      (if (forge--childp repo 'forge-gitlab-repository)
          t ; Selecting something else would fail later on.
        'confirm)
-     (mapconcat #'car value ","))))
+     (mapconcat #'cadr value ","))))
 
 (defun forge-read-topic-review-requests (&optional topic)
   (let* ((repo (forge-get-repository (or topic :tracked)))
-         (value (and topic (closql--iref topic 'review-requests)))
+         (value (and topic (oref topic review-requests)))
          (choices (mapcar #'cadr (oref repo assignees)))
          (crm-separator ","))
     (magit-completing-read-multiple
      "Request review from: " choices nil
      'confirm
-     (mapconcat #'car value ","))))
+     (mapconcat #'cadr value ","))))
 
 (defun forge--completing-read ( prompt collection &optional
                                 predicate require-match initial-input
@@ -640,11 +773,14 @@ can be selected from the start."
 
 (defun forge--format-topic-line (topic &optional width)
   (concat
-   (and (derived-mode-p 'forge-notifications-mode)
-        (eq forge-notifications-display-style 'flat)
+   (and (or (and (derived-mode-p 'forge-notifications-mode)
+                 (eq forge-notifications-display-style 'flat))
+            (and (derived-mode-p 'forge-topics-mode)
+                 (oref forge--buffer-topics-spec global)
+                 (not (oref forge--buffer-topics-spec grouped))))
         (concat (truncate-string-to-width
                  (oref (forge-get-repository topic) slug)
-                 forge-notifications-repo-slug-width
+                 forge-topic-repository-slug-width
                  nil ?\s t)
                 " "))
    ;; MAYBE bring this back once we support discussions.
@@ -698,7 +834,10 @@ can be selected from the start."
      nil
      (magit--propertize-face
       title
-      `(,(pcase status
+      `(,@(and (forge-pullreq-p topic)
+               (oref topic draft-p)
+               '(forge-pullreq-draft))
+        ,(pcase status
            ('unread  'forge-topic-unread)
            ('pending 'forge-topic-pending)
            ('done    'forge-topic-done))
@@ -710,40 +849,64 @@ can be selected from the start."
            (`(forge-pullreq merged)    'forge-pullreq-merged)
            (`(forge-pullreq rejected)  'forge-pullreq-rejected)))))))
 
-(defun forge--format-topic-title+labels (topic)
-  (concat (forge--format-topic-title  topic) " "
-          (forge--format-topic-labels topic)))
-
 (defun forge--format-topic-milestone (topic)
-  (and-let* ((id (oref topic milestone)))
-    (caar (forge-sql [:select [title] :from milestone :where (= id $s1)] id))))
+  (and-let* ((id (oref topic milestone))
+             (str (caar (forge-sql [:select [title]
+                                    :from milestone
+                                    :where (= id $s1)]
+                                   id))))
+    (magit--propertize-face str 'forge-topic-label)))
 
-(defun forge--format-topic-labels (topic)
-  (and-let* ((labels (closql--iref topic 'labels)))
-    (mapconcat (pcase-lambda (`(,name ,color ,_description))
-                 (let* ((background (forge--sanitize-color color))
-                        (foreground (forge--contrast-color background)))
-                   (magit--propertize-face
-                    name `(( :background ,background
-                             :foreground ,foreground)
-                           forge-tablist-topic-label))))
-               labels " ")))
+(defun forge--format-labels (&optional arg concat)
+  (and-let*
+      ((local t)
+       (labels (cond
+                ((eieio-object-p arg)
+                 (oref arg labels))
+                ((forge-buffer-repository)
+                 (forge-sql-cdr `[:select label:* :from label :where
+                                  ,(if arg
+                                       '(and (= repository $s1)
+                                             (in name $v2))
+                                     '(= repository $s1))
+                                  :order-by [(asc name)]]
+                                forge-buffer-repository
+                                (vconcat arg)))
+                (t
+                 (setq local nil)
+                 (forge-sql `[:select :distinct name :from label
+                             ,@(and arg '(:where (in name $v1)))
+                              :order-by [(asc name)]]
+                            (vconcat arg)))))
+       (format (if local
+                   (pcase-lambda (`(,_id ,name ,color ,_description))
+                     (let* ((background (forge--sanitize-color color))
+                            (foreground (readable-foreground-color background)))
+                       (magit--propertize-face
+                        name `(( :background ,background
+                                 :foreground ,foreground)
+                               forge-topic-label))))
+                 (pcase-lambda (`(,name))
+                   (magit--propertize-face name 'forge-topic-label)))))
+    (if concat
+        (mapconcat format labels (if (stringp concat) concat " "))
+      (mapcar format labels))))
 
-(defun forge--format-topic-label-choices (repo)
-  (mapcar (pcase-lambda (`(,_id ,name ,color ,_description))
-            (let* ((background (forge--sanitize-color color))
-                   (foreground (forge--contrast-color background)))
-              (magit--propertize-face
-               name `( :background ,background
-                       :foreground ,foreground))))
-          (oref repo labels)))
-
-(defun forge--format-topic-marks (topic)
-  (and-let* ((marks (closql--iref topic 'marks)))
-    (mapconcat (pcase-lambda (`(,name ,face ,_description))
-                 (magit--propertize-face
-                  name (list 'forge-tablist-topic-label face)))
-               marks " ")))
+(defun forge--format-marks (&optional arg concat)
+  (and-let* ((marks (if (forge-topic--eieio-childp arg)
+                        (oref arg marks)
+                      ;; Unlike labels, marks are not repo-specific.
+                      (when (forge-repository-p arg) (setq arg nil))
+                      (forge-sql-cdr `[:select * :from mark
+                                       ,@(and arg '(:where (in name $v1)))
+                                       :order-by [(asc name)]]
+                                     (vconcat arg))))
+             (format (pcase-lambda (`(,_id ,name ,face ,_description))
+                       (magit--propertize-face
+                        name (list face 'forge-topic-label)))))
+    (if concat
+        (mapconcat format marks (if (stringp concat) concat " "))
+      (mapcar format marks))))
 
 (defun forge--format-topic-state (topic)
   (with-slots (state) topic
@@ -768,15 +931,15 @@ can be selected from the start."
        ('done    'forge-topic-done)))))
 
 (defun forge--format-topic-assignees (topic)
-  (and-let* ((assignees (closql--iref topic 'assignees)))
+  (and-let* ((assignees (oref topic assignees)))
     (mapconcat #'forge--format-person assignees ", ")))
 
 (defun forge--format-topic-review-requests (topic)
-  (and-let* ((review-requests (closql--iref topic 'review-requests)))
+  (and-let* ((review-requests (oref topic review-requests)))
     (mapconcat #'forge--format-person review-requests ", ")))
 
 (defun forge--format-person (person)
-  (pcase-let ((`(,login ,name) person))
+  (pcase-let ((`(,_id ,login ,name) person))
     (format "%s%s (@%s)"
             (forge--format-avatar login)
             name login)))
@@ -786,24 +949,52 @@ can be selected from the start."
       (funcall forge-format-avatar-function person)
     ""))
 
-(defun forge--format-boolean (slot name)
+(defun forge--format-boolean (slot name &optional obj)
   ;; Booleans are formatted differently in transients and headers.
   ;; Use this to format the (complete) description of suffix commands.
-  (let ((topic (forge-current-topic)))
-    (if (and topic (slot-exists-p topic slot))
+  (let ((obj (or obj (forge-current-topic))))
+    (if (and obj (slot-exists-p obj slot))
         (format (propertize "[%s]" 'face 'transient-delimiter)
                 (propertize name 'face
-                            (if (eieio-oref topic slot)
+                            (if (eieio-oref obj slot)
                                 'transient-value
                               'transient-inactive-value)))
       (format "[%s]" name))))
 
 ;;; Insert
 
+(defun forge-insert-topics (type heading prepare)
+  "Insert a list of topics, according to PREPARE.
+
+This function is not intended to be added to section hooks directly.
+Instead create a function, which calls this function, and add wrapper
+to the section hook.
+
+PREPARE is a function which takes one arguments the repository object,
+and must return an filter object of type `forge--topics-spec' or nil.
+Insert no topics if PREPARE returns nil, or if the current repository
+isn't tracked or Forge hasn't been fully setup yet (in the latter two
+cases don't even call PREPARE).
+
+The filter object can be created either using `forge--topics-spec' or
+by `clone'ing the object returned by `forge--init-buffer-topics-spec',
+to share some settings with other topic lists in the same buffer.
+See `forge--topics-spec' for the valid slots and their values.
+
+HEADING is used as the heading of the list section and TYPE is used as
+its type.  TYPE should be a symbol of the form `SUBSET-KIND', where KIND
+is one of `topics', `issues' or `pullreqs', and SUBSET should describe
+what subset of KIND is being listed."
+  (declare (indent defun))
+  (when-let (((forge-db t))
+             (repo (forge-get-repository :tracked?))
+             (spec (funcall prepare repo)))
+    (forge--insert-topics type heading (forge--list-topics spec repo))))
+
 (defun forge--insert-topics (type heading topics)
   (when topics
     (let ((width (apply #'max (--map (length (oref it slug)) topics))))
-      (magit-insert-section ((eval type) nil t)
+      (magit-insert-section ((eval type) heading t)
         (magit-insert-heading
           (concat (magit--propertize-face (concat heading " ")
                                           'magit-section-heading)
@@ -832,11 +1023,11 @@ can be selected from the start."
         (forge--insert-pullreq-commits topic)))))
 
 (defun forge--insert-topic-labels (topic &optional separate)
-  (and-let* ((labels (closql--iref topic 'labels)))
+  (and-let* ((labels (oref topic labels)))
     (prog1 t
-      (pcase-dolist (`(,name ,color ,description) labels)
+      (pcase-dolist (`(,_id ,name ,color ,description) labels)
         (let* ((background (forge--sanitize-color color))
-               (foreground (forge--contrast-color background)))
+               (foreground (readable-foreground-color background)))
           (if separate (insert " ") (setq separate t))
           (insert name)
           (let ((o (make-overlay (- (point) (length name)) (point))))
@@ -850,9 +1041,9 @@ can be selected from the start."
               (overlay-put o 'help-echo description))))))))
 
 (defun forge--insert-topic-marks (topic &optional separate)
-  (and-let* ((marks (closql--iref topic 'marks)))
+  (and-let* ((marks (oref topic marks)))
     (prog1 t
-      (pcase-dolist (`(,name ,face ,description) marks)
+      (pcase-dolist (`(,_id ,name ,face ,description) marks)
         (if separate (insert " ") (setq separate t))
         (insert name)
         (let ((o (make-overlay (- (point) (length name)) (point))))
@@ -862,37 +1053,55 @@ can be selected from the start."
           (when description
             (overlay-put o 'help-echo description)))))))
 
-(defun forge--assert-insert-topics-get-repository (&optional issues-p)
-  (and (forge-db t)
-       (or forge-display-in-status-buffer
-           (not (eq major-mode 'magit-status-mode)))
-       (and-let* ((repo (forge-get-repository :tracked?)))
-         (and (or (not issues-p)
-                  (oref repo issues-p))
-              repo))))
-
 ;;; Modes
+
+(defvar-keymap forge-common-map
+  :doc "Parent keymap of many of Forge's keymaps.
+Keymaps that use this keymap as the/a parent keymap, remap the
+place-holder commands `forge--list-menu' and/or `forge--item-menu'
+to the appropriate menu command.  To change the keys bound to menu
+commands in all Forge keymaps, one only has to change them here."
+  "C-c C-c"    #'forge--list-menu
+  "C-c RET"    #'forge--item-menu
+  "C-<return>" #'forge--item-menu)
+
+(defun forge--list-menu ()
+  "Place-holder menu command.  See `forge-common-map'."
+  (interactive)
+  (message "No list menu available here"))
+(put 'forge--list-menu 'completion-predicate #'ignore)
+
+(defun forge--item-menu ()
+  "Place-holder menu command.  See `forge-common-map'."
+  (interactive)
+  (message "No item menu available here"))
+(put 'forge--item-menu 'completion-predicate #'ignore)
 
 (defvar-keymap forge-post-section-map
   "<remap> <magit-edit-thing>"   #'forge-edit-post
   "C-c C-k"                      #'forge-delete-comment)
 
 (defvar-keymap forge-topic-mode-map
+  :parent (make-composed-keymap forge-common-map magit-mode-map)
   "<remap> <magit-visit-thing>"  #'markdown-follow-link-at-point
   "<mouse-2>"                    #'markdown-follow-link-at-point
-  "C-c C-m"                      #'forge-topic-menu
+  "<remap> <forge--item-menu>"   #'forge-topic-menu
+  "<remap> <forge--list-menu>"   #'forge-topic-menu
   "C-c C-n"                      #'forge-create-post
   "C-c C-r"                      #'forge-create-post)
 
 (define-derived-mode forge-topic-mode magit-mode "Topic"
-  "Parent mode of `forge-{issue,pullreq}-mode'.
+  "Parent major mode of `forge-{issue,pullreq}-mode'.
 This mode itself is never used directly."
+  :interactive nil
   (face-remap-add-relative 'header-line 'forge-topic-header-line)
   (setq-local markdown-translate-filename-function
               #'forge--markdown-translate-filename-function))
 
+(defvar-keymap forge-issue-mode-map :parent forge-topic-mode-map)
 (define-derived-mode forge-issue-mode forge-topic-mode "Issue"
-  "Mode for looking at a Forge issue.")
+  "Major mode for looking at a Forge issue."
+  :interactive nil)
 (defalias 'forge-issue-setup-buffer   #'forge-topic-setup-buffer)
 (defalias 'forge-issue-refresh-buffer #'forge-topic-refresh-buffer)
 (defvar forge-issue-headers-hook
@@ -903,8 +1112,10 @@ This mode itself is never used directly."
     forge-insert-topic-marks
     forge-insert-topic-assignees))
 
+(defvar-keymap forge-pullreq-mode-map :parent forge-topic-mode-map)
 (define-derived-mode forge-pullreq-mode forge-topic-mode "Pull-request"
-  "Mode for looking at a Forge pull-request.")
+  "Major mode for looking at a Forge pull-request."
+  :interactive nil)
 (defalias 'forge-pullreq-setup-buffer   #'forge-topic-setup-buffer)
 (defalias 'forge-pullreq-refresh-buffer #'forge-topic-refresh-buffer)
 (defvar forge-pullreq-headers-hook
@@ -924,15 +1135,11 @@ This mode itself is never used directly."
 (defun forge-topic-setup-buffer (topic)
   (let* ((repo (forge-get-repository topic))
          (name (format "*forge: %s %s*" (oref repo slug) (oref topic slug)))
-         (magit-generate-buffer-name-function (lambda (_mode _value) name))
-         (current-repo (forge-get-repository :known?))
-         (default-directory (if (forge-repository-equal current-repo repo)
-                                default-directory
-                              (or (forge-get-worktree repo)
-                                  default-directory))))
+         (magit-generate-buffer-name-function (lambda (_mode _value) name)))
     (magit-setup-buffer-internal
      (if (forge-issue-p topic) #'forge-issue-mode #'forge-pullreq-mode)
-     t `((forge-buffer-topic ,topic)) name)
+     t `((forge-buffer-topic ,topic))
+     name (or (forge-get-worktree repo) "/"))
     (forge-topic-mark-read topic)))
 
 (defun forge-topic-refresh-buffer ()
@@ -953,9 +1160,9 @@ This mode itself is never used directly."
           (insert (forge--fontify-markdown note) "\n\n")))
       (dolist (post (cons topic (oref topic posts)))
         (with-slots (author created body) post
-          (magit-insert-section section (post post)
-            (oset section heading-highlight-face
-                  'magit-diff-hunk-heading-highlight)
+          (magit-insert-section
+              ( post post nil
+                :heading-highlight-face 'magit-diff-hunk-heading-highlight)
             (let ((heading
                    (format-spec
                     forge-post-heading-format
@@ -1045,82 +1252,126 @@ This mode itself is never used directly."
 ;;; Commands
 ;;;; Groups
 
-(defconst forge--topic-set-state-group
-  ["Set state"
-   ("s o" forge-topic-state-set-open)
-   ("s c" forge-issue-state-set-completed)
-   ("s u" forge-issue-state-set-unplanned)
-   ("s m" forge-pullreq-state-set-merged)
-   ("s r" forge-pullreq-state-set-rejected)
+(defconst forge--lists-group
+  ["List"
+   ("l r" "repositories"  forge-list-repositories)
+   ("l n" "notifications" forge-list-notifications)
+   ("l g" "global topics" forge-list-global-topics)
+   ("l t" "topics"        forge-list-topics)
    ""])
 
+(defconst forge--topic-menus-group
+  ["Menu"
+   ("m s" "edit"      forge-topic-menu)
+   ("m f" "filter"    forge-topics-menu)
+   ("m f" "filter"    forge-notifications-menu)
+   ("m f" "filter"    forge-repositories-menu)
+   ("m d" "dispatch"  forge-dispatch)
+   ("m c" "configure" forge-configure)
+   ""])
+
+(defconst forge--topic-set-state-group
+  [:description
+   (lambda () (if forge--show-topic-legend "Set public state" "Set state"))
+   ("o" forge-topic-state-set-open)
+   ("c" forge-issue-state-set-completed)
+   ("x" forge-issue-state-set-unplanned)
+   ("c" forge-pullreq-state-set-merged)
+   ("x" forge-pullreq-state-set-rejected)])
+
 (defconst forge--topic-set-status-group
-  ["Set status"
-   ("s i" forge-topic-status-set-unread)
-   ("s p" forge-topic-status-set-pending)
-   ("s d" forge-topic-status-set-done)])
+  [:description
+   (lambda () (if forge--show-topic-legend "Set private status" "Set status"))
+   ("u" forge-topic-status-set-unread)
+   ("p" forge-topic-status-set-pending)
+   ("d" forge-topic-status-set-done)])
 
-(defconst forge--topic-set-slots-group
-  ["Set"
-   ("e t" forge-topic-set-title)
-   ("e m" forge-topic-set-milestone)
-   ("e l" forge-topic-set-labels)
-   ("e a" forge-topic-set-assignees)
-   ("e r" forge-topic-set-review-requests)
-   ("e d" forge-topic-toggle-draft)])
+(defconst forge--topic-legend-group
+  '(["Legend" :if-non-nil forge--show-topic-legend
+     (:info* (lambda () (propertize "open issue"       'face 'forge-issue-open)))
+     (:info* (lambda () (propertize "completed issue"  'face 'forge-issue-completed)))
+     (:info* (lambda () (propertize "unplanned issue"  'face 'forge-issue-unplanned)))]
+    ["" :if-non-nil forge--show-topic-legend
+     (:info* (lambda () (propertize "open pullreq"     'face 'forge-pullreq-open)))
+     (:info* (lambda () (propertize "merged pullreq"   'face 'forge-pullreq-merged)))
+     (:info* (lambda () (propertize "rejected pullreq" 'face 'forge-pullreq-rejected)))]
+    ["" :if-non-nil forge--show-topic-legend
+     (:info* (lambda () (propertize "unread"           'face 'forge-topic-unread)))
+     (:info* (lambda () (propertize "pending"          'face 'forge-topic-pending)))
+     (:info* (lambda () (propertize "done"             'face 'forge-topic-done)))]
+    ["" :if-non-nil forge--show-topic-legend
+     (:info* (lambda () (propertize "draft"            'face 'forge-pullreq-draft)))]))
 
-(defconst forge--topic-set-local-group
-  ["Set local"
-   ("l s" forge-topic-toggle-saved)
-   ("l m" forge-topic-set-marks)
-   ("l n" forge-edit-topic-note)])
+(defvar forge--show-topic-legend t)
+
+(transient-define-suffix forge-toggle-topic-legend ()
+  "Toggle whether to show legend for faces used in topic menus and lists."
+  :description (lambda () (if forge--show-topic-legend "hide legend" "show legend"))
+  :transient t
+  (interactive)
+  (customize-set-variable 'forge--show-topic-legend
+                          (not forge--show-topic-legend)))
+
+(defconst forge--topic-menus-column-widths '(21 21 21 21))
 
 ;;;; Menus
 
-(defconst forge--topic-menus-column-widths '(19))
-
-;;;###autoload (autoload 'forge-topic-menu "forge-topic" nil t)
+;;;###autoload(autoload 'forge-topic-menu "forge-topic" nil t)
 (transient-define-prefix forge-topic-menu ()
   "Edit the topic at point."
   :transient-suffix t
-  :transient-non-suffix t
+  :transient-non-suffix #'transient--do-call
   :transient-switch-frame nil
   :refresh-suffixes t
+  :environment #'forge--menu-environment
   :column-widths forge--topic-menus-column-widths
-  [:hide always
-   ("q" forge-menu-quit-list)]
-  [["Actions"
-    ("f" forge-pull-this-topic)
-    ("b" forge-browse-this-topic)
-    ("k" forge-delete-comment)
-    ("p" forge-create-pullreq-from-issue)
-    ("m" "show more actions" forge-dispatch)]]
-  [forge--topic-set-state-group
-   forge--topic-set-slots-group]
-  [forge--topic-set-status-group
-   forge--topic-set-local-group]
-  (interactive)
-  (unless (derived-mode-p 'forge-topic-mode)
-    (if-let ((topic (forge-topic-at-point)))
-        (forge-topic-setup-buffer topic)
-      (user-error "No current topic")))
-  (transient-setup 'forge-topic-menu))
+  [:hide always ("q" forge-menu-quit-list)]
+  [forge--topic-menus-group
+   forge--topic-set-state-group
+   forge--topic-set-status-group
+   ["Actions"
+    ("/f" forge-pull-this-topic)
+    ("/b" forge-browse-this-topic)
+    ("/c" forge-checkout-this-pullreq)]]
+  [forge--lists-group
+   ["Set                                         "
+    ("-m" forge-topic-set-milestone)
+    ("-l" forge-topic-set-labels)
+    ("-x" forge-topic-set-marks)
+    ("-a" forge-topic-set-assignees)
+    ("-r" forge-topic-set-review-requests)
+    ("-n" forge-edit-topic-note)
+    ("-t" forge-topic-set-title)]
+   ["Set"
+    ("-s" forge-topic-toggle-saved)
+    ("-d" forge-topic-toggle-draft)
+    """Display"
+    ("-H" forge-toggle-topic-legend)]]
+  [forge--topic-legend-group])
 
-;;;###autoload (autoload 'forge-topic-state-menu "forge-topic" nil t)
+(transient-augment-suffix forge-topic-menu
+  :transient #'transient--do-replace
+  :inapt-if (lambda () (or (derived-mode-p 'forge-repository-list-mode)
+                      (eq (oref transient--prefix command) 'forge-topic-menu)))
+  :inapt-face (lambda () (if (derived-mode-p 'forge-repository-list-mode)
+                        'transient-inapt-suffix
+                      'forge-suffix-active)))
+
+;;;###autoload(autoload 'forge-topic-state-menu "forge-topic" nil t)
 (transient-define-prefix forge-topic-state-menu ()
   "Set state of the current topic."
-  [("o" forge-topic-state-set-open)
-   ("c" forge-issue-state-set-completed)
-   ("u" forge-issue-state-set-unplanned)
-   ("m" forge-pullreq-state-set-merged)
-   ("r" forge-pullreq-state-set-rejected)])
+  :environment #'forge--menu-environment
+  [forge--topic-set-state-group])
 
-;;;###autoload (autoload 'forge-topic-status-menu "forge-topic" nil t)
+;;;###autoload(autoload 'forge-topic-status-menu "forge-topic" nil t)
 (transient-define-prefix forge-topic-status-menu ()
   "Set status of the current topic."
-  [("i" forge-topic-status-set-unread)
-   ("p" forge-topic-status-set-pending)
-   ("d" forge-topic-status-set-done)])
+  :environment #'forge--menu-environment
+  [forge--topic-set-status-group])
+
+(defun forge--menu-environment (fn)
+  (let ((magit--refresh-cache (list (cons 0 0))))
+    (funcall fn)))
 
 ;;;; State
 
@@ -1270,7 +1521,8 @@ This mode itself is never used directly."
   "Edit the TITLE of the current topic."
   :class 'forge--topic-set-slot-command :slot 'title
   :formatter (lambda (topic)
-               (propertize (forge--format-topic-title topic)
+               (propertize (truncate-string-to-width
+                            (forge--format-topic-title topic) 34 nil ?\s t)
                            'face 'font-lock-string-face)))
 
 (transient-define-suffix forge-topic-set-milestone (milestone)
@@ -1279,11 +1531,13 @@ This mode itself is never used directly."
 
 (transient-define-suffix forge-topic-set-labels (labels)
   "Edit the LABELS of the current topic."
-  :class 'forge--topic-set-slot-command :slot 'labels)
+  :class 'forge--topic-set-slot-command :slot 'labels
+  :formatter (lambda (topic) (forge--format-labels topic t)))
 
 (transient-define-suffix forge-topic-set-marks (marks)
   "Edit the MARKS of the current topic."
-  :class 'forge--topic-set-slot-command :slot 'marks)
+  :class 'forge--topic-set-slot-command :slot 'marks
+  :formatter (lambda (topic) (forge--format-marks topic t)))
 
 (transient-define-suffix forge-topic-set-assignees (assignees)
   "Edit the ASSIGNEES of the current topic."
@@ -1318,26 +1572,6 @@ This mode itself is never used directly."
         ((string-match-p "\\`#.\\{4\\}\\'" color) (substring color 0 3))
         ((string-match-p "\\`#.\\{8\\}\\'" color) (substring color 0 6))
         (t "#000000"))) ; Use fallback instead of invalid color.
-
-(defun forge--contrast-color (color)
-  "Return black or white depending on the luminance of COLOR."
-  (if (> (forge--x-color-luminance color) 0.5) "black" "white"))
-
-;; Copy of `rainbow-x-color-luminance'.
-(defun forge--x-color-luminance (color)
-  "Calculate the luminance of a color string (e.g., \"#ffaa00\", \"blue\").
-Return a value between 0 and 1."
-  (let ((values (color-values color)))
-    (forge--color-luminance (/ (nth 0 values) 256.0)
-                            (/ (nth 1 values) 256.0)
-                            (/ (nth 2 values) 256.0))))
-
-;; Copy of `rainbow-color-luminance'.
-;; Also see https://en.wikipedia.org/wiki/Relative_luminance.
-(defun forge--color-luminance (red green blue)
-  "Calculate the luminance of color composed of RED, GREEN and BLUE.
-Return a value between 0 and 1."
-  (/ (+ (* .2126 red) (* .7152 green) (* .0722 blue)) 256))
 
 ;;; Markdown Utilities
 
@@ -1479,39 +1713,6 @@ alist, containing just `text' and `position'.")
 
 ;;; Bug-Reference
 
-(when (< emacs-major-version 28)
-  (defun bug-reference-fontify (start end)
-    "Apply bug reference overlays to region."
-    (save-excursion
-      (let ((beg-line (progn (goto-char start) (line-beginning-position)))
-            (end-line (progn (goto-char end) (line-end-position))))
-        ;; Remove old overlays.
-        (bug-reference-unfontify beg-line end-line)
-        (goto-char beg-line)
-        (while (and (< (point) end-line)
-                    (re-search-forward bug-reference-bug-regexp end-line 'move))
-          (when (and (or (not bug-reference-prog-mode)
-                         ;; This tests for both comment and string syntax.
-                         (nth 8 (syntax-ppss)))
-                     ;; This is the part where this redefinition differs
-                     ;; from the original defined in "bug-reference.el".
-                     (not (and (derived-mode-p 'magit-status-mode
-                                               'forge-notifications-mode)
-                               (= (match-beginning 0)
-                                  (line-beginning-position))))
-                     ;; End of additions.
-                     )
-            (let ((overlay (make-overlay (match-beginning 0) (match-end 0)
-                                         nil t nil)))
-              (overlay-put overlay 'category 'bug-reference)
-              ;; Don't put a link if format is undefined
-              (when bug-reference-url-format
-                (overlay-put overlay 'bug-reference-url
-                             (if (stringp bug-reference-url-format)
-                                 (format bug-reference-url-format
-                                         (match-string-no-properties 2))
-                               (funcall bug-reference-url-format)))))))))))
-
 (defun forge-bug-reference-setup ()
   "Setup `bug-reference' in the current buffer.
 If forge data has been fetched for the current repository, then
@@ -1519,38 +1720,24 @@ enable `bug-reference-mode' or `bug-reference-prog-mode' and
 modify `bug-reference-bug-regexp' if appropriate."
   (unless (or bug-reference-url-format
               (not (forge-db t))
-              ;; TODO Allow use in this mode again.
-              (derived-mode-p 'forge-notifications-mode))
+              ;; TODO Allow use in these modes again.
+              (derived-mode-p 'forge-topics-mode 'forge-notifications-mode))
     (magit--with-safe-default-directory nil
       (when-let ((repo (forge-get-repository :tracked?)))
-        (if (>= emacs-major-version 28)
-            (when (derived-mode-p 'magit-status-mode
-                                  'forge-notifications-mode)
-              (setq-local
-               bug-reference-auto-setup-functions
-               (let ((hook bug-reference-auto-setup-functions))
-                 (list (lambda ()
-                         ;; HOOK is not allowed to be a lexical var:
-                         ;; (run-hook-with-args-until-success 'hook)
-                         (catch 'success
-                           (dolist (f hook)
-                             (when (funcall f)
-                               (setq bug-reference-bug-regexp
-                                     (concat "." bug-reference-bug-regexp))
-                               (throw 'success t)))))))))
-          (setq-local bug-reference-url-format
-                      (if (forge--childp repo 'forge-gitlab-repository)
-                          (lambda ()
-                            (forge--format repo
-                                           (if (equal (match-string 3) "#")
-                                               'issue-url-format
-                                             'pullreq-url-format)
-                                           `((?i . ,(match-string 2)))))
-                        (forge--format repo 'issue-url-format '((?i . "%s")))))
-          (setq-local bug-reference-bug-regexp
-                      (if (forge--childp repo 'forge-gitlab-repository)
-                          "\\(?3:[!#]\\)\\(?2:[0-9]+\\)"
-                        "#\\(?2:[0-9]+\\)")))
+        (when (derived-mode-p 'magit-status-mode
+                              'forge-notifications-mode)
+          (setq-local
+           bug-reference-auto-setup-functions
+           (let ((hook bug-reference-auto-setup-functions))
+             (list (lambda ()
+                     ;; HOOK is not allowed to be a lexical var:
+                     ;; (run-hook-with-args-until-success 'hook)
+                     (catch 'success
+                       (dolist (f hook)
+                         (when (funcall f)
+                           (setq bug-reference-bug-regexp
+                                 (concat "." bug-reference-bug-regexp))
+                           (throw 'success t)))))))))
         (if (derived-mode-p 'prog-mode)
             (bug-reference-prog-mode 1)
           (bug-reference-mode 1))
