@@ -40,7 +40,7 @@ library is made available as a separate package.  It also defines some
 additional functionality which makes it useful even for end-users, who
 don’t use Magit or another package which uses it internally.
 
-This manual is for With-Editor version 3.4.0.
+This manual is for With-Editor version 3.4.3.
 
      Copyright (C) 2015-2024 Jonas Bernoulli
      <emacs.with-editor@jonas.bernoulli.dev>
@@ -115,7 +115,7 @@ and we have to add another kludge to find it anyway.
 
      You should *not* customize this option permanently.  If you have to
      do it, then you should consider that a temporary kludge and inform
-     the Magit maintainer as described in *note Debugging::.
+     the Magit maintainer as described in *note Debugging: Debugging.
 
      If With-Editor fails to find a suitable ‘emacsclient’ on your
      system, then this should be fixed for all users at once, by
@@ -289,7 +289,7 @@ package::.
      instead of ‘EDITOR’.
 
  -- Macro: with-editor* envvar &rest body
-     This macro is like ‘with-editor’ instead that the ENVVAR argument
+     This macro is like ‘with-editor’, except that the ENVVAR argument
      is required and that it is evaluated at run-time.
 
  -- Function: with-editor-set-process-filter process filter
@@ -370,11 +370,11 @@ Tag Table:
 Node: Top799
 Node: Using the With-Editor package2615
 Node: Configuring With-Editor3202
-Node: Using With-Editor commands7758
-Node: Using With-Editor as a library11060
-Node: Debugging13092
-Node: Function and Command Index13984
-Node: Variable Index15482
+Node: Using With-Editor commands7767
+Node: Using With-Editor as a library11069
+Node: Debugging13101
+Node: Function and Command Index13993
+Node: Variable Index15491
 
 End Tag Table
 
