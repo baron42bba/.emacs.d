@@ -7,7 +7,8 @@
 ;; license that can be found in the LICENSE file.
 
 ;; Author: The go-mode Authors
-;; Version: 1.6.0
+;; Package-Version: 20240620.1948
+;; Package-Revision: 636d36e37a0d
 ;; Keywords: languages go
 ;; Package-Requires: ((emacs "26.1"))
 ;; URL: https://github.com/dominikh/go-mode.el
@@ -2841,7 +2842,7 @@ If BUFFER, return the number of characters in that buffer instead."
   "Syntax table for `go-dot-mod-mode'.")
 
 (defconst go-dot-mod-mode-keywords
-  '("module" "go" "require" "replace" "exclude")
+  '("module" "go" "toolchain" "require" "exclude" "replace" "retract")
   "All keywords for go.mod files.  Used for font locking.")
 
 (defgroup go-dot-mod nil
@@ -2891,7 +2892,7 @@ If BUFFER, return the number of characters in that buffer instead."
 (add-to-list 'auto-mode-alist '("go\\.mod\\'" . go-dot-mod-mode))
 
 (defconst go-dot-work-mode-keywords
-  '("go" "replace" "use")
+  '("go" "toolchain" "use" "replace")
   "All keywords for go.work files.  Used for font locking.")
 
 ;;;###autoload
@@ -3049,6 +3050,45 @@ This handles multi-line comments with a * prefix on each line."
   (go--with-comment-fill-prefix
    (lambda () (comment-indent-new-line arg))))
 
+
+
+;; Convenient go-* functions for gopls features available through code
+;; actions, that work across LSP clients:
+
+(defun go-mode--code-action (kind)
+  "Request and invoke the specified kind of code actions for the current selection."
+  (cond
+   ((and (boundp 'eglot--managed-mode) eglot--managed-mode)
+    (let ((beg-end (eglot--code-action-bounds)))
+      (eglot-code-actions (car beg-end) (cadr beg-end) kind t)))
+   ((and (boundp 'lsp-mode) lsp-mode)
+    (lsp-execute-code-action-by-kind kind))
+   (error "buffer is not managed by a known LSP client")))
+
+(defun go-browse-freesymbols ()
+  "View free symbols referenced by the current selection in a browser. Requires gopls v0.16."
+  (interactive)
+  (go-mode--code-action "source.freesymbols"))
+
+(defun go-browse-doc ()
+  "View documentation for the current Go package in a browser. Requires gopls v0.16."
+  (interactive)
+  (go-mode--code-action "source.doc"))
+
+(defun go-browse-assembly ()
+  "View assembly for the enclosing Go function in a browser. Requires gopls v0.16."
+  (interactive)
+  (go-mode--code-action "source.assembly"))
+
+(defun go-rename ()
+  "Rename a Go symbol, prompting for the new name."
+  (interactive)
+  (cond
+   ((and (boundp 'eglot--managed-mode) eglot--managed-mode)
+    (call-interactively #'eglot-rename))
+   ((and (boundp 'lsp-mode) lsp-mode)
+    (call-interactively #'lsp-rename))
+   (error "buffer is not managed by a known LSP client")))
 
 
 (provide 'go-mode)
