@@ -1,8 +1,9 @@
 ;;; julia-mode.el --- Major mode for editing Julia source code -*- lexical-binding: t -*-
 
-;; Copyright (C) 2009-2014 Julia contributors, 2015-2020 julia-mode contributors
+;; Copyright (C) 2009-2014 Julia contributors, 2015-2024 julia-mode.el contributors
 ;; URL: https://github.com/JuliaEditorSupport/julia-emacs
-;; Version: 0.4
+;; Package-Version: 20241213.1620
+;; Package-Revision: 0f4d74f9049d
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -67,21 +68,43 @@ User can still use `abbrev-mode' or `expand-abbrev' to substitute
 unicode for LaTeX even if disabled."
   :type 'boolean)
 
+(defcustom julia-latexsub-greedy t
+  "When `t', `julia-latexsub-or-indent' does not offer options when a complete match is found. Eg for \"\\bar\", \"\\barcap\" etc will not be offered in a prompt."
+  :type 'boolean)
+
+(defun julia-latexsub-selector-completing-read (replacements)
+  "Use `completing-read' to pick an item from REPLACEMENTS."
+  (completing-read "LaTeX completions: " replacements (lambda (&rest _) t) t))
+
+(defvar julia-latexsub-selector 'julia-latexsub-selector-completing-read
+  "A function that is called when the `julia-latexsub-or-indent' finds multiple matches for a prefix.
+
+The argument is a list of strings. The function should ALWAYS return an item from this list, otherwise an error occurs.
+
+The default implementation uses `completing-read'.")
+
 (defconst julia-mode--latexsubs-partials
-  (let ((table (make-hash-table :test 'equal)))
-    (maphash (lambda (latex _subst)
-               (cl-assert (string= (substring latex 0 1) "\\") nil
-                          "LaTeX substitution does not start with \\.")
-               (let ((len (length latex)))
-                 (cl-assert (< 1 len) nil "Trivially short LaTeX subtitution")
-                 ;; for \foo, put f, fo, foo into the table
-                 (cl-loop for i from 2 to len
-                          do (puthash (substring latex 1 i) t table))))
-             julia-mode-latexsubs)
-    table)
+  (let ((table-unordered (make-hash-table :test 'equal))
+        (table-ordered (make-hash-table :test 'equal)))
+    (cl-flet ((_append (key replacement)
+                (puthash key (cons replacement (gethash key table-unordered nil)) table-unordered)))
+      ;; accumulate partials
+      (maphash (lambda (latex _unicode)
+                 (cl-assert (string= (substring latex 0 1) "\\") nil
+                            "LaTeX substitution does not start with \\.")
+                 (let ((len (length latex)))
+                   (cl-assert (< 1 len) nil "Trivially short LaTeX subtitution")
+                   ;; for \foo, put \f, \fo, \foo into the table
+                   (cl-loop for i from 2 to len
+                            do (_append (substring latex 0 i) latex))))
+               julia-mode-latexsubs)
+      ;; order by LaTeX part
+      (maphash (lambda (partial replacements)
+                 (puthash partial (sort replacements #'string<) table-ordered))
+               table-unordered))
+    table-ordered)
   "A hash table containing all partial strings from the LaTeX abbreviations in
-`julia-mode-latexsubs' as keys. Values are always `t', the purpose is to
-represent a set.")
+`julia-mode-latexsubs' as keys. Values are sorted lists of complete \"\\some_string\".")
 
 (defun julia-mode--latexsubs-longest-partial-end (beg)
   "Starting at `beg' (should be the  \"\\\"), return the end of the longest
@@ -89,13 +112,13 @@ partial match for LaTeX completion, or `nil' when not applicable."
   (save-excursion
     (goto-char beg)
     (when (and (= (char-after) ?\\) (not (eobp)))
-      (forward-char)
       (let ((beg (point)))
+        (forward-char)                  ; move past the \
         (cl-flet ((next-char-matches? ()
-                    (let* ((end (1+ (point)))
-                           (str (buffer-substring-no-properties beg end))
-                           (valid? (gethash str julia-mode--latexsubs-partials)))
-                      valid?)))
+                                      (let* ((end (1+ (point)))
+                                             (str (buffer-substring-no-properties beg end))
+                                             (valid? (gethash str julia-mode--latexsubs-partials)))
+                                        valid?)))
           (while (and (not (eobp)) (next-char-matches?))
             (forward-char)))
         (point)))))
@@ -115,6 +138,10 @@ partial match for LaTeX completion, or `nil' when not applicable."
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_ "_" table)
     (modify-syntax-entry ?@ "_" table)
+
+    ;; "!" can be part of both operators (!=) and variable names (append!). Here, we treat
+    ;; it as being part of a variable name. Care must be taken to account for the special
+    ;; case where "!" prefixes a variable name and acts as an operator (e.g. !any(...)).
     (modify-syntax-entry ?! "_" table)
     (modify-syntax-entry ?# "< 14" table)  ; # single-line and multiline start
     (modify-syntax-entry ?= ". 23bn" table)
@@ -267,6 +294,8 @@ partial match for LaTeX completion, or `nil' when not applicable."
       ;; The function name itself
       (group (1+ (or word (syntax symbol))))))
 
+;; TODO: function definitions of form "x + y = 5" or "!x = true" not currently highlighted
+
 ;; functions of form "f(x) = nothing"
 (defconst julia-function-assignment-regex
   (rx line-start (* (or space "@inline" "@noinline")) symbol-start
@@ -302,7 +331,7 @@ partial match for LaTeX completion, or `nil' when not applicable."
   (rx "<:" (0+ space) (group (1+ (or word (syntax symbol)))) (0+ space) (or "\n" "{" "}" "end" ",")))
 
 (defconst julia-macro-regex
-  (rx symbol-start (group "@" (1+ (or word (syntax symbol))))))
+  (rx symbol-start (0+ ?!) (group "@" (1+ (or word (syntax symbol))))))
 
 (defconst julia-keyword-regex
   (regexp-opt
@@ -310,7 +339,7 @@ partial match for LaTeX completion, or `nil' when not applicable."
      "try" "catch" "return" "local" "function" "macro"
      "finally" "break" "continue" "global" "where"
      "module" "using" "import" "export" "const" "let" "do"
-     "baremodule"
+     "baremodule" "public"
      ;; "importall" ;; deprecated in 0.7
      ;; "immutable" "type" "bitstype" "abstract" "typealias" ;; removed in 1.0
      "abstract type" "primitive type" "struct" "mutable struct")
@@ -329,7 +358,7 @@ partial match for LaTeX completion, or `nil' when not applicable."
    ;; highlighted as a keyword.
    (list julia-quoted-symbol-regex 1 ''julia-quoted-symbol-face)
    (cons julia-keyword-regex 'font-lock-keyword-face)
-   (cons julia-macro-regex ''julia-macro-face)
+   (list julia-macro-regex 1 ''julia-macro-face)
    (cons
     (regexp-opt
      ;; constants defined in Core plus true/false
@@ -472,9 +501,9 @@ a keyword if used as a field name, X.word, or quoted, :word."
       (ignore-errors (backward-char))))
 
 (defun julia-following-import-export-using ()
-  "If the current line follows an `export` or `import` keyword
-with valid syntax, return the position of the keyword, otherwise
-`nil`. Works by stepping backwards through comma-separated
+  "If the current line follows an `export`, `import`, `using`, or
+`public` keyword with valid syntax, return the position of the keyword,
+otherwise `nil`. Works by stepping backwards through comma-separated
 symbol, gives up when this is not true."
   ;; Implementation accepts a single Module: right after the keyword, and saves
   ;; the module name for future use, but does not enforce that `export` has no
@@ -486,7 +515,7 @@ symbol, gives up when this is not true."
       (while (and (not done) (< (point-min) (point)))
         (julia-safe-backward-sexp)
         (cond
-         ((looking-at (regexp-opt (list "import" "export" "using")))
+         ((looking-at (regexp-opt (list "import" "export" "using" "public")))
           (setf done (point)))
          ((looking-at (rx (group (* (or word (syntax symbol)))) (0+ space) ":"))
           (if module
@@ -904,10 +933,50 @@ buffer where the LaTeX symbol starts."
         ;; <https://github.com/abo-abo/swiper/issues/2345>). Instead of automatic
         ;; expansion, user can either enable `abbrev-mode' or call `expand-abbrev'.
         (when-let (((eq status 'finished))
-                   (symb (abbrev-symbol name julia-latexsub-abbrev-table))
-                   (end (+ beg (length name))))
+                   ;; helm-mode passes NAME with an extra whitespace at the end. Since
+                   ;; `julia--latexsub-start-symbol' won't include whitespace, we can safely
+                   ;; strip whitespace.
+                   (clean-name (string-trim-right name))
+                   (symb (abbrev-symbol clean-name julia-latexsub-abbrev-table))
+                   (end (+ beg (length clean-name))))
           (abbrev-insert symb name beg end)))
     #'ignore))
+
+(defun julia-mode--latexsub-before-point ()
+  "When there is a LaTeX substitution that can be made before the point, return (CONS BEG LATEX).
+
+`beg' is the position of the `\`, `latex' is the string to replace, including the `\`.
+
+When multiple options match, ask the user to clarify via `julia-latexsub-selector', unless there is a complete match and `julia-latexsub-greedy' is `t'."
+  (when-let (beg (julia--latexsub-start-symbol))
+    (let ((partial (buffer-substring-no-properties beg (point))))
+      (when-let (replacements (gethash partial julia-mode--latexsubs-partials))
+        (let* ((complete-match (member partial replacements))
+               (latex (cond
+                       ;; complete match w/ greedy
+                       ((and complete-match julia-latexsub-greedy) partial)
+                       ;; multiple replacements, ask user
+                       ((cdr replacements) (funcall julia-latexsub-selector replacements))
+                       ;; single replacement, pick that
+                       (t (car replacements)))))
+          (cons beg latex))))))
+
+(defun julia-latexsub-or-indent (arg)
+  "Either indent according to Julia mode conventions or perform a LaTeX-like symbol substution.
+
+When multiple options match, ask the user to clarify via `julia-latexsub-selector', unless there is a complete match and `julia-latexsub-greedy' is `t'.
+
+Presently, this is not the default. Enable with eg
+
+(define-key julia-mode-map (kbd \"TAB\") 'julia-latexsub-or-indent)
+
+eg in your `julia-mode-hook'."
+  (interactive "*i")
+  (if-let (replacement (julia-mode--latexsub-before-point))
+      (progn
+        (delete-backward-char (- (point) (car replacement)))
+        (insert (gethash (cdr replacement) julia-mode-latexsubs)))
+    (julia-indent-line)))
 
 ;; Math insertion in julia. Use it with
 ;; (add-hook 'julia-mode-hook 'julia-math-mode)
