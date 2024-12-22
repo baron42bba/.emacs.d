@@ -2922,6 +2922,32 @@ Had to diff files on 2 different servers. What's better then dired and TRAMP?
 
 #+END_SRC
 
+* dired git
+[2024-05-28 Tue 11:35]
+
+#+begin_src emacs-lisp
+  (setq dired-vc-rename-file  t)
+
+  (defun git-add-files(files)
+  "Run git add with the input FILES."
+    (interactive)
+    (shell-command (format "git add %s" files)))
+
+  (defun dired-git-add-marked-files()
+  "For each marked file in a DIRED buffer add it to the index."
+    (interactive)
+    (if (eq major-mode 'dired-mode)
+        (let ((filenames (dired-get-marked-files))
+              (files ""))
+          (dolist (fn filenames)
+            (setq fn (shell-quote-argument fn))
+            (setq files (concat files " " fn)))
+          (git-add-files files))
+      (error (format "Not a Dired buffer \(%s\)" major-mode))))
+
+#+end_src
+
+
 * Get keychain password
 [2016-10-21 Fri 13:31]
 
