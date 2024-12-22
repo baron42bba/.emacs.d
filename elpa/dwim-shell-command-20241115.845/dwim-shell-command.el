@@ -5,7 +5,8 @@
 ;; Author: Alvaro Ramirez
 ;; Package-Requires: ((emacs "28.1"))
 ;; URL: https://github.com/xenodium/dwim-shell-command
-;; Version: 0.48
+;; Package-Version: 20241115.845
+;; Package-Revision: 1fa8b9d361f0
 
 ;; This package is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -38,7 +39,6 @@
 (require 'dired-aux)
 (require 'map)
 (require 'seq)
-(require 'shell)
 (require 'simple)
 (require 'subr-x)
 (require 'view)
@@ -64,6 +64,11 @@
 (defcustom dwim-shell-command-prompt-on-error nil
   "If t, prompt user to focus buffer on process error.
 Otherwise, automatically focus buffer on process error."
+  :type 'boolean
+  :group 'dwim-shell-command)
+
+(defcustom dwim-shell-command-use-absolute-paths nil
+  "If t, generate absolute paths in templates.  Relative otherwise."
   :type 'boolean
   :group 'dwim-shell-command)
 
@@ -116,6 +121,7 @@ Use `identify' to remove formatting."
   error-autofocus
   monitor-directory)
 
+;;;###autoload
 (defun dwim-shell-command (prefix)
   "Execute DWIM shell command asynchronously using noweb templates.
 
@@ -207,7 +213,7 @@ Prefix
                     #'minibuffer-default-add-shell-commands))
     (read-from-minibuffer dwim-shell-command-prompt dwim-shell-command-default-command nil nil 'shell-command-history)))
 
-(cl-defun dwim-shell-command-on-marked-files (buffer-name script &key utils extensions shell-util shell-args shell-trace shell-pipe post-process-template on-completion repeat silent-success no-progress error-autofocus monitor-directory focus-now join-separator)
+(cl-defun dwim-shell-command-on-marked-files (buffer-name script &key utils extensions shell-util shell-args shell-trace shell-pipe post-process-template on-completion repeat silent-success no-progress error-autofocus monitor-directory focus-now join-separator temp-dir)
   "Create DWIM utilities executing templated SCRIPT on given files.
 
 Here's a simple utility invoking SCRIPT to convert image files to jpg.
@@ -308,9 +314,10 @@ Quick exit
                                      :error-autofocus error-autofocus
                                      :monitor-directory monitor-directory
                                      :focus-now focus-now
-                                     :join-separator join-separator))
+                                     :join-separator join-separator
+                                     :temp-dir temp-dir))
 
-(cl-defun dwim-shell-command-execute-script (buffer-name script &key files extensions shell-util shell-args shell-trace shell-pipe utils post-process-template on-completion silent-success gen-temp-dir repeat no-progress error-autofocus monitor-directory focus-now join-separator)
+(cl-defun dwim-shell-command-execute-script (buffer-name script &key files extensions shell-util shell-args shell-trace shell-pipe utils post-process-template on-completion silent-success temp-dir repeat no-progress error-autofocus monitor-directory focus-now join-separator)
   "Execute a script asynchronously, DWIM style with SCRIPT and BUFFER-NAME.
 
 :FILES are used to instantiate SCRIPT as a noweb template.
@@ -373,7 +380,7 @@ internal behavior).
 :SILENT-SUCCESS to avoid jumping to process buffer if neither error
  nor file generated.
 
-:GEN-TEMP-DIR to generate a temporary directory for this command.
+:TEMP-DIR to generate a temporary directory for this command.
 This is implied when <<td>> appears in the script.
 
 :REPEAT Use to repeat script N number of times.
@@ -410,8 +417,8 @@ This is implied when <<td>> appears in the script.
     (setq shell-args (seq-concatenate 'list '("-x") shell-args)))
   (when (stringp utils)
     (setq utils (list utils)))
-  (when (or gen-temp-dir (string-match-p "\<\<td\>\>" script 0))
-    (setq gen-temp-dir (make-temp-file "dwim-shell-command-" t)))
+  (when (and (string-match-p "\<\<td\>\>" script 0) (not temp-dir))
+    (setq temp-dir (make-temp-file "dwim-shell-command-" t)))
   (when (and repeat (> repeat 1))
     (cl-assert (<= (length files) 1) nil
                "Must not repeat when multiple files are selected.")
@@ -440,20 +447,20 @@ This is implied when <<td>> appears in the script.
          (padding (dwim-shell-command--digits (length files)))
          (n (or (dwim-shell-command--n-start-value template padding) "1")))
     (if (seq-empty-p files)
-        (setq script (dwim-shell-command--expand-file-template template nil post-process-template gen-temp-dir n replacements))
+        (setq script (dwim-shell-command--expand-file-template template nil post-process-template temp-dir n replacements))
       (if (dwim-shell-command--contains-multi-file-ref template)
-          (setq script (dwim-shell-command--expand-files-template template files post-process-template gen-temp-dir replacements join-separator))
+          (setq script (dwim-shell-command--expand-files-template template files post-process-template temp-dir replacements join-separator))
         (seq-do (lambda (file)
                   (setq script
                         (concat script "\n"
-                                (dwim-shell-command--expand-file-template template file post-process-template gen-temp-dir n replacements)))
+                                (dwim-shell-command--expand-file-template template file post-process-template temp-dir n replacements)))
                   (setq n (dwim-shell-command--increment-string n padding)))
                 files)))
     (setq script (string-trim script))
     (with-current-buffer proc-buffer
       (let ((inhibit-message t))
       ;; Silence noise of entering shell-mode.
-        (shell-mode))
+        (comint-mode))
       (setq default-directory default-directory)
       (shell-command-save-pos-or-erase)
       (view-mode +1)
@@ -613,7 +620,9 @@ JOIN-SEPARATOR is used to join files from <<*>>."
              (dwim-shell-command--contains-multi-file-ref template)
              (dwim-shell-command--contains-single-file-ref template))
   (setq files (seq-map (lambda (file)
-                         (expand-file-name file))
+                         (if dwim-shell-command-use-absolute-paths
+                             (expand-file-name file)
+                           (file-relative-name (expand-file-name file) default-directory)))
                        files))
 
   (mapc (lambda (replacement)
@@ -691,6 +700,9 @@ For example:
       (setq escaped-quote "\\\\\""))
      ((string-equal unescaped-quote "'")
       (setq escaped-quote "'\"'\"'"))
+     ;; Ignore slashes as user may be joining paths.
+     ((string-equal unescaped-quote "/")
+      (setq escaped-quote "/"))
      (t
       (error "Couldn't figure out how to quote for \"%s\" using %s and %s"
              haystack
@@ -732,7 +744,9 @@ REPLACEMENTS is a cons list of literals to replace with values."
         replacements)
 
   (when file
-    (setq file (expand-file-name file))
+    (setq file (if dwim-shell-command-use-absolute-paths
+                   (expand-file-name file)
+                 (file-relative-name (expand-file-name file) default-directory)))
     ;; "<<fne>>" with "/path/tmp.txt" -> "/path/tmp"
     (if-let* ((quoting (dwim-shell-command--escaped-quote-around "\<\<fne\>\>" template t))
               (unescaped-quote (nth 0 quoting))
@@ -742,14 +756,25 @@ REPLACEMENTS is a cons list of literals to replace with values."
                                                  template nil nil 2))
       (setq template (replace-regexp-in-string "\\(\<\<fne\>\>\\)" (file-name-sans-extension file) template nil nil 1)))
 
-    ;; "<<fbn>>" with "/path/tmp.txt" -> "tmp.txt"
-    (if-let* ((quoting (dwim-shell-command--escaped-quote-around "\<\<fbn\>\>" template t))
+    ;; "<<b>>" with "/path/tmp.txt" -> "tmp.txt"
+    (if-let* ((quoting (dwim-shell-command--escaped-quote-around "\<\<b\>\>" template t))
               (unescaped-quote (nth 0 quoting))
               (escaped-quote (nth 1 quoting)))
-        (setq template (replace-regexp-in-string "\\(\<\<fbn\>\>\\)\\([^ ]\\)"
+        (setq template (replace-regexp-in-string "\\(\<\<b\>\>\\)\\([^ ]\\)"
                                                  (string-replace unescaped-quote escaped-quote (file-name-nondirectory file))
                                                  template nil nil 1))
-      (setq template (replace-regexp-in-string "\\(\<\<fbn\>\>\\)" (file-name-nondirectory file) template nil nil 1)))
+      (setq template (replace-regexp-in-string "\\(\<\<b\>\>\\)" (file-name-nondirectory file) template nil nil 1)))
+
+    ;; "<<bne>>" with "/path/tmp.txt" -> "tmp"
+    (if-let* ((quoting (dwim-shell-command--escaped-quote-around "\<\<bne\>\>" template t))
+              (unescaped-quote (nth 0 quoting))
+              (escaped-quote (nth 1 quoting)))
+        (setq template (replace-regexp-in-string "\\(\<\<bne\>\>\\)\\([^ ]\\)"
+                                                 (string-replace unescaped-quote escaped-quote
+                                                                 (file-name-sans-extension (file-name-nondirectory file)))
+                                                 template nil nil 1))
+      (setq template (replace-regexp-in-string "\\(\<\<bne\>\>\\)" (file-name-sans-extension
+                                                                (file-name-nondirectory file)) template nil nil 1)))
 
     ;; "<<e>>" with "/path/tmp.txt" -> "txt"
     (if (file-name-extension file)
@@ -813,8 +838,10 @@ REPLACEMENTS is a cons list of literals to replace with values."
          "<<f>>")
         ((string-match "\<\<fne\>\>" template)
          "<<fne>>")
-        ((string-match "\<\<fbn\>\>" template)
-         "<<fbn>>")
+        ((string-match "\<\<b\>\>" template)
+         "<<b>>")
+        ((string-match "\<\<bne\>\>" template)
+         "<<bne>>")
         ((string-match "\<\<e\>\>" template)
          "<<e>>")))
 
@@ -862,10 +889,13 @@ all needed to finalize processing."
                          ;; Region is not accurate if new files added. Wipe it.
                          (when (use-region-p)
                            (deactivate-mark)))
-                (if (or buffer-auto-save-file-name
-                        buffer-file-name)
-                    (revert-buffer :ignore-auto :noconfirm)))
-              (setq files-after (dwim-shell-command--default-directory-files monitor-directory))
+                (when (and (or buffer-auto-save-file-name
+                               buffer-file-name)
+                           (not (verify-visited-file-modtime)))
+                  ;; Already visiting a file. Revert if modified by command.
+                  (revert-buffer :ignore-auto :noconfirm)))
+              (with-current-buffer (process-buffer process)
+                (setq files-after (dwim-shell-command--default-directory-files monitor-directory)))
               (setq oldest-new-file
                     (dwim-shell-command--last-modified-between
                      files-before
@@ -908,21 +938,26 @@ all needed to finalize processing."
     (setq dwim-shell-command--commands
           (map-delete dwim-shell-command--commands (process-name process)))))
 
-(cl-defun dwim-shell-command--unique-new-file-path (file-path &key expand)
-  "Return a unique FILE-PATH using :EXPAND to expand FILE-PATH.
+(defun dwim-shell-command--unique-new-file-path (file-path)
+  "Return a unique FILE-PATH.
+
+If FILE-PATH already contains a number in the format (n), set counter to n.
+
 \"/tmp/blah.txt\" -> \"/tmp/blah(1).txt\"
-\"/tmp/blah\" -> \"/tmp/blah(1)\""
-  (let ((counter 1)
-        (name (file-name-sans-extension file-path))
-        (extension (file-name-extension file-path)))
+\"/tmp/blah(2).txt\" -> \"/tmp/blah(3).txt\""
+  (let* ((name (file-name-sans-extension file-path))
+         (extension (file-name-extension file-path))
+         (counter (if (string-match "(\\([0-9]+\\))$" name)
+                      (string-to-number (match-string 1 name))
+                    0)))
+    (when (string-match "(\\([0-9]+\\))$" name)
+      (setq name(replace-match "" t t name)))
     (while (file-exists-p file-path)
-      (if extension
-          (setq file-path (format "%s(%d).%s" name counter extension))
-        (setq file-path (format "%s(%d)" name counter)))
-      (setq counter (1+ counter)))
-    (if expand
-        (expand-file-name file-path)
-      file-path)))
+      (setq counter (1+ counter))
+      (setq file-path (if extension
+                          (format "%s(%d).%s" name counter extension)
+                        (format "%s(%d)" name counter))))
+    file-path))
 
 (defun dwim-shell-command--sentinel (process _)
   "Handles PROCESS sentinel and STATE."
