@@ -6,8 +6,9 @@
 ;;         Fanael Linithien <fanael4@gmail.com>
 ;; URL: https://github.com/purcell/package-lint
 ;; Keywords: lisp
-;; Version: 0
-;; Package-Requires: ((cl-lib "0.5") (emacs "24.1") (let-alist "1.0.6"))
+;; Package-Version: 20241127.1826
+;; Package-Revision: 0dee43756be1
+;; Package-Requires: ((emacs "24.4") (let-alist "1.0.6"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -86,6 +87,9 @@ The path can be absolute or relative to that of the linted file.")
   "List of errors and warnings for the current buffer.
 This is bound dynamically while the checks run.")
 
+(defconst package-lint-emacs-head-version '(30)
+  "Version of Emacs HEAD.")
+
 (defconst package-lint-backport-libraries
   (list (list 'cl-lib "\\`cl-")
         (list 'cl-generic "\\`cl-\\(?:def\\)?generic")
@@ -107,14 +111,18 @@ SYMBOL-NAME-MATCH PACKAGE VERSION?) where PACKAGE is the name of
 a backport library shipping the feature and VERSION is an
 optional minimum version containing the feature.")
 
+(defun package-lint--load-data (file)
+  "Load sexp data from FILE."
+  (with-temp-buffer
+    (insert-file-contents
+     (expand-file-name file
+                       (if load-file-name
+                           (file-name-directory load-file-name)
+                         default-directory)))
+    (read (current-buffer))))
+
 (defconst package-lint-symbol-info
-  (let* ((stdlib-changes (with-temp-buffer
-                           (insert-file-contents
-                            (expand-file-name "data/stdlib-changes"
-                                              (if load-file-name
-                                                  (file-name-directory load-file-name)
-                                                default-directory)))
-                           (read (current-buffer))))
+  (let* ((stdlib-changes (package-lint--load-data "data/stdlib-changes"))
          (info (make-hash-table)))
     (pcase-dolist (`(,version . ,data) stdlib-changes)
       (pcase-dolist (`(,syms . ,action)
@@ -130,7 +138,7 @@ optional minimum version containing the feature.")
     info)
   "A hash table from SYMBOL to a list of events in its history.
 Each event is of the form (ACTION . EMACS-VER), where ACTION is a
-symbol such as 'variable-added.")
+symbol such as `variable-added'.")
 
 (defun package-lint-symbol-info (sym)
   "Retrieve information about SYM, as an alist of (ACTION . EMACS-VER)."
@@ -169,16 +177,31 @@ symbol such as 'variable-added.")
   (let-alist (package-lint-symbol-info sym)
     (or .function-added .function-removed)))
 
+(defconst package-lint--compat-symbols
+  (package-lint--load-data "data/compat-symbols")
+  "A cons cell of (VARS . FUNCTIONS) supported by \"compat\".")
+
+(defun package-lint--supported-by-compat (type sym)
+  "Return non-nil if SYM is supported by the \"compat\" package.
+TYPE is `function' or `variable'."
+  (memq sym (pcase type
+              (`function (cdr package-lint--compat-symbols))
+              (_ nil))))
+
 (defconst package-lint--sane-prefixes
   (rx
    string-start
    (or
     "org-dblock-write:"
     "org-babel-execute:"
+    "org-babel-expand-body:"
     "org-babel-prep-session:"
     "org-babel-variable-assignments:"
     "org-babel-default-header-args:"
-    "pcomplete/"))
+    "pcomplete/"
+    "use-package-normalize/"
+    "use-package-handler/"
+    "use-package-autoloads/"))
   "A regexp matching whitelisted non-standard symbol prefixes.")
 
 (defvar package-lint--allowed-prefix-mappings
@@ -383,6 +406,10 @@ Instead it should use `user-emacs-directory' or `locate-user-emacs-file'."
   (if (package-lint--goto-header "\\(?:URL\\|Homepage\\)")
       (let ((url (match-string 3))
             (url-start (match-beginning 3)))
+        (when (string-match-p "^<.*>$" url)
+          (setq url (substring url 1 -1)
+                url-start (1+ url-start))
+          (backward-char 1))
         (unless (and (equal (thing-at-point 'url) url)
                      (string-match-p "^https?://" url))
           (package-lint--error-at-point
@@ -427,20 +454,30 @@ the form (PACKAGE-NAME PACKAGE-VERSION DEP-POSITION)."
   (let (valid-deps)
     (dolist (entry parsed-deps)
       (pcase entry
-        ((and `(,package-name ,package-version)
-              (guard (symbolp package-name))
-              (guard (stringp package-version)))
+        ((or (and `(,package-name ,package-version)
+                  (guard (symbolp package-name))
+                  (guard (stringp package-version)))
+             (and `(,package-name)
+                  (guard (symbolp package-name)))
+             (and package-name
+                  (guard (symbolp package-name))))
          ;; Find the column at which the dependency is declared so we can
          ;; properly report the position of errors.
          (let ((dep-pos
                 (save-excursion
                   (goto-char position)
-                  (let ((pattern
-                         (format "( *\\(%s\\)\\(?:)\\|[^[:alnum:]_\\-].*?)\\)"
-                                 (regexp-quote (symbol-name package-name)))))
-                    (if (re-search-forward pattern (line-end-position) t)
+                  (let* ((symbol-pattern
+                          (format "\\(%s\\)"
+                                  (regexp-quote (symbol-name package-name))))
+                         (list-pattern
+                          (format "( *%s\\(?:[^[:alnum:]_\\-].*?\\)?)"
+                                  symbol-pattern)))
+                    (if (or (re-search-forward list-pattern (line-end-position) t)
+                            (re-search-forward symbol-pattern (line-end-position) t))
                         (match-beginning 1)
                       position)))))
+           (unless package-version
+             (setq package-version "0"))
            (if (ignore-errors (version-to-list package-version))
                (push (list package-name
                            (version-to-list package-version)
@@ -481,7 +518,7 @@ required version PACKAGE-VERSION.  If not, raise an error for DEP-POS."
          'error
          "You can only depend on Emacs version 24 or greater: package.el for Emacs 23 does not support the \"emacs\" pseudopackage."
          dep-pos))
-       ((version-list-<= '(28) package-version)
+       ((version-list-<= package-lint-emacs-head-version package-version)
         (package-lint--error-at-point
          'warning
          "This makes the package uninstallable in all released Emacs versions."
@@ -491,7 +528,8 @@ required version PACKAGE-VERSION.  If not, raise an error for DEP-POS."
   "Check that all VALID-DEPS are available for installation."
   (pcase-dolist (`(,package-name ,package-version ,dep-pos) valid-deps)
     (unless (eq 'emacs package-name)
-      (let ((archive-entry (assq package-name package-archive-contents)))
+      (let ((archive-entry (append (assq package-name package-archive-contents)
+                                   (assq package-name package-alist))))
         (if archive-entry
             (package-lint--check-package-installable archive-entry package-version dep-pos)
           (package-lint--error-at-point
@@ -565,6 +603,26 @@ CALLBACK."
               (unless (package-lint--inside-comment-or-string-p)
                 (apply #'package-lint--error-at-point err)))))))))
 
+(defun package-lint--quick-up-list ()
+  (if (eq ?\( (char-before))
+      (backward-char 1)
+    (backward-up-list)))
+
+(defun package-lint--is-a-let-binding ()
+  "Return non-nil if point is on a symbol being introduced by a let binding."
+  (let ((binding-pat (rx "(" (or "let" "let*" "cl-let") symbol-end)))
+    (condition-case _
+        (save-excursion
+          (save-match-data
+            (let ((was-first (eq ?\( (char-before))))
+              (package-lint--quick-up-list)
+              (package-lint--quick-up-list)
+              (or (looking-at binding-pat)
+                  (when was-first
+                    (package-lint--quick-up-list)
+                    (looking-at binding-pat))))))
+      (scan-error nil))))
+
 (defun package-lint--check-version-regexp-list (valid-deps symbol-regexp type)
   "Warn if symbols matched by SYMBOL-REGEXP are unavailable in the target Emacs.
 The target Emacs version is taken from VALID-DEPS, which are the
@@ -575,46 +633,53 @@ type of the symbol, either FUNCTION or FEATURE."
      symbol-regexp
      (lambda (sym)
        (let-alist (package-lint-symbol-info sym)
-         (let ((added-in-version (cl-ecase type
-                                   ('function .function-added)
-                                   ('feature .library-added))))
+         (let ((added-in-version (pcase type
+                                   (`function .function-added)
+                                   (`feature .library-added))))
            (when (and added-in-version (version-list-< emacs-version-dep added-in-version))
-             (unless (and (eq type 'function) (package-lint--seen-fboundp-check-for sym))
-               (let* ((available-backport-with-ver
-                       (cl-ecase type
-                         ('feature
-                          (cl-some (lambda (bp)
-                                     (when (string= (car bp) sym)
-                                       (or (cddr bp)
-                                           (list (car bp)))))
-                                   package-lint-backport-libraries))
-                         ('function
-                          (cl-some (lambda (bp)
-                                     (when (string-match-p (nth 1 bp) sym)
-                                       (or (cddr bp)
-                                           (list (car bp)))))
-                                   package-lint-backport-libraries))))
-                      (available-backport (car available-backport-with-ver))
-                      (required-backport-version (cadr available-backport-with-ver))
-                      (matching-dep (when available-backport
-                                      (assoc available-backport valid-deps))))
-                 (unless (and matching-dep
-                              (or (not required-backport-version)
-                                  (version-list-<= (version-to-list required-backport-version)
-                                                   (cadr matching-dep))))
-                   (list
-                    'error
-                    (format "You should depend on (emacs \"%s\")%s if you need `%s'."
-                            (mapconcat #'number-to-string added-in-version ".")
-                            (if available-backport
-                                (format " or the %s package"
-                                        (if required-backport-version
-                                            (format "(%s \"%s\")"
-                                                    available-backport
-                                                    required-backport-version)
-                                          available-backport))
-                              "")
-                            sym))))))))))))
+             (let* ((available-backport-with-ver
+                     (pcase type
+                       (`feature
+                        (cl-some (lambda (bp)
+                                   (when (string= (car bp) sym)
+                                     (or (cddr bp)
+                                         (list (car bp)))))
+                                 package-lint-backport-libraries))
+                       (`function
+                        (cl-some (lambda (bp)
+                                   (when (string-match-p (nth 1 bp) sym)
+                                     (or (cddr bp)
+                                         (list (car bp)))))
+                                 package-lint-backport-libraries))))
+                    (available-backport (car available-backport-with-ver))
+                    (required-backport-version (cadr available-backport-with-ver))
+                    (matching-dep (when available-backport
+                                    (assoc available-backport valid-deps)))
+                    (compat-support (package-lint--supported-by-compat type (intern sym)))
+                    (compat-in-deps (assoc 'compat valid-deps)))
+               (unless (or
+                        (and compat-support compat-in-deps)
+                        (and matching-dep
+                             (or (not required-backport-version)
+                                 (version-list-<= (version-to-list required-backport-version)
+                                                  (cadr matching-dep))))
+                        (and (eq type 'function)
+                             (or (package-lint--seen-fboundp-check-for sym)
+                                 (package-lint--is-a-let-binding))))
+                 (list
+                  'error
+                  (format "You should depend on (emacs \"%s\")%s%s if you need `%s'."
+                          (mapconcat #'number-to-string added-in-version ".")
+                          (if available-backport
+                              (format " or the %s package"
+                                      (if required-backport-version
+                                          (format "(%s \"%s\")"
+                                                  available-backport
+                                                  required-backport-version)
+                                        available-backport))
+                            "")
+                          (if compat-support " or the compat package" "")
+                          sym)))))))))))
 
 (defun package-lint--check-eval-after-load ()
   "Warn about use of `eval-after-load' and co."
@@ -706,7 +771,8 @@ the Emacs dependency matches the re-addition."
        (let ((removed-in-version .function-removed))
          (when removed-in-version
            (let ((emacs-version-dep (or (cadr (assq 'emacs valid-deps)) '(0))))
-             (unless (and .function-added (version-list-<= .function-added emacs-version-dep))
+             (unless (or (package-lint--seen-fboundp-check-for sym)
+                         (and .function-added (version-list-<= .function-added emacs-version-dep)))
                (list
                 'error
                 (format "`%s' was removed in Emacs version %s."
@@ -755,7 +821,7 @@ the Emacs dependency matches the re-addition."
              "`lexical-binding' must be set in the first line.")))))))
 
 (defun package-lint--check-cl-lib-version (valid-deps)
-  "Check depenendencies in VALID-DEPS on \"cl-lib\".
+  "Check dependencies in VALID-DEPS on \"cl-lib\".
 The specified versions must be remotely available for installation."
   (let ((emacs-version-dep (or (nth 1 (assq 'emacs valid-deps)) '(0)))
         (cl-lib-dep (assq 'cl-lib valid-deps)))
@@ -796,7 +862,14 @@ Alternatively, depend on (emacs \"24.3\") or greater, in which cl-lib is bundled
       (insert-buffer-substring-no-properties orig-buffer)
       (goto-char (point-min))
       (package-lint--update-or-insert-version "0")
-      (package-buffer-info))))
+      (let ((info (package-buffer-info)))
+        ;; Pedantically check for the footer comment
+        ;; In Emacs 29 this became a soft failure, but for packages to
+        ;; be installable with the package.el in older Emacsen, the
+        ;; footer comment must be there nonetheless.
+        (goto-char (point-min))
+        (search-forward (format ";;; %s.el ends here" (package-lint--package-desc-name info)))
+        info))))
 
 (defun package-lint--check-package-el-can-parse ()
   "Check that `package-buffer-info' can read metadata from this file.
@@ -910,7 +983,7 @@ Valid definition names are:
 - a NAME matching `package-lint--sane-prefixes', or
 
 - a NAME whose POSITION in the buffer denotes a global definition."
-  (or (string-prefix-p prefix name)
+  (or (string-match-p (rx-to-string `(seq string-start ,prefix (or string-end (not alpha)))) name)
       (string-match-p package-lint--sane-prefixes name)
       (string-match-p (rx-to-string `(seq string-start (or "define" "defun" "defvar" "defface" "with") "-" ,prefix)) name)
       (string-match-p (rx-to-string  `(seq string-start "global-" ,prefix (or "-mode" (seq "-" (* any) "-mode")) string-end)) name)
@@ -921,7 +994,7 @@ Valid definition names are:
       (when position
         (goto-char position)
         (looking-at-p (rx (*? space) "(" (*? space)
-                          (or "defadvice" "cl-defmethod" "define-advice")
+                          (or "defadvice" "cl-defmethod" "define-advice" "defalias" "defvaralias" (seq "define-obsolete-" (or "face" "function" "variable") "-alias"))
                           symbol-end)))))
 
 (defun package-lint--check-defs-prefix (prefix definitions)
@@ -1074,7 +1147,8 @@ Lines consisting only of whitespace or empty comments are considered empty."
 
 (defun package-lint--highest-installable-version-of (package)
   "Return the highest version of PACKAGE available for installation."
-  (let ((descriptors (cdr (assq package package-archive-contents))))
+  (let ((descriptors (append (cdr (assq package package-archive-contents))
+                             (cdr (assq package package-alist)))))
     (if (fboundp 'package-desc-version)
         (car (sort (mapcar 'package-desc-version descriptors)
                    (lambda (v1 v2) (not (version-list-< v1 v2)))))
@@ -1131,7 +1205,7 @@ The returned list is of the form (SYMBOL-NAME . POSITION)."
          (save-excursion
            ;; Use the default imenu expression list so that we're not confused
            ;; by user customizations.
-           (let ((imenu-generic-expression lisp-imenu-generic-expression)
+           (let ((imenu-generic-expression (default-value 'lisp-imenu-generic-expression))
                  ;; In case it's actually Semantic, tell it not to decorate
                  ;; symbol names.
                  (semantic-imenu-summary-function 'semantic-format-tag-name))
@@ -1202,7 +1276,7 @@ Returns a list, each element of which is list of
 
    (LINE COL TYPE MESSAGE)
 
-where TYPE is either 'warning or 'error.
+where TYPE is either `warning' or `error'.
 
 Current buffer is used if none is specified."
   (with-current-buffer (or buffer (current-buffer))
