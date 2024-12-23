@@ -1352,7 +1352,7 @@ Using =emacsclient=, the operating system or other applications can trigger a ca
 #+end_src
 When I call [[help:org-capture][org-capture]] in its own frame, I don’t want any other windows around, so we /rebind/ =org-capture= ’s call to switch the buffer to another window, to switch to the capture buffer.
 
-Wouldn’t it be grand if when we finished capturing, the frame automatically closed:
+Wouldn’t it be great if when we finished capturing, the frame automatically closed:
 #+begin_src emacs-lisp
   (defun org-capture-delete-frame ()
     "Hook for `org-capture-after-finalize-hook' to delete the frame."
@@ -1389,6 +1389,21 @@ This external shell script calls the function to kick everything off from applic
 
 #+END_SRC
 
+** [[https://www.howardabrams.com/git/howard/hamacs/src/branch/main/ha-org-literate.org#headline-6][Navigating Code Blocks]]
+[2024-12-16 Mon 17:12]
+
+
+#+begin_src emacs-lisp
+  (defun avy-jump-org-block ()
+      "Jump to org block using Avy subsystem."
+      (interactive)
+      (avy-jump (rx line-start (zero-or-more blank) "#+begin_src")
+                :action 'goto-char)
+      ;; Jump _into_ the block:
+      (forward-line))
+
+  (define-key global-map (kbd "C-c M-SPC") 'avy-jump-org-block)
+#+end_src
 ** Some clock stuff.
 taken from http://doc.norang.ca/org-mode.org
 
