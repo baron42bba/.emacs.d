@@ -972,6 +972,24 @@ Use our default socket files
   (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='~/.ssh/sockets/ssh.%%C' -o ControlPersist=600"))
 #+END_SRC
 
+TRAMP gcloud ssh
+
+#+begin_src emacs-lisp
+  (require 'tramp)
+  (eval-after-load "tramp"
+    '(progn
+       (add-to-list 'tramp-methods
+                    '("gssh"
+                      (tramp-login-program        "gssh")
+                      (tramp-login-args           (("%h")))
+                      (tramp-async-args           (("-q")))
+                      (tramp-remote-shell         "/bin/sh")
+                      (tramp-remote-shell-args    ("-c"))
+                      (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+                                                   ("-o" "UserKnownHostsFile=/dev/null")
+                                                   ("-o" "StrictHostKeyChecking=no")))
+                      (tramp-default-port         22)))))
+#+end_src
 * translate
 [2022-12-25 Sun 15:02]
 
