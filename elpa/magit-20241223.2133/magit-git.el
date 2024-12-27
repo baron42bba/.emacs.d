@@ -225,37 +225,23 @@ framework ultimately determines how the collection is displayed."
 
 ;;; Git
 
-(defvar magit-git-debug nil
-  "Whether to enable additional reporting of git errors.
+(defvar magit-git-debug nil)
+
+(defun magit-toggle-git-debug ()
+  "Toggle whether additional git errors are reported.
 
 Magit basically calls git for one of these two reasons: for
 side-effects or to do something with its standard output.
 
 When git is run for side-effects then its output, including error
-messages, go into the process buffer which is shown when using \
-\\<magit-status-mode-map>\\[magit-process-buffer].
+messages, go into the process buffer which is shown when using ~$~.
 
 When git's output is consumed in some way, then it would be too
-expensive to also insert it into this buffer, but when this
-option is non-nil and git returns with a non-zero exit status,
-then at least its standard error is inserted into this buffer.
+expensive to also insert it into this buffer, but with this command
+that can be enabled temporarily.  In that case, if git returns with
+a non-zero exit status, then at least its standard error is inserted
+into this buffer.
 
-This is only intended for debugging purposes.  Do not enable this
-permanently, that would negatively affect performance.  Also note
-that just because git exits with a non-zero exit status and prints
-an error message that usually doesn't mean that it is an error as
-far as Magit is concerned, which is another reason we usually hide
-these error messages.  Whether some error message is relevant in
-the context of some unexpected behavior has to be judged on a case
-by case basis.
-
-The command `magit-toggle-git-debug' changes the value of this
-variable.
-
-Also see `magit-process-extreme-logging'.")
-
-(defun magit-toggle-git-debug ()
-  "Toggle whether additional git errors are reported.
 See info node `(magit)Debugging Tools' for more information."
   (interactive)
   (setq magit-git-debug (not magit-git-debug))
@@ -1995,8 +1981,9 @@ SORTBY is a key or list of keys to pass to the `--sort' flag of
 
 (defun magit-list-special-refnames ()
   (let ((gitdir (magit-gitdir)))
-    (seq-keep (lambda (name) (file-exists-p (expand-file-name name gitdir)))
-              magit-special-refnames)))
+    (cl-remove-if-not (lambda (name)
+                        (file-exists-p (expand-file-name name gitdir)))
+                      magit-special-refnames)))
 
 (defun magit-list-branch-names ()
   (magit-list-refnames (list "refs/heads" "refs/remotes")))
@@ -2316,95 +2303,87 @@ and this option only controls what face is used.")
 
 (defun magit-format-ref-labels (string)
   (save-match-data
-    (let ((regexp "\\(, \\|tag: \\|HEAD -> \\)")
-          names)
-      (if (and (derived-mode-p 'magit-log-mode)
-               (member "--simplify-by-decoration" magit-buffer-log-args))
-          (let ((branches (magit-list-local-branch-names))
-                (re (format "^%s/.+" (regexp-opt (magit-list-remotes)))))
-            (setq names
-                  (--map (cond ((string-equal it "HEAD")     it)
-                               ((string-prefix-p "refs/" it) it)
-                               ((member it branches) (concat "refs/heads/" it))
-                               ((string-match re it) (concat "refs/remotes/" it))
-                               (t                    (concat "refs/" it)))
-                         (split-string
-                          (string-replace "tag: " "refs/tags/" string)
-                          regexp t))))
-        (setq names (split-string string regexp t)))
-      (let (state head upstream tags branches remotes other combined)
-        (dolist (ref names)
-          (let* ((face (cdr (--first (string-match (car it) ref)
-                                     magit-ref-namespaces)))
-                 (name (magit--propertize-face
-                        (or (match-string 1 ref) ref) face)))
-            (cl-case face
-              ((magit-bisect-bad magit-bisect-skip magit-bisect-good)
-               (setq state name))
-              (magit-head
-               (setq head (magit--propertize-face "@" 'magit-head)))
-              (magit-tag            (push name tags))
-              (magit-branch-local   (push name branches))
-              (magit-branch-remote  (push name remotes))
-              (t                    (push name other)))))
-        (setq remotes
-              (seq-keep
-               (lambda (name)
-                 (if (string-match "\\`\\([^/]*\\)/\\(.*\\)\\'" name)
-                     (let ((r (match-string 1 name))
-                           (b (match-string 2 name)))
-                       (and (not (equal b "HEAD"))
-                            (if (equal (concat "refs/remotes/" name)
-                                       (magit-git-string
-                                        "symbolic-ref"
-                                        (format "refs/remotes/%s/HEAD" r)))
-                                (magit--propertize-face
-                                 name 'magit-branch-remote-head)
-                              name)))
-                   name))
-               remotes))
-        (let* ((current (magit-get-current-branch))
-               (target  (magit-get-upstream-branch current)))
-          (dolist (name branches)
-            (let ((push (car (member (magit-get-push-branch name) remotes))))
-              (when push
-                (setq remotes (delete push remotes))
-                (string-match "^[^/]*/" push)
-                (setq push (substring push 0 (match-end 0))))
-              (cond
-               ((equal name current)
-                (setq head
-                      (concat push
+    (let ((refs (split-string
+                 (replace-regexp-in-string "\\(tag: \\|HEAD -> \\)" "" string)
+                 ", " t))
+          state head upstream tags branches remotes other combined)
+      (dolist (ref refs)
+        (let* ((face (cdr (--first (string-match (car it) ref)
+                                   magit-ref-namespaces)))
+               (name (match-string 1 ref))
+               (name (if (and name
+                              (not (string-prefix-p "refs/tags/" ref))
+                              (magit-rev-verify (concat "refs/tags/" name)))
+                         (magit-ref-abbrev ref)
+                       (or name ref)))
+               (name (magit--propertize-face name face)))
+          (cl-case face
+            ((magit-bisect-bad magit-bisect-skip magit-bisect-good)
+             (setq state name))
+            (magit-head
+             (setq head (magit--propertize-face "@" 'magit-head)))
+            (magit-tag            (push name tags))
+            (magit-branch-local   (push name branches))
+            (magit-branch-remote  (push name remotes))
+            (t                    (push name other)))))
+      (setq remotes
+            (seq-keep
+             (lambda (name)
+               (if (string-match "\\`\\([^/]*\\)/\\(.*\\)\\'" name)
+                   (let ((r (match-string 1 name))
+                         (b (match-string 2 name)))
+                     (and (not (equal b "HEAD"))
+                          (if (equal (concat "refs/remotes/" name)
+                                     (magit-git-string
+                                      "symbolic-ref"
+                                      (format "refs/remotes/%s/HEAD" r)))
                               (magit--propertize-face
-                               name 'magit-branch-current))))
-               ((equal name target)
-                (setq upstream
-                      (concat push
-                              (magit--propertize-face
-                               name '(magit-branch-upstream
-                                      magit-branch-local)))))
-               (t
-                (push (concat push name) combined)))))
-          (when (and target (not upstream))
-            (if (member target remotes)
-                (progn
-                  (magit--add-face-text-property
-                   0 (length target) 'magit-branch-upstream nil target)
-                  (setq upstream target)
-                  (setq remotes  (delete target remotes)))
-              (when-let ((target (car (member target combined))))
+                               name 'magit-branch-remote-head)
+                            name)))
+                 name))
+             remotes))
+      (let* ((current (magit-get-current-branch))
+             (target  (magit-get-upstream-branch current)))
+        (dolist (name branches)
+          (let ((push (car (member (magit-get-push-branch name) remotes))))
+            (when push
+              (setq remotes (delete push remotes))
+              (string-match "^[^/]*/" push)
+              (setq push (substring push 0 (match-end 0))))
+            (cond
+             ((equal name current)
+              (setq head
+                    (concat push
+                            (magit--propertize-face
+                             name 'magit-branch-current))))
+             ((equal name target)
+              (setq upstream
+                    (concat push
+                            (magit--propertize-face
+                             name '(magit-branch-upstream
+                                    magit-branch-local)))))
+             (t
+              (push (concat push name) combined)))))
+        (when (and target (not upstream))
+          (if (member target remotes)
+              (progn
                 (magit--add-face-text-property
                  0 (length target) 'magit-branch-upstream nil target)
                 (setq upstream target)
-                (setq combined (delete target combined))))))
-        (string-join (flatten-tree `(,state
-                                     ,head
-                                     ,upstream
-                                     ,@(nreverse tags)
-                                     ,@(nreverse combined)
-                                     ,@(nreverse remotes)
-                                     ,@other))
-                     " ")))))
+                (setq remotes  (delete target remotes)))
+            (when-let ((target (car (member target combined))))
+              (magit--add-face-text-property
+               0 (length target) 'magit-branch-upstream nil target)
+              (setq upstream target)
+              (setq combined (delete target combined))))))
+      (string-join (flatten-tree `(,state
+                                   ,head
+                                   ,upstream
+                                   ,@(nreverse tags)
+                                   ,@(nreverse combined)
+                                   ,@(nreverse remotes)
+                                   ,@other))
+                   " "))))
 
 (defun magit-object-type (object)
   (magit-git-string "cat-file" "-t" object))
