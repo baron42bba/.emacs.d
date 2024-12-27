@@ -4009,7 +4009,12 @@ to avoid an unnecessary call to `file-truename'."
              (modif              (cl-getf it :modif-time))
              (access             (cl-getf it :access-time))
              (ext                (helm-get-default-program-for-file candidate))
-             (tooltip-hide-delay (or helm-tooltip-hide-delay tooltip-hide-delay)))
+             (tooltip-hide-delay (or helm-tooltip-hide-delay tooltip-hide-delay))
+             (posn (with-helm-window
+                     (posn-at-point (save-excursion (end-of-visual-line) (point)))))
+             (tooltip-frame-parameters (append tooltip-frame-parameters
+                                               `((left . ,(car (posn-x-y posn)))
+                                                 (top .  ,(cdr (posn-x-y posn)))))))
         (if (and (display-graphic-p) tooltip-mode)
             (tooltip-show
              (concat
@@ -4488,8 +4493,7 @@ Arg FILE is the real part of candidate, a filename with no props."
     (cond ((and (file-exists-p candidate)
                 (string-match helm-ff--trash-directory-regexp
                               (helm-basedir (expand-file-name candidate)))
-                (not (member (helm-basename candidate) '("." "..")))
-                (executable-find "trash"))
+                (not (member (helm-basename candidate) '("." ".."))))
            (helm-append-at-nth
             actions
             '(("Restore file(s) from trash" . helm-restore-file-from-trash)
