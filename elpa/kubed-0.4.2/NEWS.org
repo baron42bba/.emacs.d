@@ -1,0 +1,130 @@
+#+title:                 Kubed NEWS -- history of user-visible changes
+#+author:                Eshel Yaron
+#+email:                 me@eshelyaron.com
+#+language:              en
+#+options:               ':t toc:nil num:nil ^:{}
+
+This file contains the release notes for Kubed, a rich Emacs interface
+for Kubernetes.
+
+For further details, see the Kubed manual:
+[[https://eshelyaron.com/sweep.html][https://eshelyaron.com/kubed.html]].
+
+* Version 0.4.2 on 2024-10-22
+
+** New user option 'kubed-list-mode-line-format'
+
+This user option lets you customize the indicator that Kubed shows in
+the mode line of resource table buffers when update is in progress.
+
+** Fix Tramp method autoload issue
+
+This version arranges for the Kubed Tramp integration to be loaded
+earlier, which circumvents the "Method ‘kubedv1’ is not known" error
+that some users have experienced.
+
+* Version 0.4.1 on 2024-09-23
+
+** New command and transient menu for scaling deployments
+
+You can now scale Kubernetes deployment with Kubed, directly with
+~kubed-scale-deployment~, from the deployments table buffer, or via
+the new transient menu ~kubed-transient-scale-deployment~.
+
+** New commands and transient menu for managing Kubernetes API proxies
+
+You can now use Kubed to create proxy servers that give access to the
+Kubernetes API server.  The commands ~kubed-proxy~ and
+~kubed-stop-proxy~ start and stop proxy servers, respectively.  The
+new transient menu ~kubed-transient-proxy~ lets specify options when
+starting a proxy, such as the local port to use.
+
+* Version 0.4.0 on 2024-08-23
+
+** ~kubed-list-update~ is now bound to ~g~ in resource table buffers.
+
+Previously, this command was bound to the slightly less convenient
+capital ~G~.  This shadows the default binding of ~revert-buffer~,
+which you can still invoke via ~C-x x g~.
+
+** Introduce resource type specific bindings in resource table help transients.
+
+The help transient menu that you get with ~?~ in resource table
+buffers now includes type-specific bindings, such as the ~F~ key for
+forwarding a local port to a pod in the Kubed pods buffer.
+
+** New transient menu ~kubed-transient-logs~ for showing container logs.
+
+** Improved Tramp integration.
+
+Kubed now uses a bespoke Tramp method to open Dired and Shell buffers
+inside Kubernetes pods.  The main advantage of this method is the
+ability to work with multiple ~kubectl~ contexts simultaneously.  This
+method requires Tramp 2.7 or later, Kubed will complain if you try to
+start remote Dired or Shell with an earlier Tramp version.
+
+* Version 0.3.2 on 2024-08-15
+
+** Improved support for multiple contexts and namespaces
+
+Each buffer now has a local context and namespace, which acts as the
+default/current context and namespace when you invoke Kubed commands
+from that buffer.  See new manual section "Context and Namespace" for
+more details.
+
+** New filter operators ~<~ and ~>~ in resource tables.
+
+These operators let you filter line with columns that are less than or
+greater than a given value.
+
+** New command for applying changes to displayed resource.
+
+You can now edit displayed resource YAML buffers after you select a
+resource with ~RET~ in the table buffer, and apply your changes to the
+live resource with ~C-c C-c~.
+
+* Version 0.3.1 on 2024-08-06
+
+** New command for fitting column width to content in resource tables.
+
+** New transient menu showing help in resource table buffers.
+
+* Version 0.3.0 on 2024-08-05
+
+** New command for copying name of resource at point to kill ring.
+
+** New commands for running ~kubectl~ command on resource at point.
+
+** Support bookmarking resource list and resource details buffers.
+
+** New command for jumping from resource details buffer to list buffer.
+
+** Fix installation on Doom Emacs.
+
+** New transient menu for displaying resources.
+
+** Support multiple resource list buffers with different namespaces or contexts.
+
+* Version 0.2.0 on 2024-08-02
+
+** Ensure compatibility with Emacs 29.
+
+** Add right-click context menus in resource tables.
+
+** New menu-bar "Kubernetes" menu.
+
+** New commands for restarting and watching deployments.
+
+** Add filtering capability to all resource tables.
+
+** New cron job commands: suspend, resume, and start job now.
+
+** New commands for patching resources.
+
+** New useful columns in services table and deployments table.
+
+** Use multi-column layout in transient menus.
+
+* Version 0.1.0 on 2024-07-28
+
+Initial release.

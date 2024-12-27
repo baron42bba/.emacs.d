@@ -1,0 +1,754 @@
+This is doc5HCYE0.info, produced by makeinfo version 6.8 from
+kubed.texi.
+
+This manual is for Kubed 0.4.2, a rich Emacs interface for Kubernetes.
+
+   Copyright © 2024 Eshel Yaron.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover Texts, and
+     no Back-Cover Texts.
+INFO-DIR-SECTION Emacs
+START-INFO-DIR-ENTRY
+* Kubed: (kubed).       Kubernetes, Emacs, done!
+END-INFO-DIR-ENTRY
+
+
+File: doc5HCYE0.info,  Node: Top,  Next: Overview,  Up: (dir)
+
+Kubed: Kubernetes, Emacs, done!
+*******************************
+
+This manual is for Kubed 0.4.2, a rich Emacs interface for Kubernetes.
+
+* Menu:
+
+* Overview::                    Introduction to Kubed
+* Getting Started::             First steps with Kubed
+* Usage::                       Using Kubed to interact with Kubernetes
+* Extending Kubed::             Adding support for your custom resources
+* Contributing::                Get involved in Kubed development
+* Indices::
+
+
+File: doc5HCYE0.info,  Node: Overview,  Next: Getting Started,  Prev: Top,  Up: Top
+
+1 Overview
+**********
+
+Kubed is a rich Kubernetes interface within Emacs.  It helps you work
+with your Kubernetes clusters and deployments with the full power of
+‘kubectl’, and with the comfort and confidence of an intuitive
+interactive interface.
+
+   You can use Kubed to:
+
+   • Browse and manage Kubernetes workloads
+   • Connect to pods and edit files or execute commands
+   • Create new resources, edit and delete them
+   • Work with multiple clusters
+   • Get help about various Kubernetes objects
+   • ...
+
+   These features and others are documented in the rest of this manual,
+along with many options that Kubed provides for you to customize its
+behavior.
+
+
+File: doc5HCYE0.info,  Node: Getting Started,  Next: Usage,  Prev: Overview,  Up: Top
+
+2 Getting Started
+*****************
+
+Get Kubed from GNU ELPA with ‘M-x package-install’, or use your favorite
+Emacs package manager to install Kubed from Git.  You can clone the
+Kubed Git repository from any of the following locations:
+
+   • <https://git.sr.ht/~eshel/kubed>
+   • <https://github.com/eshelyaron/kubed.git>
+   • <git://git.eshelyaron.com/kubed.git>
+
+   To get started with Kubed, all you need is ‘kubectl’ and Emacs.
+
+   Kubed tries to find ‘kubectl’ in the directories listed in the Emacs
+variable ‘exec-path’.  When Emacs is started from a shell, it
+initializes ‘exec-path’ from the shell’s ‘PATH’ environment variable
+which normally includes the location of ‘kubectl’ in common ‘kubectl’
+installations.  If Emacs doesn’t find the ‘kubectl’ executable via
+‘exec-path’, you can tell Kubed where to find it by customizing
+‘kubed-kubectl-program’.
+
+ -- User Option: kubed-kubectl-program
+     Name of ‘kubectl’ executable file to use.
+
+
+File: doc5HCYE0.info,  Node: Usage,  Next: Extending Kubed,  Prev: Getting Started,  Up: Top
+
+3 Usage
+*******
+
+Kubed comes with a large number of Emacs command for interacting with
+Kubernetes.  Some commands perform one action on one resource, while
+others show you a menu with many resources and let you interact with any
+number of them.  Some commands are specific to one type of resources,
+while others act on resources of any type.  There are different ways to
+use Kubed, depending on your use case.
+
+   The two most important entry points for Kubed are ‘kubed-prefix-map’
+and ‘kubed-transient’:
+
+ -- Keymap: kubed-prefix-map
+     Keymap with bindings for many useful Kubed commands.
+
+   The prefix keymap ‘kubed-prefix-map’ gives you quick access to the
+main Kubed commands.  You may want to bind it to a convenient key in
+your global keymap, for example:
+
+     (keymap-global-set "C-c k" 'kubed-prefix-map)
+
+   With this binding in place, you can create a new Kubernetes resource
+with ‘C-c k +’ and attach to a running pod with ‘C-c k p a’.  The ‘C-c
+k’ binding is just a suggestion of course, feel free to pick any key
+sequence you like.
+
+   You can also access all of the commands in ‘kubed-prefix-map’ via the
+menu-bar ‘Kubernetes’ menu—to add this menu to your menu-bar, enable the
+global minor mode ‘kubed-menu-bar-mode’:
+
+ -- Minor Mode: kubed-menu-bar-mode
+     Add ‘Kubernetes’ menu to your menu bar.
+
+   The other important entry point that Kubed provides for exploring and
+performing different Kubernetes operations is ‘kubed-transient’:
+
+ -- Command: kubed-transient
+     Open the main Kubed transient menu.
+
+   This command pops up the Kubed transient menu, which gives you
+interactive guidance for invoking Kubed commands.  *Note
+(transient)Top::.
+
+   The following sections describe in detail the various Kubed commands.
+
+* Menu:
+
+* Display Resource::
+* Browse Resources::
+* Context and Namespace::
+* Transient Menus::
+* Scale Deployment::
+
+
+File: doc5HCYE0.info,  Node: Display Resource,  Next: Browse Resources,  Up: Usage
+
+3.1 Display Resource
+====================
+
+You can view the YAML description of any resource in your Kubernetes
+cluster.  In Kubed, this is referred to as “displaying” the given
+resource.  The following commands display a Kubernetes resource:
+
+ -- Command: kubed-display-resource
+     Display a Kubernetes resource.
+
+ -- Command: kubed-display-pod
+ -- Command: kubed-display-deployment
+ -- Command: kubed-display-namespace
+ -- Command: kubed-display-FOO
+     Display Kubernetes resource of a given type.
+
+   Command ‘kubed-display-resource’ can display any Kubernetes resource.
+It prompts you to select a resource type and a resource name, and
+displays that resource in a dedicated buffer.  By default, this command
+assumes you want to display a resource that is in the current namespace,
+but if you invoke ‘kubed-display-resource’ with a prefix argument
+(‘C-u’) and choose a namespaced resource type, then it also lets you
+select the namespace of the resource.  With a double prefix argument, it
+lets you select which ‘kubectl’ context to use too.  *Note Context and
+Namespace::.
+
+   If you have ‘kubed-prefix-map’ bound to ‘C-c k’, you can invoke
+‘kubed-display-resource’ with ‘C-c k <RET>’.  This command is also
+available from the menu-bar “Kubernetes” menu (*note Definition of
+kubed-menu-bar-mode::), and from the transient “Kubernetes Display” menu
+(*note Transient Menus::).
+
+   You can also display the resource at point in resources list buffers
+by simply typing ‘<RET>’.  *Note Browse Resources::.
+
+   Kubed also provides a dedicated ‘kubed-display-FOO’ command for each
+supported resource type FOO.  These commands are just like
+‘kubed-display-resource’, except that they do not prompt you for a type,
+since they are type-specific.  For example, ‘kubed-display-pod’ only
+prompts you for a pod name, and then displays it like
+‘kubed-display-resource’ does.
+
+   You can invoke these commands by adding a type-specific key before
+‘<RET>’ in ‘C-c k <RET>’: ‘C-c k p <RET>’ invokes ‘kubed-display-pod’,
+‘C-c k d <RET>’ invokes ‘kubed-display-deployment’, and so on.
+
+   When Kubed prepares a buffer for displaying a resource, it runs the
+hook ‘kubed-yaml-setup-hook’ right after populating the buffer with the
+YAML description of the resource:
+
+ -- User Option: kubed-yaml-setup-hook
+     List of functions to call, in order, to prepare YAML buffers.  The
+     first function on this hook is normally the major mode you want to
+     use for YAML buffers that display Kubernetes resources.  By
+     default, this is the list ‘(yaml-ts-mode view-mode)’.
+
+   In addition, Kubed enables a bespoke minor mode
+‘kubed-display-resource-mode’ in buffers that display Kubernetes
+resources:
+
+ -- Minor Mode: kubed-display-resource-mode
+     Minor mode for buffers that display a Kubernetes resource.
+
+This minor mode does the following:
+
+   • It shows the word ‘Kubed’ in the mode line, so you know you’re
+     seeing a rendered Kubernetes resource, rather than any old YAML
+     file.
+   • It allows you to _bookmark_ the resource your viewing and your
+     position in its YAML description with the regular Emacs bookmarks
+     commands (*note (emacs)Bookmarks::), namely ‘C-x r m’.
+   • It binds the key sequence ‘C-c C-j’ to command
+     ‘kubed-display-resource-jump-to-list’, which pops up the resources
+     list buffer for the type of the displayed resource, and takes you
+     to the line corresponding to it.
+   • It binds ‘C-c C-c’ to command ‘kubed-display-resource-replace’,
+     which lets you apply any changes that you make in the YAML buffer
+     back to the resource.  When you hit ‘C-c C-c’, Kubed asks you for
+     confirmation before proceeding; you can reply with ‘d’ (‘diff’) to
+     show a diff between the current state of the resource and the
+     current buffer contents.  You can also display this diff anytime
+     with ‘C-c C-=’.  Note that by default Kubed displays resources in
+     read-only buffers, so you may need to hit ‘C-x C-q’
+     (‘read-only-mode’) before making changes in the buffer.
+   • It lets you repopulate the buffer with updated information about
+     the resource with ‘C-x x g’ (‘revert-buffer-quick’) and
+     ‘M-x revert-buffer’.  This is also useful if you edit the resource
+     and want to restart from a clean slate.
+
+
+File: doc5HCYE0.info,  Node: Browse Resources,  Next: Context and Namespace,  Prev: Display Resource,  Up: Usage
+
+3.2 Browse Resources
+====================
+
+Kubed gives you an interactive list of resources for each type, that you
+access with the ‘kubed-list-RESOURCEs’ commands, such as
+‘kubed-list-pods’.
+
+   These commands are bound to ‘l’ in Kubed’s type-specific prefix
+keymaps, most of which are accessible via the global ‘kubed-prefix-map’
+by default (*note Definition of kubed-prefix-map::).  So if you’ve bound
+‘kubed-prefix-map’ to ‘C-c k’, you can pop up the pods list with ‘C-c k
+p l’, the deployments list with ‘C-c k d l’, the jobs list with
+‘C-c k j l’, etc.  Normally, Kubed shows the list of resources in the
+current namespace, but if you invoke these commands with a prefix
+argument (say, ‘C-u C-c k p l’), they first prompt you to select a
+namespace, and then show resources in the namespace you selected.
+
+   The list of RESOURCEs in shown a buffer called
+‘*Kubed RESOURCEs@NAMESPACE[CONTEXT]*’, where CONTEXT is a ‘kubectl’
+context, and NAMESPACE is a namespace in CONTEXT.  For example, Kubed
+shows the list of pods in namespace ‘default’ for context ‘minikube’ in
+buffer ‘*Kubed pos@default[minikube]’.  For non-namespaced resources,
+the ‘@NAMESPACE’ part is omitted.
+
+   Each resource type has its own major mode for list buffers with
+type-specific commands and operations, but they are all also derived
+from a shared parent mode.  The pods list uses the ‘kubed-pods-mode’
+(‘Kubernetes Pods’) major mode, the list of Kubernetes deployments uses
+‘kubed-deployments-mode’, and so on.
+
+   The common parent major mode is ‘kubed-list-mode’:
+
+ -- Major Mode: kubed-list-mode
+     Major mode for listing generic Kubernetes resources.
+
+   This mode provides the following commands for all type-specific
+derived modes:
+
+‘<?>’
+     Show help in transient menu (‘kubed-list-transient’).
+‘<RET>’
+     Display the resource at point in the current window
+     (‘kubed-list-select-resource’).
+‘o’
+     Display the resource at point in another window and select that
+     window (‘kubed-list-select-resource-other-window’).
+‘C-o’
+     Display the resource at point in another window without selecting
+     it (‘kubed-list-display-resource’).
+‘D’
+     Delete the resource at point (‘kubed-list-delete’).
+‘e’
+     Edit the resource at point (‘kubed-list-edit’).
+‘P’
+     Patch the resource at point (‘kubed-list-patch’).
+‘g’
+     Update the resources list by fetching new information from
+     Kubernetes (‘kubed-list-update’).
+‘/’
+     Filter the current list of resources (‘kubed-list-set-filter’).
+     *Note List Filter::.
+‘d’
+     Mark the resource at point for deletion
+     (‘kubed-list-mark-for-deletion’).  Resources marked for deletion
+     have a ‘D’ in the beginning of their line.
+‘x’
+     Delete marked resources (‘kubed-list-delete-marked’).
+‘u’
+     Unmark from resource at point (‘kubed-list-unmark’).
+‘w’
+     Copy name of resource at point into the kill ring
+     (‘kubed-list-copy-as-kill’).
+‘n’
+     Move point to the next line (‘next-line’).
+‘p’
+     Move point to the previous line (‘previous-line’).
+‘<TAB>’
+     Move point to the next column.  If point is already at the last
+     column, move to the first column of the next line instead
+     (‘kubed-list-next-column’).
+‘S-<TAB>’
+     Move point to the previous column.  If point is already at the
+     first column, move to the last column of the previous line instead
+     (‘kubed-list-previous-column’).
+‘S’
+     Sort lines by the column at point (‘tabulated-list-sort’).
+‘|’
+     Fit width of column at point to its content
+     (‘kubed-list-fit-column-width-to-content’).  With non-negative
+     prefix argument N (for example, ‘0 |’), fit Nth column.  With
+     negative prefix argument (‘- |’), fit all columns.
+‘{’
+     Narrow the column at point
+     (‘tabulated-list-narrow-current-column’).
+‘}’
+     Widen the column at point (‘tabulated-list-widen-current-column’).
+
+   In addition, you can bookmark any Kubed resources list buffer with
+the usual ‘C-x r m’.  *Note (emacs)Bookmarks::.
+
+   Note that ‘kubed-list-mode’ (and its type-specific derivatives) bind
+the ‘g’ key, which is commonly bound to ‘revert-buffer’, to
+‘kubed-list-update’.  The difference between these commands is that
+‘revert-buffer’ only refreshes the list display, without fetching
+updated data from Kubernetes.  You can still invoke ‘revert-buffer’ with
+‘C-x x g’ or ‘M-x’, if you need it.
+
+   Whenever Kubed is fetching data from Kubernetes to update a resources
+list buffer, the mode line of that list buffer shows the ‘[...]’
+indicator.  You can set user option ‘kubed-list-mode-line-format’ to
+customize this indicator.
+
+* Menu:
+
+* List Filter::
+
+
+File: doc5HCYE0.info,  Node: List Filter,  Up: Browse Resources
+
+3.2.1 Filtering Resource Lists
+------------------------------
+
+In all Kubernetes resource list buffers, you can use ‘/’
+(‘kubed-list-set-filter’) to “filter” the list of resources.  This
+command sets the filter of the current buffer, which specifies
+conditions on resources (lines).  Resources that don’t satisfy the
+conditions are hidden, so you can focus on those that do.
+
+   Filters can be simple (“atomic filters”) or complex (“composed
+filters”).  In the simple case, you enter a filter in the minibuffer in
+the format ‘OP COL VAL’, where OP is a comparison operator, one of ‘=’,
+‘~’, ‘<’ and ‘>’; COL is a column name; and VAL is a value to compare to
+values of COL with OP.
+
+   If OP is ‘=’, it says to keep only lines whose COL equals VAL.  If OP
+is ‘~’, it says to keep lines whose COL matches the VAL as a regular
+expression.  ‘<’ and ‘>’ compare column values to numeric values.  For
+example, the filter ‘= Name foobar’ keeps only resources whose name is
+‘foobar’.  To include whitespace in VAL, wrap VAL in double quotes: ‘=
+Name "foo bar"’.
+
+   The possible values of OP and their meanings are defined in
+‘kubed-list-filter-operator-alist’, which is a user option you can use
+to add or change the meaning of filter operators:
+
+ -- User Option: kubed-list-filter-operator-alist
+     Association list of filter operators and corresponding Emacs Lisp
+     functions.  See the documentation string of this option for
+     specifics.
+
+   You can use more refined filters by composing simple filters.  To add
+another filter that resources must satisfy, wrap your two filters in
+parentheses and put them next to each other:
+
+     (= Name foobar) (~ Namespace kube)
+
+This filter keeps only resources whose name is ‘foobar’ in namespaces
+that include ‘kube’ as a substring, it expresses the conjunction of the
+two simple filters.
+
+   To negate a simple filter, put a single quote ahead of it, like so:
+
+     (= Name foobar) '(~ Namespace kube)
+
+This matches resources named ‘foobar’ in namespaces that do _not_
+contain ‘kube’.
+
+   To specify a disjunction of simple filters (and negated simple
+filters), add another level of nesting:
+
+     ((= Name spam) (= Name foobar)) '(~ Namespace kube)
+
+This filter matches resources named either ‘spam’ or ‘foobar’, in
+namespaces that do not contain ‘kube’.
+
+   While entering a filter in the minibuffer, ‘<TAB>’ completion is
+available for column names and values.  To clear the filter, just exit
+the minibuffer with an empty input.
+
+
+File: doc5HCYE0.info,  Node: Context and Namespace,  Next: Transient Menus,  Prev: Browse Resources,  Up: Usage
+
+3.3 Context and Namespace
+=========================
+
+Kubed uses ‘kubectl’ to interact with Kubernetes clusters, and you can
+use multiple ‘kubectl’ “contexts” in Kubed to work with different
+Kubernetes clusters in parallel.  Within each context, Kubed lets you
+work in multiple “namespaces” too.  In general, each buffer has its own
+“local context” and “local namespace”, and Kubed commands use these
+local context and namespace by default.  This is similar to how
+different buffers have different values of ‘default-directory’ (*note
+(emacs)File Names::), and how that affects commands that interact with
+the filesystem.
+
+   For Kubed buffers that display a Kubernetes resource (*note Display
+Resource::) or a list of resources (*note Browse Resources::), the
+buffer-local context and namespace are the context and namespace of the
+resources the buffer displays.  For non-Kubed buffers, the user option
+‘kubed-default-context-and-namespace’ determines the default local
+context and namespace.
+
+ -- User Option: kubed-default-context-and-namespace
+     Default ‘kubectl’ context and Kubernetes namespace for Kubed
+     commands.  The value of this option is either a cons cell
+     ‘(CONTEXT . NAMESPACE)’ or ‘nil’.  If it is ‘nil’, Kubed
+     initializes this option to a cons cell with the current ‘kubectl’
+     context and namespace for that context on the first time Kubed
+     consults this option.
+
+   As mentioned above, most Kubed commands use the local context and
+namespace by default—it is also conventional for Kubed commands to let
+you choose a different namespace if you invoke them with a prefix
+argument (‘C-u’), and to also let you choose a different context if you
+invoke them with a double prefix argument (‘C-u C-u’).
+
+   The following functions return the local context and namespace for
+buffer in which you call them:
+
+ -- Function: kubed-local-context
+     Return the local ‘kubectl’ context for the current buffer.
+
+ -- Function: kubed-local-namespace
+     Return the local Kubernetes namespace for the current buffer.
+
+ -- Function: kubed-local-context-and-namespace
+     Return the local context and namespace for the current buffer as a
+     cons cell ‘(CONTEXT . NAMESPACE)’.
+
+
+File: doc5HCYE0.info,  Node: Transient Menus,  Next: Scale Deployment,  Prev: Context and Namespace,  Up: Usage
+
+3.4 Transient Menus
+===================
+
+Kubed provides a set of keyboard-driven “transient menus” (*note
+(transient)Top::) that you can use to explore and invoke various
+commands.  Transient menus show you available commands along with their
+key bindings, which helps you use many different commands without the
+need to remember the key bindings for all them.  Additionally, the
+transient menus allow you to specify options and switches for the
+commands you invoke, which may not be available when invoking these
+commands directly.  For example, while you can invoke command
+‘kubed-logs’ directly to view logs from a container running in
+Kubernetes, the “Kubernetes Logs” transient menu which you open with
+‘kubed-transient-logs’ lets you set a maximum number of logs to
+retrieve, among other knobs and handles.
+
+   Command ‘kubed-transient’ opens the Kubed “root” transient menu,
+which is a dispatch that lets you access different transient menus, such
+as the aforementioned “Kubernetes Logs” transient menu.  It’s a good
+idea to bind ‘kubed-transient’ to a convenient key, either in the global
+keymap or under ‘kubed-prefix-map’:
+
+     (keymap-global-set "s-k" #'kubed-transient)
+     (keymap-set kubed-prefix-map "k" #'kubed-transient)
+
+   In Kubed resource list buffers, type ‘?’ to pop up a transient menu
+with commands that are specific to the type of resources the buffer
+displays.  *Note Browse Resources::.
+
+
+File: doc5HCYE0.info,  Node: Scale Deployment,  Prev: Transient Menus,  Up: Usage
+
+3.5 Scale Deployment
+====================
+
+You can use Kubed to “scale” Kubernetes a deployment, which means
+setting the size of the deployment in terms of the number of replicas it
+governs.
+
+ -- Command: kubed-scale-deployment
+     Scale a Kubernetes deployment.
+
+   ‘kubed-scale-deployment’ is bound to ‘$’ in the
+‘kubed-deployment-prefix-map’, so if you have ‘kubed-prefix-map’ bound
+to ‘C-c k’ then you can invoke it with ‘C-c k d $’.  *Note Definition of
+kubed-prefix-map::.  This command prompts you for a deployment and then
+lets you select a new number of replicas for that deployment.  By
+default you are prompted for deployment in the local context and
+namespace (*note Context and Namespace::); with a prefix argument, you
+can specify a different namespace; with a double prefix argument (‘C-u
+C-u’), you can specify a different context too.
+
+   In the deployments list buffer, you can scale the deployment at point
+by simply typing ‘$’.  *Note Browse Resources::.
+
+   Lastly, you can scale deployments using the transient menu
+‘kubed-transient-scale-deployment’, which is available from the main
+Kubed transient by pressing ‘$’.  *Note Transient Menus::.
+
+
+File: doc5HCYE0.info,  Node: Extending Kubed,  Next: Contributing,  Prev: Usage,  Up: Top
+
+4 Extending Kubed
+*****************
+
+Kubed has built-in support for many common types of Kubernetes
+resources.  “Support” for a resource type in Kubed just means providing
+common commands for working with resources of that type, such as a
+command for showing the interactive list of these resources, like
+‘kubed-list-pods’ for Kubernetes pods.  In Kubed, the macro
+‘kubed-define-resource’ is used to define these common commands and add
+support for more resource types:
+
+ -- Macro: kubed-define-resource resource &optional properties &rest [
+          keyword argument ]... commands
+     Define commands for RESOURCE.
+
+   Say you want to add support for your Kubernetes service accounts.
+With ‘kubed-define-resource’, all you need to do is to add the following
+line to your Emacs initialization file:
+
+     (kubed-define-resource serviceaccount)
+
+   This line defines the following commands for you:
+
+   • ‘kubed-display-serviceaccount’
+   • ‘kubed-list-serviceaccounts’
+   • ‘kubed-edit-serviceaccount’
+   • ‘kubed-delete-serviceaccount’
+   • ‘kubed-create-serviceaccount’
+   • ‘kubed-explain-serviceaccounts’
+
+   See the documentation string of ‘kubed-define-resource’ (‘C-h f’) for
+details about the optional arguments of this macro: the PROPERTIES
+argument which lets you specify what Kubed should show in the resource
+list buffer and the ‘commands’ argument which lets you associate
+additional commands with your resource type.
+
+
+File: doc5HCYE0.info,  Node: Contributing,  Next: Indices,  Prev: Extending Kubed,  Up: Top
+
+5 Contributing
+**************
+
+We highly appreciate all contributions, including bug reports, patches,
+improvement suggestions, and general feedback!
+
+   The best way to get in touch with the Kubed maintainers is via the
+Kubed mailing list (https://lists.sr.ht/~eshel/kubed-devel).
+
+ -- Command: kubed-submit-bug-report
+     Report a bug in Kubed to the maintainers via mail.
+
+   You can use the command ‘M-x kubed-submit-bug-report’ to easily
+contact the Kubed maintainers from within Emacs.  This command opens a
+new buffer with a message template ready to be sent to the development
+mailing list.
+
+
+File: doc5HCYE0.info,  Node: Indices,  Prev: Contributing,  Up: Top
+
+Indices
+*******
+
+* Menu:
+
+* Function Index::
+* Variable Index::
+* Keystroke Index::
+* Concept Index::
+
+
+File: doc5HCYE0.info,  Node: Function Index,  Next: Variable Index,  Up: Indices
+
+Function index
+==============
+
+ [index ]
+* Menu:
+
+* kubed-define-resource:                 Extending Kubed.      (line 14)
+* kubed-display-deployment:              Display Resource.     (line 14)
+* kubed-display-FOO:                     Display Resource.     (line 16)
+* kubed-display-namespace:               Display Resource.     (line 15)
+* kubed-display-pod:                     Display Resource.     (line 13)
+* kubed-display-resource:                Display Resource.     (line 10)
+* kubed-display-resource-diff:           Display Resource.     (line 78)
+* kubed-display-resource-jump-to-list:   Display Resource.     (line 74)
+* kubed-display-resource-mode:           Display Resource.     (line 63)
+* kubed-display-resource-replace:        Display Resource.     (line 78)
+* kubed-list-copy-as-kill:               Browse Resources.     (line 71)
+* kubed-list-delete:                     Browse Resources.     (line 51)
+* kubed-list-delete-marked:              Browse Resources.     (line 67)
+* kubed-list-display-resource:           Browse Resources.     (line 48)
+* kubed-list-edit:                       Browse Resources.     (line 53)
+* kubed-list-fit-column-width-to-content: Browse Resources.    (line 88)
+* kubed-list-mark-for-deletion:          Browse Resources.     (line 63)
+* kubed-list-mode:                       Browse Resources.     (line 35)
+* kubed-list-next-column:                Browse Resources.     (line 78)
+* kubed-list-patch:                      Browse Resources.     (line 55)
+* kubed-list-previous-column:            Browse Resources.     (line 82)
+* kubed-list-select-resource:            Browse Resources.     (line 42)
+* kubed-list-select-resource-other-window: Browse Resources.   (line 45)
+* kubed-list-set-filter:                 Browse Resources.     (line 60)
+* kubed-list-transient:                  Browse Resources.     (line 41)
+* kubed-list-unmark:                     Browse Resources.     (line 69)
+* kubed-list-update:                     Browse Resources.     (line 57)
+* kubed-local-context:                   Context and Namespace.
+                                                               (line 40)
+* kubed-local-context-and-namespace:     Context and Namespace.
+                                                               (line 46)
+* kubed-local-namespace:                 Context and Namespace.
+                                                               (line 43)
+* kubed-menu-bar-mode:                   Usage.                (line 34)
+* kubed-scale-deployment:                Scale Deployment.     (line 10)
+* kubed-submit-bug-report:               Contributing.         (line 12)
+* kubed-transient:                       Usage.                (line 40)
+* next-line:                             Browse Resources.     (line 74)
+* previous-line:                         Browse Resources.     (line 76)
+* read-only-mode:                        Display Resource.     (line 78)
+* revert-buffer:                         Display Resource.     (line 87)
+* revert-buffer-quick:                   Display Resource.     (line 87)
+* tabulated-list-narrow-current-column:  Browse Resources.     (line 93)
+* tabulated-list-sort:                   Browse Resources.     (line 86)
+* tabulated-list-widen-current-column:   Browse Resources.     (line 96)
+
+
+File: doc5HCYE0.info,  Node: Variable Index,  Next: Keystroke Index,  Prev: Function Index,  Up: Indices
+
+Variable index
+==============
+
+ [index ]
+* Menu:
+
+* kubed-default-context-and-namespace:   Context and Namespace.
+                                                              (line  23)
+* kubed-kubectl-program:                 Getting Started.     (line  24)
+* kubed-list-filter-operator-alist:      List Filter.         (line  29)
+* kubed-list-mode-line-format:           Browse Resources.    (line 110)
+* kubed-prefix-map:                      Usage.               (line  16)
+* kubed-yaml-setup-hook:                 Display Resource.    (line  53)
+
+
+File: doc5HCYE0.info,  Node: Keystroke Index,  Next: Concept Index,  Prev: Variable Index,  Up: Indices
+
+Keystroke index
+===============
+
+ [index ]
+* Menu:
+
+* /:                                     Browse Resources.     (line 60)
+* <?>:                                   Browse Resources.     (line 41)
+* {:                                     Browse Resources.     (line 93)
+* |:                                     Browse Resources.     (line 88)
+* }:                                     Browse Resources.     (line 96)
+* C-c C-=:                               Display Resource.     (line 78)
+* C-c C-c:                               Display Resource.     (line 78)
+* C-c C-j:                               Display Resource.     (line 74)
+* C-o:                                   Browse Resources.     (line 48)
+* C-x C-q:                               Display Resource.     (line 78)
+* C-x x g:                               Display Resource.     (line 87)
+* D:                                     Browse Resources.     (line 51)
+* d:                                     Browse Resources.     (line 63)
+* e:                                     Browse Resources.     (line 53)
+* g:                                     Browse Resources.     (line 57)
+* n:                                     Browse Resources.     (line 74)
+* o:                                     Browse Resources.     (line 45)
+* P:                                     Browse Resources.     (line 55)
+* p:                                     Browse Resources.     (line 76)
+* <RET>:                                 Browse Resources.     (line 42)
+* S:                                     Browse Resources.     (line 86)
+* S-<TAB>:                               Browse Resources.     (line 82)
+* <TAB>:                                 Browse Resources.     (line 78)
+* u:                                     Browse Resources.     (line 69)
+* w:                                     Browse Resources.     (line 71)
+* x:                                     Browse Resources.     (line 67)
+
+
+File: doc5HCYE0.info,  Node: Concept Index,  Prev: Keystroke Index,  Up: Indices
+
+Concept index
+=============
+
+ [index ]
+* Menu:
+
+* global prefix keymap:                  Usage.                (line 16)
+* installation:                          Getting Started.      (line  6)
+* keymap, for global commands:           Usage.                (line 16)
+* Kubed:                                 Overview.             (line  6)
+* kubed:                                 Overview.             (line  6)
+* prefix keymap, global commands:        Usage.                (line 16)
+* requirements:                          Getting Started.      (line 14)
+
+
+
+Tag Table:
+Node: Top596
+Node: Overview1140
+Node: Getting Started1908
+Node: Usage3005
+Ref: Definition of kubed-prefix-map3616
+Ref: Definition of kubed-menu-bar-mode4379
+Node: Display Resource5014
+Node: Browse Resources9544
+Node: List Filter14571
+Node: Context and Namespace17224
+Node: Transient Menus19614
+Node: Scale Deployment21189
+Node: Extending Kubed22486
+Node: Contributing24077
+Node: Indices24777
+Node: Function Index24951
+Node: Variable Index28346
+Node: Keystroke Index29009
+Node: Concept Index31069
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:
