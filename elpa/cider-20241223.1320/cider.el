@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://www.github.com/clojure-emacs/cider
-;; Package-Version: 20241203.1607
-;; Package-Revision: 588c5790f0c0
+;; Package-Version: 20241223.1320
+;; Package-Revision: 430cfd40c57a
 ;; Package-Requires: ((emacs "26") (clojure-mode "5.19") (parseedn "1.2.1") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2") (transient "0.4.1"))
 ;; Keywords: languages, clojure, cider
 
