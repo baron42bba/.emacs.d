@@ -7,8 +7,8 @@
 ;; Homepage: https://github.com/magit/forge
 ;; Keywords: git tools vc
 
-;; Package-Version: 20241218.2036
-;; Package-Revision: 3b80ace32c23
+;; Package-Version: 20241223.1032
+;; Package-Revision: 8bace81bce39
 ;; Package-Requires: (
 ;;     (emacs "29.1")
 ;;     (compat "30.0.0.0")
@@ -107,6 +107,11 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
                 #'forge-browse)
     (keymap-set magit-mode-map "<remap> <magit-copy-thing>"
                 #'forge-copy-url-at-point-as-kill)))
+
+;;;###autoload
+(with-eval-after-load 'magit-repos
+  (when forge-add-default-bindings
+    (keymap-set magit-repolist-mode-map "N" #'forge-dispatch)))
 
 ;;;###autoload
 (with-eval-after-load 'git-commit
