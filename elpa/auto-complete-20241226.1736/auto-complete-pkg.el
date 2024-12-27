@@ -1,11 +1,11 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "auto-complete" "20240320.1734"
+(define-package "auto-complete" "20241226.1736"
   "Auto Completion for GNU Emacs."
-  '((popup  "0.5.0")
-    (cl-lib "0.5"))
+  '((emacs "25.1")
+    (popup "0.5.8"))
   :url "https://github.com/auto-complete/auto-complete"
-  :commit "0c2f5a7d28b70bfe30b87378d58d74798a62741d"
-  :revdesc "0c2f5a7d28b7"
+  :commit "2290f39627e58a28e75dfe706ec8fc10c5d65ab1"
+  :revdesc "2290f39627e5"
   :keywords '("completion" "convenience")
   :authors '(("Tomohiro Matsuyama" . "m2ym.pub@gmail.com"))
   :maintainers '(("Jen-Chieh Shen" . "jcs090218@gmail.com")))

@@ -7,8 +7,8 @@
 ;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
 ;; URL: https://github.com/auto-complete/auto-complete
 ;; Keywords: completion, convenience
-;; Package-Version: 20240320.1734
-;; Package-Revision: 0c2f5a7d28b7
+;; Package-Version: 20241226.1736
+;; Package-Revision: 2290f39627e5
 ;; Package-Requires: ((emacs "25.1") (popup "0.5.8"))
 
 ;; This program is free software; you can redistribute it and/or modify
