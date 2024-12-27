@@ -6,8 +6,8 @@
 ;; Homepage: https://github.com/magit/transient
 ;; Keywords: extensions
 
-;; Package-Version: 20241219.1713
-;; Package-Revision: 5a18a79100bc
+;; Package-Version: 20241224.2234
+;; Package-Revision: 280df1350bad
 ;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0") (seq "2.24"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -78,6 +78,10 @@ this warning, then your chosen package manager likely has a
 similar defect.") :emergency))
 
 (eval-when-compile (require 'subr-x))
+
+(eval-and-compile
+  (unless (boundp 'eieio--unbound) ; New name since Emacs 28.1.
+    (defvaralias 'eieio--unbound 'eieio-unbound nil)))
 
 (declare-function info "info" (&optional file-or-node buffer))
 (declare-function Man-find-section "man" (section))
