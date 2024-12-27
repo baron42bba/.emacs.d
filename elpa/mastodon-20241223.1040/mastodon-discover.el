@@ -65,7 +65,7 @@
          ("t" "New toot" mastodon-toot)
          ("r" "Reply" mastodon-toot--reply)
          ("C" "Copy toot URL" mastodon-toot--copy-toot-url)
-         ("o" "Open toot URL" mastodon-toot--open-toot-url)
+         ("o" "Open toot URL" mastodon-toot--browse-toot-url)
          ("d" "Delete (your) toot" mastodon-toot--delete-toot)
          ("D" "Delete and redraft (your) toot" mastodon-toot--delete-toot)
          ("e" "Edit (your) toot" mastodon-toot--edit-toot-at-point)

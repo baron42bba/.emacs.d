@@ -286,8 +286,8 @@ with the image."
           (is-error-response-p (eq :error (car status-plist))))
       (let* ((data (unless is-error-response-p
                      (goto-char (point-min))
-                     (search-forward "\n\n")
-                     (buffer-substring (point) (point-max))))
+                     (and (search-forward "\n\n" nil t)
+                          (buffer-substring (point) (point-max)))))
              (image (when data
                       (apply #'create-image data ;; inbuilt scaling in 27.1:
                              (when (version< emacs-version "27.1")

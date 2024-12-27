@@ -583,10 +583,12 @@ base toot."
     (kill-new url)
     (message "Toot URL copied to the clipboard.")))
 
-(defun mastodon-toot--open-toot-url ()
-  "Open URL of toot at point."
+(defun mastodon-toot--browse-toot-url ()
+  "Browse URL of toot at point.
+Calls `browse-url'."
   (interactive)
-  (browse-url (mastodon-toot--toot-url)))
+  (browse-url
+   (mastodon-toot--toot-url)))
 
 (defun mastodon-toot--toot-url ()
   "Return the URL of the base toot at point."
@@ -791,7 +793,7 @@ TEXT-ONLY means don't check for attachments or polls."
   (interactive)
   (if mastodon-use-emojify
       (emojify-insert-emoji)
-    (emoji-search)))
+    (emoji-search))) ;; 29.1
 
 (defun mastodon-toot--emoji-dir ()
   "Return the file path for the mastodon custom emojis directory."
@@ -974,12 +976,14 @@ instance to edit a toot."
                 (mastodon-toot--restore-previous-window-config prev-window-config)
                 ;; reload: - when we have been editing
                 ;;         - when we are in thread view
-                ;; (we don't reload in every case as it can be slow and we may
-                ;; lose our place in a timeline.)
-                (when (or edit-id
-                          (eq 'thread (mastodon-tl--get-buffer-type)))
-                  (let ((pos (marker-position (cadr prev-window-config))))
-                    (mastodon-tl--reload-timeline-or-profile pos))))))))))
+                ;; (we don't reload in every case as it can be slow and we
+                ;; may lose our place in a timeline.)
+                (let ((type (mastodon-tl--get-buffer-type)))
+                  (when (or edit-id
+                            (eq 'single-status type)
+                            (eq 'thread type))
+                    (let ((pos (marker-position (cadr prev-window-config))))
+                      (mastodon-tl--reload-timeline-or-profile pos)))))))))))
 
 
 ;;; EDITING TOOTS:
@@ -1251,20 +1255,24 @@ prefixed by >."
   (message "NSFW flag is now %s" (if mastodon-toot--content-nsfw "on" "off"))
   (mastodon-toot--update-status-fields))
 
-(defun mastodon-toot--change-visibility ()
-  "Change the current visibility to the next valid value."
-  (interactive)
+(defun mastodon-toot--change-visibility (&optional arg)
+  "Change the current visibility to the next valid value.
+With prefix ARG, read a visibility type in the minibuffer."
+  (interactive "P")
   (if (mastodon-tl--buffer-type-eq 'edit-toot)
       (user-error "You can't change visibility when editing toots")
     (setq mastodon-toot--visibility
-          (cond ((string= mastodon-toot--visibility "public")
-                 "unlisted")
-                ((string= mastodon-toot--visibility "unlisted")
-                 "private")
-                ((string= mastodon-toot--visibility "private")
-                 "direct")
-                (t
-                 "public")))
+          (if arg
+              (completing-read "Visibility: "
+                               mastodon-toot-visibility-list)
+            (cond ((string= mastodon-toot--visibility "public")
+                   "unlisted")
+                  ((string= mastodon-toot--visibility "unlisted")
+                   "private")
+                  ((string= mastodon-toot--visibility "private")
+                   "direct")
+                  (t
+                   "public"))))
     (mastodon-toot--update-status-fields)))
 
 (defun mastodon-toot--set-toot-language ()
