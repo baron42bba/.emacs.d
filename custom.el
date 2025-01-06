@@ -18,6 +18,7 @@
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(grep-template "grep -i <X> <C> -nH -e <R> <F>")
  '(helm-comint-mode-list '(comint-mode slime-repl-mode sql-interactive-mode))
+ '(helm-move-to-line-cycle-in-source nil)
  '(history-length 1000)
  '(kubel-use-namespace-list 'on)
  '(magit-commit-arguments '("--signoff" "--gpg-sign=43BA01102D205F88"))
