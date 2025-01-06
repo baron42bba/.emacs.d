@@ -1389,7 +1389,7 @@ incorporate helm-comint-mode-list
     (interactive) ;; seq-contains helm-comint-mode-list major-mode
     (when (or (member major-mode helm-comint-mode-list)
               (derived-mode-p 'comint-mode))
-      (helm :sources 'helm-source-comint-input-ring
+      (helm :sources 'helm-comint-input-ring
             :input (buffer-substring-no-properties (comint-line-beginning-position)
                                                    (point-at-eol))
             :buffer "*helm comint history*")))
