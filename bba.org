@@ -2406,6 +2406,14 @@ If you are new to tags check [[http://tuhdo.github.io/c-ide.html][this]].
         ))
 #+END_SRC
 
+* projectile
+[2025-01-07 Tue 15:10]
+
+#+begin_src emacs-lisp
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c s-p") 'projectile-command-map)
+#+end_src
+
 * helm
 
 Some links you might check out:
