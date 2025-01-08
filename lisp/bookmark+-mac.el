@@ -1,14 +1,14 @@
-;;; bookmark+-mac.el --- Macros for Bookmark+.
+;;; bookmark+-mac.el --- Macros for Bookmark+.   -*- lexical-binding:t -*-
 ;;
 ;; Filename: bookmark+-mac.el
 ;; Description: Macros for Bookmark+.
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams
-;; Copyright (C) 2000-2022, Drew Adams, all rights reserved.
+;; Copyright (C) 2000-2024, Drew Adams, all rights reserved.
 ;; Created: Sun Aug 15 11:12:30 2010 (-0700)
-;; Last-Updated: Fri Jan 14 12:34:20 2022 (-0800)
+;; Last-Updated: Sun Sep 15 18:09:29 2024 (-0700)
 ;;           By: dradams
-;;     Update #: 223
+;;     Update #: 238
 ;; URL: https://www.emacswiki.org/emacs/download/bookmark%2b-mac.el
 ;; Doc URL: https://www.emacswiki.org/emacs/BookmarkPlus
 ;; Keywords: bookmarks, bookmark+, placeholders, annotations, search, info, url, eww, w3m, gnus
@@ -98,10 +98,12 @@
 ;;
 ;;  Macros defined here:
 ;;
-;;    `bmkp-define-cycle-command', `bmkp-define-history-variables',
+;;    `bmkp-define-cycle-command', `bmkp-define-file-sort-predicate',
+;;    `bmkp-define-history-variables',
 ;;    `bmkp-define-next+prev-cycle-commands',
 ;;    `bmkp-define-show-only-command', `bmkp-define-sort-command',
-;;    `bmkp-define-file-sort-predicate', `bmkp-menu-bar-make-toggle',
+;;    `bmkp-define-type-from-hander', `bmkp-lexlet', `bmkp-lexlet*',
+;;    `bmkp-make-plain-predicate', `bmkp-menu-bar-make-toggle',
 ;;    `bmkp-with-bookmark-dir', `bmkp-with-help-window',
 ;;    `bmkp-with-output-to-plain-temp-buffer'.
 ;;
@@ -206,6 +208,21 @@
 (put 'bmkp-with-output-to-plain-temp-buffer 'common-lisp-indent-function '(4 &body))
 
 
+;;;###autoload (autoload 'bmkp-make-plain-predicate "bookmark+")
+(defmacro bmkp-make-plain-predicate (pred &optional final-pred)
+  "Return a plain predicate that corresponds to component-predicate PRED.
+PRED and FINAL-PRED correspond to their namesakes in
+`bmkp-sort-comparer' (which see).
+
+PRED should return `(t)', `(nil)', or nil.
+
+Optional arg FINAL-PRED is the final predicate to use if PRED cannot
+decide (returns nil).  If FINAL-PRED is nil, then `bmkp-alpha-p', the
+plain-predicate equivalent of `bmkp-alpha-cp' is used as the final
+predicate."
+  `(lambda (b1 b2) (let ((res  (funcall ',pred b1 b2)))
+                     (if res (car res) (funcall ',(or final-pred  'bmkp-alpha-p) b1 b2)))))
+
 ;;;###autoload (autoload 'bmkp-define-cycle-command "bookmark+")
 (defmacro bmkp-define-cycle-command (type &optional otherp)
   "Define a cycling command for bookmarks of type TYPE.
@@ -265,14 +282,12 @@ See `bmkp-next-%s-bookmark'." type type))
     (defun ,(intern (format "bmkp-next-%s-bookmark%s-repeat"
                             type
                             (if otherp "-other-window" "")))
-        (arg)
+        ()
       ,(if otherp
            (format "Same as `bmkp-next-%s-bookmark-repeat', but use other window." type)
-           (format "Jump to the Nth-next %s bookmark.
-This is a repeatable version of `bmkp-next-%s-bookmark'.
-N defaults to 1, meaning the next one.
-Plain `C-u' means start over at the first one (and no repeat)." type type))
-      (interactive "P")
+           (format "Jump to the next %s bookmark.
+This is a repeatable version of `bmkp-next-%s-bookmark'." type type))
+      (interactive)
       (require 'repeat)
       (bmkp-repeat-command
        ',(intern (format "bmkp-next-%s-bookmark%s" type (if otherp "-other-window" "")))))
@@ -281,12 +296,12 @@ Plain `C-u' means start over at the first one (and no repeat)." type type))
     (defun ,(intern (format "bmkp-previous-%s-bookmark%s-repeat"
                             type
                             (if otherp "-other-window" "")))
-        (arg)
+        ()
       ,(if otherp
            (format "Same as `bmkp-previous-%s-bookmark-repeat', but use other window." type)
-           (format "Jump to the Nth-previous %s bookmark.
+           (format "Jump to the previous %s bookmark.
 See `bmkp-next-%s-bookmark-repeat'." type type))
-      (interactive "P")
+      (interactive)
       (require 'repeat)
       (bmkp-repeat-command
        ',(intern (format "bmkp-previous-%s-bookmark%s" type (if otherp "-other-window" "")))))))
@@ -495,9 +510,43 @@ The alist is used in commands such as `bmkp-jump-to-type'."
   "Create and eval defvars for Bookmark+ history variables.
 The variables are the cdrs of `bmkp-types-alist'.  They are used in
 commands such as `bmkp-jump-to-type'."
-  (dolist (entry  (bmkp-types-alist))
-    `(defvar,(cdr entry) ()
-       ,(format "History for %s bookmarks." (car entry)))))
+  (let ((dfvars  ()))
+    (dolist (entry  (bmkp-types-alist))
+      (push `(defvar ,(cdr entry) () ,(format "History for %s bookmarks." (car entry)))
+            dfvars))
+    `(progn ,@dfvars)))
+
+;; This macro is not used in the Bookmark+ code.  It's available for users who want to define
+;; simple bookmark types that are based only on a handler.
+;;
+;;;###autoload (autoload 'bmkp-define-type-from-hander "bookmark+")
+(defmacro bmkp-define-type-from-hander (type handler)
+  "Define a TYPE of bookmarks based only on a HANDLER function.
+TYPE is a short string or symbol.
+
+Define predicate `bmkp-TYPE-bookmark-p', which returns non-nil if its
+bookmark argument has HANDLER.
+
+Define filter function `bmkp-TYPE-alist-only', which returns only the
+TYPE bookmarks from the current bookmark list.
+
+Define command `bmkp-bmenu-show-only-TYPE-bookmarks', which shows only
+the TYPE bookmarks, in the bookmark-list display."
+  (let  ((predicate-doc   (format "Return non-nil if BOOKMARK is a %s bookmark." type))
+         (predicate-symb  (intern (format "bmkp-%s-bookmark-p" type)))
+         (predicate       `(eq (bookmark-get-handler bmk) ',handler))
+         (alist-only-doc  (format "`bookmark-alist', filtered to retain only %s bookmarks." type))
+         (alist-only-fn   (intern (format "bmkp-%s-alist-only" type)))
+         (show-only-doc   (format "Display (only) the %s bookmarks." type)))
+    `(progn (defun ,predicate-symb (bookmark)
+              ,predicate-doc
+              ,predicate)
+            (defun ,alist-only-fn ()
+              ,alist-only-doc
+              (bookmark-maybe-load-default-file)
+              (bmkp-remove-if-not (lambda (bmk) ,predicate) bookmark-alist))
+            (bmkp-define-show-only-command ,type ,show-only-doc ,alist-only-fn)
+            (bmkp-define-history-variables))))
 
 ;; This is compatible with Emacs 20 and later.
 ;;;###autoload (autoload 'bmkp-menu-bar-make-toggle "bookmark+")
@@ -549,6 +598,24 @@ If BOOKMARK has no location then use nil as `default-directory'."
                                                                     "-- Unknown location --")))
                                (if (file-directory-p loc) loc (file-name-directory loc)))))
     ,@body))
+
+;; These are needed because Emacs 29 removed `lexical-let[*]'.
+;;
+(defmacro bmkp-lexlet (&rest all)
+  "`lexical-let', if available and not `lexical-binding'; else `let'."
+  (if (and (fboundp 'lexical-let)              ; Emacs < 29
+           (or (not (boundp 'lexical-binding)) ; Emacs <  24.something
+               (not lexical-binding)))         ; Emacs >= 24.something
+      `(lexical-let ,@all)
+    `(let ,@all)))                      ; Emacs 29+
+
+(defmacro bmkp-lexlet* (&rest all)
+  "`lexical-let*', if available and not `lexical-binding'; else `let*'."
+  (if (and (fboundp 'lexical-let*)             ; Emacs < 29
+           (or (not (boundp 'lexical-binding)) ; Emacs <  24.something
+               (not lexical-binding)))         ; Emacs >= 24.something
+      `(lexical-let* ,@all)
+    `(let* ,@all)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

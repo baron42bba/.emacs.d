@@ -4,11 +4,11 @@
 ;; Description: Documentation for package Bookmark+
 ;; Author: Drew Adams
 ;; Maintainer: Drew Adams (concat "drew.adams" "@" "oracle" ".com")
-;; Copyright (C) 2000-2022, Drew Adams, all rights reserved.
+;; Copyright (C) 2000-2024, Drew Adams, all rights reserved.
 ;; Created: Fri Sep 15 07:58:41 2000
-;; Last-Updated: Fri Jan 14 12:46:47 2022 (-0800)
+;; Last-Updated: Tue Nov 19 12:31:28 2024 (-0800)
 ;;           By: dradams
-;;     Update #: 15385
+;;     Update #: 15425
 ;; URL: https://www.emacswiki.org/emacs/download/bookmark%2b-doc.el
 ;; Doc URL: https://www.emacswiki.org/emacs/BookmarkPlus
 ;; Keywords: bookmarks, bookmark+, placeholders, annotations, search,
@@ -146,6 +146,7 @@
 ;;      (@> "A Type-Aware `find-file'")
 ;;    (@> "Tagging Files")
 ;;    (@> "Using Multiple Bookmark Files")
+;;      (@> "Bookmark Files For Bookmarks with Specific Tags")
 ;;      (@> "Bookmark-File Bookmarks")
 ;;    (@> "The Bookmark List Display")
 ;;      (@> "Jumping To Bookmarks from the Bookmark List Display")
@@ -440,11 +441,11 @@
 ;;    using function `bookmark-make-record', or by binding variable
 ;;    `bookmark-make-record-function' for a given context.
 ;;
-;;    But you can also make jumping to a new type of bookmarks
+;;    You can also make jumping to a new type of bookmarks
 ;;    type-specific, usable with `bmkp-jump-to-type' (`C-x j :') or
 ;;    with your own type-specific jump command.
 ;;
-;;    For that, just:
+;;    For that, you need to do this:
 ;;
 ;;    1. Define a function `bmkp-TYPE-alist-only', which returns an
 ;;       alist of bookmarks that are only of your new TYPE, for use
@@ -455,6 +456,20 @@
 ;;    2. Evaluate `(bmkp-define-history-variables)', to add a history
 ;;       variable for your type, again, for use with
 ;;       `bookmark-completing-read'.
+;;
+;;    You can use macro `bmkp-define-type-from-hander' to define a
+;;    simple bookmark type that's based only on a given handler.  You
+;;    pass it the TYPE name and HANDLER name as arguments.  It does #1
+;;    and #2 above, plus it defines:
+;;
+;;    * A predicate, `bmkp-TYPE-bookmark-p', which returns non-nil if
+;;      its bookmark argument has the given HANDLER.
+;;
+;;    * A command to show only bookmarks of TYPE in *Bookmark List*.
+;;      (Macro `bmkp-define-show-only-command' is used to do this.)
+;;
+;;    (Remember that to use any of the Bookmark+ macros directly
+;;    you'll need to load library `bookmark+-mac.el'.)
 ;;
 ;;  * Extensive menus.
 ;;
@@ -1026,19 +1041,28 @@
 ;;  your choosing.  An annotation is thus metadata that is associated
 ;;  with a bookmark.  You can use it for any purpose you like.
 ;;
+;;  "Annotation" is arguably not the best name for what this is or
+;;  does.  But that's the name vanilla Emacs uses for it, so Bookmark+
+;;  does too.
+;;
 ;;  Command `bookmark-show-annotation' shows an annotation in
 ;;  read-only mode.  You can use `C-x C-q' in the annotation buffer to
 ;;  switch to edit mode (and back again).
 ;;
-;;  You can use command `bookmark-edit-annotation' or `bmkp-annotate'
-;;  anywhere to edit the annotation for a bookmark.  For
-;;  `bookmark-edit-annotation', you can choose among the bookmarks
-;;  that already have annotations.  With a prefix arg, you can choose
-;;  any bookmark (and so create an annotation).  Using `bmkp-annotate'
-;;  is the same as using `bookmark-edit-annotation' with a prefix arg.
+;;  You can use command `bookmark-edit-annotation' or
+;;  `bmkp-annotate-bookmark' anywhere to edit the annotation for a
+;;  bookmark.  For `bookmark-edit-annotation', you can choose among
+;;  the bookmarks that already have annotations.  With a prefix arg,
+;;  you can choose any bookmark (and so create an annotation).  Using
+;;  `bmkp-annotate-bookmark' is the same as using
+;;  `bookmark-edit-annotation' with a prefix arg.
+;;
+;;  The annotation edit buffer starts with some text that isn't saved
+;;  as part of the annotation.  It shows some editing instructions,
+;;  the user name, system name, and date+time of the current edit.
 ;;
 ;;  In the annotation edit buffer, make your changes and then use `C-c
-;;  C-c' to save the result.  Use `C-x C-k' if you do not want to save
+;;  C-c' to save the result.  Use `C-x C-k' if you don't want to save
 ;;  the changes.  You can also use `C-x C-q' and then `y' to confirm
 ;;  reverting the changes.
 ;;
@@ -1049,12 +1073,13 @@
 ;;  value then the buffer is in show (read-only) mode.
 ;;
 ;;  In the `*Bookmark List*' display, bookmarks with annotations are
-;;  marked by an `a' to the left of the bookmark name.  You can use `a
-;;  a' to show the annotation for the bookmark on the current line.
-;;  You can use `a e' to create an annotation or edit an existing
-;;  annotation for it.  You can use `a >' to edit annotations for all
-;;  of the marked bookmarks.  You can use `a A' to show a list of the
-;;  names and annotations of all annotated bookmarks.
+;;  marked by an `a' character to the left of the bookmark name.  You
+;;  can use `a a' to show the annotation for the bookmark on the
+;;  current line.  You can use `a e' to create an annotation or edit
+;;  an existing annotation for it.  You can use `a >' to edit
+;;  annotations for all of the marked bookmarks.  You can use `a A' to
+;;  show a list of the names and annotations of all annotated
+;;  bookmarks.
 ;;
 ;;  A bookmark annotation is stored as part of the bookmark itself.
 ;;  For this reason, you typically want to keep the text fairly short.
@@ -1062,42 +1087,49 @@
 ;;  annotation is Org mode, by default.  (To change the mode used,
 ;;  customize option `bmkp-annotation-modes-inherit-from'.)
 ;;
-;;  You can obtain the effect of using longer annotations, and some
-;;  other advantages as well, by using "external annotations".  These
-;;  are annotations that are short and serve only as pointers to
-;;  external files, URLs, or other bookmarks.
+;;  You can obtain the effect of using a longer annotation, and some
+;;  other advantages as well, by using an "annotation forward" in the
+;;  annotation text.  This is short text that serves only as a pointer
+;;  to an external file, URL, or another bookmark.
 ;;
-;;  Whenever you show the annotation of a bookmark (via `a' in the
+;;  Whenever you show the annotation of a bookmark (via `a a' in the
 ;;  `*Bookmark List*' display, `bookmark-show-annotation', or
-;;  `bookmark-automatically-show-annotations') and the annotation is
-;;  such a pointer, the effect is to visit the destination.
+;;  `bookmark-automatically-show-annotations') and the annotation
+;;  contains such a pointer (only one such is used), the effect is to
+;;  visit the pointer's destination.  That is, showing the annotation
+;;  goes to the forward destination, instead of showing the annotation
+;;  text stored with the bookmark.  (You can still see the latter, by
+;;  editing the annotation.)
 ;;
 ;;  So for example, you can use bookmarks to one or more Org files to
-;;  annotate (provide metadata for) one or more other bookmarks.
+;;  annotate (provide notes about, or metadata for) one or more other
+;;  bookmarks.  For example, set a bookmark at some place in an Info
+;;  manual, then write your own notes about that Info content in an
+;;  Org file, bookmark that Org-file destination, and use that as a
+;;  forward destination in your bookmark to that Info location.
 ;;
-;;  You create an external annotation for a bookmark by using one of
+;;  You create an annotation forward for a bookmark by using one of
 ;;  these forms as the annotation text.
 ;;
 ;;     bmkp-annot-url: "FILE"
 ;;     bmkp-annot-url: "URL"
 ;;     bmkp-annot-url: "BOOKMARK"
 ;;
-;;  * FILE is an absolute file name.  It is handled by
+;;  * FILE is an absolute file name.  Forwarding to it uses
 ;;    `find-file-other-window'.
-;;  * URL is a URL.  It is handled by `browse-url'.
+;;  * URL is a URL.  Forwarding to it uses `browse-url'.
 ;;  * BOOKMARK is the name of a bookmark in the current bookmark
-;;    alist.
+;;    alist.  Forwarding just jumps to it.
 ;;
 ;;  The double-quote characters are necessary here, so that you can
 ;;  include characters such as `SPC' in the name.  The text must be on
 ;;  the first line of the annotation (not counting the commented
 ;;  instruction lines).  It can be preceded only by whitespace.
 ;;
-;;  You can include other text in the annotation, after the
+;;  You can include other text in the annotation, after the external
 ;;  destination specification, and you can see or edit it when you
-;;  edit the annotation (e.g., using `C-u a' in buffer `*Bookmark
-;;  List*'), but it is ignored when the annotation is "shown" (e.g.,
-;;  using `a').
+;;  edit the annotation (e.g., `a e' in buffer `*Bookmark List*').
+;;  But it is ignored when the annotation is only shown (e.g., `a a').
 ;;
 ;;  In the `*Bookmark List*' display, `M-down' and `M-up' move the
 ;;  cursor down and up a line, respectively, but they also show the
@@ -2454,6 +2486,68 @@
 ;;  See Also: (@> "Bookmark+ Load Order and Option `bookmark-default-file'").
 ;;
 ;;
+;;(@* "Bookmark Files For Bookmarks with Specific Tags")
+;;  *** Bookmark Files For Bookmarks with Specific Tags ***
+;;
+;;  Bookmark+ provides various features for creating, manipulating,
+;;  and making use of bookmarks, but it generally doesn't provide
+;;  predefined ways to use such features together to accomplish a
+;;  particular goal.
+;;
+;;  This includes uses of features to organize bookmarks and their
+;;  destinations or results/effects.  But here's an example of using a
+;;  couple features out of the box to do that: create a bookmark file
+;;  for bookmarks with a given set of tags.
+;;
+;;  You can have multiple bookmark files, which you can use separately
+;;  or in combination.  If you use tags as a way of "categorizing"
+;;  bookmarks then you might create one or more bookmark files for
+;;  bookmarks tagged in particular ways.  For example, have a bookmark
+;;  file that contains only bookmarks tagged both `travel' and `2024'.
+;;
+;;  Loading that file alone gives you access to just those bookmarks,
+;;  simplifying bookmark commands (jump, tag, filter, edit,...).
+;;  Loading it together with another bookmark file, for example one
+;;  for bookmarks with another set of tags, gives you access to both
+;;  sets.
+;;
+;;  Here's one way to create a bookmark file for bookmarks tagged in a
+;;  particular way, using the bookmark-list display for a set of
+;;  bookmarks that includes those bookmarks but also others: mark the
+;;  bookmarks you want, then create a bookmark file from the marked
+;;  bookmarks.
+;;
+;;  1. Unmark all bookmarks, using `U'.
+;;
+;;  2. Mark the bookmarks that have the tags you're interested in.
+;;
+;;     You can do this using tags-command keys that mark according to
+;;     their tags.  These keys all begin with prefix key `T m'.  For
+;;     example, to mark bookmarks that are tagged with both `travel'
+;;     and `2024' you can use `T m *' and enter `travel' and `2024'
+;;     when prompted (end with an empty `RET').
+;;
+;;     Or if you want bookmarks with either `travel' or `2024' (or
+;;     both), use `T m +'.  Another way to do this is to use `T m %'
+;;     and enter the regexp `\(travel\|2024\)'.
+;;
+;;     (Marking and unmarking commands are also in menu `Bookmark+' >
+;;     `Mark'.)
+;;
+;;  3. Copy the marked bookmarks to a new bookmark file.
+;;
+;;     Use `Y > 0' to do this, entering the file name at the prompt.
+;;
+;;     Or if you want to move the bookmarks instead of copying them
+;;     (i.e., remove them from the current bookmark file), use `Y >
+;;     -'.
+;;
+;;     (Bookmark-file commands are also in menu `Bookmark+' >
+;;     `Bookmark File'.)
+;;
+;;  See Also: (@> "Tag Commands and Keys").
+;;
+;;
 ;;(@* "Bookmark-File Bookmarks")
 ;;  *** Bookmark-File Bookmarks ***
 ;;
@@ -2529,9 +2623,11 @@
 ;;    ----------------------------
 ;;
 ;;  (Bookmark+ does not use the sliding header line of vanilla Emacs
-;;  24+, which means that option `bookmark-bmenu-use-header-line' has
-;;  no effect.  You do not need to see `Bookmark' and `File' column
-;;  headers as you scroll.)
+;;  24-27, which means that option `bookmark-bmenu-use-header-line'
+;;  has no effect.  You do not need to see `Bookmark' and `File'
+;;  column headers as you scroll.  Bookmark+ also does not use
+;;  tabulated-list-mode, as vanilla Emacs 28+ does.  That mode is too
+;;  limited.)
 ;;
 ;;  Bookmarks are highlighted to indicate their type. You can mark and
 ;;  unmark bookmarks, show or hide bookmarks of particular types, and
@@ -2680,7 +2776,7 @@
 ;;  already tagged both `Java' and `ide'?
 ;;
 ;;  1. `T m * Java RET ide RET RET', to mark them.
-;;  2. `T > + Java IDE Projects RET RET, to tag them.
+;;  2. `T > + Java IDE Projects RET RET', to tag them.
 ;;
 ;;  How would you sort your bookmarks, to show all those tagged both
 ;;  `blue' and `moon' first?
@@ -3451,7 +3547,7 @@
 ;;      (let ((line  (line-number-at-pos position))
 ;;            (col   (save-excursion
 ;;                     (goto-char position) (current-column))))
-;;        (format "L%d,C%d %s" col line (buffer-name))))
+;;        (format "L%d,C%d %s" line col (buffer-name))))
 ;;
 ;;  To enable Bookmark+ to recognize such bookmarks as autonamed, you
 ;;  would then set `bmkp-autoname-format' to the format specification
