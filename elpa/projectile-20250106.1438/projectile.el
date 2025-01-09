@@ -5,8 +5,8 @@
 ;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/projectile
 ;; Keywords: project, convenience
-;; Package-Version: 20241102.1410
-;; Package-Revision: 9b466af28bac
+;; Package-Version: 20250106.1438
+;; Package-Revision: 0404b9b6eeb0
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -726,7 +726,7 @@ Set to nil to disable listing submodules contents."
   :group 'projectile
   :type 'string)
 
-(defcustom projectile-jj-command "jj files --no-pager . | tr '\\n' '\\0'"
+(defcustom projectile-jj-command "jj file list --no-pager . | tr '\\n' '\\0'"
   "Command used by projectile to get the files in a Jujutsu project."
   :group 'projectile
   :type 'string
