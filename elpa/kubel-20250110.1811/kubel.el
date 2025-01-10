@@ -21,8 +21,8 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 ;; USA
 
-;; Package-Version: 20241110.1456
-;; Package-Revision: 52d1bbdb74fd
+;; Package-Version: 20250110.1811
+;; Package-Revision: d587d6a09faa
 ;; Author: Adrien Brochard
 ;; Keywords: kubernetes k8s tools processes
 ;; URL: https://github.com/abrochard/kubel
