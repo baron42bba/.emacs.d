@@ -527,6 +527,10 @@ dirty project list.
 (fn &optional CACHED)" t)
 (autoload 'projectile-edit-dir-locals "projectile" "\
 Edit or create a .dir-locals.el file of the project." t)
+(autoload 'project-projectile "projectile" "\
+Return Projectile project of form ('projectile . root-dir) for DIR.
+
+(fn DIR)")
 (defvar projectile-mode nil "\
 Non-nil if Projectile mode is enabled.
 See the `projectile-mode' command
@@ -550,7 +554,7 @@ Otherwise behave as if called interactively.
 
 (fn &optional ARG)" t)
 (define-obsolete-function-alias 'projectile-global-mode 'projectile-mode "1.0")
-(register-definition-prefixes "projectile" '("compilation-find-file-projectile-find-compilation-buffer" "def-projectile-commander-method" "delete-file-projectile-remove-from-cache" "project" "savehist-additional-variables"))
+(register-definition-prefixes "projectile" '("compilation-find-file-projectile-find-compilation-buffer" "def-projectile-commander-method" "delete-file-projectile-remove-from-cache" "projectile-" "savehist-additional-variables"))
 
 ;;; End of scraped data
 
