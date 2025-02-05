@@ -302,6 +302,12 @@ Vagrant files are Ruby, so use ruby-mode for them:
 
 Adjust indentation at work.
 
+requires
+
+#+begin_src sh :eval never
+  port install tree-sitter-yaml
+#+end_src
+
 #+BEGIN_SRC emacs-lisp
    ;; load yaml-mode
    (require 'yaml-mode)
@@ -312,6 +318,8 @@ Adjust indentation at work.
   (add-hook 'yaml-mode-hook
             (lambda()
               (auto-fill-mode -1)
+              (yaml-pro-ts-mode 1)
+              (eldoc-mode 1)
               ;; (stripes-mode 1)
             (setq bba-keep-whitespaces 1)))
 
