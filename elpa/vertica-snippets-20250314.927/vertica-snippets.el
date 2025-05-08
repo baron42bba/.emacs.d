@@ -2,7 +2,8 @@
 
 ;; Copyright (C) 2018 Andreas Gerler
 ;; keywords: convenience,snippets
-;; Version: 0.1.0
+;; Package-Version: 20250314.927
+;; Package-Revision: 5a77be72074c
 ;; Package-Requires: ((yasnippet "0.6.1"))
 
 ;; Author: Andreas Gerler <baron@bundesbrandschatzamt.de>

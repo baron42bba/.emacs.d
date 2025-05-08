@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: directed_queries
+# key: dq_
+# group: vertica
+# expand-env: ((yas/indent-line 'auto) (yas/wrap-around-region 't))
+# --
+SELECT query_name,
+       sum(hits) AS hits
+  FROM v_monitor.directed_query_status
+ GROUP BY 1
+ ORDER BY 1;$0
