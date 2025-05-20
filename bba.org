@@ -2895,7 +2895,7 @@ positions.
     (require 'json)
     (unless text
       (setq text (if (use-region-p)
-                     (buffer-substring
+                     (buffer-substring-no-properties
                       (region-beginning) (region-end))
                    (thing-at-point 'word))))
     ;; escape some special applescript chars
