@@ -2296,7 +2296,7 @@ coffee mug
   "Lookup thing at point in OS X Dictionary."
   (interactive)
   (if (use-region-p)
-      (shell-command (concat "open dict://\"" (buffer-substring (region-beginning)(region-end)) "\""))
+      (shell-command (concat "open dict://\"" (buffer-substring-no-properties (region-beginning)(region-end)) "\""))
     (shell-command (concat "open dict://" (thing-at-point 'symbol)))
     )
   )
