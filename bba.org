@@ -2522,6 +2522,7 @@ switch default browser between eww and default.
 
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/elpa/keyfreq-20231107.106")
+  (require 'json)
   (require 'keyfreq)
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1)
