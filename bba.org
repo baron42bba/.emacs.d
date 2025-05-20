@@ -957,6 +957,7 @@ You may start it at the end of the config file.
   (load-library "tramp")
   (add-to-list 'tramp-remote-path "~/bin")
   (setq default-tramp-method "sshx")
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 #+END_SRC
 
 With this you can do /sudo:ssh-host:file-on-ssh-host
