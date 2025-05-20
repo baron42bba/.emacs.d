@@ -3465,7 +3465,7 @@ not in the public git emacs configuration.
 all in your history.
 
 #+BEGIN_SRC emacs-lisp
-  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history register-alist))
+  (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring last-kbd-macro kmacro-ring shell-command-history register-alist projectile-compilation-cmd-map))
   (setq kmacro-ring-max 42)
   (setq history-delete-duplicates t)
   (if (equal "work" (getenv "SYSENV"))
