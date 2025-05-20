@@ -1193,6 +1193,13 @@ list who can decrypt a file:
    ))
 #+END_SRC
 
+#+begin_src emacs-lisp
+  (defun gs ()
+    "gpg --card-status"
+    (interactive)
+    (shell-command "gpg --card-status")
+    )
+#+end_src
 * auto-completion
 
 #+BEGIN_SRC emacs-lisp
