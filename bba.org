@@ -969,10 +969,28 @@ Use our default socket files
 
 #+BEGIN_SRC emacs-lisp
   (if (file-accessible-directory-p "~/.ssh/sockets")
-  (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='~/.ssh/sockets/ssh.%%C' -o ControlPersist=600"))
+  (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='~/.ssh/sockets/ssh.%%r.%%n.%%p' -o ControlPersist=600"))
 #+END_SRC
 
 TRAMP gcloud ssh
+
+#+NAME:gssh
+#+begin_src sh :eval never :tangle no
+  #!/bin/bash
+
+  HOST="$1"
+
+  if [[ $HOST = *"@"* ]] ; then
+      USER=$(echo $HOST | cut -d'@' -f1)
+      HOST=$(echo $HOST | cut -d'@' -f2)
+  fi
+
+  gcloud config list | grep 'Your active'
+  ZONE=$(gcloud compute instances list |grep -E "^$HOST[[:space:]]" | awk '{print $2}')
+  echo zone: $ZONE
+  gcloud compute ssh --zone=$ZONE --tunnel-through-iap "$@"
+#+end_src
+
 
 #+begin_src emacs-lisp
   (require 'tramp)
