@@ -98,6 +98,13 @@ A major mode for editor go.work files.
 
 (fn)" t)
 (add-to-list 'auto-mode-alist '("go\\.work\\'" . go-dot-work-mode))
+(autoload 'go-asm-mode "go-mode" "\
+Major mode for Go assembly (.s) files.
+
+(fn)" t)
+(add-to-list 'magic-mode-alist (cons #'go--is-go-asm #'go-asm-mode))
+(autoload 'go--is-go-asm "go-mode" "\
+Determine whether a file is (probably) a Go assembly file.")
 (register-definition-prefixes "go-mode" '("go-" "god" "gofmt"))
 
 ;;; End of scraped data

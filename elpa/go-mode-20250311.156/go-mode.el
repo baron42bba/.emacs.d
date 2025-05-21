@@ -7,8 +7,8 @@
 ;; license that can be found in the LICENSE file.
 
 ;; Author: The go-mode Authors
-;; Package-Version: 20240620.1948
-;; Package-Revision: 636d36e37a0d
+;; Package-Version: 20250311.156
+;; Package-Revision: 58b0c3dfc87f
 ;; Keywords: languages go
 ;; Package-Requires: ((emacs "26.1"))
 ;; URL: https://github.com/dominikh/go-mode.el
@@ -3090,6 +3090,33 @@ This handles multi-line comments with a * prefix on each line."
     (call-interactively #'lsp-rename))
    (error "buffer is not managed by a known LSP client")))
 
+;;;###autoload
+(define-derived-mode go-asm-mode asm-mode "Go assembly"
+  "Major mode for Go assembly (.s) files."
+  (set (make-local-variable 'comment-start) "// ")
+  (set (make-local-variable 'comment-end)   "")
+  (set (make-local-variable 'comment-use-syntax) t)
+  (set (make-local-variable 'comment-start-skip) "\\(//+\\)\\s *")
+  (setq indent-tabs-mode t))
+
+;;;###autoload
+(add-to-list 'magic-mode-alist (cons #'go--is-go-asm #'go-asm-mode))
+
+;;;###autoload
+(defun go--is-go-asm ()
+  "Determine whether a file is (probably) a Go assembly file."
+  (when (string-suffix-p ".s" (buffer-file-name))
+	(let ((directory (file-name-directory (buffer-file-name))))
+	  (when directory
+		(cl-some (lambda (s) (or (string-suffix-p ".go" s) (string-suffix-p ".mod" s)))
+				 (condition-case nil
+					 ;; We only look at 8192 files, to avoid heavy I/O in
+					 ;; case the user opens a .s file in a giant directory.
+					 ;; If it weren't for that, we could set the count to 1
+					 ;; and use the 'match' argument of directory-files to
+					 ;; look for the first '.go' file.
+					 (directory-files directory nil nil t 8192)
+				   (error nil)))))))
 
 (provide 'go-mode)
 

@@ -1,8 +1,8 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "go-mode" "20240620.1948"
+(define-package "go-mode" "20250311.156"
   "Major mode for the Go programming language."
   '((emacs "26.1"))
   :url "https://github.com/dominikh/go-mode.el"
-  :commit "636d36e37a0d2b6adb2e12d802ff4794ccbba336"
-  :revdesc "636d36e37a0d"
+  :commit "58b0c3dfc87f5ae4137ea498dc0e03adc9eeb751"
+  :revdesc "58b0c3dfc87f"
   :keywords '("languages" "go"))
