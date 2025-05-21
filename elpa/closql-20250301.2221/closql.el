@@ -1,17 +1,17 @@
 ;;; closql.el --- Store EIEIO objects using EmacSQL  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2016-2024 Jonas Bernoulli
+;; Copyright (C) 2016-2025 Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <emacs.closql@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/emacscollective/closql
 ;; Keywords: extensions
 
-;; Package-Version: 20241201.1553
-;; Package-Revision: b1522c4bcb3a
+;; Package-Version: 20250301.2221
+;; Package-Revision: dc7924c1d206
 ;; Package-Requires: (
 ;;     (emacs "26.1")
-;;     (compat "30.0.0.0")
-;;     (emacsql "4.1.0"))
+;;     (compat "30.0.2.0")
+;;     (emacsql "4.2.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -183,7 +183,7 @@
                  (aset (eieio--class-class-allocation-values class) c value))
         (slot-missing obj slot 'oset value)))))
 
-(cl-defgeneric closql-dset (obj slot value)
+(cl-defgeneric closql-dset (obj slot value &optional drop-unknown)
   (let* ((db    (closql--oref obj 'closql-database))
          (key   (oref-default obj closql-primary-key))
          (id    (closql--oref obj key))
@@ -241,6 +241,11 @@
                      (cdr  elt1)
                      (cdr  elt2)))
                   (pop list1)
+                  (pop list2))
+                 (drop-unknown
+                  (ignore-errors
+                    (emacsql db [:insert-into $i1 :values $v2]
+                             table (vconcat (cons id elt2))))
                   (pop list2))
                  (t
                   (emacsql db [:insert-into $i1 :values $v2]
@@ -551,7 +556,7 @@
       (mapc (lambda (arg)
               (let ((str (symbol-name arg)))
                 (unless (string-match "\\`\\(!\\)?\\([^*]+\\)\\(\\*\\)?\\'" str)
-                  (error "closql-where-class-in: invalid type: %s" arg))
+                  (error "`closql-where-class-in': invalid type: %s" arg))
                 (let* ((exclude (match-beginning 1))
                        (a (intern (match-string 2 str)))
                        (a (cond ((match-beginning 3)
