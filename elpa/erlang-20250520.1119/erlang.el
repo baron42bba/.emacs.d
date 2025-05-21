@@ -1,16 +1,10 @@
 ;;; erlang.el --- Major modes for editing and running Erlang -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2004  Free Software Foundation, Inc.
-;; Author:   Anders Lindgren
-;; Keywords: erlang, languages, processes
-;; Date:     2011-12-11
-;; Package-Version: 20241217.813
-;; Package-Revision: 11e5e81a9579
-;; Package-Requires: ((emacs "24.3"))
-
 ;; %CopyrightBegin%
 ;;
-;; Copyright Ericsson AB 1996-2024. All Rights Reserved.
+;; SPDX-License-Identifier: Apache-2.0
+;;
+;; Copyright Ericsson AB 1996-2025. All Rights Reserved.
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -25,7 +19,14 @@
 ;; limitations under the License.
 ;;
 ;; %CopyrightEnd%
-;;
+
+;; Copyright (C) 2004  Free Software Foundation, Inc.
+;; Author:   Anders Lindgren
+;; Keywords: erlang, languages, processes
+;; Date:     2011-12-11
+;; Package-Version: 20250520.1119
+;; Package-Revision: 9e6f6742c4d9
+;; Package-Requires: ((emacs "24.3"))
 
 ;; Lars Thorsén's modifications of 2000-06-07 included.
 ;; The original version of this package was written by Robert Virding.
@@ -499,8 +500,8 @@ To activate the workaround, place the following in your `~/.emacs' file:
 nil means keeping default behavior.  When non-nil, indent to the column of
 if/case/receive."
   :group 'erlang
-  :type 'boolean
-  :safe 'booleanp)
+  :type '(restricted-sexp :match-alternatives (integerp 'nil))
+  :safe (lambda (val) (or (eq val nil) (integerp val))))
 
 (defcustom erlang-indent-guard 2
   "Indentation of Erlang guards."
