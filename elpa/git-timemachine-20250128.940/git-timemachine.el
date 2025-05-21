@@ -1,10 +1,10 @@
-;;; git-timemachine.el --- Walk through git revisions of a file
+;;; git-timemachine.el --- Walk through git revisions of a file  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Peter Stiernström
 
 ;; Author: Peter Stiernström <peter@stiernstrom.se>
-;; Package-Version: 20241125.750
-;; Package-Revision: 62ebb0c6588d
+;; Package-Version: 20250128.940
+;; Package-Revision: d1346a761225
 ;; URL: https://codeberg.org/pidu/git-timemachine
 ;; Keywords: vc
 ;; Package-Requires: ((emacs "24.3") (transient "0.1.0"))
@@ -90,7 +90,7 @@ Available values are:
 (defcustom git-timemachine-global-git-arguments
   '("-c" "log.showSignature=false" "--no-pager")
   "Common arguments for all git commands."
-  :type 'list
+  :type '(repeat string)
   :group 'git-timemachine)
 
 (defcustom git-timemachine-quit-to-invoking-buffer
