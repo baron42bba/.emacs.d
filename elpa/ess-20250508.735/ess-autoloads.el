@@ -195,7 +195,7 @@ indentation style. See `ess-style-alist' for predefined styles.
 ;;; Generated autoloads from ess-r-mode.el
 
 (autoload 'run-ess-r "ess-r-mode" "\
-Call 'R', the 'GNU S' system from the R Foundation.
+Call \\='R\\=', the \\='GNU S\\=' system from the R Foundation.
 Optional prefix (\\[universal-argument]) allows to set command line arguments, such as
 --vsize.  This should be OS agnostic.
 If you have certain command line arguments that should always be passed
@@ -291,6 +291,8 @@ evaluate the variable `ess-roxy-mode'.
 
 The mode's hook is called both when the mode is enabled and when it is
 disabled.
+
+\\{ess-roxy-mode-map}
 
 (fn &optional ARG)" t)
 (register-definition-prefixes "ess-roxy" '("ess-"))

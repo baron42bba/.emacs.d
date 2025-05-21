@@ -1,10 +1,10 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "ess" "20241216.1709"
+(define-package "ess" "20250508.735"
   "Emacs Speaks Statistics."
   '((emacs "25.1"))
-  :url "https://github.com/emacs-ess/ESS"
-  :commit "dda9a9400b2d03b2fdae25045d2af08a37f907ee"
-  :revdesc "dda9a9400b2d"
+  :url "https://ess.r-project.org/"
+  :commit "cf5c97bc68432c6d40b85803a5ce32b4f456fab2"
+  :revdesc "cf5c97bc6843"
   :authors '(("David Smith" . "dsmith@stats.adelaide.edu.au")
              ("A.J. Rossini" . "blindglobe@gmail.com")
              ("Richard M. Heiberger" . "rmh@temple.edu")
