@@ -4,8 +4,8 @@
 ;; Package-Requires: ((emacs "24"))
 ;; Homepage: https://github.com/spotify/dockerfile-mode
 ;; URL: https://github.com/spotify/dockerfile-mode
-;; Package-Version: 20240914.1549
-;; Package-Revision: 4d893bd2da15
+;; Package-Version: 20250315.1426
+;; Package-Revision: 8135740bfc6a
 ;; Keywords: docker languages processes tools
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -119,7 +119,7 @@ It is supported from docker 18.09"
                           "add" "copy" "entrypoint" "volume" "user" "workdir" "onbuild"
                           "label" "stopsignal" "shell" "healthcheck"))
                word-boundary)
-           font-lock-keyword-face)
+           'font-lock-keyword-face)
     (,dockerfile--from-regex
      (1 'dockerfile-image-name)
      (2 'dockerfile-image-alias nil t))
