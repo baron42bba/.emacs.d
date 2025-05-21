@@ -1,6 +1,6 @@
 ;;; flycheck.el --- On-the-fly syntax checking -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2024 Flycheck contributors
+;; Copyright (C) 2017-2025 Flycheck contributors
 ;; Copyright (C) 2012-2016 Sebastian Wiesner and Flycheck contributors
 ;; Copyright (C) 2013, 2014 Free Software Foundation, Inc.
 ;;
@@ -10,9 +10,9 @@
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
-;; Package-Version: 20241130.1502
-;; Package-Revision: ebaf48359b3e
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Version: 20250423.1305
+;; Package-Revision: 2842e237f6ab
+;; Package-Requires: ((emacs "27.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -180,6 +180,7 @@
     lua-luacheck
     lua
     markdown-markdownlint-cli
+    markdown-markdownlint-cli2
     markdown-mdl
     markdown-pymarkdown
     nix
@@ -1275,7 +1276,7 @@ Only has effect when variable `global-flycheck-mode' is non-nil."
 
 
 
-(defconst flycheck-version "35.0-snapshot"
+(defconst flycheck-version "35.0"
   "The current version of Flycheck.
 
 Should be kept in sync with the package version metadata.
@@ -8086,6 +8087,9 @@ Requires GCC 4.4 or newer.  See URL `https://gcc.gnu.org/'."
   :modes (c-mode c++-mode c-ts-mode c++-ts-mode)
   :next-checkers ((warning . c/c++-cppcheck)))
 
+(flycheck-def-args-var flycheck-cppcheck-args c/c++-cppcheck
+  :package-version '(flycheck . "35"))
+
 (flycheck-def-option-var flycheck-cppcheck-checks '("style") c/c++-cppcheck
   "Enabled checks for Cppcheck.
 
@@ -8178,6 +8182,7 @@ See URL `https://cppcheck.sourceforge.net/'."
                   (pcase major-mode
                     ((or `c++-mode `c++-ts-mode) "c++")
                     ((or `c-mode `c-ts-mode) "c")))
+            (eval flycheck-cppcheck-args)
             source)
   :error-parser flycheck-parse-cppcheck
   :modes (c-mode c++-mode c-ts-mode c++-ts-mode))
@@ -8402,6 +8407,14 @@ See URL `https://stylelint.io/'."
   :package-version '(flycheck . "32"))
 (make-variable-buffer-local 'flycheck-cuda-language-standard)
 
+(flycheck-def-option-var flycheck-cuda-compiler-options '("-Wall" "-Wextra") cuda-nvcc
+  "Specify options directly to the compiler/preprocessor."
+  :type '(choice (const :tag "No additional compiler options" nil)
+                 (repeat :tag "Addition compiler options"
+                         (string :tag "Compiler option")))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "35"))
+
 (flycheck-def-option-var flycheck-cuda-gencodes nil cuda-nvcc
   "Our real and virtual GPU architectures to pass to nvcc."
   :type '(repeat (file :tag "GPU architecture"))
@@ -8459,6 +8472,7 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
             (option-flag "--expt-extended-lambda" flycheck-cuda-extended-lambda)
             (option-list "-include" flycheck-cuda-includes)
             (option-list "-gencode" flycheck-cuda-gencodes)
+            (option-list "-Xcompiler" flycheck-cuda-compiler-options)
             (option-list "-D" flycheck-cuda-definitions concat)
             (option-list "-I" flycheck-cuda-include-path)
             source)
@@ -8468,12 +8482,18 @@ See URL `https://developer.nvidia.com/cuda-llvm-compiler'."
           " " (or "<stdin>" (file-name))
           ":" line ":" line-end)
    (error line-start (or "<stdin>" (file-name))
-          "(" line "): error: " (message) line-end)
+          "(" line "): error"
+          (optional " #" (id (one-or-more digit) (optional "-D")))
+          ": " (message) line-end)
    (error line-start (or "<stdin>" (file-name))
           ":" line ":" column
-          ": fatal error: " (optional (message)) line-end)
+          ": fatal error"
+          (optional " #" (id (one-or-more digit) (optional "-D")))
+          ": " (optional (message)) line-end)
    (warning line-start (or "<stdin>" (file-name))
-            "(" line "): warning: " (message) line-end))
+            "(" line "): warning"
+            (optional " #" (id (one-or-more digit) (optional "-D")))
+            ": " (message) line-end))
   :modes cuda-mode)
 
 
@@ -10041,11 +10061,26 @@ See URL `https://stedolan.github.io/jq/'."
           (zero-or-more not-newline) line-end))
   :modes (json-mode js-json-mode json-ts-mode))
 
+(flycheck-def-option-var flycheck-jsonnet-include-paths nil jsonnet
+  "a list of include paths to specify to the jsonnet binary, via -J .
+
+For example (\"./lib\") ."
+  :type '(repeat (directory :tag "Include directory"))
+  :safe #'flycheck-string-list-p
+  :package-version '(flycheck . "35.0"))
+
+(flycheck-def-args-var flycheck-jsonnet-command-args jsonnet
+  :package-version '(flycheck . "35.0"))
+
 (flycheck-define-checker jsonnet
   "A Jsonnet syntax checker using the jsonnet binary.
 
 See URL `https://jsonnet.org'."
-  :command ("jsonnet" source-inplace)
+  :command
+  ("jsonnet"
+   (option-list "-J" flycheck-jsonnet-include-paths)
+   (eval flycheck-jsonnet-command-args)
+   source-inplace)
   :error-patterns
   ((error line-start "STATIC ERROR: " (file-name) ":"
           (or (seq line ":" column (zero-or-one (seq "-" end-column)))
@@ -10879,7 +10914,7 @@ See URL `https://docs.astral.sh/ruff/'."
             (id (one-or-more (any alpha)) (one-or-more digit) " ")
             (message (one-or-more not-newline))
             line-end))
-  :working-directory flycheck-python-find-project-root 
+  :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
 
@@ -11267,6 +11302,35 @@ See URL `https://github.com/igorshubovych/markdownlint-cli'."
           (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
       (and error-code `(url . ,(format url error-code))))))
 
+(flycheck-def-config-file-var flycheck-markdown-markdownlint-cli2-config
+    markdown-markdownlint-cli2
+    '(".markdownlint-cli2.json" ".markdownlint-cli2.jsonc" ".markdownlint-cli2.yaml")
+  :package-version '(flycheck . "35"))
+
+(flycheck-define-checker markdown-markdownlint-cli2
+  "Markdown checker using markdownlint-cli2.
+
+See URL `https://github.com/DavidAnson/markdownlint-cli2'."
+  :command ("markdownlint-cli2"
+            (config-file "--config" flycheck-markdown-markdownlint-cli2-config)
+            "--"
+            source)
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line
+          (? ":" column) " " (id (one-or-more (not (any space))))
+          " " (message) line-end))
+  :error-filter
+  (lambda (errors)
+    (flycheck-sanitize-errors
+     (flycheck-remove-error-file-names "(string)" errors)))
+  :modes (markdown-mode gfm-mode)
+  :error-explainer
+  (lambda (err)
+    (let ((error-code (substring (flycheck-error-id err) 0 5))
+          (url "https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#%s"))
+      (and error-code `(url . ,(format url error-code))))))
+
 (flycheck-def-option-var flycheck-markdown-mdl-rules nil markdown-mdl
   "Rules to enable for mdl.
 
@@ -11328,7 +11392,7 @@ See URL `https://github.com/markdownlint/markdownlint'."
 
 See URL `https://pypi.org/project/pymarkdownlnt/'."
   :command ("pymarkdown"
-            (config-file "--config" flycheck-markdown-markdownlint-cli-config)
+            (config-file "--config" flycheck-markdown-pymarkdown-config)
             "scan"
             source)
   :error-patterns
@@ -11661,7 +11725,8 @@ See URL `https://www.ruby-lang.org/'."
   ((error line-start "SyntaxError in -:" line ": " (message) line-end)
    (warning line-start "-:" line ":" (optional column ":")
             " warning: " (message) line-end)
-   (error line-start "-:" line ": " (message) line-end))
+   ;; Ruby 3.4 includes the interpreter path when emitting syntax errors
+   (error line-start (optional (one-or-more (not (any ":"))) ": ") "-:" line ": " (message) line-end))
   :modes (enh-ruby-mode ruby-mode ruby-ts-mode)
   :next-checkers ((warning . ruby-chef-cookstyle)))
 
