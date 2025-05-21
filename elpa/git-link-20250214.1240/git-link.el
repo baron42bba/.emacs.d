@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2013-2022 Skye Shaw and others
 ;; Author: Skye Shaw <skye.shaw@gmail.com>
-;; Package-Version: 20241208.1850
-;; Package-Revision: 40f7b1674d2c
+;; Package-Version: 20250214.1240
+;; Package-Revision: 8d0f98cf36f6
 ;; Keywords: git, vc, github, bitbucket, gitlab, sourcehut, aws, azure, convenience
 ;; URL: http://github.com/sshaw/git-link
 ;; Package-Requires: ((emacs "24.3"))
@@ -312,6 +312,22 @@ we can prevent that behaviour."
   "List of extensions that should be rendered via annotate else
 they will actually be rendered. We can prevent that behaviour."
   :type 'list
+  :group 'git-link)
+
+(defcustom git-link-web-host-alist nil
+  "Mapping from Git host names to web host names.
+
+Elements have the form (GIT-HOST-REGEXP . WEB-HOST), where
+GIT-HOST-REGEXP is a regexp matching the host name used by Git
+and WEB-HOST is the name of the host serving the corresponding
+web interface.
+
+This can be used when custom deployments serve SSH access and the
+web interface under different host names. For example, if Git
+uses \"ssh.gitlab.company.com\" but the web interface is at
+\"gitlab.company.com\", add
+`(\"ssh\\\\.gitlab\\\\.company\\\\.com\" . \"gitlab.company.com\")'."
+  :type '(alist :key-type string :value-type string)
   :group 'git-link)
 
 (defun git-link--exec(&rest args)
@@ -846,22 +862,26 @@ With a double prefix argument invert the value of
            (list remote nil nil)
          (list remote (car region) (cadr region))))))
 
-  (let (filename branch commit handler remote-info (remote-url (git-link--remote-url remote)))
+  (let ((remote-url (git-link--remote-url remote))
+        filename branch commit handler remote-info git-host web-host)
     (if (null remote-url)
         (message "Remote `%s' not found" remote)
 
       (setq remote-info (git-link--parse-remote remote-url)
+            git-host    (car remote-info)
             filename    (git-link--relative-filename)
             branch      (git-link--branch)
             commit      (git-link--commit)
-            handler     (git-link--handler git-link-remote-alist (car remote-info)))
+            handler     (git-link--handler git-link-remote-alist git-host)
+            web-host    (or (assoc-default git-host git-link-web-host-alist #'string-match-p)
+                            git-host))
 
       (cond ((null filename)
              (message "Can't figure out what to link to"))
-            ((null (car remote-info))
+            ((null git-host)
              (message "Remote `%s' contains an unsupported URL" remote))
             ((not (functionp handler))
-             (message "No handler found for %s" (car remote-info)))
+             (message "No handler found for %s" git-host))
             ;; TODO: null ret val
             (t
              (let ((vc-revison (git-link--parse-vc-revision filename)))
@@ -871,7 +891,7 @@ With a double prefix argument invert the value of
 
                (git-link--new
                 (funcall handler
-                         (car remote-info)
+                         web-host
                          (cadr remote-info)
                          (url-hexify-string filename (url--allowed-chars (cons ?/ url-unreserved-chars)))
                          (if (or (git-link--using-git-timemachine)
