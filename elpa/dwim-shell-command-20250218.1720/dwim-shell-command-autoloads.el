@@ -198,6 +198,8 @@ Toggle Bluetooth device connection." t)
 Convert binary plist to xml." t)
 (autoload 'dwim-shell-commands-macos-toggle-dark-mode "dwim-shell-commands" "\
 Toggle macOS dark mode." t)
+(autoload 'dwim-shell-commands-macos-toggle-menu-bar-autohide "dwim-shell-commands" "\
+Toggle macOS dark mode." t)
 (autoload 'dwim-shell-commands-pdf-to-txt "dwim-shell-commands" "\
 Convert pdf to txt." t)
 (autoload 'dwim-shell-commands-resize-image-by-factor "dwim-shell-commands" "\

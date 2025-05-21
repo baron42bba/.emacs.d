@@ -49,7 +49,7 @@
   (when prefix
     (setq prefix (string-trim (read-string "Transcription locale: " "ja-JP")))
     (when (string-empty-p prefix)
-      (errro "No locale given")))
+      (error "No locale given")))
   (dwim-shell-command-on-marked-files
    "Extract har response content"
    (format "declare -A mime_map=( \
@@ -609,14 +609,14 @@ Optional argument ARGS as per `browse-url-default-browser'"
   "Apply iOS round corners to image(s)."
   (interactive)
   (dwim-shell-command-on-marked-files
-     "Speed up gif"
-     "set -o xtrace
+   "Speed up gif"
+   "set -o xtrace
       width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 '<<f>>')
       height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 '<<f>>')
       corner=$((${width}/4))
       echo ${corner}
       convert -size ${width}x${height} xc:none -fill white -draw \"roundRectangle 0,0 ${width},${height} ${corner},${corner}\" '<<f>>' -compose SrcIn -composite '<<fne>>_ios_round.<<e>>'"
-     :utils '("ffprobe" "convert")))
+   :utils '("ffprobe" "convert")))
 
 ;;;###autoload
 (defun dwim-shell-commands-clip-round-rect-gif ()
@@ -782,6 +782,25 @@ EOF"
    "Toggle dark mode"
    "dark-mode"
    :utils "dark-mode" ;; brew install dark-mode
+   :silent-success t))
+
+;;;###autoload
+(defun dwim-shell-commands-macos-toggle-menu-bar-autohide ()
+  "Toggle macOS dark mode."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Toggle menu bar auto-hide."
+   "current_status=$(osascript -e 'tell application \"System Events\" to get autohide menu bar of dock preferences')
+
+if [ \"$current_status\" = \"true\" ]; then
+    osascript -e 'tell application \"System Events\" to set autohide menu bar of dock preferences to false'
+    echo \"Auto-hide disabled.\"
+else
+    osascript -e 'tell application \"System Events\" to set autohide menu bar of dock preferences to true'
+    echo \"Auto-hide enabled.\"
+fi"
+   :utils "osascript"
+   :shell-util "zsh"
    :silent-success t))
 
 ;;;###autoload
@@ -1004,6 +1023,16 @@ EOF"
     (dwim-shell-command-on-marked-files
      "Speed up fragment in video"
      (format "ffmpeg -i '<<f>>' -filter_complex '[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[v0];[0:v]trim=start=%d:end=%d,setpts=(PTS-1)/%d[v1];[0:v]trim=start=%d,setpts=PTS-STARTPTS[v2];[v0][v1][v2]concat=n=3:v=1:a=0' -preset fast '<<fne>>_%d:%dx%d.<<e>>'" start start end factor end start end factor)
+     :utils "ffmpeg")))
+
+(defun dwim-shell-commands-set-song-title ()
+  "Set song(s) title."
+  (interactive)
+  (let ((title (replace-regexp-in-string "'" "\'" (read-string "New title: "))))
+    (dwim-shell-command-on-marked-files
+     "Set song(s) title"
+     (format "ffmpeg -i '<<f>>' -metadata title='%s' -codec copy '<<td>>/<<bne>>_temp.<<e>>' && mv -f '<<td>>/<<bne>>_temp.<<e>>' '<<f>>'"
+             title)
      :utils "ffmpeg")))
 
 ;;;###autoload
@@ -1340,7 +1369,7 @@ echo \"<<fne>>.svg\"
   "Select and start recording a macOS window."
   (interactive)
   (let* ((window (dwim-shell-commands--macos-select-window))
-         (path (dwim-shell-commands--generate-path "~/Desktop" (car window) ".gif"))
+         (path (dwim-shell-commands--generate-path "~/Screenshots" (car window) ".gif"))
          (buffer-file-name path) ;; override so <<f>> picks it up
          (inhibit-message t))
     ;; Silence echo to avoid unrelated messages making into animation.
@@ -1352,7 +1381,7 @@ echo \"<<fne>>.svg\"
         "macosrec --record '%s' --gif --output '<<f>>'"
         (cdr window))
        :silent-success t
-       :monitor-directory "~/Desktop"
+       :monitor-directory "~/Screenshots"
        :no-progress t
        :utils '("ffmpeg" "macosrec")
        :on-completion
@@ -1428,7 +1457,7 @@ echo \"<<fne>>.svg\"
      "Start recording a macOS window."
      (format "macosrec --screenshot %s" (cdr window))
      :silent-success t
-     :monitor-directory "~/Desktop"
+     :monitor-directory "~/Screenshots"
      :no-progress t
      :utils "macosrec")))
 

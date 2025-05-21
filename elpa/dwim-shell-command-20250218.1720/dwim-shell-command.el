@@ -5,8 +5,8 @@
 ;; Author: Alvaro Ramirez
 ;; Package-Requires: ((emacs "28.1"))
 ;; URL: https://github.com/xenodium/dwim-shell-command
-;; Package-Version: 20241115.845
-;; Package-Revision: 1fa8b9d361f0
+;; Package-Version: 20250218.1720
+;; Package-Revision: 4b077432a948
 
 ;; This package is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ Set to nil to use `shell-command-switch'."
 
 (defcustom dwim-shell-command-done-buffer-name
   (lambda (name)
-    (format "✅ %s %s" name (propertize "done" 'face 'success)))
+    (format "%s %s" name (propertize "done" 'face 'success)))
   "Function to format buffer name on success.
 Use `identify' to remove formatting."
   :type 'function
@@ -99,7 +99,7 @@ Use `identify' to remove formatting."
 
 (defcustom dwim-shell-command-error-buffer-name
   (lambda (name)
-    (format "⛔️ %s %s" name (propertize "error" 'face 'error)))
+    (format "%s %s" name (propertize "error" 'face 'error)))
   "Function to format buffer name on error.
 Use `identify' to remove formatting."
   :type 'function
