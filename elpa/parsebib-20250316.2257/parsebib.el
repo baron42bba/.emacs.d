@@ -1,13 +1,13 @@
 ;;; parsebib.el --- A library for parsing bib files  -*- lexical-binding: t -*-
 
-;; Copyright (c) 2014-2024 Joost Kremers
+;; Copyright (c) 2014-2025 Joost Kremers
 ;; All rights reserved.
 
 ;; Author: Joost Kremers <joostkremers@fastmail.fm>
 ;; Maintainer: Joost Kremers <joostkremers@fastmail.fm>
 ;; Created: 2014
-;; Package-Version: 20241219.14
-;; Package-Revision: db2de6e30a4f
+;; Package-Version: 20250316.2257
+;; Package-Revision: 7bfde4e46794
 ;; Keywords: text bibtex
 ;; URL: https://github.com/joostkremers/parsebib
 ;; Package-Requires: ((emacs "25.1"))
@@ -37,11 +37,16 @@
 
 ;;; Commentary:
 
+;; See the README for details.
 ;;
+;; Acknowledgements:
+;;
+;; The code to clean up TeX markup in field values was contributed by Hugo
+;; Heagren <hugo.heagren@kcl.ac.uk>; additional improvements were made by
+;; <rahguzar@zohomail.eu>.
 
 ;;; Code:
 
-(require 'bibtex)
 (require 'cl-lib)
 (eval-and-compile (unless (fboundp 'json-parse-buffer)
                     (require 'json)))
@@ -49,25 +54,44 @@
 
 (declare-function json-read "json.el")
 
+(defvar bibtex-dialect)
+(defvar bibtex-dialect-list)
+
 (defvar parsebib-hashid-fields nil
   "List of fields used to create a hash id for each entry.
 Hash ids can only be created for BibTeX/biblatex files.  The hash
 id is stored in the entry in the special field `=hashid='.")
 
-;; Regexes describing BibTeX identifiers and keys.  Note that while $ ^ & are
-;; valid in BibTeX keys, they may nonetheless be problematic, because they are
-;; special for TeX.  The difference between `parsebib--bibtex-identifier' and
-;; `parsebib--bibtex-key-regexp' are the parentheses (), which are valid in keys.  It may in
-;; fact not be necessary (or desirable) to distinguish the two, but until
-;; someone complains, I'll keep it this way.
+;; Regexes describing BibTeX identifiers and keys.  Note that while $ ^ &
+;; are valid in BibTeX keys, they may nonetheless be problematic, because
+;; they are special for TeX.  Which characters are allowed in keys and
+;; identifiers differs depending on context.  The StackExchange answer at
+;; https://tex.stackexchange.com/questions/96454/using-bibtex-keys-containing-parentheses-with-biber
+;; says that Biber uses a library for parsing .bib files (btparse) that
+;; disallows the following characters in keys;
+;;
+;; " # % ' ( ) , = { }
+;;
+;; Note that parentheses are allowed by BibTex, though, so I won't exclude
+;; them here.
+;;
+;; Also, keys and identifiers (field and @String names) are distinguished,
+;; though I'm not sure that is correct (or even desirable).  I'll keep it
+;; that way until someone complains, though.
+
 (defconst parsebib--bibtex-identifier "[^\"@\\#%',={}() \t\n\f]+" "Regexp describing a licit BibTeX identifier.")
-(defconst parsebib--bibtex-key-regexp "[^\"@\\#%',={} \t\n\f]+" "Regexp describing a licit BibTeX key.")
+(defconst parsebib--bibtex-key-regexp "[^\"#%',={} \t\n\f]+" "Regexp describing a licit BibTeX key.")
 (defconst parsebib--bibtex-entry-start "^[ \t]*@" "Regexp describing the start of an entry.")
 
 (defvar parsebib-postprocessing-excluded-fields '("file"
                                                   "url"
                                                   "doi")
   "List of fields that should not be post-processed.")
+
+;; Cleaning up TeX code is very slow, so we restrict it to those fields for
+;; which it makes sense.
+(defvar parsebib-replace-TeX-fields '("author" "editor" "title")
+  "List of fields in which TeX code should be cleaned up.")
 
 (defvar parsebib--biblatex-inheritances '(;; Source                        Target
                                           ("all"                           "all"
@@ -178,9 +202,7 @@ combination, the field inherits from the same-name field in the
 cross-referenced entry.  If no inheritance should take place, the
 target field is set to the symbol `none'.")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; BibTeX / biblatex parser ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; BibTeX / biblatex parser
 
 ;;; Parser primitives
 ;;
@@ -217,8 +239,7 @@ an error, unless NOERROR is non-nil, in which case return nil."
         (forward-char 1))
     (unless noerror
       (signal 'parsebib-error (list (point)
-                                    "Expected one of %s, got `%c'"
-                                    (mapcar #'char-to-string chars)
+                                    "Invalid character `%c'"
                                     (following-char))))))
 
 (defun parsebib--keyword (keywords &optional noerror)
@@ -236,7 +257,7 @@ non-nil, in which case return nil."
             keyword))
       (unless noerror
         (signal 'parsebib-error (list (point)
-                                      "Expected one of %s, got `%c'"
+                                      "Invalid keyword %s"
                                       keywords
                                       (char-after)))))))
 
@@ -277,11 +298,10 @@ sequences)."
        ((eq (char-after) close)
         (unless (eq (char-before) esc)
           (setq n-braces (1- n-braces)))))
-      (ignore-error 'end-of-buffer (forward-char 1)))
+      (ignore-error end-of-buffer (forward-char 1)))
     (if (= n-braces 0)
         (buffer-substring-no-properties beg (point))
-      (goto-char beg) ; So we can determine line and column number.
-      (signal 'parsebib-error (list (point)
+      (signal 'parsebib-error (list beg
                                     "Opening %c has no closing %c"
                                     open
                                     close)))))
@@ -304,8 +324,7 @@ character."
       (forward-char 1))
     (if (not continue)
         (buffer-substring-no-properties beg (point))
-      (goto-char beg) ; So we can determine line and column number.
-      (signal 'parsebib-error (list (point)
+      (signal 'parsebib-error (list beg
                                     "Opening %c has no closing %c"
                                     delim
                                     delim)))))
@@ -329,7 +348,6 @@ RULES is a list of symbols, each naming a parsing rule."
       (dolist (rule rules)
         (condition-case err
             (let ((res (funcall rule)))
-              (parsebib--skip-whitespace)
               (throw 'success res))
           (parsebib-error
            (goto-char start-pos)
@@ -355,6 +373,10 @@ should be read literally."
 (defun parsebib--quoted-text ()
   "Parse text in double quotes."
   (parsebib--string ?\" ?\\))
+
+(defun parsebib--key ()
+  "Parse a BibTeX key."
+  (parsebib--symbol parsebib--bibtex-key-regexp))
 
 (defun parsebib--identifier ()
   "Parse a BibTeX identifier."
@@ -402,7 +424,7 @@ A set of assignments makes up the body of an entry."
       ;; There may be a comma after the final field of an entry. If that
       ;; happens, reading another assignment will fail, so we capture the
       ;; error here.
-      (ignore-error 'parsebib-error
+      (ignore-error parsebib-error
         (push (parsebib--assignment) fields)))
     fields))
 
@@ -445,7 +467,7 @@ Return the entry as an alist of <field . value> pairs, where
   (if-let* ((_ (parsebib--char '(?@)))
             (type (parsebib--identifier))
             (open (parsebib--char '(?\{ ?\( )))
-            (key (parsebib--identifier))
+            (key (parsebib--key))
             (_ (parsebib--char '(?,)))
             (fields (parsebib--fields))
             (_ (parsebib--char (alist-get open '((?\{ ?\}) (?\( ?\)))))))
@@ -454,9 +476,7 @@ Return the entry as an alist of <field . value> pairs, where
              fields)
     (signal 'parsebib-error (list (point) "Malformed entry definition"))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Low-level BibTeX/biblatex API ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Low-level BibTeX/biblatex API
 
 (defun parsebib-find-next-item ()
   "Find the first (potential) BibTeX item following point.
@@ -477,14 +497,13 @@ If no item is found, move point to the end of the buffer."
 
 (defun parsebib--get-hashid-string (fields)
   "Create a string from the contents of FIELDS to compute a hash id."
-  (cl-loop
-   for field in parsebib-hashid-fields
-   collect (or
-            ;; Remove braces {}.
-            (replace-regexp-in-string "^{\\|}$" "" (cdr (assoc-string field fields 'case-fold)))
-            "")
-   into hashid-fields
-   finally return (mapconcat #'identity hashid-fields "")))
+  (cl-loop for field in parsebib-hashid-fields
+           collect (or
+                    ;; Remove braces {}.
+                    (replace-regexp-in-string "^{\\|}$" "" (cdr (assoc-string field fields 'case-fold)))
+                    "")
+           into hashid-fields
+           finally return (mapconcat #'identity hashid-fields "")))
 
 (defun parsebib-read-entry (&optional fields strings replace-TeX)
   "Read a BibTeX entry starting at point.
@@ -538,9 +557,7 @@ string's expansion."
 (defalias 'parsebib-read-preamble 'parsebib--@preamble)
 (defalias 'parsebib-read-comment 'parsebib--@comment)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Post-processing stuff ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; Post-processing stuff
 
 (defun parsebib--post-process (field strings replace-TeX)
   "Post-process FIELD.
@@ -565,7 +582,8 @@ value is a cons cell of field name and field value, the value now
 being a single string."
   (let* ((name (car field))
          (value (cdr field))
-         (post-process (not (member-ignore-case name parsebib-postprocessing-excluded-fields))))
+         (post-process (not (member-ignore-case name parsebib-postprocessing-excluded-fields)))
+         (replace-TeX (and replace-TeX (member-ignore-case name parsebib-replace-TeX-fields))))
     (setq value (if strings
                     (string-join (parsebib--post-process-strings value strings post-process))
                   (string-join value " # ")))
@@ -629,24 +647,25 @@ such an inheritance schema."
   (when (and target-entry source-entry)
     (when (eq inheritance 'biblatex)
       (setq inheritance parsebib--biblatex-inheritances))
-    (let* ((inheritable-fields
+    (let* ((source-type (concat "\\b" (cdr (assoc-string "=type=" source-entry)) "\\b"))
+           (target-type (concat "\\b" (cdr (assoc-string "=type=" target-entry)) "\\b"))
+           (for-all-types (nth 2 (assoc-string "all" inheritance)))
+           (inheritable-fields
             (unless (eq inheritance 'BibTeX)
               (append
                (apply #'append (mapcar #'cl-third
                                        (cl-remove-if-not
                                         (lambda (elem)
-                                          (and (string-match-p (concat "\\b" (cdr (assoc-string "=type=" source-entry)) "\\b")
-                                                               (cl-first elem))
-                                               (string-match-p (concat "\\b" (cdr (assoc-string "=type=" target-entry)) "\\b")
-                                                               (cl-second elem))))
+                                          (and (string-match-p source-type (nth 0 elem))
+                                               (string-match-p target-type (nth 1 elem))))
                                         inheritance)))
-               (cl-third (assoc-string "all" inheritance)))))
-           (new-fields (delq nil (mapcar (lambda (field)
-                                           (let ((target-field (parsebib--get-target-field (car field) inheritable-fields)))
-                                             (if (and target-field
-                                                      (not (assoc-string target-field target-entry 'case-fold)))
-                                                 (cons target-field (cdr field)))))
-                                         source-entry))))
+               for-all-types)))
+           (new-fields (mapcan (lambda (field)
+                                 (let ((target-field (parsebib--get-target-field (car field) inheritable-fields)))
+                                   (if (and target-field
+                                            (not (assoc-string target-field target-entry 'case-fold)))
+                                       (list (cons target-field (cdr field))))))
+                               source-entry)))
       (append target-entry new-fields))))
 
 (defun parsebib--get-target-field (source-field inheritances)
@@ -668,17 +687,16 @@ for INHERITANCES to be nil."
       nil)
      (t target-field))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Clean up TeX markup ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Clean up TeX markup
 
 (defvar parsebib-TeX-cleanup-target 'display
   "Target for `parsebib-clean-TeX-markup'.
 This variable affects the output of the functions that convert
 LaTeX font commands \\textbf, \\textit, and \\emph.  Its value
-should be one of the symbols `display', `markdown', `org' or `plain'.
-See `parsebib--convert-tex-italics' and `parsebib--convert-tex-bold'
-for details.")
+should be one of the symbols `display', `markdown' `org' or
+`plain'.  Any other value is treated as a synonym for `plain'.
+See `parsebib--convert-tex-italics' and
+`parsebib--convert-tex-bold' for details.")
 
 (defun parsebib--convert-tex-italics (str)
   "Return STR converted to italic face.
@@ -689,7 +707,7 @@ markup for italic text."
     ('display (propertize str 'face 'italic))
     ('markdown (concat "*" str "*"))
     ('org (concat "/" str "/"))
-    ('plain str)))
+    (_ str)))
 
 (defun parsebib--convert-tex-bold (str)
   "Return STR converted to bold face.
@@ -700,11 +718,7 @@ markup for bold text."
     ('display (propertize str 'face 'bold))
     ('markdown (concat "**" str "**"))
     ('org (concat "*" str "*"))
-    ('plain str)))
-
-(defun parsebib--convert-tex-small-caps (str)
-  "Return STR capitalised."
-  (upcase str))
+    (_ str)))
 
 (defvar parsebib-TeX-command-replacement-alist
   '(("ddag"               . "\N{DOUBLE DAGGER}")
@@ -755,7 +769,7 @@ markup for bold text."
     ("textit" . parsebib--convert-tex-italics)
     ("emph"   . parsebib--convert-tex-italics)
     ("textbf" . parsebib--convert-tex-bold)
-    ("textsc" . parsebib--convert-tex-small-caps))
+    ("textsc" . upcase))
   "An alist of <command>-<replacement> pairs for LaTeX commands.
 <command> is the name of a TeX or LaTeX command (without
 backslash), <replacement> is the string with which it is
@@ -854,8 +868,8 @@ See `parsebib-TeX-markup-replacement-alist' and the function
                                      "{" (group-n 2 (0+ (not (any "}")))) (opt "}"))
                                   (group-n 3 letter))))))
     (parsebib--TeX-replace-literal
-     . ,(rx-to-string `(or ,@(mapcar #'car parsebib-TeX-literal-replacement-alist)
-                           (1+ blank)))))
+     . ,(rx (or (regexp (regexp-opt (mapcar #'car parsebib-TeX-literal-replacement-alist)))
+                (1+ blank)))))
   "Alist of replacements and strings for TeX markup.
 This is used in `parsebib-clean-TeX-markup' to make TeX markup more
 suitable for display.  Each item in the list consists of a replacement
@@ -915,9 +929,7 @@ calling the cdr on the match (if it is a function)."
                               t t))
              finally return string)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; High-level BibTeX/biblatex API ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; High-level BibTeX/biblatex API
 
 (defun parsebib-collect-preambles ()
   "Collect all @Preamble definitions in the current buffer.
@@ -926,9 +938,9 @@ Return a list of strings, each string a separate @Preamble."
     (goto-char (point-min))
     (let (res)
       (cl-loop for item = (parsebib-find-next-item)
-               while item do
-               (when (cl-equalp item "preamble")
-                 (push (parsebib--@preamble) res)))
+               while (and item
+                          (cl-equalp item "preamble"))
+               do (push (parsebib--@preamble) res))
       (nreverse res))))
 
 (defun parsebib-collect-comments ()
@@ -938,9 +950,9 @@ Return a list of strings, each string a separate @Comment."
     (goto-char (point-min))
     (let (res)
       (cl-loop for item = (parsebib-find-next-item)
-               while item do
-               (when (cl-equalp item "comment")
-                 (push (parsebib--@comment) res)))
+               while (and item
+                          (cl-equalp item "comment"))
+               do (push (parsebib--@comment) res))
       (nreverse (delq nil res)))))
 
 (cl-defun parsebib-collect-strings (&key strings expand-strings)
@@ -958,10 +970,11 @@ STRINGS."
     (goto-char (point-min))
     (cl-loop with string = nil
              for item = (parsebib-find-next-item)
-             while item do
-             (when (cl-equalp item "string")
-               (setq string (parsebib-read-string (if expand-strings strings)))
-               (puthash (car string) (cdr string) strings)))
+             while (and item
+                        (cl-equalp item "string"))
+             do
+             (setq string (parsebib-read-string (if expand-strings strings)))
+             (puthash (car string) (cdr string) strings))
     strings))
 
 (cl-defun parsebib-collect-bib-entries (&key entries strings inheritance fields)
@@ -1007,7 +1020,7 @@ FIELDS is nil, all fields are returned."
       (setq entries (make-hash-table :test #'equal)))
   (if (eq inheritance t)
       (setq inheritance (or (parsebib-find-bibtex-dialect)
-                            bibtex-dialect
+                            (and (boundp 'bibtex-dialect) bibtex-dialect)
                             'BibTeX)))
   ;; Ensure =key= and =type= are in `fields'.
   (if fields
@@ -1038,7 +1051,10 @@ This function looks for a local value of the variable
 file.  Return nil if no dialect is found."
   (save-excursion
     (goto-char (point-max))
-    (let ((case-fold-search t))
+    (let ((case-fold-search t)
+          (bibtex-dialect-list (or (and (boundp 'bibtex-dialect-list)
+                                        bibtex-dialect-list)
+                                   '(BibTeX biblatex))))
       (when (re-search-backward (concat parsebib--bibtex-entry-start "comment") (- (point-max) 3000) t)
         (let ((comment (parsebib--@comment)))
           (when (and comment
@@ -1103,7 +1119,7 @@ ASCII/Unicode characters.  See the variable
       (setq fields (append (list "=key=" "=type=") fields)))
   (condition-case err
       (let ((dialect (or (parsebib-find-bibtex-dialect)
-                         bibtex-dialect
+                         (and (boundp 'bibtex-dialect) bibtex-dialect)
                          'BibTeX))
             preambles comments)
         (save-excursion
@@ -1131,9 +1147,7 @@ ASCII/Unicode characters.  See the variable
        (signal (car err) (list (concat (apply #'format (cddr err))
                                        (format " at position (%d,%d)" (line-number-at-pos) (current-column)))))))))
 
-;;;;;;;;;;;;;;;;;;
-;; CSL-JSON API ;;
-;;;;;;;;;;;;;;;;;;
+;;;; CSL-JSON API
 
 (cl-defun parsebib-parse-json-buffer (&key entries stringify year-only fields)
   "Parse the current buffer and return all CSL-JSON data.
@@ -1213,11 +1227,10 @@ field, a `parsebib-error' is raised."
 ENTRY is a CSL-JSON entry in the form of an alist.  ENTRY is
 modified in place.  Return value is ENTRY.  If YEAR-ONLY is
 non-nil, date fields are shortened to just the year."
-  (mapc (lambda (field)
-          (unless (stringp (alist-get field entry))
-            (setf (alist-get field entry)
-                  (parsebib-stringify-json-field (assq field entry) year-only))))
-        (mapcar #'car entry))
+  (dolist (field entry)
+    (unless (stringp (alist-get (car field) entry))
+      (setf (alist-get (car field) entry)
+            (parsebib-stringify-json-field (assq (car field) entry) year-only))))
   entry)
 
 (defvar parsebib--json-name-fields  '(author
@@ -1266,15 +1279,15 @@ Braced occurrences of the keys in ITEMS are replaced with the
 corresponding values.  Note that the keys in ITEMS should be
 symbols."
   (cl-flet ((create-replacements (match)
-                                 (save-match-data
-                                   (string-match "{\\([^A-Za-z]*\\)\\([A-Za-z][A-za-z-]+\\)\\([^A-Za-z]*\\)}" match)
-                                   (let* ((pre (match-string 1 match))
-                                          (key (match-string 2 match))
-                                          (post (match-string 3 match))
-                                          (value (alist-get (intern key) items)))
-                                     (if value
-                                         (format "%s%s%s" pre value post)
-                                       "")))))
+              (save-match-data
+                (string-match "{\\([^A-Za-z]*\\)\\([A-Za-z][A-za-z-]+\\)\\([^A-Za-z]*\\)}" match)
+                (let* ((pre (match-string 1 match))
+                       (key (match-string 2 match))
+                       (post (match-string 3 match))
+                       (value (alist-get (intern key) items)))
+                  (if value
+                      (format "%s%s%s" pre value post)
+                    "")))))
     (replace-regexp-in-string "{.*?}" #'create-replacements template nil t)))
 
 (defun parsebib-stringify-json-field (field &optional short)
@@ -1370,9 +1383,7 @@ year, a month and a day."
   (parsebib--process-template "{year}{-month}{-day}"
                               (seq-mapn #'cons '(year month day) date-parts)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Format-independent API ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Format-independent API
 
 (cl-defun parsebib-parse (files &key entries strings (display t) fields)
   "Parse one or more bibliography files.
@@ -1422,24 +1433,23 @@ details.  If FIELDS is nil, all fields are returned."
       (setq strings (make-hash-table :test #'equal)))
   (when (stringp files)
     (setq files (list files)))
-  (mapc (lambda (file)
-          (with-temp-buffer
-            (insert-file-contents file)
-            (cond
-             ((string= (file-name-extension file t) ".bib")
-              (parsebib-parse-bib-buffer :entries entries
-                                         :strings strings
-                                         :expand-strings display
-                                         :inheritance display
-                                         :fields fields
-                                         :replace-TeX display))
-             ((string= (file-name-extension file t) ".json")
-              (parsebib-parse-json-buffer :entries entries
-                                          :stringify display
-                                          :year-only display
-                                          :fields (mapcar #'intern fields)))
-             (t (error "[Parsebib] Not a bibliography file: %s" file)))))
-        files)
+  (dolist (file files)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (cond
+       ((string= (file-name-extension file t) ".bib")
+        (parsebib-parse-bib-buffer :entries entries
+                                   :strings strings
+                                   :expand-strings display
+                                   :inheritance display
+                                   :fields fields
+                                   :replace-TeX display))
+       ((string= (file-name-extension file t) ".json")
+        (parsebib-parse-json-buffer :entries entries
+                                    :stringify display
+                                    :year-only display
+                                    :fields (mapcar #'intern fields)))
+       (t (error "[Parsebib] Not a bibliography file: %s" file)))))
   entries)
 
 (provide 'parsebib)
