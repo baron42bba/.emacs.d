@@ -6,8 +6,8 @@
 ;; Maintainer: Andrey Tykhonov <atykhonov@gmail.com>
 ;; URL: https://github.com/atykhonov/google-translate
 ;; Package-Requires: ((emacs "24.3") (popup "0.5.8"))
-;; Package-Version: 20220921.245
-;; Package-Revision: e60dd6eeb9cd
+;; Package-Version: 20250115.609
+;; Package-Revision: e84599df7c70
 ;; Keywords: convenience
 
 ;; Contributors:
