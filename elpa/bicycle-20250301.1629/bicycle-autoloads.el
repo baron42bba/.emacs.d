@@ -23,7 +23,8 @@ Cycle visibility of all sections.
 
 1. OVERVIEW: Show only top-level headings.
 
-(2. There is equivalent of `bicycle-cycle-local's CHILDREN state.)
+(2.          There is no equivalent of `bicycle-cycle-local's
+             CHILDREN state.)
 
 3. TOC:      Recursively show all headings,
              without treating code blocks as sections.

@@ -1,14 +1,14 @@
 ;;; bicycle.el --- Cycle outline and code visibility  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2018-2024 Jonas Bernoulli
+;; Copyright (C) 2018-2025 Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <emacs.bicycle@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/tarsius/bicycle
 ;; Keywords: outlines
 
-;; Package-Version: 20240831.2208
-;; Package-Revision: 04c3e44eb103
-;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
+;; Package-Version: 20250301.1629
+;; Package-Revision: 530eb666ebaf
+;; Package-Requires: ((emacs "26.1") (compat "30.0.2.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -96,7 +96,8 @@ Without a prefix argument call `bicycle-cycle-local'."
 
 1. OVERVIEW: Show only top-level headings.
 
-(2. There is equivalent of `bicycle-cycle-local's CHILDREN state.)
+\(2.          There is no equivalent of `bicycle-cycle-local's
+             CHILDREN state.)
 
 3. TOC:      Recursively show all headings,
              without treating code blocks as sections.
@@ -362,7 +363,7 @@ return nil."
 If the current section has no children, then return nil.
 Otherwise return (HEADINGS . CODE), where HEADINGS and
 CODE are booleans indicating whether the section contains
-headings and/or code blocks. "
+headings and/or code blocks."
   (let (headings code)
     (catch 'both
       (save-excursion
