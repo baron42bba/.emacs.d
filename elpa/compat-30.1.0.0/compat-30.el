@@ -1,6 +1,6 @@
 ;;; compat-30.el --- Functionality added in Emacs 30 -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2023-2025 Free Software Foundation, Inc.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -33,12 +33,11 @@ buffer contents as untrusted.
 This variable might be subject to change without notice."
   :local permanent)
 
-;; TODO Update to 30.1 as soon as the Emacs emacs-30 branch version bumped
-(compat-version "30.0.50")
+(compat-version "30.1")
 
 ;;;; Defined in lread.c
 
-(compat-defun obarray-clear (ob) ;; <compat-tests:obarray>
+(compat-defun obarray-clear (ob) ;; <compat-tests:obarray-clear>
   "Remove all symbols from obarray OB."
   (fillarray ob 0))
 
@@ -59,7 +58,7 @@ See also `find-buffer-visiting'."
 
 ;;;; Defined in files.el
 
-(compat-defvar trusted-files nil ;; <compat-tests:trusted-files>
+(compat-defvar trusted-content nil ;; <compat-tests:trusted-content>
   "List of files and directories whose content we trust.
 Be extra careful here since trusting means that Emacs might execute the
 code contained within those files and directories without an explicit
@@ -79,31 +78,26 @@ all files, which opens a gaping security hole."
 (compat-defun trusted-content-p () ;; <compat-tests:trusted-content-p>
   "Return non-nil if we trust the contents of the current buffer.
 Here, \"trust\" means that we are willing to run code found inside of it.
-See also `trusted-files'."
-  ;; We compare with `buffer-file-truename' i.s.o `buffer-file-name'
-  ;; to try and avoid marking as trusted a file that's merely accessed
-  ;; via a symlink that happens to be inside a trusted dir.
+See also `trusted-content'."
   (and (not untrusted-content)
-       buffer-file-truename
-       (with-demoted-errors "trusted-content-p: %S"
-         (let ((exists (file-exists-p buffer-file-truename)))
-           (or
-            (eq trusted-files :all)
-            ;; We can't avoid trusting the user's init file.
-            (if (and exists user-init-file)
-                (file-equal-p buffer-file-truename user-init-file)
-              (equal buffer-file-truename user-init-file))
-            (let ((file (abbreviate-file-name buffer-file-truename))
-                  (trusted nil))
-              (dolist (tf trusted-files)
-                (when (or (if exists (file-equal-p tf file) (equal tf file))
-                          ;; We don't use `file-in-directory-p' here, because
-                          ;; we want to err on the conservative side: "guilty
-                          ;; until proven innocent".
-                          (and (string-suffix-p "/" tf)
-                               (string-prefix-p tf file)))
-                  (setq trusted t)))
-              trusted))))))
+       (or
+        (eq trusted-content :all)
+        (and
+         buffer-file-truename
+         (with-demoted-errors "trusted-content-p: %S"
+           (let ((exists (file-exists-p buffer-file-truename)))
+             (or
+              (if (and exists user-init-file)
+                  (file-equal-p buffer-file-truename user-init-file)
+                (equal buffer-file-truename user-init-file))
+              (let ((file (abbreviate-file-name buffer-file-truename))
+                    (trusted nil))
+                (dolist (tf trusted-content)
+                  (when (or (if exists (file-equal-p tf file) (equal tf file))
+                            (and (string-suffix-p "/" tf)
+                                 (string-prefix-p tf file)))
+                    (setq trusted t)))
+                trusted))))))))
 
 (compat-defun require-with-check (feature &optional filename noerror) ;; <compat-tests:require-with-check>
   "If FEATURE is not already loaded, load it from FILENAME.
@@ -220,6 +214,50 @@ details."
   (if (and completion-lazy-hilit completion-lazy-hilit-fn)
       (funcall completion-lazy-hilit-fn (copy-sequence str))
     str))
+
+;;;; Defined in color.el
+
+(compat-defun color-oklab-to-xyz (l a b) ;; <compat-tests:color-oklab-to-xyz>
+  "Convert the OkLab color represented by L A B to CIE XYZ.
+Oklab is a perceptual color space created by Björn Ottosson
+<https://bottosson.github.io/posts/oklab/>.  It has the property that
+changes in the hue and saturation of a color can be made while maintaining
+the same perceived lightness."
+  :feature color
+  (let ((ll (expt (+ (* 1.0 l) (* 0.39633779 a) (* 0.21580376 b)) 3))
+        (mm (expt (+ (* 1.00000001 l) (* -0.10556134 a) (* -0.06385417 b)) 3))
+        (ss (expt (+ (* 1.00000005 l) (* -0.08948418 a) (* -1.29148554 b)) 3)))
+    (list (+ (* ll 1.22701385) (* mm -0.55779998) (* ss 0.28125615))
+          (+ (* ll -0.04058018) (* mm 1.11225687) (* ss -0.07167668))
+          (+ (* ll -0.07638128) (* mm -0.42148198) (* ss 1.58616322)))))
+
+(compat-defun color-xyz-to-oklab (x y z) ;; <compat-tests:color-xyz-to-oklab>
+  "Convert the CIE XYZ color represented by X Y Z to Oklab."
+  :feature color
+  (let ((ll (+ (* x 0.8189330101) (* y 0.3618667424) (* z -0.1288597137)))
+        (mm (+ (* x 0.0329845436) (* y 0.9293118715) (* z 0.0361456387)))
+        (ss (+ (* x 0.0482003018) (* y 0.2643662691) (* z 0.6338517070))))
+    (let*
+        ((cube-root (lambda (f)
+                      (if (< f 0)
+                          (- (expt (- f) (/ 1.0 3.0)))
+                        (expt f (/ 1.0 3.0)))))
+         (lll (funcall cube-root ll))
+         (mmm (funcall cube-root mm))
+         (sss (funcall cube-root ss)))
+      (list (+ (* lll 0.2104542553) (* mmm 0.7936177850) (* sss -0.0040720468))
+            (+ (* lll 1.9779984951) (* mmm -2.4285922050) (* sss 0.4505937099))
+            (+ (* lll 0.0259040371) (* mmm 0.7827717662) (* sss -0.8086757660))))))
+
+(compat-defun color-oklab-to-srgb (l a b) ;; <compat-tests:color-oklab-to-srgb>
+  "Convert the Oklab color represented by L A B to sRGB."
+  :feature color
+  (apply #'color-xyz-to-srgb (color-oklab-to-xyz l a b)))
+
+(compat-defun color-srgb-to-oklab (r g b) ;; <compat-tests:color-srgb-to-oklab>
+  "Convert the sRGB color R G B to Oklab."
+  :feature color
+  (apply #'color-xyz-to-oklab (color-srgb-to-xyz r g b)))
 
 ;;;; Defined in subr.el
 
