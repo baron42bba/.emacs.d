@@ -1,12 +1,12 @@
 ;;; yasnippet.el --- Yet another snippet extension for Emacs  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2008-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2025 Free Software Foundation, Inc.
 ;; Authors: pluskid <pluskid@gmail.com>,
 ;;          João Távora <joaotavora@gmail.com>,
 ;;          Noam Postavsky <npostavs@gmail.com>
 ;; Maintainer: Noam Postavsky <npostavs@gmail.com>
-;; Package-Version: 20241013.1557
-;; Package-Revision: fe1f4e0e96ce
+;; Package-Version: 20250403.1926
+;; Package-Revision: 2384fe1655c6
 ;; X-URL: http://github.com/joaotavora/yasnippet
 ;; Keywords: convenience, emulation
 ;; URL: http://github.com/joaotavora/yasnippet
@@ -589,8 +589,6 @@ can be useful."
 
 ;;; Internal variables
 
-(defconst yas--version "0.14.0")
-
 (defvar yas--menu-table (make-hash-table)
   "A hash table of MAJOR-MODE symbols to menu keymaps.")
 
@@ -892,18 +890,10 @@ which decides on the snippet to expand.")
 
 ;;;###autoload
 (define-minor-mode yas-minor-mode
-  "Toggle YASnippet mode.
+  "YASnippet minor mode.
 
 When YASnippet mode is enabled, `yas-expand', normally bound to
-the TAB key, expands snippets of code depending on the major
-mode.
-
-With no argument, this command toggles the mode.
-positive prefix argument turns on the mode.
-Negative prefix argument turns off the mode.
-
-Key bindings:
-\\{yas-minor-mode-map}"
+the TAB key, expands snippets of code depending on the major mode."
   :lighter " yas" ;; The indicator for the mode line.
   (cond ((and yas-minor-mode (featurep 'yasnippet))
          ;; Install the direct keymaps in `emulation-mode-map-alists'
@@ -1001,7 +991,7 @@ Honour `yas-dont-activate-functions', which see."
 ;;; Major mode stuff
 
 (defvar yas--font-lock-keywords
-  (append '(("^#.*$" . font-lock-comment-face))
+  (append '(("^#.*$" (0 'font-lock-comment-face)))
           (with-temp-buffer
             (let ((prog-mode-hook nil)
                   (emacs-lisp-mode-hook nil))
@@ -1012,14 +1002,14 @@ Honour `yas-dont-activate-functions', which see."
                 (cadr font-lock-keywords)
               font-lock-keywords))
           '(("\\$\\([0-9]+\\)"
-             (0 font-lock-keyword-face)
-             (1 font-lock-string-face t))
+             (0 'font-lock-keyword-face)
+             (1 'font-lock-string-face t))
             ("\\${\\([0-9]+\\):?"
-             (0 font-lock-keyword-face)
-             (1 font-lock-warning-face t))
-            ("\\(\\$(\\)" 1 font-lock-preprocessor-face)
+             (0 'font-lock-keyword-face)
+             (1 'font-lock-warning-face t))
+            ("\\(\\$(\\)" 1 'font-lock-preprocessor-face)
             ("}"
-             (0 font-lock-keyword-face)))))
+             (0 'font-lock-keyword-face)))))
 
 (defvar snippet-mode-map
   (let ((map (make-sparse-keymap)))
@@ -1464,7 +1454,7 @@ Returns (TEMPLATES START END). This function respects
 (defun yas--remove-misc-free-from-undo (old-undo-list)
   "Tries to work around Emacs Bug#30931.
 Helper function for `yas--save-restriction-and-widen'."
-  ;; If Bug#30931 is unfixed, we get (#<Lisp_Misc_Free> . INTEGER)
+  ;; If Bug#30931 is unfixed (Emacs<26.2), we get (#<Lisp_Misc_Free> . INTEGER)
   ;; entries in the undo list.  If we call `type-of' on the
   ;; Lisp_Misc_Free object then Emacs aborts, so try to find it by
   ;; checking that its type is none of the expected ones.
@@ -1488,15 +1478,16 @@ Helper function for `yas--save-restriction-and-widen'."
 
 (defmacro yas--save-restriction-and-widen (&rest body)
   "Equivalent to (save-restriction (widen) BODY).
-Also tries to work around Emacs Bug#30931."
+Also tries to work around Emacs Bug#30931, fixed in Emacs-26.2."
   (declare (debug (body)) (indent 0))
-  ;; Disable garbage collection, since it could cause an abort.
-  `(let ((gc-cons-threshold most-positive-fixnum)
-         (old-undo-list buffer-undo-list))
-     (prog1 (save-restriction
-              (widen)
-              ,@body)
-       (yas--remove-misc-free-from-undo old-undo-list))))
+  (let ((main `(save-restriction (widen) ,@body)))
+    (if (< emacs-major-version 27)
+        ;; Disable garbage collection, since it could cause an abort.
+        `(let ((gc-cons-threshold most-positive-fixnum)
+               (old-undo-list buffer-undo-list))
+           (prog1 ,main
+            (yas--remove-misc-free-from-undo old-undo-list)))
+      main)))
 
 (defun yas--eval-for-string (form)
   "Evaluate FORM and convert the result to string."
@@ -1680,8 +1671,9 @@ Here's a list of currently recognized directives:
                 (directory-files directory t)))
 
 (defun yas--make-menu-binding (template)
-  (let ((mode (yas--table-mode (yas--template-table template))))
-    `(lambda () (interactive) (yas--expand-or-visit-from-menu ',mode ,(yas--template-uuid template)))))
+  (let ((mode (yas--table-mode (yas--template-table template)))
+        (uuid (yas--template-uuid template)))
+    (lambda () (interactive) (yas--expand-or-visit-from-menu mode uuid))))
 
 (defun yas--expand-or-visit-from-menu (mode uuid)
   (let* ((table (yas--table-get-create mode))
@@ -2128,27 +2120,23 @@ This works by stubbing a few functions, then calling
 (defun yas-about ()
   (interactive)
   (message "yasnippet (version %s) -- pluskid/joaotavora/npostavs"
-           (or (ignore-errors (car (let ((default-directory yas--loaddir))
-                                     (process-lines "git" "describe"
-                                                    "--tags" "--dirty"))))
-               (eval-when-compile
+           (or (eval-when-compile
                  (and (fboundp 'package-get-version)
                       (package-get-version)))
-               (when (and (featurep 'package)
+               (when (and (boundp 'package-alist)
                           (fboundp 'package-desc-version)
                           (fboundp 'package-version-join))
-                 (defvar package-alist)
                  (ignore-errors
-                   (let* ((yas-pkg (cdr (assq 'yasnippet package-alist)))
-                          (version (package-version-join
-                                    (package-desc-version (car yas-pkg)))))
-                     ;; Special case for MELPA's bogus version numbers.
-                     (if (string-match "\\`20..[01][0-9][0-3][0-9][.][0-9]\\{3,4\\}\\'"
-                                       version)
-                         (concat yas--version "-snapshot" version)
-                       version))))
-               yas--version)))
-
+                   (let* ((yas-pkg (cdr (assq 'yasnippet package-alist))))
+                     (when yas-pkg
+                       (package-version-join
+                        (package-desc-version (car yas-pkg)))))))
+               ;; The Git description can be misleading, for lack of
+               ;; recent tags, so we prefer package version info.
+               (ignore-errors (car (let ((default-directory yas--loaddir))
+                                     (process-lines "git" "describe"
+                                                    "--tags" "--dirty"))))
+               "unknown")))
 
 ;;; Apropos snippet menu:
 ;;
@@ -2785,18 +2773,20 @@ Return the `yas--template' object created"
 
 (defun yas-maybe-load-snippet-buffer ()
   "Added to `after-save-hook' in `snippet-mode'."
-  (let* ((mode (intern (file-name-sans-extension
-                        (file-name-nondirectory
-                         (directory-file-name default-directory)))))
-         (current-snippet
-          (apply #'yas--define-snippets-2 (yas--table-get-create mode)
-                 (yas--parse-template buffer-file-name)))
-         (uuid (yas--template-uuid current-snippet)))
-    (unless (equal current-snippet
-                   (if uuid (yas--get-template-by-uuid mode uuid)
-                     (yas--lookup-snippet-1
-                      (yas--template-name current-snippet) mode)))
-      (yas-load-snippet-buffer mode t))))
+  (save-excursion ;; Issue #1146.  Here or in `yas--parse-template`?
+    (let* ((mode (intern (file-name-sans-extension
+                          (file-name-nondirectory
+                           (directory-file-name default-directory)))))
+           (current-snippet
+            (apply #'yas--define-snippets-2 (yas--table-get-create mode)
+                   ;; FIXME: `yas-load-snippet-buffer' will *re*parse!
+                   (yas--parse-template buffer-file-name)))
+           (uuid (yas--template-uuid current-snippet)))
+      (unless (equal current-snippet
+                     (if uuid (yas--get-template-by-uuid mode uuid)
+                       (yas--lookup-snippet-1
+                        (yas--template-name current-snippet) mode)))
+        (yas-load-snippet-buffer mode t)))))
 
 (defun yas-load-snippet-buffer-and-close (table &optional kill)
   "Load and save the snippet, then `quit-window' if saved.
@@ -4132,7 +4122,7 @@ Returns the newly created snippet."
         (unwind-protect
             (let ((buffer-undo-list t))
               (goto-char begin)
-              (if (> emacs-major-version 29)
+              (if (< emacs-major-version 27)
                   ;; Don't use the workaround for CC-mode's cache,
                   ;; since it was presumably a bug in CC-mode, so either
                   ;; it's fixed already, or it should get fixed.
@@ -4160,6 +4150,7 @@ Returns the newly created snippet."
                 (run-hook-with-args 'after-change-functions
                                     (point-min) (point-max)
                                     (- end begin))))
+          ;; FIXME: Use `undo-amalgamate-change-group'?
           (when (listp buffer-undo-list)
             (push (cons (point-min) (point-max))
                   buffer-undo-list)))
@@ -5055,7 +5046,7 @@ object satisfying `yas--field-p' to restrict the expansion to.")))
 (define-button-type 'help-snippet-def
   :supertype 'help-xref
   'help-function (lambda (template) (yas--visit-snippet-file-1 template))
-  'help-echo (purecopy "mouse-2, RET: find snippets's definition"))
+  'help-echo "mouse-2, RET: find snippets's definition")
 
 (defun yas--snippet-description-finish-runonce ()
   "Final adjustments for the help buffer when snippets are concerned."
