@@ -781,7 +781,7 @@ Single pipes interfere with org tables. Just go double.
 #+BEGIN_SRC emacs-lisp
   (load-file (expand-file-name "~/.emacs.d/lisp/hidepw.el"))
   (add-hook 'org-mode-hook  'hidepw-mode)
-  (setq hidepw-pattern "||\\(.*\\)||")
+  (setq hidepw-patterns '("||\\(.*\\)||"))
 #+END_SRC
 
 * latex
