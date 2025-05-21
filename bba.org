@@ -1133,7 +1133,7 @@ necessary.
   (if (>= emacs-major-version 24)
       (progn
         (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-20210822.2129")
-        (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-org-20221118.852")
+        (add-to-list 'load-path "~/.emacs.d/elpa/elfeed-org-20250219.950")
         (require 'elfeed-org)
         (elfeed-org)
         (setq rmh-elfeed-org-files (list "~/org/elfeed.org"))))
