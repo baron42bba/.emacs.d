@@ -1,13 +1,13 @@
 ;;; with-editor.el --- Use the Emacsclient as $EDITOR  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2014-2024 The Magit Project Contributors
+;; Copyright (C) 2014-2025 The Magit Project Contributors
 
 ;; Author: Jonas Bernoulli <emacs.with-editor@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/with-editor
 ;; Keywords: processes terminals
 
-;; Package-Version: 20241201.1419
-;; Package-Revision: ca902ae02972
+;; Package-Version: 20250509.1455
+;; Package-Revision: cc86ac08bdea
 ;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
