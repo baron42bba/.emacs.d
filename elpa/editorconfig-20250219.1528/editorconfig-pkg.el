@@ -1,10 +1,10 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "editorconfig" "20241027.1815"
+(define-package "editorconfig" "20250219.1528"
   "EditorConfig Emacs Plugin."
-  '((emacs "26.1"))
-  :url "https://github.com/editorconfig/editorconfig-emacs"
-  :commit "24f5b2b1cd4e37adc245fb59f7edeb6872a707a4"
-  :revdesc "24f5b2b1cd4e"
+  '((emacs "27.2"))
+  :url "https://github.com/editorconfig/editorconfig-emacs#readme"
+  :commit "1a9942746cf5b10daae8962f380b5f2a459086f3"
+  :revdesc "1a9942746cf5"
   :keywords '("convenience" "editorconfig")
   :authors '(("EditorConfig Team" . "editorconfig@googlegroups.com"))
   :maintainers '(("EditorConfig Team" . "editorconfig@googlegroups.com")))

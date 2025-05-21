@@ -3,10 +3,10 @@
 ;; Copyright (C) 2011-2024 EditorConfig Team
 
 ;; Author: EditorConfig Team <editorconfig@googlegroups.com>
-;; Package-Version: 20241027.1815
-;; Package-Revision: 24f5b2b1cd4e
+;; Package-Version: 20250219.1528
+;; Package-Revision: 1a9942746cf5
 ;; URL: https://github.com/editorconfig/editorconfig-emacs#readme
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "27.2"))
 ;; Keywords: convenience editorconfig
 
 ;; See
@@ -295,6 +295,7 @@ This hook will be run even when there are no matching sections in
     (terra-mode terra-indent-level)
     (tcl-mode tcl-indent-level
               tcl-continued-indent-level)
+    (templ-ts-mode go-ts-mode-indent-offset js-indent-level)
     (toml-ts-mode toml-ts-mode-indent-offset)
     (typescript-mode typescript-indent-level)
     (typescript-ts-base-mode typescript-ts-mode-indent-offset)
