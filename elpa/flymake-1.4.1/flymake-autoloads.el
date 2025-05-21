@@ -23,24 +23,29 @@ generated it.
 Make a Flymake diagnostic for LOCUS's region from BEG to END.
 LOCUS is a buffer object or a string designating a file name.
 
-TYPE is a diagnostic symbol and TEXT is string describing the
-problem detected in this region.  DATA is any object that the
-caller wishes to attach to the created diagnostic for later
-retrieval with `flymake-diagnostic-data'.
+TYPE is a diagnostic symbol (see Info Node `(Flymake)Flymake error
+types')
 
-If LOCUS is a buffer BEG and END should be buffer positions
-inside it.  If LOCUS designates a file, BEG and END should be a
-cons (LINE . COL) indicating a file position.  In this second
-case, END may be omitted in which case the region is computed
-using `flymake-diag-region' if the diagnostic is appended to an
-actual buffer.
+INFO is a description of the problem detected.  It may be a string, or
+list (ORIGIN CODE MESSAGE) appropriately categorizing and describing the
+diagnostic.  ORIGIN may be a string or nil.  CODE maybe be a string, a
+number or nil.  MESSAGE must be a string.
 
-OVERLAY-PROPERTIES is an alist of properties attached to the
-created diagnostic, overriding the default properties and any
-properties listed in the `flymake-overlay-control' property of
-the diagnostic's type symbol.
+DATA is any object that the caller wishes to attach to the created
+diagnostic for later retrieval with `flymake-diagnostic-data'.
 
-(fn LOCUS BEG END TYPE TEXT &optional DATA OVERLAY-PROPERTIES)")
+If LOCUS is a buffer, BEG and END should be buffer positions inside it.
+If LOCUS designates a file, BEG and END should be a cons (LINE . COL)
+indicating a file position.  In this second case, END may be omitted in
+which case the region is computed using `flymake-diag-region' if the
+diagnostic is appended to an actual buffer.
+
+OVERLAY-PROPERTIES is an alist of properties attached to the created
+diagnostic, overriding the default properties and any properties listed
+in the `flymake-overlay-control' property of the diagnostic's type
+symbol.
+
+(fn LOCUS BEG END TYPE INFO &optional DATA OVERLAY-PROPERTIES)")
 (autoload 'flymake-diagnostics "flymake" "\
 Get Flymake diagnostics in region determined by BEG and END.
 
