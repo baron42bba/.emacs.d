@@ -20,7 +20,7 @@ Define your default translator like this:
     (gt-translator :engines (gt-bing-engine)))
 
   (setq gt-default-translator
-    (gt-translator :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+    (gt-translator :taker (gt-taker :langs ='(en fr) :text ='sentence :prompt t)
                    :engines (list (gt-google-engine) (gt-deepl-engine))
                    :render (gt-buffer-render)))
 
@@ -83,6 +83,11 @@ When TTS with specific engine, you can specify the language with `lang.' prefix.
 ;;; Generated autoloads from gt-engine-libre.el
 
 (register-definition-prefixes "gt-engine-libre" '("gt-libre-"))
+
+
+;;; Generated autoloads from gt-engine-osxdict.el
+
+(register-definition-prefixes "gt-engine-osxdict" '("gt-osxdict-"))
 
 
 ;;; Generated autoloads from gt-engine-stardict.el
