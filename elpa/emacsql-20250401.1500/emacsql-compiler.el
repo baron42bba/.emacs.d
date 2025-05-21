@@ -1,4 +1,4 @@
-;;; emacsql-compile.el --- S-expression SQL compiler  -*- lexical-binding:t -*-
+;;; emacsql-compiler.el --- S-expression SQL compiler  -*- lexical-binding:t -*-
 
 ;; This is free and unencumbered software released into the public domain.
 
@@ -6,6 +6,10 @@
 ;; Maintainer: Jonas Bernoulli <emacs.emacsql@jonas.bernoulli.dev>
 
 ;; SPDX-License-Identifier: Unlicense
+
+;;; Commentary:
+
+;; This library provides support for compiling S-expressions to SQL.
 
 ;;; Code:
 
@@ -122,7 +126,7 @@
 (defun emacsql-escape-vector (vector)
   "Encode VECTOR into a SQL vector scalar."
   (cl-typecase vector
-    (null   (emacsql-error "Empty SQL vector expression."))
+    (null   (emacsql-error "Empty SQL vector expression"))
     (list   (mapconcat #'emacsql-escape-vector vector ", "))
     (vector (concat "(" (mapconcat #'emacsql-escape-scalar vector ", ") ")"))
     (otherwise (emacsql-error "Invalid vector %S" vector))))
@@ -146,7 +150,7 @@
     (upcase (replace-regexp-in-string "-" " " name))))
 
 (defun emacsql--prepare-constraints (constraints)
-  "Compile CONSTRAINTS into a partial SQL expresson."
+  "Compile CONSTRAINTS into a partial SQL expression."
   (mapconcat
    #'identity
    (cl-loop for constraint in constraints collect
@@ -225,7 +229,7 @@ vector (v), raw string (r), schema (S)."
 (defmacro emacsql-with-params (prefix &rest body)
   "Evaluate BODY, collecting parameters.
 Provided local functions: `param', `identifier', `scalar', `raw',
-`svector', `expr', `subsql', and `combine'. BODY should return a
+`svector', `expr', `subsql', and `combine'.  BODY should return a
 string, which will be combined with variable definitions."
   (declare (indent 1))
   `(let ((emacsql--vars ()))
@@ -283,15 +287,15 @@ The generated function is bound to NAME and accepts two
 arguments, OPERATOR-NAME and OPERATOR-ARGUMENT-COUNT.
 OPERATOR-PRECEDENCE-GROUPS should be a number of lists containing
 operators grouped by operator precedence (in order of precedence
-from highest to lowest). A single operator is represented by a
+from highest to lowest).  A single operator is represented by a
 list of at least two elements: operator name (symbol) and
-operator arity (:unary or :binary). Optionally a custom
+operator arity (:unary or :binary).  Optionally a custom
 expression can be included, which defines how the operator is
 expanded into an SQL expression (there are two defaults, one for
 :unary and one for :binary operators).
 
 An example for OPERATOR-PRECEDENCE-GROUPS:
-(((+ :unary (\"+\" :operand)) (- :unary (\"-\" :operand)))
+\(((+ :unary (\"+\" :operand)) (- :unary (\"-\" :operand)))
  ((+ :binary) (- :binary)))"
   `(defun ,name (operator-name operator-argument-count)
      "Look up predefined SQL operator metadata.
@@ -366,7 +370,7 @@ to create an SQL expression."
   "Lookup SQL operator information for generating an SQL expression.
 Returns the following multiple values when an operator can be
 identified: a format string (see `emacsql--expand-format-string')
-and a precedence value. If PARENT-PRECEDENCE-VALUE is greater or
+and a precedence value.  If PARENT-PRECEDENCE-VALUE is greater or
 equal to the identified operator's precedence, then the format
 string returned is wrapped with parentheses."
   (cl-destructuring-bind (format-string arity precedence-value)
@@ -539,4 +543,4 @@ Only use within `emacsql-with-params'!"
 
 (provide 'emacsql-compiler)
 
-;;; emacsql-compile.el ends here
+;;; emacsql-compiler.el ends here

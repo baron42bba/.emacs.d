@@ -16,10 +16,9 @@
 
 (require 'emacsql-sqlite)
 
-(require 'sqlite nil t)
-(declare-function sqlite-open "sqlite")
-(declare-function sqlite-select "sqlite")
-(declare-function sqlite-close "sqlite")
+(declare-function sqlite-open "sqlite.c")
+(declare-function sqlite-select "sqlite.c")
+(declare-function sqlite-close "sqlite.c")
 
 (emacsql-register-reserved emacsql-sqlite-reserved)
 
@@ -28,7 +27,6 @@
 
 (cl-defmethod initialize-instance :after
   ((connection emacsql-sqlite-builtin-connection) &rest _)
-  (require (quote sqlite))
   (oset connection handle
         (sqlite-open (oref connection file)))
   (emacsql-sqlite-set-busy-timeout connection)
@@ -40,7 +38,7 @@
 If FILE is nil use an in-memory database.
 
 :debug LOG -- When non-nil, log all SQLite commands to a log
-buffer. This is for debugging purposes."
+buffer.  This is for debugging purposes."
   (let ((connection (make-instance #'emacsql-sqlite-builtin-connection
                                    :file file)))
     (when debug
