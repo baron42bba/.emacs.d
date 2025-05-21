@@ -1,17 +1,18 @@
 ;;; ghub.el --- Client libraries for Git forge APIs  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2016-2024 Jonas Bernoulli
+;; Copyright (C) 2016-2025 Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <emacs.ghub@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/ghub
 ;; Keywords: tools
 
-;; Package-Version: 20241208.2219
-;; Package-Revision: 97edaf450ef7
+;; Package-Version: 20250509.1440
+;; Package-Revision: 6bb612e7b7ea
 ;; Package-Requires: (
 ;;     (emacs "29.1")
-;;     (compat "30.0.0.0")
+;;     (compat "30.1.0.0")
 ;;     (let-alist "1.0.6")
+;;     (llama "0.6.2")
 ;;     (treepy "0.1.2"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -63,16 +64,12 @@
 (require 'compat)
 (require 'gnutls)
 (require 'let-alist)
+(require 'llama)
 (require 'url)
 (require 'url-auth)
 (require 'url-http)
 
 (eval-when-compile (require 'subr-x))
-
-;; Needed for Emacs < 27.
-(eval-when-compile (require 'json))
-(declare-function json-read-from-string "json" (string))
-(declare-function json-encode "json" (object))
 
 (declare-function glab-repository-id "glab" (owner name &key username auth host))
 (declare-function gtea-repository-id "gtea" (owner name &key username auth host))
@@ -99,18 +96,8 @@ only serves as documentation.")
 (defvar ghub-insecure-hosts nil
   "List of hosts that use http instead of https.")
 
-(defvar ghub-json-use-jansson nil
-  "Whether to use the Jansson library, if available.
-This is experimental.  Only let-bind this but do not enable it
-globally because doing that is likely to break other packages
-that use `ghub'.  As a user also do not enable this yet.
-See https://github.com/magit/ghub/pull/149.")
-
-(defvar ghub-json-object-type 'alist
-  "The object type that is used for json payload decoding.")
-
-(defvar ghub-json-array-type 'list
-  "The array type that is used for json payload decoding.")
+(defvar ghub-debug nil
+  "Record additional debug information.")
 
 ;;; Request
 ;;;; Object
@@ -446,10 +433,8 @@ to the value of `ghub-response-headers', for later use when
 this function is called with nil for PAYLOAD."
   (if (eq (ghub--req-forge req) 'bitbucket)
       (if payload
-          (let* ((page (mapcan (lambda (key)
-                                 (and-let* ((elt (assq key payload)))
-                                   (list elt)))
-                               '(size page pagelen next previous)))
+          (let* ((page (seq-keep (##assq % payload)
+                                 '(size page pagelen next previous)))
                  (headers (cons (cons 'link-alist page) headers)))
             (if (and req (or (ghub--req-callback req)
                              (ghub--req-errorback req)))
@@ -464,7 +449,7 @@ this function is called with nil for PAYLOAD."
                 (pcase-let ((`(,url ,rel) (split-string elt "; ")))
                   (cons (intern (substring rel 5 -1))
                         (substring url 1 -1))))
-              (split-string rels ", ")))))
+              (split-string rels ", ?")))))
 
 (cl-defun ghub-repository-id (owner name &key username auth host forge noerror)
   "Return the id of the specified repository.
@@ -546,7 +531,8 @@ Signal an error if the id cannot be determined."
                              (set-buffer req-buf))
                            (funcall callback value headers status req)))
                         (t value))))))
-      (when (buffer-live-p buf)
+      (when (and (buffer-live-p buf)
+                 (not (buffer-local-value 'ghub-debug buf)))
         (kill-buffer buf)))))
 
 (defun ghub--handle-response-headers (_status req)
@@ -608,34 +594,27 @@ Signal an error if the id cannot be determined."
                'ghub--read-json-payload)
            url-http-response-status))
 
-(defun ghub--read-json-payload (_status)
-  (let ((raw (ghub--decode-payload)))
-    (and raw
-         (condition-case nil
-             (if (and ghub-json-use-jansson
-                      (fboundp 'json-parse-string))
-                 (json-parse-string
-                  raw
-                  :object-type  ghub-json-object-type
-                  :array-type   ghub-json-array-type
-                  :false-object nil
-                  :null-object  nil)
-               (require 'json)
-               (let ((json-object-type ghub-json-object-type)
-                     (json-array-type  ghub-json-array-type)
-                     (json-false       nil)
-                     (json-null        nil))
-                 (json-read-from-string raw)))
-           ((json-parse-error json-readtable-error)
-            `((message
-               . ,(if (looking-at "<!DOCTYPE html>")
-                      (if (re-search-forward
-                           "<p>\\(?:<strong>\\)?\\([^<]+\\)" nil t)
-                          (match-string 1)
-                        "error description missing")
-                    (string-trim (buffer-substring (point) (point-max)))))
-              (documentation_url
-               . "https://github.com/magit/ghub/wiki/Github-Errors")))))))
+(defun ghub--read-json-payload (_status &optional json-type-args)
+  (and-let* ((payload (ghub--decode-payload)))
+    (ghub--assert-json-available)
+    (condition-case nil
+        (apply #'json-parse-string payload
+               (or json-type-args
+                   '( :object-type alist
+                      :array-type list
+                      :null-object nil
+                      :false-object nil)))
+      (json-parse-error
+       (pop-to-buffer (current-buffer))
+       (setq-local ghub-debug t)
+       `((message . ,(if (looking-at "<!DOCTYPE html>")
+                         (if (re-search-forward
+                              "<p>\\(?:<strong>\\)?\\([^<]+\\)" nil t)
+                             (match-string 1)
+                           "error description missing")
+                       (string-trim (buffer-substring (point) (point-max)))))
+         (documentation_url
+          . "https://github.com/magit/ghub/wiki/Github-Errors"))))))
 
 (defun ghub--decode-payload (&optional _status)
   (and (not (eobp))
@@ -644,27 +623,15 @@ Signal an error if the id cannot be determined."
         'utf-8)))
 
 (defun ghub--encode-payload (payload)
-  (and payload
-       (progn
-         (unless (stringp payload)
-           (setq payload
-                 (if (and ghub-json-use-jansson
-                          (fboundp 'json-serialize))
-                     (json-serialize payload
-                                     ;; :object-type and :array-type
-                                     ;; are not supported here.
-                                     :false-object nil
-                                     :null-object  :null)
-                   (require 'json)
-                   (let ((json-object-type ghub-json-object-type)
-                         (json-array-type  ghub-json-array-type)
-                         (json-false       nil)
-                         (json-null        :null))
-                     ;; Unfortunately `json-encode' may modify the input.
-                     ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40693.
-                     ;; and https://github.com/magit/forge/issues/267
-                     (json-encode (copy-tree payload))))))
-         (encode-coding-string payload 'utf-8))))
+  (cl-typecase payload
+    (null nil)
+    (string (encode-coding-string payload 'utf-8))
+    (t (ghub--assert-json-available)
+       (encode-coding-string
+        (json-serialize payload
+                        :null-object :null
+                        :false-object nil)
+        'utf-8))))
 
 (defun ghub--url-encode-params (params)
   (mapconcat (lambda (param)
@@ -675,6 +642,11 @@ Signal an error if the id cannot be determined."
                            (boolean (if val "true" "false"))
                            (t (url-hexify-string val))))))
              params "&"))
+
+(defun ghub--assert-json-available ()
+  (unless (and (fboundp 'json-available-p)
+               (json-available-p))
+    (error "Ghub requires Emacs 29 --with-json or Emacs >= 30")))
 
 ;;; Authentication
 ;;;; API
@@ -754,25 +726,22 @@ and call `auth-source-forget+'."
 
 (defun ghub--token (host username package &optional nocreate forge)
   (let* ((user (ghub--ident username package))
-         (token
-          (or (car (ghub--auth-source-get (list :secret)
-                     :host host :user user))
-              (progn
-                ;; Auth-Source caches the information that there is no
-                ;; value, but in our case that is a situation that needs
-                ;; fixing so we want to keep trying by invalidating that
-                ;; information.
-                ;; The (:max 1) is needed and has to be placed at the
-                ;; end for Emacs releases before 26.1.  #24 #64 #72
-                (auth-source-forget (list :host host :user user :max 1))
-                (and (not nocreate)
-                     (error "\
-Required %s token (\"%s\" for \"%s\") does not exist.
+         (token (or (ghub--auth-source-get :secret :host host :user user)
+                    (and (string-match "\\`\\([^/]+\\)" host)
+                         (ghub--auth-source-get :secret
+                           :host (match-string 1 host)
+                           :user user)))))
+    (unless (or token nocreate)
+      (error "\
+Required %s token (%S for %s%S) does not exist.
 See https://magit.vc/manual/ghub/Getting-Started.html
-or (info \"(ghub)Getting Started\") for instructions.
-\(The setup wizard no longer exists.)"
-                            (capitalize (symbol-name (or forge 'github)))
-                            user host))))))
+or (info \"(ghub)Getting Started\") for instructions."
+             (capitalize (symbol-name (or forge 'github)))
+             user
+             (if (string-match "\\`\\([^/]+\\)" host)
+                 (format "either %S or " (match-string 1 host))
+               "")
+             host))
     (if (functionp token) (funcall token) token)))
 
 (cl-defgeneric ghub--host (&optional forge)
@@ -840,11 +809,16 @@ or (info \"(ghub)Getting Started\") for instructions.
 
 (defun ghub--auth-source-get (keys &rest spec)
   (declare (indent 1))
-  (let ((plist (car (apply #'auth-source-search
-                           (append spec (list :max 1))))))
-    (mapcar (lambda (k)
-              (plist-get plist k))
-            keys)))
+  (if-let ((plist (car (apply #'auth-source-search
+                              (append spec (list :max 1))))))
+      (if (keywordp keys)
+          (plist-get plist keys)
+        (mapcar (##plist-get plist %) keys))
+    ;; Auth-Source caches the information that there is no value, but in
+    ;; our case that is a situation that needs fixing, so we want to keep
+    ;; trying, by invalidating that information.
+    (auth-source-forget spec)
+    nil))
 
 ;;; _
 (provide 'ghub)

@@ -1,6 +1,6 @@
-;;; glab.el --- Client library for the Gitlab API  -*- lexical-binding:t -*-
+;;; buck.el --- Client library for the Bitbucket API  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2016-2024 Jonas Bernoulli
+;; Copyright (C) 2016-2025 Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <emacs.ghub@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/magit/ghub
@@ -23,12 +23,12 @@
 
 ;;; Commentary:
 
-;; Glab is a library that provides basic support for using the Gitlab API
+;; Buck is a library that provides basic support for using the Bitbucket API
 ;; from Emacs packages.  It abstracts access to API resources using only
 ;; a handful of functions that are not resource-specific.
 
-;; This library is implemented on top of Ghub.  Unlike Ghub, Glab does
-;; not support the guided creation of tokens because Gitlab lacks the
+;; This library is implemented on top of Ghub.  Unlike Ghub, Buck does
+;; not support the guided creation of tokens because Bitbucket lacks the
 ;; features that would be necessary to implement that.  Users have to
 ;; create tokens through the web interface.
 
@@ -36,133 +36,99 @@
 
 (require 'ghub)
 
-(defconst glab-default-host "gitlab.com/api/v4"
-  "The default host that is used if `glab.host' is not set.")
+(defconst buck-default-host "api.bitbucket.org/2.0"
+  "The default host that is used if `buck.host' is not set.")
 
-(cl-defun glab-head (resource &optional params
-                              &key query payload headers
-                              silent unpaginate noerror reader
-                              username auth host
-                              callback errorback extra)
-  "Make a `HEAD' request for RESOURCE, with optional query PARAMS.
-Like calling `ghub-request' (which see) with \"HEAD\" as METHOD
-and `gitlab' as FORGE."
-  (ghub-request "HEAD" resource params :forge 'gitlab
-                :query query :payload payload :headers headers
-                :silent silent :unpaginate unpaginate
-                :noerror noerror :reader reader
-                :username username :auth auth :host host
-                :callback callback :errorback errorback :extra extra))
+;; HEAD and PATCH are not supported according to
+;; https://developer.atlassian.com/bitbucket/api/2/reference/meta/uri-uuid
 
-(cl-defun glab-get (resource &optional params
+(cl-defun buck-get (resource &optional params
                              &key query payload headers
                              silent unpaginate noerror reader
                              username auth host
                              callback errorback extra)
   "Make a `GET' request for RESOURCE, with optional query PARAMS.
 Like calling `ghub-request' (which see) with \"GET\" as METHOD
-and `gitlab' as FORGE."
-  (ghub-request "GET" resource params :forge 'gitlab
+and `bitbucket' as FORGE."
+  (declare (obsolete ghub-get "4.3.1"))
+  (ghub-request "GET" resource params :forge 'bitbucket
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
                 :username username :auth auth :host host
                 :callback callback :errorback errorback :extra extra))
 
-(cl-defun glab-put (resource &optional params
+(cl-defun buck-put (resource &optional params
                              &key query payload headers
                              silent unpaginate noerror reader
                              username auth host
                              callback errorback extra)
   "Make a `PUT' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"PUT\" as METHOD
-and `gitlab' as FORGE."
-  (ghub-request "PUT" resource params :forge 'gitlab
+and `bitbucket' as FORGE."
+  (declare (obsolete ghub-put "4.3.1"))
+  (ghub-request "PUT" resource params :forge 'bitbucket
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
                 :username username :auth auth :host host
                 :callback callback :errorback errorback :extra extra))
 
-(cl-defun glab-post (resource &optional params
+(cl-defun buck-post (resource &optional params
                               &key query payload headers
                               silent unpaginate noerror reader
                               username auth host
                               callback errorback extra)
   "Make a `POST' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"POST\" as METHOD
-and `gitlab' as FORGE."
-  (ghub-request "POST" resource params :forge 'gitlab
+and `bitbucket' as FORGE."
+  (declare (obsolete ghub-post "4.3.1"))
+  (ghub-request "POST" resource params :forge 'bitbucket
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
                 :username username :auth auth :host host
                 :callback callback :errorback errorback :extra extra))
 
-(cl-defun glab-patch (resource &optional params
-                               &key query payload headers
-                               silent unpaginate noerror reader
-                               username auth host
-                               callback errorback extra)
-  "Make a `PATCH' request for RESOURCE, with optional payload PARAMS.
-Like calling `ghub-request' (which see) with \"PATCH\" as METHOD
-and `gitlab' as FORGE."
-  (ghub-request "PATCH" resource params :forge 'gitlab
-                :query query :payload payload :headers headers
-                :silent silent :unpaginate unpaginate
-                :noerror noerror :reader reader
-                :username username :auth auth :host host
-                :callback callback :errorback errorback :extra extra))
-
-(cl-defun glab-delete (resource &optional params
+(cl-defun buck-delete (resource &optional params
                                 &key query payload headers
                                 silent unpaginate noerror reader
                                 username auth host
                                 callback errorback extra)
   "Make a `DELETE' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"DELETE\" as METHOD
-and `gitlab' as FORGE."
-  (ghub-request "DELETE" resource params :forge 'gitlab
+and `bitbucket' as FORGE."
+  (declare (obsolete ghub-delete "4.3.1"))
+  (ghub-request "DELETE" resource params :forge 'bitbucket
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
                 :username username :auth auth :host host
                 :callback callback :errorback errorback :extra extra))
 
-(cl-defun glab-request (method resource &optional params
+(cl-defun buck-request (method resource &optional params
                                &key query payload headers
                                silent unpaginate noerror reader
                                username auth host
                                callback errorback extra)
   "Make a request for RESOURCE and return the response body.
-Like calling `ghub-request' (which see) with `gitlab' as FORGE."
-  (ghub-request method resource params :forge 'gitlab
+Like calling `ghub-request' (which see) with `bitbucket' as FORGE."
+  (declare (obsolete ghub-request "4.3.1"))
+  (ghub-request method resource params :forge 'bitbucket
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
                 :username username :auth auth :host host
                 :callback callback :errorback errorback :extra extra))
 
-(cl-defun glab-graphql (graphql &optional variables
-                                &key username auth host
-                                headers silent
-                                callback errorback value extra)
-  "Make a GraphQL request using GRAPHQL and VARIABLES.
-Like calling `ghub-graphql' (which see) with `gitlab' as FORGE."
-  (ghub-graphql graphql variables :forge 'gitlab
-                :username username :auth auth :host host
-                :headers headers :silent silent
-                :callback callback :errorback errorback
-                :value value :extra extra))
-
-(cl-defun glab-repository-id (owner name &key username auth host)
+(cl-defun buck-repository-id (owner name &key username auth host)
   "Return the id of the repository specified by OWNER, NAME and HOST."
-  (number-to-string
-   (cdr (assq 'id (glab-get (format "/projects/%s%%2F%s"
-                                    (string-replace "/" "%2F" owner)
-                                    name)
-                            nil :username username :auth auth :host host)))))
+  (substring (cdr (assq 'uuid
+                        (ghub-get (format "/repositories/%s/%s" owner name)
+                                  nil :forge 'bitbucket
+                                  :username username :auth auth :host host)))
+             1 -1))
 
 ;;; _
-(provide 'glab)
-;;; glab.el ends here
+(provide 'buck)
+;;; buck.el ends here
