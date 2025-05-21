@@ -1,9 +1,9 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "annotate" "20241017.1508"
+(define-package "annotate" "20250515.1428"
   "Annotate files without changing them."
-  ()
+  '((emacs "27.1"))
   :url "https://github.com/bastibe/annotate.el"
-  :commit "c5a41ce5ac861e3fcd95669eb68c886ce702d39b"
-  :revdesc "c5a41ce5ac86"
+  :commit "dc6e884265c9de5b0e486b9f6bd9509a14b85c94"
+  :revdesc "dc6e884265c9"
   :maintainers '(("Bastian Bechtold" . "bastibe.dev@mailbox.org")
                  ("cage" . "cage-dev@twistfold.it")))
