@@ -5,8 +5,8 @@
 ;;
 ;; Author: Rob Myers <rob@robmyers.org>, Sacha Chua <sacha@sachachua.com>
 ;; URL: https://github.com/sachac/artbollocks-mode
-;; Package-Version: 20170524.422
-;; Version: 1.1.2
+;; Package-Version: 20250327.1744
+;; Package-Revision: 1ef30f2cabaa
 ;;
 ;; Based on fic-mode.el
 ;; Copyright (C) 2010, Trey Jackson <bigfaceworm(at)gmail(dot)com>
@@ -307,7 +307,8 @@ entire buffer, subject to narrowing."
   :group 'artbollocks-mode
   (if artbollocks-mode
       (artbollocks-add-keywords)
-    (artbollocks-remove-keywords)))
+    (artbollocks-remove-keywords))
+  (font-lock-flush))
 
 (provide 'artbollocks-mode)
 
