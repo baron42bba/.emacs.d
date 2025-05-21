@@ -69,6 +69,18 @@ The binding goes in the current buffer's local map, which in most
 cases is shared with all other buffers in the same major mode.
 
 (fn KEYS COMMAND)" t)
+(autoload 'key-chord-register-keys "key-chord" "\
+Register KEY1 and KEY2 as being used in a key chord.
+This function should be called by packages that define key chords
+outside of the standard key-chord-define functions.
+
+(fn KEY1 KEY2)")
+(autoload 'key-chord-unregister-keys "key-chord" "\
+Unregister KEY1 and KEY2 as being used in a key chord.
+This should only be called if you're certain these keys are not
+used in any other chords.
+
+(fn KEY1 KEY2)")
 (autoload 'key-chord-define "key-chord" "\
 Define in KEYMAP, a key-chord of the two keys in KEYS starting a COMMAND.
 
