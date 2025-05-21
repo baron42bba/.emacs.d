@@ -388,7 +388,7 @@ Some key bindings taken from [[https://ebzzry.github.io/emacs-pairs.html][emacs-
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20230529.1017")
+        (add-to-list 'load-path "~/.emacs.d/elpa/smartparens-20250511.2354")
         (add-to-list 'load-path "~/.emacs.d/elpa/dash-20250312.1307")
         (require 'smartparens)
         (smartparens-global-mode 1)
