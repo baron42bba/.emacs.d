@@ -6,8 +6,8 @@
 ;; Maintainer: Chen Bin <chenbin.sh@gmail.com>
 ;; Keywords: mime, mail, email, html
 ;; Homepage: http://github.com/org-mime/org-mime
-;; Package-Version: 20241001.415
-;; Package-Revision: 90aa9081ec00
+;; Package-Version: 20250318.2155
+;; Package-Revision: 9571c148eed5
 ;; Package-Requires: ((emacs "27.1"))
 
 ;; This file is not part of GNU Emacs.
@@ -140,6 +140,11 @@
   "Beautify quoted mail in more clean HTML, like Gmail."
   :group 'org-mime
   :type 'boolean)
+
+(defcustom org-mime-beautify-quoted-mail-style "margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"
+  "Style for beautifying quoted mail."
+  :type 'string
+  :group 'org-mime)
 
 (defcustom org-mime-use-property-inheritance nil
   "Non-nil means al MAIL_ properties apply also for sub-levels."
@@ -314,7 +319,9 @@ HTML is the body of the message."
   (let ((quote-depth 0)
         (line-depth 0)
         (in-quote-p nil)
-        (quote-opening "<blockquote class=\"gmail_quote\" style=\"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex\">\n\n<div>")
+        (quote-opening (concat "<blockquote class=\"gmail_quote\" style=\""
+                               org-mime-beautify-quoted-mail-style
+                               "\">\n\n<div>"))
         (quote-closing "\n</div></blockquote>\n"))
     (with-temp-buffer
       ;; clean title of quoted
