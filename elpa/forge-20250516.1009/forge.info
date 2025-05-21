@@ -27,7 +27,7 @@ Forge User and Developer Manual
 Forge allows you to work with Git forges, currently Github and Gitlab,
 from the comfort of Magit and Emacs.
 
-This manual is for Forge version 0.4.6.
+This manual is for Forge version 0.5.0.
 
      Copyright (C) 2018-2025 Jonas Bernoulli
      <emacs.forge@jonas.bernoulli.dev>
@@ -360,10 +360,13 @@ after the final closing parenthesis and typing ‘C-x C-e’
 
    Next add a line like the following to the chosen file:
 
-     machine gitlab.com/api/v4 login USERNAME^forge password TOKEN
+     machine gitlab.com login USERNAME^forge password TOKEN
 
-   • The value of ‘machine’ must be ‘gitlab.com/api/v4’.  Variations of
-     this won’t work.
+   • The value of ‘machine’ should be ‘gitlab.com’.  For historic
+     reasons ‘gitlab.com’ is also supported.
+
+   • Note that if you instead use the ‘auth-source-pass’ backend, then
+     you *must* use ‘gitlab.com’ as ‘host’.
 
    • USERNAME must be the same as the value used for the ‘gitlab.user’
      Git variable above.  You *must* append ‘^forge’ to that, without
@@ -465,10 +468,21 @@ after the final closing parenthesis and typing ‘C-x C-e’
 
      machine APIHOST login USERNAME^forge password TOKEN
 
-   • APIHOST must be the same as the second element of the entry we
-     added to ‘forge-alist’.  In the above example that would be
-     ‘example.com/api/v4’.  Do *not* instead use GITHOST or INSTANCE-ID
-     (aka WEBHOST).
+   • APIHOST must be either the same as the second element of the entry
+     we added to ‘forge-alist’, or that element with the path suffix
+     removed.  For example, if the APIHOST, specified in an
+     ‘forge-alist’ entry, is ‘example.com/api/v4’, then you can use
+     ‘example.com/api/v4’ or ‘example.com’.
+
+     Historically only the former was supported, but that was a design
+     mistake, which we are now stuck with, and using just ‘example.com’
+     as APIHOST in ‘~/.authsource’ is now recommended.  For the time
+     being, in ‘forge-alist’ you must still always use
+     ‘example.com/api/v4’ as APIHOST.
+
+     If you instead use the ‘auth-source-pass’ backend, then you *must*
+     use ‘example.com’ as the value of ‘host’.  Using
+     ‘example.com/api/v4’ does not work with that backend.
 
    • USERNAME must be the same username you used above as the value of
      the Git variable.  You *must* append ‘^forge’ to that, without any
@@ -696,7 +710,7 @@ Topic menu and list commands
      This command lists the current repository’s issues in a separate
      buffer.  If the list buffer already exists, this command only
      ensures that all types of topics are listed.  If any other filters
-     are in effect, they are left intact.  TODO fix preserving type
+     are in effect, they are left intact.
 
 ‘<RET> [on "Issues" status section]’ (‘forge-list-issues’)
      This command lists the current repository’s issues in a separate
@@ -729,7 +743,7 @@ Notification menu and list commands
 ===================================
 
 ‘N m n’ (‘forge-notifications-menu’)
-‘C-c C-c’
+‘C-c C-c [in notifications list buffer]’
      This command displays a menu used to control the list of
      notifications displayed in the current buffer.
 
@@ -741,7 +755,7 @@ Repository menu and list commands
 =================================
 
 ‘N m r’ (‘forge-repositories-menu’)
-‘C-c C-c’
+‘C-c C-c [in repositories list buffer]’
      This command displays a menu used to control the list of
      repositories displayed in the current buffer.
 
@@ -796,7 +810,7 @@ may also remain active.
 Default topic filters
 =====================
 
- -- User Option: forge-status-buffer-default-topic-filters
+ -- User Option: forge-list-buffer-default-topic-filters
      This option specifies the filters initially used to limit topics
      listed in topic list buffers.
 
@@ -1243,13 +1257,19 @@ File: forge.info,  Node: Miscellaneous Commands,  Next: Miscellaneous Options,  
 
  -- Command: forge-remove-topic-locally
      This command reads a topic and removes it from the local database.
-     The topic is not removed from the forge and, if it is later
-     modified, then it will be added to the database again.
+     When the region marks multiple topics, then offer to remove them
+     all.
 
-     Due to how the supported APIs work, it would be too expensive to
-     automatically remove topics from the local database that were
-     removed from the forge.  The only purpose of this command is to
-     allow you to manually clean up the local database.
+     The topic is not removed from the forge and, if it is later
+     modified, then it will be added to the database again when fetching
+     all topics.
+
+     This is useful for users who only fetch individual topics and want
+     to remove the topics they are no longer interested in.  This can
+     also be used to remove topics locally, which have already been
+     removed on the forge (the service).  Forge (the package) cannot
+     automatically detect when that happens, because given how the APIs
+     work, this would be too expensive.
 
  -- Command: forge-reset-database
      This command moves the current database file to the trash and
@@ -1534,8 +1554,8 @@ File: forge.info,  Node: Partially Supported Forges,  Next: Supported Semi-Forge
 B.2 Partially Supported Forges
 ==============================
 
-B.2.1 Forgejo <https://forgejo.org>
------------------------------------
+B.2.1 Forgejo https://forgejo.org
+---------------------------------
 
 This is the next forge whose API will be supported.
 
@@ -1544,22 +1564,22 @@ B.2.1.1 Forgejo Hosts
 
    • <https://codeberg.org>
 
-B.2.2 Gitea <https://gitea.io>
-------------------------------
+B.2.2 Gitea https://gitea.io
+----------------------------
 
 Once Forgejo is supported it might be fairly simple to support Gitea
 too, because the former is a fork of the latter, and their APIs might
 still be similar enough.
 
-B.2.3 Gogs <https://gogs.io>
-----------------------------
+B.2.3 Gogs https://gogs.io
+--------------------------
 
 Once Forgejo is supported it might be fairly simple to support Gogs too,
 because the Forgejo is a fork of Gitea, which is a fork of Gogs, and
 their APIs might still be similar enough.
 
-B.2.4 Bitbucket <https://bitbucket.org>
----------------------------------------
+B.2.4 Bitbucket https://bitbucket.org
+-------------------------------------
 
 I don’t plan to support Bitbucket’s API any time soon, and it gets less
 likely that I will every do it every time I look at it.
@@ -1594,8 +1614,8 @@ File: forge.info,  Node: Supported Semi-Forges,  Prev: Partially Supported Forge
 B.3 Supported Semi-Forges
 =========================
 
-B.3.1 Gitweb <https://git-scm.com/docs/gitweb>
-----------------------------------------------
+B.3.1 Gitweb https://git-scm.com/docs/gitweb
+--------------------------------------------
 
 B.3.1.1 Gitweb Caveats
 ......................
@@ -1605,8 +1625,8 @@ B.3.1.1 Gitweb Caveats
      between Gitweb and Cgit.  The latter seems more popular (not just
      on this site).
 
-B.3.2 Cgit <https://git.zx2c4.com/cgit/about>
----------------------------------------------
+B.3.2 Cgit https://git.zx2c4.com/cgit/about
+-------------------------------------------
 
 B.3.2.1 Cgit Caveats
 ....................
@@ -1624,8 +1644,8 @@ B.3.2.2 Cgit Hosts
    • <https://git.kernel.org>
    • <https://repo.or.cz>
 
-B.3.3 Stgit <https://codemadness.org/git/stagit/file/README.html>
------------------------------------------------------------------
+B.3.3 Stgit https://codemadness.org/git/stagit/file/README.html
+---------------------------------------------------------------
 
 B.3.3.1 Stgit Caveats
 .....................
@@ -1640,8 +1660,8 @@ B.3.3.2 Stgit Hosts
 
    • <https://git.suckless.org>
 
-B.3.4 Srht <https://meta.sr.ht>
--------------------------------
+B.3.4 Srht https://meta.sr.ht
+-----------------------------
 
 B.3.4.1 Srht Caveats
 ....................
@@ -1716,10 +1736,10 @@ Appendix D Keystroke Index
 * b F:                                   Branching.           (line  13)
 * b f:                                   Branching.           (line 102)
 * C-<return> [on a topic section]:       Editing Topics.      (line  26)
-* C-c C-c:                               Lists and Menus.     (line  97)
-* C-c C-c <1>:                           Lists and Menus.     (line 109)
-* C-c C-c <2>:                           Creating Topics and Posts.
+* C-c C-c:                               Creating Topics and Posts.
                                                               (line  37)
+* C-c C-c [in notifications list buffer]: Lists and Menus.    (line  97)
+* C-c C-c [in repositories list buffer]: Lists and Menus.     (line 109)
 * C-c C-c [in topics list buffer/section]: Lists and Menus.   (line  53)
 * C-c C-e:                               Creating Topics and Posts.
                                                               (line  45)
@@ -1878,7 +1898,7 @@ Appendix E Function and Command Index
                                                               (line  45)
 * forge-repositories-menu:               Lists and Menus.     (line 109)
 * forge-reset-database:                  Miscellaneous Commands.
-                                                              (line  85)
+                                                              (line  91)
 * forge-toggle-display-in-status-buffer: Miscellaneous Commands.
                                                               (line  33)
 * forge-toggle-topic-legend:             Miscellaneous Commands.
@@ -1911,6 +1931,7 @@ Appendix F Variable Index
                                                               (line   6)
 * forge-limit-topic-choices:             Miscellaneous Options.
                                                               (line  41)
+* forge-list-buffer-default-topic-filters: Lists and Menus.   (line 163)
 * forge-owned-accounts:                  Lists and Menus.     (line 127)
 * forge-owned-ignored:                   Lists and Menus.     (line 140)
 * forge-post-fill-region:                Miscellaneous Options.
@@ -1919,9 +1940,7 @@ Appendix F Variable Index
                                                               (line  45)
 * forge-repository-list-columns:         Miscellaneous Options.
                                                               (line  28)
-* forge-status-buffer-default-topic-filters: Lists and Menus. (line 163)
-* forge-status-buffer-default-topic-filters <1>: Lists and Menus.
-                                                              (line 167)
+* forge-status-buffer-default-topic-filters: Lists and Menus. (line 167)
 * forge-topic-repository-slug-width:     Miscellaneous Options.
                                                               (line  17)
 * forge-topic-wash-title-hook:           Miscellaneous Options.
@@ -1946,64 +1965,64 @@ Ref: Create and Store an Access Token (1)8988
 Node: Setup for Gitlabcom11089
 Ref: Set your Username (2)11292
 Ref: Create and Store an Access Token (2)11622
-Node: Setup for Another Gitlab Instance13513
-Ref: Tell Forge about the Instance (1)14074
-Ref: Set your Username (3)15415
-Ref: Create and Store an Access Token (3)15723
-Node: Setup a Partially Supported Host17775
-Ref: Tell Forge about the Instance (2)18460
-Ref: Add Support for Additional Forge Types19956
-Node: Initial Pull21127
-Node: Getting Started22334
-Node: Lists and Menus24620
-Ref: Dispatch and configuration menus26444
-Ref: Topic menu and list commands26903
-Ref: Notification menu and list commands28840
-Ref: Repository menu and list commands29217
-Ref: Exiting menus and lists30984
-Ref: Default topic filters31679
-Ref: Topic sections in Magit status buffers32119
-Node: Visiting Topics33350
-Node: Creating Topics and Posts36241
-Node: Editing Topics38323
-Node: Pulling39948
-Node: Branching42110
-Node: Miscellaneous Commands48503
-Node: Miscellaneous Options52227
-Node: How Forge Detection Works54691
-Node: Supported Forges and Hosts60228
-Node: Supported Forges61537
-Ref: Github61693
-Ref: Github Caveats61848
-Ref: Github Hosts62510
-Ref: Gitlab62582
-Ref: Gitlab Caveats62609
-Ref: Gitlab Hosts62750
-Node: Partially Supported Forges62886
-Ref: Forgejo https//forgejoorg63092
-Ref: Forgejo Hosts63218
-Ref: Gitea https//giteaio63294
-Ref: Gogs https//gogsio63522
-Ref: Bitbucket https//bitbucketorg63766
-Ref: Bitbucket Caveats63980
-Ref: Bitbucket Hosts64893
-Node: Supported Semi-Forges64974
-Ref: Gitweb https//git-scmcom/docs/gitweb65145
-Ref: Gitweb Caveats65240
-Ref: Cgit https//gitzx2c4com/cgit/about65496
-Ref: Cgit Caveats65589
-Ref: Cgit Hosts65954
-Ref: Stgit https//codemadnessorg/git/stagit/file/READMEhtml66097
-Ref: Stgit Caveats66230
-Ref: Stgit Hosts66532
-Ref: Srht https//metasrht66608
-Ref: Srht Caveats66673
-Ref: Srht Hosts66972
-Node: FAQ67039
-Node: error in process filter HTTP Error 502 "Bad gateway"67449
-Node: Keystroke Index68930
-Node: Function and Command Index74910
-Node: Variable Index81263
+Node: Setup for Another Gitlab Instance13655
+Ref: Tell Forge about the Instance (1)14216
+Ref: Set your Username (3)15557
+Ref: Create and Store an Access Token (3)15865
+Node: Setup a Partially Supported Host18541
+Ref: Tell Forge about the Instance (2)19226
+Ref: Add Support for Additional Forge Types20722
+Node: Initial Pull21893
+Node: Getting Started23100
+Node: Lists and Menus25386
+Ref: Dispatch and configuration menus27210
+Ref: Topic menu and list commands27669
+Ref: Notification menu and list commands29580
+Ref: Repository menu and list commands29988
+Ref: Exiting menus and lists31785
+Ref: Default topic filters32480
+Ref: Topic sections in Magit status buffers32918
+Node: Visiting Topics34149
+Node: Creating Topics and Posts37040
+Node: Editing Topics39122
+Node: Pulling40747
+Node: Branching42909
+Node: Miscellaneous Commands49302
+Node: Miscellaneous Options53266
+Node: How Forge Detection Works55730
+Node: Supported Forges and Hosts61267
+Node: Supported Forges62576
+Ref: Github62732
+Ref: Github Caveats62887
+Ref: Github Hosts63549
+Ref: Gitlab63621
+Ref: Gitlab Caveats63648
+Ref: Gitlab Hosts63789
+Node: Partially Supported Forges63925
+Ref: Forgejo https//forgejoorg64131
+Ref: Forgejo Hosts64253
+Ref: Gitea https//giteaio64329
+Ref: Gogs https//gogsio64553
+Ref: Bitbucket https//bitbucketorg64793
+Ref: Bitbucket Caveats65003
+Ref: Bitbucket Hosts65916
+Node: Supported Semi-Forges65997
+Ref: Gitweb https//git-scmcom/docs/gitweb66168
+Ref: Gitweb Caveats66259
+Ref: Cgit https//gitzx2c4com/cgit/about66515
+Ref: Cgit Caveats66604
+Ref: Cgit Hosts66969
+Ref: Stgit https//codemadnessorg/git/stagit/file/READMEhtml67112
+Ref: Stgit Caveats67241
+Ref: Stgit Hosts67543
+Ref: Srht https//metasrht67619
+Ref: Srht Caveats67680
+Ref: Srht Hosts67979
+Node: FAQ68046
+Node: error in process filter HTTP Error 502 "Bad gateway"68456
+Node: Keystroke Index69937
+Node: Function and Command Index75917
+Node: Variable Index82270
 
 End Tag Table
 

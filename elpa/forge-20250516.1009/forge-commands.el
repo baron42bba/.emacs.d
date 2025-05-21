@@ -65,14 +65,15 @@ Takes the pull-request as only argument and must return a directory."
     ("f t" "one topic"      forge-pull-topic)
     ("f n" "notifications"  forge-pull-notifications)]
    ["Create"
-    :if forge--get-repository:tracked?
+    :if (##forge-get-repository :tracked?)
+    ("c d" "discussion"     forge-create-discussion)
     ("c i" "issue"          forge-create-issue)
     ("c p" "pull-request"   forge-create-pullreq)
     ("c u" "pr from issue"  forge-create-pullreq-from-issue)
     ("c f" "fork or remote" forge-fork)]
    [:description (lambda ()
                    (cond
-                    ((forge--get-repository:tracked?) "Actions")
+                    ((forge-get-repository :tracked?) "Actions")
                     ((or (magit-gitdir) (forge-repository-at-point))
                      "Forge does not yet track this repository")
                     ("Not inside a Git repository")))
@@ -83,20 +84,22 @@ Takes the pull-request as only argument and must return a directory."
                             "track some repo"
                           "track this repository"))))
     ("/M" "merge with api" forge-merge
-     :if forge--get-repository:tracked? :level 7)]]
+     :if (##forge-get-repository :tracked?)
+     :level 7)]]
   [forge--lists-group
    ["Visit"
-    :inapt-if-not forge--get-repository:tracked?
+    :inapt-if-not (##forge-get-repository :tracked?)
     ("v t" "topic"          forge-visit-topic)
+    ("v d" "discussion"     forge-visit-discussion)
     ("v i" "issue"          forge-visit-issue)
     ("v p" "pull-request"   forge-visit-pullreq)]
    ["Browse"
     ("b t" "topic"          forge-browse-topic
-     :inapt-if-not forge--get-repository:tracked?)
+     :inapt-if-not (##forge-get-repository :tracked?))
     ("b i" "issue"          forge-browse-issue
-     :inapt-if-not forge--get-repository:tracked?)
+     :inapt-if-not (##forge-get-repository :tracked?))
     ("b p" "pull-request"   forge-browse-pullreq
-     :inapt-if-not forge--get-repository:tracked?)
+     :inapt-if-not (##forge-get-repository :tracked?))
     ("b r" "remote"         forge-browse-remote)
     ("b I" "issues"         forge-browse-issues)
     ("b P" "pull-requests"  forge-browse-pullreqs)
@@ -109,7 +112,7 @@ Takes the pull-request as only argument and must return a directory."
 
 (transient-augment-suffix forge-dispatch
   :transient #'transient--do-replace
-  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-dispatch))
+  :inapt-if (##eq (oref transient--prefix command) 'forge-dispatch)
   :inapt-face 'forge-suffix-active)
 
 ;;;###autoload(autoload 'forge-configure "forge-commands" nil t)
@@ -127,7 +130,7 @@ Takes the pull-request as only argument and must return a directory."
 
 (transient-augment-suffix forge-configure
   :transient #'transient--do-replace
-  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-configure))
+  :inapt-if (##eq (oref transient--prefix command) 'forge-configure)
   :inapt-face 'forge-suffix-active)
 
 ;;; Pull
@@ -198,7 +201,7 @@ repository cannot be determined, instead invoke `forge-add-repository'."
 ;;;###autoload(autoload 'forge-pull-topic "forge-commands" nil t)
 (transient-define-suffix forge-pull-topic (number)
   "Read a topic TYPE and NUMBER pull data about it from its forge."
-  :inapt-if-not (lambda () (and (forge--get-repository:tracked?)
+  :inapt-if-not (lambda () (and (forge-get-repository :tracked?)
                            (forge--get-github-repository)))
   (interactive
    (list (read-number "Pull topic: "
@@ -222,6 +225,13 @@ repository cannot be determined, instead invoke `forge-add-repository'."
 ;;; Browse
 
 ;;;###autoload
+(defun forge-browse-discussions ()
+  "Visit the current repository's discussions using a browser."
+  (interactive)
+  (browse-url (forge--format (forge-get-repository :stub)
+                             'discussions-url-format)))
+
+;;;###autoload
 (defun forge-browse-issues ()
   "Visit the current repository's issues using a browser."
   (interactive)
@@ -242,6 +252,14 @@ By default only offer open topics but with a prefix argument
 also offer closed topics."
   (interactive (list (forge-read-topic "Browse topic")))
   (forge--browse-topic topic))
+
+;;;###autoload
+(defun forge-browse-discussion (discussion)
+  "Read a DISCUSSION and visit it using a browser.
+By default only offer open discussions but with a prefix argument
+also offer closed issues."
+  (interactive (list (forge-read-discussion "Browse discussion")))
+  (forge--browse-topic discussion))
 
 ;;;###autoload
 (defun forge-browse-issue (issue)
@@ -386,6 +404,9 @@ commit, and for a file."
 (cl-defgeneric forge-get-url (obj)
   "Return the URL for a forge object.")
 
+(cl-defmethod forge-get-url ((disc forge-discussion))
+  (forge--format disc 'discussion-url-format))
+
 (cl-defmethod forge-get-url ((issue forge-issue))
   (forge--format issue 'issue-url-format))
 
@@ -440,13 +461,18 @@ commit, and for a file."
 
 (cl-defmethod forge-get-url ((post forge-post))
   (forge--format post (let ((topic (forge-get-parent post)))
-                        (cond ((forge--childp topic 'forge-issue)
+                        (cond ((forge--childp topic 'forge-discussion)
+                               'discussion-post-url-format)
+                              ((forge--childp topic 'forge-issue)
                                'issue-post-url-format)
                               ((forge--childp topic 'forge-pullreq)
                                'pullreq-post-url-format)))))
 
 (cl-defmethod forge-get-url ((notify forge-notification))
   (oref notify url))
+
+ ;; Transitional kludge for the infamous package.el defect.
+(require 'forge-forgejo)
 
 (cl-defmethod forge-format-blob-lines ((repo forge-repository) line end)
   (cl-etypecase repo ;Third-party classes require separate methods.
@@ -480,6 +506,16 @@ argument offer all topics.  While completion is in progress, \
 the limitation to active topics."
   (interactive (list (forge-read-topic "View topic")))
   (forge-topic-setup-buffer (forge-get-topic topic)))
+
+;;;###autoload
+(defun forge-visit-discussion (discussion)
+  "Read a DISCUSSION and visit it.
+By default only offer active topics for completion.  With a prefix
+argument offer all topics.  While completion is in progress, \
+\\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts
+the limitation to active topics."
+  (interactive (list (forge-read-discussion "View discussion")))
+  (forge-topic-setup-buffer (forge-get-discussion discussion)))
 
 ;;;###autoload
 (defun forge-visit-issue (issue)
@@ -536,18 +572,39 @@ With prefix argument MENU, also show the topic menu."
 
 ;;; Create
 
+(defun forge-create-discussion (category)
+  "Create a new discussion for the current repository."
+  (interactive
+   (list (forge-read-topic-category nil "Category for new discussion")))
+  (let* ((repo (forge-get-repository :tracked))
+         (buf (forge--prepare-post-buffer
+               "new-discussion"
+               (forge--format repo "Create new discussion on %p"))))
+    (when buf
+      (with-current-buffer buf
+        (setq forge--buffer-post-object repo)
+        (setq forge--submit-post-function
+              (rpartial #'forge--submit-create-discussion category)))
+      (forge--display-post-buffer buf))))
+
 (defun forge-create-issue ()
   "Create a new issue for the current repository."
   (interactive)
   (let* ((repo (forge-get-repository :tracked))
-         (buf (forge--prepare-post-buffer
-               "new-issue"
-               (forge--format repo "Create new issue on %p"))))
-    (when buf
-      (with-current-buffer buf
-        (setq forge--buffer-post-object repo)
-        (setq forge--submit-post-function #'forge--submit-create-issue))
-      (forge--display-post-buffer buf))))
+         (template (forge--topic-template repo 'forge-issue)))
+    (let-alist template
+      (pcase-exhaustive .type
+        ('redirect (browse-url .url))
+        ('forge-discussion (forge-create-discussion .category))
+        ('forge-issue
+         (when-let ((buf (forge--prepare-post-buffer
+                          "new-issue"
+                          (forge--format repo "Create new issue on %p")
+                          nil nil template)))
+           (with-current-buffer buf
+             (setq forge--buffer-post-object repo)
+             (setq forge--submit-post-function #'forge--submit-create-issue))
+           (forge--display-post-buffer buf)))))))
 
 (defun forge-create-pullreq (source target)
   "Create a new pull-request for the current repository."
@@ -556,7 +613,8 @@ With prefix argument MENU, also show the topic menu."
          (buf (forge--prepare-post-buffer
                "new-pullreq"
                (forge--format repo "Create new pull-request on %p")
-               source target)))
+               source target
+               (forge--topic-template repo 'forge-pullreq))))
     (with-current-buffer buf
       (setq forge--buffer-base-branch target)
       (setq forge--buffer-head-branch source)
@@ -619,22 +677,31 @@ point is currently on."
   (interactive (list current-prefix-arg))
   (unless (derived-mode-p 'forge-topic-mode)
     (user-error "This command is only available from topic buffers"))
-  (let* ((topic forge-buffer-topic)
-         (buf (forge--prepare-post-buffer
-               (forge--format topic "%i;new-comment")
-               (forge--format topic "New comment on #%i of %p")))
-         (quote (cond
+  (let* ((quote (cond
                  ((not (magit-section-match 'post)) nil)
                  ((use-region-p)
-                  (buffer-substring-no-properties (region-beginning)
-                                                  (region-end)))
+                  (magit--buffer-string (region-beginning) (region-end)))
                  (quote
-                  (let ((section (magit-current-section)))
-                    (string-trim-right
-                     (buffer-substring-no-properties (oref section content)
-                                                     (oref section end))))))))
+                  (with-slots (content end) (magit-current-section)
+                    (magit--buffer-string content end t)))))
+         (obj (if (forge-discussion-p forge-buffer-topic)
+                  (forge--select-discussion-reply-target)
+                forge-buffer-topic))
+         (buf (cond
+               ((forge-discussion-post-p obj)
+                (forge--prepare-post-buffer
+                 (forge--format obj "%i;%I;new-reply")
+                 (forge--format obj "New comment on #%i;%I of %p")))
+               ((forge-discussion-p obj)
+                (forge--prepare-post-buffer
+                 (forge--format obj "%i;new-answer")
+                 (forge--format obj "New comment on #%i of %p")))
+               (t
+                (forge--prepare-post-buffer
+                 (forge--format obj "%i;new-comment")
+                 (forge--format obj "New comment on #%i of %p"))))))
     (with-current-buffer buf
-      (setq forge--buffer-post-object topic)
+      (setq forge--buffer-post-object obj)
       (setq forge--submit-post-function #'forge--submit-create-post)
       (when quote
         (goto-char (point-max))
@@ -642,6 +709,41 @@ point is currently on."
           (insert "\n"))
         (insert (replace-regexp-in-string "^" "> " quote) "\n\n")))
     (forge--display-post-buffer buf)))
+
+(transient-define-suffix forge-approve-pullreq ()
+  "Approve the current pull-request."
+  :description "approve pull-request"
+  :inapt-if-not #'forge-current-pullreq
+  :transient nil
+  (interactive)
+  (let ((pullreq (forge-current-pullreq t)))
+    (unless (cl-typep (forge-get-repository pullreq) 'forge-github-repository)
+      (user-error "This command is only available for Github"))
+    (when-let ((buf (forge--prepare-post-buffer
+                     (forge--format pullreq "%i;new-approval")
+                     (forge--format pullreq "Approve pull-request #%i of %p"))))
+      (with-current-buffer buf
+        (setq forge--buffer-post-object pullreq)
+        (setq forge--submit-post-function #'forge--submit-approve-pullreq))
+      (forge--display-post-buffer buf))))
+
+(transient-define-suffix forge-request-changes ()
+  "Request changes to the current pull-request."
+  :description "request changes"
+  :inapt-if-not #'forge-current-pullreq
+  :transient nil
+  (interactive)
+  (let ((pullreq (forge-current-pullreq t)))
+    (unless (cl-typep (forge-get-repository pullreq) 'forge-github-repository)
+      (user-error "This command is only available for Github"))
+    (when-let ((buf (forge--prepare-post-buffer
+                     (forge--format pullreq "%i;new-request")
+                     (forge--format
+                      pullreq "Request changes for pull-request #%i of %p"))))
+      (with-current-buffer buf
+        (setq forge--buffer-post-object pullreq)
+        (setq forge--submit-post-function #'forge--submit-request-changes))
+      (forge--display-post-buffer buf))))
 
 ;;; Edit
 
@@ -670,6 +772,7 @@ point is currently on."
 (transient-define-suffix forge-edit-topic-note ()
   "Edit your private note about the current topic."
   :transient #'transient--do-quit-all
+  :inapt-if-not #'forge-current-topic
   :description
   (lambda ()
     (if-let ((topic (forge-current-topic)))
@@ -718,7 +821,7 @@ Please see the manual for more information."
     (if-let ((branch (forge--pullreq-branch-active pullreq)))
         (progn (message "Branch %S already exists and is configured" branch)
                branch)
-      (forge--branch-pullreq (forge-get-repository pullreq) pullreq)
+      (forge--branch-pullreq pullreq)
       (forge-refresh-buffer))))
 
 (cl-defmethod forge--branch-pullreq ((pullreq forge-pullreq))
@@ -865,7 +968,7 @@ configure it first."
 (defun forge-checkout-worktree (path pullreq)
   "Create, configure and checkout a new worktree from a pull-request.
 This is like `forge-checkout-pullreq', except that it also
-creates a new worktree. Please see the manual for more
+creates a new worktree.  Please see the manual for more
 information."
   (interactive
    (let ((id (forge-read-pullreq "Checkout pull request")))
@@ -975,24 +1078,26 @@ is configured to disallow that, you should instead merge locally
 and then push the target branch.  Forges detect that you have
 done that and respond by automatically marking the pull-request
 as merged."
-  (interactive
-   (list (forge-read-pullreq "Merge pull-request")
-         (if (forge--childp (forge-get-repository :tracked)
-                            'forge-gitlab-repository)
-             (magit-read-char-case "Merge method " t
-               (?m "[m]erge"  'merge)
-               (?s "[s]quash" 'squash))
-           (magit-read-char-case "Merge method " t
-             (?m "[m]erge"  'merge)
-             (?s "[s]quash" 'squash)
-             (?r "[r]ebase" 'rebase)))))
+  (declare (interactive-only nil))
+  (interactive (list (forge-read-pullreq "Merge pull-request")
+                     (forge-select-merge-method)))
   (let ((pullreq (forge-get-pullreq pullreq)))
     (forge--merge-pullreq (forge-get-repository pullreq)
                           pullreq
                           (magit-rev-hash
                            (forge--pullreq-branch-internal pullreq))
-                          method))
-  (forge-pull))
+                          method)))
+
+(defun forge-select-merge-method ()
+  (if (forge--childp (forge-get-repository :tracked)
+                     'forge-gitlab-repository)
+      (magit-read-char-case "Merge method " t
+        (?m "[m]erge"  'merge)
+        (?s "[s]quash" 'squash))
+    (magit-read-char-case "Merge method " t
+      (?m "[m]erge"  'merge)
+      (?s "[s]quash" 'squash)
+      (?r "[r]ebase" 'rebase))))
 
 ;;;###autoload
 (defun forge-set-default-branch ()
@@ -1073,7 +1178,7 @@ Also update the upstream branches of local branches accordingly."
   :class 'magit--git-variable
   :variable "forge.graphqlItemLimit"
   :reader #'read-string
-  :default (lambda () (number-to-string ghub-graphql-items-per-request)))
+  :default (##number-to-string ghub-graphql-items-per-request))
 
 (transient-define-suffix forge-toggle-display-in-status-buffer ()
   "Toggle whether to display topics in the current status buffer."
@@ -1130,7 +1235,7 @@ upstream remote."
   [:class transient-subgroups
 
    ;; Already tracked.
-   [:if (lambda () (forge--scope :tracked))
+   [:if (##forge--scope :tracked)
     (:info*
      (lambda ()
        (format
@@ -1139,7 +1244,7 @@ upstream remote."
      :format "%d")]
 
    ;; Nothing to tracked.
-   [:if-not (lambda () (forge--scope 'topdir))
+   [:if-not (##forge--scope 'topdir)
     (:info*
      (lambda ()
        (format
@@ -1148,7 +1253,7 @@ upstream remote."
      :format "%d")]
 
    ;; Cannot track.
-   [:if (lambda () (and (not (forge--scope 'repo)) (forge--scope 'topdir)))
+   [:if (##and (not (forge--scope 'repo)) (forge--scope 'topdir))
     :description
     (lambda ()
       (concat
@@ -1171,7 +1276,7 @@ upstream remote."
      (lambda () (interactive) (info "(forge)Setup a Partially Supported Host")))]
 
    ;; Track it!
-   [:if (lambda () (forge--scope :untracked))
+   [:if (##forge--scope :untracked)
     :description
     (lambda ()
       (format
@@ -1310,18 +1415,35 @@ This may take a while.  Only Github is supported at the moment."
 ;;;###autoload
 (defun forge-remove-topic-locally (topic)
   "Remove a topic from the local database only.
-Due to how the supported APIs work, it would be too expensive to
-automatically remove topics from the local database that were
-removed from the forge.  The purpose of this command is to allow
-you to manually clean up the local database."
-  (interactive (list (forge-read-topic "Delete topic LOCALLY only")))
-  (setq topic (forge-get-topic topic))
-  (closql-delete topic)
-  (if (and (derived-mode-p 'forge-topic-mode)
-           (eq (oref topic id)
-               (oref forge-buffer-topic id)))
-      (kill-buffer (current-buffer))
-    (forge-refresh-buffer)))
+
+When the region marks multiple topics, then offer to remove them all.
+
+The topic is not removed from the forge and, if it is later modified,
+then it will be added to the database again when fetching all topics.
+
+This is useful for users who only fetch individual topics and want to
+remove the topics they are no longer interested in.  This can also be
+used to remove topics locally, which have already been removed on the
+forge (the service).  Forge (the package) cannot automatically detect
+when that happens, because given how the APIs work, this would be too
+expensive."
+  (interactive
+   (list (if-let* ((topics (magit-region-values '(issue pullreq) t))
+                   ((magit-confirm 'remove-topics-locally nil
+                      "Delete %d topics locally" nil
+                      (mapcar #'forge--format-topic-line topics))))
+             topics
+           (forge-read-topic "Delete topic LOCALLY only"))))
+  (if (listp topic)
+      (progn (mapc #'closql-delete topic)
+             (forge-refresh-buffer))
+    (setq topic (forge-get-topic topic))
+    (closql-delete topic)
+    (if (and (derived-mode-p 'forge-topic-mode)
+             (equal (oref topic id)
+                    (oref forge-buffer-topic id)))
+        (kill-buffer (current-buffer))
+      (forge-refresh-buffer))))
 
 ;;;###autoload
 (defun forge-reset-database ()
@@ -1339,9 +1461,41 @@ heavy development."
 
 ;;; Miscellaneous
 
+(defun forge-mark-completed-topics-as-done ()
+  "Mark completed topics of the current repository as done.
+Change the private status to \"done\" for topics whose private status is
+\"unread\" or \"pending\" and whose public state is \"completed\".
+Whether this affects all such topics or only all such topics of a
+certain type (discussion, issue or pull-request), depends on the
+context."
+  (interactive)
+  (let* ((type (forge-current-topic-type))
+         (desc (if (eq type 'pullreq) 'pull-request type))
+         (topics (forge--list-topics
+                  (forge--topics-spec :type type
+                                      :active nil
+                                      :state 'closed
+                                      :status 'inbox)
+                  (forge-get-repository :tracked))))
+    (cond ((not topics)
+           (message "No completed %s that could be marked as done" desc))
+          ((magit-confirm t
+             "Mark \"%s\" as done"
+             (format "Mark %%d %ss as done" desc)
+             nil
+             (mapcar #'forge--format-topic-line topics))
+           (dolist (topic topics)
+             (oset topic status 'done))
+           (forge-refresh-buffer)))))
+
 (magit-define-section-jumper forge-jump-to-pullreqs "Pull requests" pullreqs)
 (magit-define-section-jumper forge-jump-to-issues "Issues" issues)
 
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 (provide 'forge-commands)
 ;;; forge-commands.el ends here

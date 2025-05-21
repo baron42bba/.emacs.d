@@ -152,7 +152,7 @@ Must be set before `forge-list' is loaded.")
 (transient-augment-suffix forge-repositories-menu
   :transient #'transient--do-replace
   :if-mode 'forge-repository-list-mode
-  :inapt-if (lambda () (eq (oref transient--prefix command) 'forge-repositories-menu))
+  :inapt-if (##eq (oref transient--prefix command) 'forge-repositories-menu)
   :inapt-face 'forge-suffix-active)
 
 ;;;; List
@@ -187,5 +187,10 @@ Only Github is supported for now."
   (transient-setup 'forge-repositories-menu))
 
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 (provide 'forge-repos)
 ;;; forge-repos.el ends here

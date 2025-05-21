@@ -34,8 +34,8 @@
 (declare-function forge-get-repository "forge-core" (demand))
 
 (eval-when-compile
-  (cl-pushnew 'number eieio--known-slot-names)
-  (cl-pushnew 'value eieio--known-slot-names))
+  (cl-pushnew 'milestone eieio--known-slot-names)  ; forge-{issue,pullreq}
+  (cl-pushnew 'number    eieio--known-slot-names)) ; forge-{issue,pullreq,...}
 
 ;;; Options
 
@@ -53,7 +53,7 @@
    (object-class :initform 'forge-repository)
    (file         :initform 'forge-database-file)
    (schemata     :initform 'forge--db-table-schemata)
-   (version      :initform 13)))
+   (version      :initform 15)))
 
 (defvar forge--override-connection-class nil)
 
@@ -64,6 +64,9 @@
   (if (stringp sql)
       (emacsql (forge-db) (apply #'format sql args))
     (apply #'emacsql (forge-db) sql args)))
+
+(defun forge-sql-car (sql &rest args)
+  (mapcar #'car (apply #'forge-sql sql args)))
 
 (defun forge-sql-cdr (sql &rest args)
   (mapcar #'cdr (apply #'forge-sql sql args)))
@@ -122,6 +125,11 @@
       (milestones :default eieio-unbound)
       issues-until
       pullreqs-until
+      teams
+      (discussion-categories :default eieio-unbound)
+      (discussions           :default eieio-unbound)
+      discussions-p
+      discussions-until
       ])
 
     (assignee
@@ -129,9 +137,110 @@
       (id :not-null :primary-key)
       login
       name
-      forge-id] ; Needed for Gitlab.
+      forge-id]
      (:foreign-key
       [repository] :references repository [id]
+      :on-delete :cascade))
+
+    (discussion
+     [(class :not-null)
+      (id :not-null :primary-key)
+      repository
+      number
+      answer
+      state
+      author
+      title
+      created
+      updated
+      closed
+      status
+      locked-p
+      category
+      body
+      (cards        :default eieio-unbound)
+      (edits        :default eieio-unbound)
+      (labels       :default eieio-unbound)
+      (participants :default eieio-unbound)
+      (posts        :default eieio-unbound)
+      (reactions    :default eieio-unbound)
+      (timeline     :default eieio-unbound)
+      (marks        :default eieio-unbound)
+      note
+      their-id
+      slug
+      saved-p]
+     (:foreign-key
+      [repository] :references repository [id]
+      :on-delete :cascade))
+
+    (discussion-category
+     [(repository :not-null)
+      (id :not-null :primary-key)
+      their-id
+      name
+      emoji
+      answerable-p
+      description]
+     (:foreign-key
+      [repository] :references repository [id]
+      :on-delete :cascade))
+
+    (discussion-label
+     [(discussion :not-null)
+      (id :not-null)]
+     (:foreign-key
+      [discussion] :references discussion [id]
+      :on-delete :cascade)
+     (:foreign-key
+      [id] :references label [id]
+      :on-delete :cascade))
+
+    (discussion-mark
+     [(discussion :not-null)
+      (id :not-null)]
+     (:foreign-key
+      [discussion] :references discussion [id]
+      :on-delete :cascade)
+     (:foreign-key
+      [id] :references mark [id]
+      :on-delete :cascade))
+
+    (discussion-post ; aka top-level answer
+     [(class :not-null)
+      (id :not-null :primary-key)
+      their-id
+      number
+      discussion
+      author
+      created
+      updated
+      body
+      (edits        :default eieio-unbound)
+      (reactions    :default eieio-unbound)
+      (replies      :default eieio-unbound)]
+     (:foreign-key
+      [discussion] :references discussion [id]
+      :on-delete :cascade))
+
+    (discussion-reply ; aka nested reply to top-level answer
+     [(class :not-null)
+      (id :not-null :primary-key)
+      their-id
+      number
+      post
+      discussion
+      author
+      created
+      updated
+      body
+      (edits        :default eieio-unbound)
+      (reactions    :default eieio-unbound)]
+     (:foreign-key
+      [post] :references discussion-post [id]
+      :on-delete :cascade)
+     (:foreign-key
+      [discussion] :references discussion [id]
       :on-delete :cascade))
 
     (fork
@@ -377,40 +486,40 @@
       :on-delete :cascade))))
 
 (cl-defmethod closql--db-update-schema ((db forge-database))
-  (let ((code-version (oref-default 'forge-database version))
-        (version (closql--db-get-version db)))
-    (when (< version code-version)
-      (forge--backup-database db))
-    (closql-with-transaction db
-      (when (= version 2)
-        (message "Upgrading Forge database from version 2 to 3...")
+  (let ((version (closql--db-get-version db)))
+    (when (< version (oref-default 'forge-database version))
+      (forge--backup-database db)
+      (closql-with-transaction db
+        (forge--db-update-schema db version)))
+    (cl-call-next-method)))
+
+(defun forge--db-update-schema (db version)
+  (cl-macrolet
+      ((up (to &rest body)
+         `(when (= (1+ version) ,to)
+            (message "Upgrading Forge database from version %s to %s..."
+                     version ,to)
+            ,@body
+            (closql--db-set-version db ,to)
+            (message "Upgrading Forge database from version %s to %s...done"
+                     version ,to)
+            (setq version ,to))))
+    (up 3
         (emacsql db [:create-table pullreq-review-request $S1]
-                 (cdr (assq 'pullreq-review-request forge--db-table-schemata)))
-        (closql--db-set-version db (setq version 3))
-        (message "Upgrading Forge database from version 2 to 3...done"))
-      (when (= version 3)
-        (message "Upgrading Forge database from version 3 to 4...")
+                 (cdr (assq 'pullreq-review-request forge--db-table-schemata))))
+    (up 4
         (emacsql db [:drop-table notification])
         (pcase-dolist (`(,table . ,schema) forge--db-table-schemata)
           (when (memq table '(notification
                               mark issue-mark pullreq-mark))
             (emacsql db [:create-table $i1 $S2] table schema)))
         (emacsql db [:alter-table issue   :add-column marks :default $s1] 'eieio-unbound)
-        (emacsql db [:alter-table pullreq :add-column marks :default $s1] 'eieio-unbound)
-        (closql--db-set-version db (setq version 4))
-        (message "Upgrading Forge database from version 3 to 4...done"))
-      (when (= version 4)
-        (message "Upgrading Forge database from version 4 to 5...")
-        (emacsql db [:alter-table repository :add-column selective-p :default nil])
-        (closql--db-set-version db (setq version 5))
-        (message "Upgrading Forge database from version 4 to 5...done"))
-      (when (= version 5)
-        (message "Upgrading Forge database from version 5 to 6...")
-        (emacsql db [:alter-table repository :add-column worktree :default nil])
-        (closql--db-set-version db (setq version 6))
-        (message "Upgrading Forge database from version 5 to 6...done"))
-      (when (= version 6)
-        (message "Upgrading Forge database from version 6 to 7...")
+        (emacsql db [:alter-table pullreq :add-column marks :default $s1] 'eieio-unbound))
+    (up 5
+        (emacsql db [:alter-table repository :add-column selective-p :default nil]))
+    (up 6
+        (emacsql db [:alter-table repository :add-column worktree :default nil]))
+    (up 7
         (emacsql db [:alter-table issue   :add-column note :default nil])
         (emacsql db [:alter-table pullreq :add-column note :default nil])
         (emacsql db [:create-table milestone $S1]
@@ -430,24 +539,15 @@
                                     :where (notnull milestone)]))
           (unless (stringp milestone)
             (oset (forge-get-pullreq pullreq-id) milestone
-                  (forge--object-id repo-id (cdar milestone)))))
-        (closql--db-set-version db (setq version 7))
-        (message "Upgrading Forge database from version 6 to 7...done"))
-      (when (= version 7)
-        (message "Upgrading Forge database from version 7 to 8...")
+                  (forge--object-id repo-id (cdar milestone))))))
+    (up 8
         (emacsql db [:alter-table pullreq :add-column base-rev :default nil])
         (emacsql db [:alter-table pullreq :add-column head-rev :default nil])
-        (emacsql db [:alter-table pullreq :add-column draft-p  :default nil])
-        (closql--db-set-version db (setq version 8))
-        (message "Upgrading Forge database from version 7 to 8...done"))
-      (when (= version 8)
-        (message "Upgrading Forge database from version 8 to 9...")
+        (emacsql db [:alter-table pullreq :add-column draft-p  :default nil]))
+    (up 9
         (emacsql db [:alter-table pullreq :add-column their-id :default nil])
-        (emacsql db [:alter-table issue   :add-column their-id :default nil])
-        (closql--db-set-version db (setq version 9))
-        (message "Upgrading Forge database from version 8 to 9...done"))
-      (when (= version 9)
-        (message "Upgrading Forge database from version 9 to 10...")
+        (emacsql db [:alter-table issue   :add-column their-id :default nil]))
+    (up 10
         (emacsql db [:alter-table pullreq :add-column slug :default nil])
         (emacsql db [:alter-table issue   :add-column slug :default nil])
         (pcase-dolist (`(,id ,number ,type)
@@ -468,22 +568,16 @@
                        (emacsql db [:select [id number] :from issue]))
           (emacsql db [:update issue :set (= slug $s1) :where (= id $s2)]
                    (format "#%s" number)
-                   id))
-        (closql--db-set-version db (setq version 10))
-        (message "Upgrading Forge database from version 9 to 10...done"))
-      (when (= version 10)
-        (message "Upgrading Forge database from version 10 to 11...")
+                   id)))
+    (up 11
         (emacsql db [:drop-table notification])
         (emacsql db [:create-table notification $S1]
                  (cdr (assq 'notification forge--db-table-schemata)))
         (emacsql db [:alter-table pullreq :rename-column unread-p :to status])
         (emacsql db [:alter-table issue   :rename-column unread-p :to status])
         (emacsql db [:alter-table pullreq :add-column saved-p :default nil])
-        (emacsql db [:alter-table issue   :add-column saved-p :default nil])
-        (closql--db-set-version db (setq version 11))
-        (message "Upgrading Forge database from version 10 to 11...done"))
-      (when (= version 11)
-        (message "Upgrading Forge database from version 11 to 12...")
+        (emacsql db [:alter-table issue   :add-column saved-p :default nil]))
+    (up 12
         (emacsql db [:drop-table notification])
         (emacsql db [:create-table notification $S1]
                  (cdr (assq 'notification forge--db-table-schemata)))
@@ -500,11 +594,8 @@
           (emacsql db [:update pullreq :set (= state 'done) :where (= id $s1)]
                    id))
         (emacsql db [:alter-table repository :add-column issues-until :default nil])
-        (emacsql db [:alter-table repository :add-column pullreqs-until :default nil])
-        (closql--db-set-version db (setq version 12))
-        (message "Upgrading Forge database from version 11 to 12...done"))
-      (when (= version 12)
-        (message "Upgrading Forge database from version 12 to 13...")
+        (emacsql db [:alter-table repository :add-column pullreqs-until :default nil]))
+    (up 13
         (dolist (id (emacsql db [:select id :from repository
                                  :where (isnull issues-until)]))
           (emacsql
@@ -531,11 +622,31 @@
           (emacsql
            db [:update repository :set (= condition $s1) :where (= id $s2)]
            (if not-tracked :known :tracked)
-           id))
-        (closql--db-set-version db (setq version 13))
-        (message "Upgrading Forge database from version 12 to 13...done"))
-      )
-    (cl-call-next-method)))
+           id)))
+    (up 14
+        (emacsql db [:alter-table repository :add-column teams :default nil]))
+    (up 15
+        (emacsql db [:create-table discussion $S1]
+                 (cdr (assq 'discussion forge--db-table-schemata)))
+        (emacsql db [:create-table discussion-category $S1]
+                 (cdr (assq 'discussion-category forge--db-table-schemata)))
+        (emacsql db [:create-table discussion-label $S1]
+                 (cdr (assq 'discussion-label forge--db-table-schemata)))
+        (emacsql db [:create-table discussion-mark $S1]
+                 (cdr (assq 'discussion-mark forge--db-table-schemata)))
+        (emacsql db [:create-table discussion-post $S1]
+                 (cdr (assq 'discussion-post forge--db-table-schemata)))
+        (emacsql db [:create-table discussion-reply $S1]
+                 (cdr (assq 'discussion-reply forge--db-table-schemata))))
+        (emacsql db [:alter-table repository :add-column discussion-categories
+                     :default 'eieio-unbound])
+        (emacsql db [:alter-table repository :add-column discussions
+                     :default 'eieio-unbound])
+        (emacsql db [:alter-table repository :add-column discussions-p
+                     :default nil])
+        (emacsql db [:alter-table repository :add-column discussions-until
+                     :default nil])
+    ))
 
 (defun forge--backup-database (db)
   (let ((dst (concat (file-name-sans-extension forge-database-file)
@@ -548,5 +659,10 @@
     (message "Copying Forge database to %s...done" dst)))
 
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 (provide 'forge-db)
 ;;; forge-db.el ends here

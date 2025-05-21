@@ -121,7 +121,7 @@ an error."
 (defvar-local forge--pre-post-buffer nil)
 (make-variable-buffer-local 'forge-buffer-draft-p)
 
-(defun forge--prepare-post-buffer (filename &optional header source target)
+(defun forge--prepare-post-buffer (filename &optional header source target template)
   (let* ((repo (forge-get-repository :tracked))
          (tree (oref repo worktree))
          (file (convert-standard-filename
@@ -151,17 +151,9 @@ an error."
                   (?d "[d]iscard draft and start over" t))
             (erase-buffer)
             (setq resume nil)))
-        (when (and (not resume) (string-prefix-p "new" filename))
-          (let-alist (forge--topic-template
-                      (forge-get-repository :tracked)
-                      (if source 'forge-pullreq 'forge-issue))
+        (when (and (not resume) template)
+          (let-alist template
             (cond
-             (.url
-              (browse-url .url)
-              (forge-post-cancel)
-              (setq buf nil)
-              (message "Using browser to visit %s instead of opening an issue"
-                       .url))
              (.name
               ;; A Github issue with yaml frontmatter.
               (save-excursion (insert .text))
@@ -213,7 +205,7 @@ an error."
          (prevbuf forge--pre-post-buffer)
          (topic   (ignore-errors (forge-get-topic forge--buffer-post-object)))
          (repo    (forge-get-repository topic)))
-    (lambda (value headers status req)
+    (lambda (value &optional headers status req)
       (run-hook-with-args 'forge-post-submit-callback-hook
                           value headers status req)
       (delete-file file t)
@@ -248,7 +240,7 @@ an error."
   :class 'transient-lisp-variable
   :variable 'forge-buffer-draft-p
   :reader (lambda (&rest _) (not forge-buffer-draft-p))
-  :if (lambda () (equal (file-name-nondirectory buffer-file-name) "new-pullreq")))
+  :if (##equal (file-name-nondirectory buffer-file-name) "new-pullreq"))
 
 ;;; Notes
 
@@ -258,9 +250,7 @@ an error."
   "<remap> <magit-edit-thing>" #'forge-edit-topic-note)
 
 (defun forge--save-note (_repo topic)
-  (let ((value (string-trim (buffer-substring-no-properties
-                             (point-min)
-                             (point-max)))))
+  (let ((value (string-trim (magit--buffer-string))))
     (oset topic note (if (equal value "") nil value)))
   (delete-file buffer-file-name t)
   (let ((dir (file-name-directory buffer-file-name)))
@@ -271,5 +261,10 @@ an error."
     (forge-refresh-buffer prevbuf)))
 
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 (provide 'forge-post)
 ;;; forge-post.el ends here

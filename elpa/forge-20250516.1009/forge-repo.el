@@ -28,59 +28,67 @@
 ;;; Classes
 
 (defclass forge-repository (forge-object)
-  ((closql-class-prefix       :initform "forge-")
-   (closql-class-suffix       :initform "-repository")
-   (closql-table              :initform 'repository)
-   (closql-primary-key        :initform 'id)
-   (issues-url-format         :initform nil :allocation :class)
-   (issue-url-format          :initform nil :allocation :class)
-   (issue-post-url-format     :initform nil :allocation :class)
-   (pullreqs-url-format       :initform nil :allocation :class)
-   (pullreq-url-format        :initform nil :allocation :class)
-   (pullreq-post-url-format   :initform nil :allocation :class)
-   (commit-url-format         :initform nil :allocation :class)
-   (branch-url-format         :initform nil :allocation :class)
-   (remote-url-format         :initform nil :allocation :class)
-   (blob-url-format           :initform nil :allocation :class)
-   (create-issue-url-format   :initform nil :allocation :class)
-   (create-pullreq-url-format :initform nil :allocation :class)
-   (pullreq-refspec           :initform nil :allocation :class)
-   (id                        :initform nil :initarg :id)
-   (forge-id                  :initform nil :initarg :forge-id)
-   (forge                     :initform nil :initarg :forge)
-   (owner                     :initform nil :initarg :owner)
-   (name                      :initform nil :initarg :name)
-   (apihost                   :initform nil :initarg :apihost)
-   (githost                   :initform nil :initarg :githost)
-   (remote                    :initform nil :initarg :remote)
-   (condition                 :initform :stub)
-   (created                   :initform nil)
-   (updated                   :initform nil)
-   (pushed                    :initform nil)
-   (parent                    :initform nil)
-   (description               :initform nil)
-   (homepage                  :initform nil)
-   (default-branch            :initform nil)
-   (archived-p                :initform nil)
-   (fork-p                    :initform nil)
-   (locked-p                  :initform nil)
-   (mirror-p                  :initform nil)
-   (private-p                 :initform nil)
-   (issues-p                  :initform t)
-   (wiki-p                    :initform nil)
-   (stars                     :initform nil)
-   (watchers                  :initform nil)
-   (assignees                 :closql-table assignee)
-   (forks                     :closql-table fork)
-   (issues                    :closql-class forge-issue)
-   (labels                    :closql-table label)
-   (pullreqs                  :closql-class forge-pullreq)
-   (revnotes                  :closql-class forge-revnote)
-   (selective-p               :initform nil)
-   (worktree                  :initform nil)
-   (milestones                :closql-table milestone)
-   (issues-until              :initform nil)
-   (pullreqs-until            :initform nil))
+  ((closql-class-prefix        :initform "forge-")
+   (closql-class-suffix        :initform "-repository")
+   (closql-table               :initform 'repository)
+   (closql-primary-key         :initform 'id)
+   (discussions-url-format     :initform nil :allocation :class)
+   (discussion-url-format      :initform nil :allocation :class)
+   (discussion-post-url-format :initform nil :allocation :class)
+   (issues-url-format          :initform nil :allocation :class)
+   (issue-url-format           :initform nil :allocation :class)
+   (issue-post-url-format      :initform nil :allocation :class)
+   (pullreqs-url-format        :initform nil :allocation :class)
+   (pullreq-url-format         :initform nil :allocation :class)
+   (pullreq-post-url-format    :initform nil :allocation :class)
+   (commit-url-format          :initform nil :allocation :class)
+   (branch-url-format          :initform nil :allocation :class)
+   (remote-url-format          :initform nil :allocation :class)
+   (blob-url-format            :initform nil :allocation :class)
+   (create-issue-url-format    :initform nil :allocation :class)
+   (create-pullreq-url-format  :initform nil :allocation :class)
+   (pullreq-refspec            :initform nil :allocation :class)
+   (id                         :initform nil :initarg :id)
+   (forge-id                   :initform nil :initarg :forge-id)
+   (forge                      :initform nil :initarg :forge)
+   (owner                      :initform nil :initarg :owner)
+   (name                       :initform nil :initarg :name)
+   (apihost                    :initform nil :initarg :apihost)
+   (githost                    :initform nil :initarg :githost)
+   (remote                     :initform nil :initarg :remote)
+   (condition                  :initform :stub)
+   (created                    :initform nil)
+   (updated                    :initform nil)
+   (pushed                     :initform nil)
+   (parent                     :initform nil)
+   (description                :initform nil)
+   (homepage                   :initform nil)
+   (default-branch             :initform nil)
+   (archived-p                 :initform nil)
+   (fork-p                     :initform nil)
+   (locked-p                   :initform nil)
+   (mirror-p                   :initform nil)
+   (private-p                  :initform nil)
+   (issues-p                   :initform t)
+   (wiki-p                     :initform nil)
+   (stars                      :initform nil)
+   (watchers                   :initform nil)
+   (assignees                  :closql-table assignee)
+   (forks                      :closql-table fork)
+   (issues                     :closql-class forge-issue)
+   (labels                     :closql-table label)
+   (pullreqs                   :closql-class forge-pullreq)
+   (revnotes                   :closql-class forge-revnote)
+   (selective-p                :initform nil)
+   (worktree                   :initform nil)
+   (milestones                 :closql-table milestone)
+   (issues-until               :initform nil)
+   (pullreqs-until             :initform nil)
+   (teams                      :initform nil)
+   (discussion-categories      :closql-table discussion-category)
+   (discussions                :closql-class forge-discussion)
+   (discussions-p              :initform nil)
+   (discussions-until          :initform nil))
   :abstract t)
 
 (defclass forge-unusedapi-repository (forge-repository) () :abstract t)
@@ -291,9 +299,6 @@ See `forge-alist' for valid Git hosts."
       (error "(Maybe repository) is nil; `%s' not satisfied" demand)
     nil))
 
-(defun forge--get-repository:tracked? ()
-  (forge-get-repository :tracked?))
-
 (defun forge-repository-at-point (&optional demand)
   "Return the repository at point.
 If there is no such repository and DEMAND is non-nil, then signal
@@ -349,16 +354,12 @@ REPO, return it, else set the slot to nil and return nil."
 ;;;; List
 
 (defun forge--ls-repos ()
-  (mapcar (let ((db (forge-db)))
-            (lambda (row)
-              (closql--remake-instance 'forge-repository db row)))
+  (mapcar (partial #'closql--remake-instance 'forge-repository (forge-db))
           (forge-sql [:select * :from repository
                       :order-by [(asc owner) (asc name)]])))
 
 (defun forge--ls-owned-repos ()
-  (mapcar (let ((db (forge-db)))
-            (lambda (row)
-              (closql--remake-instance 'forge-repository db row)))
+  (mapcar (partial #'closql--remake-instance 'forge-repository (forge-db))
           (forge-sql [:select * :from repository
                       :where (and (in owner $v1)
                                   (not (in name $v2)))
@@ -485,18 +486,30 @@ forges and hosts."
        (?p . ,path)
        (?P . ,(string-replace "/" "%2F" path))))))
 
-(defun forge--set-field-callback (topic)
-  (lambda (&rest _)
-    (forge--pull-topic
-     (forge-get-repository topic)
-     topic
-     :callback (lambda ()
-                 (forge-refresh-buffer)
-                 (when (transient-active-prefix
-                        '(forge-topic-menu
-                          forge-topics-menu
-                          forge-notifications-menu))
-                   (transient--refresh-transient))))))
+(defun forge--set-field-callback (topic &optional preserve-status)
+  (let ((status (oref topic status)))
+    (lambda (&rest _)
+      (forge--pull-topic
+       (forge-get-repository topic)
+       topic
+       :callback (lambda ()
+                   ;; Necessary when setting a discussion field because
+                   ;; the API provides even less information about the
+                   ;; status of discussions compared to other topics and
+                   ;; as a result we would otherwise always switch the
+                   ;; status to `unread'.  This is not needed for every
+                   ;; modification of a discussion because some of them
+                   ;; (e.g., setting labels) do not cause `updated_at' to
+                   ;; be bumped; this second defect cancels out the first
+                   ;; when it comes to this function.
+                   (when preserve-status
+                     (oset topic status status))
+                   (forge-refresh-buffer)
+                   (when (transient-active-prefix
+                          '(forge-topic-menu
+                            forge-topics-menu
+                            forge-notifications-menu))
+                     (transient--refresh-transient)))))))
 
 (defvar forge--mode-line-buffer nil)
 
@@ -544,5 +557,10 @@ forges and hosts."
     ('forge-bitbucket-repository 'bitbucket)))
 
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 (provide 'forge-repo)
 ;;; forge-repo.el ends here

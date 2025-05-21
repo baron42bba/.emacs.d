@@ -199,8 +199,8 @@
                :body         (forge--sanitize-string .description))))
         (closql-insert (forge-db) issue t)
         (unless (magit-get-boolean "forge.omitExpensive")
-          (forge--set-id-slot repo issue 'assignees .assignees)
-          (forge--set-id-slot repo issue 'labels .labels))
+          (forge--set-connections repo issue 'assignees .assignees)
+          (forge--set-connections repo issue 'labels .labels))
         (dolist (c .notes)
           (let-alist c
             (let ((post
@@ -337,9 +337,9 @@
                :body         (forge--sanitize-string .description))))
         (closql-insert (forge-db) pullreq t)
         (unless (magit-get-boolean "forge.omitExpensive")
-          (forge--set-id-slot repo pullreq 'assignees .assignees)
-          (forge--set-id-slot repo pullreq 'review-requests .reviewers)
-          (forge--set-id-slot repo pullreq 'labels .labels))
+          (forge--set-connections repo pullreq 'assignees .assignees)
+          (forge--set-connections repo pullreq 'review-requests .reviewers)
+          (forge--set-connections repo pullreq 'labels .labels))
         (dolist (c .notes)
           (let-alist c
             (let ((post
@@ -427,14 +427,15 @@
                       ;; tagged with the old label name until it itself
                       ;; is modified somehow.  Additionally it leads to
                       ;; name conflicts between group and project
-                      ;; labels.  See #160.
+                      ;; labels.  See #160.  Also see the comment in
+                      ;; `forge--set-connections'.
                       (list (forge--object-id id .name)
                             .name
                             (downcase .color)
                             .description)))
                   ;; For now simply remove one of the duplicates.
                   (cl-delete-duplicates data
-                                        :key (apply-partially #'alist-get 'name)
+                                        :key (##alist-get 'name %)
                                         :test #'equal)))))
 
 ;;;; Notifications
@@ -491,9 +492,9 @@
 (cl-defmethod forge--submit-edit-post ((_ forge-gitlab-repository) post)
   (forge--glab-put post
     (cl-etypecase post
-      (forge-pullreq "/projects/:project/merge_requests/:number")
-      (forge-issue   "/projects/:project/issues/:number")
-      (forge-issue-post "/projects/:project/issues/:topic/notes/:number")
+      (forge-pullreq      "/projects/:project/merge_requests/:number")
+      (forge-issue        "/projects/:project/issues/:number")
+      (forge-issue-post   "/projects/:project/issues/:topic/notes/:number")
       (forge-pullreq-post "/projects/:project/merge_requests/:topic/notes/:number"))
     (if (cl-typep post 'forge-topic)
         (let-alist (forge--topic-parse-buffer)
@@ -515,7 +516,7 @@
     (cl-typecase topic
       (forge-pullreq "/projects/:project/merge_requests/:number")
       (forge-issue   "/projects/:project/issues/:number"))
-    `((,field . ,value))
+    `((,field . ,(if (and value (listp value)) (vconcat value) value)))
     :callback (forge--set-field-callback topic)))
 
 (cl-defmethod forge--set-topic-title
@@ -565,14 +566,14 @@
                                    0)))
       (forge-issue
        (forge--set-topic-field repo topic 'assignee_ids
-                               (or (--map (caddr (assoc it users)) assignees)
+                               (or (mapcar (##caddr (assoc % users)) assignees)
                                    0))))))
 
 (cl-defmethod forge--set-topic-review-requests
   ((repo forge-gitlab-repository) topic reviewers)
   (let ((users (mapcar #'cdr (oref repo assignees))))
     (forge--set-topic-field repo topic 'reviewer_ids
-                            (or (--map (caddr (assoc it users)) reviewers)
+                            (or (mapcar (##caddr (assoc % users)) reviewers)
                                 0))))
 
 (cl-defmethod forge--delete-comment
@@ -588,13 +589,11 @@
 
 (cl-defmethod forge--topic-template-files ((repo forge-gitlab-repository)
                                            (_ (subclass forge-issue)))
-  (--filter (string-match-p "\\`\\.gitlab/issue_templates/.+\\.md\\'" it)
-            (magit-revision-files (oref repo default-branch))))
+  (forge--topic-template-files-1 repo "md" ".gitlab/issue_templates"))
 
 (cl-defmethod forge--topic-template-files ((repo forge-gitlab-repository)
                                            (_ (subclass forge-pullreq)))
-  (--filter (string-match-p "\\`\\.gitlab/merge_request_templates/.+\\.md\\'" it)
-            (magit-revision-files (oref repo default-branch))))
+  (forge--topic-template-files-1 repo "md" ".gitlab/merge_request_templates"))
 
 (cl-defmethod forge--fork-repository ((repo forge-gitlab-repository) fork)
   (with-slots (owner name) repo
@@ -679,5 +678,10 @@
                :errorback (or errorback (and callback t))))
 
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 (provide 'forge-gitlab)
 ;;; forge-gitlab.el ends here

@@ -36,6 +36,8 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
 (autoload 'forge-pull-notifications "forge-commands" nil t)
 (autoload 'forge-pull-topic "forge-commands" nil t)
 (autoload 'forge-pull-this-topic "forge-commands" nil t)
+(autoload 'forge-browse-discussions "forge-commands" "\
+Visit the current repository's discussions using a browser." t)
 (autoload 'forge-browse-issues "forge-commands" "\
 Visit the current repository's issues using a browser." t)
 (autoload 'forge-browse-pullreqs "forge-commands" "\
@@ -46,6 +48,12 @@ By default only offer open topics but with a prefix argument
 also offer closed topics.
 
 (fn TOPIC)" t)
+(autoload 'forge-browse-discussion "forge-commands" "\
+Read a DISCUSSION and visit it using a browser.
+By default only offer open discussions but with a prefix argument
+also offer closed issues.
+
+(fn DISCUSSION)" t)
 (autoload 'forge-browse-issue "forge-commands" "\
 Read an ISSUE and visit it using a browser.
 By default only offer open issues but with a prefix argument
@@ -104,6 +112,13 @@ argument offer all topics.  While completion is in progress, \\<forge-read-topic
 the limitation to active topics.
 
 (fn TOPIC)" t)
+(autoload 'forge-visit-discussion "forge-commands" "\
+Read a DISCUSSION and visit it.
+By default only offer active topics for completion.  With a prefix
+argument offer all topics.  While completion is in progress, \\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts
+the limitation to active topics.
+
+(fn DISCUSSION)" t)
 (autoload 'forge-visit-issue "forge-commands" "\
 Read an ISSUE and visit it.
 By default only offer active issues for completion.  With a prefix
@@ -139,7 +154,7 @@ Please see the manual for more information.
 (autoload 'forge-checkout-worktree "forge-commands" "\
 Create, configure and checkout a new worktree from a pull-request.
 This is like `forge-checkout-pullreq', except that it also
-creates a new worktree. Please see the manual for more
+creates a new worktree.  Please see the manual for more
 information.
 
 (fn PATH PULLREQ)" t)
@@ -174,10 +189,18 @@ Remove a repository from the database.
 (fn REPOSITORY)" t)
 (autoload 'forge-remove-topic-locally "forge-commands" "\
 Remove a topic from the local database only.
-Due to how the supported APIs work, it would be too expensive to
-automatically remove topics from the local database that were
-removed from the forge.  The purpose of this command is to allow
-you to manually clean up the local database.
+
+When the region marks multiple topics, then offer to remove them all.
+
+The topic is not removed from the forge and, if it is later modified,
+then it will be added to the database again when fetching all topics.
+
+This is useful for users who only fetch individual topics and want to
+remove the topics they are no longer interested in.  This can also be
+used to remove topics locally, which have already been removed on the
+forge (the service).  Forge (the package) cannot automatically detect
+when that happens, because given how the APIs work, this would be too
+expensive.
 
 (fn TOPIC)" t)
 (autoload 'forge-reset-database "forge-commands" "\
@@ -196,6 +219,11 @@ heavy development." t)
 ;;; Generated autoloads from forge-db.el
 
 (register-definition-prefixes "forge-db" '("forge-"))
+
+
+;;; Generated autoloads from forge-discussion.el
+
+(register-definition-prefixes "forge-discussion" '("forge-"))
 
 
 ;;; Generated autoloads from forge-forgejo.el
@@ -284,6 +312,7 @@ heavy development." t)
 
 (autoload 'forge-topics-menu "forge-topics" nil t)
 (autoload 'forge-list-topics "forge-topics" nil t)
+(autoload 'forge-list-discussions "forge-topics" nil t)
 (autoload 'forge-list-issues "forge-topics" nil t)
 (autoload 'forge-list-pullreqs "forge-topics" nil t)
 (autoload 'forge-list-global-topics "forge-topics" nil t)

@@ -7,21 +7,21 @@
 ;; Homepage: https://github.com/magit/forge
 ;; Keywords: git tools vc
 
-;; Package-Version: 20250108.2134
-;; Package-Revision: 96fe98120c49
+;; Package-Version: 20250516.1009
+;; Package-Revision: 8e4dd7ed0521
 ;; Package-Requires: (
 ;;     (emacs "29.1")
-;;     (compat "30.0.1.0")
-;;     (closql "2.1.0")
-;;     (dash "2.19.1")
-;;     (emacsql "4.1.0")
-;;     (ghub "4.2.0")
+;;     (compat "30.0.2.0")
+;;     (closql "2.2.1")
+;;     (emacsql "4.3.0")
+;;     (ghub "4.3.0")
 ;;     (let-alist "1.0.6")
-;;     (magit "4.2.1")
-;;     (markdown-mode "2.6")
+;;     (llama "0.6.2")
+;;     (magit "4.3.2")
+;;     (markdown-mode "2.7")
 ;;     (seq "2.24")
-;;     (transient "0.8.2")
-;;     (yaml "0.5.5"))
+;;     (transient "0.8.7")
+;;     (yaml "1.2.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -60,6 +60,7 @@
 (require 'forge-repo)
 (require 'forge-post)
 (require 'forge-topic)
+(require 'forge-discussion)
 (require 'forge-issue)
 (require 'forge-pullreq)
 (require 'forge-revnote)
@@ -86,8 +87,9 @@ If you want to disable this, then you must set this to nil before
 `forge' is loaded.")
 
 (when forge-add-default-sections
-  (magit-add-section-hook 'magit-status-sections-hook #'forge-insert-pullreqs nil t)
-  (magit-add-section-hook 'magit-status-sections-hook #'forge-insert-issues   nil t))
+  (magit-add-section-hook 'magit-status-sections-hook #'forge-insert-pullreqs    nil t)
+  (magit-add-section-hook 'magit-status-sections-hook #'forge-insert-issues      nil t)
+  (magit-add-section-hook 'magit-status-sections-hook #'forge-insert-discussions nil t))
 
 ;;; Add Bindings
 
@@ -137,11 +139,12 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
   (transient-append-suffix 'magit-branch "W"
     '("F" "from pull-request" forge-branch-pullreq))
 
-  (transient-suffix-put 'magit-remote 'magit-update-default-branch :key "b u")
-  (transient-append-suffix 'magit-remote "b u"
-    '("b r" "Rename default branch" forge-rename-default-branch))
-  (transient-append-suffix 'magit-remote "b u"
-    '("b s" "Set default branch" forge-set-default-branch))
+  (transient-append-suffix 'magit-remote "a"
+    '("f" "Fork" forge-fork))
+  (transient-insert-suffix 'magit-remote "d u"
+    '("d s" "Set default branch" forge-set-default-branch))
+  (transient-append-suffix 'magit-remote "d u"
+    '("d r" "Rename default branch" forge-rename-default-branch))
 
   (transient-append-suffix 'magit-worktree "c"
     '("n" "pull-request worktree" forge-checkout-worktree))
@@ -156,7 +159,7 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
 
 ;;; Startup Asserts
 
-(defconst forge--minimal-git "2.7.0")
+(defconst forge--minimal-git "2.25.0")
 
 (defun forge-startup-asserts ()
   (let ((version (magit-git-version)))
@@ -181,4 +184,10 @@ too.\n" forge--minimal-git version) :error))))
     (forge-startup-asserts)
   (add-hook 'after-init-hook #'forge-startup-asserts t))
 
+;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("partial" . "llama--left-apply-partially")
+;;   ("rpartial" . "llama--right-apply-partially"))
+;; End:
 ;;; forge.el ends here
