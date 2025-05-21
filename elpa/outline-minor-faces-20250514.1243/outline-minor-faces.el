@@ -1,14 +1,14 @@
 ;;; outline-minor-faces.el --- Highlight only section headings  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2018-2024 Jonas Bernoulli
+;; Copyright (C) 2018-2025 Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <emacs.outline-minor-faces@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/tarsius/outline-minor-faces
 ;; Keywords: faces outlines
 
-;; Package-Version: 20241202.1859
-;; Package-Revision: 41de0cd1633c
-;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
+;; Package-Version: 20250514.1243
+;; Package-Revision: a1ef3834f9f6
+;; Package-Requires: ((emacs "26.1") (compat "30.0.1.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -141,11 +141,19 @@ Returns REGEXP directly for modes where `font-lock-keywords-only'
 is non-nil because Font Lock does not mark strings and comments
 for those modes, and the matcher will not know what is/is not a
 string."
-  (if font-lock-keywords-only
-      regexp
-    (lambda (limit)
+  (cond
+   ;; Assume that if a mode defines such a function, it likely is
+   ;; benefitial to use it.  We know that `elisp-outline-search'
+   ;; (added in Emacs 31) is unnecessary here though.  It's purpose
+   ;; is to avoid matching parens at the bol inside strings, but we
+   ;; don't even try to match parens at all, so that's not relevant.
+   ((and outline-search-function
+         (not (eq outline-search-function 'elisp-outline-search)))
+    #'ignore)
+   (font-lock-keywords-only regexp)
+   ((lambda (limit)
       (and (re-search-forward regexp limit t)
-           (not (nth 3 (syntax-ppss (match-beginning 0))))))))
+           (not (nth 3 (syntax-ppss (match-beginning 0)))))))))
 
 (defvar outline-minor-faces--font-lock-keywords
   '((eval . (list (outline-minor-faces--syntactic-matcher
@@ -203,8 +211,10 @@ string."
 
 (defun outline-minor-faces--level ()
   (save-excursion
-    (and (if (bound-and-true-p outline-search-function)
-             (funcall outline-search-function nil nil nil t)
+    (and (if-let ((fn (bound-and-true-p outline-search-function))
+                  ;; See `outline-minor-faces--syntactic-matcher'.
+                  ((not (eq fn 'elisp-outline-search))))
+             (funcall fn nil nil nil t)
            (beginning-of-line)
            (looking-at outline-regexp))
          (funcall outline-level))))
