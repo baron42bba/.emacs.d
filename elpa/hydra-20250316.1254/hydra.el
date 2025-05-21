@@ -5,7 +5,8 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.15.0
+;; Package-Version: 20250316.1254
+;; Package-Revision: 59a2a45a3502
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5") (lv "0"))
 
@@ -329,26 +330,6 @@ Exitable only through a blue head.")
    '("Hydras"
      "^.*(\\(defhydra\\) \\([a-zA-Z-]+\\)"
      2)))
-
-;;* Find Function
-(eval-after-load 'find-func
-  '(defadvice find-function-search-for-symbol
-    (around hydra-around-find-function-search-for-symbol-advice
-     (symbol type library) activate)
-    "Navigate to hydras with `find-function-search-for-symbol'."
-    (prog1 ad-do-it
-      (when (symbolp symbol)
-        ;; The original function returns (cons (current-buffer) (point))
-        ;; if it found the point.
-        (unless (cdr ad-return-value)
-          (with-current-buffer (find-file-noselect library)
-            (let ((sn (symbol-name symbol)))
-              (when (and (null type)
-                         (string-match "\\`\\(hydra-[a-z-A-Z0-9]+\\)/\\(.*\\)\\'" sn)
-                         (re-search-forward (concat "(defhydra " (match-string 1 sn))
-                                            nil t))
-                (goto-char (match-beginning 0)))
-              (cons (current-buffer) (point)))))))))
 
 ;;* Universal Argument
 (defvar hydra-base-map
