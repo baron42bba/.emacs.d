@@ -1,12 +1,12 @@
 ;;; kubed.el --- Kubernetes, Emacs, done!   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2024  Free Software Foundation, Inc.
+;; Copyright (C) 2024-2025  Free Software Foundation, Inc.
 
 ;; Author: Eshel Yaron <me@eshelyaron.com>
 ;; Maintainer: Eshel Yaron <~eshel/kubed-devel@lists.sr.ht>
 ;; Keywords: tools kubernetes containers
 ;; URL: https://eshelyaron.com/kubed.html
-;; Package-Version: 0.4.2
+;; Package-Version: 0.4.3
 ;; Package-Requires: ((emacs "29.1"))
 
 ;;; Commentary:
@@ -767,9 +767,14 @@ regardless of QUIET."
             (make-process
              :name "*kubed-list-delete-marked*"
              :stderr errb
-             :command (append
-                       (list kubed-kubectl-program "delete" kubed-list-type)
-                       delete-list)
+             :command (cons kubed-kubectl-program
+                            (append
+                             (when kubed-list-context
+                               (list "--context" kubed-list-context))
+                             (when kubed-list-namespace
+                               (list "--namespace" kubed-list-namespace))
+                             (list "delete" kubed-list-type)
+                             delete-list))
              :sentinel (lambda (_proc status)
                          (cond
                           ((string= status "finished\n")
@@ -1182,14 +1187,21 @@ value of PROP when applied to the JSON representation of a RESOURCE.
 WIDTH, SORT, FORMAT and ATTRS are optional and can be omitted.  WIDTH is
 used as the default width of the column corresponding to PROP in
 RESOURCEs list buffers; SORT is sort predicate, a function that takes
-two values of PROP as strings and return non-nil if the first should
+two values of PROP as strings and returns non-nil if the first should
 sort before the second; FORMAT is a function that takes a value of PROP
-and formats it; and ATTRS is a plist of additional attributes of the
-PROP column, see `tabulated-list-format' for available attributes.  For
-example, (phase \".status.phase\" 10) says that RESOURCE has a `phase'
-property at JSONPath \".status.phase\" whose values are typically 10
-columns wide.  The first property in PROPERTIES, is used to annotate
-completion candidates when prompting for a RESOURCE.
+and formats it.  If you provide a FORMAT function and a SORT function,
+then the SORT function gets the formatted values (the output of the
+FORMAT function), not the original values.  If you want to sort based on
+the unformatted original values, you can store them as text properties
+in your FORMAT function and access them in your SORT function.
+
+ATTRS is a plist of additional attributes of the PROP column, see
+`tabulated-list-format' for available attributes.
+
+For example, if PROPERTIES is (phase \".status.phase\" 10) that means
+that RESOURCE has a `phase' property at JSONPath \".status.phase\" whose
+values are typically 10 columns wide.  The first property in PROPERTIES
+is used to annotate completion candidates when prompting for a RESOURCE.
 
 COMMANDS is a list of elements (COMMAND KEYS DOC-PREFIX . BODY) that
 define commands for RESOURCE list buffers.  COMMAND is a symbol

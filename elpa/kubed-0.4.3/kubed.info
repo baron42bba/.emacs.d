@@ -1,9 +1,9 @@
-This is doc5HCYE0.info, produced by makeinfo version 6.8 from
+This is docHlL4Z1.info, produced by makeinfo version 6.8 from
 kubed.texi.
 
-This manual is for Kubed 0.4.2, a rich Emacs interface for Kubernetes.
+This manual is for Kubed 0.4.3, a rich Emacs interface for Kubernetes.
 
-   Copyright © 2024 Eshel Yaron.
+   Copyright © 2024-2025 Eshel Yaron.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -16,12 +16,12 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: doc5HCYE0.info,  Node: Top,  Next: Overview,  Up: (dir)
+File: docHlL4Z1.info,  Node: Top,  Next: Overview,  Up: (dir)
 
 Kubed: Kubernetes, Emacs, done!
 *******************************
 
-This manual is for Kubed 0.4.2, a rich Emacs interface for Kubernetes.
+This manual is for Kubed 0.4.3, a rich Emacs interface for Kubernetes.
 
 * Menu:
 
@@ -33,7 +33,7 @@ This manual is for Kubed 0.4.2, a rich Emacs interface for Kubernetes.
 * Indices::
 
 
-File: doc5HCYE0.info,  Node: Overview,  Next: Getting Started,  Prev: Top,  Up: Top
+File: docHlL4Z1.info,  Node: Overview,  Next: Getting Started,  Prev: Top,  Up: Top
 
 1 Overview
 **********
@@ -57,7 +57,7 @@ along with many options that Kubed provides for you to customize its
 behavior.
 
 
-File: doc5HCYE0.info,  Node: Getting Started,  Next: Usage,  Prev: Overview,  Up: Top
+File: docHlL4Z1.info,  Node: Getting Started,  Next: Usage,  Prev: Overview,  Up: Top
 
 2 Getting Started
 *****************
@@ -84,7 +84,7 @@ installations.  If Emacs doesn’t find the ‘kubectl’ executable via
      Name of ‘kubectl’ executable file to use.
 
 
-File: doc5HCYE0.info,  Node: Usage,  Next: Extending Kubed,  Prev: Getting Started,  Up: Top
+File: docHlL4Z1.info,  Node: Usage,  Next: Extending Kubed,  Prev: Getting Started,  Up: Top
 
 3 Usage
 *******
@@ -141,7 +141,7 @@ interactive guidance for invoking Kubed commands.  *Note
 * Scale Deployment::
 
 
-File: doc5HCYE0.info,  Node: Display Resource,  Next: Browse Resources,  Up: Usage
+File: docHlL4Z1.info,  Node: Display Resource,  Next: Browse Resources,  Up: Usage
 
 3.1 Display Resource
 ====================
@@ -233,7 +233,7 @@ This minor mode does the following:
      and want to restart from a clean slate.
 
 
-File: doc5HCYE0.info,  Node: Browse Resources,  Next: Context and Namespace,  Prev: Display Resource,  Up: Usage
+File: docHlL4Z1.info,  Node: Browse Resources,  Next: Context and Namespace,  Prev: Display Resource,  Up: Usage
 
 3.2 Browse Resources
 ====================
@@ -352,7 +352,7 @@ customize this indicator.
 * List Filter::
 
 
-File: doc5HCYE0.info,  Node: List Filter,  Up: Browse Resources
+File: docHlL4Z1.info,  Node: List Filter,  Up: Browse Resources
 
 3.2.1 Filtering Resource Lists
 ------------------------------
@@ -415,7 +415,7 @@ available for column names and values.  To clear the filter, just exit
 the minibuffer with an empty input.
 
 
-File: doc5HCYE0.info,  Node: Context and Namespace,  Next: Transient Menus,  Prev: Browse Resources,  Up: Usage
+File: docHlL4Z1.info,  Node: Context and Namespace,  Next: Transient Menus,  Prev: Browse Resources,  Up: Usage
 
 3.3 Context and Namespace
 =========================
@@ -465,7 +465,7 @@ buffer in which you call them:
      cons cell ‘(CONTEXT . NAMESPACE)’.
 
 
-File: doc5HCYE0.info,  Node: Transient Menus,  Next: Scale Deployment,  Prev: Context and Namespace,  Up: Usage
+File: docHlL4Z1.info,  Node: Transient Menus,  Next: Scale Deployment,  Prev: Context and Namespace,  Up: Usage
 
 3.4 Transient Menus
 ===================
@@ -497,7 +497,7 @@ with commands that are specific to the type of resources the buffer
 displays.  *Note Browse Resources::.
 
 
-File: doc5HCYE0.info,  Node: Scale Deployment,  Prev: Transient Menus,  Up: Usage
+File: docHlL4Z1.info,  Node: Scale Deployment,  Prev: Transient Menus,  Up: Usage
 
 3.5 Scale Deployment
 ====================
@@ -527,7 +527,7 @@ by simply typing ‘$’.  *Note Browse Resources::.
 Kubed transient by pressing ‘$’.  *Note Transient Menus::.
 
 
-File: doc5HCYE0.info,  Node: Extending Kubed,  Next: Contributing,  Prev: Usage,  Up: Top
+File: docHlL4Z1.info,  Node: Extending Kubed,  Next: Contributing,  Prev: Usage,  Up: Top
 
 4 Extending Kubed
 *****************
@@ -566,7 +566,7 @@ list buffer and the ‘commands’ argument which lets you associate
 additional commands with your resource type.
 
 
-File: doc5HCYE0.info,  Node: Contributing,  Next: Indices,  Prev: Extending Kubed,  Up: Top
+File: docHlL4Z1.info,  Node: Contributing,  Next: Indices,  Prev: Extending Kubed,  Up: Top
 
 5 Contributing
 **************
@@ -586,7 +586,7 @@ new buffer with a message template ready to be sent to the development
 mailing list.
 
 
-File: doc5HCYE0.info,  Node: Indices,  Prev: Contributing,  Up: Top
+File: docHlL4Z1.info,  Node: Indices,  Prev: Contributing,  Up: Top
 
 Indices
 *******
@@ -599,7 +599,7 @@ Indices
 * Concept Index::
 
 
-File: doc5HCYE0.info,  Node: Function Index,  Next: Variable Index,  Up: Indices
+File: docHlL4Z1.info,  Node: Function Index,  Next: Variable Index,  Up: Indices
 
 Function index
 ==============
@@ -654,7 +654,7 @@ Function index
 * tabulated-list-widen-current-column:   Browse Resources.     (line 96)
 
 
-File: doc5HCYE0.info,  Node: Variable Index,  Next: Keystroke Index,  Prev: Function Index,  Up: Indices
+File: docHlL4Z1.info,  Node: Variable Index,  Next: Keystroke Index,  Prev: Function Index,  Up: Indices
 
 Variable index
 ==============
@@ -671,7 +671,7 @@ Variable index
 * kubed-yaml-setup-hook:                 Display Resource.    (line  53)
 
 
-File: doc5HCYE0.info,  Node: Keystroke Index,  Next: Concept Index,  Prev: Variable Index,  Up: Indices
+File: docHlL4Z1.info,  Node: Keystroke Index,  Next: Concept Index,  Prev: Variable Index,  Up: Indices
 
 Keystroke index
 ===============
@@ -707,7 +707,7 @@ Keystroke index
 * x:                                     Browse Resources.     (line 67)
 
 
-File: doc5HCYE0.info,  Node: Concept Index,  Prev: Keystroke Index,  Up: Indices
+File: docHlL4Z1.info,  Node: Concept Index,  Prev: Keystroke Index,  Up: Indices
 
 Concept index
 =============
@@ -726,25 +726,25 @@ Concept index
 
 
 Tag Table:
-Node: Top596
-Node: Overview1140
-Node: Getting Started1908
-Node: Usage3005
-Ref: Definition of kubed-prefix-map3616
-Ref: Definition of kubed-menu-bar-mode4379
-Node: Display Resource5014
-Node: Browse Resources9544
-Node: List Filter14571
-Node: Context and Namespace17224
-Node: Transient Menus19614
-Node: Scale Deployment21189
-Node: Extending Kubed22486
-Node: Contributing24077
-Node: Indices24777
-Node: Function Index24951
-Node: Variable Index28346
-Node: Keystroke Index29009
-Node: Concept Index31069
+Node: Top601
+Node: Overview1145
+Node: Getting Started1913
+Node: Usage3010
+Ref: Definition of kubed-prefix-map3621
+Ref: Definition of kubed-menu-bar-mode4384
+Node: Display Resource5019
+Node: Browse Resources9549
+Node: List Filter14576
+Node: Context and Namespace17229
+Node: Transient Menus19619
+Node: Scale Deployment21194
+Node: Extending Kubed22491
+Node: Contributing24082
+Node: Indices24782
+Node: Function Index24956
+Node: Variable Index28351
+Node: Keystroke Index29014
+Node: Concept Index31074
 
 End Tag Table
 

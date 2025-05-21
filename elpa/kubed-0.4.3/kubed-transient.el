@@ -1,6 +1,6 @@
 ;;; kubed-transient.el --- Kubernetes transient menus   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2024  Free Software Foundation, Inc.
+;; Copyright (C) 2024-2025  Free Software Foundation, Inc.
 
 ;; Author: Eshel Yaron <me@eshelyaron.com>
 ;; Keywords: tools
@@ -94,7 +94,7 @@ defaults to \"RESOURCEs\"."
          ("-b" "Limit bytes" "--limit-bytes="
           :prompt "Byte limit: " :reader transient-read-number-N+)
          ("-t" "Limit lines" "--tail="
-          :prompt "Byte limit: " :reader transient-read-number-N+)
+          :prompt "Line limit: " :reader transient-read-number-N+)
          ("-S" "Since time" "--since-time="
           :prompt "Since time: " :reader kubed-transient-read-date)]
         ["Switches"
