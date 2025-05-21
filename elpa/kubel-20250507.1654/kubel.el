@@ -21,8 +21,8 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 ;; USA
 
-;; Package-Version: 20250110.1811
-;; Package-Revision: d587d6a09faa
+;; Package-Version: 20250507.1654
+;; Package-Revision: 61ec610b817c
 ;; Author: Adrien Brochard
 ;; Keywords: kubernetes k8s tools processes
 ;; URL: https://github.com/abrochard/kubel
@@ -300,7 +300,7 @@ CMD is the command string to run."
 (defvar-local kubel-namespace "default"
   "Current namespace.")
 
-(defvar-local kubel-resource "Pods"
+(defvar-local kubel-resource "pods"
   "Current resource.")
 
 (defvar-local kubel-context
@@ -533,7 +533,7 @@ READONLY If true buffer will be in readonly mode(view-mode)."
                   :buffer buffer-name
                   :sentinel (kubel--sentinel callback)
                   :file-handler t
-                  :stderr error-buffer
+                  :stderr (get-buffer-create error-buffer)
                   :command cmd)
     (pop-to-buffer buffer-name)
     (if readonly
@@ -687,7 +687,7 @@ Allows simple apply of the changes made.
   (setq dir-prefix (or
                     (when (tramp-tramp-file-p default-directory)
                       (with-parsed-tramp-file-name default-directory nil
-                        (format "/%s%s:%s@%s:" (or hop "") method user host)))
+                        (format "/%s%s:%s:" (or hop "") method (if user (concat user "@" host) host))))
                     ""))
   (let* ((filename-without-tramp-prefix (format "/tmp/kubel/%s-%s.yaml"
                                                 (replace-regexp-in-string "/" "_"
@@ -840,9 +840,12 @@ ARGS is the arguments list from transient."
   (unless (member namespace kubel-namespace-history)
     (push namespace kubel-namespace-history)))
 
-(defun kubel-set-namespace ()
-  "Set the namespace."
-  (interactive)
+(defun kubel-set-namespace (&optional refresh)
+  "Set the namespace.
+If called with a prefix argument REFRESH, refreshes
+the context caches, including the cached resource list."
+  (interactive "P")
+  (when refresh (kubel--invalidate-context-caches))
   (let* ((namespace (completing-read "Namespace: " (kubel--list-namespace)
                                      nil nil nil nil "default"))
          (kubel--buffer (get-buffer (kubel--buffer-name)))
@@ -970,7 +973,7 @@ P can be a single number or a localhost:container port pair."
   (or
    (when (tramp-tramp-file-p default-directory)
      (with-parsed-tramp-file-name default-directory nil
-       (format "%s%s:%s@%s|" (or hop "") method user host)))
+       (format "%s%s:%s|" (or hop "") method (if user (concat user "@" host) host))))
    ""))
 
 (defun kubel-exec-pod ()
@@ -1033,7 +1036,7 @@ the variables `kubel-namespace' and `kubel-context', respectively."
          (vterm-buffer-name
           (kubel--shell-buffer-name "vterm" container pod))
          (vterm-shell "/bin/sh"))
-    (vterm)))
+    (vterm nil)))
 
 ;;;###autoload
 (defun kubel-vterm-setup ()
