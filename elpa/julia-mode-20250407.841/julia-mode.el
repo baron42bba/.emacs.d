@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2009-2014 Julia contributors, 2015-2024 julia-mode.el contributors
 ;; URL: https://github.com/JuliaEditorSupport/julia-emacs
-;; Package-Version: 20241213.1620
-;; Package-Revision: 0f4d74f9049d
+;; Package-Version: 20250407.841
+;; Package-Revision: 7fc071eb2c38
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -885,7 +885,7 @@ If there is not a LaTeX-like symbol at point, return nil."
                     ;; "\^(", "\1/", and "\^=)" are valid.
                     (member (char-syntax (char-before)) '(?\s ?< ?> ?\\))))
       (backward-char))
-    (when (= ?\\ (char-before))
+    (when (and (not (bobp)) (= ?\\ (char-before)))
       (- (point) 1))))
 
 ;; Sometimes you want to complete a symbol `point' is in middle of
@@ -998,7 +998,7 @@ command is only entered if it is supported in Julia. The
 following commands are defined:
 
 \\{LaTeX-math-mode-map}"
-      nil nil (list (cons (LaTeX-math-abbrev-prefix) LaTeX-math-keymap))
+      :keymap (list (cons (LaTeX-math-abbrev-prefix) LaTeX-math-keymap))
       (if julia-math-mode
           (setq-local LaTeX-math-insert-function #'julia-math-insert)))))
 

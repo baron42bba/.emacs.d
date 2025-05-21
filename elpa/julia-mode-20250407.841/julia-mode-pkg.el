@@ -1,8 +1,8 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "julia-mode" "20241213.1620"
+(define-package "julia-mode" "20250407.841"
   "Major mode for editing Julia source code."
   '((emacs "26.1"))
   :url "https://github.com/JuliaEditorSupport/julia-emacs"
-  :commit "0f4d74f9049df28e2f522733141bfc5b7a0f69a3"
-  :revdesc "0f4d74f9049d"
+  :commit "7fc071eb2c383d44be6d61ea6cef73b0cc8ef9b7"
+  :revdesc "7fc071eb2c38"
   :keywords '("languages"))
