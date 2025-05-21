@@ -1,14 +1,14 @@
 ;;; auto-complete.el --- Auto Completion for GNU Emacs
 
 ;; Copyright (C) 2008-2015  Tomohiro Matsuyama
-;; Copyright (C) 2020-2024  Jen-Chieh Shen
+;; Copyright (C) 2020-2025  Jen-Chieh Shen
 
 ;; Author: Tomohiro Matsuyama <m2ym.pub@gmail.com>
 ;; Maintainer: Jen-Chieh Shen <jcs090218@gmail.com>
 ;; URL: https://github.com/auto-complete/auto-complete
 ;; Keywords: completion, convenience
-;; Package-Version: 20241226.1736
-;; Package-Revision: 2290f39627e5
+;; Package-Version: 20250101.843
+;; Package-Revision: 01bbfdf12b34
 ;; Package-Requires: ((emacs "25.1") (popup "0.5.8"))
 
 ;; This program is free software; you can redistribute it and/or modify
