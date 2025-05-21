@@ -4,8 +4,8 @@
 
 ;; Author: Matúš Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matúš Goljer <matus.goljer@gmail.com>
-;; Package-Version: 20240629.1953
-;; Package-Revision: e9e408e8571a
+;; Package-Version: 20250511.2303
+;; Package-Revision: bb5d1c3c8b0b
 ;; Created: 14th February 2014
 ;; Package-Requires: ((dash "2.7.0") (dired-hacks-utils "0.0.1") (emacs "24"))
 ;; Keywords: files
@@ -251,7 +251,7 @@ read from minibuffer."
                                    "Regex Filter:\s")
                                   ('dired-narrow--fuzzy-filter
                                    "Fuzzy Filter:\s")
-                                  (t "Filter:\s"))
+                                  (_ "Filter:\s"))
                                 nil dired-narrow-map))
           (let ((inhibit-read-only t))
             (dired-narrow--remove-text-with-property :dired-narrow))
