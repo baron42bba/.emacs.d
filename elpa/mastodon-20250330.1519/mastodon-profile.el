@@ -56,8 +56,8 @@
 (autoload 'mastodon-media--get-media-link-rendering "mastodon-media.el")
 (autoload 'mastodon-media--inline-images "mastodon-media.el")
 (autoload 'mastodon-mode "mastodon.el")
-(autoload 'mastodon-notifications--follow-request-accept "mastodon-notifications")
-(autoload 'mastodon-notifications--follow-request-reject "mastodon-notifications")
+(autoload 'mastodon-notifications-follow-request-accept "mastodon-notifications")
+(autoload 'mastodon-notifications-follow-request-reject "mastodon-notifications")
 (autoload 'mastodon-search--insert-users-propertized "mastodon-search")
 (autoload 'mastodon-tl--as-string "mastodon-tl.el")
 (autoload 'mastodon-tl--buffer-type-eq "mastodon tl")
@@ -79,10 +79,10 @@
 (autoload 'mastodon-tl--item-id "mastodon-tl")
 (autoload 'mastodon-toot--count-toot-chars "mastodon-toot")
 (autoload 'mastodon-toot--get-max-toot-chars "mastodon-toot")
-(autoload 'mastodon-views--add-account-to-list "mastodon-views")
+(autoload 'mastodon-views-add-account-to-list "mastodon-views")
 (autoload 'mastodon-return-credential-account "mastodon")
 (autoload 'mastodon-tl--buffer-property "mastodon-tl")
-(autoload 'mastodon-search--query "mastodon-search")
+(autoload 'mastodon-search-query "mastodon-search")
 (autoload 'mastodon-tl--field-status "mastodon-tl")
 (autoload 'mastodon-toot--with-toot-item "mastodon-toot" nil nil 'macro)
 (autoload 'mastodon-tl--toot-or-base "mastodon-tl")
@@ -100,9 +100,9 @@
 
 (defvar mastodon-profile-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-c") #'mastodon-profile--account-view-cycle)
-    (define-key map (kbd "C-c C-s") #'mastodon-profile--account-search)
-    (define-key map (kbd "C-c #") #'mastodon-profile--open-statuses-tagged)
+    (define-key map (kbd "C-c C-c") #'mastodon-profile-account-view-cycle)
+    (define-key map (kbd "C-c C-s") #'mastodon-profile-account-search)
+    (define-key map (kbd "C-c #") #'mastodon-profile-open-statuses-tagged)
     map)
   "Keymap for `mastodon-profile-mode'.")
 
@@ -125,8 +125,8 @@ It contains details of the current user's account.")
 
 (defvar mastodon-profile-update-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-c") #'mastodon-profile--user-profile-send-updated)
-    (define-key map (kbd "C-c C-k") #'mastodon-profile--update-profile-note-cancel)
+    (define-key map (kbd "C-c C-c") #'mastodon-profile-user-profile-send-updated)
+    (define-key map (kbd "C-c C-k") #'mastodon-profile-update-profile-note-cancel)
     map)
   "Keymap for `mastodon-profile-update-mode'.")
 
@@ -165,20 +165,21 @@ MAX-ID is a flag to include the max_id pagination parameter."
 ;;; PROFILE VIEW COMMANDS
 
 (defvar mastodon-profile--account-view-alist
-  '((statuses   . mastodon-profile--open-statuses)
-    (no-boosts  . mastodon-profile--open-statuses-no-reblogs)
-    (no-replies . mastodon-profile--open-statuses-no-replies)
-    (only-media . mastodon-profile--open-statuses-only-media)
-    (followers  . mastodon-profile--open-followers)
-    (following  . mastodon-profile--open-following)
-    (tag        . mastodon-profile--open-statuses-tagged)))
+  '((statuses   . mastodon-profile-open-statuses)
+    (no-boosts  . mastodon-profile-open-statuses-no-reblogs)
+    (no-replies . mastodon-profile-open-statuses-no-replies)
+    (only-media . mastodon-profile-open-statuses-only-media)
+    (followers  . mastodon-profile-open-followers)
+    (following  . mastodon-profile-open-following)
+    (tag        . mastodon-profile-open-statuses-tagged)))
 
 (defun mastodon-profile--view-types ()
   "Return the keys of `mastodon-profile--account-view-alist' as a list."
   (map-keys mastodon-profile--account-view-alist))
 
-(defun mastodon-profile--account-view-cycle (&optional prefix)
-  "Cycle through profile view: toots, toot sans boosts, followers, and following."
+(defun mastodon-profile-account-view-cycle (&optional prefix)
+  "Cycle through profile view: toots, toot sans boosts, followers, and following.
+If a PREFIX argument is provided, prompt for a view type and load."
   (interactive "P")
   (if prefix
       (let* ((choice
@@ -187,19 +188,19 @@ MAX-ID is a flag to include the max_id pagination parameter."
              (fun (alist-get choice mastodon-profile--account-view-alist)))
         (funcall fun))
     (cond ((mastodon-tl--buffer-type-eq 'profile-statuses)
-           (mastodon-profile--open-statuses-no-reblogs))
+           (mastodon-profile-open-statuses-no-reblogs))
           ((mastodon-tl--buffer-type-eq 'profile-statuses-no-boosts)
-           (mastodon-profile--open-statuses-no-replies))
+           (mastodon-profile-open-statuses-no-replies))
           ((mastodon-tl--buffer-type-eq 'profile-statuses-no-replies)
-           (mastodon-profile--open-statuses-only-media))
+           (mastodon-profile-open-statuses-only-media))
           ((mastodon-tl--buffer-type-eq 'profile-statuses-only-media)
-           (mastodon-profile--open-followers))
+           (mastodon-profile-open-followers))
           ((mastodon-tl--buffer-type-eq 'profile-followers)
-           (mastodon-profile--open-following))
+           (mastodon-profile-open-following))
           ((mastodon-tl--buffer-type-eq 'profile-following)
-           (mastodon-profile--open-statuses)))))
+           (mastodon-profile-open-statuses)))))
 
-(defun mastodon-profile--open-statuses ()
+(defun mastodon-profile-open-statuses ()
   "Open a profile showing statuses."
   (interactive)
   (if mastodon-profile--account
@@ -207,7 +208,7 @@ MAX-ID is a flag to include the max_id pagination parameter."
        mastodon-profile--account)
     (user-error "Not in a mastodon profile")))
 
-(defun mastodon-profile--open-statuses-no-replies ()
+(defun mastodon-profile-open-statuses-no-replies ()
   "Open a profile buffer showing statuses without replies."
   (interactive)
   (if mastodon-profile--account
@@ -215,7 +216,7 @@ MAX-ID is a flag to include the max_id pagination parameter."
        mastodon-profile--account nil :no-replies)
     (user-error "Not in a mastodon profile")))
 
-(defun mastodon-profile--open-statuses-no-reblogs ()
+(defun mastodon-profile-open-statuses-no-reblogs ()
   "Open a profile buffer showing statuses without reblogs."
   (interactive)
   (if mastodon-profile--account
@@ -223,7 +224,7 @@ MAX-ID is a flag to include the max_id pagination parameter."
        mastodon-profile--account :no-reblogs)
     (user-error "Not in a mastodon profile")))
 
-(defun mastodon-profile--open-statuses-only-media ()
+(defun mastodon-profile-open-statuses-only-media ()
   "Open a profile buffer showing only statuses with media."
   (interactive)
   (if mastodon-profile--account
@@ -231,7 +232,7 @@ MAX-ID is a flag to include the max_id pagination parameter."
        mastodon-profile--account nil nil :only-media)
     (user-error "Not in a mastodon profile")))
 
-(defun mastodon-profile--open-statuses-tagged ()
+(defun mastodon-profile-open-statuses-tagged ()
   "Prompt for a hashtag and display a profile with only statuses containing it."
   (interactive)
   (let ((tag (read-string "Statuses containing tag: ")))
@@ -240,7 +241,7 @@ MAX-ID is a flag to include the max_id pagination parameter."
          mastodon-profile--account nil nil nil tag)
       (user-error "Not in a mastodon profile"))))
 
-(defun mastodon-profile--open-following ()
+(defun mastodon-profile-open-following ()
   "Open a profile buffer showing the accounts that current profile follows."
   (interactive)
   (if mastodon-profile--account
@@ -249,7 +250,7 @@ MAX-ID is a flag to include the max_id pagination parameter."
        #'mastodon-profile--format-user nil :headers)
     (user-error "Not in a mastodon profile")))
 
-(defun mastodon-profile--open-followers ()
+(defun mastodon-profile-open-followers ()
   "Open a profile buffer showing the accounts following the current profile."
   (interactive)
   (if mastodon-profile--account
@@ -258,34 +259,34 @@ MAX-ID is a flag to include the max_id pagination parameter."
        #'mastodon-profile--format-user nil :headers)
     (user-error "Not in a mastodon profile")))
 
-(defun mastodon-profile--view-favourites ()
+(defun mastodon-profile-view-favourites ()
   "Open a new buffer displaying the user's favourites."
   (interactive)
   (message "Loading your favourited toots...")
   (mastodon-tl--init "favourites" "favourites"
                      'mastodon-tl--timeline :headers))
 
-(defun mastodon-profile--view-bookmarks ()
+(defun mastodon-profile-view-bookmarks ()
   "Open a new buffer displaying the user's bookmarks."
   (interactive)
   (message "Loading your bookmarked toots...")
   (mastodon-tl--init "bookmarks" "bookmarks"
                      'mastodon-tl--timeline :headers))
 
-(defun mastodon-profile--add-account-to-list ()
+(defun mastodon-profile-add-account-to-list ()
   "Add account of current profile buffer to a list."
   (interactive)
   (if (not mastodon-profile--account)
       (user-error "No profile to add?")
     (let-alist mastodon-profile--account
-      (mastodon-views--add-account-to-list nil .id .acct))))
+      (mastodon-views-add-account-to-list nil .id .acct))))
 
-(defun mastodon-profile--account-search (query)
+(defun mastodon-profile-account-search (query)
   "Run a statuses search QUERY for the currently viewed account."
   (interactive "sSearch account for: ")
   (let* ((ep (mastodon-tl--buffer-property 'endpoint))
          (id (nth 1 (split-string ep "/"))))
-    (mastodon-search--query query "statuses" nil nil id)))
+    (mastodon-search-query query "statuses" nil nil id)))
 
 
 ;;; ACCOUNT PREFERENCES
@@ -313,7 +314,7 @@ If value is :json-false, return nil."
   (mastodon-profile--get-account-value
    pref #'mastodon-profile--get-source-values))
 
-(defun mastodon-profile--update-user-profile-note ()
+(defun mastodon-profile-update-user-profile-note ()
   "Fetch user's profile note and display for editing."
   (interactive)
   (let* ((source (mastodon-profile--get-source-values))
@@ -335,7 +336,7 @@ If value is :json-false, return nil."
                                      'display nil)
                          "/500 characters")
                         'read-only t
-                        'face 'font-lock-comment-face
+                        'face 'mastodon-toot-docs-face
                         'note-header t)
             "\n")
     (make-local-variable 'after-change-functions)
@@ -359,7 +360,7 @@ If value is :json-false, return nil."
     (add-text-properties (car count-region) (cdr count-region)
                          (list 'display count))))
 
-(defun mastodon-profile--update-profile-note-cancel ()
+(defun mastodon-profile-update-profile-note-cancel ()
   "Cancel updating user profile and kill buffer and window."
   (interactive)
   (when (y-or-n-p "Cancel updating your profile note?")
@@ -371,7 +372,7 @@ If value is :json-false, return nil."
                                                          (point-min))))
     (buffer-substring (cdr header-region) (point-max))))
 
-(defun mastodon-profile--user-profile-send-updated ()
+(defun mastodon-profile-user-profile-send-updated ()
   "Send PATCH request with the updated profile note.
 Ask for confirmation if length > 500 characters."
   (interactive)
@@ -443,24 +444,24 @@ If NO-FORCE, only fetch if `mastodon-profile-account-settings' is nil."
             mastodon-toot--content-nsfw (mastodon-profile--get-pref 'sensitive))
       mastodon-profile-account-settings)))
 
-(defun mastodon-profile--account-locked-toggle ()
+(defun mastodon-profile-account-locked-toggle ()
   "Toggle the locked status of your account.
 Locked means follow requests have to be approved."
   (interactive)
   (mastodon-profile--toggle-account-key 'locked))
 
-(defun mastodon-profile--account-discoverable-toggle ()
+(defun mastodon-profile-account-discoverable-toggle ()
   "Toggle the discoverable status of your account.
 Discoverable means the account is listed in the server directory."
   (interactive)
   (mastodon-profile--toggle-account-key 'discoverable))
 
-(defun mastodon-profile--account-bot-toggle ()
+(defun mastodon-profile-account-bot-toggle ()
   "Toggle the bot status of your account."
   (interactive)
   (mastodon-profile--toggle-account-key 'bot))
 
-(defun mastodon-profile--account-sensitive-toggle ()
+(defun mastodon-profile-account-sensitive-toggle ()
   "Toggle the sensitive status of your account.
 When enabled, statuses are marked as sensitive by default."
   (interactive)
@@ -486,7 +487,7 @@ Current settings are fetched from the server."
                                val)))
     (mastodon-profile--update-preference (symbol-name key) new-val)))
 
-(defun mastodon-profile--update-display-name ()
+(defun mastodon-profile-update-display-name ()
   "Update display name for your account."
   (interactive)
   (mastodon-profile--edit-string-value 'display_name))
@@ -504,7 +505,7 @@ Returns an alist."
              append (list (cons (car a-pair) (car b-pair))
                           (cons (cdr a-pair) (cdr b-pair))))))
 
-(defun mastodon-profile--update-meta-fields ()
+(defun mastodon-profile-update-meta-fields ()
   "Prompt for new metadata fields information and PATCH the server."
   (interactive)
   (let* ((url (mastodon-http--api "accounts/update_credentials"))
@@ -556,7 +557,7 @@ The endpoint only holds a few preferences. For others, see
                        (mastodon-http--get-json
                         (mastodon-http--api "preferences"))))))
 
-(defun mastodon-profile--view-preferences ()
+(defun mastodon-profile-view-preferences ()
   "View user preferences in another window."
   (interactive)
   (let* ((url (mastodon-http--api "preferences"))
@@ -611,14 +612,14 @@ FIELDS means provide a fields vector fetched by other means."
 
 (defun mastodon-profile--insert-statuses-pinned (pinned-statuses)
   "Insert each of the PINNED-STATUSES for a given account."
-  (mapc (lambda (pinned-status)
-          (insert
-           (concat "\n   "
-                   (propertize " pinned "
-                               'face '(:inherit success :box t))
-                   "   "))
-          (mastodon-tl--toot pinned-status))
-        pinned-statuses))
+  (cl-loop for s in pinned-statuses
+           do (progn
+                (insert
+                 (concat "\n   "
+                         (propertize " pinned "
+                                     'face '(:inherit success :box t))
+                         "   "))
+                (mastodon-tl--toot s))))
 
 (defun mastodon-profile--follows-p (list)
   "T if you have any relationship with the accounts in LIST."
@@ -729,25 +730,27 @@ MAX-ID is a flag to include the max_id pagination parameter."
                  ;; sharkey has no relationships endpoint, returns 500.
                  ;; or poss it has a different endpoint
                  ""
-                 (let* ((followsp (mastodon-profile--follows-p
-                                   (list .requested_by .following .followed_by)))
-                        (rels (mastodon-profile--relationships-get .id))
-                        (langs-filtered (if-let ((langs (alist-get 'languages rels)))
-                                            (concat " ("
-                                                    (mapconcat #'identity langs " ")
-                                                    ")")
-                                          "")))
-                   (if followsp
-                       (mastodon-tl--set-face
-                        (concat (when (eq .following t)
-                                  (format " | FOLLOWED BY YOU%s" langs-filtered))
-                                (when (eq .followed_by t)
-                                  " | FOLLOWS YOU")
-                                (when (eq .requested_by t)
-                                  " | REQUESTED TO FOLLOW YOU")
-                                "\n\n")
-                        'success)
-                     ""))))) ; for insert call
+               (let* ((followsp (mastodon-profile--follows-p
+                                 (list .requested_by .following .followed_by .blocked_by)))
+                      (rels (mastodon-profile--relationships-get .id))
+                      (langs-filtered (if-let* ((langs (alist-get 'languages rels)))
+                                          (concat " ("
+                                                  (mapconcat #'identity langs " ")
+                                                  ")")
+                                        "")))
+                 (if followsp
+                     (mastodon-tl--set-face
+                      (concat (when (eq .following t)
+                                (format " | FOLLOWED BY YOU%s" langs-filtered))
+                              (when (eq .followed_by t)
+                                " | FOLLOWS YOU")
+                              (when (eq .requested_by t)
+                                " | REQUESTED TO FOLLOW YOU")
+                              (when (eq .blocked_by t)
+                                " | BLOCKS YOU")
+                              "\n\n")
+                      'success)
+                   ""))))) ; for insert call
           (mastodon-media--inline-images (point-min) (point))
           ;; widget items description
           (mastodon-widget--create
@@ -767,14 +770,16 @@ MAX-ID is a flag to include the max_id pagination parameter."
         (let* ((inhibit-read-only t))
           ;; insert pinned toots first
           (when (and pinned (string= endpoint-type "statuses"))
-            (mastodon-profile--insert-statuses-pinned pinned)
-            (setq mastodon-tl--update-point (point))) ; updates after pinned toots
+            (let ((beg (point)))
+              (mastodon-profile--insert-statuses-pinned pinned)
+              (setq mastodon-tl--update-point (point))
+              (mastodon-media--inline-images beg (point)))) ; updates after pinned toots
           ;; insert items
           (funcall update-function json)
           (goto-char (point-min))
           (message
            (substitute-command-keys
-            ;; "\\[mastodon-profile--account-view-cycle]" ; not always bound?
+            ;; "\\[mastodon-profile-account-view-cycle]" ; not always bound?
             "\\`C-c C-c' to cycle profile views: toots, no replies, no boosts,\
  only media, followers, following.
 \\`C-c C-s' to search user's toots, \\`C-c \#' to search user's posts for a hashtag.")))))))
@@ -797,7 +802,7 @@ the format \"2000-01-31T00:00:00.000Z\"."
   (format-time-string "Joined: %d %B %Y"
                       (parse-iso8601-time-string joined)))
 
-(defun mastodon-profile--get-toot-author (&optional max-id)
+(defun mastodon-profile-get-toot-author (&optional max-id)
   "Open profile of author of toot under point.
 If toot is a boost, load the profile of the author of the original item.
 MAX-ID is a flag to include the max_id pagination parameter."
@@ -816,7 +821,7 @@ IMG-TYPE is the JSON key from the account data."
     (unless (string= img "/avatars/original/missing.png")
       (mastodon-media--get-media-link-rendering img))))
 
-(defun mastodon-profile--show-user (user-handle)
+(defun mastodon-profile-show-user (user-handle)
   "Query for USER-HANDLE from current status and show that user's profile."
   (interactive
    (list
@@ -842,7 +847,7 @@ IMG-TYPE is the JSON key from the account data."
           (message "Loading profile of user %s..." user-handle)
           (mastodon-profile--make-author-buffer account))))))
 
-(defun mastodon-profile--my-profile ()
+(defun mastodon-profile-my-profile ()
   "Show the profile of the currently signed in user."
   (interactive)
   (message "Loading your profile...")
@@ -935,7 +940,7 @@ These include the author, author of reblogged entries and any user mentioned."
 
 ;;; REMOVE
 
-(defun mastodon-profile--remove-user-from-followers (&optional id)
+(defun mastodon-profile-remove-user-from-followers (&optional id)
   "Remove a user from your followers.
 Optionally provide the ID of the account to remove."
   (interactive)
@@ -952,7 +957,7 @@ Optionally provide the ID of the account to remove."
                                (lambda (_)
                                  (message "Follower %s removed!" handle)))))))
 
-(defun mastodon-profile--remove-from-followers-at-point ()
+(defun mastodon-profile-remove-from-followers-at-point ()
   "Prompt for a user in the item at point and remove from followers."
   (interactive)
   (let* ((handles (mastodon-profile--extract-users-handles
@@ -961,12 +966,12 @@ Optionally provide the ID of the account to remove."
          (account (mastodon-profile--lookup-account-in-status
                    handle (mastodon-profile--item-json)))
          (id (alist-get 'id account)))
-    (mastodon-profile--remove-user-from-followers id)))
+    (mastodon-profile-remove-user-from-followers id)))
 
-(defun mastodon-profile--remove-from-followers-list ()
+(defun mastodon-profile-remove-from-followers-list ()
   "Select a user from your followers and remove from followers.
 Currently limited to 100 handles. If not found, try
-`mastodon-search--query'."
+`mastodon-search-query'."
   (interactive)
   (let* ((endpoint (format "accounts/%s/followers"
                            (mastodon-auth--get-account-id)))
@@ -975,11 +980,11 @@ Currently limited to 100 handles. If not found, try
          (handles (mastodon-tl--map-alist-vals-to-alist 'acct 'id response))
          (choice (completing-read "Remove from followers: " handles))
          (id (alist-get choice handles)))
-    (mastodon-profile--remove-user-from-followers id)))
+    (mastodon-profile-remove-user-from-followers id)))
 
 ;;; PRIVATE NOTES
 
-(defun mastodon-profile--add-private-note-to-account ()
+(defun mastodon-profile-add-private-note-to-account ()
   "Add a private note to an account.
 Can be called from a profile page or normal timeline.
 Send an empty note to clear an existing one."
@@ -1001,7 +1006,7 @@ NOTE-OLD is the text of any existing note."
                            (lambda (_)
                              (message "Private note on %s added!" handle)))))
 
-(defun mastodon-profile--view-account-private-note ()
+(defun mastodon-profile-view-account-private-note ()
   "Display the private note about a user."
   (interactive)
   (mastodon-profile--add-or-view-private-note
@@ -1049,7 +1054,7 @@ ACTION-FUN does the adding or viewing, MESSAGE is a prompt for
 
 ;;; FAMILIAR FOLLOWERS
 
-(defun mastodon-profile--show-familiar-followers ()
+(defun mastodon-profile-show-familiar-followers ()
   "Show a list of familiar followers.
 Familiar followers are accounts that you follow, and that follow
 the given account."
@@ -1076,7 +1081,7 @@ the given account."
     (if (null handles)
         (user-error "Looks like there are no familiar followers for this account")
       (let ((choice (completing-read "Show profile of user: " handles)))
-        (mastodon-profile--show-user choice)))))
+        (mastodon-profile-show-user choice)))))
 
 (provide 'mastodon-profile)
 ;;; mastodon-profile.el ends here

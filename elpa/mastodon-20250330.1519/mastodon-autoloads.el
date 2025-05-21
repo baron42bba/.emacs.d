@@ -11,6 +11,9 @@
 
 ;;; Generated autoloads from mastodon.el
 
+(autoload 'mastodon-forget-all-logins "mastodon" "\
+Delete `mastodon-client--token-file'.
+Also nil `mastodon-auth--token-alist'." t)
 (autoload 'mastodon "mastodon" "\
 Connect client to `mastodon-instance-url' instance.
 If there are any open mastodon.el buffers, switch to one instead.
@@ -102,7 +105,7 @@ disabled.
 
 ;;; Generated autoloads from mastodon-notifications.el
 
-(register-definition-prefixes "mastodon-notifications" '("mastodon-notifications-"))
+(register-definition-prefixes "mastodon-notifications" '("mastodon-"))
 
 
 ;;; Generated autoloads from mastodon-profile.el
@@ -117,7 +120,7 @@ disabled.
 
 ;;; Generated autoloads from mastodon-tl.el
 
-(register-definition-prefixes "mastodon-tl" '("mastodon-tl-" "with-mastodon-buffer"))
+(register-definition-prefixes "mastodon-tl" '("mastodon-" "with-mastodon-buffer"))
 
 
 ;;; Generated autoloads from mastodon-toot.el
@@ -128,11 +131,15 @@ disabled.
 
 ;;; Generated autoloads from mastodon-transient.el
 
-(register-definition-prefixes "mastodon-transient" '("mastodon-transient-"))
+(register-definition-prefixes "mastodon-transient" '("mastodon-"))
 
 
 ;;; Generated autoloads from mastodon-views.el
 
+(autoload 'mastodon-views-view-scheduled-toots "mastodon-views" "\
+Show the user's scheduled toots in a new buffer." t)
+(autoload 'mastodon-views-view-filters "mastodon-views" "\
+View the user's filters in a new buffer." t)
 (register-definition-prefixes "mastodon-views" '("mastodon-views-"))
 
 

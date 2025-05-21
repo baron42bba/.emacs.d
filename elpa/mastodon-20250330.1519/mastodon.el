@@ -6,9 +6,9 @@
 ;; Author: Johnson Denen <johnson.denen@gmail.com>
 ;;         Marty Hiatt <mousebot@disroot.org>
 ;; Maintainer: Marty Hiatt <mousebot@disroot.org>
-;; Package-Version: 20241223.1040
-;; Package-Revision: e2443f1cd425
-;; Package-Requires: ((emacs "28.1") (request "0.3.0") (persist "0.4") (tp "0.6"))
+;; Package-Version: 20250330.1519
+;; Package-Revision: 163ba2b0b89a
+;; Package-Requires: ((emacs "28.1") (persist "0.4") (tp "0.7"))
 ;; Homepage: https://codeberg.org/martianh/mastodon.el
 
 ;; This file is not part of GNU Emacs.
@@ -47,6 +47,7 @@
 (require 'mastodon-toot)
 (require 'mastodon-search)
 (require 'mastodon-transient)
+(require 'mastodon-tl)
 
 (declare-function discover-add-context-menu "discover")
 (declare-function emojify-mode "emojify")
@@ -55,58 +56,62 @@
 (autoload 'mastodon-auth--get-account-name "mastodon-auth")
 (autoload 'mastodon-auth--user-acct "mastodon-auth")
 (autoload 'mastodon-discover "mastodon-discover")
-(autoload 'mastodon-notifications--follow-request-accept "mastodon-notifications")
-(autoload 'mastodon-notifications--follow-request-reject "mastodon-notifications")
-(autoload 'mastodon-notifications--get-mentions "mastodon-notifications")
+(autoload 'mastodon-notifications-follow-request-accept "mastodon-notifications")
+(autoload 'mastodon-notifications-follow-request-reject "mastodon-notifications")
+(autoload 'mastodon-notifications-get-mentions "mastodon-notifications")
 (autoload 'mastodon-notifications--timeline "mastodon-notifications")
+(autoload 'mastodon-notifications-policy "mastodon-notifications")
+(autoload 'mastodon-notifications-requests "mastodon-notifications")
 (autoload 'mastodon-profile--fetch-server-account-settings "mastodon-profile")
-(autoload 'mastodon-profile--get-toot-author "mastodon-profile")
+(autoload 'mastodon-profile-get-toot-author "mastodon-profile")
 (autoload 'mastodon-profile--make-author-buffer "mastodon-profile")
-(autoload 'mastodon-profile--my-profile "mastodon-profile")
-(autoload 'mastodon-profile--show-user "mastodon-profile")
-(autoload 'mastodon-profile--update-user-profile-note "mastodon-profile")
-(autoload 'mastodon-profile--view-bookmarks "mastodon-profile")
-(autoload 'mastodon-profile--view-favourites "mastodon-profile")
-(autoload 'mastodon-tl--block-user "mastodon-tl")
-(autoload 'mastodon-tl--follow-user "mastodon-tl")
-(autoload 'mastodon-tl--followed-tags-timeline "mastodon-tl")
-(autoload 'mastodon-tl--get-buffer-type "mastodon-tl")
-(autoload 'mastodon-tl--get-federated-timeline "mastodon-tl")
-(autoload 'mastodon-tl--get-home-timeline "mastodon-tl")
-(autoload 'mastodon-tl--get-local-timeline "mastodon-tl")
-(autoload 'mastodon-tl--get-tag-timeline "mastodon-tl")
-(autoload 'mastodon-tl--goto-next-item "mastodon-tl")
-(autoload 'mastodon-tl--goto-prev-item "mastodon-tl")
-(autoload 'mastodon-tl--init-sync "mastodon-tl")
-(autoload 'mastodon-tl--list-followed-tags "mastodon-tl")
-(autoload 'mastodon-tl--mute-user "mastodon-tl")
-(autoload 'mastodon-tl--next-tab-item "mastodon-tl")
-(autoload 'mastodon-tl--poll-vote "mastodon-http")
-(autoload 'mastodon-tl--previous-tab-item "mastodon-tl")
-(autoload 'mastodon-tl--thread "mastodon-tl")
-(autoload 'mastodon-tl--toggle-spoiler-text-in-toot "mastodon-tl")
-(autoload 'mastodon-tl--unblock-user "mastodon-tl")
-(autoload 'mastodon-tl--unfollow-user "mastodon-tl")
-(autoload 'mastodon-tl--unmute-user "mastodon-tl")
-(autoload 'mastodon-tl--report-to-mods "mastodon-tl")
-(autoload 'mastodon-tl--update "mastodon-tl")
-(autoload 'mastodon-toot--edit-toot-at-point "mastodon-toot")
+(autoload 'mastodon-profile-my-profile "mastodon-profile")
+(autoload 'mastodon-profile-show-user "mastodon-profile")
+(autoload 'mastodon-profile-update-user-profile-note "mastodon-profile")
+(autoload 'mastodon-profile-view-bookmarks "mastodon-profile")
+(autoload 'mastodon-profile-view-favourites "mastodon-profile")
+(autoload 'mastodon-toot-edit-toot-at-point "mastodon-toot")
 (when (require 'lingva nil :no-error)
-  (autoload 'mastodon-toot--translate-toot-text "mastodon-toot"))
+  (autoload 'mastodon-toot-translate-toot-text "mastodon-toot"))
 (autoload 'mastodon-toot--view-toot-history "mastodon-tl")
-(autoload 'mastodon-views--view-follow-suggestions "mastodon-views")
-(autoload 'mastodon-views--view-filters "mastodon-views")
-(autoload 'mastodon-views--view-follow-requests "mastodon-views")
-(autoload 'mastodon-views--view-instance-description "mastodon-views")
-(autoload 'mastodon-views--view-lists "mastodon-views")
-(autoload 'mastodon-views--view-scheduled-toots "mastodon-views")
-(autoload 'mastodon-tl--dm-user "mastodon-tl")
-(autoload 'mastodon-tl--scroll-up-command "mastodon-tl")
+
+;; for M-x visibility
+;; (views.el uses `mastodon-mode-map', so we can't easily require it)
+(autoload 'mastodon-views-view-follow-suggestions "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-filters "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-follow-requests "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-own-instance "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-instance-description "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-lists "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-scheduled-toots "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-add-account-to-list "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-add-toot-account-at-point-to-list "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-create-list "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-create-filter "mastodon-views"
+  nil :interactive)
+(autoload 'mastodon-views-view-list-timeline "mastodon-views"
+  nil :interactive)
+
 (autoload 'special-mode "simple")
-(autoload 'mastodon-tl--thread-do "mastodon-tl")
 
 (defvar mastodon-tl--highlight-current-toot)
 (defvar mastodon-notifications--map)
+(defvar mastodon-client--token-file)
+
+(defvar mastodon-notifications-grouped-types
+  '("reblog" "favourite") ;; TODO: implement follow!
+  "List of notification types for which grouping is implemented.
+Used in `mastodon-notifications-get'")
 
 (defgroup mastodon nil
   "Interface with Mastodon."
@@ -192,87 +197,108 @@ and X others...\"."
   (interactive)
   (quit-window 'kill))
 
+(defvar mastodon-client--active-user-details-plist)
+(defvar mastodon-auth--token-alist)
+
+;;;###autoload
+(defun mastodon-forget-all-logins ()
+  "Delete `mastodon-client--token-file'.
+Also nil `mastodon-auth--token-alist'."
+  (interactive)
+  (when (y-or-n-p "Remove all saved login data?")
+    (if (not (file-exists-p mastodon-client--token-file))
+        (message "No plstore file")
+      (delete-file mastodon-client--token-file)
+      (message "File %s deleted." mastodon-client--token-file))
+    ;; nil some vars too:
+    (setq mastodon-client--active-user-details-plist nil)
+    (setq mastodon-auth--token-alist nil)))
+
 (defvar mastodon-mode-map
   (let ((map (make-sparse-keymap)))
     ;; navigation inside a timeline
-    (define-key map (kbd "n")      #'mastodon-tl--goto-next-item)
-    (define-key map (kbd "p")      #'mastodon-tl--goto-prev-item)
-    (define-key map (kbd "M-n")    #'mastodon-tl--next-tab-item)
-    (define-key map (kbd "M-p")    #'mastodon-tl--previous-tab-item)
-    (define-key map [?\t]          #'mastodon-tl--next-tab-item)
-    (define-key map [backtab]      #'mastodon-tl--previous-tab-item)
-    (define-key map [?\S-\t]       #'mastodon-tl--previous-tab-item)
-    (define-key map [?\M-\t]       #'mastodon-tl--previous-tab-item)
+    (define-key map (kbd "n")      #'mastodon-tl-goto-next-item)
+    (define-key map (kbd "p")      #'mastodon-tl-goto-prev-item)
+    (define-key map (kbd "M-n")    #'mastodon-tl-next-tab-item)
+    (define-key map (kbd "M-p")    #'mastodon-tl-previous-tab-item)
+    (define-key map [?\t]          #'mastodon-tl-next-tab-item)
+    (define-key map [backtab]      #'mastodon-tl-previous-tab-item)
+    (define-key map [?\S-\t]       #'mastodon-tl-previous-tab-item)
+    (define-key map [?\M-\t]       #'mastodon-tl-previous-tab-item)
     (define-key map (kbd "l")      #'recenter-top-bottom)
     ;; navigation between timelines
-    (define-key map (kbd "#")      #'mastodon-tl--get-tag-timeline)
-    (define-key map (kbd "\"")     #'mastodon-tl--list-followed-tags)
-    (define-key map (kbd "'")      #'mastodon-tl--followed-tags-timeline)
-    (define-key map (kbd "A")      #'mastodon-profile--get-toot-author)
-    (define-key map (kbd "F")      #'mastodon-tl--get-federated-timeline)
-    (define-key map (kbd "H")      #'mastodon-tl--get-home-timeline)
-    (define-key map (kbd "L")      #'mastodon-tl--get-local-timeline)
+    (define-key map (kbd "#")      #'mastodon-tl-get-tag-timeline)
+    (define-key map (kbd "\"")     #'mastodon-tl-list-followed-tags)
+    (define-key map (kbd "'")      #'mastodon-tl-followed-tags-timeline)
+    (define-key map (kbd "C-'")   #'mastodon-tl-tag-group-timeline)
+    (define-key map (kbd "A")      #'mastodon-profile-get-toot-author)
+    (define-key map (kbd "F")      #'mastodon-tl-get-federated-timeline)
+    (define-key map (kbd "H")      #'mastodon-tl-get-home-timeline)
+    (define-key map (kbd "L")      #'mastodon-tl-get-local-timeline)
     (define-key map (kbd "N")      #'mastodon-notifications-get)
-    (define-key map (kbd "@")      #'mastodon-notifications--get-mentions)
-    (define-key map (kbd "P")      #'mastodon-profile--show-user)
-    (define-key map (kbd "s")      #'mastodon-search--query)
+    (define-key map (kbd "S-C-n")  #'mastodon-notifications-requests)
+    (define-key map (kbd "@")      #'mastodon-notifications-get-mentions)
+    (define-key map (kbd "P")      #'mastodon-profile-show-user)
+    (define-key map (kbd "s")      #'mastodon-search-query)
     (define-key map (kbd "/")      #'mastodon-switch-to-buffer)
-    (define-key map (kbd "\\")     #'mastodon-tl--get-remote-local-timeline)
+    (define-key map (kbd "\\")     #'mastodon-tl-get-remote-local-timeline)
     ;; quitting mastodon
     (define-key map (kbd "q")      #'kill-current-buffer)
     (define-key map (kbd "Q")      #'mastodon-kill-window)
     (define-key map (kbd "M-C-q")  #'mastodon-kill-all-buffers)
     ;; toot actions
-    (define-key map (kbd "c")      #'mastodon-tl--toggle-spoiler-text-in-toot)
-    (define-key map (kbd "b")      #'mastodon-toot--toggle-boost)
-    (define-key map (kbd "f")      #'mastodon-toot--toggle-favourite)
-    (define-key map (kbd "k")      #'mastodon-toot--toggle-bookmark)
-    (define-key map (kbd "r")      #'mastodon-toot--reply)
-    (define-key map (kbd "C")      #'mastodon-toot--copy-toot-url)
-    (define-key map (kbd "o")      #'mastodon-toot--browse-toot-url)
-    (define-key map (kbd "v")      #'mastodon-tl--poll-vote)
-    (define-key map (kbd "E")      #'mastodon-toot--view-toot-edits)
-    (define-key map (kbd "T")      #'mastodon-tl--thread)
-    (define-key map (kbd "RET")    #'mastodon-tl--thread)
-    (define-key map (kbd "m")      #'mastodon-tl--dm-user)
+    (define-key map (kbd "c")      #'mastodon-tl-toggle-spoiler-text-in-toot)
+    (define-key map (kbd "b")      #'mastodon-toot-toggle-boost)
+    (define-key map (kbd "f")      #'mastodon-toot-toggle-favourite)
+    (define-key map (kbd "k")      #'mastodon-toot-toggle-bookmark)
+    (define-key map (kbd "r")      #'mastodon-toot-reply)
+    (define-key map (kbd "C")      #'mastodon-toot-copy-toot-url)
+    (define-key map (kbd "o")      #'mastodon-toot-browse-toot-url)
+    (define-key map (kbd "v")      #'mastodon-tl-poll-vote)
+    (define-key map (kbd "E")      #'mastodon-toot-view-toot-edits)
+    (define-key map (kbd "T")      #'mastodon-tl-thread)
+    (define-key map (kbd "RET")    #'mastodon-tl-thread)
+    (define-key map (kbd "m")      #'mastodon-tl-dm-user)
+    (define-key map (kbd "=")      #'mastodon-tl-view-first-full-image)
     (when (require 'lingva nil :no-error)
-      (define-key map (kbd "a")    #'mastodon-toot--translate-toot-text))
-    (define-key map (kbd ",")      #'mastodon-toot--list-favouriters)
-    (define-key map (kbd ".")      #'mastodon-toot--list-boosters)
-    (define-key map (kbd ";")      #'mastodon-views--view-instance-description)
+      (define-key map (kbd "a")    #'mastodon-toot-translate-toot-text))
+    (define-key map (kbd ",")      #'mastodon-toot-list-favouriters)
+    (define-key map (kbd ".")      #'mastodon-toot-list-boosters)
+    (define-key map (kbd ";")      #'mastodon-views-view-instance-description)
     ;; override special mode binding
     (define-key map (kbd "g")      #'undefined)
-    (define-key map (kbd "g")      #'mastodon-tl--update)
+    (define-key map (kbd "g")      #'mastodon-tl-update)
     ;; this is now duplicated by 'g', cd remove/use for else:
-    (define-key map (kbd "u")      #'mastodon-tl--update)
+    (define-key map (kbd "u")      #'mastodon-tl-update)
     ;; own toot actions:
     (define-key map (kbd "t")      #'mastodon-toot)
-    (define-key map (kbd "d")      #'mastodon-toot--delete-toot)
-    (define-key map (kbd "D")      #'mastodon-toot--delete-and-redraft-toot)
-    (define-key map (kbd "i")      #'mastodon-toot--pin-toot-toggle)
-    (define-key map (kbd "e")      #'mastodon-toot--edit-toot-at-point)
+    (define-key map (kbd "d")      #'mastodon-toot-delete-toot)
+    (define-key map (kbd "D")      #'mastodon-toot-delete-and-redraft-toot)
+    (define-key map (kbd "i")      #'mastodon-toot-pin-toot-toggle)
+    (define-key map (kbd "e")      #'mastodon-toot-edit-toot-at-point)
     ;; user actions
-    (define-key map (kbd "W")      #'mastodon-tl--follow-user)
-    (define-key map (kbd "C-S-W")  #'mastodon-tl--unfollow-user)
-    (define-key map (kbd "B")      #'mastodon-tl--block-user)
-    (define-key map (kbd "C-S-B")  #'mastodon-tl--unblock-user)
-    (define-key map (kbd "M")      #'mastodon-tl--mute-user)
-    (define-key map (kbd "C-S-M")  #'mastodon-tl--unmute-user)
-    (define-key map (kbd "Z")      #'mastodon-tl--report-to-mods)
+    (define-key map (kbd "W")      #'mastodon-tl-follow-user)
+    (define-key map (kbd "C-S-W")  #'mastodon-tl-unfollow-user)
+    (define-key map (kbd "B")      #'mastodon-tl-block-user)
+    (define-key map (kbd "C-S-B")  #'mastodon-tl-unblock-user)
+    (define-key map (kbd "M")      #'mastodon-tl-mute-user)
+    (define-key map (kbd "C-S-M")  #'mastodon-tl-unmute-user)
+    (define-key map (kbd "Z")      #'mastodon-tl-report-to-mods)
     ;; own profile
-    (define-key map (kbd "O")      #'mastodon-profile--my-profile)
-    (define-key map (kbd "U")      #'mastodon-profile--update-user-profile-note)
-    (define-key map (kbd "V")      #'mastodon-profile--view-favourites)
-    (define-key map (kbd "K")      #'mastodon-profile--view-bookmarks)
+    (define-key map (kbd "O")      #'mastodon-profile-my-profile)
+    (define-key map (kbd "U")      #'mastodon-profile-update-user-profile-note)
+    (define-key map (kbd "V")      #'mastodon-profile-view-favourites)
+    (define-key map (kbd "K")      #'mastodon-profile-view-bookmarks)
     (define-key map (kbd ":")      #'mastodon-user-settings)
+    (define-key map (kbd "C-:")    #'mastodon-notifications-policy)
     ;; minor views
-    (define-key map (kbd "R")      #'mastodon-views--view-follow-requests)
-    (define-key map (kbd "S")      #'mastodon-views--view-scheduled-toots)
-    (define-key map (kbd "I")      #'mastodon-views--view-filters)
-    (define-key map (kbd "G")      #'mastodon-views--view-follow-suggestions)
-    (define-key map (kbd "X")      #'mastodon-views--view-lists)
-    (define-key map (kbd "SPC")    #'mastodon-tl--scroll-up-command)
-    (define-key map (kbd "!")      #'mastodon-tl--fold-post-toggle)
+    (define-key map (kbd "R")      #'mastodon-views-view-follow-requests)
+    (define-key map (kbd "S")      #'mastodon-views-view-scheduled-toots)
+    (define-key map (kbd "I")      #'mastodon-views-view-filters)
+    (define-key map (kbd "G")      #'mastodon-views-view-follow-suggestions)
+    (define-key map (kbd "X")      #'mastodon-views-view-lists)
+    (define-key map (kbd "SPC")    #'mastodon-tl-scroll-up-command)
+    (define-key map (kbd "!")      #'mastodon-tl-fold-post-toggle)
     (define-key map (kbd "z")      #'bury-buffer)
     map)
   "Keymap for `mastodon-mode'.")
@@ -303,7 +329,7 @@ and X others...\"."
   "Face used for content warning.")
 
 (defface mastodon-toot-docs-face
-  `((t :inherit font-lock-comment-face))
+  `((t :inherit shadow))
   "Face used for documentation in toot compose buffer.
 If `mastodon-tl--enable-proportional-fonts' is changed,
 mastodon.el needs to be re-loaded for this to be correctly set.")
@@ -343,7 +369,7 @@ Prority in switching is given to timeline views."
       ;; we need to update credential-account in case setting have been changed
       ;; outside mastodon.el in the meantime:
       (mastodon-return-credential-account :force)
-      (mastodon-tl--get-home-timeline)
+      (mastodon-tl-get-home-timeline)
       (message "Loading fediverse account %s on %s..."
                (mastodon-auth--user-acct)
                mastodon-instance-url))))
@@ -408,8 +434,11 @@ MAX-ID is a request parameter for pagination."
      "notifications"
      'mastodon-notifications--timeline
      type
-     (when max-id
-       `(("max_id" . ,(mastodon-tl--buffer-property 'max-id))))
+     `(,@(when mastodon-group-notifications
+           (mastodon-http--build-array-params-alist
+            "grouped_types[]" mastodon-notifications-grouped-types))
+       ,@(when max-id
+           `(("max_id" . ,(mastodon-tl--buffer-property 'max-id)))))
      nil nil nil
      (if (or (not mastodon-group-notifications)
              ;; if version less than 1st grouped notifs release:
@@ -530,7 +559,7 @@ Calls `mastodon-tl--get-buffer-type', which see."
              (require 'emojify nil :noerror))
     (emojify-mode t)
     (when mastodon-toot--enable-custom-instance-emoji
-      (mastodon-toot--enable-custom-emoji)))
+      (mastodon-toot-enable-custom-emoji)))
   (mastodon-profile--fetch-server-account-settings)
   (when (and mastodon-tl--highlight-current-toot
              (fboundp #'cursor-face-highlight-mode))

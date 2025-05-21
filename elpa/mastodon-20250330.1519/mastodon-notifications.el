@@ -52,8 +52,8 @@
 (autoload 'mastodon-tl--reload-timeline-or-profile "mastodon-tl")
 (autoload 'mastodon-tl--spoiler "mastodon-tl")
 (autoload 'mastodon-tl--item-id "mastodon-tl")
-(autoload 'mastodon-tl--update "mastodon-tl")
-(autoload 'mastodon-views--view-follow-requests "mastodon-views")
+(autoload 'mastodon-tl-update "mastodon-tl")
+(autoload 'mastodon-views-view-follow-requests "mastodon-views")
 (autoload 'mastodon-tl--current-filters "mastodon-views")
 (autoload 'mastodon-tl--render-text "mastodon-tl")
 (autoload 'mastodon-notifications-get "mastodon")
@@ -64,10 +64,13 @@
 (autoload 'mastodon-tl--image-trans-check "mastodon-tl")
 (autoload 'mastodon-tl--symbol "mastodon-tl")
 (autoload 'mastodon-tl--display-or-uname "mastodon-tl")
-(autoload 'mastodon-tl--goto-next-item "mastodon-tl")
+(autoload 'mastodon-tl-goto-next-item "mastodon-tl")
 (autoload 'mastodon-tl--buffer-type-eq "mastodon-tl")
 (autoload 'mastodon-tl--buffer-property "mastodon-tl")
 (autoload 'mastodon-http--patch "mastodon-http")
+(autoload 'mastodon-views--minor-view "mastodon-views")
+(autoload 'mastodon-tl--goto-first-item "mastodon-tl")
+(autoload 'mastodon-tl--init-sync "mastodon-tl")
 
 ;; notifications defcustoms moved into mastodon.el
 ;; as some need to be available without loading this file
@@ -85,16 +88,17 @@
 (defvar mastodon-profile-note-in-foll-reqs-max-length)
 (defvar mastodon-group-notifications)
 (defvar mastodon-notifications-grouped-names-count)
-
+(defvar mastodon-tl--link-keymap)
+(defvar mastodon-tl--update-point)
 ;;; VARIABLES
 
 (defvar mastodon-notifications--map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map mastodon-mode-map)
-    (define-key map (kbd "a") #'mastodon-notifications--follow-request-accept)
-    (define-key map (kbd "j") #'mastodon-notifications--follow-request-reject)
-    (define-key map (kbd "C-k") #'mastodon-notifications--clear-current)
-    (define-key map (kbd "C-c C-c") #'mastodon-notifications--cycle-type)
+    (define-key map (kbd "a") #'mastodon-notifications-follow-request-accept)
+    (define-key map (kbd "j") #'mastodon-notifications-follow-request-reject)
+    (define-key map (kbd "C-k") #'mastodon-notifications-clear-current)
+    (define-key map (kbd "C-c C-c") #'mastodon-notifications-cycle-type)
     map)
   "Keymap for viewing notifications.")
 
@@ -106,14 +110,14 @@
 
 (defvar mastodon-notifications--filter-types-alist
   '(("all"                    . mastodon-notifications-get)
-    ("favourite"              . mastodon-notifications--get-favourites)
-    ("reblog"                 . mastodon-notifications--get-boosts)
-    ("mention"                . mastodon-notifications--get-mentions)
-    ("poll"                   . mastodon-notifications--get-polls)
-    ("follow_request"         . mastodon-notifications--get-follow-requests)
-    ("follow"                 . mastodon-notifications--get-follows)
-    ("status"                 . mastodon-notifications--get-statuses)
-    ("update"                 . mastodon-notifications--get-edits))
+    ("favourite"              . mastodon-notifications-get-favourites)
+    ("reblog"                 . mastodon-notifications-get-boosts)
+    ("mention"                . mastodon-notifications-get-mentions)
+    ("poll"                   . mastodon-notifications-get-polls)
+    ("follow_request"         . mastodon-notifications-get-follow-requests)
+    ("follow"                 . mastodon-notifications-get-follows)
+    ("status"                 . mastodon-notifications-get-statuses)
+    ("update"                 . mastodon-notifications-get-edits))
   "An alist of notification types and their corresponding load functions.
 Notification types are named according to their name on the server.")
 
@@ -127,10 +131,6 @@ Notification types are named according to their name on the server.")
     ("Posted"               . "a post")
     ("Edited"               . "their post"))
   "Alist of subjects for notification types.")
-
-(defvar mastodon-notifications-grouped-types
-  '(follow reblog favourite)
-  "List of notification types for which grouping is implemented.")
 
 (defvar mastodon-notifications--action-alist
   '((reblog                . "Boosted")
@@ -209,18 +209,18 @@ follow-requests view."
                response
                (lambda (_)
                  (if f-reqs-view-p
-                     (mastodon-views--view-follow-requests)
+                     (mastodon-views-view-follow-requests)
                    (mastodon-tl--reload-timeline-or-profile))
                  (message "Follow request of %s (@%s) %s!"
                           .username .acct (if reject "rejected" "accepted")))))))))))
 
-(defun mastodon-notifications--follow-request-accept ()
+(defun mastodon-notifications-follow-request-accept ()
   "Accept a follow request.
 Can be called in notifications view or in follow-requests view."
   (interactive)
   (mastodon-notifications--follow-request-process))
 
-(defun mastodon-notifications--follow-request-reject ()
+(defun mastodon-notifications-follow-request-reject ()
   "Reject a follow request.
 Can be called in notifications view or in follow-requests view."
   (interactive)
@@ -298,8 +298,7 @@ Can be called in notifications view or in follow-requests view."
                 str))))
          (status (mastodon-tl--field 'status note))
          (follower (alist-get 'account note))
-         (follower-name (or (alist-get 'display_name follower)
-                            (alist-get 'username follower)))
+         (follower-name (mastodon-notifications--follower-name follower))
          (filtered (mastodon-tl--field 'filtered status))
          (filters (when filtered
                     (mastodon-tl--current-filters filtered))))
@@ -336,8 +335,7 @@ ACCOUNTS is data of the accounts that have reacted to the notification."
                     str))))
              (follower (when (member type '(follow follow_request))
                          (car accounts)))
-             (follower-name (or (alist-get 'display_name follower)
-                                (alist-get 'username follower)))
+             (follower-name (mastodon-notifications--follower-name follower))
              (filtered (mastodon-tl--field 'filtered status))
              (filters (when filtered
                         (mastodon-tl--current-filters filtered))))
@@ -358,6 +356,12 @@ ACCOUNTS is data of the accounts that have reacted to the notification."
              status)
            folded group accounts))))))
 
+(defun mastodon-notifications--follower-name (follower)
+  "Return display_name or username of FOLLOWER."
+  (if (not (string= "" (alist-get 'display_name follower)))
+      (alist-get 'display_name follower)
+    (alist-get 'username follower)))
+
 (defun mastodon-notifications--comment-note-text (str)
   "Add comment face to all text in STR with `shr-text' face only."
   (with-temp-buffer
@@ -367,7 +371,7 @@ ACCOUNTS is data of the accounts that have reacted to the notification."
       (while (setq prop (text-property-search-forward 'face 'shr-text t))
         (add-text-properties (prop-match-beginning prop)
                              (prop-match-end prop)
-                             '(face (font-lock-comment-face shr-text)))))
+                             '(face (mastodon-toot-docs-face shr-text)))))
     (buffer-string)))
 
 (defun mastodon-notifications--body-arg
@@ -377,7 +381,7 @@ The string returned is passed to `mastodon-notifications--insert-note'.
 TYPE is a symbol, a member of `mastodon-notifiations--types'.
 FILTERS STATUS PROFILE-NOTE FOLLOWER-NAME GROUP NOTE."
   (let ((body
-         (if-let ((match (assoc "warn" filters)))
+         (if-let* ((match (assoc "warn" filters)))
              (mastodon-tl--spoiler status (cadr match))
            (mastodon-tl--clean-tabs-and-nl
             (cond ((mastodon-tl--has-spoiler status)
@@ -578,23 +582,22 @@ When AVATAR, include the account's avatar image."
   "Display grouped notifications in JSON.
 NO-GROUP means don't render grouped notifications."
   ;; (setq masto-grouped-notifs json)
-  (if no-group
-      (cl-loop for x in json
-               do (mastodon-notifications--format-note x))
-    (let ((groups (alist-get 'notification_groups json)))
+  (let ((start-pos (point)))
+    (if no-group
+        (cl-loop for x in json
+                 do (mastodon-notifications--format-note x))
       (cl-loop
-       for g in groups
-       for start-pos = (point)
+       for g in (alist-get 'notification_groups json)
        for accounts = (mastodon-notifications--group-accounts
                        (alist-get 'sample_account_ids g)
                        (alist-get 'accounts json))
        for type = (alist-get 'type g)
        for status = (mastodon-notifications--status-or-event g type json)
-       do (mastodon-notifications--format-group-note g status accounts)
-       (when mastodon-tl--display-media-p
-         ;; images-in-notifs custom is handeld in
-         ;; `mastodon-tl--media-attachment', not here
-         (mastodon-media--inline-images start-pos (point)))))))
+       do (mastodon-notifications--format-group-note g status accounts)))
+    (when mastodon-tl--display-media-p
+      ;; images-in-notifs custom is handeld in
+      ;; `mastodon-tl--media-attachment', not here
+      (mastodon-media--inline-images start-pos (point)))))
 
 (defun mastodon-notifications--status-or-event (group type json)
   "Return a notification's status or event data.
@@ -609,6 +612,10 @@ Using GROUP data, notification TYPE, and overall notifs JSON."
      'id
      (alist-get 'statuses json))))
 
+(defun mastodon-notifications--empty-group-json-p (json)
+  "Non-nil if JSON is empty grouped notifs data."
+  (equal json '((accounts) (statuses) (notification_groups))))
+
 (defun mastodon-notifications--timeline (json &optional type update)
   "Format JSON in Emacs buffer.
 Optionally specify TYPE.
@@ -621,23 +628,32 @@ UPDATE means we are updating, so skip some things."
        (or type "all")
        (lambda (widget &rest _ignore)
          (let ((value (widget-value widget)))
-           (mastodon-notifications--get-type value)))
+           (mastodon-notifications-get-type value)))
        :newline)
       (insert "\n"))
+    ;; filtered/requests message:
+    (when (mastodon-notifications--notif-requests)
+      (insert
+       (substitute-command-keys
+        "You have filtered notifications. \
+\\[mastodon-notifications-requests] to view requests.\n\n")))
+    ;; set update point:
+    (setq mastodon-tl--update-point (point))
+    ;; render:
     (mastodon-notifications--render json
                                     (not mastodon-group-notifications))
     (goto-char (point-min))
     ;; set last read notif ID:
     (save-excursion
-      (mastodon-tl--goto-next-item :no-refresh)
+      (mastodon-tl-goto-next-item :no-refresh)
       (let ((id (mastodon-tl--property 'item-id))) ;; notif not base
         (mastodon-notifications--set-last-read id)))
     (unless update ;; already in tl--update
-      (mastodon-tl--goto-next-item))))
+      (mastodon-tl-goto-next-item))))
 
 ;;; VIEW LOADING FUNCTIONS
 
-(defun mastodon-notifications--get-type (&optional type)
+(defun mastodon-notifications-get-type (&optional type)
   "Read a notification type and load its timeline.
 Optionally specify TYPE."
   (interactive)
@@ -649,7 +665,7 @@ Optionally specify TYPE."
               choice mastodon-notifications--filter-types-alist
               nil nil #'equal))))
 
-(defun mastodon-notifications--cycle-type (&optional prefix)
+(defun mastodon-notifications-cycle-type (&optional prefix)
   "Cycle the current notifications view.
 With arg PREFIX, `completing-read' a type and load it."
   (interactive "P")
@@ -680,44 +696,44 @@ With arg PREFIX, `completing-read' a type and load it."
       (or (cadr (member type mastodon-notifications--types))
           (car mastodon-notifications--types)))))
 
-(defun mastodon-notifications--get-mentions ()
+(defun mastodon-notifications-get-mentions ()
   "Display mention notifications in buffer."
   (interactive)
   (mastodon-notifications-get "mention" "mentions"))
 
-(defun mastodon-notifications--get-favourites ()
+(defun mastodon-notifications-get-favourites ()
   "Display favourite notifications in buffer."
   (interactive)
   (mastodon-notifications-get "favourite" "favourites"))
 
-(defun mastodon-notifications--get-boosts ()
+(defun mastodon-notifications-get-boosts ()
   "Display boost notifications in buffer."
   (interactive)
   (mastodon-notifications-get "reblog" "boosts"))
 
-(defun mastodon-notifications--get-polls ()
+(defun mastodon-notifications-get-polls ()
   "Display poll notifications in buffer."
   (interactive)
   (mastodon-notifications-get "poll" "polls"))
 
-(defun mastodon-notifications--get-statuses ()
+(defun mastodon-notifications-get-statuses ()
   "Display status notifications in buffer.
 Status notifications are created when you call
-`mastodon-tl--enable-notify-user-posts'."
+`mastodon-tl-enable-notify-user-posts'."
   (interactive)
   (mastodon-notifications-get "status" "statuses"))
 
-(defun mastodon-notifications--get-follows ()
+(defun mastodon-notifications-get-follows ()
   "Display follow notifications in buffer."
   (interactive)
   (mastodon-notifications-get "follow" "follows"))
 
-(defun mastodon-notifications--get-follow-requests ()
+(defun mastodon-notifications-get-follow-requests ()
   "Display follow request notifications in buffer."
   (interactive)
   (mastodon-notifications-get "follow_request" "follow-requests"))
 
-(defun mastodon-notifications--get-edits ()
+(defun mastodon-notifications-get-edits ()
   "Display edited post notifications in buffer."
   (interactive)
   (mastodon-notifications-get "update" "edits"))
@@ -728,7 +744,7 @@ Status notifications are created when you call
 
 ;;; CLEAR/DISMISS NOTIFS
 
-(defun mastodon-notifications--clear-all ()
+(defun mastodon-notifications-clear-all ()
   "Clear all notifications."
   (interactive)
   (when (y-or-n-p "Clear all notifications?")
@@ -741,14 +757,17 @@ Status notifications are created when you call
                     (mastodon-tl--reload-timeline-or-profile))
                   (message "All notifications cleared!"))))))
 
-(defun mastodon-notifications--clear-current ()
+(defun mastodon-notifications-clear-current ()
   "Dismiss the notification at point."
   (interactive)
-  (let* ((id (or (or (mastodon-tl--property 'notification-id) ;; grouped
-                     (mastodon-tl--property 'item-id)
-                     (mastodon-tl--field
-                      'id
-                      (mastodon-tl--property 'item-json)))))
+  (let* ((id (or ;; grouping enabled
+              ;; (*should* also work for ungrouped items):
+              (mastodon-tl--property 'notification-id)
+              ;; FIXME: are these all required?
+              (mastodon-tl--property 'item-id)
+              (mastodon-tl--field
+               'id
+               (mastodon-tl--property 'item-json))))
          (endpoint (mastodon-notifications--api
                     (format "notifications/%s/dismiss" id)))
          (response (mastodon-http--post endpoint)))
@@ -773,19 +792,15 @@ Status notifications are created when you call
          (resp (mastodon-http--get-json endpoint params)))
     (map-nested-elt resp '(notifications last_read_id))))
 
-(defun mastodon-notifications--get-single-notif ()
+(defun mastodon-notifications-get-single-notif ()
   "Return a single notification JSON for v2 notifs."
   (interactive)
-  (let* ((id (mastodon-tl--property
-              'notification-id)) ;; grouped, doesn't work for ungrouped!
-         ;; (key (format "ungrouped-%s"
-         ;;              (mastodon-tl--property 'item-id)))
+  (let* ((id ;; grouped (should work for ungrouped items):
+          (mastodon-tl--property 'notification-id))
          (endpoint (mastodon-notifications--api
                     (format "notifications/%s" id)))
          (response (mastodon-http--get-json endpoint)))
-    (mastodon-http--triage
-     response (lambda (response)
-                (message "%s" (prin1-to-string response))))))
+    (message "%s" (prin1-to-string response))))
 
 (defun mastodon-notifications--get-unread-count ()
   "Return the number of unread notifications for the current account."
@@ -796,23 +811,148 @@ Status notifications are created when you call
          (resp (mastodon-http--get-json url)))
     (alist-get 'count resp)))
 
-(defvar mastodon-notifications--policy-vals
+;;; NOTIFICATION REQUESTS / FILTERING / POLICY
+
+(defvar mastodon-notifications--requests-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map mastodon-mode-map)
+    (define-key map (kbd "j") #'mastodon-notifications-request-reject)
+    (define-key map (kbd "a") #'mastodon-notifications-request-accept)
+    (define-key map (kbd "g") #'mastodon-notifications-requests)
+    map)
+  "Keymap for viewing follow requests.")
+
+;; FIXME: these are only for grouped notifs, else the fields are JSON bools
+(defvar mastodon-notifications-policy-vals
   '("accept" "filter" "drop"))
 
-(defun mastodon-notifications--get-policy ()
+(defun mastodon-notifications-get-policy ()
   "Return the notification filtering policy."
-  (interactive)
-  (let ((url
-         (mastodon-notifications--api "notifications/policy")))
+  (let ((url (mastodon-notifications--api "notifications/policy")))
     (mastodon-http--get-json url)))
+
+(defun mastodon-notifications--notif-requests ()
+  "Non-nil if the user currently has pending/filtered notifications.
+Returns"
+  (let* ((policy (mastodon-notifications-get-policy))
+         (count (map-nested-elt policy '(summary pending_notifications_count))))
+    (if (and count (> count 0))
+        count)))
+
+(defun mastodon-notifications--pending-p ()
+  "Non-nil if there are any pending requests or notifications."
+  (let* ((json (mastodon-notifications-get-policy))
+         (summary (alist-get 'summary json)))
+    (or (not (= 0 (alist-get 'pending_requests_count summary)))
+        (not (= 0 (alist-get 'pending_notifications_count summary))))))
 
 (defun mastodon-notifications--update-policy (&optional params)
   "Update notifications filtering policy.
 PARAMS is an alist of parameters."
   ;; https://docs.joinmastodon.org/methods/notifications/#update-the-filtering-policy-for-notifications
-  (let ((url
-         (mastodon-notifications--api "notifications/policy")))
+  (let ((url (mastodon-notifications--api "notifications/policy")))
     (mastodon-http--patch url params)))
+
+(defun mastodon-notifications--get-requests (&optional params)
+  "Get a list of notification requests data from the server.
+PARAMS is an alist of parameters."
+  ;; NB: link header pagination
+  (let ((url (mastodon-notifications--api "notifications/requests")))
+    (mastodon-http--get-json url params)))
+
+(defun mastodon-notifications-request-accept (&optional reject)
+  "Accept a notification request for a user.
+This will merge any filtered notifications from them into the main
+notifications and accept any future notification from them.
+REJECT means reject notifications instead."
+  ;; POST /api/v1/notifications/requests/:id/accept
+  (interactive)
+  (let* ((id (mastodon-tl--property 'item-id))
+         (user (mastodon-tl--property 'notif-req-user))
+         (url (mastodon-http--api
+               (format "notifications/requests/%s/%s"
+                       id (if reject "dismiss" "accept"))))
+         (resp (mastodon-http--post url)))
+    (mastodon-http--triage
+     resp
+     (lambda (_resp)
+       (message "%s notifications from %s"
+                (if reject "Not accepting" "Accepting") user)
+       ;; reload view:
+       (mastodon-notifications-requests)))))
+
+(defun mastodon-notifications-request-reject ()
+  "Reject a notification request for a user.
+Rejecting a request means any notifications from them will continue to
+be filtered."
+  (interactive)
+  (mastodon-notifications-request-accept :reject))
+
+(defun mastodon-notifications-requests ()
+  "Open a new buffer displaying the user's notification requests."
+  ;; calqued off `mastodon-views-view-follow-requests'
+  (interactive)
+  (mastodon-tl--init-sync
+   "notification-requests"
+   "notifications/requests"
+   'mastodon-views--insert-notification-requests
+   nil
+   '(("limit" . "40")) ; server max is 80
+   :headers
+   "notification requests"
+   "a/j - accept/reject request at point\n\
+ n/p - go to next/prev request\n\
+ \\[mastodon-notifications-policy] - set filtering policy")
+  (mastodon-tl--goto-first-item)
+  (with-current-buffer "*mastodon-notification-requests*"
+    (use-local-map mastodon-notifications--requests-map)))
+
+(defun mastodon-views--insert-notification-requests (json)
+  "Insert the user's current notification requests.
+JSON is the data returned by the server."
+  (mastodon-views--minor-view
+   "notification requests"
+   #'mastodon-notifications--insert-users
+   json))
+;; masto-notif-req))
+
+(defun mastodon-notifications--insert-users (json)
+  "Insert users list into the buffer.
+JSON is the data from the server."
+  ;; calqued off `mastodon-views--insert-users-propertized-note'
+  ;; and `mastodon-search--insert-users-propertized'
+  (cl-loop for req in json
+           do (insert
+               (concat
+                (mastodon-notifications--format-req-user req)
+                mastodon-tl--horiz-bar "\n\n"))))
+
+(defun mastodon-notifications--format-req-user (req &optional note)
+  "Format a notification request user, REQ.
+NOTE means to include a profile note."
+  ;; calqued off `mastodon-search--propertize-user'
+  (let-alist req
+    (propertize
+     (concat
+      (propertize .account.username
+                  'face 'mastodon-display-name-face
+                  'byline t
+                  'notif-req-user .account.username
+                  'item-type 'notif-req
+                  'item-id .id) ;; notif req id
+      " : \n : "
+      (propertize (concat "@" .account.acct)
+                  'face 'mastodon-handle-face
+                  'mouse-face 'highlight
+		  'mastodon-tab-stop 'user-handle
+		  'keymap mastodon-tl--link-keymap
+                  'mastodon-handle (concat "@" .account.acct)
+		  'help-echo (concat "Browse user profile of @" .account.acct))
+      " : \n"
+      (when note
+        (mastodon-tl--render-text .account.note .account))
+      "\n")
+     'item-json req)))
 
 (provide 'mastodon-notifications)
 ;;; mastodon-notifications.el ends here

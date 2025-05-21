@@ -9,6 +9,9 @@ END-INFO-DIR-ENTRY
 
 File: mastodon.info,  Node: Top,  Next: README,  Up: (dir)
 
+A Mastodon client
+*****************
+
 * Menu:
 
 * README::
@@ -24,7 +27,7 @@ README
 * Contributing::
 * Supporting ‘mastodon.el’: Supporting mastodonel.
 * Contributors::
-* screenshots::
+* Screenshots::
 
 Installation
 
@@ -40,10 +43,10 @@ Usage
 * Timelines::
 * Composing toots::
 * Other commands and account settings::
+* Notifications::
 * Customization::
 * Commands and variables index::
-* Alternative timeline layout::
-* mastodon hydra::
+* Packages related to ‘mastodon.el’: Packages related to mastodonel.
 * Live-updating timelines mastodon-async-mode::
 * Translating toots::
 * Bookmarks and ‘mastodon.el’: Bookmarks and mastodonel.
@@ -61,7 +64,7 @@ File: mastodon.info,  Node: README,  Prev: Top,  Up: Top
 1 README
 ********
 
-‘mastodon.el’ is an Emacs client for the AcitivityPub social networks
+‘mastodon.el’ is an Emacs client for the ActivityPub social networks
 that implement the Mastodon API.  For info see joinmastodon.org
 (https://joinmastodon.org/).
 
@@ -78,7 +81,7 @@ have it installed you should be able to browse this readme inside emacs.
 * Contributing::
 * Supporting ‘mastodon.el’: Supporting mastodonel.
 * Contributors::
-* screenshots::
+* Screenshots::
 
 
 File: mastodon.info,  Node: Installation,  Next: Usage,  Up: README
@@ -196,10 +199,10 @@ File: mastodon.info,  Node: Usage,  Next: Dependencies,  Prev: Installation,  Up
 * Timelines::
 * Composing toots::
 * Other commands and account settings::
+* Notifications::
 * Customization::
 * Commands and variables index::
-* Alternative timeline layout::
-* mastodon hydra::
+* Packages related to ‘mastodon.el’: Packages related to mastodonel.
 * Live-updating timelines mastodon-async-mode::
 * Translating toots::
 * Bookmarks and ‘mastodon.el’: Bookmarks and mastodonel.
@@ -228,9 +231,38 @@ accounts you can activate one at a time by changing those two variables
 and restarting Emacs.
 
    If you were using mastodon.el before 2FA was implemented and the
-above steps do not work, delete the old file specified by
-‘mastodon-client--token-file’ and restart Emacs and follow the steps
-again.
+above steps do not work, call ‘(mastodon-forget-all-logins)’, restart
+Emacs and follow the steps again.
+
+  1. encrypted access tokens (from 2.0.0)
+
+     By default, user access tokens are now stored in the user’s auth
+     source file (typically ‘~/.authinfo.gpg’, check the value of
+     ‘auth-sources’).  When you first update to 2.0.0, or if you
+     encounter issues due to old credentials, call
+     ‘(mastodon-forget-all-logins)’ to remove the old mastodon.el
+     plstore, and then authenticate again.  If you don’t want to use the
+     auth source file, set ‘mastodon-auth-use-auth-source’ to nil.
+     Entries will instead be stored encrypted in
+     ‘mastodon-client--token-file’, a plstore.
+
+     If for some reason you reauthenticate, you’ll need to either remove
+     the entry in your auth sources file, or manually update the token
+     in it after doing so, as mastodon.el is unable to reliably update
+     (or even remove) entires.
+
+     The format for a mastodon.el auth source entry is as follows:
+
+     ‘machine INSTANCE login USERNAME password AUTHTOKEN’
+
+     with the token being what you copy from the browser when
+     authenticating.  If you have ‘auth-source-save-behavior’ set to
+     nil, you’ll also need to add such an entry manually.
+
+     Finally, if you find you’re asked for your key passphrase too often
+     while authenticating, consider setting ‘epa-file-encrypt-to’ (for
+     auth-source encryption) and ‘plstore-encrypt-to’ (for plstore
+     encryption) to your preferred key ID.
 
 
 File: mastodon.info,  Node: Timelines,  Next: Composing toots,  Prev: Logging in to your instance,  Up: Usage
@@ -258,8 +290,8 @@ your ‘mastodon-token-file’ does not contain ‘:client_id’ and
                               *Timeline actions*
      ‘n’                      Go to next item (toot, notification, user)
      ‘p’                      Go to previous item (toot, notification, user)
-     ‘M-n=/=<tab>’            Go to the next interesting thing that has an action
-     ‘M-p=/=<S-tab>’          Go to the previous interesting thing that has an action
+     ‘M-n/<tab>’              Go to the next interesting thing that has an action
+     ‘M-p/<S-tab>’            Go to the previous interesting thing that has an action
      ‘F’                      Open federated timeline (1 prefix arg: hide-replies, 2 prefix args: media only)
      ‘H’                      Open home timeline (1 prefix arg: hide-replies)
      ‘L’                      Open local timeline (1 prefix arg: hide-replies, 2 prefix args: media only)
@@ -289,6 +321,7 @@ your ‘mastodon-token-file’ does not contain ‘:client_id’ and
      ‘K’                      view bookmarked toots
      ‘X’                      view/edit/create/delete lists
      ‘S’                      view your scheduled toots
+     ‘S-:’                    view profile/account settings transient menu
                               *Toot actions*
      ‘t’                      Compose a new toot
      ‘c’                      Toggle content warning content
@@ -308,10 +341,11 @@ your ‘mastodon-token-file’ does not contain ‘:client_id’ and
      (‘S-C-’) ‘W’, ‘M’, ‘B’   (un)follow, (un)mute, (un)block author of toot at point
                               *Profile view*
      ‘C-c C-c’                cycle between statuses, statuses without boosts, followers, and following
-                              ‘mastodon-profile--account-account-to-list’ (see lists view)
+                              ‘mastodon-profile--add-account-to-list’ (see lists view)
                               *Notifications view*
      ‘a’, ‘j’                 accept/reject follow request
      ‘C-k’                    clear notification at point
+     ‘C-c C-c’                cycle between notification types
                               see ‘mastodon-notifications--get-*’ functions for filtered views
                               *Quitting*
      ‘q’                      Quit mastodon buffer, leave window open
@@ -327,7 +361,7 @@ your ‘mastodon-token-file’ does not contain ‘:client_id’ and
      ‘(⭐)’ (or          I favourited this toot
      ‘(F)’)
      ‘(🔖)’ (or          I bookmarked this toot
-     (‘K’))
+     ‘(K)’)
 
 
 File: mastodon.info,  Node: Composing toots,  Next: Other commands and account settings,  Prev: Timelines,  Up: Usage
@@ -368,19 +402,20 @@ is as follows:
 
   1. Keybindings
 
-     Key          Action
-     ---------------------------------------------
-     ‘C-c C-c’    Send toot
-     ‘C-c C-k’    Cancel toot
-     ‘C-c C-w’    Add content warning
-     ‘C-c C-v’    Change toot visibility
-     ‘C-c C-n’    Add sensitive media/nsfw flag
-     ‘C-c C-a’    Upload attachment(s)
-     ‘C-c !’      Remove all attachments
-     ‘C-c C-e’    Insert emoji
-     ‘C-c C-p’    Create a poll
-     ‘C-c C-l’    Set toot language
-     ‘-C-c C-s’   Schedule toot
+     Key         Action
+     --------------------------------------------
+     ‘C-c C-c’   Send toot
+     ‘C-c C-k’   Cancel toot
+     ‘C-c C-w’   Add content warning
+     ‘C-c C-v’   Change toot visibility
+     ‘C-c C-n’   Add sensitive media/nsfw flag
+     ‘C-c C-a’   Upload attachment(s)
+     ‘C-c !’     Remove all attachments
+     ‘C-c C-e’   Insert emoji
+     ‘C-c C-p’   Create a poll
+     ‘C-c C-o’   Cancel poll
+     ‘C-c C-l’   Set toot language
+     ‘C-c C-s’   Schedule toot
 
   2. Autocompletion of mentions, tags and emoji
 
@@ -412,7 +447,7 @@ is as follows:
         • ‘mastodon-toot--delete-all-drafts’: Delete all your drafts.
 
 
-File: mastodon.info,  Node: Other commands and account settings,  Next: Customization,  Prev: Composing toots,  Up: Usage
+File: mastodon.info,  Node: Other commands and account settings,  Next: Notifications,  Prev: Composing toots,  Up: Usage
 
 1.2.4 Other commands and account settings:
 ------------------------------------------
@@ -432,6 +467,9 @@ and should work without first loading a ‘mastodon.el’ buffer:
      on your instance.
    • ‘mastodon-search--trending-statuses’: View a list of trending
      statuses on your instance.
+   • ‘mastodon-search--trending-links’: View a list of trending links on
+     your instance (+ click through to a timeline of posts featuring a
+     given link)
 
    • ‘mastodon-tl--add-toot-account-at-point-to-list’: Add the account
      of the toot at point to a list.
@@ -465,28 +503,25 @@ and should work without first loading a ‘mastodon.el’ buffer:
    • ‘mastodon-tl--remote-tag-timeline’: View a tag timeline on a remote
      instance.
 
-   • ‘mastodon-profile--update-display-name’: Update the display name
-     for your account.
-   • ‘mastodon-profile--update-user-profile-note’: Update your bio note.
-   • ‘mastodon-profile--update-meta-fields’: Update your metadata
-     fields.
-   • ‘mastodon-profile--set-default-toot-visibility’: Set the default
-     visibility for your toots.
-   • ‘mastodon-profile--account-locked-toggle’: Toggle the locked status
-     of your account.  Locked accounts have to manually approve follow
-     requests.
-   • ‘mastodon-profile--account-discoverable-toggle’: Toggle the
-     discoverable status of your account.  Non-discoverable accounts are
-     not listed in the profile directory.
-   • ‘mastodon-profile--account-bot-toggle’: Toggle whether your account
-     is flagged as a bot.
-   • ‘mastodon-profile--account-sensitive-toggle’: Toggle whether your
-     posts are marked as sensitive (nsfw) by default.
+   • ‘mastodon-user-settings’: Launch a transient menu to update various
+     account settings.
 
 
-File: mastodon.info,  Node: Customization,  Next: Commands and variables index,  Prev: Other commands and account settings,  Up: Usage
+File: mastodon.info,  Node: Notifications,  Next: Customization,  Prev: Other commands and account settings,  Up: Usage
 
-1.2.5 Customization
+1.2.5 Notifications
+-------------------
+
+Mastodon from 4.3 supports grouped notifications.  These are implemented
+by ‘mastodon.el’ but disabled by default out of consideration to users
+on instances that don’t support them.  If you are on an instance that
+implements grouped notifications, set ‘mastodon-group-notifications’ to
+‘t’ to enable them.
+
+
+File: mastodon.info,  Node: Customization,  Next: Commands and variables index,  Prev: Notifications,  Up: Usage
+
+1.2.6 Customization
 -------------------
 
 See ‘M-x customize-group RET mastodon’ to view all customize options.
@@ -510,11 +545,12 @@ See ‘M-x customize-group RET mastodon’ to view all customize options.
 
    • Nofitication options:
         • Display user’s profile note in follow requests
+        • Group notifications
 
 
-File: mastodon.info,  Node: Commands and variables index,  Next: Alternative timeline layout,  Prev: Customization,  Up: Usage
+File: mastodon.info,  Node: Commands and variables index,  Next: Packages related to mastodonel,  Prev: Customization,  Up: Usage
 
-1.2.6 Commands and variables index
+1.2.7 Commands and variables index
 ----------------------------------
 
 An index of all user-facing commands and custom variables is available
@@ -525,28 +561,45 @@ bindings, or run ‘M-X’ (upper-case ‘X’) to view all commands in the
 buffer with completion, and call one.
 
 
-File: mastodon.info,  Node: Alternative timeline layout,  Next: mastodon hydra,  Prev: Commands and variables index,  Up: Usage
+File: mastodon.info,  Node: Packages related to mastodonel,  Next: Live-updating timelines mastodon-async-mode,  Prev: Commands and variables index,  Up: Usage
 
-1.2.7 Alternative timeline layout
----------------------------------
+1.2.8 Packages related to ‘mastodon.el’
+---------------------------------------
 
-The incomparable Nicholas Rougier has written an alternative timeline
-layout for ‘mastodon.el’.
+  1. Alternative timeline layout
 
-   The repo is at mastodon-alt
-(https://github.com/rougier/mastodon-alt).
+     The incomparable Nicholas Rougier has written an alternative
+     timeline layout for ‘mastodon.el’.
+
+     The repo is at mastodon-alt
+     (https://github.com/rougier/mastodon-alt).
+
+  2. Org links, archive search
+
+     toot-suite (https://codeberg.org/chrmoe/toot-suite) implements an
+     org link type for fediverse posts, and also provides a way to
+     browse an offline archive of your account.
+
+  3. Mastodon hydra
+
+     A user made a hydra for handling basic ‘mastodon.el’ commands.
+     It’s available at
+     <https://holgerschurig.github.io/en/emacs-mastodon-hydra/>.
+
+  4. Narrow to timeline item
+
+     A simple code snippet to enable narrowing to current item in
+     timelines:
+     <http://takeonrules.com/2024/10/31/hacking-on-mastodon-emacs-package-to-narrow-viewing/>
+
+  5. Sachac’s config goodies
+
+     The incomparable sachac has a bunch of ‘mastodon.el’ extensions and
+     goodies in their literate config, available here:
+     <https://sachachua.com/dotemacs/index.html#mastodon>.
 
 
-File: mastodon.info,  Node: mastodon hydra,  Next: Live-updating timelines mastodon-async-mode,  Prev: Alternative timeline layout,  Up: Usage
-
-1.2.8 mastodon hydra
---------------------
-
-A user made a hydra for handling basic mastodon.el commands.  It’s
-available at <https://holgerschurig.github.io/en/emacs-mastodon-hydra/>.
-
-
-File: mastodon.info,  Node: Live-updating timelines mastodon-async-mode,  Next: Translating toots,  Prev: mastodon hydra,  Up: Usage
+File: mastodon.info,  Node: Live-updating timelines mastodon-async-mode,  Next: Translating toots,  Prev: Packages related to mastodonel,  Up: Usage
 
 1.2.9 Live-updating timelines: ‘mastodon-async-mode’
 ----------------------------------------------------
@@ -582,7 +635,7 @@ translator of choice (‘libretrans.el’ , ‘google-translate’, ‘babel’,
 its text argument.  Here’s what ‘mastodon-toot--translate-toot-text’
 looks like:
 
-     (defun mastodon-toot--translate-toot-text ()
+     (defun mastodon-toot-translate-toot-text ()
        "Translate text of toot at point.
        Uses `lingva.el'."
          (interactive)
@@ -611,9 +664,12 @@ File: mastodon.info,  Node: Dependencies,  Next: Network compatibility,  Prev: U
 ================
 
 Hard dependencies (should all install with ‘mastodon.el’):
-   • ‘request’ (for uploading attachments), emacs-request
-     (https://github.com/tkf/emacs-request)
-   • ‘persist’ for storing some settings across sessions
+   • ‘request’ (for uploading attachments, emacs-request
+     (https://github.com/tkf/emacs-request))
+   • ‘persist’ (for storing some settings across sessions, persist
+     (https://elpa.gnu.org/packages/persist.html))
+   • ‘tp.el’ (for transient menus, tp.el
+     (https://codeberg.org/martianh/tp.el))
 
    Optional dependencies (install yourself, ‘mastodon.el’ can use them):
    • ‘emojify’ to use custom emoji (else we use builtin ‘emoji.el’)
@@ -633,6 +689,7 @@ Mastodon API.
    • Pleroma (pleroma.social (https://pleroma.social/))
    • Akkoma (akkoma.social (https://akkoma.social/))
    • Gotosocial (gotosocial.org (https://gotosocial.org/))
+   • Sharkey (joinsharkey.org (https://joinsharkey.org))
 
    It does not support the non-Mastodon API servers Misskey (misskey.io
 (https://misskey.io/)), Firefish (joinfirefish.org
@@ -718,14 +775,14 @@ File: mastodon.info,  Node: Supporting mastodonel,  Next: Contributors,  Prev: C
 If you’d like to support continued development of ‘mastodon.el’, I
 accept donations via paypal: paypal.me/martianh
 (https://paypal.me/martianh).  If you would prefer a different payment
-method, please write to me at <mousebot@disroot.org> and I can provide
-IBAN or other bank account details.
+method, please write to me at <mousebot {at} disroot.org> and I can
+provide IBAN or other bank account details.
 
    I don’t have a tech worker’s income, so even a small tip would help
 out.
 
 
-File: mastodon.info,  Node: Contributors,  Next: screenshots,  Prev: Supporting mastodonel,  Up: README
+File: mastodon.info,  Node: Contributors,  Next: Screenshots,  Prev: Supporting mastodonel,  Up: README
 
 1.7 Contributors
 ================
@@ -741,9 +798,9 @@ File: mastodon.info,  Node: Contributors,  Next: screenshots,  Prev: Supporting 
    • <https://codeberg.org/Red_Starfish>
 
 
-File: mastodon.info,  Node: screenshots,  Prev: Contributors,  Up: README
+File: mastodon.info,  Node: Screenshots,  Prev: Contributors,  Up: README
 
-1.8 screenshots
+1.8 Screenshots
 ===============
 
 Here’s a (federated) timeline:
@@ -772,39 +829,45 @@ server values commented):
 
 Tag Table:
 Node: Top219
-Node: README1006
-Node: Installation1656
-Node: ELPA1945
-Node: MELPA2173
-Node: Repo2553
-Node: Emoji3046
-Node: Discover3640
-Node: Usage4192
-Node: Logging in to your instance4654
-Node: Timelines5651
-Ref: Keybindings6126
-Ref: Toot byline legend10966
-Node: Composing toots11275
-Ref: Keybindings (1)12827
-Ref: Autocompletion of mentions tags and emoji13362
-Ref: Draft toots14287
-Node: Other commands and account settings14758
-Node: Customization18122
-Node: Commands and variables index19000
-Node: Alternative timeline layout19516
-Node: mastodon hydra19892
-Node: Live-updating timelines mastodon-async-mode20224
-Node: Translating toots21063
-Node: Bookmarks and mastodonel22247
-Node: Dependencies22789
-Node: Network compatibility23423
-Node: Contributing24305
-Node: Bug reports24801
-Node: Fixes and features25712
-Node: Coding style26213
-Node: Supporting mastodonel26837
-Node: Contributors27389
-Node: screenshots27824
+Node: README1083
+Node: Installation1732
+Node: ELPA2021
+Node: MELPA2249
+Node: Repo2629
+Node: Emoji3122
+Node: Discover3716
+Node: Usage4268
+Node: Logging in to your instance4770
+Ref: encrypted access tokens (from 200)5742
+Node: Timelines7200
+Ref: Keybindings7675
+Ref: Toot byline legend12657
+Node: Composing toots12966
+Ref: Keybindings (1)14518
+Ref: Autocompletion of mentions tags and emoji15073
+Ref: Draft toots15998
+Node: Other commands and account settings16469
+Node: Notifications19144
+Node: Customization19629
+Node: Commands and variables index20517
+Node: Packages related to mastodonel21036
+Ref: Alternative timeline layout21289
+Ref: Org links archive search21516
+Ref: Mastodon hydra21735
+Ref: Narrow to timeline item21919
+Ref: Sachac's config goodies22126
+Node: Live-updating timelines mastodon-async-mode22345
+Node: Translating toots23200
+Node: Bookmarks and mastodonel24383
+Node: Dependencies24925
+Node: Network compatibility25711
+Node: Contributing26652
+Node: Bug reports27148
+Node: Fixes and features28059
+Node: Coding style28560
+Node: Supporting mastodonel29184
+Node: Contributors29741
+Node: Screenshots30176
 
 End Tag Table
 

@@ -24,8 +24,8 @@
 
 ;;; Code:
 
-(require 'tp)
 (require 'transient)
+(require 'tp)
 
 (defvar mastodon-active-user)
 (defvar mastodon-toot-visibility-settings-list)
@@ -37,14 +37,15 @@
 (autoload 'mastodon-http--api "mastodon-http")
 (autoload 'mastodon-http--triage "mastodon-http")
 (autoload 'mastodon-http--patch "mastodon-http")
-(autoload 'mastodon-profile--update-user-profile-note "mastodon-profile")
+(autoload 'mastodon-profile-update-user-profile-note "mastodon-profile")
 (autoload 'mastodon-toot--fetch-max-poll-options "mastodon-toot")
 (autoload 'mastodon-toot--fetch-max-poll-option-chars "mastodon-toot")
 (autoload 'mastodon-instance-data "mastodon")
 (autoload 'mastodon-toot--update-status-fields "mastodon-toot")
 (autoload 'mastodon-toot--read-poll-expiry "mastodon-toot")
 (autoload 'mastodon-toot--poll-expiry-options-alist "mastodon-toot")
-(autoload 'mastodon-toot--clear-poll "mastodon-toot")
+(autoload 'mastodon-toot-clear-poll "mastodon-toot")
+(autoload 'mastodon-notifications-get-policy "mastodon-notifications")
 
 ;;; UTILS
 
@@ -131,7 +132,7 @@ the format fields.X.keyname."
          (resp (mastodon-http--patch url strs))) ;; :json fails
     (mastodon-http--triage
      resp
-     (lambda (_)
+     (lambda (_resp)
        (message "Settings updated!\n%s" (pp-to-string strs))))))
 
 (transient-define-prefix mastodon-user-settings ()
@@ -155,19 +156,17 @@ the format fields.X.keyname."
    ("d"  "discoverable" "discoverable" :alist-key discoverable :class tp-bool)
    ("c" "hide follower/following lists" "source.hide_collections"
     :alist-key source.hide_collections :class tp-bool)
-   ("i" "indexable" "source.indexable" :alist-key source.indexable :class tp-bool)
-   ]
+   ("i" "indexable" "source.indexable" :alist-key source.indexable :class tp-bool)]
   ["Tooting options"
    ("p" "default privacy" "source.privacy" :alist-key source.privacy
     :class tp-option
     :choices (lambda () mastodon-toot-visibility-settings-list))
    ("s" "mark sensitive" "source.sensitive" :alist-key source.sensitive :class tp-bool)
    ("g" "default language" "source.language" :alist-key source.language :class tp-option
-    :choices (lambda () mastodon-iso-639-regional))
-   ]
+    :choices (lambda () mastodon-iso-639-regional))]
   ["Update"
    ("C-c C-c" "Save settings" mastodon-user-settings-update)
-   ("C-c C-k" :info "Revert all changes")]
+   ("C-x C-k" :info "Revert all changes")]
   (interactive)
   (if (or (not (boundp 'mastodon-active-user))
           (not mastodon-active-user))
@@ -178,7 +177,7 @@ the format fields.X.keyname."
   "Update current user profile note."
   :transient 'transient--do-exit
   (interactive)
-  (mastodon-profile--update-user-profile-note))
+  (mastodon-profile-update-user-profile-note))
 
 (transient-define-suffix mastodon-profile-fields-update (args)
   "Update current user profile fields."
@@ -192,7 +191,7 @@ the format fields.X.keyname."
          (url (mastodon-http--api endpoint))
          (resp (mastodon-http--patch url arrays))) ; :json)))
     (mastodon-http--triage
-     resp (lambda (_) (message "Fields updated!")))))
+     resp (lambda (_resp) (message "Fields updated!")))))
 
 (defun mastodon-transient-fetch-fields ()
   "Fetch profile fields (metadata)."
@@ -217,7 +216,7 @@ the format fields.X.keyname."
     ("4 v" "" "fields.4.value" :alist-key fields.4.value :class mastodon-transient-field)]]
   ["Update"
    ("C-c C-c" "Save settings" mastodon-profile-fields-update)
-   ("C-c C-k" :info "Revert all changes")]
+   ("C-x C-k" :info "Revert all changes")]
   (interactive)
   (if (not mastodon-active-user)
       (user-error "User not set")
@@ -233,7 +232,7 @@ the format fields.X.keyname."
   (let ((instance (mastodon-instance-data)))
     (mastodon-toot--fetch-max-poll-option-chars instance)))
 
-(transient-define-suffix mastodon-transient--choice-add ()
+(transient-define-suffix mastodon-transient-choice-add ()
   "Add another poll choice if possible.
 Do not add more than 9 choices.
 Do not add more than the server's maximum setting."
@@ -295,7 +294,7 @@ Do not add more than the server's maximum setting."
    ("4" "" "4" :alist-key four :class mastodon-transient-poll-choice)]
   ;; TODO: display the max number of options or add options cmd
   ["Update"
-   ("C-c C-s" "Add another poll choice" mastodon-transient--choice-add
+   ("C-c C-s" "Add another poll choice" mastodon-transient-choice-add
     :if (lambda () (< 4 (mastodon-transient-max-poll-opts))))
    ("C-c C-c" "Save and done" mastodon-create-poll-done)
    ("C-x C-k" :info "Revert all")
@@ -309,7 +308,7 @@ Do not add more than the server's maximum setting."
   "Clear current poll data."
   :transient 'transient--do-stay
   (interactive)
-  (mastodon-toot--clear-poll :transient)
+  (mastodon-toot-clear-poll :transient)
   (transient-reset))
 
 (transient-define-suffix mastodon-create-poll-done (args)
@@ -345,7 +344,71 @@ Do not add more than the server's maximum setting."
               (tp-bools-to-strs args)))
       (mastodon-toot--update-status-fields))))
 
+(defvar mastodon-notifications-policy-vals)
+(declare-function mastodon-notifications-get-policy "mastodon-notifications")
+(declare-function mastodon-notifications--update-policy "mastodon-notifications")
+
+(transient-define-prefix mastodon-notifications-policy ()
+  "A transient to set notifications policy options."
+  ;; https://docs.joinmastodon.org/methods/notifications/#get-policy
+  :value (lambda () (tp-return-data #'mastodon-notifications-get-policy))
+  ["Notification policy options"
+   ("f" "people you don't follow" "for_not_following"
+    :alist-key for_not_following :class mastodon-transient-policy)
+   ("F" "people not following you" "for_not_followers"
+    :alist-key for_not_followers :class mastodon-transient-policy)
+   ("n" "New accounts" "for_new_accounts"
+    :alist-key for_new_accounts :class mastodon-transient-policy)
+   ("p" "Unsolicited private mentions" "for_private_mentions"
+    :alist-key for_private_mentions :class mastodon-transient-policy)
+   ("l" "Moderated accounts" "for_limited_accounts"
+    :alist-key for_limited_accounts :class mastodon-transient-policy)
+   (:info "")
+   (:info "\"accept\" = receive notifications")
+   (:info "\"filter\" = mark as filtered")
+   (:info "\"drop\" = do not receive any notifications")]
+  ["Notification requests"
+   (:info #'mastodon-notifications-requests-count)
+   (:info #'mastodon-notifications-filtered-count)]
+  ["Update"
+   ("C-c C-c" "Save settings" mastodon-notifications-policy-update)
+   ("C-x C-k" :info "Revert all changes")])
+
+(defun mastodon-notifications-requests-count ()
+  "Format a string for pending requests."
+  (let ((val (oref transient--prefix value)))
+    (format "Pending requests: %d"
+            (or (map-nested-elt
+                 val
+                 '(summary pending_requests_count))
+                0))))
+
+(defun mastodon-notifications-filtered-count ()
+  "Format a string for pending notifications."
+  (let ((val (oref transient--prefix value)))
+    (format "Pending notifications: %d"
+            (or (map-nested-elt
+                 val
+                 '(summary pending_notifications_count))
+                0))))
+
+(transient-define-suffix mastodon-notifications-policy-update (args)
+  "Send updated notification policy settings."
+  :transient 'transient--do-exit
+  ;; TODO:
+  (interactive (list (transient-args 'mastodon-notifications-policy)))
+  (let* ((parsed (tp-parse-args-for-send args))
+         (resp (mastodon-notifications--update-policy parsed)))
+    (mastodon-http--triage
+     resp
+     (lambda (_resp)
+       (message "Settings updated!\n%s" (pp-to-string parsed))))))
+
 ;;; CLASSES
+
+(defclass mastodon-transient-policy (tp-cycle)
+  ((choices :initarg :choices :initform 'mastodon-notifications-policy-vals))
+  "An option class for mastodon notification policy options.")
 
 (defclass mastodon-transient-field (tp-option-str)
   ((always-read :initarg :always-read :initform t))

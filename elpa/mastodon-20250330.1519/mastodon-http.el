@@ -31,8 +31,8 @@
 ;;; Code:
 
 (require 'json)
-(require 'request) ; for attachments upload
 (require 'url)
+(require 'url-http)
 (require 'shr)
 
 (defvar mastodon-instance-url)
@@ -41,6 +41,7 @@
 
 (autoload 'mastodon-auth--access-token "mastodon-auth")
 (autoload 'mastodon-toot--update-status-fields "mastodon-toot")
+(autoload 'url-insert "url-handlers")
 
 (defvar mastodon-http--api-version "v1")
 
@@ -57,23 +58,6 @@ Optionally specify VERSION in format vX."
   "Return Mastodon API v2 URL for ENDPOINT."
   (mastodon-http--api endpoint "v2"))
 
-(defun mastodon-http--response ()
-  "Capture response buffer content as string."
-  (with-current-buffer (current-buffer)
-    (buffer-substring-no-properties (point-min) (point-max))))
-
-(defun mastodon-http--response-body (pattern)
-  "Return substring matching PATTERN from `mastodon-http--response'."
-  (let ((resp (mastodon-http--response)))
-    (string-match pattern resp)
-    (match-string 0 resp)))
-
-(defun mastodon-http--status ()
-  "Return HTTP Response Status Code from `mastodon-http--response'."
-  (let* ((status-line (mastodon-http--response-body "^HTTP/1.*$")))
-    (string-match "[0-9][0-9][0-9]" status-line)
-    (match-string 0 status-line)))
-
 (defun mastodon-http--url-retrieve-synchronously (url &optional silent)
   "Retrieve URL asynchronously.
 This is a thin abstraction over the system
@@ -86,13 +70,16 @@ SILENT means don't message."
 
 (defun mastodon-http--triage (response success)
   "Determine if RESPONSE was successful.
-Call SUCCESS if successful. Message status and JSON error from
-RESPONSE if unsuccessful."
+Call SUCCESS on RESPONSE if successful. Message status and JSON error
+from RESPONSE if unsuccessful."
   (let ((status (with-current-buffer response
-                  (mastodon-http--status))))
-    (if (string-prefix-p "2" status)
+                  ;; FIXME: breaks tests, as url-http-end-of-headers not set
+                  (url-http-parse-response))))
+    (if (and (>= 200 status)
+             (<= status 299))
+        ;; (string-prefix-p "2" (number-to-string status))
         (funcall success response)
-      (if (string-prefix-p "404" status)
+      (if (= 404 status)
           (message "Error %s: page not found" status)
         (let ((json-response (with-current-buffer response
                                (mastodon-http--process-json))))
@@ -151,7 +138,7 @@ Authorization header is included by default unless
 UNAUTHENTICATED-P is non-nil.
 If JSON is :json, encode PARAMS as JSON for
 the request data. If it is :raw, just use the plain params."
-  ;; NB: raw is used by `mastodon-tl--unfilter-user-languages'; not sure if
+  ;; NB: raw is used by `mastodon-tl-unfilter-user-languages'; not sure if
   ;; there's a way around it?
   (mastodon-http--authorized-request "POST"
     (let* ((url-request-data
@@ -189,13 +176,13 @@ PARAMS is an alist of any extra parameters to send with the request.
 SILENT means don't message.
 NO-HEADERS means don't collect http response headers.
 VECTOR means return json arrays as vectors."
-(let ((buf (mastodon-http--get url params silent)))
-  ;; --get can return nil if instance unresponsive:
-  (if (not buf)
-      (user-error "Looks like the server response borked. \
+  (let ((buf (mastodon-http--get url params silent)))
+    ;; --get can return nil if instance unresponsive:
+    (if (not buf)
+        (user-error "Looks like the server response borked. \
 Is your instance up?")
-    (with-current-buffer buf
-      (mastodon-http--process-response no-headers vector)))))
+      (with-current-buffer buf
+        (mastodon-http--process-response no-headers vector)))))
 
 (defun mastodon-http--get-json (url &optional params silent vector)
   "Return only JSON data from URL request.
@@ -315,8 +302,9 @@ JSON means send params as JSON data."
               (encode-coding-string
                (json-encode params) 'utf-8)))
            ;; (mastodon-http--build-params-string params))))
-           (url (unless json
-                  (mastodon-http--concat-params-to-url url params)))
+           (url (if (not json)
+                    (mastodon-http--concat-params-to-url url params)
+                  url))
            (headers (when json
                       '(("Content-Type" . "application/json")
                         ("Accept" . "application/json"))))
@@ -359,68 +347,80 @@ PARAMS is an alist of any extra parameters to send with the request."
 Then run function CALLBACK with arguements CBARGS.
 Authorization header is included by default unless UNAUTHENTICED-P is non-nil."
   (mastodon-http--authorized-request "POST"
-    (let (;(request-timeout 5) ; this is from request.el no url.el!
-          (url-request-data (when params
+    (let ((url-request-data (when params
                               (mastodon-http--build-params-string params))))
       (with-temp-buffer
         (url-retrieve url callback cbargs)))))
 
-;; TODO: test for curl first?
+(defun mastodon-http--get-cb-data (status)
+  "Return data using `json-read' after a successful async request.
+If STATUS includes an error, emit a message describing it and return nil."
+  (let* ((buf (current-buffer))
+         (data (with-temp-buffer
+                 (url-insert buf)
+                 (goto-char (point-min))
+                 (json-read))))
+    (if-let* ((error-thrown (plist-get status :error)))
+        ;; not necessarily a user error, but we want its functionality:
+        (user-error "%S %s" error-thrown (alist-get 'error data))
+      data)))
+
+(defun mastodon-http--post-media-callback (status file caption buffer)
+  "Callback function called after posting FILE as an attachment with CAPTION.
+The toot is being composed in BUFFER. See `url-retrieve' for STATUS."
+  (unwind-protect
+      (when-let* ((data (mastodon-http--get-cb-data status)))
+        (with-current-buffer buffer
+          (let ((id (alist-get 'id data)))
+            ;; update ids:
+            (if (not mastodon-toot--media-attachment-ids)
+                ;; add first id:
+                (push id mastodon-toot--media-attachment-ids)
+              ;; add new id to end of list to preserve order:
+              (push id (cdr
+                        (last mastodon-toot--media-attachment-ids))))
+            ;; pleroma, PUT the description:
+            ;; this is how the mangane akkoma web client does it
+            ;; and it seems easier than the other options!
+            (when (and caption
+                       (not (string= caption (alist-get 'description data))))
+              (let ((url (mastodon-http--api (format "media/%s" id))))
+                ;; (message "PUTting image description")
+                (mastodon-http--put url `(("description" . ,caption)))))
+            (message "Uploading %s... (done)" file)
+            (mastodon-toot--update-status-fields))))
+    (kill-buffer (current-buffer))))
+
+(defun mastodon-http--post-media-prep-file (filename)
+  "Return the request data to upload FILENAME."
+  (with-temp-buffer
+    (set-buffer-multibyte nil)
+    (insert-file-contents-literally filename)
+    (let ((boundary (buffer-hash)))
+      (goto-char (point-min))
+      (insert "--" boundary "\r\n"
+              (format "Content-Disposition: form-data; name=\"file\"; filename=\"%s\"\r\n\r\n"
+                      (file-name-nondirectory filename)))
+      (goto-char (point-max))
+      (insert "\r\n" "--" boundary "--" "\r\n")
+      `(,boundary . ,(buffer-substring-no-properties (point-min) (point-max))))))
+
 (defun mastodon-http--post-media-attachment (url filename caption)
   "Make POST request to upload FILENAME with CAPTION to the server's media URL.
 The upload is asynchronous. On succeeding,
 `mastodon-toot--media-attachment-ids' is set to the id(s) of the
 item uploaded, and `mastodon-toot--update-status-fields' is run."
-  (let* ((file (file-name-nondirectory filename))
-         (request-backend 'curl)
-         (desc `(("description" . ,caption)))
-         (cb (cl-function
-              (lambda (&key data &allow-other-keys)
-                (when data
-                  (let* ((id (alist-get 'id data)))
-                    ;; update ids:
-                    (push id mastodon-toot--media-attachment-ids)
-                    ;; pleroma, PUT the description:
-                    ;; this is how the mangane akkoma web client does it
-                    ;; and it seems easier than the other options!
-                    (when (and caption
-                               (not (string= caption (alist-get 'description data))))
-                      (let ((url (mastodon-http--api (format "media/%s" id))))
-                        ;; (message "PUTting image description")
-                        (mastodon-http--put url desc)))
-                    (message "Uploading %s... (done)" file)
-                    (mastodon-toot--update-status-fields)))))))
-    (request
-      url
-      :type "POST"
-      :params desc
-      :files `(("file" . (,file :file ,filename
-                                :mime-type "multipart/form-data")))
-      :parser 'json-read
-      :headers `(("Authorization" . ,(concat "Bearer "
-                                             (mastodon-auth--access-token))))
-      :sync nil
-      :success (apply-partially cb)
-      :error (cl-function
-              (lambda (&key error-thrown &allow-other-keys)
-                (cond
-                 ;; handle curl errors first (eg 26, can't read file/path)
-                 ;; because the '=' test below fails for them
-                 ;; they have the form (error . error message 24)
-                 ((not (proper-list-p error-thrown)) ; not dotted list
-		  (message "Got error: %s. Shit went south." (cdr error-thrown)))
-                 ;; handle mastodon api errors
-                 ;; they have the form (error http 401)
-		 ((= (car (last error-thrown)) 401)
-                  (message "Got error: %s Unauthorized: The access token is invalid"
-                           error-thrown))
-                 ((= (car (last error-thrown)) 422)
-                  (message "Got error: %s Unprocessable entity: file or file\
- type is unsupported or invalid"
-                           error-thrown))
-                 (t
-                  (message "Got error: %s Shit went south"
-                           error-thrown))))))))
+  (mastodon-http--authorized-request "POST"
+    (let* ((data (mastodon-http--post-media-prep-file filename))
+           (url-request-extra-headers
+            (append url-request-extra-headers ; auth set in macro
+                    `(("Content-Type" . ,(format "multipart/form-data; boundary=%s"
+                                                 (car data))))))
+           (url-request-data (cdr data))
+           (params `(("description" . ,caption)))
+           (url (mastodon-http--concat-params-to-url url params)))
+      (url-retrieve url #'mastodon-http--post-media-callback
+                    `(,filename ,caption ,(current-buffer))))))
 
 (provide 'mastodon-http)
 ;;; mastodon-http.el ends here

@@ -39,6 +39,7 @@
 
 (autoload 'mastodon-tl--propertize-img-str-or-url "mastodon-tl")
 (autoload 'mastodon-tl--image-trans-check "mastodon-tl")
+(autoload 'mastodon-image-mode "mastodon-tl")
 
 (defvar url-show-status)
 
@@ -332,13 +333,19 @@ image-data prop so it can be toggled."
                              mastodon-media--sensitive-image-data nil t)
                            sensitive-state hidden image-data ,image))))
 
-(defun mastodon-media--process-full-sized-image-response (status-plist url)
+(defvar mastodon-media--attachments nil
+  "A list attachment details for full sized image view buffer.
+The first element is the URL of the image displayed, followed by plists
+of details of all of a toot's attachments.")
+
+(defun mastodon-media--process-full-sized-image-response
+    (status-plist url attachments &optional prev-buf)
   ;; FIXME: refactor this with but not into
   ;; `mastodon-media--process-image-response'.
   "Callback function processing the `url-retrieve' response for URL.
 URL is a full-sized image URL attached to a timeline image.
 STATUS-PLIST is a plist of status events as per `url-retrieve'."
-  (if-let (error-response (plist-get status-plist :error))
+  (if-let* ((error-response (plist-get status-plist :error)))
       (user-error "error in loading image: %S" error-response)
     (when mastodon-media--enable-image-caching
       (unless (url-is-cached url) ;; cache if not already cached
@@ -347,16 +354,25 @@ STATUS-PLIST is a plist of status events as per `url-retrieve'."
     ;; https://codeberg.org/martianh/mastodon.el/issues/540
     (let* ((handle (mm-dissect-buffer t))
            (image (mm-get-image handle))
-           (str (image-property image :data)))
-      (with-current-buffer (get-buffer-create "*masto-image*")
+           (str (image-property image :data))
+           (buf "*masto-image*"))
+      (with-current-buffer (get-buffer-create buf)
         (let ((inhibit-read-only t))
           (erase-buffer)
           (insert-image image str)
           (special-mode) ; prevent image-mode loop bug
-          (image-mode)
+          (mastodon-image-mode) ;; for our keymap
           (goto-char (point-min))
-          (switch-to-buffer-other-window (current-buffer))
-          (image-transform-fit-both))))))
+          (image-transform-fit-both)
+          ;; set image metadata for view cycling:
+          (setq-local mastodon-media--attachments (cons url attachments))))
+      ;; switch to buf if not already viewing it:
+      (unless (equal buf prev-buf)
+        (switch-to-buffer-other-window buf))
+      ;; display bindings if multiple images:
+      (when (< 1 (length (cdr mastodon-media--attachments)))
+        (message (substitute-command-keys
+                  "\\`.'/\\`>'/\\`<right>' to cycle images"))))))
 
 (defun mastodon-media--image-or-cached (url process-fun args)
   "Fetch URL from cache or fro host.
@@ -467,7 +483,7 @@ START and END are the beginning and end of the media item to overlay."
      (propertize ""
                  'help-echo "Video"
                  'face
-                 '((:height 3.5 :inherit font-lock-comment-face))))))
+                 '((:height 3.5 :inherit mastodon-toot-docs-face))))))
 ;; (cl-pushnew ov mastodon-media--overlays)))
 
 (defun mastodon-media--get-avatar-rendering (avatar-url)
@@ -499,8 +515,8 @@ CAPTION is the image caption if provided.
 SENSITIVE is a flag from the item's JSON data."
   (let* ((help-echo-base
           (substitute-command-keys
-           (concat "\\`RET'/\\`i': load full image (prefix: copy URL), \\`+'/\\`-': zoom,\
- \\`r': rotate, \\`o': save preview"
+           (concat "\\`RET': load full image or play video,\
+ \\`i' for image options"
                    (when (not (eq sensitive :json-false))
                      ", \\`S': toggle sensitive media"))))
          (help-echo (if caption
