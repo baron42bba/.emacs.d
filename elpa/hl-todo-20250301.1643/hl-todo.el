@@ -1,14 +1,14 @@
 ;;; hl-todo.el --- Highlight TODO and similar keywords  -*- lexical-binding:t -*-
 
-;; Copyright (C) 2013-2024 Jonas Bernoulli
+;; Copyright (C) 2013-2025 Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <emacs.hl-todo@jonas.bernoulli.dev>
 ;; Homepage: https://github.com/tarsius/hl-todo
 ;; Keywords: convenience
 
-;; Package-Version: 20240805.1444
-;; Package-Revision: 82eba6b8f7b5
-;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
+;; Package-Version: 20250301.1643
+;; Package-Revision: 0ce21c329b68
+;; Package-Requires: ((emacs "26.1") (compat "30.0.2.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -158,6 +158,12 @@ a Grep implementation other than GNU's, then that may break
                (hl-todo-mode -1)
                (hl-todo-mode 1))))))
 
+(defface hl-todo-flymake-type '((t :inherit font-lock-keyword-face))
+  "Face used for the Flymake diagnostics type `hl-todo-flymake'.
+This is used for the word \"todo\" appearing in the \"Type\" column
+of buffers created by `flymake-show-buffer-diagnostics' and similar."
+  :group 'hl-todo)
+
 (defcustom hl-todo-color-background nil
   "Whether to emphasize keywords using the background color.
 
@@ -295,7 +301,8 @@ If COLOR is a face symbol, do not combine, return COLOR instead."
 Depends on `hl-todo-include-modes' and `hl-todo-exclude-modes'."
   (when (and (apply #'derived-mode-p hl-todo-include-modes)
              (not (apply #'derived-mode-p hl-todo-exclude-modes))
-             (not (bound-and-true-p enriched-mode)))
+             (not (bound-and-true-p enriched-mode))
+             (not (string-prefix-p " *temp*" (buffer-name))))
     (hl-todo-mode 1)))
 
 ;;;###autoload
@@ -402,7 +409,8 @@ enabling `flymake-mode'."
           (save-match-data
             (goto-char (point-min))
             (while (hl-todo--search)
-              (let ((beg (match-beginning 0))
+              (let ((keyword (match-string 1))
+                    (beg (match-beginning 0))
                     (end (pos-eol))
                     (bol (pos-bol)))
                 ;; Take whole line when keyword is not at the start of comment.
@@ -417,11 +425,24 @@ enabling `flymake-mode'."
                     ;; Skip comment.
                     (re-search-forward comment beg t)
                     (setq beg (point))))
-                (push (flymake-make-diagnostic
-                       buf beg end :note
-                       (buffer-substring-no-properties beg end))
+                (push (hl-todo-make-flymake-diagnostic
+                       buf beg end (buffer-substring-no-properties beg end)
+                       keyword)
                       diags)))))))
     (funcall report-fn (nreverse diags))))
+
+;; Advise this function if you want multiple keyword types.
+(defun hl-todo-make-flymake-diagnostic (locus beg end text _keyword)
+  (flymake-make-diagnostic locus beg end 'hl-todo-flymake text))
+(put 'hl-todo-flymake 'flymake-category 'flymake-note)
+(put 'hl-todo-flymake 'flymake-type-name "todo")
+;; Do not underline lines containing TODO keyword.
+(put 'hl-todo-flymake 'face nil)
+;; As of Emacs 30.0.50, we have to set this property to control
+;; the face that is used *inside* the list buffer.  This face
+;; is *not* used in the mode-line (where the respective face of
+;; the `flymake-note' category is used instead).
+(put 'hl-todo-flymake 'mode-line-face 'hl-todo-flymake-type)
 
 ;;;###autoload
 (defun hl-todo-insert (keyword)
@@ -469,18 +490,17 @@ then append that character to the inserted string."
         (save-excursion (insert "\n")))
       (indent-region (line-beginning-position) (line-end-position))))))
 
-(defun hl-todo-magit-revision ()
-  "Highlight TODO and similar keywords in commit messages and notes.
-If `global-hl-todo-mode' is disabled, do nothing."
-  (when global-hl-todo-mode
-    (let ((case-fold-search nil)
-          (regexp (hl-todo--regexp)))
-      (while (re-search-forward regexp nil t)
-        (put-text-property (match-beginning 1)
-                           (match-end 1)
-                           'font-lock-face (hl-todo--get-face))))))
-
-(add-hook 'magit-wash-message-hook #'hl-todo-magit-revision)
+;;;###autoload
+(defun hl-todo-search-and-highlight ()
+  "Highlight TODO and similar keywords starting at point.
+Intended to be added to `magit-revision-wash-message-hook' and
+`magit-log-wash-summary-hook', but might be useful elsewhere too."
+  (let ((case-fold-search nil)
+        (regexp (hl-todo--regexp)))
+    (while (re-search-forward regexp nil t)
+      (put-text-property (match-beginning 1)
+                         (match-end 1)
+                         'font-lock-face (hl-todo--get-face)))))
 
 ;;; _
 (provide 'hl-todo)

@@ -28,6 +28,8 @@ evaluate the variable `hl-todo-mode'.
 The mode's hook is called both when the mode is enabled and when it is
 disabled.
 
+\\{hl-todo-mode-map}
+
 (fn &optional ARG)" t)
 (put 'global-hl-todo-mode 'globalized-minor-mode t)
 (defvar global-hl-todo-mode nil "\
@@ -104,6 +106,10 @@ If `hl-todo-require-punctuation' is non-nil and
 then append that character to the inserted string.
 
 (fn KEYWORD)" t)
+(autoload 'hl-todo-search-and-highlight "hl-todo" "\
+Highlight TODO and similar keywords starting at point.
+Intended to be added to `magit-revision-wash-message-hook' and
+`magit-log-wash-summary-hook', but might be useful elsewhere too.")
 (register-definition-prefixes "hl-todo" '("hl-todo-"))
 
 ;;; End of scraped data
