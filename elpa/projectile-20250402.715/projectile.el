@@ -5,8 +5,8 @@
 ;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://github.com/bbatsov/projectile
 ;; Keywords: project, convenience
-;; Package-Version: 20250204.1346
-;; Package-Revision: 1d02b6a391a8
+;; Package-Version: 20250402.715
+;; Package-Revision: 4dd84b02c9cd
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -192,7 +192,7 @@ A value of nil means the cache never expires."
   :type '(choice (const :tag "Disabled" nil)
                  (integer :tag "Seconds")))
 
-(defcustom projectile-auto-discover t
+(defcustom projectile-auto-discover nil
   "Whether to discover projects when project switching commands are invoked.
 
 See also `projectile-project-search-path'."
@@ -943,7 +943,7 @@ Should be set via .dir-locals.el.")
 
 ;;; Version information
 
-(defconst projectile-version "2.9.0-snapshot"
+(defconst projectile-version "2.9.1"
   "The current version of Projectile.")
 
 (defun projectile--pkg-version ()
@@ -1081,6 +1081,9 @@ A wrapper around `file-exists-p' with additional caching support."
                 (run-with-timer 10 nil 'projectile-file-exists-cache-cleanup)))
         (equal value 'found)))))
 
+(defsubst projectile-persistent-cache-p ()
+  (eq projectile-enable-caching 'persistent))
+
 ;;;###autoload
 (defun projectile-invalidate-cache (prompt)
   "Remove the current project's files from `projectile-projects-cache'.
@@ -1099,7 +1102,9 @@ to invalidate."
     (remhash project-root projectile-projects-cache)
     (remhash project-root projectile-projects-cache-time)
     ;; reset the project's cache file
-    (projectile-serialize nil (projectile-project-cache-file project-root))
+    (when (projectile-persistent-cache-p)
+      ;; TODO: Perhaps it's better to delete the cache file in such cases?
+      (projectile-serialize nil (projectile-project-cache-file project-root)))
     (when projectile-verbose
       (message "Invalidated Projectile cache for %s."
                (propertize project-root 'face 'font-lock-keyword-face))))
@@ -1118,7 +1123,7 @@ to invalidate."
 The cache is created both in memory and on the hard drive."
   (puthash project files projectile-projects-cache)
   (puthash project (projectile-time-seconds) projectile-projects-cache-time)
-  (when (eq projectile-enable-caching 'persistent)
+  (when (projectile-persistent-cache-p)
     (projectile-serialize files (projectile-project-cache-file project))))
 
 (defun projectile-load-project-cache (project-root)
@@ -1139,7 +1144,8 @@ The cache is created both in memory and on the hard drive."
     (if (projectile-file-cached-p file project-root)
         (progn
           (puthash project-root (remove file project-cache) projectile-projects-cache)
-          (projectile-serialize project-cache (projectile-project-cache-file project-root))
+          (when (projectile-persistent-cache-p)
+            (projectile-serialize project-cache (projectile-project-cache-file project-root)))
           (when projectile-verbose
             (message "%s removed from cache" file)))
       (error "%s is not in the cache" file))))
@@ -1177,10 +1183,11 @@ The cache is created both in memory and on the hard drive."
             (puthash current-project project-files projectile-projects-cache)
             ;; we serialize the cache with an idle time to avoid freezing the UI
             ;; immediately after the new file was created
-            (run-with-idle-timer
-             30
-             nil
-             'projectile-serialize project-files cache-file))
+            (when (projectile-persistent-cache-p)
+              (run-with-idle-timer
+               30
+               nil
+               'projectile-serialize project-files cache-file)))
           (message "File %s added to project %s cache."
                    (propertize current-file 'face 'font-lock-keyword-face)
                    (propertize current-project 'face 'font-lock-keyword-face)))))))
@@ -2896,7 +2903,8 @@ ones and overrule settings in the other lists."
 
 A project type is defined by PROJECT-TYPE, a set of MARKER-FILES,
 and optional keyword arguments:
-PROJECT-FILE the main project file in the root project directory.
+PROJECT-FILE the main project file in the root project directory.  It may be a
+             single file or a list of possible files.
 COMPILATION-DIR the directory to run the tests- and compilations in,
 CONFIGURE which specifies a command that configures the project
           `%s' in the command will be substituted with (projectile-project-root)
@@ -2949,7 +2957,8 @@ files such as test/impl/other files as below:
 
 A project type is defined by PROJECT-TYPE, a set of MARKER-FILES,
 and optional keyword arguments:
-PROJECT-FILE the main project file in the root project directory.
+PROJECT-FILE the main project file in the root project directory.  It may be a
+             single file or a list of possible files.
 COMPILATION-DIR the directory to run the tests- and compilations in,
 CONFIGURE which specifies a command that configures the project
           `%s' in the command will be substituted with (projectile-project-root)
@@ -3121,6 +3130,13 @@ When DIR is specified it checks DIR's project, otherwise
 it acts on the current project."
   (or (projectile-verify-file "go.mod" dir)
       (projectile-verify-file-wildcard "*.go" dir)))
+
+(defun projectile-mill-project-p (&optional dir)
+  "Check if a project contains a mill build file.
+When DIR is specified it checks DIR's project, otherwise
+it acts on the current project."
+  (or (projectile-verify-file "build.mill" dir)
+      (projectile-verify-file "build.sc" dir)))
 
 (defcustom projectile-go-project-test-function #'projectile-go-project-p
   "Function to determine if project's type is go."
@@ -3532,8 +3548,8 @@ a manual COMMAND-TYPE command is created with
                                   :test "sbt test"
                                   :test-suffix "Spec")
 
-(projectile-register-project-type 'mill '("build.sc")
-                                  :project-file "build.sc"
+(projectile-register-project-type 'mill #'projectile-mill-project-p
+                                  :project-file '("build.sc" "build.mill")
                                   :src-dir "src/"
                                   :test-dir "test/src/"
                                   :compile "mill __.compile"
@@ -5562,26 +5578,33 @@ An open project is a project with any open buffers."
        (list (abbreviate-file-name project)))
     projects))
 
-(defun projectile--init-known-projects ()
+(defun projectile-known-projects ()
   "Initialize the known projects.
 
-This might potentially clean up redundant projects
-and discover new ones if `projectile-auto-discover' is enabled."
+This might potentially clean up redundant projects and discover new ones if
+`projectile-auto-cleanup-known-projects' or `projectile-auto-discover' are
+enabled."
   ;; load the known projects
   (unless projectile-known-projects
     (projectile-load-known-projects))
   (when projectile-auto-cleanup-known-projects
     (projectile--cleanup-known-projects))
   (when (and projectile-auto-discover projectile-project-search-path)
-    (projectile-discover-projects-in-search-path)))
+    (projectile-discover-projects-in-search-path))
+  ;; return the list of known projects
+  projectile-known-projects)
+
+(defalias 'projectile--init-known-projects 'projectile-known-projects)
 
 (defun projectile-relevant-known-projects ()
-  "Return a list of known projects."
-  (projectile--init-known-projects)
-  (pcase projectile-current-project-on-switch
-    ('remove (projectile--remove-current-project projectile-known-projects))
-    ('move-to-end (projectile--move-current-project-to-end projectile-known-projects))
-    ('keep projectile-known-projects)))
+  "Return a list of known projects.
+
+It factors the value of `projectile-current-project-on-switch'."
+  (let ((known-projects (projectile-known-projects)))
+    (pcase projectile-current-project-on-switch
+      ('remove (projectile--remove-current-project known-projects))
+      ('move-to-end (projectile--move-current-project-to-end known-projects))
+      ('keep known-projects))))
 
 (defun projectile-relevant-open-projects ()
   "Return a list of open projects."
@@ -6154,6 +6177,7 @@ thing shown in the mode line otherwise."
     (define-key map (kbd "&") #'projectile-run-async-shell-command-in-root)
     (define-key map (kbd "?") #'projectile-find-references)
     (define-key map (kbd "a") #'projectile-find-other-file)
+    (define-key map (kbd "A") #'projectile-add-known-project)
     (define-key map (kbd "b") #'projectile-switch-to-buffer)
     (define-key map (kbd "d") #'projectile-find-dir)
     (define-key map (kbd "D") #'projectile-dired)
@@ -6238,6 +6262,8 @@ thing shown in the mode line otherwise."
          ["Previous buffer" projectile-previous-project-buffer]
          ["Next buffer" projectile-next-project-buffer])
         ("Projects"
+         ["Add known project" projectile-add-known-project]
+         "--"
          ["Switch to project" projectile-switch-project]
          ["Switch to open project" projectile-switch-open-project]
          "--"
