@@ -4,7 +4,7 @@
 # contributor : Nick Anderson <nick@cmdln.org>
 # group : cfengine3
 # expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
-# https://gitlab.com/nickanderson/the-agent-is-in/-/tree/main/Episodes/12
+# see https://gitlab.com/nickanderson/the-agent-is-in/-/tree/main/Episodes/12
 # --
 #+caption: Example Policy
 #+begin_src cfengine3 :include-stdlib t :log-level info :exports both
