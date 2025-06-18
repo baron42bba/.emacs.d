@@ -172,7 +172,22 @@ from bash.
             (push "/opt/local/share/info" Info-directory-list)))
 #+END_SRC
 
+* print on osx
+[2025-06-18 Wed 14:44]
 
+#+begin_src sh :tangle ~/bin/lpr-ps
+  #!/bin/bash
+  uuid=$(uuidgen)
+  gs -sDEVICE=pdfwrite -o $TMPDIR/$uuid.pdf - && open $TMPDIR/$uuid.pdf && sleep 1 && rm $TMPDIR/$uuid.pdf
+#+end_src
+
+#+begin_src emacs-lisp
+  (if (string-equal system-type "darwin")
+      (if (file-exists-p "~/bin/lpr-ps")
+            (setq ps-lpr-command "~/bin/lpr-ps")
+          )
+      )
+#+end_src
 * testing steampipe
 [2023-04-05 Wed 13:18]
 
