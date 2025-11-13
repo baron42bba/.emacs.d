@@ -2946,10 +2946,10 @@ Kill the current buffer without asking if there is no prefix.
   (defun jcs-kill-a-buffer (askp)
     (interactive "P")
     (if askp
-	(kill-buffer (funcall completing-read-function
+        (kill-buffer (funcall completing-read-function
                               "Kill buffer: "
                               (mapcar #'buffer-name (buffer-list))))
-      (kill-this-buffer)))
+      (kill-current-buffer)))
 
   (global-set-key (kbd "C-x k") 'jcs-kill-a-buffer)
 #+END_SRC
