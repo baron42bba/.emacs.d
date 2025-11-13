@@ -4,15 +4,21 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
-   ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"])
+   ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3"
+    "gray90"])
  '(aws-snippets-ec2-list-instances-query
-   '("Reservations[].Instances[].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Schedule`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime]" "Reservations[].Instances[].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Schedule`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime, IamInstanceProfile.Arn]" "Reservations[].Instances[].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Schedule`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime, KeyName]" "Reservations[].Instances[?IamInstanceProfile.Arn==null].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Type`].Value[] | [0],Tags[?Key==`Project`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime, IamInstanceProfile.Arn]"))
+   '("Reservations[].Instances[].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Schedule`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime]"
+     "Reservations[].Instances[].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Schedule`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime, IamInstanceProfile.Arn]"
+     "Reservations[].Instances[].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Schedule`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime, KeyName]"
+     "Reservations[].Instances[?IamInstanceProfile.Arn==null].[Tags[?Key==`Name`].Value[] | [0],Tags[?Key==`Type`].Value[] | [0],Tags[?Key==`Project`].Value[] | [0],InstanceId, State.Name, PublicDnsName, InstanceType,Placement.AvailabilityZone,LaunchTime, IamInstanceProfile.Arn]"))
  '(aws-snippets-profiles '("test" "prod" "cn-prod"))
  '(aws-snippets-regions '("us-east-1" "eu-west-1" "ap-southeast-1" "cn-north-1"))
  '(bmkp-last-as-first-bookmark-file "~/workorg/bookmarks")
  '(cfengine-parameters-indent '(promise pname 2))
  '(custom-safe-themes
-   '("8c6bc3959bb049983f4c76b1a0b78a3a28629370558e1d7bd45d7b54bf671a88" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" default))
+   '("8c6bc3959bb049983f4c76b1a0b78a3a28629370558e1d7bd45d7b54bf671a88"
+     "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26"
+     default))
  '(custom-theme-directory "~/.emacs.d/themes/")
  '(forge-topic-list-limit '(60 . -5))
  '(gnuserv-program (concat exec-directory "/gnuserv"))
@@ -28,13 +34,53 @@
  '(magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18))
  '(magit-pull-arguments nil)
  '(magit-repo-dirs '("~/git"))
+ '(magit-repository-directories '(("~/git" . 2)))
  '(org-mobile-directory
    "~/Library/Mobile Documents/iCloud~com~mobileorg~mobileorg/Documents/")
  '(org-mobile-files
-   '("~/org/notes.org" "~/org/motorcycles.org" "~/org/milling.org" "~/org/kitchen.org" "~/org/todo.org"))
+   '("~/org/notes.org" "~/org/motorcycles.org" "~/org/milling.org"
+     "~/org/kitchen.org" "~/org/todo.org"))
  '(org-startup-folded t)
  '(package-selected-packages
-   '(google-translate mastodon dired-git eat pinentry eshell-bookmark eshell-vterm websocket tablist sesman projectile popup pdf-tools parseclj julia-mode ivy eldoc s restclient popwin ox-pandoc key-chord json-snatcher json-reformat ht helm-bibtex go-translate flymake-easy erlang dwim-shell-command direx dired-hacks-utils closql biblio-core auto-complete-pcmp auto-complete flycheck-mmark terraform-doc hcl-mode yaxception yaml ob-graphql emacsql-sqlite docker-cli citeproc spinner symbol-overlay sqlite3 outline-minor-faces forge bibtex-completion detached atomic-chrome org-mac-link noflet pcre2el vterm german-holidays jenkinsfile-mode cider company seq flymake log4e annotate a magit-section bicycle beacon alert graphviz-dot-mode helm-core apache-mode groovy-mode kubel solarized-theme lsp-ui docker-tramp dockerfile-mode yasnippet with-editor treepy transient simple-httpd request markdown-mode magit-popup hydra htmlize hl-todo helm git-commit f elfeed dash-functional dash clomacs clojure-mode async magit org lsp-mode git-link eglot helm-org biblio parsebib parseedn lv yaml-mode xah-lookup x-path-walker visual-regexp visual-ascii-mode vertica-snippets undo-tree twittering-mode tt-mode tldr terraform-mode tabulated-list sx string-inflection string-edit sqlup-mode sokoban smartparens sicp s3ed rhtml-mode restclient-helm rainbow-mode rainbow-delimiters puppet-mode paradox pacmacs package-lint ox-reveal ox-jira ox-clip org-tree-slide org-sticky-header org-ref org-plus-contrib org-mime org-jira org-chef org-ac ob-tmux ob-restclient ob-cfengine3 ob-async neotree mwe-log-commands mustache multiple-cursors mew magit-todos magit-gitflow langtool keyfreq json-mode impatient-mode highlight-symbol helm-swoop helm-safari helm-projectile helm-gtags helm-git helm-descbinds helm-c-yasnippet helm-aws guide-key graphql go-snippets go-mode gnuplot git-timemachine ghub ggtags fullscreen-mode fullframe flymake-yaml flymake-puppet flymake-perlcritic flymake-json flycheck fast-scroll expand-region ess epoch-view engine-mode elfeed-org ejc-sql editorconfig edit-indirect dired-narrow dired+ demo-it debian-changelog-mode csv-nav csv-mode command-log-mode color-identifiers-mode centered-cursor-mode bug-hunter aws-snippets avy ascii artbollocks-mode apples-mode ac-helm))
+   '(a ac-helm alert annotate ansible apache-mode apples-mode
+       artbollocks-mode ascii async atomic-chrome auto-complete
+       auto-complete-pcmp avy aws-snippets beacon biblio biblio-core
+       bibtex-completion bicycle bug-hunter centered-cursor-mode cider
+       citeproc clojure-mode clomacs closql color-identifiers-mode
+       command-log-mode company csv-mode csv-nav dash dash-functional
+       debian-changelog-mode demo-it detached dired+ dired-git
+       dired-hacks-utils dired-narrow direx docker-cli docker-tramp
+       dockerfile-mode dwim-shell-command eat edit-indirect
+       editorconfig eglot ejc-sql eldoc elfeed elfeed-org
+       emacsql-sqlite engine-mode epoch-view erlang eshell-bookmark
+       eshell-vterm ess expand-region f fast-scroll flycheck
+       flycheck-mmark flymake flymake-easy flymake-json
+       flymake-perlcritic flymake-puppet flymake-yaml forge fullframe
+       fullscreen-mode german-holidays ggtags ghub git-commit git-link
+       git-timemachine gnuplot go-mode go-snippets go-translate
+       google-translate graphql graphviz-dot-mode groovy-mode
+       guide-key hcl-mode helm helm-aws helm-bibtex helm-c-yasnippet
+       helm-core helm-descbinds helm-git helm-gtags helm-org
+       helm-projectile helm-safari helm-swoop highlight-symbol hl-todo
+       ht htmlize hydra impatient-mode ivy jenkinsfile-mode json-mode
+       json-reformat json-snatcher julia-mode key-chord keyfreq kubel
+       langtool log4e lsp-mode lsp-ui lv magit magit-gitflow
+       magit-popup magit-section magit-todos markdown-mode mastodon
+       mew multiple-cursors mustache mwe-log-commands neotree noflet
+       ob-async ob-cfengine3 ob-graphql ob-restclient ob-tmux org
+       org-ac org-chef org-jira org-mac-link org-mime org-plus-contrib
+       org-ref org-sticky-header org-tree-slide outline-minor-faces
+       ox-clip ox-jira ox-pandoc ox-reveal package-lint pacmacs
+       paradox parsebib parseclj parseedn pcre2el pdf-tools pinentry
+       popup popwin projectile puppet-mode rainbow-delimiters
+       rainbow-mode request restclient restclient-helm rhtml-mode s
+       s3ed seq sesman sicp simple-httpd smartparens sokoban
+       solarized-theme spinner sqlite3 sqlup-mode string-edit
+       string-inflection sx symbol-overlay tablist tabulated-list
+       terraform-doc terraform-mode tldr transient treepy tt-mode
+       twittering-mode undo-tree vertica-snippets visual-ascii-mode
+       visual-regexp vterm websocket with-editor x-path-walker
+       xah-lookup yaml yaml-mode yasnippet yaxception))
  '(package-user-dir "~/.emacs.d/elpa")
  '(paradox-github-token t)
  '(safe-local-variable-values
@@ -46,15 +92,7 @@
  '(undo-tree-auto-save-history nil)
  '(vc-handled-backends '(RCS CVS SVN SCCS Bzr Hg Arch))
  '(warning-suppress-types
-   '((comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
+   '((comp) (comp) (comp) (comp) (comp) (comp) (comp) (comp) (comp)
      (comp))))
 (defcustom sql-mysql-program "~/bin/mysql"
 "*Command to start mysql by mysqlDB."
@@ -89,3 +127,23 @@
 ;;  '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
 ;;  '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
 ;;  '(stripes-face ((t :background "gray0"))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
+ '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))))
+ '(org-block-end-line ((t (:inherit org-block-begin-line))))
+ '(org-document-title ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.5 :underline nil))))
+ '(org-level-1 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.6))))
+ '(org-level-2 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.4))))
+ '(org-level-3 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.25))))
+ '(org-level-4 ((t (:inherit default :foreground "#62a9cd" :font "Arial" :height 1.1))))
+ '(org-level-5 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
+ '(org-level-6 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
+ '(org-level-7 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
+ '(org-level-8 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
+ '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
+ '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
+ '(stripes-face ((t :background "gray0"))))

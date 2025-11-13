@@ -1209,6 +1209,12 @@ list who can decrypt a file:
    ))
 #+END_SRC
 
+If Emacs hangs while writing a gpg file we need this ignore wait
+
+#+begin_src emacs-lisp
+  (fset 'epg-wait-for-status 'ignore)
+#+end_src
+
 #+begin_src emacs-lisp
   (defun gs ()
     "gpg --card-status"
