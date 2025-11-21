@@ -68,8 +68,8 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
     (defun eshell/my-prompt ()
     (let ((header-bg "#161616"))
     (concat
-    (with-face user-login-name :foreground "#d75faf")
-    (with-face (concat "@" hostname) :foreground "#8700af")
+    (with-face user-login-name :foreground "#ff383c")
+    (with-face (concat "@" hostname) :foreground "#ffcc00")
     " "
     (with-face (eshell/abbr-pwd) :foreground "#008700")
     (if (= (user-uid) 0)

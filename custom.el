@@ -132,6 +132,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-blue ((t (:background "systemBlueColor" :foreground "systemBlueColor"))))
  '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
  '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))))
  '(org-block-end-line ((t (:inherit org-block-begin-line))))
