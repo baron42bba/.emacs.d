@@ -314,5 +314,7 @@ Adjust indentation at work.
               (auto-fill-mode -1)
               ;; (stripes-mode 1)
             (setq bba-keep-whitespaces 1)))
-
+  (load-file (expand-file-name "~/.emacs.d/lisp/outline-yaml.el"))
+  (add-hook 'yaml-mode-hook 'outline-yaml-minor-mode)
+  (add-hook 'yaml-ts-mode-hook 'outline-yaml-minor-mode)
 #+END_SRC
