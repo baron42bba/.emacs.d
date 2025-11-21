@@ -2680,16 +2680,6 @@ character before any spaces."
 easy access to secrets.
 
 #+BEGIN_SRC emacs-lisp
-  (define-prefix-command 'bba/pw)
-  (define-key global-map "\C-xp" bba/pw)
-  (define-key bba/pw "p" #'(lambda () "awsprod" (interactive)(bba-pw-lookup "0DA39906-79C8-4468-AB0A-C72DB613C529")))
-  (define-key bba/pw "t" #'(lambda () "awstest" (interactive)(bba-pw-lookup "D0518F8B-C724-45B8-8D85-C568DCDD5913")))
-  (define-key bba/pw "c" #'(lambda () "awscn" (interactive)(bba-pw-lookup "53D5B091-0295-42BA-9D91-4A36055E554B")))
-  (define-key bba/pw "s" #'(lambda () "sys" (interactive)(bba-pw-lookup "FABC2AFA-E966-4AC3-AEEB-2883DE790DE4")))
-  (define-key bba/pw "S" #'(lambda () "ssh" (interactive)(bba-pw-lookup "BF852AE1-57B7-4C7F-BE02-F73095D4CD52")))
-  (define-key bba/pw "i" #'(lambda () "it" (interactive)(bba-pw-lookup "83752B2C-5DE4-4B2F-A306-B191348A2E26")))
-
-
   (defun bba-pw-lookup (id)
     "lookup org id and grab hide-pw entry"
     (interactive)
@@ -2704,7 +2694,8 @@ easy access to secrets.
           (kill-ring-save 1 1 1)
           (org-previous-visible-heading 1)
           (org-end-of-line)
-          (org-beginning-of-line))))
+          (org-beginning-of-line)
+      (previous-buffer))))
 #+END_SRC
 
 duplicate previous line
