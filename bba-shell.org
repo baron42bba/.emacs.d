@@ -113,6 +113,16 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
                     (shell-command "git stash pop")))
 #+end_src
 
+#+begin_src elisp
+  (defun eshell/cd- (new-path)
+  (let* ((d default-directory)
+  (s (split-string d ":"))
+  (path (car (last s)))
+  (l (length path))
+  (host (substring d 0 (- (length d) l))))
+  (eshell/cd (format "%s%s" host new-path))))
+#+end_src
+
 ** [[https://codeberg.org/akib/emacs-eat/][eat]]
 [2024-02-05 Mon 12:10]
 
