@@ -455,6 +455,16 @@ But we use it only in graphical mode as text mode lacks color depth.
   (add-hook 'sql-interactive-mode-hook 'rainbow-delimiters-mode)
 #+end_src
 
+* docker
+[2025-11-25 Tue 12:48]
+
+#+begin_src emacs-lisp
+    (require 'docker)
+    (global-set-key "\C-cd" 'docker)
+    (eval-after-load 'docker
+      '(add-hook 'dockerfile-mode-hook '(lambda()   (define-key dockerfile-mode-map "\C-c\C-c" 'compile)
+  (setq compile-command "docker build -t tag ."))))
+#+end_src
 * [[https://github.com/hrs/engine-mode][engine-mode]]
 
 search the web on your fingertips. C-c /.
