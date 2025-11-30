@@ -5,9 +5,8 @@
 ;; Author: John Wiegley <jwiegley@gmail.com>
 ;; Created: 24 Aug 2011
 ;; Updated: 16 Mar 2015
-;; Version: 1.2
-;; Package-Version: 20221213.1619
-;; Package-Commit: c762380ff71c429faf47552a83605b2578656380
+;; Package-Version: 20250823.650
+;; Package-Revision: 79f6936ab4d8
 ;; Package-Requires: ((gntp "0.1") (log4e "0.3.0") (cl-lib "0.5"))
 ;; Keywords: notification emacs message
 ;; X-URL: https://github.com/jwiegley/alert
@@ -680,12 +679,12 @@ This is found in the Growl Extras: http://growl.info/extras.php."
              (args
               (cl-case system-type
                 (windows-nt (mapcar
-                              (lambda (lst) (apply #'concat lst))
-                              `(
-                                ;; http://www.growlforwindows.com/gfw/help/growlnotify.aspx
-                                ("/i:" ,(file-truename (concat invocation-directory "../share/icons/hicolor/48x48/apps/emacs.png")))
-                                ("/t:" ,title)
-                                ("/p:" ,priority))))
+                             (lambda (lst) (apply #'concat lst))
+                             `(
+                               ;; http://www.growlforwindows.com/gfw/help/growlnotify.aspx
+                               ("/i:" ,(file-truename (concat invocation-directory "../share/icons/hicolor/48x48/apps/emacs.png")))
+                               ("/t:" ,title)
+                               ("/p:" ,priority))))
                 (t (list
                     "--appIcon"  "Emacs"
                     "--name"     "Emacs"
@@ -882,16 +881,16 @@ From https://github.com/julienXX/terminal-notifier."
 (defun alert-osx-notifier-notify (info)
   (apply #'call-process "osascript" nil nil nil "-e"
          (list (format "display notification %S with title %S"
-                       (alert-encode-string (plist-get info :message))
-                       (alert-encode-string (plist-get info :title)))))
+                       (plist-get info :message)
+                       (plist-get info :title))))
   (alert-message-notify info))
 
 (when (fboundp 'do-applescript)
   ;; Use built-in AppleScript support when possible.
   (defun alert-osx-notifier-notify (info)
     (do-applescript (format "display notification %S with title %S"
-                            (alert-encode-string (plist-get info :message))
-                            (alert-encode-string (plist-get info :title))))
+                            (plist-get info :message)
+                            (plist-get info :title)))
     (alert-message-notify info)))
 
 (alert-define-style 'osx-notifier :title "Notify using native OSX notification" :notifier #'alert-osx-notifier-notify)
