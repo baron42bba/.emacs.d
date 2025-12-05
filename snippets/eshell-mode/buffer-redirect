@@ -3,4 +3,4 @@
 # key: buf_
 # To redirect output to an Emacs buffer
 # --
-> #<buffer *${1:test}*>$0
+&> #<buffer *${1:test}*>$0
