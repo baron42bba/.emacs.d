@@ -123,6 +123,23 @@ A little bit of code from https://github.com/bodil/emacs.d/blob/master/bodil/bod
   (eshell/cd (format "%s%s" host new-path))))
 #+end_src
 
+Better than a specific cd command we can insert the current remote
+host.
+
+#+begin_src elisp
+  (defun bba-eshell-host()
+    (interactive)
+    (let* ((d default-directory)
+           (s (split-string d ":"))
+           (path (car (last s)))
+           (l (length path))
+           (host (substring d 0 (- (length d) l))))
+      (insert host)))
+
+  (define-key eshell-mode-map (kbd "s-i") 'bba-eshell-host)
+#+end_src
+
+
 ** [[https://codeberg.org/akib/emacs-eat/][eat]]
 [2024-02-05 Mon 12:10]
 
