@@ -1,6 +1,6 @@
 ;;; ess-r-mode.el --- R customization  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 1997-2022 Free Software Foundation, Inc.
+;; Copyright (C) 1997-2025 Free Software Foundation, Inc.
 ;; Author: A.J. Rossini
 ;; Created: 12 Jun 1997
 ;; Maintainer: ESS-core <ESS-core@r-project.org>
@@ -264,7 +264,7 @@ value by using `ess-r-runners-reset'."
 (defvar ess-r-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-=") #'ess-cycle-assign)
-    (define-key map "\M-?" #'ess-complete-object-name)
+    ;;(define-key map "\M-?" #'ess-complete-object-name); not stealing  M-?  from "standard Emacs"
     (define-key map (kbd "C-c C-.") 'ess-rutils-map)
     map))
 
@@ -298,6 +298,14 @@ It makes underscores and dots word constituent chars.")
 When t, loading a file into a namespaced will output information
 about which objects are exported and which stay hidden in the
 namespace.")
+
+(defun ess-r-outline-level ()
+  "R mode `outline-level` function."
+  (save-excursion
+    (beginning-of-line)
+    (if (looking-at "^[ \t]*\\(#+\\)\\s-")
+	(length (match-string 1))
+      1000)))
 
 ;; The syntax class for '\' is punctuation character to handle R 4.1
 ;; lambdas. Inside strings it should be treated as an escape
@@ -476,7 +484,7 @@ To be used as part of `font-lock-defaults' keywords."
      (ess-smart-operators                   . ess-r-smart-operators)
      (inferior-ess-program                  . inferior-ess-r-program)
      (inferior-ess-objects-command          . inferior-ess-r-objects-command)
-     (inferior-ess-search-list-command      . "search()\n")
+     (inferior-ess-search-list-command      . "base::search()\n")
      (inferior-ess-help-command             . inferior-ess-r-help-command)
      (inferior-ess-exit-command             . "q()")
      (ess-error-regexp-alist                . ess-r-error-regexp-alist)
@@ -855,6 +863,9 @@ top level functions only."
   (setq imenu-generic-expression ess-imenu-S-generic-expression)
   (when ess-imenu-use-S
     (imenu-add-to-menubar "Imenu-R"))
+  ;; outline
+  (setq-local outline-level #'ess-r-outline-level)
+  (setq-local outline-regexp ess-r-outline-regexp)
   (setq-local beginning-of-defun-function #'ess-r-beginning-of-defun)
   (setq-local end-of-defun-function #'ess-r-end-of-defun)
   (ess-roxy-mode))
@@ -992,7 +1003,7 @@ as `ess-r-created-runners' upon ESS initialization."
         (message "Recreated %d R versions known to ESS: %s"
                  (length versions) versions))
       (if ess-microsoft-p
-          (cl-mapcar (lambda (v p) (ess-define-runner v "R" p)) versions ess-rterm-version-paths)
+          (cl-mapc (lambda (v p) (ess-define-runner v "R" p)) versions ess-rterm-version-paths)
         (mapc (lambda (v) (ess-define-runner v "R")) versions))
       ;; Add to menu
       (when ess-r-created-runners
@@ -1619,7 +1630,7 @@ environment to the search path."
 Send the contents of the etc/ESSR/R directory to the remote
 process through the process connection file by file. Then,
 collect all the objects into an ESSR environment and attach to
-the search path. If CHUNKED is non-nil, split each file by 
+the search path. If CHUNKED is non-nil, split each file by \\^L
 separators and send chunk by chunk."
   (ess-command (format ".ess.ESSRversion <<- '%s'\n" essr-version))
   (with-temp-message "Loading ESSR into remote ..."

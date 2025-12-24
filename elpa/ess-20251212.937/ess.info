@@ -3269,6 +3269,7 @@ ESS has a few extra features, which didn't fit anywhere else.
 * Parens::                      Parenthesis matching
 * Graphics::                    Using graphics with ESS
 * Imenu::                       Support for Imenu in ESS
+* Outline::                     Use outline-minor-mode in R scripts
 * Toolbar::                     Support for toolbar in ESS
 * Xref::                        Xref
 * Rdired::                      Directory editor for R objects
@@ -3484,7 +3485,7 @@ interaction and graphics within S-PLUS. (Thanks to Tim Hesterberg for
 this information.)
 
 
-File: ess.info,  Node: Imenu,  Next: Toolbar,  Prev: Graphics,  Up: Extras
+File: ess.info,  Node: Imenu,  Next: Outline,  Prev: Graphics,  Up: Extras
 
 11.7 Imenu
 ==========
@@ -3503,9 +3504,42 @@ uses, check the value of 'imenu-generic-expression'.  This value is set
 by various ESS variables such as 'ess-imenu-S-generic-expression'.
 
 
-File: ess.info,  Node: Toolbar,  Next: Xref,  Prev: Imenu,  Up: Extras
+File: ess.info,  Node: Outline,  Next: Toolbar,  Prev: Imenu,  Up: Extras
 
-11.8 Toolbar
+11.8 Outline navigation
+=======================
+
+R editing buffers integrate with 'outline-minor-mode'.  When you toggle
+the minor mode (for example via 'M-x outline-minor-mode' or by adding it
+to 'ess-r-mode-hook'), ESS assigns 'ess-r-outline-level' to
+'outline-level' and installs 'ess-r-outline-regexp' so that comment
+headings drive folding.  Lines that begin with one or more '#', followed
+by text and a trailing marker of '----', '====', or '####', are treated
+as outline headings.  This matches the section markers convention
+adopted by RStudio.
+
+     # Setup ----
+     ## Data ----
+     ### Models ====
+     #### Helpers ####
+
+   The number of leading '#' characters sets the outline depth.  Use
+standard Outline commands (such as 'C-c  C-t') to cycle visibility once
+the minor mode is active.  To enable Outlining automatically, add it to
+the R mode hook:
+
+     (add-hook 'ess-r-mode-hook #'outline-minor-mode)
+
+ -- User Option: ess-r-outline-regexp
+     Regular expression used by ESS to recognise outline headings in R
+     buffers.  The default matches the RStudio-style sections shown
+     above, but you can customise it if you prefer a different comment
+     convention.
+
+
+File: ess.info,  Node: Toolbar,  Next: Xref,  Prev: Outline,  Up: Extras
+
+11.9 Toolbar
 ============
 
 The R and S editing modes have support for a toolbar.  This toolbar
@@ -3517,8 +3551,8 @@ ways to change the toolbar.
 
 File: ess.info,  Node: Xref,  Next: Rdired,  Prev: Toolbar,  Up: Extras
 
-11.9 Xref
-=========
+11.10 Xref
+==========
 
 Xref is an Emacs interface that supports finding "identifiers," usually
 function definitions in ESS's view.  ESS ships with support for Xref in
@@ -3528,7 +3562,7 @@ Emacs versions 25.1 and higher.  For how to use this feature, see *Note
 
 File: ess.info,  Node: Rdired,  Next: Package listing,  Prev: Xref,  Up: Extras
 
-11.10 Rdired
+11.11 Rdired
 ============
 
 Ess-rdired provides a dired-like buffer for viewing, editing and
@@ -3560,7 +3594,7 @@ the object, 'v' will view it, and 'd' will mark the object for deletion
 
 File: ess.info,  Node: Package listing,  Next: Org,  Prev: Rdired,  Up: Extras
 
-11.11 Package listing
+11.12 Package listing
 =====================
 
 ESS[R] provides several commands to list and manage packages and objects
@@ -3600,7 +3634,7 @@ bindings in this mode (type '?' in this buffer for a description).
 
 File: ess.info,  Node: Org,  Next: Sweave and AUCTeX,  Prev: Package listing,  Up: Extras
 
-11.12 Interaction with Org mode
+11.13 Interaction with Org mode
 ===============================
 
 Org-mode (<https://orgmode.org>) now supports reproducible research and
@@ -3619,7 +3653,7 @@ R process.  (This section contributed by Dan Davison and Eric Schulte.)
 
 File: ess.info,  Node: Sweave and AUCTeX,  Prev: Org,  Up: Extras
 
-11.13 Support for Sweave in ESS and AUCTeX
+11.14 Support for Sweave in ESS and AUCTeX
 ==========================================
 
 Libraries for literate data analysis are obsolete and not loaded by
@@ -4541,11 +4575,11 @@ File: ess.info,  Node: Reporting Bugs,  Next: Mailing Lists,  Prev: Bugs,  Up: M
 16.2 Reporting Bugs
 ===================
 
-Please send bug reports, suggestions etc.  to <ESS-bugs@r-project.org>,
-or post them on our github issue tracker
-(https://github.com/emacs-ess/ESS/issues)
+Please post bug reports, suggestions etc.  on our github issue tracker
+(https://github.com/emacs-ess/ESS/issues); if not possible, e-mail them
+to <ESS-help@r-project.org>.
 
-   The easiest way to do this is within Emacs by typing
+   The easiest way to set this up, is within Emacs by typing
 
    'M-x ess-submit-bug-report'
 
@@ -4781,6 +4815,7 @@ Function and program index
 * ess-quit:                              Hot keys.            (line  70)
 * ess-quit <1>:                          Help.                (line 170)
 * ess-R-complete-object-name:            roxygen2.            (line  80)
+* ess-r-outline-level:                   Outline.             (line   6)
 * ess-r-package-list-available-packages: Package listing.     (line  12)
 * ess-r-package-list-local-packages:     Package listing.     (line   9)
 * ess-r-package-update-packages:         Package listing.     (line  16)
@@ -4830,6 +4865,7 @@ Function and program index
 * mark-paragraph:                        roxygen2.            (line  85)
 * newline-and-indent:                    roxygen2.            (line 102)
 * objects():                             Hot keys.            (line  24)
+* outline-minor-mode:                    Outline.             (line   6)
 * printer():                             printer.             (line  11)
 * q():                                   Hot keys.            (line  71)
 * R:                                     Starting up.         (line  11)
@@ -4880,6 +4916,8 @@ Variable index
 * ess-r-flymake-linters:                 ESS Flymake.          (line 16)
 * ess-r-flymake-lintr-cache:             ESS Flymake.          (line 23)
 * ess-R-font-lock-keywords:              Highlighting.         (line 19)
+* ess-r-outline-regexp:                  Outline.              (line  6)
+* ess-r-outline-regexp <1>:              Outline.              (line 27)
 * ess-search-list:                       Source Directories.   (line 62)
 * ess-source-directory:                  Source Directories.   (line 22)
 * ess-style:                             Styles.               (line 21)
@@ -4918,6 +4956,7 @@ Concept Index
 * changing ESS processes:                Multiple ESS processes.
                                                               (line   6)
 * cleaning up:                           Hot keys.            (line  71)
+* code folding:                          Outline.             (line   6)
 * comint:                                Credits.             (line   6)
 * command history:                       Command History.     (line   6)
 * command line arguments:                iESS(R)--Inferior ESS processes.
@@ -5000,6 +5039,7 @@ Concept Index
                                                               (line   6)
 * new objects, creating:                 Edit buffer.         (line  14)
 * objects:                               Hot keys.            (line  24)
+* outline-minor-mode:                    Outline.             (line   6)
 * pages in the process buffer:           Transcript.          (line  24)
 * paging commands in help buffers:       Help.                (line  28)
 * paragraphs in the process buffer:      Transcript.          (line  13)
@@ -5115,50 +5155,51 @@ Node: R documentation files129077
 Node: roxygen2132780
 Node: Namespaced Evaluation137191
 Node: Extras139189
-Node: ESS ElDoc140213
-Node: ESS Flymake141709
-Node: Handy commands142803
-Node: Highlighting144000
-Node: Parens145035
-Node: Graphics145511
-Node: printer146182
-Node: X11146938
-Node: winjava147277
-Node: Imenu147689
-Node: Toolbar148536
-Node: Xref148944
-Node: Rdired149272
-Node: Package listing150335
-Node: Org151719
-Node: Sweave and AUCTeX152673
-Node: ESS for R155225
-Node: ESS(R)--Editing files155525
-Node: iESS(R)--Inferior ESS processes156026
-Node: Philosophies for using ESS(R)158681
-Node: Example ESS usage159608
-Node: ESS for SAS161013
-Node: ESS(SAS)--Design philosophy161736
-Node: ESS(SAS)--Editing files162669
-Node: ESS(SAS)--TAB key164523
-Node: ESS(SAS)--Batch SAS processes165889
-Node: ESS(SAS)--Function keys for batch processing170917
-Node: iESS(SAS)--Interactive SAS processes180404
-Node: iESS(SAS)--Common problems184158
-Node: ESS(SAS)--Graphics185682
-Node: ESS(SAS)--Windows186465
-Node: ESS for BUGS187043
-Node: ESS for JAGS188799
-Node: Mailing lists/bug reports192151
-Node: Bugs192415
-Node: Reporting Bugs194039
-Node: Mailing Lists194932
-Node: Help with Emacs195659
-Node: Customization196191
-Node: Indices196965
-Node: Key index197140
-Node: Function and program index202272
-Node: Variable index211692
-Node: Concept index215253
+Node: ESS ElDoc140281
+Node: ESS Flymake141777
+Node: Handy commands142871
+Node: Highlighting144068
+Node: Parens145103
+Node: Graphics145579
+Node: printer146250
+Node: X11147006
+Node: winjava147345
+Node: Imenu147757
+Node: Outline148604
+Node: Toolbar149868
+Node: Xref150278
+Node: Rdired150608
+Node: Package listing151671
+Node: Org153055
+Node: Sweave and AUCTeX154009
+Node: ESS for R156561
+Node: ESS(R)--Editing files156861
+Node: iESS(R)--Inferior ESS processes157362
+Node: Philosophies for using ESS(R)160017
+Node: Example ESS usage160944
+Node: ESS for SAS162349
+Node: ESS(SAS)--Design philosophy163072
+Node: ESS(SAS)--Editing files164005
+Node: ESS(SAS)--TAB key165859
+Node: ESS(SAS)--Batch SAS processes167225
+Node: ESS(SAS)--Function keys for batch processing172253
+Node: iESS(SAS)--Interactive SAS processes181740
+Node: iESS(SAS)--Common problems185494
+Node: ESS(SAS)--Graphics187018
+Node: ESS(SAS)--Windows187801
+Node: ESS for BUGS188379
+Node: ESS for JAGS190135
+Node: Mailing lists/bug reports193487
+Node: Bugs193751
+Node: Reporting Bugs195375
+Node: Mailing Lists196290
+Node: Help with Emacs197017
+Node: Customization197549
+Node: Indices198323
+Node: Key index198498
+Node: Function and program index203630
+Node: Variable index213196
+Node: Concept index216903
 
 End Tag Table
 

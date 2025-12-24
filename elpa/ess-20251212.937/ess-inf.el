@@ -1,6 +1,6 @@
 ;;; ess-inf.el --- Support for running S as an inferior Emacs process  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 1989-2023 Free Software Foundation, Inc.
+;; Copyright (C) 1989-2025 Free Software Foundation, Inc.
 
 ;; Author: David Smith <dsmith@stats.adelaide.edu.au>
 ;; Created: 7 Jan 1994
@@ -1998,7 +1998,7 @@ meaning as for `ess-eval-region'."
     (define-key map "\C-c\C-z" #'ess-switch-to-inferior-or-script-buffer) ; mask comint map
     (define-key map "\C-d"     #'delete-char)   ; EOF no good in S
     (define-key map "\t"       #'completion-at-point)
-    (define-key map "\M-?"     #'ess-complete-object-name)
+    (define-key map "\M-?"     #'ess-complete-object-name); stealing  M-? from xref(standard Emacs)
     (define-key map "\C-c\C-k" #'ess-request-a-process)
     (define-key map ","        #'ess-smart-comma)
     (define-key map "\C-c\C-d"  'ess-doc-map)
@@ -3143,7 +3143,7 @@ Uses `temp-buffer-show-function' and respects
 
 (defun ess--inject-code-from-file (file &optional chunked)
   "Load code from FILE into process.
-If CHUNKED is non-nil, split the file by  separator (must be at
+If CHUNKED is non-nil, split the file by \\^L separator (must be at
 bol) and load each chunk separately."
   ;; This is different from ess-load-file as it works by directly loading the
   ;; string into the process and thus works on remotes.

@@ -1,6 +1,6 @@
 ;;; ess.el --- Emacs Speaks Statistics  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 1997-2024 Free Software Foundation, Inc.
+;; Copyright (C) 1997-2025 Free Software Foundation, Inc.
 
 ;; Author: David Smith <dsmith@stats.adelaide.edu.au>
 ;;         A.J. Rossini <blindglobe@gmail.com>
@@ -17,8 +17,8 @@
 ;;
 ;; Maintainer: ESS Core Team <ESS-core@r-project.org>
 ;; Created: 7 Jan 1994
-;; Package-Version: 20250508.735
-;; Package-Revision: cf5c97bc6843
+;; Package-Version: 20251212.937
+;; Package-Revision: e39ca8fa7fce
 ;; URL: https://ess.r-project.org/
 ;; Package-Requires: ((emacs "25.1"))
 ;; ESSR-Version: 1.8
@@ -129,7 +129,7 @@ Is set  by \\[ess-version-string].")
   (interactive)
   (let ((reporter-prompt-for-summary-p 't))
     (reporter-submit-bug-report
-     "ess-bugs@r-project.org"
+     "ess-help@r-project.org"
      (concat "ess-mode " (ess-version-string))
      (list 'ess-language
            'ess-dialect
@@ -151,10 +151,12 @@ Is set  by \\[ess-version-string].")
        ;;(goto-char (point-max))
        (rfc822-goto-eoh)
        (forward-line 1)
-       (insert "\n\n-------------------------------------------------------\n")
-       (insert "This bug report will be sent to the ESS bugs email list\n")
-       (insert "Press C-c C-c when you are ready to send your message.\n")
-       (insert "-------------------------------------------------------\n\n")
+       (insert "\n\n-------------------------------------------------------------\n")
+       (insert "This bug report will be sent to the ESS _help_ email list\n")
+       (insert ">>> _INSTEAD_ we strongly recommend you open an issue for this\n")
+       (insert "    at  https://github.com/emacs-ess/ESS/issues .\n\n")
+       (insert "If you still prefer to use the ESS help email, press C-c C-c to send your message.\n")
+       (insert "-------------------------------------------------------------\n\n")
        (insert (with-current-buffer ess-dribble-buffer
                  (goto-char (point-max))
                  (forward-line -100)

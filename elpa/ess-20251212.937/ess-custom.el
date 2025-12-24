@@ -563,6 +563,7 @@ contain spaces on either side."
   :type '(repeat string)
   :group 'ess
   :package-version '(ess . "25.01.1"))
+
 (defvar ess-S-assign)
 (make-obsolete-variable 'ess-S-assign 'ess-assign-list "ESS 18.10")
 
@@ -1568,6 +1569,12 @@ by `ess-function-template'."
     "[Ee]rror")
   "Regexp used to detect an error when loading a file."
   :group 'ess
+  :type 'regexp)
+
+(defcustom ess-r-outline-regexp
+  "^[ \t]*#+ +.*\\(?:----\\|====\\|####\\)\\s-*$"
+  "Regexp used to detect the beginning of R headings."
+  :group 'ess-R
   :type 'regexp)
 
 
