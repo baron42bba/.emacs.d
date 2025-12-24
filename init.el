@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 (setq load-path
       (append
-       (list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-9.7.17"))
+       (list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-9.7.39"))
        load-path))
 (if (string-equal system-type "darwin")
     (delete ' "/Applications/Emacs.app/Contents/Resources/lisp/org" load-path))
