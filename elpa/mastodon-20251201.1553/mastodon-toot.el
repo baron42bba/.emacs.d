@@ -251,14 +251,17 @@ send.")
 ;;; REGEXES
 
 (defvar mastodon-toot-handle-regex
-  (rx (| (any ?\( "\n" "\t "" ") bol) ; preceding things
-      (group-n 2 (+ ?@ (* (any ?- ?_ ?. "A-Z" "a-z" "0-9" ))) ; handle
-               (? ?@ (* (not (any "\n" "\t" " "))))) ; optional domain
+  (rx (group-n 2 ; include domain
+        (group-n 4 ; exclude domain
+          (| (any ?\( "\n" "\t" " ") bol) ; preceding things
+          ?@ ; first @
+          (* (any ?- ?_ ?. "A-Z" "a-z" "0-9" ))) ; username
+        (? ?@ (* (not (any "\n" "\t" " "))))) ; optional domain
       (| "'" word-boundary))) ; boundary or possessive
 
 (defvar mastodon-toot-tag-regex
   (rx (| (any ?\( "\n" "\t" " ") bol)
-      (group-n 2 ?# (+ (any "A-Z" "a-z" "0-9")))
+      (group-n 2 ?# (+ (any "_" "A-Z" "a-z" "0-9")))
       (| "'" word-boundary))) ; boundary or possessive
 
 (defvar mastodon-toot-emoji-regex
@@ -801,7 +804,7 @@ TEXT-ONLY means don't check for attachments or polls."
   (interactive)
   (if mastodon-use-emojify
       (emojify-insert-emoji)
-    (emoji-search))) ;; 29.1
+    (call-interactively #'emoji-search))) ;; 29.1
 
 (defun mastodon-toot--emoji-dir ()
   "Return the file path for the mastodon custom emojis directory."
@@ -1486,8 +1489,9 @@ Return a cons of a human readable string, and a seconds-from-now string."
          (response (completing-read "poll ends in [or enter seconds]: "
                                     options nil 'confirm)))
     (or (assoc response options #'string=)
-        (if (< (string-to-number response) 600)
-            (car options))))) ;; min 5 mins
+        (if (< (string-to-number response) 300)
+            (cons "5 minutes" (number-to-string (* 60 5))) ;; min 5 mins
+	  (cons (format "%s seconds" response) response)))))
 
 (defun mastodon-toot--poll-expiry-options-alist ()
   "Return an alist of expiry options options in seconds."
@@ -1883,10 +1887,11 @@ CW is the content warning, which contributes to the character count."
   ;; FIXME: URL chars is avail at /api/v1/instance
   ;; for masto, it's .statuses.characters_reserved_per_url
   (let* ((url-replacement (make-string 23 ?x))
-         (count-str (replace-regexp-in-string ; handle @handles
-                     mastodon-toot-handle-regex "\2"
-                     (replace-regexp-in-string ; handle URLs
-                      mastodon-toot-url-regex url-replacement toot-string))))
+         (count-str
+          (replace-regexp-in-string ; handle @handles
+           mastodon-toot-handle-regex "\\4"
+           (replace-regexp-in-string ; handle URLs
+            mastodon-toot-url-regex url-replacement toot-string))))
     (+ (length cw)
        (length count-str))))
 

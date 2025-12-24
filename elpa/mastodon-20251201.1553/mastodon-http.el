@@ -68,13 +68,21 @@ SILENT means don't message."
       (url-retrieve-synchronously url)
     (url-retrieve-synchronously url (or silent nil) nil mastodon-http--timeout)))
 
+(defun mastodon-http--response-status (resp)
+  "Return the status code from RESP, a response buffer."
+  ;; `url-http-parse-response' breaks tests, as
+  ;; `url-http-end-of-headers' not set, so we roll our own:
+  (with-current-buffer resp
+    (goto-char (point-min))
+    (skip-chars-forward " \t\n")    ; Skip any blank crap
+    (skip-chars-forward "/HPT0-9.") ; Skip HTTP Version "HTTP/X.Y"
+    (read (current-buffer))))
+
 (defun mastodon-http--triage (response success)
   "Determine if RESPONSE was successful.
 Call SUCCESS on RESPONSE if successful. Message status and JSON error
 from RESPONSE if unsuccessful."
-  (let ((status (with-current-buffer response
-                  ;; FIXME: breaks tests, as url-http-end-of-headers not set
-                  (url-http-parse-response))))
+  (let ((status (mastodon-http--response-status response)))
     (if (and (>= 200 status)
              (<= status 299))
         ;; (string-prefix-p "2" (number-to-string status))
@@ -220,9 +228,10 @@ Callback to `mastodon-http--get-response-async', usually
     (goto-char (point-min))
     (re-search-forward "^$" nil 'move)
     (let ((json-array-type (if vector 'vector 'list))
-          (json-string (decode-coding-string
-                        (buffer-substring-no-properties (point) (point-max))
-                        'utf-8)))
+          (json-string (string-trim-right
+                        (decode-coding-string
+                         (buffer-substring-no-properties (point) (point-max))
+                         'utf-8))))
       (kill-buffer)
       (cond ((or (string-empty-p json-string) (null json-string))
              nil)

@@ -636,6 +636,22 @@ FIELDS means provide a fields vector fetched by other means."
                  'face `(:box t :foreground ,(alist-get 'color role))))
    roles))
 
+(defun mastodon-profile--render-moved (data)
+  "Return a propertized string of a migrated account link.
+DATA is an account data from a moved field in profile data."
+  (let-alist data
+    (let ((handle (concat "@" .acct)))
+      (concat
+       "this account has migrated to: "
+       (mastodon-tl--buttonify-link
+        handle
+        'face 'shr-link ;'mastodon-handle-face
+        'mastodon-tab-stop 'user-handle
+        'shr-url .url
+        'mastodon-handle handle
+        'help-echo (concat "Browse user profile of " handle))
+       "\n\n"))))
+
 (defun mastodon-profile--make-profile-buffer-for
     (account endpoint-type update-function
              &optional no-reblogs headers no-replies only-media tag max-id)
@@ -693,7 +709,11 @@ MAX-ID is a flag to include the max_id pagination parameter."
              (mastodon-profile--image-from-account account 'avatar_static)
              (mastodon-profile--image-from-account account 'header_static)
              "\n"
-             (propertize .display_name 'face 'mastodon-display-name-face)
+             (when .display_name
+               (propertize (if (string-empty-p .display_name)
+                               .username
+                             .display_name)
+                           'face 'mastodon-display-name-face))
              ;; roles
              (when .roles
                (concat " " (mastodon-profile--render-roles .roles)))
@@ -702,6 +722,9 @@ MAX-ID is a flag to include the max_id pagination parameter."
              (when (eq .locked t)
                (concat " " (mastodon-tl--symbol 'locked)))
              "\n " mastodon-tl--horiz-bar "\n"
+             ;; migration:
+             (when .moved
+               (mastodon-profile--render-moved .moved))
              ;; profile note:
              (mastodon-tl--render-text .note account) ; account = tab-stops in profile
              ;; meta fields:
@@ -867,7 +890,7 @@ Used to view a user's followers and those they're following."
            (insert
             "\n"
             (propertize
-             (mastodon-tl--byline-author `((account . ,toot)) :avatar)
+             (mastodon-tl--byline-author `((account . ,toot)) :avatar nil :base)
              'byline  't
              'item-id (alist-get 'id toot)
              'base-item-id (mastodon-tl--item-id toot)

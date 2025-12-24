@@ -6,9 +6,9 @@
 ;; Author: Johnson Denen <johnson.denen@gmail.com>
 ;;         Marty Hiatt <mousebot@disroot.org>
 ;; Maintainer: Marty Hiatt <mousebot@disroot.org>
-;; Package-Version: 20250330.1519
-;; Package-Revision: 163ba2b0b89a
-;; Package-Requires: ((emacs "28.1") (persist "0.4") (tp "0.7"))
+;; Package-Version: 20251201.1553
+;; Package-Revision: 3c00418bfbb1
+;; Package-Requires: ((emacs "28.1") (persist "0.8") (tp "0.7"))
 ;; Homepage: https://codeberg.org/martianh/mastodon.el
 
 ;; This file is not part of GNU Emacs.
@@ -74,6 +74,8 @@
 (when (require 'lingva nil :no-error)
   (autoload 'mastodon-toot-translate-toot-text "mastodon-toot"))
 (autoload 'mastodon-toot--view-toot-history "mastodon-tl")
+(autoload 'mastodon-tl-return "mastodon-tl")
+(autoload 'mastodon-tl-jump-to-followed-tag "mastodon-tl")
 
 ;; for M-x visibility
 ;; (views.el uses `mastodon-mode-map', so we can't easily require it)
@@ -229,6 +231,7 @@ Also nil `mastodon-auth--token-alist'."
     ;; navigation between timelines
     (define-key map (kbd "#")      #'mastodon-tl-get-tag-timeline)
     (define-key map (kbd "\"")     #'mastodon-tl-list-followed-tags)
+    (define-key map (kbd "C-\"")     #'mastodon-tl-jump-to-followed-tag)
     (define-key map (kbd "'")      #'mastodon-tl-followed-tags-timeline)
     (define-key map (kbd "C-'")   #'mastodon-tl-tag-group-timeline)
     (define-key map (kbd "A")      #'mastodon-profile-get-toot-author)
@@ -257,7 +260,7 @@ Also nil `mastodon-auth--token-alist'."
     (define-key map (kbd "v")      #'mastodon-tl-poll-vote)
     (define-key map (kbd "E")      #'mastodon-toot-view-toot-edits)
     (define-key map (kbd "T")      #'mastodon-tl-thread)
-    (define-key map (kbd "RET")    #'mastodon-tl-thread)
+    (define-key map (kbd "RET")    #'mastodon-tl-return)
     (define-key map (kbd "m")      #'mastodon-tl-dm-user)
     (define-key map (kbd "=")      #'mastodon-tl-view-first-full-image)
     (when (require 'lingva nil :no-error)
@@ -265,6 +268,7 @@ Also nil `mastodon-auth--token-alist'."
     (define-key map (kbd ",")      #'mastodon-toot-list-favouriters)
     (define-key map (kbd ".")      #'mastodon-toot-list-boosters)
     (define-key map (kbd ";")      #'mastodon-views-view-instance-description)
+    (define-key map (kbd "M-;")    #'mastodon-tl-nodeinfo-for-toot)
     ;; override special mode binding
     (define-key map (kbd "g")      #'undefined)
     (define-key map (kbd "g")      #'mastodon-tl-update)
@@ -493,14 +497,14 @@ If FORCE, do a lookup regardless of the result of `mastodon--fedi-url-p'."
   (interactive)
   (mastodon-url-lookup nil :force))
 
-(defun mastodon--fedi-url-p (query)
+(defun mastodon--fedi-url-p (url)
   "Check if QUERY resembles a fediverse URL."
   ;; calqued off https://github.com/tuskyapp/Tusky/blob/c8fc2418b8f5458a817bba221d025b822225e130/app/src/main/java/com/keylesspalace/tusky/BottomSheetActivity.kt
   ;; thx to Conny Duck!
   ;; mastodon at least seems to allow only [a-z0-9_] for usernames, plus "."
   ;; but not at beginning or end, see https://github.com/mastodon/mastodon/issues/6830
   ;; objects may have - in them
-  (let* ((uri-parsed (url-generic-parse-url query))
+  (let* ((uri-parsed (url-generic-parse-url url))
          (query (url-filename uri-parsed)))
     (save-match-data
       (or (string-match "^/@[^/]+$" query)
@@ -519,7 +523,10 @@ If FORCE, do a lookup regardless of the result of `mastodon--fedi-url-p'."
           (string-match "^/comment/[[:digit:]]+$" query) ; lemmy
           (string-match "^/@[^/]+/statuses/[[:alnum:]]" query) ; GTS
           (string-match "^/user[s]?/[[:alnum:]_]+/statuses/[[:digit:]]+$" query) ; hometown
-          (string-match "^/notes/[[:alnum:]]+$" query))))) ; misskey post
+          (string-match "^/notes/[[:alnum:]]+$" query) ; misskey post
+          (string-match "^/w/[[:alnum:]_]+$" query) ; peertube post
+          ;; bsky via fed.brid.gy (unsure if this needs narrowing down?):
+          (string-prefix-p "https://fed.brid.gy/r/" url)))))
 
 (defun mastodon-live-buffers ()
   "Return a list of open mastodon buffers.

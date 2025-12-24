@@ -105,7 +105,8 @@
 (defvar mastodon-notifications--types
   '("all" "favourite" "reblog" "mention" "poll"
     "follow_request" "follow" "status" "update"
-    "severed_relationships" "moderation_warning")
+    "severed_relationships" "moderation_warning" "quote"
+    "quoted_update")
   "A list of notification types according to their name on the server, plus \"all\".")
 
 (defvar mastodon-notifications--filter-types-alist
@@ -117,7 +118,9 @@
     ("follow_request"         . mastodon-notifications-get-follow-requests)
     ("follow"                 . mastodon-notifications-get-follows)
     ("status"                 . mastodon-notifications-get-statuses)
-    ("update"                 . mastodon-notifications-get-edits))
+    ("update"                 . mastodon-notifications-get-edits)
+    ("quote"                  . mastodon-notifications-get-quotes)
+    ("quoted_update"          . mastodon-notifications-get-quoted-updates))
   "An alist of notification types and their corresponding load functions.
 Notification types are named according to their name on the server.")
 
@@ -129,7 +132,16 @@ Notification types are named according to their name on the server.")
     ("Posted a poll"        . "that has now ended")
     ("Requested to follow"  . "you")
     ("Posted"               . "a post")
-    ("Edited"               . "their post"))
+    ("Edited"               . "their post")
+    ("Quoted"               . "your post")
+    ;; FIXME: this is very annoying, but because "Edited" is used above,
+    ;; we cannot reuse it here. I think this is because we use
+    ;; `mastodon-notifications--action-alist' to go from (server) notif
+    ;; type, to a string, and then use that string to get the rest of the
+    ;; byline string from `mastodon-notifications--response-alist' here.
+    ;; Ideally would just key the two strings according to notif type,
+    ;; even if they did need to be gathered separately and combined.
+    ("Modified"             . "a post that you quoted"))
   "Alist of subjects for notification types.")
 
 (defvar mastodon-notifications--action-alist
@@ -142,7 +154,9 @@ Notification types are named according to their name on the server.")
     (poll                  . "Posted a poll")
     (update                . "Edited")
     (severed_relationships . "Relationships severed")
-    (moderation_warning    . "Moderation warning"))
+    (moderation_warning    . "Moderation warning")
+    (quote                 . "Quoted")
+    (quoted_update         . "Modified"))
   "Action strings keyed by notification type.
 Types are those of the Mastodon API.")
 
@@ -455,6 +469,9 @@ TYPE is notification type, used for non-group notifs."
        (propertize body ;; body only
                    'toot-body t) ;; includes newlines etc. for folding
        "\n"
+       ;; display quoted post:
+       (when (alist-get 'quote toot)
+         (mastodon-tl--insert-quoted (alist-get 'quote toot)))
        ;; actual byline:
        (if (member type '("severed_relationships" "moderation_warning"))
            (propertize
