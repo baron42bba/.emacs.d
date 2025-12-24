@@ -6,8 +6,8 @@
 ;; Author: Jason R. Blevins <jblevins@xbeta.org>
 ;; Maintainer: Jason R. Blevins <jblevins@xbeta.org>
 ;; Created: May 24, 2007
-;; Package-Version: 20250501.551
-;; Package-Revision: 90ad4af79a8b
+;; Package-Version: 20251204.852
+;; Package-Revision: 92802fae9ebb
 ;; Package-Requires: ((emacs "28.1"))
 ;; Keywords: Markdown, GitHub Flavored Markdown, itex
 ;; URL: https://jblevins.org/projects/markdown-mode/
@@ -39,6 +39,7 @@
 (require 'thingatpt)
 (require 'cl-lib)
 (require 'url-parse)
+(require 'url-util)
 (require 'button)
 (require 'color)
 (require 'rx)
@@ -188,12 +189,10 @@ fewer than six nested heading levels are used."
   :safe 'natnump
   :package-version '(markdown-mode . "2.4"))
 
-(defcustom markdown-asymmetric-header nil
+(defcustom markdown-asymmetric-header t
   "Determines if atx header style will be asymmetric.
 Set to a non-nil value to use asymmetric header styling, placing
-header markup only at the beginning of the line. By default,
-balanced markup will be inserted at the beginning and end of the
-line around the header title."
+header markup only at the beginning of the line."
   :group 'markdown
   :type 'boolean)
 
@@ -2613,7 +2612,11 @@ Return the point at the end when a list item was found at the
 original point.  If the point is not in a list item, do nothing."
   (let (indent)
     (forward-line)
-    (setq indent (current-indentation))
+    ;; #904 consider a space indentation and tab indentation case
+    (save-excursion
+      (let ((pos (point)))
+        (back-to-indentation)
+        (setq indent (- (point) pos))))
     (while
         (cond
          ;; Stop at end of the buffer.
@@ -2903,7 +2906,8 @@ data.  See `markdown-inline-code-at-point-p' for inline code."
 (defun markdown-heading-at-point (&optional pos)
   "Return non-nil if there is a heading at the POS.
 Set match data for `markdown-regex-header'."
-  (let ((match-data (get-text-property (or pos (point)) 'markdown-heading)))
+  (let* ((p (or pos (if (and (eolp) (>= (point) 2)) (1- (point)) (point))))
+         (match-data (get-text-property p 'markdown-heading)))
     (when match-data
       (set-match-data match-data)
       t)))
@@ -3280,11 +3284,18 @@ processed elements."
                              (markdown-end-of-text-block)
                              (point))))
            ;; Move over balanced expressions to closing right bracket.
-           ;; Catch unbalanced expression errors and return nil.
+           ;; Catch unbalanced expression errors, then try to search right bracket manually.
            (first-end (condition-case nil
                           (and (goto-char first-begin)
                                (scan-sexps (point) 1))
-                        (error nil)))
+                        (error
+                         (save-match-data
+                           (let ((last (match-end 4))
+                                 ok end-pos)
+                             (while (and (not ok) (search-forward "]" last t))
+                               (unless (= (char-before (1- (point))) ?\\)
+                                 (setq ok t end-pos (point))))
+                             end-pos)))))
            ;; Continue with point at CONT-POINT upon failure.
            (cont-point (min (1+ first-begin) last))
            second-begin second-end url-begin url-end
@@ -8158,6 +8169,27 @@ See `markdown-wiki-link-p' for more information."
             (thing-at-point-looking-at markdown-regex-uri)
             (thing-at-point-looking-at markdown-regex-angle-uri))))))
 
+(defun markdown--unhex-url-string (url)
+  "Unhex control characters and spaces in URL.
+This is similar to `url-unhex-string' but this doesn't unhex all percent-encoded
+characters."
+  (let ((str (or url ""))
+        (tmp "")
+        (case-fold-search t))
+    (while (string-match "%\\([01][0-9a-f]\\|20\\)" str)
+      (let* ((start (match-beginning 0))
+             (ch1 (url-unhex (elt str (+ start 1))))
+             (code (+ (* 16 ch1)
+                      (url-unhex (elt str (+ start 2))))))
+        (setq tmp (concat
+                   tmp (substring str 0 start)
+                   (cond
+                    ((or (= code ?\n) (= code ?\r))
+                     " ")
+                    (t (byte-to-string code))))
+              str (substring str (match-end 0)))))
+    (concat tmp str)))
+
 (defun markdown-link-at-pos (pos)
   "Return properties of link or image at position POS.
 Value is a list of elements describing the link:
@@ -8181,7 +8213,9 @@ Value is a list of elements describing the link:
               url (match-string-no-properties 6))
         ;; consider nested parentheses
         ;; if link target contains parentheses, (match-end 0) isn't correct end position of the link
-        (let* ((close-pos (scan-sexps (match-beginning 5) 1))
+        (let* ((close-pos (condition-case nil
+                              (scan-sexps (match-beginning 5) 1)
+                            (error (match-end 0))))
                (destination-part (string-trim (buffer-substring-no-properties (1+ (match-beginning 5)) (1- close-pos)))))
           (setq end close-pos)
           ;; A link can contain spaces if it is wrapped with angle brackets
@@ -8191,7 +8225,7 @@ Value is a list of elements describing the link:
                  (setq url (match-string-no-properties 1 destination-part)
                        title (substring (match-string-no-properties 2 destination-part) 1 -1)))
                 (t (setq url destination-part)))
-          (setq url (url-unhex-string url))))
+          (setq url (markdown--unhex-url-string url))))
        ;; Reference link at point.
        ((thing-at-point-looking-at markdown-regex-link-reference)
         (setq bang (match-string-no-properties 1)
@@ -9322,6 +9356,37 @@ position."
 (require 'edit-indirect nil t)
 (defvar edit-indirect-guess-mode-function)
 (defvar edit-indirect-after-commit-functions)
+(defvar edit-indirect--overlay)
+(declare-function edit-indirect-commit "edit-indirect")
+(declare-function edit-indirect--commit "edit-indirect")
+
+(defvar-local markdown--edit-indirect-committed-position nil)
+
+(defun markdown--edit-indirect-save-committed-position ()
+  "Save where editing is committed in a local variable in the parent buffer."
+  (if-let* ((parent-buffer (overlay-buffer edit-indirect--overlay))
+            ((with-current-buffer parent-buffer
+               (derived-mode-p 'markdown-mode)))
+            (pos (cons (line-number-at-pos) (current-column))))
+    (with-current-buffer parent-buffer
+      (setq markdown--edit-indirect-committed-position pos))))
+
+(with-eval-after-load 'edit-indirect
+  (advice-add #'edit-indirect--commit :after #'markdown--edit-indirect-save-committed-position))
+
+(defun markdown--edit-indirect-move-to-committed-position ()
+  "Move the point in the code block corresponding to the saved committed position."
+  (when-let* ((pos markdown--edit-indirect-committed-position)
+              (bounds (markdown-get-enclosing-fenced-block-construct))
+              (fence-begin (nth 0 bounds)))
+    (goto-char fence-begin)
+    (let ((block-indentation (current-indentation)))
+      (forward-line (car pos))
+      (move-to-column (+ block-indentation (cdr pos)))))
+  (setq markdown--edit-indirect-committed-position nil))
+
+(with-eval-after-load 'edit-indirect
+  (advice-add #'edit-indirect-commit :after #'markdown--edit-indirect-move-to-committed-position))
 
 (defun markdown--edit-indirect-after-commit-function (beg end)
   "Corrective logic run on code block content from lines BEG to END.
@@ -9343,18 +9408,24 @@ at the END of code blocks."
   (interactive)
   (save-excursion
     (if (fboundp 'edit-indirect-region)
-        (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
-               (begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (line-beginning-position 2)))
-               (end (and bounds(not (null (nth 1 bounds)))  (goto-char (nth 1 bounds)) (line-beginning-position 1))))
-          (if (and begin end)
-              (let* ((indentation (and (goto-char (nth 0 bounds)) (current-indentation)))
-                     (lang (markdown-code-block-lang))
-                     (mode (or (and lang (markdown-get-lang-mode lang))
-                               markdown-edit-code-block-default-mode))
-                     (edit-indirect-guess-mode-function
-                      (lambda (_parent-buffer _beg _end)
-                        (funcall mode)))
-                     (indirect-buf (edit-indirect-region begin end 'display-buffer)))
+        (if-let* ((bounds (markdown-get-enclosing-fenced-block-construct))
+                  (fence-begin (nth 0 bounds))
+                  (fence-end (nth 1 bounds)))
+            (let* ((original-line (line-number-at-pos))
+                   (original-column (current-column))
+                   (begin (progn (goto-char fence-begin) (line-beginning-position 2)))
+                   (line (max 0 (- original-line (line-number-at-pos) 1)))
+                   (indentation (current-indentation))
+                   (column (max 0 (- original-column indentation)))
+                   (end (progn (goto-char fence-end) (line-beginning-position 1)))
+                   (lang (markdown-code-block-lang))
+                   (mode (or (and lang (markdown-get-lang-mode lang))
+                             markdown-edit-code-block-default-mode))
+                   (edit-indirect-guess-mode-function
+                    (lambda (_parent-buffer _beg _end)
+                      (funcall mode)))
+                   (indirect-buf (edit-indirect-region begin end 'display-buffer)))
+              (with-current-buffer indirect-buf
                 ;; reset `sh-shell' when indirect buffer
                 (when (and (not (member system-type '(ms-dos windows-nt)))
                            (member mode '(shell-script-mode sh-mode))
@@ -9362,16 +9433,17 @@ at the END of code blocks."
                                          (mapcar (lambda (e) (symbol-name (car e)))
                                                  sh-ancestor-alist)
                                          '("csh" "rc" "sh"))))
-                  (with-current-buffer indirect-buf
-                    (sh-set-shell lang)))
+                  (sh-set-shell lang))
                 (when (> indentation 0) ;; un-indent in edit-indirect buffer
-                  (with-current-buffer indirect-buf
-                    (indent-rigidly (point-min) (point-max) (- indentation)))))
-            (user-error "Not inside a GFM or tilde fenced code block")))
+                  (indent-rigidly (point-min) (point-max) (- indentation)))
+                (goto-char (point-min))
+                (forward-line line)
+                (move-to-column column)))
+          (user-error "Not inside a GFM or tilde fenced code block"))
       (when (y-or-n-p "Package edit-indirect needed to edit code blocks. Install it now? ")
-        (progn (package-refresh-contents)
-               (package-install 'edit-indirect)
-               (markdown-edit-code-block))))))
+        (package-refresh-contents)
+        (package-install 'edit-indirect)
+        (markdown-edit-code-block)))))
 
 
 ;;; Table Editing =============================================================
@@ -9688,6 +9760,18 @@ This function assumes point is on a table."
        (cl-loop for c across line
                 always (member c '(?| ?- ?: ?\t ? )))))
 
+(defun markdown-table-align-raw (cells fmtspec widths)
+  (let (fmt width)
+    (mapconcat
+     (lambda (cell)
+       (setq fmt (car fmtspec) fmtspec (cdr fmtspec))
+       (setq width (car widths) widths (cdr widths))
+       (if (equal fmt 'c)
+           (setq cell (concat (make-string (/ (- width (length cell)) 2) ?\s) cell)))
+       (unless (equal fmt 'r) (setq width (- width)))
+       (format (format " %%%ds " width) cell))
+     cells "|")))
+
 (defun markdown-table-align ()
   "Align table at point.
 This function assumes point is on a table."
@@ -9712,8 +9796,6 @@ This function assumes point is on a table."
             (maxcells (if cells
                           (apply #'max (mapcar #'length cells))
                         (user-error "Empty table")))
-            ;; Empty cells to fill short lines
-            (emptycells (make-list maxcells ""))
             maxwidths)
        ;; Calculate maximum width for each column
        (dotimes (i maxcells)
@@ -9725,20 +9807,20 @@ This function assumes point is on a table."
        (setq fmtspec (markdown-table-colfmt fmtspec))
        ;; Compute formats needed for output of table lines
        (let ((hfmt (concat indent "|"))
-             (rfmt (concat indent "|"))
-             hfmt1 rfmt1 fmt)
-         (dolist (width maxwidths (setq hfmt (concat (substring hfmt 0 -1) "|")))
-           (setq fmt (pop fmtspec))
-           (cond ((equal fmt 'l) (setq hfmt1 ":%s-|" rfmt1 " %%-%ds |"))
-                 ((equal fmt 'r) (setq hfmt1 "-%s:|" rfmt1  " %%%ds |"))
-                 ((equal fmt 'c) (setq hfmt1 ":%s:|" rfmt1 " %%-%ds |"))
-                 (t              (setq hfmt1 "-%s-|" rfmt1 " %%-%ds |")))
-           (setq rfmt (concat rfmt (format rfmt1 width)))
+             hfmt1 fmt (fmts fmtspec))
+         (dolist (width maxwidths)
+           (setq fmt (car fmts) fmts (cdr fmts))
+           (cond ((equal fmt 'l) (setq hfmt1 ":%s-|"))
+                 ((equal fmt 'r) (setq hfmt1 "-%s:|"))
+                 ((equal fmt 'c) (setq hfmt1 ":%s:|"))
+                 (t              (setq hfmt1 "-%s-|")))
            (setq hfmt (concat hfmt (format hfmt1 (make-string width ?-)))))
          ;; Replace modified lines only
          (dolist (line lines)
            (let ((line (if line
-                           (apply #'format rfmt (append (pop cells) emptycells))
+                           (concat indent "|"
+                                   (markdown-table-align-raw (pop cells) fmtspec maxwidths)
+                                   "|")
                          hfmt))
                  (previous (buffer-substring (point) (line-end-position))))
              (if (equal previous line)
@@ -10523,7 +10605,7 @@ rows and columns and the column alignment."
     (define-key map (kbd "SPC") #'scroll-up-command)
     (define-key map (kbd ">") #'end-of-buffer)
     (define-key map (kbd "<") #'beginning-of-buffer)
-    (define-key map (kbd "q") #'kill-this-buffer)
+    (define-key map (kbd "q") #'kill-current-buffer)
     (define-key map (kbd "?") #'describe-mode)
     map)
   "Keymap for `markdown-view-mode'.")
