@@ -14,8 +14,8 @@
 ;; Homepage: https://www.github.com/clojure-emacs/cider
 ;; Keywords: languages, clojure, cider
 ;;
-;; Package-Version: 20250520.1110
-;; Package-Revision: f83d7684185b
+;; Package-Version: 20251105.925
+;; Package-Revision: 8e3091e8c427
 ;; Package-Requires: (
 ;;     (emacs "27")
 ;;     (clojure-mode "5.19")
@@ -104,10 +104,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.19.0-snapshot"
+(defconst cider-version "1.20.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Athens"
+(defconst cider-codename "Lanzarote"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -519,7 +519,7 @@ Throws an error if PROJECT-TYPE is unknown."
   "List of dependencies where elements are lists of artifact name and version.")
 (put 'cider-jack-in-dependencies 'risky-local-variable t)
 
-(defcustom cider-injected-nrepl-version "1.3.1"
+(defcustom cider-injected-nrepl-version "1.5.1"
   "The version of nREPL injected on jack-in.
 We inject the newest known version of nREPL just in case
 your version of Leiningen is bundling an older one."
@@ -531,7 +531,7 @@ your version of Leiningen is bundling an older one."
   "List of dependencies where elements are lists of artifact name and version.
 Added to `cider-jack-in-dependencies' when doing `cider-jack-in-cljs'.")
 (put 'cider-jack-in-cljs-dependencies 'risky-local-variable t)
-(cider-add-to-alist 'cider-jack-in-cljs-dependencies "cider/piggieback" "0.5.3")
+(cider-add-to-alist 'cider-jack-in-cljs-dependencies "cider/piggieback" "0.6.1")
 
 (defvar cider-jack-in-dependencies-exclusions nil
   "List of exclusions for jack in dependencies.
@@ -550,7 +550,7 @@ the artifact.")
 
 Used when `cider-jack-in-auto-inject-clojure' is set to `latest'.")
 
-(defconst cider-required-middleware-version "0.55.7"
+(defconst cider-required-middleware-version "0.58.0"
   "The CIDER nREPL version that's known to work properly with CIDER.")
 
 (defcustom cider-injected-middleware-version cider-required-middleware-version
@@ -1444,14 +1444,54 @@ server buffer, in which case a new session for that server is created."
                    (plist-put :session-name ses-name)
                    (plist-put :repl-type 'cljs)))))
 
+(defcustom cider-connect-default-params nil
+  "Default plist of params for connecting to an external nREPL server.
+Recognized keys are :host, :port and :project-dir.
+
+These are used as arguments to the commands `cider-connect-clj',
+`cider-connect-cljs' and `cider-connect-clj&cljs', in order to bypass
+the corresponding user prompts.
+
+This defcustom is intended for use with .dir-locals.el on a per-project basis.
+See `cider-connect-default-cljs-params' in order to specify a separate set of params
+for cljs REPL connections.
+
+Note: it is recommended to set the variable `cider-default-cljs-repl'
+instead of specifying the :cljs-repl-type key."
+  :type '(plist :key-type
+                (choice (const :host)
+                        (const :port)
+                        (const :project-dir)))
+  :group 'cider)
+
+(defcustom cider-connect-default-cljs-params nil
+  "Default plist of params for connecting to a ClojureScript REPL.
+Recognized keys are :host, :port and :project-dir.
+
+If non-nil, overrides `cider-connect-default-params' for the commands
+`cider-connect-cljs' and (the latter half of) `cider-connect-clj&cljs'.
+
+Note: it is recommended to set the variable `cider-default-cljs-repl'
+instead of specifying the :cljs-repl-type key."
+  :type '(plist :key-type
+                (choice (const :host)
+                        (const :port)
+                        (const :project-dir)))
+  :group 'cider)
+
 ;;;###autoload
 (defun cider-connect-clj (&optional params)
   "Initialize a Clojure connection to an nREPL server.
-PARAMS is a plist optionally containing :host, :port and :project-dir.  On
-prefix argument, prompt for all the parameters."
+PARAMS is a plist optionally containing :host, :port and :project-dir.
+If nil, use the default parameters in `cider-connect-default-params'.
+
+With the prefix argument, prompt for all the parameters regardless of
+their supplied or default values."
   (interactive "P")
   (cider-nrepl-connect
-   (thread-first params
+   (thread-first (or params cider-connect-default-params)
+                 (copy-sequence) ;; Note: the following steps mutate the list
+                 (map-delete :cljs-repl-type)
                  (cider--update-project-dir)
                  (cider--update-host-port)
                  (cider--check-existing-session)
@@ -1464,12 +1504,17 @@ prefix argument, prompt for all the parameters."
   "Initialize a ClojureScript connection to an nREPL server.
 PARAMS is a plist optionally containing :host, :port, :project-dir and
 :cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).
+If nil, use the default parameters in `cider-connect-default-params' or
+`cider-connect-default-cljs-params'.
 
-On prefix, prompt for all the
-parameters regardless of their supplied or default values."
+With the prefix argument, prompt for all the parameters regardless of
+their supplied or default values."
   (interactive "P")
   (cider-nrepl-connect
-   (thread-first params
+   (thread-first (or params
+                     cider-connect-default-cljs-params
+                     cider-connect-default-params)
+                 (copy-sequence)
                  (cider--update-project-dir)
                  (cider--update-host-port)
                  (cider--check-existing-session)
@@ -1482,22 +1527,27 @@ parameters regardless of their supplied or default values."
 (defun cider-connect-clj&cljs (params &optional soft-cljs-start)
   "Initialize a Clojure and ClojureScript connection to an nREPL server.
 PARAMS is a plist optionally containing :host, :port, :project-dir and
-:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).  When SOFT-CLJS-START is
-non-nil, don't start if ClojureScript requirements are not met."
+:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).
+If nil, use the default parameters in `cider-connect-default-params' and
+`cider-connect-default-cljs-params'.
+
+When SOFT-CLJS-START is non-nil, don't start if ClojureScript requirements are
+not met.
+
+With the prefix argument, prompt for all the parameters regardless of
+their supplied or default values."
   (interactive "P")
-  (let* ((params (thread-first params
-                               (cider--update-project-dir)
-                               (cider--update-host-port)
-                               (cider--check-existing-session)
-                               (cider--update-cljs-type)))
-         (clj-params (thread-first params
-                                   copy-sequence
-                                   (map-delete :cljs-repl-type)))
-         (clj-repl (cider-connect-clj clj-params)))
+  (let* ((clj-repl (cider-connect-clj params))
+         (cljs-params
+          (thread-first (or params cider-connect-default-cljs-params)
+                        (copy-sequence)
+                        (cider--update-cljs-type)
+                        ;; already asked, don't ask on sibling connect
+                        (plist-put :do-prompt nil))))
     (when (if soft-cljs-start
-              (cider--check-cljs (plist-get params :cljs-repl-type) 'no-error)
+              (cider--check-cljs (plist-get cljs-params :cljs-repl-type) 'no-error)
             t)
-      (cider-connect-sibling-cljs params clj-repl))))
+      (cider-connect-sibling-cljs cljs-params clj-repl))))
 
 (defvar cider-connection-init-commands
   '(cider-jack-in-clj

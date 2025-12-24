@@ -69,7 +69,7 @@ Useful for switching between alternative minor modes like `inf-clojure-mode'."
   :package-version '(cider . "0.9.0"))
 
 (defcustom cider-merge-sessions nil
-  "Controls session combination behaviour.
+  "Controls session combination behavior.
 
 Symbol `host' combines all sessions of a project associated with the same host.
 Symbol `project' combines all sessions of a project.
@@ -530,7 +530,7 @@ REPL defaults to the current REPL."
   (interactive)
   (let ((repl (or repl
                   (sesman-browser-get 'object)
-                  (cider-current-repl nil 'ensure))))
+                  (cider-current-repl 'infer 'ensure))))
     (cider--close-connection repl))
   ;; if there are no more sessions we can kill all ancillary buffers
   (unless (cider-sessions)
@@ -546,7 +546,7 @@ entire session."
   (interactive)
   (let* ((repl (or repl
                    (sesman-browser-get 'object)
-                   (cider-current-repl nil 'ensure)))
+                   (cider-current-repl 'infer 'ensure)))
          (params (thread-first ()
                                (cider--gather-connect-params repl)
                                (plist-put :session-name (sesman-session-name-for-object 'CIDER repl))
@@ -569,7 +569,7 @@ REPL defaults to the current REPL."
   (interactive)
   (let ((repl (or repl
                   (sesman-browser-get 'object)
-                  (cider-current-repl nil 'ensure))))
+                  (cider-current-repl 'infer 'ensure))))
     (message "%s" (cider--connection-info repl))))
 
 (defconst cider-nrepl-session-buffer "*cider-nrepl-session*")
@@ -580,7 +580,7 @@ REPL defaults to the current REPL."
   "Describe an nREPL session."
   (interactive)
   (cider-ensure-connected)
-  (let* ((repl (cider-current-repl nil 'ensure))
+  (let* ((repl (cider-current-repl 'infer 'ensure))
          (selected-session (completing-read "Describe nREPL session: " (nrepl-sessions repl))))
     (when (and selected-session (not (equal selected-session "")))
       (let* ((session-info (nrepl-sync-request:describe repl))
@@ -602,7 +602,7 @@ REPL defaults to the current REPL."
   "List the loaded nREPL middleware."
   (interactive)
   (cider-ensure-connected)
-  (let* ((repl (cider-current-repl nil 'ensure))
+  (let* ((repl (cider-current-repl 'infer 'ensure))
          (middleware (nrepl-middleware repl)))
     (with-current-buffer (cider-popup-buffer "*cider-nrepl-middleware*" 'select nil 'ancillary)
       (read-only-mode -1)
@@ -946,19 +946,23 @@ REPL (connection) which produced them.")
 
 (defun cider-current-repl (&optional type ensure)
   "Get the most recent REPL of TYPE from the current session.
-TYPE is either clj, cljs, multi or any.
-When nil, infer the type from the current buffer.
+TYPE is either clj, cljs, multi, infer or any.
+When infer or nil, infer the type from the current buffer.
 If ENSURE is non-nil, throw an error if either there is
 no linked session or there is no REPL of TYPE within the current session."
   (let ((type (cider-maybe-intern type)))
     (if (and (derived-mode-p 'cider-repl-mode)
              (or (null type)
                  (eq 'any type)
+                 (eq 'infer type)
                  (eq cider-repl-type type)))
         ;; shortcut when in REPL buffer
         (current-buffer)
       (or cider--ancillary-buffer-repl
-          (let* ((type (or type (cider-repl-type-for-buffer)))
+          (let* ((type (if (or (null type)
+                               (eq 'infer type))
+                           (cider-repl-type-for-buffer)
+                         type))
                  (repls (cider-repls type ensure))
                  (repl (if (<= (length repls) 1)
                            (car repls)
@@ -1011,11 +1015,12 @@ Returns a list of the form ((session1 host1) (session2 host2) ...)."
              sessions
              :initial-value '()))
 
-(defun cider-repls (&optional type ensure)
+(defun cider-repls (&optional type ensure required-ops)
   "Return cider REPLs of TYPE from the current session.
 If TYPE is nil or multi, return all REPLs.  If TYPE is a list of types,
 return only REPLs of type contained in the list.  If ENSURE is non-nil,
-throw an error if no linked session exists."
+throw an error if no linked session exists.  If REQUIRED-OPS is non-nil,
+filters out all the REPLs that do not support the designated ops."
   (let ((type (cond
                ((listp type)
                 (mapcar #'cider-maybe-intern type))
@@ -1041,7 +1046,10 @@ throw an error if no linked session exists."
     (or (seq-filter (lambda (b)
                       (unless
                           (cider-cljs-pending-p b)
-                        (cider--match-repl-type type b)))
+                        (and (cider--match-repl-type type b)
+                             (seq-every-p (lambda (op)
+                                            (nrepl-op-supported-p op b))
+                                          required-ops))))
                     repls)
         (when ensure
           (cider--no-repls-user-error type)))))
@@ -1049,8 +1057,9 @@ throw an error if no linked session exists."
 (defun cider-map-repls (which function)
   "Call FUNCTION once for each appropriate REPL as indicated by WHICH.
 The function is called with one argument, the REPL buffer.  The appropriate
-connections are found by inspecting the current buffer.  WHICH is one of
-the following keywords:
+connections are found by inspecting the current buffer.  WHICH is either one of
+the following keywords or a list starting with one of them followed by names of
+operations that the REPL is expected to support:
  :auto - Act on the connections whose type matches the current buffer.  In
      `cljc' files, mapping happens over both types of REPLs.
  :clj (:cljs) - Map over clj (cljs)) REPLs only.
@@ -1060,22 +1069,24 @@ the following keywords:
 Error is signaled if no REPL buffers of specified type exist in current
 session."
   (declare (indent 1))
-  (let ((cur-type (cider-repl-type-for-buffer)))
-    (cl-case which
+  (let ((cur-type (cider-repl-type-for-buffer))
+        (which-key (or (car-safe which) which))
+        (required-ops (cdr-safe which)))
+    (cl-case which-key
       (:clj-strict (when (eq cur-type 'cljs)
                      (user-error "Clojure-only operation requested in a ClojureScript buffer")))
       (:cljs-strict (when (eq cur-type 'clj)
                       (user-error "ClojureScript-only operation requested in a Clojure buffer"))))
-    (let* ((type (cl-case which
+    (let* ((type (cl-case which-key
                    ((:clj :clj-strict) 'clj)
                    ((:cljs :cljs-strict) 'cljs)
                    (:auto (if (eq cur-type 'multi)
                               '(clj cljs)
                             cur-type))))
-           (ensure (cl-case which
+           (ensure (cl-case which-key
                      (:auto nil)
                      (t 'ensure)))
-           (repls (cider-repls type ensure)))
+           (repls (cider-repls type ensure required-ops)))
       (mapcar function repls))))
 
 ;; REPLs double as connections in CIDER, so it's useful to be able to refer to

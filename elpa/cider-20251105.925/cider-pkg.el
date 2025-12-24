@@ -1,5 +1,5 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "cider" "20250520.1110"
+(define-package "cider" "20251105.925"
   "Clojure Interactive Development Environment that Rocks."
   '((emacs        "27")
     (clojure-mode "5.19")
@@ -10,8 +10,8 @@
     (sesman       "0.3.2")
     (transient    "0.4.1"))
   :url "https://www.github.com/clojure-emacs/cider"
-  :commit "f83d7684185b1a8e6acdf6be6cd8d304a92f4874"
-  :revdesc "f83d7684185b"
+  :commit "8e3091e8c427cc18f1cc511d5d5aa15424cddb62"
+  :revdesc "8e3091e8c427"
   :keywords '("languages" "clojure" "cider")
   :authors '(("Tim King" . "kingtim@gmail.com")
              ("Phil Hagelberg" . "technomancy@gmail.com")

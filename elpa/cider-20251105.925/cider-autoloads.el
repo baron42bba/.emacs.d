@@ -63,24 +63,36 @@ server buffer, in which case a new session for that server is created.
 (fn PARAMS &optional OTHER-REPL)" t)
 (autoload 'cider-connect-clj "cider" "\
 Initialize a Clojure connection to an nREPL server.
-PARAMS is a plist optionally containing :host, :port and :project-dir.  On
-prefix argument, prompt for all the parameters.
+PARAMS is a plist optionally containing :host, :port and :project-dir.
+If nil, use the default parameters in `cider-connect-default-params'.
+
+With the prefix argument, prompt for all the parameters regardless of
+their supplied or default values.
 
 (fn &optional PARAMS)" t)
 (autoload 'cider-connect-cljs "cider" "\
 Initialize a ClojureScript connection to an nREPL server.
 PARAMS is a plist optionally containing :host, :port, :project-dir and
 :cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).
+If nil, use the default parameters in `cider-connect-default-params' or
+`cider-connect-default-cljs-params'.
 
-On prefix, prompt for all the
-parameters regardless of their supplied or default values.
+With the prefix argument, prompt for all the parameters regardless of
+their supplied or default values.
 
 (fn &optional PARAMS)" t)
 (autoload 'cider-connect-clj&cljs "cider" "\
 Initialize a Clojure and ClojureScript connection to an nREPL server.
 PARAMS is a plist optionally containing :host, :port, :project-dir and
-:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).  When SOFT-CLJS-START is
-non-nil, don't start if ClojureScript requirements are not met.
+:cljs-repl-type (e.g. 'shadow, 'node, 'figwheel, etc).
+If nil, use the default parameters in `cider-connect-default-params' and
+`cider-connect-default-cljs-params'.
+
+When SOFT-CLJS-START is non-nil, don't start if ClojureScript requirements are
+not met.
+
+With the prefix argument, prompt for all the parameters regardless of
+their supplied or default values.
 
 (fn PARAMS &optional SOFT-CLJS-START)" t)
 (autoload 'cider "cider" "\
