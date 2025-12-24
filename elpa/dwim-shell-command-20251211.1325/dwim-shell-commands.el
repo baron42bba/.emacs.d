@@ -84,10 +84,7 @@ done"
            (if prefix
                "true"
              "false")
-           prefix
-           (if prefix
-               "true"
-             "false"))
+           prefix)
    :utils "jq"
    :extensions "har"))
 
@@ -297,6 +294,15 @@ Optional argument ARGS as per `browse-url-default-browser'"
    :utils "convert"))
 
 ;;;###autoload
+(defun dwim-shell-commands-image-to-webp ()
+  "Convert all marked images to webp(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Convert to png"
+   "convert -verbose '<<f>>' '<<fne>>.webp'"
+   :utils "convert"))
+
+;;;###autoload
 (defun dwim-shell-commands-svg-to-png ()
   "Convert all marked svg(s) to png(s)."
   (interactive)
@@ -417,6 +423,26 @@ Optional argument ARGS as per `browse-url-default-browser'"
    :utils "ffmpeg"))
 
 ;;;###autoload
+(defun dwim-shell-commands-extract-first-video-frame ()
+  "Extract first frame from video(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Convert to gif"
+   "ffmpeg -i '<<f>>' -vframes 1 -q:v 2 '<<fne>>.jpg'"
+   :utils "ffmpeg"))
+
+;;;###autoload
+(defun dwim-shell-commands-set-video-framerate ()
+  "Set framerate for marked video(s)."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Set video framerate"
+   (let ((fps (read-number "Target framerate (fps): " 30)))
+     (format "ffmpeg -i '<<f>>' -r %d -c:a copy '<<fne>>_%dfps.<<e>>'"
+             fps fps))
+   :utils "ffmpeg"))
+
+;;;###autoload
 (defun dwim-shell-commands-macos-empty-trash ()
   "Empty macOS trash."
   (interactive)
@@ -504,7 +530,7 @@ Optional argument ARGS as per `browse-url-default-browser'"
   (interactive)
   (dwim-shell-command-on-marked-files
    "Convert to webp"
-   "ffmpeg -i '<<f>>' -vcodec libwebp -filter:v fps=fps=10 -compression_level 3 -lossless 1 -loop 0 -preset default -an -vsync 0 '<<fne>>'.webp"
+   "ffmpeg -i '<<f>>' -vcodec libwebp -filter:v fps=fps=10 -compression_level 3 -loop 0 -preset default -an -vsync 0 '<<fne>>'.webp"
    :utils "ffmpeg"))
 
 ;;;###autoload
@@ -754,8 +780,10 @@ EOF"
                                (cons (nth 1 (split-string device " - "))
                                      (nth 0 (split-string device " - "))))
                              devices))
-         (selected-name (completing-read "Toggle connection: "
-                                         (seq-sort #'string-lessp candidates) nil t))
+         (selected-name (completing-read "Toggle BT connection: "
+                                         (seq-sort (lambda (a b)
+                                                     (string-lessp (car a) (car b)))
+                                                   candidates) nil t))
          (address (map-elt candidates selected-name)))
     (dwim-shell-command-on-marked-files
      (format "Toggle %s" selected-name)
@@ -896,7 +924,6 @@ fi"
                                source) ".org"))
          (fields (with-temp-buffer
                    (insert-file-contents source)
-                   (buffer-substring-no-properties (point-min) (line-end-position))
                    (read-string "Fields: " (mapconcat 'identity (mapcar (lambda (item)
                                                                           (symbol-name (car item)))
                                                                         (json-read-from-string
@@ -977,11 +1004,10 @@ fi"
 (defun dwim-shell-commands-video-to-thumbnail ()
   "Generate a thumbnail for marked video(s)."
   (interactive)
-  (let ((temp-dir (make-temp-file "thumbnails-" t)))
-    (dwim-shell-command-on-marked-files
-     "Thumbnail with ffmpeg"
-     "ffmpeg -i '<<f>>' -ss 00:00:01.000 -vframes 1 '<<fne>>.jpg'"
-     :utils "ffmpeg")))
+  (dwim-shell-command-on-marked-files
+   "Thumbnail with ffmpeg"
+   "ffmpeg -i '<<f>>' -ss 00:00:01.000 -vframes 1 '<<fne>>.jpg'"
+   :utils "ffmpeg"))
 
 ;;;###autoload
 (defun dwim-shell-commands-drop-video-audio ()
@@ -1374,13 +1400,14 @@ echo \"<<fne>>.svg\"
          (inhibit-message t))
     ;; Silence echo to avoid unrelated messages making into animation.
     (cl-letf (((symbol-function 'dwim-shell-command--message)
-               (lambda (fmt &rest args) nil)))
+               (lambda (_fmt &rest _args) nil)))
       (dwim-shell-command-on-marked-files
        "Start recording a macOS window."
        (format
         "macosrec --record '%s' --gif --output '<<f>>'"
         (cdr window))
        :silent-success t
+       :focus-now nil
        :monitor-directory "~/Screenshots"
        :no-progress t
        :utils '("ffmpeg" "macosrec")
@@ -1423,7 +1450,7 @@ echo \"<<fne>>.svg\"
   (interactive)
   (let ((inhibit-message t))
     (cl-letf (((symbol-function 'dwim-shell-command--message)
-               (lambda (fmt &rest args) nil)))
+               (lambda (_fmt &rest _args) nil)))
       (dwim-shell-command-on-marked-files
        "End recording macOS window."
        "macosrec --save"
@@ -1438,7 +1465,7 @@ echo \"<<fne>>.svg\"
   (interactive)
   (let ((inhibit-message t))
     (cl-letf (((symbol-function 'dwim-shell-command--message)
-               (lambda (fmt &rest args) nil)))
+               (lambda (_fmt &rest _args) nil)))
       (dwim-shell-command-on-marked-files
        "Abort recording macOS window."
        "macosrec --abort"
@@ -1520,28 +1547,6 @@ echo \"<<fne>>.svg\"
    :utils "magick"))
 
 ;;;###autoload
-(defun dwim-shell-commands-git-clone-clipboard-url-to-downloads ()
-  "Clone git URL in clipboard to \"~/Downloads/\"."
-  (interactive)
-  (cl-assert (or (string-match-p "^\\(http\\|https\\|ssh\\)://" (current-kill 0))
-                 (string-match-p "^git@" (current-kill 0))) nil "No URL in clipboard")
-  (let* ((url (current-kill 0))
-         (download-dir (expand-file-name "~/Downloads/"))
-         (project-dir (concat download-dir (file-name-base url)))
-         (default-directory download-dir))
-    (when (or (not (file-exists-p project-dir))
-              (when (y-or-n-p (format "%s exists.  delete?" (file-name-base url)))
-                (delete-directory project-dir t)
-                t))
-      (dwim-shell-command-on-marked-files
-       (format "Clone %s" (file-name-base url))
-       (format "git clone %s" url)
-       :utils "git"
-       :on-completion (lambda (buffer _process)
-                        (kill-buffer buffer)
-                        (dired project-dir))))))
-
-;;;###autoload
 (defun dwim-shell-commands-http-serve-dir ()
   "HTTP serve current directory."
   (interactive)
@@ -1569,14 +1574,67 @@ echo \"<<fne>>.svg\"
         (t
          (error "No python found"))))
 
+(defcustom dwim-shell-commands-git-clone-dirs
+  '("~/Downloads" "~/Desktop")
+  "List of directories where git repositories can be cloned.
+The first directory is used as the default."
+  :type '(repeat directory)
+  :group 'dwim-shell-commands)
+
 ;;;###autoload
-(defun dwim-shell-commands-git-clone-clipboard-url ()
-  "Clone git URL in clipboard to `default-directory'."
-  (interactive)
-  (dwim-shell-command-on-marked-files
-   (format "Clone %s" (file-name-base (current-kill 0)))
-   "git clone <<cb>>"
-   :utils "git"))
+(defun dwim-shell-commands-git-clone-clipboard-url (&optional arg)
+  "Clone git URL in clipboard to a directory.
+With C-u ARG, prompt for directory from
+`dwim-shell-commands-git-clone-dirs'.
+
+With C-u C-u ARG, prompt for any directory.
+
+Without prefix, use the first directory in
+`dwim-shell-commands-git-clone-dirs'."
+  (interactive "P")
+  (unless (or (string-match-p "^\\(?:http\\|https\\|ssh\\|git\\)://" (string-trim (current-kill 0)))
+              (string-match-p "^git@" (string-trim (current-kill 0))))
+    (user-error "No URL in clipboard"))
+  (let* ((url (string-trim (current-kill 0)))
+         (current-dir (abbreviate-file-name
+                       (directory-file-name default-directory)))
+         (fallback-dir (car dwim-shell-commands-git-clone-dirs))
+         (candidates (append (list (cons fallback-dir fallback-dir))
+                             (list (cons (concat current-dir " (current)") current-dir))
+                             (mapcar (lambda (dir)
+                                       (cons dir dir))
+                                     (cdr dwim-shell-commands-git-clone-dirs))))
+         (target-dir (cond
+                      ;; C-u prefix - Choose from `dwim-shell-commands-git-clone-dirs'
+                      ((equal arg '(4))
+                       (expand-file-name
+                        (map-elt candidates
+                                 (completing-read "Clone repo to: " candidates
+                                                  nil t))))
+                      ;; C-u C-u prefix - Choose any directory
+                      ((equal arg '(16))
+                       (expand-file-name
+                        (read-directory-name "Clone repo to: " nil nil t)))
+                      ;; Default to using first in `dwim-shell-commands-git-clone-dirs'
+                      (t
+                       (expand-file-name fallback-dir))))
+         (base-name (file-name-base url))
+         (project-dir (dwim-shell-command--unique-new-file-path
+                       (concat (file-name-as-directory target-dir) base-name)))
+         (default-directory target-dir))
+    (dwim-shell-command-on-marked-files
+     (format "Clone %s" (file-name-base url))
+     (format "git clone %s %s"
+             (shell-quote-argument url)
+             (shell-quote-argument (file-name-nondirectory project-dir)))
+     :monitor-directory target-dir
+     :utils "git"
+     :on-completion (lambda (buffer _)
+                      (kill-buffer buffer)
+                      (dired project-dir)
+                      (goto-char (point-min))
+                      (when (re-search-forward "README" nil t)
+                        (beginning-of-line))))))
 
 ;;;###autoload
 (defun dwim-shell-commands-pass-git-pull ()
@@ -1642,13 +1700,29 @@ Needs ideviceinstaller and libmobiledevice installed."
    :monitor-directory "~/Downloads"))
 
 ;;;###autoload
-(defun dwim-shell-commands-duplicate ()
-  "Duplicate file."
-  (interactive)
-  (dwim-shell-command-on-marked-files
-   "Duplicate file(s)."
-   "cp -R '<<f>>' '<<f(u)>>'"
-   :utils "cp"))
+(defun dwim-shell-commands-duplicate (times)
+  "Duplicate file.
+
+With prefix, duplicate it n TIMES."
+  (interactive "p")
+  (dwim-shell-commands--duplicate (list times)))
+
+(defun dwim-shell-commands--duplicate (remaining)
+  "Helper using REMAINING as a list to share recursion state."
+  (let ((current-buffer (current-buffer)))
+    (dwim-shell-command-on-marked-files
+     "Duplicate file(s)."
+     "cp -R '<<f>>' '<<f(u)>>'"
+     :utils "cp"
+     :on-completion
+     (lambda (buffer _process)
+       (kill-buffer buffer)
+       (setcar remaining (1- (car remaining)))
+       (if (> (car remaining) 0)
+           (with-current-buffer current-buffer
+             (dwim-shell-commands--duplicate remaining))
+         (dired-jump nil (with-current-buffer current-buffer
+                           default-directory)))))))
 
 ;;;###autoload
 (defun dwim-shell-commands-rename-all ()
@@ -1713,6 +1787,40 @@ gpg: decryption failed: No pinentry"
    "gpgconf --kill gpg-agent"
    :utils "gpgconf"
    :silent-success t))
+
+(defun dwim-shell-commands-upload-to-tmpfiles-org ()
+  "Upload the marked files to 0x0.st"
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "0x0 upload"
+   "curl -Ffile=@<<f>> -Fsecret= https://tmpfiles.org/api/v1/upload"
+   :utils "curl"
+   :post-process-template
+   ;; The placement of required single quotes confuse the escaping
+   ;; mechanisms of dwim-shell-command, as it considers @ as the
+   ;; opening 'quote' because it appears in front of <<f>>.
+   ;;
+   ;; What we want is:
+   ;;
+   ;; curl -F'file=@yourfile.png' -Fsecret= https://tmpfiles.org/api/v1/upload
+   (lambda (template path)
+     (string-replace "-Ffile" "-F'file"
+                     (string-replace path (concat path "'") template)))
+   :on-completion
+   (lambda (buffer process)
+     (if (= (process-exit-status process) 0)
+         (with-current-buffer buffer
+           (if-let* ((json (condition-case nil
+                               (json-read-from-string (buffer-string))
+                             (error nil)))
+                     (success (equal (map-elt json 'status) "success")))
+               (progn
+                 (eww (map-nested-elt json '(data url)))
+                 (kill-new (map-nested-elt json '(data url)))
+                 (message "Copied: %s" (current-kill 0))
+                 (kill-buffer buffer))
+             (switch-to-buffer buffer)))
+       (switch-to-buffer buffer)))))
 
 ;; Based on
 ;; https://apps.bram85.nl/git/bram/gists/src/commit/31ac3363da925daafa2420b7f96c67612ca28241/gists/dwim-0x0-upload.el

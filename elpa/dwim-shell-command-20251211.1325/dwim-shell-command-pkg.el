@@ -1,7 +1,7 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "dwim-shell-command" "20250218.1720"
+(define-package "dwim-shell-command" "20251211.1325"
   "Shell commands with DWIM behaviour."
   '((emacs "28.1"))
   :url "https://github.com/xenodium/dwim-shell-command"
-  :commit "4b077432a94873e5f505c8f569743cfd984eebb1"
-  :revdesc "4b077432a948")
+  :commit "35ca64d529987578dbbdf3f07d34310ee727b4a5"
+  :revdesc "35ca64d52998")

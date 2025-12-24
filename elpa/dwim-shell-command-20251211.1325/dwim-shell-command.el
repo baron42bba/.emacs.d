@@ -5,8 +5,8 @@
 ;; Author: Alvaro Ramirez
 ;; Package-Requires: ((emacs "28.1"))
 ;; URL: https://github.com/xenodium/dwim-shell-command
-;; Package-Version: 20250218.1720
-;; Package-Revision: 4b077432a948
+;; Package-Version: 20251211.1325
+;; Package-Revision: 35ca64d52998
 
 ;; This package is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

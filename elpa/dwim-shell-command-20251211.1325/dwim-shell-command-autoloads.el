@@ -126,6 +126,8 @@ Horizontally flip image(s)." t)
 Convert all marked images to jpg(s)." t)
 (autoload 'dwim-shell-commands-image-to-png "dwim-shell-commands" "\
 Convert all marked images to png(s)." t)
+(autoload 'dwim-shell-commands-image-to-webp "dwim-shell-commands" "\
+Convert all marked images to webp(s)." t)
 (autoload 'dwim-shell-commands-svg-to-png "dwim-shell-commands" "\
 Convert all marked svg(s) to png(s)." t)
 (autoload 'dwim-shell-commands-svg-to-favicons "dwim-shell-commands" "\
@@ -146,6 +148,10 @@ Convert all marked images to grayscale." t)
 Reorient images." t)
 (autoload 'dwim-shell-commands-gif-to-video "dwim-shell-commands" "\
 Convert all marked gif(s) to video(s)." t)
+(autoload 'dwim-shell-commands-extract-first-video-frame "dwim-shell-commands" "\
+Extract first frame from video(s)." t)
+(autoload 'dwim-shell-commands-set-video-framerate "dwim-shell-commands" "\
+Set framerate for marked video(s)." t)
 (autoload 'dwim-shell-commands-macos-empty-trash "dwim-shell-commands" "\
 Empty macOS trash." t)
 (autoload 'dwim-shell-commands-macos-ocr-text-from-desktop-region "dwim-shell-commands" "\
@@ -282,12 +288,19 @@ Convert png to icns icon." t)
 Add a drop shadow." t)
 (autoload 'dwim-shell-commands-image-trim-borders "dwim-shell-commands" "\
 Trim image(s) border (useful for video screenshots)." t)
-(autoload 'dwim-shell-commands-git-clone-clipboard-url-to-downloads "dwim-shell-commands" "\
-Clone git URL in clipboard to \"~/Downloads/\"." t)
 (autoload 'dwim-shell-commands-http-serve-dir "dwim-shell-commands" "\
 HTTP serve current directory." t)
 (autoload 'dwim-shell-commands-git-clone-clipboard-url "dwim-shell-commands" "\
-Clone git URL in clipboard to `default-directory'." t)
+Clone git URL in clipboard to a directory.
+With C-u ARG, prompt for directory from
+`dwim-shell-commands-git-clone-dirs'.
+
+With C-u C-u ARG, prompt for any directory.
+
+Without prefix, use the first directory in
+`dwim-shell-commands-git-clone-dirs'.
+
+(fn &optional ARG)" t)
 (autoload 'dwim-shell-commands-pass-git-pull "dwim-shell-commands" "\
 Pass git pull." t)
 (autoload 'dwim-shell-commands-git-list-untracked-files "dwim-shell-commands" "\
@@ -302,7 +315,11 @@ Needs ideviceinstaller and libmobiledevice installed." t)
 (autoload 'dwim-shell-commands-copy-to-downloads "dwim-shell-commands" "\
 Copy file to ~/Downloads." t)
 (autoload 'dwim-shell-commands-duplicate "dwim-shell-commands" "\
-Duplicate file." t)
+Duplicate file.
+
+With prefix, duplicate it n TIMES.
+
+(fn TIMES)" t)
 (autoload 'dwim-shell-commands-rename-all "dwim-shell-commands" "\
 Rename all marked file(s)." t)
 (autoload 'dwim-shell-commands-move-to-downloads "dwim-shell-commands" "\
