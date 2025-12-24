@@ -4,8 +4,8 @@
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; URL: https://github.com/syohex/emacs-terraform-mode
-;; Package-Version: 20241217.1628
-;; Package-Revision: 5bdd734a87f6
+;; Package-Version: 20251115.2210
+;; Package-Revision: 01635df3625c
 ;; Package-Requires: ((emacs "24.3") (hcl-mode "0.03") (dash "2.17.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -97,9 +97,9 @@
 
 (defconst terraform--block-builtins-with-type-only--builtin-highlight-regexp
   (eval `(rx line-start
-         (zero-or-more space)
-         (group-n 1 (regexp ,(eval terraform--block-builtins-with-type-only)))
-         (one-or-more space))))
+             (zero-or-more space)
+             (group-n 1 (regexp ,(eval terraform--block-builtins-with-type-only)))
+             (one-or-more space))))
 
 (defconst terraform--block-builtins-with-type-only--resource-type-highlight-regexp
   (eval `(rx (regexp ,(eval terraform--block-builtins-with-type-only--builtin-highlight-regexp))
@@ -111,33 +111,33 @@
 
 (defconst terraform--block-builtins-with-name-only--builtin-highlight-regexp
   (eval `(rx line-start
-         (zero-or-more space)
-         (group-n 1 (regexp ,(eval terraform--block-builtins-with-name-only)))
-         (one-or-more space))))
+             (zero-or-more space)
+             (group-n 1 (regexp ,(eval terraform--block-builtins-with-name-only)))
+             (one-or-more space))))
 
 (defconst terraform--block-builtins-with-name-only--name-highlight-regexp
   (eval `(rx (regexp ,(eval terraform--block-builtins-with-name-only--builtin-highlight-regexp))
-         (group-n 2 (+? (not space)))
-         (or (one-or-more space) "{"))))
+             (group-n 2 (+? (not space)))
+             (or (one-or-more space) "{"))))
 
 (defconst terraform--block-builtins-with-type-and-name
-  (rx (or "data" "resource")))
+  (rx (or "data" "resource" "ephemeral")))
 
 (defconst terraform--block-builtins-with-type-and-name--builtin-highlight-regexp
   (eval `(rx line-start
-         (zero-or-more space)
-         (group-n 1 (regexp ,(eval terraform--block-builtins-with-type-and-name)))
-         (one-or-more space))))
+             (zero-or-more space)
+             (group-n 1 (regexp ,(eval terraform--block-builtins-with-type-and-name)))
+             (one-or-more space))))
 
 (defconst terraform--block-builtins-with-type-and-name--type-highlight-regexp
   (eval `(rx (regexp ,(eval terraform--block-builtins-with-type-and-name--builtin-highlight-regexp))
-         (group-n 2 "\"" (+? (not space)) "\"")
-         (one-or-more space))))
+             (group-n 2 "\"" (+? (not space)) "\"")
+             (one-or-more space))))
 
 (defconst terraform--block-builtins-with-type-and-name--name-highlight-regexp
   (eval `(rx (regexp ,(eval terraform--block-builtins-with-type-and-name--type-highlight-regexp))
-         (group-n 3 (+? (not space)))
-         (or (one-or-more space) "{"))))
+             (group-n 3 (+? (not space)))
+             (or (one-or-more space) "{"))))
 
 (defconst terraform--assignment-statement
   (rx line-start
@@ -188,16 +188,16 @@
   (interactive)
   (let ((buf (get-buffer-create "*terraform-fmt*")))
     (when (use-region-p)
-    (if (zerop (call-process-region (region-beginning) (region-end)
-                                    terraform-command nil buf nil "fmt" "-"))
-        (let ((point (region-end))
-              (window-start (region-beginning)))
-          (delete-region window-start point)
-          (insert-buffer-substring buf)
-          (goto-char point)
-          (set-window-start nil window-start))
-      (message "terraform fmt: %s" (with-current-buffer buf (buffer-string))))
-    (kill-buffer buf))))
+      (if (zerop (call-process-region (region-beginning) (region-end)
+                                      terraform-command nil buf nil "fmt" "-"))
+          (let ((point (region-end))
+                (window-start (region-beginning)))
+            (delete-region window-start point)
+            (insert-buffer-substring buf)
+            (goto-char point)
+            (set-window-start nil window-start))
+        (message "terraform fmt: %s" (with-current-buffer buf (buffer-string))))
+      (kill-buffer buf))))
 
 (define-minor-mode terraform-format-on-save-mode
   "Run terraform-format-buffer before saving current buffer."
@@ -208,39 +208,39 @@
 
 (defun terraform--generate-imenu ()
   (let ((search-results (make-hash-table :test #'equal))
-    (menu-list '()))
+        (menu-list '()))
     (save-match-data
       (goto-char (point-min))
       (while (re-search-forward terraform--block-builtins-with-type-only--resource-type-highlight-regexp nil t)
         (let ((key (match-string 1))
-          (location (match-beginning 2))
-          (resource-type (replace-regexp-in-string "\"" "" (match-string 2))))
-      (-if-let (matches (gethash key search-results))
-          (puthash key (push `(,resource-type . ,location) matches) search-results)
-        (puthash key `((,resource-type . ,location)) search-results))))
+              (location (match-beginning 2))
+              (resource-type (replace-regexp-in-string "\"" "" (match-string 2))))
+          (-if-let (matches (gethash key search-results))
+              (puthash key (push `(,resource-type . ,location) matches) search-results)
+            (puthash key `((,resource-type . ,location)) search-results))))
 
 
       (goto-char (point-min))
       (while (re-search-forward terraform--block-builtins-with-name-only--name-highlight-regexp nil t)
         (let ((key (match-string 1))
-          (location (match-beginning 2))
-          (resource-name (replace-regexp-in-string "\"" "" (match-string 2))))
-      (-if-let (matches (gethash key search-results))
-          (puthash key (push `(,resource-name . ,location) matches) search-results)
-        (puthash key `((,resource-name . ,location)) search-results))))
+              (location (match-beginning 2))
+              (resource-name (replace-regexp-in-string "\"" "" (match-string 2))))
+          (-if-let (matches (gethash key search-results))
+              (puthash key (push `(,resource-name . ,location) matches) search-results)
+            (puthash key `((,resource-name . ,location)) search-results))))
 
       (goto-char (point-min))
       (while (re-search-forward terraform--block-builtins-with-type-and-name--name-highlight-regexp nil t)
         (let* ((key (match-string 1))
-           (location (match-beginning 2))
+               (location (match-beginning 2))
                (type (match-string 2))
                (name (match-string 3))
-           (resource-name (concat (replace-regexp-in-string "\"" "" type)
-                      "/"
-                      (replace-regexp-in-string "\"" "" name))))
-      (-if-let (matches (gethash key search-results))
-          (puthash key (push `(,resource-name . ,location) matches) search-results)
-        (puthash key `((,resource-name . ,location)) search-results))))
+               (resource-name (concat (replace-regexp-in-string "\"" "" type)
+                                      "/"
+                                      (replace-regexp-in-string "\"" "" name))))
+          (-if-let (matches (gethash key search-results))
+              (puthash key (push `(,resource-name . ,location) matches) search-results)
+            (puthash key `((,resource-name . ,location)) search-results))))
 
       (maphash (lambda (k v) (push `(,k ,@v) menu-list)) search-results)
       menu-list)))
@@ -277,17 +277,17 @@ The DIR parameter is optional and used only for tests."
         (provider-source (terraform--get-resource-provider-source-in-buffer provider)))
     ;; check if terraform provider-source was found
     (when (and (= (length provider-source) 0) dir)
-        ;; find all terraform files of this project. One of them
-        ;; should contain required_provider declaration
-        (setq tf-files (directory-files dir nil "^[[:alnum:][:blank:]_.-]+\\.tf$")))
+      ;; find all terraform files of this project. One of them
+      ;; should contain required_provider declaration
+      (setq tf-files (directory-files dir nil "^[[:alnum:][:blank:]_.-]+\\.tf$")))
     ;; iterate on terraform files until a provider source is found
     (while (and (= (length provider-source) 0) tf-files)
-        (with-temp-buffer
-          (let* ((file (pop tf-files))
-                 (file-path (if dir (concat dir "/" file) file)))
-            (insert-file-contents file-path)
-            ;; look for provider source in a terraform file
-            (setq provider-source (terraform--get-resource-provider-source-in-buffer provider)))))
+      (with-temp-buffer
+        (let* ((file (pop tf-files))
+               (file-path (if dir (concat dir "/" file) file)))
+          (insert-file-contents file-path)
+          ;; look for provider source in a terraform file
+          (setq provider-source (terraform--get-resource-provider-source-in-buffer provider)))))
     provider-source))
 
 (defun terraform--get-resource-provider-source-in-buffer (provider)
@@ -303,11 +303,11 @@ Return nil if not found."
 (defun terraform--resource-url (resource doc-dir)
   "Return the url containing the documentation for RESOURCE using DOC-DIR."
   (let* ((provider (terraform--extract-provider resource))
-          ;; search provider source in terraform files
+         ;; search provider source in terraform files
          (provider-source (terraform--get-resource-provider-source provider))
          (resource-name (terraform--extract-resource resource)))
     (when (= (length provider-source) 0)
-        ;; fallback to old method with terraform providers command
+      ;; fallback to old method with terraform providers command
       (setq provider-source (concat
                              (terraform--get-resource-provider-namespace provider)
                              "/" provider)))
@@ -405,7 +405,7 @@ If the point is not at the heading, call
   (terraform--setup-outline-mode)
 
   ;; imenu
-  (setq imenu-sort-function 'imenu--sort-by-name)
+  (set (make-local-variable 'imenu-sort-function) 'imenu--sort-by-name)
   (setq imenu-create-index-function 'terraform--generate-imenu)
   (imenu-add-to-menubar "Terraform"))
 
