@@ -6,9 +6,9 @@
 ;; Homepage: https://github.com/magit/with-editor
 ;; Keywords: processes terminals
 
-;; Package-Version: 20250509.1455
-;; Package-Revision: cc86ac08bdea
-;; Package-Requires: ((emacs "26.1") (compat "30.0.0.0"))
+;; Package-Version: 20251101.2100
+;; Package-Revision: dbc694406c2f
+;; Package-Requires: ((emacs "26.1") (compat "30.1"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -159,10 +159,15 @@ please see https://github.com/magit/magit/wiki/Emacsclient."))))
         (let ((dir (expand-file-name "bin" invocation-directory)))
           (when (file-directory-p dir)
             (push dir path)))
-        (when (string-search "Cellar" invocation-directory)
+        (cond
+         ((string-search "Cellar" invocation-directory)
           (let ((dir (expand-file-name "../../../bin" invocation-directory)))
             (when (file-directory-p dir)
-              (push dir path))))))
+              (push dir path))))
+         ((string-search "Emacs.app" invocation-directory)
+          (let ((dir (expand-file-name "../../../../bin" invocation-directory)))
+            (when (file-directory-p dir)
+              (push dir path)))))))
     (cl-remove-duplicates path :test #'equal)))
 
 (defcustom with-editor-emacsclient-executable (with-editor-locate-emacsclient)
@@ -776,7 +781,7 @@ This works in `shell-mode', `term-mode', `eshell-mode' and
           (when-let ((v (getenv "EMACS_SERVER_FILE")))
             (vterm-send-string (format " export EMACS_SERVER_FILE=%S" v))
             (vterm-send-return))
-          (vterm-send-string "clear")
+          (vterm-send-string " clear")
           (vterm-send-return))
       (error "Cannot use sleeping editor in this buffer")))
    (t
