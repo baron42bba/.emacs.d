@@ -10,9 +10,9 @@
 ;;             Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: https://www.flycheck.org
 ;; Keywords: convenience, languages, tools
-;; Package-Version: 20250423.1305
-;; Package-Revision: 2842e237f6ab
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Version: 20251128.1706
+;; Package-Revision: 62570fafbedb
+;; Package-Requires: ((emacs "27.1") (seq "2.24"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -10502,30 +10502,54 @@ CHECKER and BUFFER denoted the CHECKER that returned OUTPUT and
 the BUFFER that was checked respectively.
 
 See URL `https://proselint.com/' for more information about proselint."
-  (mapcar (lambda (err)
-            (let-alist err
-              (flycheck-error-new-at-pos
-               .start
-               (pcase .severity
-                 (`"suggestion" 'info)
-                 (`"warning"    'warning)
-                 (`"error"      'error)
-                 ;; Default to error
-                 (_             'error))
-               .message
-               :id .check
-               :buffer buffer
-               :checker checker
-               ;; See https://github.com/amperser/proselint/issues/1048
-               :end-pos .end)))
-          (let-alist (car (flycheck-parse-json output))
-            .data.errors)))
+  (let ((response (flycheck-parse-json output)))
+    (if (eq (caaar response) 'data)
+        ;; Proselint versions <= 0.14.0:
+        (mapcar (lambda (err)
+                  (let-alist err
+                    (flycheck-error-new-at-pos
+                     .start
+                     (pcase .severity
+                       (`"suggestion" 'info)
+                       (`"warning"    'warning)
+                       (`"error"      'error)
+                       ;; Default to error
+                       (_             'error))
+                     .message
+                     :id .check
+                     :buffer buffer
+                     :checker checker
+                     ;; See https://github.com/amperser/proselint/issues/1048
+                     :end-pos .end)))
+                (let-alist (car response)
+                  .data.errors))
+      ;; Proselint versions >= 0.16.0
+      (mapcar (lambda (err)
+                (let-alist err
+                  (flycheck-error-new-at-pos
+                   (nth 0 .span)
+                   'warning
+                   .message
+                   :id .check_path
+                   :buffer buffer
+                   :checker checker
+                   :end-pos (nth 1 .span))))
+              (let-alist (car response)
+                .result.<stdin>.diagnostics)))))
 
 (flycheck-define-checker proselint
   "Flycheck checker using Proselint.
 
 See URL `https://proselint.com/'."
-  :command ("proselint" "--json" "-")
+  :command ("proselint"
+            (eval
+             (if (= (call-process (or flycheck-proselint-executable "proselint")
+                                  nil nil nil "--version")
+                    0)
+                 ;; Proselint versions <= 0.14.0:
+                 (list "--json" "-")
+               ;; Proselint versions >= 0.16.0
+               (list "check" "--output-format=json"))))
   :standard-input t
   :error-parser flycheck-proselint-parse-errors
   :modes (text-mode markdown-mode gfm-mode message-mode org-mode))
@@ -10886,6 +10910,15 @@ Requires Flake8 3.0 or newer. See URL
 (flycheck-def-config-file-var flycheck-python-ruff-config python-ruff
                               '("pyproject.toml" "ruff.toml" ".ruff.toml"))
 
+(defun flycheck-python-ruff-explainer (err)
+  "Return documentation for the ruff `flycheck-error' ERR."
+  (when-let (error-code (flycheck-error-id err))
+    (lambda ()
+      (flycheck-call-checker-process
+       'python-ruff nil standard-output t "rule" error-code)
+      (with-current-buffer standard-output
+        (flycheck--fontify-as-markdown)))))
+
 (flycheck-define-checker python-ruff
   "A Python syntax and style checker using Ruff.
 
@@ -10893,6 +10926,7 @@ See URL `https://docs.astral.sh/ruff/'."
   :command ("ruff"
             "check"
             (config-file "--config" flycheck-python-ruff-config)
+            ;; older versions of ruff (before 0.2) used "text" instead of "concise"
             "--output-format=concise"
             (option "--stdin-filename" buffer-file-name)
             "-")
@@ -10906,14 +10940,16 @@ See URL `https://docs.astral.sh/ruff/'."
   :error-patterns
   ((error line-start
           (or "-" (file-name)) ":" line ":" (optional column ":") " "
-          "SyntaxError: "
+          ;; first variant is produced by ruff < 0.8 and kept for backward compat
+          (or "SyntaxError: " "invalid-syntax: ")
           (message (one-or-more not-newline))
           line-end)
    (warning line-start
             (or "-" (file-name)) ":" line ":" (optional column ":") " "
-            (id (one-or-more (any alpha)) (one-or-more digit) " ")
+            (id (one-or-more (any alpha)) (one-or-more digit)) " "
             (message (one-or-more not-newline))
             line-end))
+  :error-explainer flycheck-python-ruff-explainer
   :working-directory flycheck-python-find-project-root
   :modes (python-mode python-ts-mode)
   :next-checkers ((warning . python-mypy)))
@@ -12501,13 +12537,25 @@ or added as a shellcheck directive before the source command:
   :safe #'booleanp
   :package-version '(flycheck . "31"))
 
+(flycheck-def-option-var flycheck-shellcheck-infer-shell nil sh-shellcheck
+  "Whether to let ShellCheck infer the shell from the script.
+
+When non-nil, the --shell flag is not passed to ShellCheck,
+allowing it to infer the shell from the shebang line or
+shellcheck directives in the script."
+  :type 'boolean
+  :safe #'booleanp
+  :package-version '(flycheck . "36"))
+
 (flycheck-define-checker sh-shellcheck
   "A shell script syntax and style checker using Shellcheck.
 
 See URL `https://github.com/koalaman/shellcheck/'."
   :command ("shellcheck"
             "--format" "checkstyle"
-            "--shell" (eval (symbol-name sh-shell))
+            (eval
+             (unless flycheck-shellcheck-infer-shell
+               (list "--shell" (symbol-name sh-shell))))
             (option-flag "--external-sources"
                          flycheck-shellcheck-follow-sources)
             (option "--exclude" flycheck-shellcheck-excluded-warnings list
