@@ -6,8 +6,8 @@
 ;; Maintainer: Thierry Volpiatto <thievol@posteo.net>
 
 ;; Created: 18 Jun 2012
-;; Package-Version: 20250325.509
-;; Package-Revision: bb3f31966ed6
+;; Package-Version: 20251005.634
+;; Package-Revision: 31cb2fea8f4b
 ;; Package-Requires: ((emacs "24.4"))
 
 ;; Keywords: async
@@ -118,7 +118,7 @@ is returned unmodified."
                   collect elm))
         (t object)))
 
-(defvar async-inject-variables-exclude-regexps '("-syntax-table\\'")
+(defvar async-inject-variables-exclude-regexps '("-syntax-table\\'" "-abbrev-table\\'")
   "A list of regexps that `async-inject-variables' should ignore.")
 
 (defun async-inject-variables

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; auto-complete.el --- Auto Completion for GNU Emacs
 
 ;; Copyright (C) 2008-2015  Tomohiro Matsuyama

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; auto-complete-config.el --- auto-complete additional configuations
 
 ;; Copyright (C) 2009-2010  Tomohiro Matsuyama
