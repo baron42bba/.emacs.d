@@ -3,8 +3,8 @@
 ;; Copyright (C) 2016  Clément Pit-Claudel
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
-;; Package-Version: 20250409.2132
-;; Package-Revision: 0314982c0ca0
+;; Package-Version: 20250812.1408
+;; Package-Revision: bb9d6b4b962f
 ;; Package-Requires: ((emacs "24.3") (biblio-core "0.3"))
 ;; Keywords: bib, tex, convenience, hypermedia
 ;; URL: https://github.com/cpitclaudel/biblio.el
