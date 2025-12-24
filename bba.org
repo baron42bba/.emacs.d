@@ -731,57 +731,15 @@ Languages differ and I need different templates.
 
 * [[https://github.com/flycheck/flycheck][flycheck]]
 
-To get puppet-lint:
-
-#+BEGIN_SRC sh :tangle never
-  gem install puppet-lint
-#+END_SRC
-
 modified puppet-lint definition to include no-80chars-check and fixed
 log-format.
 
 #+BEGIN_SRC emacs-lisp
   (if (>= emacs-major-version 24)
       (progn
-	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20250423.1305")
-	(require 'flycheck)
-	(add-hook 'after-init-hook #'global-flycheck-mode)
-	(flycheck-define-checker puppet-lint
-          "A Puppet DSL style checker using puppet-lint.
-
-  See URL `http://puppet-lint.com/'."
-          ;; We must check the original file, because Puppetlint is quite picky on the
-          ;; names of files and there place in the directory structure, to comply with
-          ;; Puppet's autoload directory layout.  For instance, a class foo::bar is
-          ;; required to be in a file foo/bar.pp.  Any other place, such as a Flycheck
-          ;; temporary file will cause an error.
-          :command ("puppet-lint"
-                    "--no-80chars-check" "--log-format" "%{path}:%{line}:%{kind}: %{message} (%{check})"
-                    source-original)
-          :error-patterns
-          ((warning line-start (file-name) ":" line ":warning: " (message) line-end)
-           (error line-start (file-name) ":" line ":error: " (message) line-end))
-          :modes puppet-mode
-          ;; Since we check the original file, we can only use this syntax checker if
-          ;; the buffer is actually linked to a file, and if it is not modified.
-          :predicate flycheck-buffer-saved-p)
-	))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (setq puppet-lint-command
-	(concat
-	 "puppet-lint --with-context "
-	 "--no-80chars-check "
-	 "--no-puppet_url_without_modules-check "
-	 "--fail-on-warnings "
-	 "--log-format \"%{path}:%{line}: %{kind}: %{message} (%{check})\""
-	 )
-	)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (setq flycheck-json-python-json-executable "python2.7")
+  	(add-to-list 'load-path "~/.emacs.d/elpa/flycheck-20250423.1305")
+  	(require 'flycheck)
+  	(add-hook 'after-init-hook #'global-flycheck-mode)))
 #+END_SRC
 
 SQL:
