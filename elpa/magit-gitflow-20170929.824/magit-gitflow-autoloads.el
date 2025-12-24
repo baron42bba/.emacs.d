@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; magit-gitflow-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

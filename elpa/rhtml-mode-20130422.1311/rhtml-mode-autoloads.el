@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; rhtml-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

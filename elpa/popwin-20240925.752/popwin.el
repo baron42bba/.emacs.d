@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; popwin.el --- Popup Window Manager
 
 ;; Copyright (C) 2011-2015  Tomohiro Matsuyama

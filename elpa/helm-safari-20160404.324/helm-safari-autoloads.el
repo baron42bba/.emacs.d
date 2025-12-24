@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; helm-safari-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

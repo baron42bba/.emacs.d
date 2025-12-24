@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; synonyms.el --- Look up synonyms for a word or phrase in a thesaurus.
 ;;
 ;; Filename: synonyms.el

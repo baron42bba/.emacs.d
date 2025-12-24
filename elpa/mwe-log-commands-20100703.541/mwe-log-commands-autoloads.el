@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; mwe-log-commands-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

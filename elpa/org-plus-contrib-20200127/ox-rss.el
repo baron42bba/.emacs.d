@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ox-rss.el --- RSS 2.0 Back-End for Org Export Engine
 
 ;; Copyright (C) 2013-2015  Bastien Guerry

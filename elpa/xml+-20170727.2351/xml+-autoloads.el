@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; xml+-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

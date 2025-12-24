@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; sqlup-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

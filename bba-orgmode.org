@@ -1,3 +1,10 @@
+* lexical-binding
+[2025-09-28 Sun 17:03]
+
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t; -*-
+#+end_src
+
 * org-mode
 
 See [[http://orgmode.org/worg/org-tutorials/orgtutorial_dto.html][orgtutorial_dto]] for details.

@@ -1,4 +1,5 @@
-; malyon.el --- mode to execute z code files version 3, 5, 8
+;; -*- lexical-binding: t; -*-
+;; malyon.el --- mode to execute z code files version 3, 5, 8
 
 ;; Maintainer: Peter Ilberg <peter.ilberg@gmail.com>
 ;; (I am unable to continue supporting malyon.el. Please send me an

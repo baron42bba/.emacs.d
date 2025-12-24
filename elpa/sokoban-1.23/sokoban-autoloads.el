@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; sokoban-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

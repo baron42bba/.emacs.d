@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; command-log-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

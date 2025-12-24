@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ob-async-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

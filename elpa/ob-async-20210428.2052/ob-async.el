@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ob-async.el --- Asynchronous org-babel src block execution
 
 ;; Copyright (C) 2017 Andrew Stahlman

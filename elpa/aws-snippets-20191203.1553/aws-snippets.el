@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; aws-snippets.el --- Yasnippets for AWS
 
 ;; Copyright (C) 2018, 2019 Andreas Gerler

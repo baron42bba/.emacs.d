@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (setq load-path
       (append
        (list (expand-file-name "~/.emacs.d/lisp") (expand-file-name "~/.emacs.d/elpa/org-9.7.17"))

@@ -1,5 +1,5 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; keyfreq.el --- track command frequencies
-;; -*- coding: utf-8 -*-
 ;;
 ;; Copyright 2009-2010, 2015 by David Capello
 ;; Copyright 2008 by Xah Lee

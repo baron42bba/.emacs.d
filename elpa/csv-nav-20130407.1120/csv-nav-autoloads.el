@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; csv-nav-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

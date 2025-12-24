@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; xah-lookup-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

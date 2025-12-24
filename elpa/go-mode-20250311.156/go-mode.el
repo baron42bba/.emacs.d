@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; go-mode.el --- Major mode for the Go programming language
 
 ;;; Commentary:

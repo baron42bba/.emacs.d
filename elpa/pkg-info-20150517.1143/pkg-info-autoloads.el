@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; pkg-info-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

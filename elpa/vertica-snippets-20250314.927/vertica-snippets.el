@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; vertica-snippets.el --- Yasnippets for Vertica
 
 ;; Copyright (C) 2018 Andreas Gerler

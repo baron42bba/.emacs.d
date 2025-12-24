@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; asterisk-dialplan.el --- Asterisk PBX dialplan support for Emacs
 
 ;;; This file is not a part of GNU Emacs, but is made available under

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; ipcalc.el --- IP subnet calculator
 
 ;; Filename: ipcalc.el

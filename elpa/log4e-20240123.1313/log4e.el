@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; log4e.el --- provide logging framework for elisp
 
 ;; Copyright (C) 2013  Hiroaki Otsu

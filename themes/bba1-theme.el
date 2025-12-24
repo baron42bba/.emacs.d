@@ -1,4 +1,5 @@
- (deftheme bba1 "DOCSTRING for bba1")
+;; -*- lexical-binding: t; -*-
+(deftheme bba1 "DOCSTRING for bba1")
    (custom-theme-set-faces 'bba1
     '(default ((default (:foreground "#07e30d" :background "#000000" ))))
     '(cursor ((default (:background "#f09213" ))))

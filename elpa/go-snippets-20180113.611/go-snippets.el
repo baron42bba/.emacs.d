@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; go-snippets.el --- Yasnippets for go
 
 ;; Copyright (C) 2013 Yusuke Tsutsumi

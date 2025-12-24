@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; visual-ascii-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; aws-snippets-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

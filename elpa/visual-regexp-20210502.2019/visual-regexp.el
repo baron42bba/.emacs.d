@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; visual-regexp.el --- A regexp/replace command for Emacs with interactive visual feedback
 
 ;; Copyright (C) 2013-2019 Marko Bencun

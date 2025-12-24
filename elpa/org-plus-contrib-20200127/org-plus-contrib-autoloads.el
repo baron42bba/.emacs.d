@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; org-plus-contrib-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

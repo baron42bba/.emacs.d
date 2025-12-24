@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; xml-query.el --- query engine complimenting the xml package
 
 ;; This is free and unencumbered software released into the public domain.

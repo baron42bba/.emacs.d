@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; fast-scroll-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

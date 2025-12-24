@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; gntp-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

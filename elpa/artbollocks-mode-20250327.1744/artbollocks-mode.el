@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; artbollocks-mode.el --- Improve your writing (especially about art)
 ;;
 ;; Copyright (c) 2011,2012 Rob Myers <rob@robmyers.org>

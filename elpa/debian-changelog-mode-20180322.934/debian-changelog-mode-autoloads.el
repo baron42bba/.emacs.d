@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; debian-changelog-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; queue-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

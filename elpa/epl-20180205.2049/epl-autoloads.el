@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; epl-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

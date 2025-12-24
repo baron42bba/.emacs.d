@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; go-snippets-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

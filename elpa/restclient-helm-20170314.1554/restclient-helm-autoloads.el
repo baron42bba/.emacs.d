@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; restclient-helm-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

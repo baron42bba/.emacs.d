@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; org-eldoc.el --- display org header and src block info using eldoc
 
 ;; Copyright (c) 2014-2017 Free Software Foundation, Inc.

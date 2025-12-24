@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; guide-key-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

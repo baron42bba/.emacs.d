@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; flymake-puppet-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

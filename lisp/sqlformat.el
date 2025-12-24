@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; sqlformat.el --- Use sqlformat to make SQL readable in Emacs
 
 ;; Copyright 2015, steckerhalter
@@ -50,7 +51,7 @@
         (goto-char (point-min))
         (while (not (eobp))
           (unless (looking-at "^\\([ad]\\)\\([0-9]+\\) \\([0-9]+\\)")
-            (error "invalid rcs patch or internal error in sqlformat-apply-rcs-patch"))
+            (error "Invalid rcs patch or internal error in sqlformat-apply-rcs-patch"))
           (forward-line)
           (let ((action (match-string 1))
                 (from (string-to-number (match-string 2)))
@@ -59,7 +60,7 @@
              ((equal action "a")
               (let ((start (point)))
                 (forward-line len)
-                (let ((text (buffer-substring start (point))))
+                (let ((text (buffer-substring-no-properties start (point))))
                   (with-current-buffer target-buffer
                     (setq line-offset (- line-offset len))
                     (goto-char (point-min))

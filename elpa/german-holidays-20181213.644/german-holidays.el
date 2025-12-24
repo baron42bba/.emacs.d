@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; german-holidays.el --- German holidays for Emacs calendar
 
 ;; Author: Sebastian Christ <rudolfo.christ@gmail.com>

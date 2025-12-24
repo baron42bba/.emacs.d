@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; stripes.el --- alternate the background color of lines
 
 ;; Copyright (C) 2003 Michael Schierl

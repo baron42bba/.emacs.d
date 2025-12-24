@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; cfengine.el --- mode for editing Cfengine files
 
 ;; Copyright (C) 2001-2014 Free Software Foundation, Inc.

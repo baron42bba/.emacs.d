@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; perlcritic.el --- minor mode for Perl::Critic integration
 
 ;;; Readme

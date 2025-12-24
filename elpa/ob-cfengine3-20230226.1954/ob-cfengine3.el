@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ob-cfengine3.el --- Org Babel functions for CFEngine 3
 
 ;; Copyright (C) 2017  Nick Anderson

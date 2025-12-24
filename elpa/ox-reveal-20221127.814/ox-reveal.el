@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ox-reveal.el --- reveal.js Presentation Back-End for Org Export Engine
 
 ;; Copyright (C) 2013 Yujie Wen

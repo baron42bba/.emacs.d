@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; sqlup-mode.el --- Upcase SQL words for you
 
 ;; Copyright (C) 2014 Aldric Giacomoni

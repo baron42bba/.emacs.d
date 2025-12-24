@@ -1,6 +1,5 @@
+;; -*- lexical-binding: t; -*-
 ;;; key-chord.el --- map pairs of simultaneously pressed keys to commands
-;;  -*- lexical-binding: t; -*-
-
 ;; Copyright (C) 2003, 2005, 2008, 2012 David Andersson
 
 ;; Author: David Andersson <l.david.andersson(at)sverige.nu>

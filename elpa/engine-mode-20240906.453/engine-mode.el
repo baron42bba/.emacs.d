@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; engine-mode.el --- Define and query search engines
 
 ;; Author: Robin Schwartz <hello@robinschwartz.me>

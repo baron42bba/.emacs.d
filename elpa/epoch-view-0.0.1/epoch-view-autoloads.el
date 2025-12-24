@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; epoch-view-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

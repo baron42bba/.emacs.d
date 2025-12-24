@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; org-bullets.el --- Show bullets in org-mode as UTF-8 characters
 ;;; Version: 0.2.4
 ;;; Author: sabof

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ob-applescript.el --- org-babel functions for template evaluation
 
 ;; Copyright (C) Stig Brautaset

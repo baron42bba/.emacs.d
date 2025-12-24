@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; flymake-json-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

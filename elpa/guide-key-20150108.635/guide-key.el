@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; guide-key.el --- Guide the following key bindings automatically and dynamically
 
 ;; Copyright (C) 2012, 2013 Tsunenobu Kai

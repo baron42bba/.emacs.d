@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; string-edit-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

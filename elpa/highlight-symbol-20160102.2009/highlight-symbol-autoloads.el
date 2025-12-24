@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; highlight-symbol-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

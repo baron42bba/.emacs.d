@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ox-jira.el --- JIRA Backend for Org Export Engine
 
 ;; Copyright (C) 2016-2020 Stig Brautaset

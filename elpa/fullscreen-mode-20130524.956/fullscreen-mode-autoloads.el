@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; fullscreen-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

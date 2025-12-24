@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; helm-aws-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

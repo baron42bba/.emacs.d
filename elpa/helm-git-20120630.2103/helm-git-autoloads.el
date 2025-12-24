@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; helm-git-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

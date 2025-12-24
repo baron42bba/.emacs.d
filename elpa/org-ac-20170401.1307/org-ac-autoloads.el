@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; org-ac-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
