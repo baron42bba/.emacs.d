@@ -6,8 +6,8 @@
 ;;         gemmaro <gemmaro.dev@gmail.com>
 ;; Maintainer: Sam Graham <libflymake-perlcritic-emacs BLAHBLAH illusori.co.uk>
 ;; URL: https://github.com/illusori/emacs-flymake-perlcritic
-;; Package-Version: 20240229.953
-;; Package-Revision: f65ac37608b7
+;; Package-Version: 20250615.802
+;; Package-Revision: 311743e97d2f
 ;; Package-Requires: ((flymake "1.2"))
 ;;
 ;; This program is free software: you can redistribute it and/or modify
@@ -146,7 +146,7 @@ exits successfully, it calls REPORT-FN to report to Flymake."
 
 (defun flymake-perlcritic-init ()
   "Initialise perlcritic command."
-  (let ((command (list "perlcritic"
+  (let ((command (list flymake-perlcritic-command
                        "--nocolour"
                        "--verbose" "%s:%l:%c:%m.  %e.  (%p)\\n"
                        "--severity" (number-to-string flymake-perlcritic-severity))))
