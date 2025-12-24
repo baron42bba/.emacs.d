@@ -36,7 +36,7 @@
 multiplying them all by MULTIPLIER"
   (save-excursion
     (while (re-search-forward
-            "\\([0-9]+\\)?\\([¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]\\)\\|\\([0-9]+\\)/\\([0-9]+\\)\\|\\([0-9]+\\)" (mark) t)
+            "\\([0-9]+\\)?\\([¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]\\)\\|\\([0-9]+\\)/\\([0-9]+\\)\\|\\([0-9]+\\(?:\\.[0-9]+\\)?\\)" (mark) t)
       (cond
        ;; Unicode vulgar/mixed fractions
        ((match-string 2)

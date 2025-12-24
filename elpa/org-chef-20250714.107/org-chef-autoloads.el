@@ -15,24 +15,18 @@
 Prompt for a recipe URL, and then insert the recipe at point.
 
 (fn URL)" t)
+(autoload 'org-chef-get-recipe-string-from-url "org-chef" "\
+Prompt for a recipe URL, and return the ‘org-mode’ string.
+
+(fn URL)")
 (autoload 'org-chef-get-recipe-from-url "org-chef" "\
 Prompt for a recipe URL, and return the ‘org-mode’ string.")
 (register-definition-prefixes "org-chef" '("org-chef-"))
 
 
-;;; Generated autoloads from org-chef-24kitchen.el
-
-(register-definition-prefixes "org-chef-24kitchen" '("org-chef-24kitchen-"))
-
-
 ;;; Generated autoloads from org-chef-basics-with-babish.el
 
 (register-definition-prefixes "org-chef-basics-with-babish" '("org-chef-basics-with-babish-"))
-
-
-;;; Generated autoloads from org-chef-bbc-food.el
-
-(register-definition-prefixes "org-chef-bbc-food" '("org-chef-bbc-food-"))
 
 
 ;;; Generated autoloads from org-chef-bbc-good-food.el
@@ -95,29 +89,9 @@ the quantities inside the ingredients list.
 (register-definition-prefixes "org-chef-marmiton" '("org-chef-marmiton-"))
 
 
-;;; Generated autoloads from org-chef-martha-stewart.el
-
-(register-definition-prefixes "org-chef-martha-stewart" '("org-chef-martha-stewart-"))
-
-
-;;; Generated autoloads from org-chef-nytimes.el
-
-(register-definition-prefixes "org-chef-nytimes" '("org-chef-nytimes-"))
-
-
 ;;; Generated autoloads from org-chef-recipetin-eats.el
 
 (register-definition-prefixes "org-chef-recipetin-eats" '("org-chef-recipetin-eats-"))
-
-
-;;; Generated autoloads from org-chef-reluctant-gourmet.el
-
-(register-definition-prefixes "org-chef-reluctant-gourmet" '("org-chef-reluctant-gourmet-"))
-
-
-;;; Generated autoloads from org-chef-saveur.el
-
-(register-definition-prefixes "org-chef-saveur" '("org-chef-saveur-"))
 
 
 ;;; Generated autoloads from org-chef-serious-eats.el
