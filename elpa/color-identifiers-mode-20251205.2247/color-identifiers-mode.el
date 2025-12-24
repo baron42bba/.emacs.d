@@ -5,8 +5,8 @@
 ;; Author: Ankur Dave <ankurdave@gmail.com>
 ;; Url: https://github.com/ankurdave/color-identifiers-mode
 ;; Created: 24 Jan 2014
-;; Package-Version: 20241023.2217
-;; Package-Revision: 89343c624ae6
+;; Package-Version: 20251205.2247
+;; Package-Revision: a868ccaeb2be
 ;; Keywords: faces, languages
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.4"))
 
@@ -190,7 +190,7 @@ SCAN-FN."
           (setq next-change (next-property-change (point))))))
     (hash-table-keys result)))
 
-(dolist (maj-mode '(c-mode c++-mode java-mode rust-mode rust-ts-mode rustic-mode meson-mode typescript-mode cuda-mode tsx-ts-mode typescript-ts-mode))
+(dolist (maj-mode '(c-mode c++-mode java-mode rust-mode rust-ts-mode rustic-mode meson-mode typescript-mode cuda-mode tsx-ts-mode typescript-ts-mode python-ts-mode))
   (add-to-list
    'color-identifiers:modes-alist
    `(,maj-mode . (""
@@ -500,20 +500,16 @@ incompatible with Emacs Lisp syntax, such as reader macros (#)."
     (delete-dups result)
     result))
 
-(color-identifiers:set-declaration-scan-fn
- 'clojure-mode 'color-identifiers:clojure-get-declarations)
-
-(add-to-list
- 'color-identifiers:modes-alist
- `(clojure-mode . (""
-                   "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
-                   (nil))))
-
-(add-to-list
- 'color-identifiers:modes-alist
- `(clojurescript-mode . (""
-                         "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
-                         (nil))))
+(dolist (mode '(clojure-mode
+                clojure-ts-mode
+                clojurescript-mode))
+  (color-identifiers:set-declaration-scan-fn
+   mode 'color-identifiers:clojure-get-declarations)
+  (add-to-list
+   'color-identifiers:modes-alist
+   `(,mode . (""
+              "\\_<\\(\\(?:\\s_\\|\\sw\\)+\\)"
+              (nil)))))
 
 (dolist (maj-mode '(tuareg-mode sml-mode))
   (add-to-list
@@ -685,7 +681,7 @@ mode. This variable memoizes the result of the declaration scan function.")
   (color-identifiers:refontify))
 
 ;;;###autoload
-(define-global-minor-mode global-color-identifiers-mode
+(define-globalized-minor-mode global-color-identifiers-mode
   color-identifiers-mode color-identifiers-mode-maybe)
 
 (defun color-identifiers:attribute-luminance (attribute)
@@ -778,10 +774,11 @@ be colored."
 
 (defun color-identifiers:scan-identifiers (fn limit)
   "Run FN on all candidate identifiers from point up to LIMIT.
-Candidate identifiers are defined by
-`color-identifiers:modes-alist'. Declaration scan functions are
-not applied. If supplied, iteration only continues if CONTINUE-P
-evaluates to true."
+
+Basically, this is the function that highlights all identifiers, with
+highlight being done by applying FN.
+
+Candidate identifiers are defined by `color-identifiers:modes-alist'."
   (let ((identifier-context-re (nth 1 color-identifiers:colorize-behavior))
         (identifier-re (nth 2 color-identifiers:colorize-behavior))
         (identifier-faces (color-identifiers:curr-identifier-faces))
@@ -789,7 +786,16 @@ evaluates to true."
     ;; Skip forward to the next identifier that matches all four conditions
     (condition-case nil
         (while (< (point) limit)
-          (if (or (memq (get-text-property (point) 'face) identifier-faces)
+          (if (or (let ((curr-face (get-text-property (point) 'face)))
+                    (or
+                     ;; Note: if `curr-face' is nil, the memq will usually
+                     ;; succeed because nil is typically part of the list.
+                     (memq curr-face identifier-faces)
+                     ;; `font-lock-variable-use-face' isn't included in
+                     ;; `identifier-faces' due to the latter being also used for
+                     ;; initial scanning, so `font-lock-variable-use-face' being
+                     ;; there would be an overhead with no benefit.
+                     (eq curr-face 'font-lock-variable-use-face)))
                   (let ((flface-prop (get-text-property (point) 'font-lock-face)))
                     (and flface-prop (memq flface-prop identifier-faces))))
               (if (and (looking-back identifier-context-re (line-beginning-position))
@@ -812,9 +818,8 @@ evaluates to true."
             (hex (color-identifiers:color-identifier identifier)))
        (when hex
          (let ((face-spec (append `(:foreground ,hex) color-identifiers:extra-face-attributes)))
-           (put-text-property start end 'face face-spec)
-           (put-text-property start end 'color-identifiers:fontified t)))))
-     limit))
+           (add-text-properties start end `(face ,face-spec color-identifiers:fontified t))))))
+   limit))
 
 (defun color-identifiers-mode-maybe ()
   "Potentially enable `color-identifiers-mode' in the current buffer.

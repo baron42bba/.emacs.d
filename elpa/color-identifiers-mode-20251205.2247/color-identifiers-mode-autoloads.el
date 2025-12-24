@@ -39,16 +39,16 @@ either customize it (see the info node `Easy Customization')
 or call the function `global-color-identifiers-mode'.")
 (custom-autoload 'global-color-identifiers-mode "color-identifiers-mode" nil)
 (autoload 'global-color-identifiers-mode "color-identifiers-mode" "\
-Toggle Color-Identifiers mode in all buffers.
+Toggle Color-Identifiers mode in many buffers.
+Specifically, Color-Identifiers mode is enabled in all buffers where
+`color-identifiers-mode-maybe' would do it.
+
 With prefix ARG, enable Global Color-Identifiers mode if ARG is
 positive; otherwise, disable it.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
-
-Color-Identifiers mode is enabled in all buffers where
-`color-identifiers-mode-maybe' would do it.
 
 See `color-identifiers-mode' for more information on Color-Identifiers
 mode.
