@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; ac-helm-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

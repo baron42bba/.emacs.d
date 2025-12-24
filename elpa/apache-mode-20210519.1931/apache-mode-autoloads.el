@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; apache-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:

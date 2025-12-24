@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; apples-mode-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
