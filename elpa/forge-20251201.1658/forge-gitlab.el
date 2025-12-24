@@ -22,9 +22,7 @@
 
 ;;; Code:
 
-(require 'glab)
-
-(require 'forge)
+(require 'forge-client)
 (require 'forge-issue)
 (require 'forge-pullreq)
 
@@ -154,7 +152,7 @@
     (forge--glab-get repo "/projects/:project/issues"
       `((per_page . 100)
         (order_by . "updated_at")
-        ,@(and-let* ((after (or since (oref repo issues-until))))
+        ,@(and-let ((after (or since (oref repo issues-until))))
             `((updated_after . ,after))))
       :unpaginate t
       :callback (lambda (value _headers _status _req)
@@ -249,7 +247,7 @@
     (forge--glab-get repo "/projects/:project/merge_requests"
       `((per_page . 100)
         (order_by . "updated_at")
-        ,@(and-let* ((after (or since (oref repo pullreqs-until))))
+        ,@(and-let ((after (or since (oref repo pullreqs-until))))
             `((updated_after . ,after))))
       :unpaginate t
       :callback (lambda (value _headers _status _req)
@@ -451,45 +449,47 @@
 ;;; Mutations
 
 (cl-defmethod forge--submit-create-issue ((_ forge-gitlab-repository) repo)
-  (let-alist (forge--topic-parse-buffer)
-    (forge--glab-post repo "/projects/:project/issues"
-      `((title       . , .title)
-        (description . , .body))
+  (forge--glab-post repo "/projects/:project/issues"
+    (pcase-let ((`(,title . ,body) (forge--post-buffer-text)))
+      `((title        . ,title)
+        (description  . ,body)))
+    :callback  (forge--post-submit-callback)
+    :errorback (forge--post-submit-errorback)))
+
+(cl-defmethod forge--submit-create-pullreq ((_ forge-gitlab-repository) base-repo)
+  (pcase-let* ((`(,title . ,body) (forge--post-buffer-text))
+               (`(,_base-remote . ,base-branch)
+                (magit-split-branch-name forge--buffer-base-branch))
+               (`(,head-remote . ,head-branch)
+                (magit-split-branch-name forge--buffer-head-branch))
+               (head-repo (forge-get-repository :stub head-remote)))
+    (forge--glab-post head-repo "/projects/:project/merge_requests"
+      `((title . ,(if forge--buffer-draft-p
+                      (concat "Draft: " title)
+                    title))
+        (description . ,body)
+        ;; ,@(and (not (equal head-remote base-remote))
+        (target_project_id . ,(oref base-repo forge-id))
+        (target_branch . ,base-branch)
+        (source_branch . ,head-branch)
+        (allow_collaboration . t))
       :callback  (forge--post-submit-callback)
       :errorback (forge--post-submit-errorback))))
 
-(cl-defmethod forge--submit-create-pullreq ((_ forge-gitlab-repository) base-repo)
-  (let-alist (forge--topic-parse-buffer)
-    (pcase-let* ((`(,base-remote . ,base-branch)
-                  (magit-split-branch-name forge--buffer-base-branch))
-                 (`(,head-remote . ,head-branch)
-                  (magit-split-branch-name forge--buffer-head-branch))
-                 (head-repo (forge-get-repository :stub head-remote)))
-      (forge--glab-post head-repo "/projects/:project/merge_requests"
-        `((title . ,(if (if (local-variable-p 'forge-buffer-draft-p)
-                            forge-buffer-draft-p
-                          .draft)
-                        (concat "Draft: " .title)
-                      .title))
-          (description . , .body)
-          ,@(and (not (equal head-remote base-remote))
-                 `((target_project_id . ,(oref base-repo forge-id))))
-          (target_branch . ,base-branch)
-          (source_branch . ,head-branch)
-          (allow_collaboration . t))
-        :callback  (forge--post-submit-callback)
-        :errorback (forge--post-submit-errorback)))))
-
-(cl-defmethod forge--submit-create-post ((_ forge-gitlab-repository) topic)
+(cl-defmethod forge--submit-create-post
+  ((_     forge-gitlab-repository)
+   (topic forge-topic))
   (forge--glab-post topic
     (if (forge-issue-p topic)
         "/projects/:project/issues/:number/notes"
       "/projects/:project/merge_requests/:number/notes")
-    `((body . ,(string-trim (buffer-string))))
+    `((body . ,(string-trim (buffer-str))))
     :callback  (forge--post-submit-callback)
     :errorback (forge--post-submit-errorback)))
 
-(cl-defmethod forge--submit-edit-post ((_ forge-gitlab-repository) post)
+(cl-defmethod forge--submit-edit-post
+  ((_    forge-gitlab-repository)
+   (post forge-post))
   (forge--glab-put post
     (cl-etypecase post
       (forge-pullreq      "/projects/:project/merge_requests/:number")
@@ -497,21 +497,22 @@
       (forge-issue-post   "/projects/:project/issues/:topic/notes/:number")
       (forge-pullreq-post "/projects/:project/merge_requests/:topic/notes/:number"))
     (if (cl-typep post 'forge-topic)
-        (let-alist (forge--topic-parse-buffer)
-          ;; Keep Gitlab from claiming that the user
-          ;; changed the description when that isn't
-          ;; true.  The same isn't necessary for the
-          ;; title; in that case Gitlab performs the
-          ;; necessary check itself.
-          `((title . , .title)
-            ,@(and (not (equal .body (oref post body)))
-                   `((description . , .body)))))
-      `((body . ,(string-trim (buffer-string)))))
+        (pcase-let ((`(,title . ,body) (forge--post-buffer-text)))
+          `((title . ,title)
+            ;; Keep Gitlab from claiming that the user changed
+            ;; the description when that isn't true.  The same
+            ;; isn't necessary for the title; for that, Gitlab
+            ;; performs the necessary check itself.
+            ,@(and (not (equal body (oref post body)))
+                   `((description . ,body)))))
+      `((body . ,(string-trim (buffer-str)))))
     :callback  (forge--post-submit-callback)
     :errorback (forge--post-submit-errorback)))
 
 (cl-defmethod forge--set-topic-field
-  ((_repo forge-gitlab-repository) topic field value)
+  ((_repo forge-gitlab-repository)
+   (topic forge-topic)
+   field value)
   (forge--glab-put topic
     (cl-typecase topic
       (forge-pullreq "/projects/:project/merge_requests/:number")
@@ -520,11 +521,15 @@
     :callback (forge--set-field-callback topic)))
 
 (cl-defmethod forge--set-topic-title
-  ((repo forge-gitlab-repository) topic title)
+  ((repo  forge-gitlab-repository)
+   (topic forge-topic)
+   title)
   (forge--set-topic-field repo topic 'title title))
 
 (cl-defmethod forge--set-topic-state
-  ((repo forge-gitlab-repository) topic state)
+  ((repo  forge-gitlab-repository)
+   (topic forge-topic)
+   state)
   (forge--set-topic-field repo topic 'state_event
                           (pcase-exhaustive state
                             ;; Merging isn't done through here.
@@ -534,30 +539,25 @@
                             ('open      "reopen"))))
 
 (cl-defmethod forge--set-topic-draft
-  ((repo forge-gitlab-repository) topic value)
-  (let ((buffer (current-buffer)))
-    (glab-graphql
-     `(mutation (mergeRequestSetDraft
-                 [(input $input MergeRequestSetDraftInput!)]
-                 (mergeRequest iid draft)))
-     `((input (projectPath . ,(oref repo slug))
-              (iid . ,(number-to-string (oref topic number)))
-              (draft . ,value)))
-     :host (oref (forge-get-repository topic) apihost)
-     :auth 'forge
-     :callback (lambda (data &rest _)
-                 (if (assq 'error data)
-                     (ghub--graphql-pp-response data)
-                   (oset topic draft-p value)
-                   (forge-refresh-buffer buffer))))))
+  ((repo  forge-gitlab-repository)
+   (topic forge-topic)
+   value)
+  (forge--mutate-field topic mergeRequestSetDraft
+    ((projectPath (oref repo slug))
+     (iid (number-to-string (oref topic number)))
+     (draft value))))
 
 (cl-defmethod forge--set-topic-labels
-  ((repo forge-gitlab-repository) topic labels)
+  ((repo  forge-gitlab-repository)
+   (topic forge-topic)
+   labels)
   (forge--set-topic-field repo topic 'labels
                           (string-join labels ",")))
 
 (cl-defmethod forge--set-topic-assignees
-  ((repo forge-gitlab-repository) topic assignees)
+  ((repo  forge-gitlab-repository)
+   (topic forge-topic)
+   assignees)
   (let ((users (mapcar #'cdr (oref repo assignees))))
     (cl-typecase topic
       (forge-pullreq ; Can only be assigned to a single user.
@@ -570,14 +570,17 @@
                                    0))))))
 
 (cl-defmethod forge--set-topic-review-requests
-  ((repo forge-gitlab-repository) topic reviewers)
+  ((repo  forge-gitlab-repository)
+   (topic forge-pullreq)
+   reviewers)
   (let ((users (mapcar #'cdr (oref repo assignees))))
     (forge--set-topic-field repo topic 'reviewer_ids
                             (or (mapcar (##caddr (assoc % users)) reviewers)
                                 0))))
 
 (cl-defmethod forge--delete-comment
-  ((_repo forge-gitlab-repository) post)
+  ((_    forge-gitlab-repository)
+   (post forge-post))
   (forge--glab-delete post
     (cl-etypecase post
       (forge-pullreq-post
@@ -595,17 +598,19 @@
                                            (_ (subclass forge-pullreq)))
   (forge--topic-template-files-1 repo "md" ".gitlab/merge_request_templates"))
 
-(cl-defmethod forge--fork-repository ((repo forge-gitlab-repository) fork)
-  (with-slots (owner name) repo
-    (forge--glab-post repo (format "/projects/%s%%2F%s/fork" owner name)
-      (and (not (equal fork (ghub--username (ghub--host nil))))
+(cl-defmethod forge--fork-repository ((repo forge-gitlab-repository) fork _all)
+  (with-slots (name apihost) repo
+    (forge--glab-post repo "/projects/:project/fork"
+      (and (not (equal fork (ghub--username apihost 'gitlab)))
            `((namespace . ,fork)))
       :noerror t)
-    (ghub-wait (format "/projects/%s%%2F%s" fork name)
-               nil :auth 'forge :forge 'gitlab)))
+    (ghub-wait (format "/projects/%s%%2F%s" (string-replace "/" "%2F" fork) name)
+               nil :auth 'forge :host apihost :forge 'gitlab)))
 
-(cl-defmethod forge--merge-pullreq ((_repo forge-gitlab-repository)
-                                    topic hash method)
+(cl-defmethod forge--merge-pullreq
+  ((_repo forge-gitlab-repository)
+   (topic forge-topic)
+   hash method)
   (forge--glab-put topic
     "/projects/:project/merge_requests/:number/merge"
     `((squash . ,(eq method 'squash))
@@ -619,15 +624,16 @@
                                silent unpaginate noerror reader
                                host callback errorback)
   (declare (indent defun))
-  (glab-get (if obj (forge--format-resource obj resource) resource)
-            params
-            :host (or host (oref (forge-get-repository obj) apihost))
-            :auth 'forge
-            :query query :payload payload :headers headers
-            :silent silent :unpaginate unpaginate
-            :noerror noerror :reader reader
-            :callback callback
-            :errorback (or errorback (and callback t))))
+  (ghub-request "GET" (if obj (forge--format-resource obj resource) resource)
+                params
+                :forge 'gitlab
+                :host (or host (oref (forge-get-repository obj) apihost))
+                :auth 'forge
+                :query query :payload payload :headers headers
+                :silent silent :unpaginate unpaginate
+                :noerror noerror :reader reader
+                :callback callback
+                :errorback (or errorback (and callback t))))
 
 (cl-defun forge--glab-put (obj resource
                                &optional params
@@ -635,15 +641,16 @@
                                silent unpaginate noerror reader
                                host callback errorback)
   (declare (indent defun))
-  (glab-put (if obj (forge--format-resource obj resource) resource)
-            params
-            :host (or host (oref (forge-get-repository obj) apihost))
-            :auth 'forge
-            :query query :payload payload :headers headers
-            :silent silent :unpaginate unpaginate
-            :noerror noerror :reader reader
-            :callback callback
-            :errorback (or errorback (and callback t))))
+  (ghub-request "PUT" (if obj (forge--format-resource obj resource) resource)
+                params
+                :forge 'gitlab
+                :host (or host (oref (forge-get-repository obj) apihost))
+                :auth 'forge
+                :query query :payload payload :headers headers
+                :silent silent :unpaginate unpaginate
+                :noerror noerror :reader reader
+                :callback callback
+                :errorback (or errorback (and callback t))))
 
 (cl-defun forge--glab-post (obj resource
                                 &optional params
@@ -651,15 +658,16 @@
                                 silent unpaginate noerror reader
                                 host callback errorback)
   (declare (indent defun))
-  (glab-post (forge--format-resource obj resource)
-             params
-             :host (or host (oref (forge-get-repository obj) apihost))
-             :auth 'forge
-             :query query :payload payload :headers headers
-             :silent silent :unpaginate unpaginate
-             :noerror noerror :reader reader
-             :callback callback
-             :errorback (or errorback (and callback t))))
+  (ghub-request "POST" (forge--format-resource obj resource)
+                params
+                :forge 'gitlab
+                :host (or host (oref (forge-get-repository obj) apihost))
+                :auth 'forge
+                :query query :payload payload :headers headers
+                :silent silent :unpaginate unpaginate
+                :noerror noerror :reader reader
+                :callback callback
+                :errorback (or errorback (and callback t))))
 
 (cl-defun forge--glab-delete (obj resource
                                   &optional params
@@ -667,21 +675,26 @@
                                   silent unpaginate noerror reader
                                   host callback errorback)
   (declare (indent defun))
-  (glab-delete (forge--format-resource obj resource)
-               params
-               :host (or host (oref (forge-get-repository obj) apihost))
-               :auth 'forge
-               :query query :payload payload :headers headers
-               :silent silent :unpaginate unpaginate
-               :noerror noerror :reader reader
-               :callback callback
-               :errorback (or errorback (and callback t))))
+  (ghub-request "DELETE" (forge--format-resource obj resource)
+                params
+                :forge 'gitlab
+                :host (or host (oref (forge-get-repository obj) apihost))
+                :auth 'forge
+                :query query :payload payload :headers headers
+                :silent silent :unpaginate unpaginate
+                :noerror noerror :reader reader
+                :callback callback
+                :errorback (or errorback (and callback t))))
 
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let")
+;;   ("buffer-string" . "buffer-string")
+;;   ("buffer-str"    . "forge--buffer-substring-no-properties"))
 ;; End:
 (provide 'forge-gitlab)
 ;;; forge-gitlab.el ends here

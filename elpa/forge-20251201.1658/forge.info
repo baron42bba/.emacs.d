@@ -27,7 +27,7 @@ Forge User and Developer Manual
 Forge allows you to work with Git forges, currently Github and Gitlab,
 from the comfort of Magit and Emacs.
 
-This manual is for Forge version 0.5.0.
+This manual is for Forge version 0.6.2.
 
      Copyright (C) 2018-2025 Jonas Bernoulli
      <emacs.forge@jonas.bernoulli.dev>
@@ -514,7 +514,7 @@ Tell Forge about the Instance
 A few hosts, which use partially supported forge types, are available
 out-of-the-box, because they have an entry in the default value of
 option ‘forge-alist’ (also see its docstring).  For example, the entry
-for <https://github.com> in that variable looks like this:
+for <https://codeberg.org> in that variable looks like this:
 
      ("codeberg.org"                     ; GITHOST
       "codeberg.org/api/v1"              ; APIHOST
@@ -831,6 +831,10 @@ status buffers, by adding the following functions to
 ‘forge-status-buffer-default-topic-filters’ and can be changed
 temporarily for the current buffer, using ‘N m f’ (‘forge-topics-menu’).
 
+ -- Function: forge-insert-discussions
+     This function inserts a list of discussions, by default a list of
+     "active" discussions.
+
  -- Function: forge-insert-issues
      This function inserts a list of issues, by default a list of
      "active" issues.
@@ -880,6 +884,13 @@ argument, i.e., ‘C-u RET’.
      These commands read a topic, issue or pull-request and visit it in
      a separate buffer.
 
+‘N v u’ (‘forge-visit-topic-from-url’)
+     This commands reads an URL and visits the corresponding topic.
+     Normally users would yank that URL into the minibuffer, after
+     having copied it from an email or a browser’s address bar.
+
+     This command is disabled in the menu by default.
+
 ‘C-c C-o’ (‘forge-browse’)
 ‘o [on topic in topic list]’ (‘forge-browse-this-topic’)
 ‘o [on repository in repository list]’ (‘forge-browse-this-repository’)
@@ -910,6 +921,10 @@ argument, i.e., ‘C-u RET’.
      part of the URL.  From a file in the worktree with no active
      region, instead use the branch name as part of the URL, unless a
      prefix argument is used.
+
+     When invoked from a Dired buffer, visit the blob at point without
+     prompting.  If a prefix argument is used, the commit hash is
+     included in the URL.
 
      When invoked from any other buffer, prompt the user for a branch or
      commit, and for a file.
@@ -1013,7 +1028,7 @@ File: forge.info,  Node: Pulling,  Next: Branching,  Prev: Editing Topics,  Up: 
 
 The commands that fetch forge data are available the Forge’s main menu
 (‘forge-dispatch’ on ‘N’) and from the same menu (‘magit-fetch’ on ‘f’)
-that is used to fetch Git data.  If ‘magit-pull-or-fetch’ is non-nil,
+that is used to fetch Git data.  If ‘magit-pull-or-fetch’ is non-‘nil’,
 then they are also available from the ‘magit-pull’ menu (on ‘F’).
 
    With Git you have to explicitly pull Git data to make it available in
@@ -1116,43 +1131,32 @@ and check out branches and work trees in a more generic fashion
           to their personal fork, even if they have push access to the
           upstream, so ‘branch.<name>.pushRemote’ is set anyway.
 
-        • If the pull-request branch is located inside a fork, then you
-          are usually able to push to that branch, because Github by
-          default allows the recipient of a pull-request to push to the
-          remote pull-request branch even if it is located in a fork.
-          The contributor has to explicitly disable this.
-
-             • If you are not allowed to push to the pull-request branch
-               on the fork, then a branch by the same name located in
-               the upstream repository is configured as the push-target.
-
-             • A—sadly rather common—special case is when the
-               contributor didn’t bother to use a dedicated branch for
-               the pull-request.
-
-               The most likely such case is when you are being asked to
-               merge something like "fork/master" into "origin/master".
-               The special push permission mentioned above is never
-               granted for the branch that is the repository’s default
-               branch, and that would almost certainly be the case in
-               this scenario.
-
-               To enable you to easily push somewhere anyway, the local
-               branch is named "pr-N" (where ‘N’ is the pull-request
-               number) and the upstream repository is used as the
-               push-remote.
-
-             • Finally, if you are allowed to push to the pull-request
-               branch and the contributor had the foresight to use a
-               dedicated branch, then the fork is configured as the
-               push-remote.
-
-          The push-remote is configured using
+        • The push-remote is configured using
           ‘branch.<name>.pushRemote’, even if the used value is
           identical to that of ‘remote.pushDefault’, just in case you
           change the value of the latter later on.  Additionally the
           variable ‘branch.<name>.pullRequestRemote’ is set to the
           remote on which the pull-request branch is located.
+
+        • If the pull-request branch is located on the contributor’s
+          fork, then you, as a maintainer of the upstream repository,
+          are usually allowed to push to that branch anyway.  (However,
+          the contributor could explicitly disallow this, but in my
+          experience that rarely happens.)
+
+        • As mentioned above, contributors sometimes fail to use a
+          dedicated branch for their pull-requests and this command is
+          thus forced to make up a branch name such as "pr-313".
+
+          Usually a maintainer would use
+          ‘magit-push-current-to-pushremote’ (on ‘p’) to push to the
+          contributor’s pull-request branch on their fork.  For a branch
+          named "pr-313" that does not work.  (Instead of pushing to
+          "fork/main", it would unsuccessfully attempt to create a new
+          branch "pr-313" on the fork.)  In such situations the
+          ‘magit-push’ menu offers an alternative command for pushing to
+          the pull-request branch: ‘forge-push-to-unnamed-pullreq’ (on
+          ‘N’).
 
 ‘b f’ (‘forge-checkout-pullreq’)
      This command creates and configures a new branch from a
@@ -1207,6 +1211,9 @@ File: forge.info,  Node: Miscellaneous Commands,  Next: Miscellaneous Options,  
      access to.
 
      Currently this only supports Github and Gitlab.
+
+     With a prefix argument, fork all branches, not just the default
+     branch.  On Gitlab it is not possible to fork only the default.
 
 ‘N - H’ (‘forge-toggle-topic-legend’)
      This command toggle whether to show a legend for faces used in
@@ -1734,7 +1741,7 @@ Appendix D Keystroke Index
 * Menu:
 
 * b F:                                   Branching.           (line  13)
-* b f:                                   Branching.           (line 102)
+* b f:                                   Branching.           (line  91)
 * C-<return> [on a topic section]:       Editing Topics.      (line  26)
 * C-c C-c:                               Creating Topics and Posts.
                                                               (line  37)
@@ -1755,31 +1762,31 @@ Appendix D Keystroke Index
                                                               (line  23)
 * C-c C-n [on "Pull requests" section]:  Creating Topics and Posts.
                                                               (line  19)
-* C-c C-o:                               Visiting Topics.     (line  34)
+* C-c C-o:                               Visiting Topics.     (line  41)
 * C-c C-r:                               Creating Topics and Posts.
                                                               (line  27)
 * C-c C-w:                               Miscellaneous Commands.
-                                                              (line  37)
+                                                              (line  40)
 * f n:                                   Getting Started.     (line  32)
 * f n <1>:                               Pulling.             (line  23)
 * f N:                                   Pulling.             (line  34)
 * M b r:                                 Miscellaneous Commands.
-                                                              (line  45)
+                                                              (line  48)
 * m M [if enabled]:                      Miscellaneous Commands.
                                                               (line   8)
 * N:                                     Getting Started.     (line  50)
 * N <1>:                                 Lists and Menus.     (line  40)
 * N - H:                                 Miscellaneous Commands.
-                                                              (line  29)
+                                                              (line  32)
 * N - S:                                 Miscellaneous Commands.
-                                                              (line  33)
+                                                              (line  36)
 * N / a:                                 Getting Started.     (line  15)
-* N b i:                                 Visiting Topics.     (line  46)
-* N b I:                                 Visiting Topics.     (line  46)
-* N b p:                                 Visiting Topics.     (line  46)
-* N b P:                                 Visiting Topics.     (line  46)
-* N b r:                                 Visiting Topics.     (line  46)
-* N b t:                                 Visiting Topics.     (line  46)
+* N b i:                                 Visiting Topics.     (line  53)
+* N b I:                                 Visiting Topics.     (line  53)
+* N b p:                                 Visiting Topics.     (line  53)
+* N b P:                                 Visiting Topics.     (line  53)
+* N b r:                                 Visiting Topics.     (line  53)
+* N b t:                                 Visiting Topics.     (line  53)
 * N c f:                                 Miscellaneous Commands.
                                                               (line  21)
 * N c i:                                 Creating Topics and Posts.
@@ -1806,14 +1813,15 @@ Appendix D Keystroke Index
 * N v i:                                 Visiting Topics.     (line  28)
 * N v p:                                 Visiting Topics.     (line  28)
 * N v t:                                 Visiting Topics.     (line  28)
+* N v u:                                 Visiting Topics.     (line  32)
 * o [in forge-repositories-menu]:        Lists and Menus.     (line 120)
-* o [on repository in repository list]:  Visiting Topics.     (line  34)
-* o [on topic in topic list]:            Visiting Topics.     (line  34)
+* o [on repository in repository list]:  Visiting Topics.     (line  41)
+* o [on topic in topic list]:            Visiting Topics.     (line  41)
 * RET [on "Issues" status section]:      Lists and Menus.     (line  66)
 * RET [on "Pull requests" status section]: Lists and Menus.   (line  72)
 * RET [on repository]:                   Lists and Menus.     (line 117)
 * RET [on topic]:                        Visiting Topics.     (line  21)
-* Z n:                                   Branching.           (line 107)
+* Z n:                                   Branching.           (line  96)
 
 
 File: forge.info,  Node: Function and Command Index,  Next: Variable Index,  Prev: Keystroke Index,  Up: Top
@@ -1825,31 +1833,31 @@ Appendix E Function and Command Index
 * Menu:
 
 * forge-add-organization-repositories:   Miscellaneous Commands.
-                                                              (line  64)
+                                                              (line  67)
 * forge-add-pullreq-refspec:             Miscellaneous Commands.
-                                                              (line  51)
+                                                              (line  54)
 * forge-add-repository:                  Getting Started.     (line  15)
 * forge-add-user-repositories:           Miscellaneous Commands.
-                                                              (line  58)
+                                                              (line  61)
 * forge-branch-pullreq:                  Branching.           (line  13)
-* forge-browse:                          Visiting Topics.     (line  34)
-* forge-browse-branch:                   Visiting Topics.     (line  38)
-* forge-browse-commit:                   Visiting Topics.     (line  37)
-* forge-browse-commit <1>:               Visiting Topics.     (line  49)
-* forge-browse-issue:                    Visiting Topics.     (line  46)
-* forge-browse-issues:                   Visiting Topics.     (line  46)
-* forge-browse-pullreq:                  Visiting Topics.     (line  46)
-* forge-browse-pullreqs:                 Visiting Topics.     (line  46)
-* forge-browse-remote:                   Visiting Topics.     (line  46)
-* forge-browse-repository:               Visiting Topics.     (line  39)
-* forge-browse-this-repository:          Visiting Topics.     (line  34)
-* forge-browse-this-topic:               Visiting Topics.     (line  34)
-* forge-browse-topic:                    Visiting Topics.     (line  46)
-* forge-checkout-pullreq:                Branching.           (line 102)
-* forge-checkout-worktree:               Branching.           (line 107)
+* forge-browse:                          Visiting Topics.     (line  41)
+* forge-browse-branch:                   Visiting Topics.     (line  45)
+* forge-browse-commit:                   Visiting Topics.     (line  44)
+* forge-browse-commit <1>:               Visiting Topics.     (line  56)
+* forge-browse-issue:                    Visiting Topics.     (line  53)
+* forge-browse-issues:                   Visiting Topics.     (line  53)
+* forge-browse-pullreq:                  Visiting Topics.     (line  53)
+* forge-browse-pullreqs:                 Visiting Topics.     (line  53)
+* forge-browse-remote:                   Visiting Topics.     (line  53)
+* forge-browse-repository:               Visiting Topics.     (line  46)
+* forge-browse-this-repository:          Visiting Topics.     (line  41)
+* forge-browse-this-topic:               Visiting Topics.     (line  41)
+* forge-browse-topic:                    Visiting Topics.     (line  53)
+* forge-checkout-pullreq:                Branching.           (line  91)
+* forge-checkout-worktree:               Branching.           (line  96)
 * forge-configure:                       Lists and Menus.     (line  45)
 * forge-copy-url-at-point-as-kill:       Miscellaneous Commands.
-                                                              (line  37)
+                                                              (line  40)
 * forge-create-issue:                    Creating Topics and Posts.
                                                               (line  23)
 * forge-create-post:                     Creating Topics and Posts.
@@ -1864,8 +1872,9 @@ Appendix E Function and Command Index
                                                               (line  83)
 * forge-fork:                            Miscellaneous Commands.
                                                               (line  21)
-* forge-insert-issues:                   Lists and Menus.     (line 184)
-* forge-insert-pullreqs:                 Lists and Menus.     (line 188)
+* forge-insert-discussions:              Lists and Menus.     (line 184)
+* forge-insert-issues:                   Lists and Menus.     (line 188)
+* forge-insert-pullreqs:                 Lists and Menus.     (line 192)
 * forge-list-global-issues:              Lists and Menus.     (line  82)
 * forge-list-global-pullreqs:            Lists and Menus.     (line  87)
 * forge-list-global-topics:              Lists and Menus.     (line  78)
@@ -1891,18 +1900,18 @@ Appendix E Function and Command Index
 * forge-pull-notifications:              Pulling.             (line  34)
 * forge-pull-topic:                      Pulling.             (line  43)
 * forge-remove-repository:               Miscellaneous Commands.
-                                                              (line  71)
+                                                              (line  74)
 * forge-remove-topic-locally:            Miscellaneous Commands.
-                                                              (line  75)
+                                                              (line  78)
 * forge-rename-default-branch:           Miscellaneous Commands.
-                                                              (line  45)
+                                                              (line  48)
 * forge-repositories-menu:               Lists and Menus.     (line 109)
 * forge-reset-database:                  Miscellaneous Commands.
-                                                              (line  91)
+                                                              (line  94)
 * forge-toggle-display-in-status-buffer: Miscellaneous Commands.
-                                                              (line  33)
+                                                              (line  36)
 * forge-toggle-topic-legend:             Miscellaneous Commands.
-                                                              (line  29)
+                                                              (line  32)
 * forge-topic-menu:                      Editing Topics.      (line  26)
 * forge-topics-menu:                     Lists and Menus.     (line  53)
 * forge-visit-issue:                     Visiting Topics.     (line  28)
@@ -1910,6 +1919,7 @@ Appendix E Function and Command Index
 * forge-visit-this-repository:           Lists and Menus.     (line 117)
 * forge-visit-this-topic:                Visiting Topics.     (line  21)
 * forge-visit-topic:                     Visiting Topics.     (line  28)
+* forge-visit-topic-from-url:            Visiting Topics.     (line  32)
 
 
 File: forge.info,  Node: Variable Index,  Prev: Function and Command Index,  Up: Top
@@ -1926,7 +1936,7 @@ Appendix F Variable Index
                                                               (line  21)
 * forge-bug-reference-hooks:             Miscellaneous Options.
                                                               (line  58)
-* forge-checkout-worktree-read-directory-function: Branching. (line 112)
+* forge-checkout-worktree-read-directory-function: Branching. (line 101)
 * forge-database-file:                   Miscellaneous Options.
                                                               (line   6)
 * forge-limit-topic-choices:             Miscellaneous Options.
@@ -1971,58 +1981,58 @@ Ref: Set your Username (3)15557
 Ref: Create and Store an Access Token (3)15865
 Node: Setup a Partially Supported Host18541
 Ref: Tell Forge about the Instance (2)19226
-Ref: Add Support for Additional Forge Types20722
-Node: Initial Pull21893
-Node: Getting Started23100
-Node: Lists and Menus25386
-Ref: Dispatch and configuration menus27210
-Ref: Topic menu and list commands27669
-Ref: Notification menu and list commands29580
-Ref: Repository menu and list commands29988
-Ref: Exiting menus and lists31785
-Ref: Default topic filters32480
-Ref: Topic sections in Magit status buffers32918
-Node: Visiting Topics34149
-Node: Creating Topics and Posts37040
-Node: Editing Topics39122
-Node: Pulling40747
-Node: Branching42909
-Node: Miscellaneous Commands49302
-Node: Miscellaneous Options53266
-Node: How Forge Detection Works55730
-Node: Supported Forges and Hosts61267
-Node: Supported Forges62576
-Ref: Github62732
-Ref: Github Caveats62887
-Ref: Github Hosts63549
-Ref: Gitlab63621
-Ref: Gitlab Caveats63648
-Ref: Gitlab Hosts63789
-Node: Partially Supported Forges63925
-Ref: Forgejo https//forgejoorg64131
-Ref: Forgejo Hosts64253
-Ref: Gitea https//giteaio64329
-Ref: Gogs https//gogsio64553
-Ref: Bitbucket https//bitbucketorg64793
-Ref: Bitbucket Caveats65003
-Ref: Bitbucket Hosts65916
-Node: Supported Semi-Forges65997
-Ref: Gitweb https//git-scmcom/docs/gitweb66168
-Ref: Gitweb Caveats66259
-Ref: Cgit https//gitzx2c4com/cgit/about66515
-Ref: Cgit Caveats66604
-Ref: Cgit Hosts66969
-Ref: Stgit https//codemadnessorg/git/stagit/file/READMEhtml67112
-Ref: Stgit Caveats67241
-Ref: Stgit Hosts67543
-Ref: Srht https//metasrht67619
-Ref: Srht Caveats67680
-Ref: Srht Hosts67979
-Node: FAQ68046
-Node: error in process filter HTTP Error 502 "Bad gateway"68456
-Node: Keystroke Index69937
-Node: Function and Command Index75917
-Node: Variable Index82270
+Ref: Add Support for Additional Forge Types20724
+Node: Initial Pull21895
+Node: Getting Started23102
+Node: Lists and Menus25388
+Ref: Dispatch and configuration menus27212
+Ref: Topic menu and list commands27671
+Ref: Notification menu and list commands29582
+Ref: Repository menu and list commands29990
+Ref: Exiting menus and lists31787
+Ref: Default topic filters32482
+Ref: Topic sections in Magit status buffers32920
+Node: Visiting Topics34289
+Node: Creating Topics and Posts37648
+Node: Editing Topics39730
+Node: Pulling41355
+Node: Branching43523
+Node: Miscellaneous Commands49418
+Node: Miscellaneous Options53521
+Node: How Forge Detection Works55985
+Node: Supported Forges and Hosts61522
+Node: Supported Forges62831
+Ref: Github62987
+Ref: Github Caveats63142
+Ref: Github Hosts63804
+Ref: Gitlab63876
+Ref: Gitlab Caveats63903
+Ref: Gitlab Hosts64044
+Node: Partially Supported Forges64180
+Ref: Forgejo https//forgejoorg64386
+Ref: Forgejo Hosts64508
+Ref: Gitea https//giteaio64584
+Ref: Gogs https//gogsio64808
+Ref: Bitbucket https//bitbucketorg65048
+Ref: Bitbucket Caveats65258
+Ref: Bitbucket Hosts66171
+Node: Supported Semi-Forges66252
+Ref: Gitweb https//git-scmcom/docs/gitweb66423
+Ref: Gitweb Caveats66514
+Ref: Cgit https//gitzx2c4com/cgit/about66770
+Ref: Cgit Caveats66859
+Ref: Cgit Hosts67224
+Ref: Stgit https//codemadnessorg/git/stagit/file/READMEhtml67367
+Ref: Stgit Caveats67496
+Ref: Stgit Hosts67798
+Ref: Srht https//metasrht67874
+Ref: Srht Caveats67935
+Ref: Srht Hosts68234
+Node: FAQ68301
+Node: error in process filter HTTP Error 502 "Bad gateway"68711
+Node: Keystroke Index70192
+Node: Function and Command Index76245
+Node: Variable Index82744
 
 End Tag Table
 

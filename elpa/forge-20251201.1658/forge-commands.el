@@ -77,19 +77,22 @@ Takes the pull-request as only argument and must return a directory."
                     ((or (magit-gitdir) (forge-repository-at-point))
                      "Forge does not yet track this repository")
                     ("Not inside a Git repository")))
-    ("/a" forge-add-repository
+    ("/ a" forge-add-repository
      :description (lambda () (let ((repo (forge-get-repository :stub?)))
                           (if (or (not repo)
                                   (eq (oref repo condition) :tracked))
                             "track some repo"
                           "track this repository"))))
-    ("/M" "merge with api" forge-merge
+    ("c f" "fork this repository" forge-fork
+     :if-not (##forge-get-repository :tracked?))
+    ("/ M" "merge with api" forge-merge
      :if (##forge-get-repository :tracked?)
      :level 7)]]
   [forge--lists-group
    ["Visit"
     :inapt-if-not (##forge-get-repository :tracked?)
     ("v t" "topic"          forge-visit-topic)
+    ("v u" "topic from url" forge-visit-topic-from-url :level 0)
     ("v d" "discussion"     forge-visit-discussion)
     ("v i" "issue"          forge-visit-issue)
     ("v p" "pull-request"   forge-visit-pullreq)]
@@ -144,7 +147,6 @@ repository cannot be determined, instead invoke `forge-add-repository'."
                  (if (forge-get-repository :tracked?)
                      "forge topics"
                    "new forge repository"))
-  (declare (interactive-only nil))
   (interactive)
   (if-let ((repo (forge-get-repository :tracked?)))
       (forge--pull repo)
@@ -173,17 +175,18 @@ repository cannot be determined, instead invoke `forge-add-repository'."
   (magit-git-fetch (oref repo remote) (magit-fetch-arguments)))
 
 (defun forge--maybe-git-fetch (repo &optional buffer)
-  (if (buffer-live-p buffer)
-      (with-current-buffer buffer
-        (if (and (derived-mode-p 'magit-mode)
-                 (forge-repository-equal (forge-get-repository :stub?) repo)
-                 (magit-toplevel))
-            (magit-git-fetch (oref repo remote) (magit-fetch-arguments))
-          (magit-refresh-buffer)))
-    (when-let ((worktree (forge-get-worktree repo)))
-      (let ((default-directory worktree)
-            (magit-inhibit-refresh t))
-        (magit-git-fetch (oref repo remote) (magit-fetch-arguments))))))
+  (cond-let
+    ((buffer-live-p buffer)
+     (with-current-buffer buffer
+       (if (and (derived-mode-p 'magit-mode)
+                (forge-repository-equal (forge-get-repository :stub?) repo)
+                (magit-toplevel))
+           (magit-git-fetch (oref repo remote) (magit-fetch-arguments))
+         (magit-refresh-buffer))))
+    ([worktree (forge-get-worktree repo)]
+     (let ((default-directory worktree)
+           (magit-inhibit-refresh t))
+       (magit-git-fetch (oref repo remote) (magit-fetch-arguments))))))
 
 ;;;###autoload(autoload 'forge-pull-notifications "forge-commands" nil t)
 (transient-define-suffix forge-pull-notifications ()
@@ -205,8 +208,7 @@ repository cannot be determined, instead invoke `forge-add-repository'."
                            (forge--get-github-repository)))
   (interactive
    (list (read-number "Pull topic: "
-                      (and-let* ((topic (forge-current-topic)))
-                        (oref topic number)))))
+                      (and$ (forge-current-topic) (oref $ number)))))
   (forge--pull-topic (forge-get-repository :tracked) number))
 
 ;;;###autoload(autoload 'forge-pull-this-topic "forge-commands" nil t)
@@ -324,6 +326,10 @@ jumping to a line, always use a commit hash as part of the URL.  From
 a file in the worktree with no active region, instead use the branch
 name as part of the URL, unless a prefix argument is used.
 
+When invoked from a Dired buffer, visit the blob at point without
+prompting. If a prefix argument is used, the commit hash is included
+in the URL.
+
 When invoked from any other buffer, prompt the user for a branch or
 commit, and for a file."
   (interactive (forge--browse-blob-args))
@@ -365,19 +371,16 @@ commit, and for a file."
     (user-error "Nothing to browse here")))
 
 (defun forge--browse-target ()
-  (or (and-let* ((branch (magit--painted-branch-at-point)))
-        (forge-get-url :branch branch))
-      (and-let* ((commit (magit-commit-at-point)))
-        (forge-get-url :commit commit))
-      (and-let* ((branch (magit-branch-at-point)))
-        (forge-get-url :branch branch))
-      (and-let* ((remote (magit-remote-at-point)))
-        (forge-get-url :remote remote))
-      (and-let* ((file (magit-file-at-point)))
-        (forge-get-url :blob nil file))
+  (or (and$ (magit--painted-branch-at-point) (forge-get-url :branch $))
+      (and$ (magit-commit-at-point)          (forge-get-url :commit $))
+      (and$ (magit-branch-at-point)          (forge-get-url :branch $))
+      (and$ (magit-remote-at-point)          (forge-get-url :remote $))
+      (and$ (magit-file-at-point)            (forge-get-url :blob nil $))
       (forge-post-at-point)
       (forge-current-topic)
-      (and (or magit-buffer-file-name buffer-file-name)
+      (and (or magit-buffer-file-name
+               buffer-file-name
+               (derived-mode-p 'dired-mode))
            (apply #'forge-get-url :blob (forge--browse-blob-args)))
       (and magit-buffer-revision
            (forge-get-url :commit magit-buffer-revision))
@@ -394,6 +397,10 @@ commit, and for a file."
     `(nil
       ,(magit-file-relative-name buffer-file-name)
       ,@(magit-file-region-line-numbers)
+      ,current-prefix-arg))
+   ((derived-mode-p 'dired-mode)
+    `(nil
+      ,(magit-file-relative-name (dired-get-filename))
       ,current-prefix-arg))
    ((let ((commit (magit-read-local-branch-or-commit
                    "Browse file from commit")))
@@ -418,13 +425,14 @@ commit, and for a file."
 
 (cl-defmethod forge-get-url ((_(eql :commit)) commit)
   (let ((repo (forge-get-repository :stub)))
-    (unless (magit-list-containing-branches
-             commit "-r" (concat (oref repo remote) "/*"))
-      (if-let* ((branch (car (magit-list-containing-branches commit "-r")))
-                (remote (car (magit-split-branch-name branch))))
-          (setq repo (forge-get-repository :stub remote))
-        (message "%s does not appear to be available on any remote.  %s"
-                 commit "You might have to push it first.")))
+    (cond-let*
+      ((magit-list-containing-branches
+        commit "-r" (concat (oref repo remote) "/*")))
+      ([branch (car (magit-list-containing-branches commit "-r"))]
+       [remote (car (magit-split-branch-name branch))]
+       (setq repo (forge-get-repository :stub remote)))
+      ((message "%s does not appear to be available on any remote.  %s"
+                commit "You might have to push it first.")))
     (forge--format repo 'commit-url-format
                    `((?r . ,(magit-commit-p commit))))))
 
@@ -538,6 +546,20 @@ lifts the limitation to active pull-requests."
   (forge-topic-setup-buffer (forge-get-pullreq pull-request)))
 
 ;;;###autoload
+(defun forge-visit-topic-from-url (url)
+  "Visit the topic specified by web URL."
+  (interactive (list (read-string "Topic URL: ")))
+  (if (string-match
+       "/\\(issues\\|pull\\|discussions\\|merge_requests\\)/\\([0-9]+\\)\\'"
+       url)
+      (forge-topic-setup-buffer
+       (forge-get-topic (forge-get-repository
+                         (substring url 0 (match-beginning 1))
+                         nil :tracked)
+                        (string-to-number (match-string 2 url))))
+    (user-error "Not recognized as a topic URL: %s" url)))
+
+;;;###autoload
 (defun forge-visit-this-topic (&optional menu)
   "Visit the topic at point.
 With prefix argument MENU, also show the topic menu."
@@ -560,10 +582,11 @@ With prefix argument MENU, also show the topic menu."
     (cond
      ((and (eq transient-current-command 'forge-repositories-menu)
            (forge-get-repository repo nil :tracked?))
-      (if-let ((buffer (get-buffer (forge-topics-buffer-name repo))))
-          (progn (switch-to-buffer buffer)
-                 (transient-setup 'forge-topics-menu))
-        (forge-list-topics repo)))
+      (cond-let
+        ([buffer (get-buffer (forge-topics-buffer-name repo))]
+         (switch-to-buffer buffer)
+         (transient-setup 'forge-topics-menu))
+        ((forge-list-topics repo))))
      (worktree
       (magit-status-setup-buffer worktree))
      ((forge-get-repository repo nil :tracked?)
@@ -576,52 +599,30 @@ With prefix argument MENU, also show the topic menu."
   "Create a new discussion for the current repository."
   (interactive
    (list (forge-read-topic-category nil "Category for new discussion")))
-  (let* ((repo (forge-get-repository :tracked))
-         (buf (forge--prepare-post-buffer
-               "new-discussion"
-               (forge--format repo "Create new discussion on %p"))))
-    (when buf
-      (with-current-buffer buf
-        (setq forge--buffer-post-object repo)
-        (setq forge--submit-post-function
-              (rpartial #'forge--submit-create-discussion category)))
-      (forge--display-post-buffer buf))))
+  (forge--setup-post-buffer 'new-discussion #'forge--submit-create-discussion
+    "new-discussion" "Create new discussion on %p"
+    `((forge--buffer-category ,category))))
 
-(defun forge-create-issue ()
+(defun forge-create-issue (template)
   "Create a new issue for the current repository."
-  (interactive)
-  (let* ((repo (forge-get-repository :tracked))
-         (template (forge--topic-template repo 'forge-issue)))
-    (let-alist template
-      (pcase-exhaustive .type
-        ('redirect (browse-url .url))
-        ('forge-discussion (forge-create-discussion .category))
-        ('forge-issue
-         (when-let ((buf (forge--prepare-post-buffer
-                          "new-issue"
-                          (forge--format repo "Create new issue on %p")
-                          nil nil template)))
-           (with-current-buffer buf
-             (setq forge--buffer-post-object repo)
-             (setq forge--submit-post-function #'forge--submit-create-issue))
-           (forge--display-post-buffer buf)))))))
+  (interactive (list (forge--topic-template nil 'forge-issue)))
+  (let-alist template
+    (pcase-exhaustive .type
+      ('redirect (browse-url .url))
+      ('forge-discussion (forge-create-discussion .category))
+      ('forge-issue
+       (forge--setup-post-buffer 'new-issue #'forge--submit-create-issue
+         "new-issue" "Create new issue on %p"
+         `((forge--buffer-template ,template)))))))
 
 (defun forge-create-pullreq (source target)
   "Create a new pull-request for the current repository."
   (interactive (forge-create-pullreq--read-args))
-  (let* ((repo (forge-get-repository :tracked))
-         (buf (forge--prepare-post-buffer
-               "new-pullreq"
-               (forge--format repo "Create new pull-request on %p")
-               source target
-               (forge--topic-template repo 'forge-pullreq))))
-    (with-current-buffer buf
-      (setq forge--buffer-base-branch target)
-      (setq forge--buffer-head-branch source)
-      (setq forge--buffer-post-object repo)
-      (setq forge--submit-post-function #'forge--submit-create-pullreq)
-      (run-hooks 'forge-create-pullreq-hook))
-    (forge--display-post-buffer buf)))
+  (forge--setup-post-buffer 'new-pullreq #'forge--submit-create-pullreq
+    "new-pullreq" "Create new pull-request on %p"
+    `((forge--buffer-base-branch ,target)
+      (forge--buffer-head-branch ,source)
+      (forge--buffer-template    ,(forge--topic-template nil 'forge-pullreq)))))
 
 (transient-define-suffix forge-create-pullreq-from-issue (issue source target)
   "Convert an existing ISSUE into a pull-request."
@@ -645,11 +646,11 @@ With prefix argument MENU, also show the topic menu."
                    "Source branch"
                    (magit-list-remote-branch-names)
                    nil t nil 'magit-revision-history
-                   (or (and-let* ((d (magit-branch-at-point)))
+                   (or (and-let ((d (magit-branch-at-point)))
                          (if (magit-remote-branch-p d)
                              d
                            (magit-get-push-branch d t)))
-                       (and-let* ((d (magit-get-current-branch)))
+                       (and-let ((d (magit-get-current-branch)))
                          (if (magit-remote-branch-p d)
                              d
                            (magit-get-push-branch d t))))))
@@ -680,35 +681,30 @@ point is currently on."
   (let* ((quote (cond
                  ((not (magit-section-match 'post)) nil)
                  ((use-region-p)
-                  (magit--buffer-string (region-beginning) (region-end)))
+                  (buffer-str (region-beginning) (region-end)))
                  (quote
                   (with-slots (content end) (magit-current-section)
-                    (magit--buffer-string content end t)))))
+                    (string-trim (buffer-str content end))))))
+         (quote (and quote
+                     (lambda ()
+                       (goto-char (point-max))
+                       (unless (bobp)
+                         (insert "\n"))
+                       (insert (replace-regexp-in-string "^" "> " quote))
+                       (insert "\n\n"))))
          (obj (if (forge-discussion-p forge-buffer-topic)
                   (forge--select-discussion-reply-target)
-                forge-buffer-topic))
-         (buf (cond
-               ((forge-discussion-post-p obj)
-                (forge--prepare-post-buffer
-                 (forge--format obj "%i;%I;new-reply")
-                 (forge--format obj "New comment on #%i;%I of %p")))
-               ((forge-discussion-p obj)
-                (forge--prepare-post-buffer
-                 (forge--format obj "%i;new-answer")
-                 (forge--format obj "New comment on #%i of %p")))
-               (t
-                (forge--prepare-post-buffer
-                 (forge--format obj "%i;new-comment")
-                 (forge--format obj "New comment on #%i of %p"))))))
-    (with-current-buffer buf
-      (setq forge--buffer-post-object obj)
-      (setq forge--submit-post-function #'forge--submit-create-post)
-      (when quote
-        (goto-char (point-max))
-        (unless (bobp)
-          (insert "\n"))
-        (insert (replace-regexp-in-string "^" "> " quote) "\n\n")))
-    (forge--display-post-buffer buf)))
+                forge-buffer-topic)))
+    (cl-typecase obj
+      (forge-discussion-post
+       (forge--setup-post-buffer obj #'forge--submit-create-post
+         "%i;%I;new-reply" "New comment on #%i;%I of %p" nil quote))
+      (forge-discussion
+       (forge--setup-post-buffer obj #'forge--submit-create-post
+         "%i;new-answer" "New comment on #%i of %p" nil quote))
+      (t
+       (forge--setup-post-buffer obj #'forge--submit-create-post
+         "%i;new-comment" "New comment on #%i of %p" nil quote)))))
 
 (transient-define-suffix forge-approve-pullreq ()
   "Approve the current pull-request."
@@ -717,15 +713,10 @@ point is currently on."
   :transient nil
   (interactive)
   (let ((pullreq (forge-current-pullreq t)))
-    (unless (cl-typep (forge-get-repository pullreq) 'forge-github-repository)
+    (unless (forge-github-repository-p (forge-get-repository pullreq))
       (user-error "This command is only available for Github"))
-    (when-let ((buf (forge--prepare-post-buffer
-                     (forge--format pullreq "%i;new-approval")
-                     (forge--format pullreq "Approve pull-request #%i of %p"))))
-      (with-current-buffer buf
-        (setq forge--buffer-post-object pullreq)
-        (setq forge--submit-post-function #'forge--submit-approve-pullreq))
-      (forge--display-post-buffer buf))))
+    (forge--setup-post-buffer pullreq #'forge--submit-approve-pullreq
+      "%i;new-approval" "Approve pull-request #%i of %p")))
 
 (transient-define-suffix forge-request-changes ()
   "Request changes to the current pull-request."
@@ -734,40 +725,29 @@ point is currently on."
   :transient nil
   (interactive)
   (let ((pullreq (forge-current-pullreq t)))
-    (unless (cl-typep (forge-get-repository pullreq) 'forge-github-repository)
+    (unless (forge-github-repository-p (forge-get-repository pullreq))
       (user-error "This command is only available for Github"))
-    (when-let ((buf (forge--prepare-post-buffer
-                     (forge--format pullreq "%i;new-request")
-                     (forge--format
-                      pullreq "Request changes for pull-request #%i of %p"))))
-      (with-current-buffer buf
-        (setq forge--buffer-post-object pullreq)
-        (setq forge--submit-post-function #'forge--submit-request-changes))
-      (forge--display-post-buffer buf))))
+    (forge--setup-post-buffer pullreq #'forge--submit-request-changes
+      "%i;new-request" "Request changes for pull-request #%i of %p")))
 
 ;;; Edit
 
 (defun forge-edit-post ()
   "Edit the current post."
   (interactive)
-  (let* ((post (forge-post-at-point t))
-         (buf (cl-typecase post
-                (forge-topic
-                 (forge--prepare-post-buffer
-                  (forge--format post "%i")
-                  (forge--format post "Edit #%i of %p")))
-                (forge-post
-                 (forge--prepare-post-buffer
-                  (forge--format post "%i;%I")
-                  (forge--format post "Edit comment on #%i of %p"))))))
-    (with-current-buffer buf
-      (setq forge--buffer-post-object post)
-      (setq forge--submit-post-function #'forge--submit-edit-post)
-      (erase-buffer)
-      (when (cl-typep post 'forge-topic)
-        (insert "# " (oref post title) "\n\n"))
-      (insert (oref post body)))
-    (forge--display-post-buffer buf)))
+  (let ((post (forge-post-at-point t)))
+    (cl-typecase post
+      (forge-topic
+       (forge--setup-post-buffer post #'forge--submit-edit-post
+         "%i" "Edit #%i of %p" nil
+         (lambda ()
+           (insert "# " (oref post title) "\n\n")
+           (insert (oref post body)))))
+      (forge-post
+       (forge--setup-post-buffer post #'forge--submit-edit-post
+         "%i;%I" "Edit comment on #%i of %p" nil
+         (lambda ()
+           (insert (oref post body))))))))
 
 (transient-define-suffix forge-edit-topic-note ()
   "Edit your private note about the current topic."
@@ -785,18 +765,12 @@ point is currently on."
   (interactive)
   (if-let* ((topic (forge-current-topic t))
             (repo (forge-get-repository topic))
-            (default-directory (forge-get-worktree repo))
-            (buf (forge--prepare-post-buffer
-                  (forge--format topic "%i;note")
-                  (forge--format topic "New note on #%i of %p"))))
-      (progn
-        (with-current-buffer buf
-          (setq forge--buffer-post-object topic)
-          (setq forge--submit-post-function #'forge--save-note)
-          (erase-buffer)
+            (default-directory (forge-get-worktree repo)))
+      (forge--setup-post-buffer topic #'forge--save-note
+        "%i;note" "New note on #%i of %p" nil
+        (lambda ()
           (when-let ((note (oref topic note)))
-            (save-excursion (insert note ?\n))))
-        (forge--display-post-buffer buf))
+            (save-excursion (insert note ?\n)))))
     (message "Cannot determine topic or worktree")))
 
 ;;; Delete
@@ -819,8 +793,8 @@ Please see the manual for more information."
   (interactive (list (forge-read-pullreq "Branch pull request")))
   (let ((pullreq (forge-get-pullreq pullreq)))
     (if-let ((branch (forge--pullreq-branch-active pullreq)))
-        (progn (message "Branch %S already exists and is configured" branch)
-               branch)
+        (prog1 branch
+          (message "Branch %S already exists and is configured" branch))
       (forge--branch-pullreq pullreq)
       (forge-refresh-buffer))))
 
@@ -844,7 +818,7 @@ Please see the manual for more information."
          (branch-n (format "pr-%s" number))
          (branch (or (forge--pullreq-branch-internal pullreq) branch-n))
          (pullreq-ref (format "refs/pullreqs/%s" number)))
-    (cond ((and-let* ((pr-branch (oref pullreq head-ref)))
+    (cond ((and-let ((pr-branch (oref pullreq head-ref)))
              (string-search ":" pr-branch))
            ;; Such a branch name would be invalid.  If we encounter
            ;; it anyway, then that means that the source branch and
@@ -852,7 +826,7 @@ Please see the manual for more information."
            ;; longer does this, but we nevertheless have to deal
            ;; with merge-requests that have been lost in time.
            (error "Cannot check out this merge-request because %s"
-                  "on old Gitlab version discarded the source branch"))
+                  "an old Gitlab version discarded the source branch"))
           ((not (eq (oref pullreq state) 'open))
            (magit-git "branch" "--force" branch pullreq-ref))
           (t
@@ -998,6 +972,44 @@ information."
       (user-error "The empty string isn't a valid path"))
     path))
 
+;;;###autoload(autoload 'forge-push-to-unnamed-pullreq "forge-commands" nil t)
+(transient-define-suffix forge-push-to-unnamed-pullreq (args)
+  "Push the current branch to the branch on the contributor's fork.
+
+Usually a maintainer would use `magit-push-current-to-pushremote' to
+push to the branch, the contributor asks to be merged.  That does not
+work if they did not create a dedicated branch and instead committed
+directly to \"main\", or some other branch, that also exists in the
+upstream repository.
+
+If this is the case then the branch, which is used to check out the
+pull-request locally, is named \"pr-N\" (where N is the pull-request
+number) and this command is made available as a substitute in the
+`magit-push' menu."
+  :if (lambda ()
+        (and-let ((branch (magit-get-current-branch)))
+          (and (forge-get-pullreq :branch branch)
+               (string-match-p "\\`pr-[0-9]+\\'" branch))))
+  :description (lambda ()
+                 (and-let* ((branch (magit-get-current-branch))
+                            (pullreq (forge-get-pullreq :branch branch)))
+                   (format "contributor's %s branch"
+                           (magit--propertize-face
+                            (format "%s/%s"
+                                    (oref pullreq head-user)
+                                    (oref pullreq head-ref))
+                            'magit-branch-remote))))
+  (interactive (list (magit-push-arguments)))
+  (cond-let*
+    ([branch (magit-get-current-branch)]
+     [pullreq (forge-get-pullreq :branch branch)]
+     (run-hooks 'magit-credential-hook)
+     (magit-run-git-async "push" "-v"
+                          (delete "--tags" (delete "--follow-tags" args))
+                          (oref pullreq head-user)
+                          (format "%s:%s" branch (oref pullreq head-ref))))
+    ((error "Checked out branch is not an unnamed pull-request branch"))))
+
 ;;; Marks
 
 (defun forge-create-mark (name face description)
@@ -1047,10 +1059,14 @@ information."
 ;;; Remotely
 
 ;;;###autoload
-(defun forge-fork (fork remote)
+(defun forge-fork (fork remote all)
   "Fork the current repository to FORK and add it as a REMOTE.
+
 If the fork already exists, then that isn't an error; the remote
-is added anyway.  Currently this only supports Github and Gitlab."
+is added anyway.  Currently this only supports Github and Gitlab.
+
+With prefix argument ALL, fork all branches, not just the default
+branch.  On Gitlab it is not possible to fork only the default."
   (interactive
    (let ((fork (magit-completing-read "Fork to"
                                       (mapcar #'car forge-owned-accounts))))
@@ -1058,9 +1074,10 @@ is added anyway.  Currently this only supports Github and Gitlab."
            (read-string "Remote name: "
                         (or (plist-get (cdr (assoc fork forge-owned-accounts))
                                        'remote-name)
-                            fork)))))
+                            fork))
+           current-prefix-arg)))
   (let ((repo (forge-get-repository :stub)))
-    (forge--fork-repository repo fork)
+    (forge--fork-repository repo fork all)
     (magit-remote-add remote
                       (magit-clone--format-url (oref repo githost) fork
                                                (oref repo name))
@@ -1315,15 +1332,15 @@ upstream remote."
                      :scope (forge-add-repository--scope repo)))
    (t
     (when-let*
-        (((not (eq limit :selective)))
-         ((magit-git-config-p "forge.autoPull" t))
+        ((_(not (eq limit :selective)))
+         (_(magit-git-config-p "forge.autoPull" t))
          (remote  (oref repo remote))
          (refspec (oref repo pullreq-refspec))
          (default-directory (forge-get-worktree repo))
-         ((and (not (member refspec (magit-get-all "remote" remote "fetch")))
-               (or (eq forge-add-pullreq-refspec t)
-                   (and (eq forge-add-pullreq-refspec 'ask)
-                        (y-or-n-p (format "Also add %S refspec? " refspec)))))))
+         (_(and (not (member refspec (magit-get-all "remote" remote "fetch")))
+                (or (eq forge-add-pullreq-refspec t)
+                    (and (eq forge-add-pullreq-refspec 'ask)
+                         (y-or-n-p (format "Also add %S refspec? " refspec)))))))
       (magit-call-git "config" "--add"
                       (format "remote.%s.fetch" remote)
                       refspec))
@@ -1429,9 +1446,9 @@ when that happens, because given how the APIs work, this would be too
 expensive."
   (interactive
    (list (if-let* ((topics (magit-region-values '(issue pullreq) t))
-                   ((magit-confirm 'remove-topics-locally nil
-                      "Delete %d topics locally" nil
-                      (mapcar #'forge--format-topic-line topics))))
+                   (_(magit-confirm 'remove-topics-locally nil
+                       "Delete %d topics locally" nil
+                       (mapcar #'forge--format-topic-line topics))))
              topics
            (forge-read-topic "Delete topic LOCALLY only"))))
   (if (listp topic)
@@ -1494,8 +1511,13 @@ context."
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let")
+;;   ("buffer-string" . "buffer-string")
+;;   ("buffer-str"    . "forge--buffer-substring-no-properties")
+;;   ("partial"       . "llama--left-apply-partially"))
 ;; End:
 (provide 'forge-commands)
 ;;; forge-commands.el ends here

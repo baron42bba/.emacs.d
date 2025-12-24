@@ -1,4 +1,4 @@
-;;; forge-gogs.el --- Gogs support  -*- lexical-binding:t -*-
+;;; forge-gitea.el --- Gitea support  -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2018-2025 Jonas Bernoulli
 
@@ -22,20 +22,20 @@
 
 ;;; Code:
 
-(require 'gogs)
 (require 'forge)
 
 ;;; Class
 
-(defclass forge-gogs-repository (forge-unusedapi-repository)
+(defclass forge-gitea-repository (forge-unusedapi-repository)
   ((issues-url-format         :initform "https://%h/%o/%n/issues")
    (issue-url-format          :initform "https://%h/%o/%n/issues/%i")
+   ;; The anchor for the issue itself is .../%i#issue-%i
    (issue-post-url-format     :initform "https://%h/%o/%n/issues/%i#issuecomment-%I")
    (pullreqs-url-format       :initform "https://%h/%o/%n/pulls")
    (pullreq-url-format        :initform "https://%h/%o/%n/pulls/%i")
    (pullreq-post-url-format   :initform "https://%h/%o/%n/pulls/%i#issuecomment-%I")
    (commit-url-format         :initform "https://%h/%o/%n/commit/%r")
-   (branch-url-format         :initform "https://%h/%o/%n/commits/%r")
+   (branch-url-format         :initform "https://%h/%o/%n/commits/branch/%r")
    (remote-url-format         :initform "https://%h/%o/%n")
    (blob-url-format           :initform "https://%h/%o/%n/src/%r/%f")
    (create-issue-url-format   :initform "https://%h/%o/%n/issues/new")
@@ -43,5 +43,12 @@
    (pullreq-refspec :initform "+refs/pull/*/head:refs/pullreqs/*")))
 
 ;;; _
-(provide 'forge-gogs)
-;;; forge-gogs.el ends here
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
+;; End:
+(provide 'forge-gitea)
+;;; forge-gitea.el ends here

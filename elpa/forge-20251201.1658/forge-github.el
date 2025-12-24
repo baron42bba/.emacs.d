@@ -22,9 +22,7 @@
 
 ;;; Code:
 
-(require 'ghub)
-
-(require 'forge)
+(require 'forge-client)
 (require 'forge-discussion)
 (require 'forge-issue)
 (require 'forge-pullreq)
@@ -55,6 +53,155 @@
   (forge-github-repository-p (forge-get-repository :stub?)))
 
 ;;; Pull
+;;;; GraphQL
+
+(defconst forge--github-sparse-repository-query
+  '(query
+    (  repository
+       [(owner $owner String!)
+        (name  $name  String!)]
+       name
+       id
+       createdAt
+       updatedAt
+       nameWithOwner
+       (parent nameWithOwner)
+       description
+       homepageUrl
+       (defaultBranchRef name)
+       isArchived
+       isFork
+       isLocked
+       isMirror
+       isPrivate
+       hasDiscussionsEnabled
+       hasIssuesEnabled
+       hasWikiEnabled
+       (licenseInfo name)
+       (stargazers totalCount)
+       (watchers totalCount))))
+
+(defconst forge--github-repository-query
+  `(query
+    (  repository
+       ,@(cdr (cadr forge--github-sparse-repository-query))
+       (  assignableUsers [(:edges t)]
+          id
+          login
+          name)
+       (  discussionCategories [(:edges t)]
+          id
+          name
+          emoji
+          isAnswerable
+          description)
+       (  discussions [(:edges t)
+                       (:singular discussion number)
+                       (orderBy ((field UPDATED_AT) (direction DESC)))]
+          id
+          databaseId
+          number
+          url
+          stateReason
+          ;; Discussions lack isReadByViewer.
+          (answer id)
+          (author login)
+          title
+          createdAt
+          updatedAt
+          closedAt
+          locked
+          (category id)
+          body
+          (  comments [(:edges t)]
+             id
+             databaseId
+             (author login)
+             createdAt
+             updatedAt
+             body
+             (  replies [(:edges 20)]
+                id
+                databaseId
+                (author login)
+                createdAt
+                updatedAt
+                body))
+          (   labels [(:edges t)] id))
+       (  issues [(:edges t)
+                  (:singular issue number)
+                  (orderBy ((field UPDATED_AT) (direction DESC)))]
+          number
+          id
+          state
+          stateReason
+          isReadByViewer
+          (author login)
+          title
+          createdAt
+          updatedAt
+          closedAt
+          locked
+          (milestone id)
+          body
+          (  assignees [(:edges t)] id)
+          (  comments [(:edges t)]
+             id
+             databaseId
+             (author login)
+             createdAt
+             updatedAt
+             body)
+          (  labels [(:edges t)] id))
+       (  labels [(:edges t) (:singular label id)]
+          id
+          name
+          color
+          description)
+       (  milestones [(:edges t) (:singular milestone id)]
+          id
+          number
+          title
+          createdAt
+          updatedAt
+          dueOn
+          closedAt
+          description)
+       (  pullRequests [(:edges t)
+                        (:singular pullRequest number)
+                        (orderBy ((field UPDATED_AT) (direction DESC)))]
+          number
+          id
+          state
+          isReadByViewer
+          (author login)
+          title
+          createdAt
+          updatedAt
+          closedAt
+          mergedAt
+          isDraft
+          locked
+          maintainerCanModify
+          isCrossRepository
+          (milestone id)
+          body
+          (baseRef name (repository nameWithOwner))
+          baseRefOid
+          (headRef name (repository (owner login) nameWithOwner))
+          headRefOid
+          (  assignees [(:edges t)] id)
+          (  reviewRequests [(:edges t)]
+             (requestedReviewer "... on User { id }\n"))
+          (  comments [(:edges t)]
+             id
+             databaseId
+             (author login)
+             createdAt
+             updatedAt
+             body)
+          (  labels [(:edges t)] id)))))
+
 ;;;; Repository
 
 (cl-defmethod forge--pull ((repo forge-github-repository)
@@ -63,38 +210,41 @@
   (setq forge--mode-line-buffer (current-buffer))
   (forge--msg repo t nil "Pulling REPO")
   (let ((buf (current-buffer)))
-    (ghub-fetch-repository
-     (oref repo owner)
-     (oref repo name)
-     (lambda (data)
-       (forge--msg repo t t   "Pulling REPO")
-       (forge--msg repo t nil "Storing REPO")
-       (closql-with-transaction (forge-db)
-         (let-alist data
-           (forge--update-repository  repo data)
-           (forge--update-assignees   repo .assignableUsers)
-           (forge--update-forks       repo .forks)
-           (forge--update-labels      repo .labels)
-           (forge--update-milestones  repo .milestones)
-           (forge--update-discussion-categories repo .discussionCategories)
-           (forge--update-discussions repo .discussions t)
-           (forge--update-issues      repo .issues t)
-           (forge--update-pullreqs    repo .pullRequests t)
-           (forge--update-revnotes    repo .commitComments))
-         (oset repo condition :tracked))
-       (forge--msg repo t t   "Storing REPO")
-       (cond
-        ((oref repo selective-p))
-        (callback (funcall callback))
-        ((forge--maybe-git-fetch repo buf))))
-     ;; Keys have the form `FIELD-until', where FIELD is the name of a
-     ;; field of Repository objects.  See `ghub--graphql-walk-response'.
-     `((discussions-until  . ,(or since (oref repo discussions-until)))
-       (issues-until       . ,(or since (oref repo issues-until)))
-       (pullRequests-until . ,(or since (oref repo pullreqs-until))))
-     :host (oref repo apihost)
-     :auth 'forge
-     :sparse (oref repo selective-p))))
+    (forge--query repo
+      (if (oref repo selective-p)
+          forge--github-sparse-repository-query
+        forge--github-repository-query)
+      `((owner . ,(oref repo owner))
+        (name  . ,(oref repo name)))
+      :callback
+      (lambda (data)
+        (forge--msg repo t t   "Pulling REPO")
+        (forge--msg repo t nil "Storing REPO")
+        (closql-with-transaction (forge-db)
+          (let-alist data
+            (forge--update-repository  repo data)
+            (forge--update-assignees   repo .assignableUsers)
+            (forge--update-forks       repo .forks)
+            (forge--update-labels      repo .labels)
+            (forge--update-milestones  repo .milestones)
+            (forge--update-discussion-categories repo .discussionCategories)
+            (forge--update-discussions repo .discussions t)
+            (forge--update-issues      repo .issues t)
+            (forge--update-pullreqs    repo .pullRequests t)
+            (forge--update-revnotes    repo .commitComments))
+          (oset repo condition :tracked))
+        (forge--msg repo t t   "Storing REPO")
+        (cond
+         ((oref repo selective-p))
+         (callback (funcall callback))
+         ((forge--maybe-git-fetch repo buf))))
+      :narrow '(repository)
+      :until
+      ;; Keys have the form `FIELD-until', where FIELD is the name of a
+      ;; field of Repository objects.  See `ghub--graphql-walk-response'.
+      `((discussions-until  . ,(or since (oref repo discussions-until)))
+        (issues-until       . ,(or since (oref repo issues-until)))
+        (pullRequests-until . ,(or since (oref repo pullreqs-until)))))))
 
 (cl-defmethod forge--update-repository ((repo forge-github-repository) data)
   (let-alist data
@@ -204,73 +354,59 @@
 
 (cl-defmethod forge--pull-topic ((repo forge-github-repository)
                                  (number number))
-  (let ((id (oref repo id)))
-    (forge--pull-topic
-     repo
-     (forge-issue :repository id :number number)
-     :errorback
-     (lambda (err _headers _status _req)
-       (when (equal (cdr (assq 'type (cadr err))) "NOT_FOUND")
-         (forge--pull-topic
-          repo
-          (forge-pullreq :repository id :number number)
-          :errorback
-          (lambda (err _headers _status _req)
-            (when (equal (cdr (assq 'type (cadr err))) "NOT_FOUND")
-              (forge--pull-topic
-               repo
-               (forge-discussion :repository id :number number))))))))))
+  (forge--query repo
+    `(query
+      [($owner String!)
+       ($name  String!)]
+      (repository
+      [(owner $owner)
+       (name  $name)]
+       ,(caddr (caddr (ghub--graphql-prepare-query
+                       forge--github-repository-query
+                       `(repository discussions (discussion . ,number)))))
+       ,(caddr (caddr (ghub--graphql-prepare-query
+                       forge--github-repository-query
+                       `(repository issues (issue . ,number)))))
+       ,(caddr (caddr (ghub--graphql-prepare-query
+                       forge--github-repository-query
+                       `(repository pullRequests (pullreq . ,number)))))))
+    `((owner . ,(oref repo owner))
+      (name  . ,(oref repo name)))
+    :noerror t
+    :callback (lambda (data)
+                (let-alist data
+                  (cond ((setq data .repository.discussion)
+                         (forge--update-discussion repo data))
+                        ((setq data .repository.issue)
+                         (forge--update-issue repo data))
+                        ((setq data .repository.pullRequest)
+                         (forge--update-pullreq repo data))))
+                (forge-refresh-buffer))))
 
 (cl-defmethod forge--pull-topic ((repo forge-github-repository)
-                                 (topic forge-discussion)
-                                 &key callback errorback)
-  (let ((buffer (current-buffer)))
-    (ghub-fetch-discussion
-     (oref repo owner)
-     (oref repo name)
-     (oref topic number)
-     (lambda (data)
-       (forge--update-discussion repo data)
-       (forge-refresh-buffer buffer)
-       (when callback (funcall callback)))
-     nil
-     :host (oref repo apihost)
-     :auth 'forge
-     :errorback errorback)))
+                                 (topic forge-discussion))
+  (forge--pull-topic-1 repo #'forge--update-discussion
+    `(repository discussions (discussion . ,(oref topic number)))))
 
 (cl-defmethod forge--pull-topic ((repo forge-github-repository)
-                                 (topic forge-issue)
-                                 &key callback errorback)
-  (let ((buffer (current-buffer)))
-    (ghub-fetch-issue
-     (oref repo owner)
-     (oref repo name)
-     (oref topic number)
-     (lambda (data)
-       (forge--update-issue repo data)
-       (forge-refresh-buffer buffer)
-       (when callback (funcall callback)))
-     nil
-     :host (oref repo apihost)
-     :auth 'forge
-     :errorback errorback)))
+                                 (topic forge-issue))
+  (forge--pull-topic-1 repo #'forge--update-issue
+    `(repository issues (issue . ,(oref topic number)))))
 
 (cl-defmethod forge--pull-topic ((repo forge-github-repository)
-                                 (topic forge-pullreq)
-                                 &key callback errorback)
-  (let ((buffer (current-buffer)))
-    (ghub-fetch-pullreq
-     (oref repo owner)
-     (oref repo name)
-     (oref topic number)
-     (lambda (data)
-       (forge--update-pullreq repo data)
-       (forge-refresh-buffer buffer)
-       (when callback (funcall callback)))
-     nil
-     :host (oref repo apihost)
-     :auth 'forge
-     :errorback errorback)))
+                                 (topic forge-pullreq))
+  (forge--pull-topic-1 repo #'forge--update-pullreq
+    `(repository pullRequests (pullRequest . ,(oref topic number)))))
+
+(cl-defun forge--pull-topic-1 (repo update narrow)
+  (declare (indent defun))
+  (forge--query repo
+    (ghub--graphql-prepare-query forge--github-repository-query narrow)
+    `((owner . ,(oref repo owner))
+      (name  . ,(oref repo name)))
+    :callback (lambda (data)
+                (funcall update repo (cdr (cadr (cadr data))))
+                (forge-refresh-buffer))))
 
 (cl-defmethod forge--update-status ((repo forge-github-repository)
                                     topic data bump initial-pull)
@@ -278,7 +414,26 @@
     (let ((updated (or .updatedAt .createdAt))
           (current-status (oref topic status)))
       (if (forge-discussion-p topic)
-          ;; Discussions lack `isReadByViewer'.
+          ;; Discussions lack `isReadByViewer', so we have to use a
+          ;; heuristic, which is even worse than what we use for other
+          ;; topic types.  Except during the repository's initial pull,
+          ;; all new discussions start out as `unread'.
+          ;;
+          ;; If we pull a discussion after the user mutated it, setting
+          ;; the status to `unread' is highly undesirable (since they made
+          ;; the mutation, they have already "read" it), yet that is what
+          ;; we do here.  However, the callback used by the discussion
+          ;; method of `forge--pull-topic', afterwards resets the status
+          ;; to the previous value.
+          ;;
+          ;; Of course it is possible that we pull other changes by other
+          ;; people at the same time, but we have no (reasonable) way of
+          ;; knowing that.  So in that case too the status sadly doesn't
+          ;; end up as `unread'.
+          ;;
+          ;; The callback kludge is not needed for all mutations.  Some
+          ;; mutations (e.g., setting labels) do not cause `updated_at'
+          ;; to be bumped; this second defect cancels out the first.
           (cond (initial-pull
                  (oset topic status 'done))
                 ((null current-status)
@@ -520,9 +675,10 @@
                       ;; which we suppress.  See #164.
                       (with-demoted-errors "forge--pull-notifications: %S"
                         (forge--ghub-massage-notification data githost)))
-                    (forge--ghub-get nil "/notifications"
-                      `((all . t) ,@(and since `((since . ,since))))
-                      :host apihost :unpaginate t)))
+                    (forge-rest apihost "GET" "/notifications"
+                      ((all t)
+                       (and since (since since)))
+                      :unpaginate t)))
          ;; Split into multiple requests to reduce risk of timeouts.
          (groups (seq-partition notifs 50))
          (pages  (length groups))
@@ -533,14 +689,13 @@
              (when data
                (setq topics (nconc topics (cdr data))))
              (if groups
-                 (let* ((query (seq-keep #'caddr (pop groups)))
+                 (let* ((query (cons 'query (seq-keep #'caddr (pop groups))))
                         (tries 3)
                         (errorback nil)
                         (vacuum (lambda ()
-                                  (ghub--graphql-vacuum
-                                   (cons 'query query) nil #'cb nil
-                                   :auth 'forge :host apihost
-                                   :errorback errorback))))
+                                  (forge--query apihost query nil
+                                    :callback #'cb
+                                    :errorback errorback))))
                    ;; Github also returns notifications for issues
                    ;; belonging to repositories for which issues
                    ;; have been disabled.  Drop them and try again.
@@ -549,19 +704,19 @@
                            (if (zerop tries)
                                (ghub--signal-error errors)
                              (cl-decf tries)
-                             (if-let ((notfound
-                                       (seq-keep
-                                        (lambda (err)
-                                          (and (equal (cdr (assq 'type err))
-                                                      "NOT_FOUND")
-                                               (cadr (assq 'path err))
-                                               (intern (cadr (assq 'path err)))))
-                                        (cdr errors))))
-                                 (progn
-                                   (setq query (cl-delete-if (##memq % notfound)
-                                                             query :key #'caar))
-                                   (funcall vacuum))
-                               (ghub--signal-error errors)))))
+                             (cond-let
+                               ([notfound
+                                 (seq-keep
+                                  (lambda (err)
+                                    (and (equal (cdr (assq 'type err))
+                                                "NOT_FOUND")
+                                         (cadr (assq 'path err))
+                                         (intern (cadr (assq 'path err)))))
+                                  (cdr errors))]
+                                (setq query (cl-delete-if (##memq % notfound)
+                                                          query :key #'caar))
+                                (funcall vacuum))
+                               ((ghub--signal-error errors))))))
                    (cl-incf page)
                    (forge--msg nil t nil
                                "Pulling notifications (page %s/%s)" page pages)
@@ -576,12 +731,12 @@
         (cb)))))
 
 (defun forge--ghub-notifications-since (forge)
-  (caar (forge-sql [:select :distinct [notification:updated]
-                    :from [notification repository]
-                    :where (and (= repository:forge $s1)
-                                (= repository:id notification:repository))
-                    :order-by [(desc notification:updated)]]
-                   forge)))
+  (forge-sql1 [:select :distinct [notification:updated]
+               :from [notification repository]
+               :where (and (= repository:forge $s1)
+                           (= repository:id notification:repository))
+               :order-by [(desc notification:updated)]]
+              forge))
 
 (defun forge--ghub-massage-notification (data githost)
   (let-alist data
@@ -613,7 +768,7 @@
                    ,@(cddr
                       (caddr
                        (ghub--graphql-prepare-query
-                        ghub-fetch-repository
+                        forge--github-repository-query
                         (pcase type
                           ('discussion `(repository
                                          discussions
@@ -630,7 +785,7 @@
   (closql-with-transaction (forge-db)
     (pcase-dolist (`(,alias ,id ,_query ,repo ,type ,data) notifs)
       (let-alist data
-        (and-let*
+        (when-let*
             ((topic-data (cdr (cadr (assq alias topics))))
              (topic (funcall (pcase-exhaustive type
                                ('discussion #'forge--update-discussion)
@@ -667,32 +822,25 @@
 
 (cl-defmethod forge--fetch-user-repos
   ((_ (subclass forge-github-repository)) host user callback)
-  (ghub--graphql-vacuum
-   '(query (user
-            [(login $login String!)]
-            (repositories
-             [(:edges t)
-              (ownerAffiliations . (OWNER))]
-             name)))
-   `((login . ,user))
-   (lambda (d)
-     (funcall callback
-              (mapcar (##alist-get 'name %)
-                      (let-alist d .user.repositories))))
-   nil :auth 'forge :host host))
+  (forge-query host
+    (user [(login $login String!)]
+          (repositories [(:edges t) (ownerAffiliations . (OWNER))] name))
+    ((login user))
+    :callback (lambda (d)
+                (funcall callback
+                         (mapcar (##alist-get 'name %)
+                                 (let-alist d .user.repositories))))))
 
 (cl-defmethod forge--fetch-organization-repos
   ((_ (subclass forge-github-repository)) host org callback)
-  (ghub--graphql-vacuum
-   '(query (organization
-            [(login $login String!)]
-            (repositories [(:edges t)] name)))
-   `((login . ,org))
-   (lambda (d)
-     (funcall callback
-              (mapcar (##alist-get 'name %)
-                      (let-alist d .organization.repositories))))
-   nil :auth 'forge :host host))
+  (forge-query host
+    (organization [(login $login String!)]
+                  (repositories [(:edges t)] name))
+    ((login org))
+    :callback (lambda (d)
+                (funcall callback
+                         (mapcar (##alist-get 'name %)
+                                 (let-alist d .organization.repositories))))))
 
 (defun forge--batch-add-callback (host owner names)
   (let ((repos (mapcan (lambda (name)
@@ -710,144 +858,204 @@
 
 ;;; Mutations
 
-(cl-defmethod forge--submit-create-discussion ((_ forge-github-repository)
-                                               repo category)
-  (let-alist (forge--topic-parse-buffer)
-    (ghub--graphql
-     '(mutation (createDiscussion
-                 [(input $input CreateDiscussionInput!)]
-                 clientMutationId))
-     `((input (repositoryId . ,(forge--their-id repo))
-              (categoryId
-               . , (caar (forge-sql [:select [their-id]
-                                     :from discussion-category
-                                     :where (and (= repository $s1)
-                                                 (= name $s2))]
-                                    (oref repo id)
-                                    category)))
-              (title . , .title)
-              (body . , .body)))
-     :callback  (forge--post-submit-callback)
-     :errorback (forge--post-submit-errorback))))
-
-(cl-defmethod forge--submit-create-issue ((_ forge-github-repository) repo)
-  (let-alist (forge--topic-parse-buffer)
-    (forge--ghub-post repo "/repos/:owner/:repo/issues"
-      `((title . , .title)
-        (body  . , .body)
-        ,@(and .labels    `((labels    . , .labels)))
-        ,@(and .assignees `((assignees . , .assignees))))
-      :callback  (forge--post-submit-callback)
+(cl-defmethod forge--submit-create-discussion ((repo forge-github-repository) _)
+  (pcase-let ((`(,title . ,body) (forge--post-buffer-text)))
+    (forge-mutate repo createDiscussion
+      ((repositoryId (forge--their-id repo))
+       (categoryId (forge--their-id forge--buffer-category 'category repo))
+       (title title)
+       (body  body))
+      :callback  (forge--post-submit-callback t)
       :errorback (forge--post-submit-errorback))))
 
-(cl-defmethod forge--create-pullreq-from-issue ((repo forge-github-repository)
-                                                (issue forge-issue)
-                                                source target)
+(cl-defmethod forge--submit-create-issue ((repo forge-github-repository) _)
+  (pcase-let ((`(,title . ,body) (forge--post-buffer-text)))
+    (forge-mutate repo createIssue
+      ((repositoryId (forge--their-id repo))
+       (title title)
+       (body  body)
+       (and forge--buffer-milestone
+            (milestoneId
+             (forge--their-id forge--buffer-milestone 'milestone)))
+       (and forge--buffer-labels
+            (labelIds
+             (vconcat (forge--their-id forge--buffer-labels 'labels repo))))
+       (and forge--buffer-assignees
+            (assigneeIds
+             (vconcat (forge--their-id forge--buffer-assignees 'assignees repo)))))
+      :callback  (forge--post-submit-callback t)
+      :errorback (forge--post-submit-errorback))))
+
+(cl-defmethod forge--create-pullreq-from-issue
+  ((repo  forge-github-repository)
+   (issue forge-issue)
+   source target)
   (pcase-let* ((`(,base-remote . ,base-branch)
                 (magit-split-branch-name target))
                (`(,head-remote . ,head-branch)
                 (magit-split-branch-name source))
                (head-repo (forge-get-repository :stub head-remote)))
-    (forge--ghub-post repo "/repos/:owner/:repo/pulls"
-      `((issue . ,(oref issue number))
-        (base  . ,base-branch)
-        (head  . ,(if (equal head-remote base-remote)
-                      head-branch
-                    (concat (oref head-repo owner) ":"
-                            head-branch)))
-        (maintainer_can_modify . t))
+    (forge-rest repo "POST" "/repos/:owner/:repo/pulls"
+      ((issue (oref issue number))
+       (base base-branch)
+       (head (if (equal head-remote base-remote)
+                 head-branch
+               (concat (oref head-repo owner) ":" head-branch)))
+       (maintainer_can_modify t))
       :callback  (lambda (&rest _)
                    (closql-delete issue)
-                   (forge-pull))
-      :errorback (lambda (&rest _) (forge-pull)))))
+                   (forge--pull repo))
+      :errorback (lambda (&rest _) (forge--pull repo)))))
 
-(cl-defmethod forge--submit-create-pullreq ((_ forge-github-repository) repo)
-  (let-alist (forge--topic-parse-buffer)
-    (when (and .yaml (local-variable-p 'forge-buffer-draft-p))
-      (user-error "Cannot use yaml frontmatter and set `%s' at the same time"
-                  'forge-buffer-draft-p))
-    (pcase-let* ((`(,base-remote . ,base-branch)
-                  (magit-split-branch-name forge--buffer-base-branch))
-                 (`(,head-remote . ,head-branch)
-                  (magit-split-branch-name forge--buffer-head-branch))
-                 (head-repo (forge-get-repository :stub head-remote)))
-      (forge--ghub-post repo "/repos/:owner/:repo/pulls"
-        `((title . , .title)
-          (body  . , .body)
-          (base  . ,base-branch)
-          (head  . ,(if (equal head-remote base-remote)
-                        head-branch
-                      (concat (oref head-repo owner) ":"
-                              head-branch)))
-          (draft . ,(if (local-variable-p 'forge-buffer-draft-p)
-                        forge-buffer-draft-p
-                      .draft))
-          (maintainer_can_modify . t))
-        :callback  (forge--post-submit-callback)
-        :errorback (forge--post-submit-errorback)))))
+(cl-defmethod forge--submit-create-pullreq ((repo forge-github-repository) _)
+  (pcase-let* ((`(,title . ,body) (forge--post-buffer-text))
+               (`(,base-remote . ,base-branch)
+                (magit-split-branch-name forge--buffer-base-branch))
+               (`(,head-remote . ,head-branch)
+                (magit-split-branch-name forge--buffer-head-branch))
+               (head-repo (forge-get-repository :stub head-remote)))
+    ;; Cannot use `createPullRequest' because value for
+    ;; `headRepositoryId' is unavailable.
+    (forge-rest repo "POST" "/repos/:owner/:repo/pulls"
+      ((title title)
+       (body  body)
+       (base  base-branch)
+       (head  (if (equal head-remote base-remote)
+                  head-branch
+                (concat (oref head-repo owner) ":" head-branch)))
+       (draft forge--buffer-draft-p)
+       (maintainer_can_modify t))
+      :callback  (forge--post-submit-callback t)
+      :errorback (forge--post-submit-errorback))))
 
-(cl-defmethod forge--submit-create-post ((_ forge-github-repository) post)
-  (cond
-   ((cl-typep post '(or forge-discussion forge-discussion-post))
-    (ghub-graphql
-     `(mutation (addDiscussionComment
-                 [(input $input AddDiscussionCommentInput!)]
-                 clientMutationId))
-     `((input
-        ,@(if (cl-typep post 'forge-discussion-post)
-              `((discussionId . ,(oref (forge-get-discussion post) their-id))
-                (replyToId . ,(oref post their-id)))
-            `((discussionId . ,(oref post their-id))))
-        (body . ,(string-trim (buffer-string)))))
-     :callback  (forge--post-submit-callback)
-     :errorback (forge--post-submit-errorback)))
-   (t
-    (forge--ghub-post post "/repos/:owner/:repo/issues/:number/comments"
-      `((body . ,(string-trim (buffer-string))))
-      :callback  (forge--post-submit-callback)
-      :errorback (forge--post-submit-errorback)))))
-
-(cl-defmethod forge--submit-edit-post ((_ forge-github-repository) post)
-  (forge--ghub-patch post
-    (cl-typecase post
-      (forge-pullreq "/repos/:owner/:repo/pulls/:number")
-      (forge-issue   "/repos/:owner/:repo/issues/:number")
-      (forge-post    "/repos/:owner/:repo/issues/comments/:number"))
-    (if (cl-typep post 'forge-topic)
-        (let-alist (forge--topic-parse-buffer)
-          `((title . , .title)
-            (body  . , .body)))
-      `((body . ,(string-trim (buffer-string)))))
+(cl-defmethod forge--submit-create-post
+  ((repo forge-github-repository)
+   (post forge-post))
+  (forge-mutate repo addComment
+    ((subjectId (oref post their-id))
+     (body      (string-trim (buffer-str))))
     :callback  (forge--post-submit-callback)
     :errorback (forge--post-submit-errorback)))
 
-(cl-defmethod forge--submit-approve-pullreq ((_ forge-github-repository) repo)
-  (let ((body (magit--buffer-string nil nil t)))
-    (forge--ghub-post repo "/repos/:owner/:repo/pulls/:number/reviews"
-      `((event . "APPROVE")
-        ,@(and (not (equal body "")) `((body . ,body))))
+(cl-defmethod forge--submit-create-post
+  ((repo forge-github-repository)
+   (post forge-discussion-post))
+  (forge-mutate repo addDiscussionComment
+    ((discussionId (oref (forge-get-discussion post) their-id))
+     (replyToId    (oref post their-id))
+     (body         (string-trim (buffer-str))))
+    :callback  (forge--post-submit-callback)
+    :errorback (forge--post-submit-errorback)))
+
+(cl-defmethod forge--submit-create-post
+  ((repo forge-github-repository)
+   (post forge-discussion))
+  (forge-mutate repo addDiscussionComment
+    ((discussionId (oref post their-id))
+     (body         (string-trim (buffer-str))))
+    :callback  (forge--post-submit-callback)
+    :errorback (forge--post-submit-errorback)))
+
+(cl-defmethod forge--submit-edit-post
+  ((repo forge-github-repository)
+   (post forge-post))
+  (cl-typecase post
+    ((or forge-issue-post forge-pullreq-post)
+     ;; Cannot use GraphQL because we made the mistake to derive our ID
+     ;; from the number instead of their ID.  `updatePullRequestComment'
+     ;; (or something equivalent under an inconsistent name) does not
+     ;; exist, so for that we would have to continue to use REST anyway.
+     (forge-rest post "PATCH" "/repos/:owner/:repo/issues/comments/:number"
+       ((body (string-trim (buffer-str))))
+       :callback  (forge--post-submit-callback)
+       :errorback (forge--post-submit-errorback)))
+    (t
+     (forge--query repo
+       `(mutation (,(cl-etypecase post
+                      (forge-discussion       'updateDiscussion)
+                      (forge-issue            'updateIssue)
+                      (forge-pullreq          'updatePullRequest)
+                      (forge-discussion-post  'updateDiscussionComment)
+                      (forge-discussion-reply 'updateDiscussionComment)
+                      (forge-issue-post       'updateIssueComment)
+                      (forge-pullreq-post     'updatePullRequestComment))
+                   [(input
+                     $input
+                     ,(cl-etypecase post
+                        (forge-discussion       'UpdateDiscussionInput!)
+                        (forge-issue            'UpdateIssueInput!)
+                        (forge-pullreq          'UpdatePullRequestInput!)
+                        (forge-discussion-post  'UpdateDiscussionCommentInput!)
+                        (forge-discussion-reply 'UpdateDiscussionCommentInput!)
+                        (forge-issue-post       'UpdateIssueCommentInput!)
+                        (forge-pullreq-post     'UpdatePullRequestCommentInput!)))]
+                   clientMutationId))
+       `((input (,(cl-etypecase post
+                    (forge-discussion       'discussionId)
+                    (forge-issue            'id)
+                    (forge-pullreq          'pullRequestId)
+                    (forge-discussion-post  'commentId)
+                    (forge-discussion-reply 'commentId)
+                    (forge-issue-post       'id)
+                    (forge-pullreq-post     'id))
+                 . ,(forge--their-id post))
+                ,@(if (cl-typep post 'forge-topic)
+                      (pcase-let ((`(,title . ,body) (forge--post-buffer-text)))
+                        `((title . ,title)
+                          (body  . ,body)))
+                    `((body . ,(string-trim (buffer-str)))))))
+       :callback  (forge--post-submit-callback)
+       :errorback (forge--post-submit-errorback)))))
+
+(cl-defmethod forge--submit-approve-pullreq
+  ((_repo forge-github-repository)
+   (topic forge-pullreq))
+  (let ((body (string-trim (buffer-str))))
+    (forge-rest topic "POST" "/repos/:owner/:repo/pulls/:number/reviews"
+      ((event "APPROVE")
+       (and (not (equal body "")) (body body)))
       :callback  (forge--post-submit-callback)
       :errorback (forge--post-submit-errorback))))
 
-(cl-defmethod forge--submit-request-changes ((_ forge-github-repository) repo)
-  (let ((body (magit--buffer-string nil nil t)))
-    (forge--ghub-post repo "/repos/:owner/:repo/pulls/:number/reviews"
-      `((event . "REQUEST_CHANGES")
-        ,@(and (not (equal body "")) `((body . ,body))))
+(cl-defmethod forge--submit-request-changes
+  ((_repo forge-github-repository)
+   (topic forge-pullreq))
+  (let ((body (string-trim (buffer-str))))
+    (forge-rest topic "POST" "/repos/:owner/:repo/pulls/:number/reviews"
+      ((event "REQUEST_CHANGES")
+       (and (not (equal body "")) (body body)))
       :callback  (forge--post-submit-callback)
       :errorback (forge--post-submit-errorback))))
 
 (cl-defmethod forge--set-topic-title
-  ((_repo forge-github-repository) topic title)
-  (forge--ghub-patch topic
-    "/repos/:owner/:repo/issues/:number"
-    `((title . ,title))
-    :callback (forge--set-field-callback topic)))
+  ((_repo forge-github-repository)
+   (topic forge-discussion)
+   title)
+  (forge--mutate-field topic updateDiscussion
+    ((discussionId (oref topic their-id))
+     (title        title))))
+
+(cl-defmethod forge--set-topic-title
+  ((_repo forge-github-repository)
+   (topic forge-issue)
+   title)
+  (forge--mutate-field topic updateIssue
+    ((id    (oref topic their-id))
+     (title title))))
+
+(cl-defmethod forge--set-topic-title
+  ((_repo forge-github-repository)
+   (topic forge-pullreq)
+   title)
+  (forge--mutate-field topic updatePullRequest
+    ((pullRequestId (oref topic their-id))
+     (title         title))))
 
 (cl-defmethod forge--set-topic-state
-  ((_repo forge-github-repository) topic state)
-  (forge--ghub-patch topic
-    "/repos/:owner/:repo/issues/:number"
+  ((_repo forge-github-repository)
+   (topic forge-topic)
+   state)
+  (forge--rest topic "PATCH" "/repos/:owner/:repo/issues/:number"
     (pcase-exhaustive state
       ;; Merging isn't done through here.
       ;; Marking as a duplicate isn't supported via API.
@@ -861,101 +1069,82 @@
   ((_repo forge-github-repository)
    (topic forge-discussion)
    state)
-  (with-slots (their-id) topic
-    (cond ((eq state 'open)
-           (ghub--graphql
-            '(mutation (reopenDiscussion
-                        [(input $input ReopenDiscussionInput!)]
-                        clientMutationId))
-            `((input (discussionId . ,their-id)))
-            :callback (forge--set-field-callback topic t)))
-          ((ghub--graphql
-            '(mutation (closeDiscussion
-                        [(input $input CloseDiscussionInput!)]
-                        clientMutationId))
-            `((input (discussionId . ,their-id)
-                     (reason . ,(pcase-exhaustive state
-                                  ('completed "RESOLVED")
-                                  ('duplicate "DUPLICATE")
-                                  ('outdated  "OUTDATED")))))
-            :callback (forge--set-field-callback topic t))))))
+  (cond ((eq state 'open)
+         (forge--mutate-field topic reopenDiscussion
+           ((discussionId (oref topic their-id)))))
+        ((forge--mutate-field topic closeDiscussion
+           ((discussionId (oref topic their-id))
+            (reason (pcase-exhaustive state
+                      ('completed "RESOLVED")
+                      ('duplicate "DUPLICATE")
+                      ('outdated  "OUTDATED"))))))))
 
 (cl-defmethod forge--set-topic-draft
-  ((_repo forge-github-repository) topic value)
-  (let ((buffer (current-buffer)))
-    (ghub-graphql
-     `(mutation (,(if value
-                      'convertPullRequestToDraft
-                    'markPullRequestReadyForReview)
-                 [(input $input ,(if value
-                                     'ConvertPullRequestToDraftInput!
-                                   'MarkPullRequestReadyForReviewInput!))]
-                 (pullRequest isDraft)))
-     `((input (pullRequestId . ,(oref topic their-id))))
-     :host (oref (forge-get-repository topic) apihost)
-     :auth 'forge
-     :callback (lambda (data &rest _)
-                 (if (assq 'error data)
-                     (ghub--graphql-pp-response data)
-                   (oset topic draft-p value)
-                   (forge-refresh-buffer buffer))))))
+  ((_repo forge-github-repository)
+   (topic forge-topic)
+   value)
+  (cond (value
+         (forge--mutate-field topic convertPullRequestToDraft
+           ((pullRequestId (oref topic their-id)))))
+        ((forge--mutate-field topic markPullRequestReadyForReview
+           ((pullRequestId (oref topic their-id)))))))
 
 (cl-defmethod forge--set-topic-category
-  ((_repo forge-github-repository)
+  ((repo  forge-github-repository)
    (topic forge-discussion)
    category)
-  (ghub--graphql
-   '(mutation (updateDiscussion
-               [(input $input UpdateDiscussionInput!)]
-               clientMutationId))
-   `((input (discussionId . ,(oref topic their-id))
-            (categoryId
-             . , (caar (forge-sql [:select [their-id]
-                                   :from discussion-category
-                                   :where (and (= repository $s1)
-                                               (= name $s2))]
-                                  (oref (forge-get-repository :tracked) id)
-                                  category)))))
-   :callback (forge--set-field-callback topic t)))
+  (forge--mutate-field topic updateDiscussion
+    ((discussionId (oref topic their-id))
+     (categoryId (forge--their-id category 'category repo)))))
 
 (cl-defmethod forge--set-topic-answer
-  ((_repo forge-github-repository)
+  ((repo  forge-github-repository)
    (topic forge-discussion)
    answer)
   (let* ((old (oref topic answer))
          (old (and old (forge--their-id old)))
          (new (and answer (oref answer their-id))))
-    (ghub--graphql
-     `(mutation
-       ,@(and old '((unmarkDiscussionCommentAsAnswer
-                     [(input $old UnmarkDiscussionCommentAsAnswerInput!)]
-                     clientMutationId)))
-       ,@(and new '((markDiscussionCommentAsAnswer
-                     [(input $new MarkDiscussionCommentAsAnswerInput!)]
-                     clientMutationId))))
-     `(,@(and old `((old (id . ,old))))
-       ,@(and new `((new (id . ,new)))))
-     :callback (forge--set-field-callback topic t))))
+    (forge--query repo
+      `(mutation
+        ,@(and old '((unmarkDiscussionCommentAsAnswer
+                      [(input $old UnmarkDiscussionCommentAsAnswerInput!)]
+                      clientMutationId)))
+        ,@(and new '((markDiscussionCommentAsAnswer
+                      [(input $new MarkDiscussionCommentAsAnswerInput!)]
+                      clientMutationId))))
+      `(,@(and old `((old (id . ,old))))
+        ,@(and new `((new (id . ,new)))))
+      :callback (forge--set-field-callback topic))))
 
 (cl-defmethod forge--set-topic-milestone
-  ((repo forge-github-repository) topic milestone)
-  (forge--ghub-patch topic
-    "/repos/:owner/:repo/issues/:number"
-    (if milestone
-        `((milestone . ,(caar (forge-sql [:select [number]
-                                          :from milestone
-                                          :where (and (= repository $s1)
-                                                      (= title $s2))]
-                                         (oref repo id)
-                                         milestone))))
-      `((milestone . :null)))
+  ((repo  forge-github-repository)
+   (topic forge-topic)
+   milestone)
+  (forge-rest topic "POST" "/repos/:owner/:repo/issues/:number"
+    ((milestone (if milestone
+                    (forge-sql1 [:select [number]
+                                 :from milestone
+                                 :where (and (= repository $s1)
+                                             (= title $s2))]
+                                (oref repo id)
+                                milestone)
+                  :null)))
     :callback (forge--set-field-callback topic)))
 
 (cl-defmethod forge--set-topic-labels
-  ((repo forge-github-repository) topic labels)
+  ((repo  forge-github-repository)
+   (topic forge-topic)
+   labels)
   (let* ((topic-id (oref topic their-id))
-         (old (mapcar (##forge--their-id (car %)) (oref topic labels)))
-         (new (mapcar (##forge--their-id (car %))
+         (their-id ; I really messed up IDs! :(
+          (pcase-lambda (`(,id))
+            (let* ((parts (split-string (base64-decode-string id) ":"))
+                   (maybe-id (car (last parts))))
+              (if (string-prefix-p "Label" maybe-id)
+                  (base64-encode-string (string-join (last parts 2) ":"))
+                maybe-id))))
+         (old (mapcar their-id (oref topic labels)))
+         (new (mapcar their-id
                       (forge-sql [:select [id] :from label
                                   :where (and (= repository $s1)
                                               (in name $v2))]
@@ -964,67 +1153,60 @@
          (add (cl-set-difference new old :test #'equal))
          (del (cl-set-difference old new :test #'equal)))
     (when (or add del)
-      (ghub--graphql
-       `(mutation
-         ,@(and add '((addLabelsToLabelable
-                       [(input $add AddLabelsToLabelableInput!)]
-                       clientMutationId)))
-         ,@(and del '((removeLabelsFromLabelable
-                       [(input $del RemoveLabelsFromLabelableInput!)]
-                       clientMutationId))))
-       `(,@(and add `((add (labelableId . ,topic-id)
-                           (labelIds . ,(vconcat add)))))
-         ,@(and del `((del (labelableId . ,topic-id)
-                           (labelIds . ,(vconcat del))))))
-       :callback (forge--set-field-callback topic)))))
+      (forge--query repo
+        `(mutation
+          ,@(and add '((addLabelsToLabelable
+                        [(input $add AddLabelsToLabelableInput!)]
+                        clientMutationId)))
+          ,@(and del '((removeLabelsFromLabelable
+                        [(input $del RemoveLabelsFromLabelableInput!)]
+                        clientMutationId))))
+        `(,@(and add `((add (labelableId . ,topic-id)
+                            (labelIds . ,(vconcat add)))))
+          ,@(and del `((del (labelableId . ,topic-id)
+                            (labelIds . ,(vconcat del))))))
+        :callback (forge--set-field-callback topic)))))
 
 (cl-defmethod forge--set-topic-assignees
-  ((repo forge-github-repository) topic assignees)
+  ((repo  forge-github-repository)
+   (topic forge-topic)
+   assignees)
   (let* ((topic-id (oref topic their-id))
          (old (mapcar (##nth 3 %) (oref topic assignees)))
-         (new (forge-sql-car [:select [forge-id] :from assignee
-                              :where (and (= repository $s1)
-                                          (in login $v2))]
-                             (oref repo id)
-                             (vconcat assignees)))
+         (new (forge--their-id assignees 'assignees repo))
          (add (cl-set-difference new old :test #'equal))
          (del (cl-set-difference old new :test #'equal)))
     (when (or add del)
-      (ghub--graphql
-       `(mutation
-         ,@(and add '((addAssigneesToAssignable
-                       [(input $add AddAssigneesToAssignableInput!)]
-                       clientMutationId)))
-         ,@(and del '((removeAssigneesFromAssignable
-                       [(input $del RemoveAssigneesFromAssignableInput!)]
-                       clientMutationId))))
-       `(,@(and add `((add (assignableId . ,topic-id)
-                           (assigneeIds . ,(vconcat add)))))
-         ,@(and del `((del (assignableId . ,topic-id))
-                      (assigneeIds . ,(vconcat del)))))
-       :callback (forge--set-field-callback topic)))))
+      (forge--query repo
+        `(mutation
+          ,@(and add '((addAssigneesToAssignable
+                        [(input $add AddAssigneesToAssignableInput!)]
+                        clientMutationId)))
+          ,@(and del '((removeAssigneesFromAssignable
+                        [(input $del RemoveAssigneesFromAssignableInput!)]
+                        clientMutationId))))
+        `(,@(and add `((add (assignableId . ,topic-id)
+                            (assigneeIds . ,(vconcat add)))))
+          ,@(and del `((del (assignableId . ,topic-id)
+                            (assigneeIds . ,(vconcat del))))))
+        :callback (forge--set-field-callback topic)))))
 
 (cl-defmethod forge--set-topic-review-requests
-  ((repo forge-github-repository) topic reviewers)
-  (let ((users (forge-sql-car
-                [:select [forge-id] :from assignee
-                 :where (and (= repository $s1)
-                             (in login $v2))]
-                (oref repo id)
-                (vconcat (seq-remove (##string-match "/" %) reviewers))))
+  ((repo  forge-github-repository)
+   (topic forge-topic)
+   reviewers)
+  (let ((users (forge--their-id (seq-remove (##string-match "/" %) reviewers)
+                                'assignees repo))
         (teams nil)) ;TODO Investigate #742, track id, then use it here.
-    (ghub--graphql
-     `(mutation (requestReviews
-                 [(input $input RequestReviewsInput!)]
-                 clientMutationId))
-     `((input (pullRequestId . ,(oref topic their-id))
-              ,@(and users `((userIds . ,(vconcat users))))
-              ,@(and teams `((teamIds . ,(vconcat teams))))))
-     :callback (forge--set-field-callback topic))))
+    (forge--mutate-field topic requestReviews
+      ((pullRequestId (oref topic their-id))
+       (and users (userIds (vconcat users)))
+       (and teams (teamIds (vconcat teams)))))))
 
 (cl-defmethod forge--delete-comment
-  ((_repo forge-github-repository) post)
-  (forge--ghub-delete post "/repos/:owner/:repo/issues/comments/:number")
+  ((_    forge-github-repository)
+   (post forge-post))
+  (forge-rest post "DELETE" "/repos/:owner/:repo/issues/comments/:number")
   (closql-delete post)
   (forge-refresh-buffer))
 
@@ -1052,7 +1234,7 @@
   ;; When there are multiple conflicting "default" templates, the rules
   ;; used by Github are more complex than just sorting alphabetically and
   ;; then taking the first found file.  Too bad; that's what we do.
-  (let ((branch (oref repo default-branch))
+  (let ((branch (forge--get-default-branch repo))
         (case-fold-search t))
     (seq-some (lambda (file)
                 (and (string-match-p "\
@@ -1062,9 +1244,8 @@
                                "-r" branch))))
 
 (cl-defmethod forge--set-default-branch ((repo forge-github-repository) branch)
-  (forge--ghub-patch repo
-    "/repos/:owner/:repo"
-    `((default_branch . ,branch)))
+  (forge-rest repo "PATCH" "/repos/:owner/:repo"
+    ((default_branch branch)))
   (message "Waiting 5 seconds for GitHub to complete update...")
   (sleep-for 5)
   (message "Waiting 5 seconds for GitHub to complete update...done")
@@ -1074,36 +1255,38 @@
 
 (cl-defmethod forge--rename-branch ((repo forge-github-repository)
                                     newname oldname)
-  (forge--ghub-post repo
+  (forge-rest repo "POST"
     (format "/repos/:owner/:name/branches/%s/rename" oldname)
-    `((new_name . ,newname)))
+    ((new_name newname)))
   (message "Waiting 5 seconds for GitHub to complete rename...")
   (sleep-for 5)
   (message "Waiting 5 seconds for GitHub to complete rename...done")
   (magit-call-git "fetch" "--prune" (oref repo remote)))
 
-(cl-defmethod forge--fork-repository ((repo forge-github-repository) fork)
-  (with-slots (owner name) repo
-    (forge--ghub-post repo
-      (format "/repos/%s/%s/forks" owner name)
-      (and (not (equal fork (ghub--username (ghub--host nil))))
-           `((organization . ,fork))))
-    (ghub-wait (format "/repos/%s/%s" fork name) nil :auth 'forge)))
+(cl-defmethod forge--fork-repository ((repo forge-github-repository) fork all)
+  (with-slots (name apihost) repo
+    (forge-rest repo "POST" "/repos/:owner/:name/forks"
+      ((and (not (equal fork (ghub--username apihost)))
+            (organization fork))
+       (default-branch-only (not all))))
+    (ghub-wait (format "/repos/%s/%s" fork name)
+               nil :auth 'forge :host apihost)))
 
-(cl-defmethod forge--merge-pullreq ((repo forge-github-repository)
-                                    pullreq hash method)
-  (forge--ghub-put pullreq
-    "/repos/:owner/:repo/pulls/:number/merge"
-    `((merge_method . ,(symbol-name method))
-      ,@(and hash `((sha . ,hash))))
-    :errorback t
+(cl-defmethod forge--merge-pullreq
+  ((repo  forge-github-repository)
+   (topic forge-pullreq)
+   hash method)
+  (forge-mutate topic mergePullRequest
+    ((pullRequestId (oref topic their-id))
+     (mergeMethod (upcase (symbol-name method)))
+     (and hash (expectedHeadOid hash)))
     :callback
-    (lambda (&rest _)
+    (lambda (_)
       (forge--pull
        repo
        (lambda ()
-         (when-let* ((branch (or (forge--pullreq-branch-active pullreq)
-                                 (forge--branch-pullreq pullreq)))
+         (when-let* ((branch (or (forge--pullreq-branch-active topic)
+                                 (forge--branch-pullreq topic)))
                      (upstream (magit-get-local-upstream-branch branch))
                      (remote (oref repo remote)))
            (magit-call-git "checkout" upstream)
@@ -1111,90 +1294,16 @@
            (magit-call-git "branch" "-d" branch)
            (forge-refresh-buffer)))))))
 
-;;; Wrappers
-
-(cl-defun forge--ghub-get (obj resource
-                               &optional params
-                               &key query payload headers
-                               silent unpaginate noerror reader
-                               host
-                               callback errorback)
-  (declare (indent defun))
-  (ghub-get (if obj (forge--format-resource obj resource) resource)
-            params
-            :host (or host (oref (forge-get-repository obj) apihost))
-            :auth 'forge
-            :query query :payload payload :headers headers
-            :silent silent :unpaginate unpaginate
-            :noerror noerror :reader reader
-            :callback callback :errorback errorback))
-
-(cl-defun forge--ghub-put (obj resource
-                               &optional params
-                               &key query payload headers
-                               silent unpaginate noerror reader
-                               host
-                               callback errorback)
-  (declare (indent defun))
-  (ghub-put (if obj (forge--format-resource obj resource) resource)
-            params
-            :host (or host (oref (forge-get-repository obj) apihost))
-            :auth 'forge
-            :query query :payload payload :headers headers
-            :silent silent :unpaginate unpaginate
-            :noerror noerror :reader reader
-            :callback callback :errorback errorback))
-
-(cl-defun forge--ghub-post (obj resource
-                                &optional params
-                                &key query payload headers
-                                silent unpaginate noerror reader
-                                host callback errorback)
-  (declare (indent defun))
-  (ghub-post (forge--format-resource obj resource)
-             params
-             :host (or host (oref (forge-get-repository obj) apihost))
-             :auth 'forge
-             :query query :payload payload :headers headers
-             :silent silent :unpaginate unpaginate
-             :noerror noerror :reader reader
-             :callback callback :errorback errorback))
-
-(cl-defun forge--ghub-patch (obj resource
-                                 &optional params
-                                 &key query payload headers
-                                 silent unpaginate noerror reader
-                                 host callback errorback)
-  (declare (indent defun))
-  (ghub-patch (forge--format-resource obj resource)
-              params
-              :host (or host (oref (forge-get-repository obj) apihost))
-              :auth 'forge
-              :query query :payload payload :headers headers
-              :silent silent :unpaginate unpaginate
-              :noerror noerror :reader reader
-              :callback callback :errorback errorback))
-
-(cl-defun forge--ghub-delete (obj resource
-                                  &optional params
-                                  &key query payload headers
-                                  silent unpaginate noerror reader
-                                  host callback errorback)
-  (declare (indent defun))
-  (ghub-delete (forge--format-resource obj resource)
-               params
-               :host (or host (oref (forge-get-repository obj) apihost))
-               :auth 'forge
-               :query query :payload payload :headers headers
-               :silent silent :unpaginate unpaginate
-               :noerror noerror :reader reader
-               :callback callback :errorback errorback))
-
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let")
+;;   ("buffer-string" . "buffer-string")
+;;   ("buffer-str"    . "forge--buffer-substring-no-properties")
+;;   ("partial"       . "llama--left-apply-partially"))
 ;; End:
 (provide 'forge-github)
 ;;; forge-github.el ends here

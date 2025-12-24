@@ -7,21 +7,21 @@
 ;; Homepage: https://github.com/magit/forge
 ;; Keywords: git tools vc
 
-;; Package-Version: 20250516.1009
-;; Package-Revision: 8e4dd7ed0521
+;; Package-Version: 20251201.1658
+;; Package-Revision: 325dbcd6fff6
 ;; Package-Requires: (
-;;     (emacs "29.1")
-;;     (compat "30.0.2.0")
-;;     (closql "2.2.1")
-;;     (emacsql "4.3.0")
-;;     (ghub "4.3.0")
-;;     (let-alist "1.0.6")
-;;     (llama "0.6.2")
-;;     (magit "4.3.2")
+;;     (emacs        "29.1")
+;;     (compat       "30.1")
+;;     (closql        "2.3")
+;;     (cond-let      "0.2")
+;;     (emacsql       "4.3")
+;;     (ghub          "5.0")
+;;     (llama         "1.0")
+;;     (magit         "4.4")
 ;;     (markdown-mode "2.7")
-;;     (seq "2.24")
-;;     (transient "0.8.7")
-;;     (yaml "1.2.0"))
+;;     (seq           "2.24")
+;;     (transient     "0.10")
+;;     (yaml          "1.2"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -134,6 +134,9 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
   (transient-append-suffix 'magit-pull  "m" '("n" forge-pull))
   (transient-append-suffix 'magit-pull  "n" '("N" forge-pull-notifications))
 
+  (transient-insert-suffix 'magit-push "p"
+    '("N" forge-push-to-unnamed-pullreq))
+
   (transient-append-suffix 'magit-branch "w"
     '("f" "pull-request" forge-checkout-pullreq))
   (transient-append-suffix 'magit-branch "W"
@@ -184,10 +187,4 @@ too.\n" forge--minimal-git version) :error))))
     (forge-startup-asserts)
   (add-hook 'after-init-hook #'forge-startup-asserts t))
 
-;;; _
-;; Local Variables:
-;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
-;; End:
 ;;; forge.el ends here

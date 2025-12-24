@@ -116,13 +116,14 @@
   issue)
 
 (cl-defmethod forge-get-issue ((repo forge-repository) number)
+  (cl-assert (numberp number) t)
   (closql-get (forge-db)
               (forge--object-id 'forge-issue repo number)
               'forge-issue))
 
 (cl-defmethod forge-get-issue ((number integer))
-  (and-let* ((repo (forge-get-repository :tracked nil 'notatpt)))
-    (forge-get-issue repo number)))
+  (and$ (forge-get-repository :tracked nil 'notatpt)
+        (forge-get-issue $ number)))
 
 (cl-defmethod forge-get-issue ((id string))
   (closql-get (forge-db) id 'forge-issue))
@@ -153,9 +154,9 @@ an error."
 
 (put 'forge-issue 'thing-at-point #'forge-thingatpt--issue)
 (defun forge-thingatpt--issue ()
-  (and-let* (((thing-at-point-looking-at "#\\([0-9]+\\)\\_>"))
-             (number (string-to-number (match-string 1)))
-             (repo (forge--repo-for-thingatpt)))
+  (and-let ((_(thing-at-point-looking-at "#\\([0-9]+\\)\\_>"))
+            (number (string-to-number (match-string 1)))
+            (repo (forge--repo-for-thingatpt)))
     (forge-get-issue repo number)))
 
 ;;; Read
@@ -210,11 +211,11 @@ can be selected from the start."
   "Insert a list of issues, according to `forge--buffer-topics-spec'.
 Optional SPEC can be used to override that filtering specification,
 and optional HEADING to change the section heading."
-  (when-let (((forge-db t))
-             (repo (forge-get-repository :tracked?))
-             ((oref repo issues-p))
-             (spec (if sspec spec (forge--clone-buffer-topics-spec)))
-             ((memq (oref spec type) '(topic issue))))
+  (when-let* ((_(forge-db t))
+              (repo (forge-get-repository :tracked?))
+              (_(oref repo issues-p))
+              (spec (if sspec spec (forge--clone-buffer-topics-spec)))
+              (_(memq (oref spec type) '(topic issue))))
     (oset spec type 'issue)
     (forge--insert-topics 'issues
                           (or heading "Issues")
@@ -223,8 +224,10 @@ and optional HEADING to change the section heading."
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
 ;; End:
 (provide 'forge-issue)
 ;;; forge-issue.el ends here

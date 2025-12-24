@@ -28,6 +28,11 @@ is loaded, then `magit-mode-map' ends up being modified anyway.")
 (register-definition-prefixes "forge-bitbucket" '("forge-bitbucket-repository"))
 
 
+;;; Generated autoloads from forge-client.el
+
+(register-definition-prefixes "forge-client" '("forge--" "ghub--prepare-mutation"))
+
+
 ;;; Generated autoloads from forge-commands.el
 
 (autoload 'forge-dispatch "forge-commands" nil t)
@@ -94,6 +99,10 @@ jumping to a line, always use a commit hash as part of the URL.  From
 a file in the worktree with no active region, instead use the branch
 name as part of the URL, unless a prefix argument is used.
 
+When invoked from a Dired buffer, visit the blob at point without
+prompting. If a prefix argument is used, the commit hash is included
+in the URL.
+
 When invoked from any other buffer, prompt the user for a branch or
 commit, and for a file.
 
@@ -133,6 +142,10 @@ prefix argument offer all topics.  While completion is in progress,
 \\<forge-read-topic-minibuffer-map>\\[forge-read-topic-lift-limit] lifts the limitation to active pull-requests.
 
 (fn PULL-REQUEST)" t)
+(autoload 'forge-visit-topic-from-url "forge-commands" "\
+Visit the topic specified by web URL.
+
+(fn URL)" t)
 (autoload 'forge-visit-this-topic "forge-commands" "\
 Visit the topic at point.
 With prefix argument MENU, also show the topic menu.
@@ -158,12 +171,17 @@ creates a new worktree.  Please see the manual for more
 information.
 
 (fn PATH PULLREQ)" t)
+(autoload 'forge-push-to-unnamed-pullreq "forge-commands" nil t)
 (autoload 'forge-fork "forge-commands" "\
 Fork the current repository to FORK and add it as a REMOTE.
+
 If the fork already exists, then that isn't an error; the remote
 is added anyway.  Currently this only supports Github and Gitlab.
 
-(fn FORK REMOTE)" t)
+With prefix argument ALL, fork all branches, not just the default
+branch.  On Gitlab it is not possible to fork only the default.
+
+(fn FORK REMOTE ALL)" t)
 (autoload 'forge-merge "forge-commands" nil t)
 (autoload 'forge-set-default-branch "forge-commands" "\
 Change the default branch on the upstream remote and locally.

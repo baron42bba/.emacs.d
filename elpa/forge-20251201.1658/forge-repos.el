@@ -143,10 +143,11 @@ Must be set before `forge-list' is loaded.")
      :if-non-nil forge--buffer-list-filter
      :inapt-if-mode nil)]]
   (interactive)
-  (unless (derived-mode-p 'forge-repository-list-mode)
-    (if-let ((buffer (get-buffer forge-repository-list-buffer-name)))
-        (switch-to-buffer buffer)
-      (forge-list-repositories)))
+  (cond-let
+    ((derived-mode-p 'forge-repository-list-mode))
+    ([buffer (get-buffer forge-repository-list-buffer-name)]
+     (switch-to-buffer buffer))
+    ((forge-list-repositories)))
   (transient-setup 'forge-repositories-menu))
 
 (transient-augment-suffix forge-repositories-menu
@@ -189,8 +190,10 @@ Only Github is supported for now."
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
 ;; End:
 (provide 'forge-repos)
 ;;; forge-repos.el ends here

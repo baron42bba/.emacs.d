@@ -138,13 +138,14 @@
   pullreq)
 
 (cl-defmethod forge-get-pullreq ((repo forge-repository) number)
+  (cl-assert (numberp number) t)
   (closql-get (forge-db)
               (forge--object-id 'forge-pullreq repo number)
               'forge-pullreq))
 
 (cl-defmethod forge-get-pullreq ((number integer))
-  (and-let* ((repo (forge-get-repository :tracked nil 'notatpt)))
-    (forge-get-pullreq repo number)))
+  (and$ (forge-get-repository :tracked nil 'notatpt)
+        (forge-get-pullreq $ number)))
 
 (cl-defmethod forge-get-pullreq ((id string))
   (closql-get (forge-db) id 'forge-pullreq))
@@ -185,12 +186,12 @@ an error."
 
 (put 'forge-pullreq 'thing-at-point #'forge-thingatpt--pullreq)
 (defun forge-thingatpt--pullreq ()
-  (and-let* (((thing-at-point-looking-at "\\([#!]\\)\\([0-9]+\\)\\_>"))
+  (and-let* ((_(thing-at-point-looking-at "\\([#!]\\)\\([0-9]+\\)\\_>"))
              (prefix (match-string-no-properties 1))
              (number (string-to-number (match-string-no-properties 2)))
              (repo (forge--repo-for-thingatpt))
-             ((or (equal prefix "#")
-                  (forge-gitlab-repository--eieio-childp repo))))
+             (_(or (equal prefix "#")
+                   (forge-gitlab-repository--eieio-childp repo))))
     (forge-get-pullreq repo number)))
 
 ;;; Read
@@ -238,7 +239,7 @@ can be selected from the start."
     (and (magit-rev-verify ref) ref)))
 
 (defun forge--pullreq-range (pullreq &optional endpoints)
-  (and-let* ((head (forge--pullreq-ref pullreq)))
+  (and-let ((head (forge--pullreq-ref pullreq)))
     (concat (forge--get-remote) "/" (oref pullreq base-ref)
             (if endpoints "..." "..")
             head)))
@@ -263,10 +264,10 @@ can be selected from the start."
   "Insert a list of pull-requests, according to `forge--buffer-topics-spec'.
 Optional SPEC can be used to override that filtering specification,
 and optional HEADING to change the section heading."
-  (when-let (((forge-db t))
-             (repo (forge-get-repository :tracked?))
-             (spec (if sspec spec (forge--clone-buffer-topics-spec)))
-             ((memq (oref spec type) '(topic pullreq))))
+  (when-let* ((_(forge-db t))
+              (repo (forge-get-repository :tracked?))
+              (spec (if sspec spec (forge--clone-buffer-topics-spec)))
+              (_(memq (oref spec type) '(topic pullreq))))
     (oset spec type 'pullreq)
     (forge--insert-topics 'pullreqs
                           (or heading "Pull requests")
@@ -274,29 +275,33 @@ and optional HEADING to change the section heading."
 
 (defun forge--insert-pullreq-commits (pullreq &optional all)
   (cl-letf (((symbol-function #'magit-cancel-section) (lambda ())))
-    (if all
-        ;; Numeric pr ref, pr branch (if it exists) and api
-        ;; pr range may be out of sync.  Just show them all.
-        (magit-insert-section-body
-          (magit--insert-log nil
-            (delq nil (list (concat "^" (or (oref pullreq base-rev)
-                                            (concat (forge--get-remote) "/"
-                                                    (oref pullreq base-ref))))
-                            (forge--pullreq-ref pullreq)
-                            (forge--pullreq-branch-active pullreq)
-                            (and-let* ((branch (oref pullreq head-ref)))
-                              (and (magit-local-branch-p branch) branch))))
-            (seq-uniq (cons "--graph" magit-buffer-log-args))))
-      (when-let ((range (forge--pullreq-range pullreq)))
-        (magit-insert-section-body
-          (magit--insert-log nil range magit-buffer-log-args)
-          (magit-make-margin-overlay nil t))))))
+    (cond-let
+      (all
+       ;; Numeric pr ref, pr branch (if it exists) and api
+       ;; pr range may be out of sync.  Just show them all.
+       (magit-insert-section-body
+         (magit--insert-log nil
+           (delq nil (list (concat "^" (or (oref pullreq base-rev)
+                                           (concat (forge--get-remote) "/"
+                                                   (oref pullreq base-ref))))
+                           (forge--pullreq-ref pullreq)
+                           (forge--pullreq-branch-active pullreq)
+                           (and-let* ((branch (oref pullreq head-ref))
+                                      (_(magit-local-branch-p branch)))
+                             branch)))
+           (seq-uniq (cons "--graph" magit-buffer-log-args)))))
+      ([range (forge--pullreq-range pullreq)]
+       (magit-insert-section-body
+         (magit--insert-log nil range magit-buffer-log-args)
+         (magit-make-margin-overlay nil t))))))
 
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
 ;; End:
 (provide 'forge-pullreq)
 ;;; forge-pullreq.el ends here

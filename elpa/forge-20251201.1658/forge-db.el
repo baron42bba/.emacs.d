@@ -65,6 +65,9 @@
       (emacsql (forge-db) (apply #'format sql args))
     (apply #'emacsql (forge-db) sql args)))
 
+(defun forge-sql1 (sql &rest args)
+  (caar (apply #'forge-sql sql args)))
+
 (defun forge-sql-car (sql &rest args)
   (mapcar #'car (apply #'forge-sql sql args)))
 
@@ -600,21 +603,21 @@
                                  :where (isnull issues-until)]))
           (emacsql
            db [:update repository :set (= issues-until $s1) :where (= id $s2)]
-           (caar (forge-sql [:select [updated] :from issue
-                             :where (= repository $s1)
-                             :order-by [(desc updated)]
-                             :limit 1]
-                            id))
+           (forge-sql1 [:select [updated] :from issue
+                        :where (= repository $s1)
+                        :order-by [(desc updated)]
+                        :limit 1]
+                       id)
            id))
         (dolist (id (emacsql db [:select id :from repository
                                  :where (isnull pullreqs-until)]))
           (emacsql
            db [:update repository :set (= pullreqs-until $s1) :where (= id $s2)]
-           (caar (forge-sql [:select [updated] :from pullreq
-                             :where (= repository $s1)
-                             :order-by [(desc updated)]
-                             :limit 1]
-                            id))
+           (forge-sql1 [:select [updated] :from pullreq
+                        :where (= repository $s1)
+                        :order-by [(desc updated)]
+                        :limit 1]
+                       id)
            id))
         (emacsql db [:alter-table repository :rename-column sparse-p :to condition])
         (pcase-dolist (`(,id ,not-tracked)
@@ -661,8 +664,10 @@
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
 ;; End:
 (provide 'forge-db)
 ;;; forge-db.el ends here

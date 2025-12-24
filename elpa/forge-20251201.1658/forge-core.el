@@ -26,6 +26,7 @@
 
 (require 'cl-lib)
 (require 'compat)
+(require 'cond-let)
 (require 'eieio)
 (require 'llama)
 (require 'seq)
@@ -33,16 +34,14 @@
 
 (require 'transient)
 
+(require 'ghub-graphql)
 (require 'forge-db)
 
 (eval-when-compile
   (cl-pushnew 'forge-id eieio--known-slot-names)
-  (cl-pushnew 'id       eieio--known-slot-names)
-  (cl-pushnew 'name     eieio--known-slot-names)
   (cl-pushnew 'number   eieio--known-slot-names)
   (cl-pushnew 'owner    eieio--known-slot-names)
-  (cl-pushnew 'their-id eieio--known-slot-names)
-  (cl-pushnew 'worktree eieio--known-slot-names))
+  (cl-pushnew 'their-id eieio--known-slot-names))
 
 ;;; Options
 
@@ -58,6 +57,8 @@
 (defcustom forge-alist
   '(;; Forges
     ("github.com" "api.github.com"
+     "github.com" forge-github-repository)
+    ("ssh.github.com" "api.github.com"
      "github.com" forge-github-repository)
     ("gitlab.com" "gitlab.com/api/v4"
      "gitlab.com" forge-gitlab-repository)
@@ -267,7 +268,7 @@ is non-nil."
                "\\(?:\\.git\\|/\\)?"
                "\\'")
        url)
-      (and-let* ((elt (forge--get-forge-host (match-string 1 url) (not relax))))
+      (and-let ((elt (forge--get-forge-host (match-string 1 url) (not relax))))
         ;; Return the WEBHOST (not the GITHOST, URLs passed to this
         ;; function usually contain a GITHOST) because the IDs used to
         ;; identify a repository in the database are based on WEBHOSTs.
@@ -291,16 +292,50 @@ is non-nil."
                                        &optional stub noerror)
   "Return the database and forge ids for the specified CLASS object.")
 
-(defun forge--their-id (id/obj)
-  "Return the forge's id for the ID used in the local database."
+(defun forge--their-id (arg &optional type repo)
+  "Return the forge's ID for ARG.
+This deals with technical debt related to our handling of IDs."
   (cond
-   ((stringp id/obj)
-    (car (last (split-string (base64-decode-string id/obj) ":"))))
-   ((slot-exists-p id/obj 'their-id)
-    (oref id/obj their-id))
-   ((slot-exists-p id/obj 'forge-id)
-    (oref id/obj forge-id))
-   ((forge--their-id (oref id/obj id)))))
+   (type
+    (pcase type
+      ('assignee
+       (forge-sql1 [:select [forge-id]
+                    :from assignee
+                    :where (and (= repository $s1)
+                                (= login $s2))]
+                   (oref repo id) arg))
+      ('assignees
+       (forge-sql-car [:select [forge-id]
+                       :from assignee
+                       :where (and (= repository $s1)
+                                   (in login $v2))]
+                      (oref repo id)
+                      (vconcat arg)))
+      ('category
+       (forge-sql1 [:select [their-id]
+                    :from discussion-category
+                    :where (and (= repository $s1)
+                                (= name $s2))]
+                   (oref repo id) arg))
+      ('label
+       (forge--their-id
+        (forge-sql1 [:select [id]
+                     :from label
+                     :where (and (= repository $s1)
+                                 (= name $s2))]
+                    (oref repo id) arg)))
+      ('labels
+       (mapcar (##forge--their-id % 'label repo) arg))
+      ('milestone
+       (forge--their-id
+        (forge-sql1 [:select [id] :from milestone :where (= title $s1)] arg)))))
+   ((stringp arg)
+    (car (last (split-string (base64-decode-string arg) ":"))))
+   ((slot-exists-p arg 'their-id)
+    (oref arg their-id))
+   ((slot-exists-p arg 'forge-id)
+    (oref arg forge-id))
+   ((forge--their-id (oref arg id)))))
 
 (cl-defmethod magit-section-ident-value ((obj forge-object))
   "Return the value ob OBJ's `id' slot.
@@ -336,7 +371,7 @@ of SLOT.")
 
 (cl-defmethod forge--format-resource ((object forge-object) resource)
   "Return an API resource based on RESOURCE and slots of OBJECT.
-For use in `forge--FORGE-METHOD' such as `forge--ghub-get'.
+This is used by `forge--rest' and by extension `forge-rest'.
 RESOURCE is a string separated by slashes.  Each part that begins
 with a colon is replaced with a value from OBJECT.  `:repo' is a
 synonym for `:name'.  `:project' is a like `:owner/:name', but the
@@ -350,36 +385,39 @@ parent object (determined using `forge-get-parent')."
            ":\\([^/]+\\)"
            (lambda (str)
              (let ((slot (intern (substring str 1))))
-               (or (and-let*
-                       ((v (ignore-errors
-                             (pcase slot
-                               ('repo    (oref object name))
-                               ('project (concat (string-replace
-                                                  "/" "%2F" (oref object owner))
-                                                 "%2F"
-                                                 (oref object name)))
-                               ('topic   (and (forge--childp object 'forge-topic)
-                                              (oref object number)))
-                               (_        (eieio-oref object slot))))))
-                     (format "%s" v))
+               (or (and$ (ignore-errors
+                           (pcase slot
+                             ('repo    (oref object name))
+                             ('project (concat (string-replace
+                                                "/" "%2F" (oref object owner))
+                                               "%2F"
+                                               (oref object name)))
+                             ('topic   (and (forge--childp object 'forge-topic)
+                                            (oref object number)))
+                             (_        (eieio-oref object slot))))
+                         (format "%s" $))
                    str)))
            resource t t))
-    (if (string-match ":[^/]*" resource)
-        (if-let ((parent (ignore-errors (forge-get-parent object))))
-            (forge--format-resource parent resource)
-          (error "Cannot resolve %s for a %s"
-                 (match-string 0 resource)
-                 (eieio-object-class object)))
-      resource)))
+    (cond-let
+      ((not (string-match ":[^/]*" resource))
+       resource)
+      ([parent (ignore-errors (forge-get-parent object))]
+       (forge--format-resource parent resource))
+      ((error "Cannot resolve %s for a %s"
+              (match-string 0 resource)
+              (eieio-object-class object))))))
 
 ;;; Miscellaneous
 
 (defun forge-refresh-buffer (&optional buffer)
   "Refresh the current buffer, if it is a Magit or Forge buffer.
+
 Refresh the buffer if its major-mode derives from `magit-mode'
 or `forge-repository-list-mode'.  If optional BUFFER is non-nil,
 then refresh that buffer, provided it is alive and satisfies
-the mode requirement."
+the mode requirement.
+
+When certain Forge menus are active, refresh them too."
   (interactive)
   (cond (buffer
          (when (buffer-live-p buffer)
@@ -394,11 +432,23 @@ the mode requirement."
               (oref forge--buffer-topics-spec global))
          (revert-buffer))
         ((derived-mode-p 'forge-repository-list-mode)
-         (revert-buffer))))
+         (revert-buffer)))
+  (when (transient-active-prefix
+         '(forge-topic-menu
+           forge-topics-menu
+           forge-notifications-menu))
+    (transient--refresh-transient)))
 
 (defun forge--sanitize-string (string)
   ;; For Gitlab this may also be nil.
   (if string (string-replace "\r\n" "\n" string) ""))
+
+(defun forge--buffer-substring-no-properties (&optional start end)
+  "Like `buffer-substring-no-properties' but the arguments are optional.
+Optional START defaults to the value of `point-min'.
+Optional END defaults to the value of `point-max'."
+  (buffer-substring-no-properties (or start (point-min))
+                                  (or end   (point-max))))
 
 (defun forge--uuid ()
   "Return string with random (version 4) UUID."
@@ -429,8 +479,10 @@ the mode requirement."
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
 ;; End:
 (provide 'forge-core)
 ;;; forge-core.el ends here

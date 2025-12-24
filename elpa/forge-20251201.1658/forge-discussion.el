@@ -106,20 +106,27 @@
 (cl-defmethod forge-get-repository ((post forge-discussion-post))
   (forge-get-repository (forge-get-discussion post)))
 
+(cl-defmethod forge-get-repository ((post forge-discussion-reply))
+  (forge-get-repository (forge-get-discussion post)))
+
 (cl-defmethod forge-get-topic ((post forge-discussion-post))
+  (forge-get-discussion post))
+
+(cl-defmethod forge-get-topic ((post forge-discussion-reply))
   (forge-get-discussion post))
 
 (cl-defmethod forge-get-discussion ((disc forge-discussion))
   disc)
 
 (cl-defmethod forge-get-discussion ((repo forge-repository) number)
+  (cl-assert (numberp number) t)
   (closql-get (forge-db)
               (forge--object-id 'forge-discussion repo number)
               'forge-discussion))
 
 (cl-defmethod forge-get-discussion ((number integer))
-  (and-let* ((repo (forge-get-repository :tracked nil 'notatpt)))
-    (forge-get-discussion repo number)))
+  (and$ (forge-get-repository :tracked nil 'notatpt)
+        (forge-get-discussion $ number)))
 
 (cl-defmethod forge-get-discussion ((id string))
   (closql-get (forge-db) id 'forge-discussion))
@@ -129,15 +136,10 @@
               (oref post discussion)
               'forge-discussion))
 
-;; (cl-defmethod forge-get-discussion ((post forge-discussion-reply))
-;;   (closql-get (forge-db)
-;;               (oref post discussion)
-;;               'forge-discussion))
-
-;; (cl-defmethod forge-get-discussion-post ((reply forge-discussion-reply))
-;;   (closql-get (forge-db)
-;;               (oref reply post)
-;;               'forge-discussion-post))
+(cl-defmethod forge-get-discussion ((post forge-discussion-reply))
+  (closql-get (forge-db)
+              (oref post discussion)
+              'forge-discussion))
 
 ;;;; Current
 
@@ -171,9 +173,9 @@ an error."
 
 (put 'forge-discussion 'thing-at-point #'forge-thingatpt--discussion)
 (defun forge-thingatpt--discussion ()
-  (and-let* (((thing-at-point-looking-at "#\\([0-9]+\\)\\_>"))
-             (number (string-to-number (match-string 1)))
-             (repo (forge--repo-for-thingatpt)))
+  (and-let ((_(thing-at-point-looking-at "#\\([0-9]+\\)\\_>"))
+            (number (string-to-number (match-string 1)))
+            (repo (forge--repo-for-thingatpt)))
     (forge-get-discussion repo number)))
 
 ;;; Read
@@ -208,9 +210,9 @@ can be selected from the start."
   (if-let ((post (forge-post-at-point)))
       (cond ((forge-discussion-p (forge-post-at-point))
              (user-error "Cannot pick the question as its own answer"))
-            ((and-let* ((answer (oref topic answer)))
-               (equal (oref post their-id)
-                      (forge--their-id answer)))
+            ((and$ (oref topic answer)
+                   (equal (oref post their-id)
+                          (forge--their-id $)))
              nil)
             (post))
     (user-error "Point must be on an reply to mark it as the answer")))
@@ -226,14 +228,17 @@ can be selected from the start."
                                       (substring text 0 (match-beginning 0))
                                     text))
                           answer)))))
+             (new-answer (cons "Add new top-level answer" forge-buffer-topic))
              (post (forge-post-at-point))
-             (answer (if (forge-discussion-reply-p post)
-                         (magit-section-parent-value
-                          (magit-current-section))
-                       post))
-             (default (and answer (funcall format-answer answer)))
-             (choices `(("Add new top-level answer" . ,forge-buffer-topic)
-                        ,@(mapcar format-answer answers))))
+             (default (cl-typecase post
+                        (forge-discussion-reply
+                         (funcall format-answer
+                                  (magit-section-parent-value
+                                   (magit-current-section))))
+                        (forge-discussion-post
+                         (funcall format-answer post))
+                        (forge-discussion new-answer)))
+             (choices (cons new-answer (mapcar format-answer answers))))
         (cdr (assoc (magit-completing-read "Reply to: "
                                            choices nil t nil nil default)
                     choices)))
@@ -258,11 +263,11 @@ can be selected from the start."
   "Insert a list of discussions, according to `forge--buffer-topics-spec'.
 Optional SPEC can be used to override that filtering specification,
 and optional HEADING to change the section heading."
-  (when-let (((forge-db t))
-             (repo (forge-get-repository :tracked?))
-             ((oref repo discussions-p))
-             (spec (if sspec spec (forge--clone-buffer-topics-spec)))
-             ((memq (oref spec type) '(topic discussion))))
+  (when-let* ((_(forge-db t))
+              (repo (forge-get-repository :tracked?))
+              (_(oref repo discussions-p))
+              (spec (if sspec spec (forge--clone-buffer-topics-spec)))
+              (_(memq (oref spec type) '(topic discussion))))
     (oset spec type 'discussion)
     (forge--insert-topics 'discussions
                           (or heading "Discussions")
@@ -271,8 +276,10 @@ and optional HEADING to change the section heading."
 ;;; _
 ;; Local Variables:
 ;; read-symbol-shorthands: (
-;;   ("partial" . "llama--left-apply-partially")
-;;   ("rpartial" . "llama--right-apply-partially"))
+;;   ("and$"          . "cond-let--and$")
+;;   ("and-let"       . "cond-let--and-let")
+;;   ("if-let"        . "cond-let--if-let")
+;;   ("when-let"      . "cond-let--when-let"))
 ;; End:
 (provide 'forge-discussion)
 ;;; forge-discussion.el ends here
