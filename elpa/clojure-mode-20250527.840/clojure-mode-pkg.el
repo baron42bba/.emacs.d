@@ -1,9 +1,9 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "clojure-mode" "20241211.1522"
+(define-package "clojure-mode" "20250527.840"
   "Major mode for Clojure code."
   '((emacs "25.1"))
   :url "https://github.com/clojure-emacs/clojure-mode"
-  :commit "76630045fb5b1660c91e2ab960f5636f4d567c47"
-  :revdesc "76630045fb5b"
+  :commit "d336db623e7ae8cffff50aaaea3f1b05cc4ccecb"
+  :revdesc "d336db623e7a"
   :keywords '("languages" "clojure" "clojurescript" "lisp")
   :maintainers '(("Bozhidar Batsov" . "bozhidar@batsov.dev")))

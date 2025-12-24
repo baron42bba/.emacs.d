@@ -95,9 +95,30 @@ Major mode for editing ClojureC code.
 \\{clojurec-mode-map}
 
 (fn)" t)
+(autoload 'clojuredart-mode "clojure-mode" "\
+Major mode for editing Clojure Dart code.
+
+\\{clojuredart-mode-map}
+
+(fn)" t)
+(autoload 'jank-mode "clojure-mode" "\
+Major mode for editing Jank code.
+
+\\{jank-mode-map}
+
+(fn)" t)
+(autoload 'joker-mode "clojure-mode" "\
+Major mode for editing Joker code.
+
+\\{joker-mode-map}
+
+(fn)" t)
 (add-to-list 'auto-mode-alist '("\\.\\(clj\\|cljd\\|dtm\\|edn\\|lpy\\)\\'" . clojure-mode))
 (add-to-list 'auto-mode-alist '("\\.cljc\\'" . clojurec-mode))
 (add-to-list 'auto-mode-alist '("\\.cljs\\'" . clojurescript-mode))
+(add-to-list 'auto-mode-alist '("\\.cljd\\'" . clojuredart-mode))
+(add-to-list 'auto-mode-alist '("\\.jank\\'" . jank-mode))
+(add-to-list 'auto-mode-alist '("\\.joke\\'" . joker-mode))
 (add-to-list 'auto-mode-alist '("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
 (add-to-list 'interpreter-mode-alist '("bb" . clojure-mode))
 (add-to-list 'interpreter-mode-alist '("nbb" . clojurescript-mode))
