@@ -5,8 +5,8 @@
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Created: 17 Nov 2012
-;; Package-Version: 20250511.2354
-;; Package-Revision: 603325ab3d11
+;; Package-Version: 20250612.1050
+;; Package-Revision: b629b4e893ba
 ;; Package-Requires: ((dash "2.13.0"))
 ;; Keywords: abbrev convenience editing
 ;; URL: https://github.com/Fuco1/smartparens

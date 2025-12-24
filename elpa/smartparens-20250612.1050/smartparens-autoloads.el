@@ -99,16 +99,16 @@ either customize it (see the info node `Easy Customization')
 or call the function `smartparens-global-strict-mode'.")
 (custom-autoload 'smartparens-global-strict-mode "smartparens" nil)
 (autoload 'smartparens-global-strict-mode "smartparens" "\
-Toggle Smartparens-Strict mode in all buffers.
+Toggle Smartparens-Strict mode in many buffers.
+Specifically, Smartparens-Strict mode is enabled in all buffers where
+`turn-on-smartparens-strict-mode' would do it.
+
 With prefix ARG, enable Smartparens-Global-Strict mode if ARG is
 positive; otherwise, disable it.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
-
-Smartparens-Strict mode is enabled in all buffers where
-`turn-on-smartparens-strict-mode' would do it.
 
 See `smartparens-strict-mode' for more information on
 Smartparens-Strict mode.
@@ -128,16 +128,16 @@ either customize it (see the info node `Easy Customization')
 or call the function `smartparens-global-mode'.")
 (custom-autoload 'smartparens-global-mode "smartparens" nil)
 (autoload 'smartparens-global-mode "smartparens" "\
-Toggle Smartparens mode in all buffers.
+Toggle Smartparens mode in many buffers.
+Specifically, Smartparens mode is enabled in all buffers where
+`turn-on-smartparens-mode' would do it.
+
 With prefix ARG, enable Smartparens-Global mode if ARG is positive;
 otherwise, disable it.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
-
-Smartparens mode is enabled in all buffers where
-`turn-on-smartparens-mode' would do it.
 
 See `smartparens-mode' for more information on Smartparens mode.
 
@@ -190,16 +190,16 @@ either customize it (see the info node `Easy Customization')
 or call the function `show-smartparens-global-mode'.")
 (custom-autoload 'show-smartparens-global-mode "smartparens" nil)
 (autoload 'show-smartparens-global-mode "smartparens" "\
-Toggle Show-Smartparens mode in all buffers.
+Toggle Show-Smartparens mode in many buffers.
+Specifically, Show-Smartparens mode is enabled in all buffers where
+`turn-on-show-smartparens-mode' would do it.
+
 With prefix ARG, enable Show-Smartparens-Global mode if ARG is
 positive; otherwise, disable it.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
-
-Show-Smartparens mode is enabled in all buffers where
-`turn-on-show-smartparens-mode' would do it.
 
 See `show-smartparens-mode' for more information on Show-Smartparens
 mode.
