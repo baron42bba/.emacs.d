@@ -17,9 +17,11 @@
 (require 'emacsql-sqlite)
 
 (require 'sqlite3 nil t)
-(declare-function sqlite3-open "ext:sqlite3-api")
-(declare-function sqlite3-exec "ext:sqlite3-api")
-(declare-function sqlite3-close "ext:sqlite3-api")
+;; Prevent check-declare from finding the defining file but then making
+;; noise because it fails to find the definition because it is a module.
+(declare-function sqlite3-open "ext:module:sqlite3-api")
+(declare-function sqlite3-exec "ext:module:sqlite3-api")
+(declare-function sqlite3-close "ext:module:sqlite3-api")
 (defvar sqlite-open-readwrite)
 (defvar sqlite-open-create)
 
@@ -55,8 +57,9 @@ buffer.  This is for debugging purposes."
   (and (oref connection handle) t))
 
 (cl-defmethod emacsql-close ((connection emacsql-sqlite-module-connection))
-  (sqlite3-close (oref connection handle))
-  (oset connection handle nil))
+  (when (oref connection handle)
+    (sqlite3-close (oref connection handle))
+    (oset connection handle nil)))
 
 (cl-defmethod emacsql-send-message
   ((connection emacsql-sqlite-module-connection) message)

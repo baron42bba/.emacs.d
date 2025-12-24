@@ -52,7 +52,7 @@
        debian-changelog-mode demo-it detached dired+ dired-git
        dired-hacks-utils dired-narrow direx docker-cli docker-tramp
        dockerfile-mode dwim-shell-command eat edit-indirect
-       editorconfig eglot ejc-sql eldoc elfeed elfeed-org
+       editorconfig eglot ejc-sql eldoc elfeed elfeed-org emacsql
        emacsql-sqlite engine-mode epoch-view erlang eshell-bookmark
        eshell-vterm ess expand-region f fast-scroll flycheck
        flycheck-mmark flymake flymake-easy flymake-json

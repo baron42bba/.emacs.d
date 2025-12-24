@@ -261,7 +261,7 @@ from bash.
 BUGBUG
 
 #+begin_src sql emacs-lisp :tangle no
-  (add-to-list 'load-path "~/.emacs.d/elpa/emacsql-20250401.1500")
+  (add-to-list 'load-path "~/.emacs.d/elpa/emacsql-20251130.1841")
   (require 'emacsql)
 
   (add-to-list 'load-path "~/.emacs.d/elpa/emacsql-sqlite-20230225.2205")
