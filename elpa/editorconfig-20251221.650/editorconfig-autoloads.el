@@ -66,27 +66,7 @@ Major mode for editing .editorconfig files.
 Return path to .editorconfig file that is closest to DIRECTORY.
 
 (fn DIRECTORY)")
-(autoload 'editorconfig-core-get-properties "editorconfig-core" "\
-Get EditorConfig properties for FILE.
-If FILE is not given, use currently visiting file.
-Give CONFNAME for basename of config file other than .editorconfig.
-If need to specify config format version, give CONFVERSION.
-
-This function returns an alist of properties.  Each element will
-look like (KEY . VALUE).
-
-(fn &optional FILE CONFNAME CONFVERSION)")
-(autoload 'editorconfig-core-get-properties-hash "editorconfig-core" "\
-Get EditorConfig properties for FILE.
-If FILE is not given, use currently visiting file.
-Give CONFNAME for basename of config file other than .editorconfig.
-If need to specify config format version, give CONFVERSION.
-
-This function is almost same as `editorconfig-core-get-properties', but returns
-hash object instead.
-
-(fn &optional FILE CONFNAME CONFVERSION)")
-(register-definition-prefixes "editorconfig-core" '("editorconfig-core--"))
+(register-definition-prefixes "editorconfig-core" '("editorconfig-core-"))
 
 
 ;;; Generated autoloads from editorconfig-core-handle.el
