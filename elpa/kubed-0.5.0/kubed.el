@@ -6,7 +6,7 @@
 ;; Maintainer: Eshel Yaron <~eshel/kubed-devel@lists.sr.ht>
 ;; Keywords: tools kubernetes containers
 ;; URL: https://eshelyaron.com/kubed.html
-;; Package-Version: 0.4.3
+;; Package-Version: 0.5.0
 ;; Package-Requires: ((emacs "29.1"))
 
 ;;; Commentary:
@@ -696,7 +696,7 @@ to 1."
                   #'previous-single-property-change)))
     (dotimes (_ times)
       (setq next (funcall dir-fn next 'tabulated-list-column-name))
-      (when (= (char-after next) ?\n)
+      (when (equal (char-after next) ?\n)
         ;; At line boundary, go to first/last column of next line.
         (setq next (funcall dir-fn next 'tabulated-list-column-name)))
       (unless next (user-error "End of table")))
@@ -943,6 +943,7 @@ number at point, or the numeric prefix argument if you provide one."
 (declare-function kubed-transient-logs-for-deployment  "kubed-transient" (val))
 (declare-function kubed-transient-logs-for-statefulset "kubed-transient" (val))
 (declare-function kubed-transient-logs-for-replicaset  "kubed-transient" (val))
+(declare-function kubed-transient-logs-for-daemonset   "kubed-transient" (val))
 (declare-function kubed-transient-logs-for-job         "kubed-transient" (val))
 (declare-function kubed-transient-logs-for-service     "kubed-transient" (val))
 
@@ -1673,10 +1674,33 @@ Interactively, use the current context.  With a prefix argument
                "\\)")
        1))
 
+(defconst kubed--hex-encoding-table
+  (let ((vec (make-vector 256 nil)))
+    (dotimes (byte 256) (aset vec byte (format ".%02X" byte))) vec))
+
+(defconst kubed--hex-allowed-chars-table
+  (let ((vec (make-vector 256 nil)))
+    (dolist (byte '( ?a ?b ?c ?d ?e ?f ?g ?h ?i ?j ?k ?l ?m ?n ?o ?p ?q ?r ?s ?t ?u ?v ?w ?x ?y ?z
+                     ?A ?B ?C ?D ?E ?F ?G ?H ?I ?J ?K ?L ?M ?N ?O ?P ?Q ?R ?S ?T ?U ?V ?W ?X ?Y ?Z
+                     ?0 ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9
+                     ?- ?_))
+      (ignore-errors (aset vec byte t)))
+    vec))
+
+(defun kubed--encode-context-name (str)
+  ;; Adopted from `url-hexify-string'.
+  (mapconcat (lambda (byte)
+	       (if (aref kubed--hex-allowed-chars-table byte)
+		   (char-to-string byte)
+		 (aref kubed--hex-encoding-table byte)))
+	     (if (multibyte-string-p str)
+		 (encode-coding-string str 'utf-8)
+	       str)))
+
 (defun kubed-remote-file-name (context namespace pod &optional file-name)
   "Return remote FILE-NAME for POD in NAMESPACE and CONTEXT."
   (concat "/" kubed-tramp-method ":"
-          context "%" namespace "%" pod
+          (kubed--encode-context-name context) "%" namespace "%" pod
           "%" (kubed-read-container pod "Container" t context namespace)
           ":" file-name))
 
@@ -2198,6 +2222,37 @@ optional command to run in the images."
      (creationtimestamp ".metadata.creationTimestamp" 20))
   :logs t)
 
+;;;###autoload (autoload 'kubed-display-daemonset "kubed" nil t)
+;;;###autoload (autoload 'kubed-edit-daemonset "kubed" nil t)
+;;;###autoload (autoload 'kubed-delete-daemonsets "kubed" nil t)
+;;;###autoload (autoload 'kubed-list-daemonsets "kubed" nil t)
+;;;###autoload (autoload 'kubed-create-daemonset "kubed" nil t)
+;;;###autoload (autoload 'kubed-logs-for-daemonset "kubed" nil t)
+;;;###autoload (autoload 'kubed-daemonset-prefix-map "kubed" nil t 'keymap)
+(kubed-define-resource daemonset
+    ((desired ".status.desiredNumberScheduled" 8
+              (lambda (l r) (< (string-to-number l) (string-to-number r)))
+              nil                          ; formatting function
+              :right-align t)
+     (current ".status.currentNumberScheduled" 8
+              (lambda (l r) (< (string-to-number l) (string-to-number r)))
+              nil                          ; formatting function
+              :right-align t)
+     (ready ".status.numberReady" 6
+              (lambda (l r) (< (string-to-number l) (string-to-number r)))
+              nil                          ; formatting function
+              :right-align t)
+     (updated ".status.updatedNumberScheduled" 8
+            (lambda (l r) (< (string-to-number l) (string-to-number r)))
+            nil                          ; formatting function
+            :right-align t)
+     (available ".status.numberAvailable" 10
+              (lambda (l r) (< (string-to-number l) (string-to-number r)))
+              nil                          ; formatting function
+              :right-align t)
+     (creationtimestamp ".metadata.creationTimestamp" 20))
+  :logs t)
+
 ;;;###autoload (autoload 'kubed-display-statefulset "kubed" nil t)
 ;;;###autoload (autoload 'kubed-edit-statefulset "kubed" nil t)
 ;;;###autoload (autoload 'kubed-delete-statefulsets "kubed" nil t)
@@ -2556,7 +2611,11 @@ prefix argument, prompt for CONTEXT as well."
             "config" "set-context" (or context "--current")
             "--namespace" namespace))
     (user-error "Failed to set Kubernetes namespace to `%s'" namespace))
-  (message "Kubernetes namespace is now `%s'." namespace))
+  (message "Default Kubernetes namespace%s is now `%s'."
+           (if context
+               (substitute-quotes (concat " for context `" context "'"))
+             "")
+           namespace))
 
 (defcustom kubed-read-resource-definition-filter-files-by-kind t
   "Whether to filter file completion candidates by their Kubernetes \"kind\".
@@ -3473,6 +3532,7 @@ Interactively, prompt for COMMAND with completion for `kubectl' arguments."
   "<job>"              '("Jobs..."               . kubed-job-menu-map)
   "<deployment>"       '("Deployments..."        . kubed-deployment-menu-map)
   "<replicaset>"       '("Replica Sets..."       . kubed-replicaset-menu-map)
+  "<daemonset>"        '("Daemon Sets..."        . kubed-daemonset-menu-map)
   "<statefulset>"      '("Stateful Sets..."      . kubed-statefulset-menu-map)
   "<cronjob>"          '("Cron Jobs..."          . kubed-cronjob-menu-map)
   "<ingressclass>"     '("Ingress Classes..."    . kubed-ingressclass-menu-map)
