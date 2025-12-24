@@ -1,12 +1,12 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "closql" "20250301.2221"
+(define-package "closql" "20250913.1926"
   "Store EIEIO objects using EmacSQL."
-  '((emacs   "26.1")
-    (compat  "30.0.2.0")
-    (emacsql "4.2.0"))
+  '((emacs   "28.1")
+    (compat  "30.1")
+    (emacsql "4.3"))
   :url "https://github.com/emacscollective/closql"
-  :commit "dc7924c1d206483a2555a98470c96fadf419f32d"
-  :revdesc "dc7924c1d206"
+  :commit "f5dd024c47b792dac499dac94c906af60044d2ad"
+  :revdesc "f5dd024c47b7"
   :keywords '("extensions")
   :authors '(("Jonas Bernoulli" . "emacs.closql@jonas.bernoulli.dev"))
   :maintainers '(("Jonas Bernoulli" . "emacs.closql@jonas.bernoulli.dev")))

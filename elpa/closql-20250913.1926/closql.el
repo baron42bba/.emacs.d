@@ -6,12 +6,12 @@
 ;; Homepage: https://github.com/emacscollective/closql
 ;; Keywords: extensions
 
-;; Package-Version: 20250301.2221
-;; Package-Revision: dc7924c1d206
+;; Package-Version: 20250913.1926
+;; Package-Revision: f5dd024c47b7
 ;; Package-Requires: (
-;;     (emacs "26.1")
-;;     (compat "30.0.2.0")
-;;     (emacsql "4.2.0"))
+;;     (emacs "28.1")
+;;     (compat "30.1")
+;;     (emacsql "4.3"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -45,10 +45,6 @@
 (require 'emacsql-sqlite)
 
 (eval-when-compile (require 'subr-x))
-
-(eval-and-compile
-  (unless (boundp 'eieio--unbound) ; New name since Emacs 28.1.
-    (defvaralias 'eieio--unbound 'eieio-unbound nil)))
 
 (eval-when-compile
   (cl-pushnew 'connection eieio--known-slot-names))
@@ -278,7 +274,7 @@
     (:after (cname _superclasses slots _options) closql-object)
   "Handle additional slot properties used by `closql-object' derived classes."
   (when-let* ((class (cl--find-class cname))
-              ((child-of-class-p class 'closql-object)))
+              (_(child-of-class-p class 'closql-object)))
     (pcase-dolist (`(,name . ,slot) slots)
       (let ((desc (cl-find name
                            (cl-coerce (eieio--class-slots class) 'list)
@@ -399,11 +395,7 @@
                (pcase-let ((`(,class ,_db . ,values)
                             (closql--intern-unbound
                              (closql--coerce obj 'list))))
-                 (vconcat (cons (closql--abbrev-class
-                                 (if (eieio--class-p class)    ; see 7db24ab
-                                     (eieio--class-name class) ; Emacs 26
-                                   class))                     ; Emacs 27+
-                                values))))
+                 (vconcat (cons (closql--abbrev-class class) values))))
       (pcase-dolist (`(,slot . ,value) alist)
         (closql-dset obj slot value))))
   obj)
@@ -592,16 +584,15 @@
 
 (cl-defmethod closql--list-subabbrevs ((class (subclass closql-object))
                                        &optional wildcards)
-  (cl-labels
-      ((types (class)
-         (let ((children (eieio--class-children (cl--find-class class)))
-               ;; An abstract base-class may violate its own naming rules.
-               (abbrev (ignore-errors (closql--abbrev-class class))))
-           (nconc (and (not (class-abstract-p class)) (list abbrev))
-                  (and wildcards children
-                       (list (if abbrev (intern (format "%s*" abbrev)) '*)))
-                  (mapcan #'types children)))))
-    (sort (types class) #'string<)))
+  (sort (named-let types ((class class))
+          (let ((children (eieio--class-children (cl--find-class class)))
+                ;; An abstract base-class may violate its own naming rules.
+                (abbrev (ignore-errors (closql--abbrev-class class))))
+            (nconc (and (not (class-abstract-p class)) (list abbrev))
+                   (and wildcards children
+                        (list (if abbrev (intern (format "%s*" abbrev)) '*)))
+                   (mapcan #'types children))))
+        #'string<))
 
 (cl-defmethod closql--set-object-class ((db closql-database) obj class)
   (let* ((table (oref-default obj closql-table))
