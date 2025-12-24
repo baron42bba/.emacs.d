@@ -27,7 +27,7 @@ Ghub User and Developer Manual
 Ghub is an Emacs library that is used by various packages to access the
 APIs of various instances of various Git forge implementations.
 
-This manual is for Ghub version 4.3.1.
+This manual is for Ghub version 5.0.2.
 
      Copyright (C) 2017-2025 Jonas Bernoulli
      <emacs.ghub@jonas.bernoulli.dev>
@@ -66,7 +66,6 @@ API
 * Making REST Requests::
 * Making GraphQL Requests::
 * Github Convenience Wrappers::
-* Non-Github Convenience Wrappers::
 
 Notes
 
@@ -180,12 +179,12 @@ For ‘gitlab’ and ‘bitbucket’ forges similar variables are available:
    • ‘gitlab.HOST.user’ specifies the user for the HOST ‘gitlab’
      instance.
    • ‘gitlab.host’ specifies the ‘gitlab’ host, unless the HOST argument
-     is non-nil
+     is non-‘nil’
    • ‘bitbucket.user’ specifies the <https://bitbucket.org> user.
    • ‘bitbucket.HOST.user’ specifies the user for the HOST ‘bitbucket’
      instance.
    • ‘bitbucket.host’ specifies the ‘bitbucket’ host, unless the HOST
-     argument is non-nil.
+     argument is non-‘nil’.
 
    For the ‘gitea’ and ‘gogs’ forges some similar variables are
 available, however for some of the ‘ghub.*’ variables no equivalent
@@ -195,12 +194,12 @@ variable exist for these two forges:
      exists.
    • ‘gitea.HOST.user’ specifies the user for the HOST ‘gitea’ instance.
    • ‘gitea.host’ specifies the ‘gitea’ host, unless the HOST argument
-     is non-nil
+     is non-‘nil’
    • ‘gogs.user’ is *not* used because no canonical ‘gogs’ instance
      exists.
    • ‘gogs.HOST.user’ specifies the user for the HOST ‘gogs’ instance.
    • ‘gogs.host’ specifies the ‘gogs’ host, unless the HOST argument is
-     non-nil
+     non-‘nil’
 
 
 File: ghub.info,  Node: Setting the Username,  Next: Creating and Storing a Token,  Prev: Basic Concepts Arguments and Variables,  Up: Getting Started
@@ -297,7 +296,7 @@ To create a token, use the web interface of the host you want to connect
 to.  Here is a list of pages to do this for certain popular hosts:
 
    • <https://github.com/settings/tokens>
-   • <https://gitlab.com/-/profile/personal_access_tokens>
+   • <https://gitlab.com/-/user_settings/personal_access_tokens>
 
    For other forges we cannot provide a functioning URL because they
 contain unknown values such as your name.  Just go to the general
@@ -405,7 +404,6 @@ File: ghub.info,  Node: API,  Next: Notes,  Prev: Getting Started,  Up: Top
 * Making REST Requests::
 * Making GraphQL Requests::
 * Github Convenience Wrappers::
-* Non-Github Convenience Wrappers::
 
 
 File: ghub.info,  Node: Their APIs,  Next: Making REST Requests,  Up: API
@@ -418,17 +416,17 @@ supports, but for your convenience, here are the links to their API
 manuals:
 
    • Github:
-        • <https://developer.github.com/v4> (GraphQl)
-        • <https://developer.github.com/v3> (REST)
+        • <https://docs.github.com/en/graphql> (GraphQl)
+        • <https://docs.github.com/en/rest> (REST)
    • Gitlab:
-        • <https://docs.gitlab.com/ee/api/README.html>
+        • <https://docs.gitlab.com/api>
    • Gitea:
-        • <https://docs.gitea.io/en-us/api-usage>
-        • <https://try.gitea.io/api/swagger>
+        • <https://docs.gitea.com/next/development/api-usage>
+        • <https://demo.gitea.com>
    • Gogs:
-        • <https://github.com/gogs/go-gogs-client/wiki>
+        • <https://gogs.io/docs>
    • Bitbucket:
-        • <https://developer.atlassian.com/bitbucket/api/2/reference>
+        • <https://developer.atlassian.com/cloud/bitbucket>
 
 
 File: ghub.info,  Node: Making REST Requests,  Next: Making GraphQL Requests,  Prev: Their APIs,  Up: API
@@ -474,24 +472,24 @@ File: ghub.info,  Node: Making REST Requests,  Next: Making GraphQL Requests,  P
                or payload.  When that is the case, then the Github API
                documentation usually mentions it explicitly.
 
-        • If ‘SILENT’ is non-nil, then progress reports and the like are
-          not messaged.
+        • If ‘SILENT’ is non-‘nil’, then progress reports and the like
+          are not messaged.
 
-        • If ‘UNPAGINATE’ is t, then this function makes as many
+        • If ‘UNPAGINATE’ is ‘t’, then this function makes as many
           requests as necessary to get all values.  If ‘UNPAGINATE’ is a
           natural number, then it gets at most that many pages.  For any
-          other non-nil value it raises an error.
+          other non-‘nil’ value it raises an error.
 
-        • If ‘NOERROR’ is non-nil, then no error is raised if the
+        • If ‘NOERROR’ is non-‘nil’, then no error is raised if the
           request fails and ‘nil’ is returned instead.  If ‘NOERROR’ is
           ‘return’, then the error payload is returned instead of ‘nil’.
 
-        • If ‘READER’ is non-nil, then it is used to read and return
+        • If ‘READER’ is non-‘nil’, then it is used to read and return
           from the response buffer.  The default is
           ‘ghub--read-json-payload’.  For the very few resources that do
           not return JSON, you might want to use ‘ghub--decode-payload’.
 
-        • If ‘USERNAME’ is non-nil, then the request is made on behalf
+        • If ‘USERNAME’ is non-‘nil’, then the request is made on behalf
           of that user.  It is better to specify the user using the Git
           variable ‘github.user’ for "api.github.com", or
           ‘github.HOST.user’ if connecting to a Github Enterprise
@@ -520,25 +518,22 @@ File: ghub.info,  Node: Making REST Requests,  Next: Making GraphQL Requests,  P
           if that is not specified.  See ‘ghub-github-token-scopes’ for
           an example.
 
-        • If ‘HOST’ is non-nil, then connect to that Github instance.
+        • If ‘HOST’ is non-‘nil’, then connect to that Github instance.
           This defaults to "api.github.com".  When a repository is
           connected to a Github Enterprise instance, then it is better
           to specify that using the Git variable ‘github.host’ instead
           of using this argument.
 
         • If ‘FORGE’ is ‘gitlab’, then connect to Gitlab.com or,
-          depending on ‘HOST’, to another Gitlab instance.  This is only
-          intended for internal use.  Instead of using this argument you
-          should use function ‘glab-request’ and other ‘glab-*’
-          functions.
+          depending on ‘HOST’, to another Gitlab instance.
 
-        • If ‘CALLBACK’ and/or ‘ERRORBACK’ is non-nil, then this
+        • If ‘CALLBACK’ and/or ‘ERRORBACK’ is non-‘nil’, then this
           function makes one or more asynchronous requests and calls
           ‘CALLBACK’ or ‘ERRORBACK’ when finished.  If no error
           occurred, then it calls ‘CALLBACK’, unless that is ‘nil’.
 
           If an error occurred, then it calls ‘ERRORBACK’, or if that is
-          nil, then ‘CALLBACK’.  ‘ERRORBACK’ can also be ‘t’, in which
+          ‘nil’, then ‘CALLBACK’.  ‘ERRORBACK’ can also be ‘t’, in which
           case it signals instead.  ‘NOERROR’ is ignored for all
           asynchronous requests.
 
@@ -560,8 +555,9 @@ File: ghub.info,  Node: Making REST Requests,  Next: Making GraphQL Requests,  P
 
      This function is only intended to be called from callbacks.  If
      there is a next page, then that is retrieved and the buffer that
-     the result will be loaded into is returned, or t if the process has
-     already completed.  If there is no next page, then return nil.
+     the result will be loaded into is returned, or ‘t’ if the process
+     has already completed.  If there is no next page, then return
+     ‘nil’.
 
      Callbacks are called with four arguments (see ‘ghub-request’).  The
      forth argument is a ‘ghub--req’ struct, intended to be passed to
@@ -606,7 +602,7 @@ File: ghub.info,  Node: Making REST Requests,  Next: Making GraphQL Requests,  P
 
  -- Function: ghub-response-link-relations req headers payload
      This function returns an alist of the link relations in ‘HEADERS’,
-     or if optional ‘HEADERS’ is nil, then those in
+     or if optional ‘HEADERS’ is ‘nil’, then those in
      ‘ghub-response-headers’.
 
      When accessing a Bitbucket instance then the link relations are in
@@ -708,7 +704,7 @@ instead implement something more powerful, though also more opinionated.
      again that you already have.
 
      Other arguments behave as for ‘ghub-graphql’ and ‘ghub-request’,
-     more or less.  If ‘CALLBACK’ is nil, pretty-print the response.
+     more or less.  If ‘CALLBACK’ is ‘nil’, pretty-print the response.
 
    Using ‘ghub--graphql-vacuum’, the following resource specific
 functions are implemented.  These functions are not part of the public
@@ -741,7 +737,7 @@ unpaginating, but as demonstrated here they can be useful even before
 making an initial request.
 
 
-File: ghub.info,  Node: Github Convenience Wrappers,  Next: Non-Github Convenience Wrappers,  Prev: Making GraphQL Requests,  Up: API
+File: ghub.info,  Node: Github Convenience Wrappers,  Prev: Making GraphQL Requests,  Up: API
 
 3.4 Github Convenience Wrappers
 ===============================
@@ -813,114 +809,6 @@ File: ghub.info,  Node: Github Convenience Wrappers,  Next: Non-Github Convenien
 
      See ‘ghub-request’’s documentation above for information about the
      other arguments.
-
-
-File: ghub.info,  Node: Non-Github Convenience Wrappers,  Prev: Github Convenience Wrappers,  Up: API
-
-3.5 Non-Github Convenience Wrappers
-===================================
-
-‘ghub-request’ and ‘ghub-METHOD’ can be used to make a request for any
-of the supported forge types, but except when making a request for a
-‘github’ instance, then that requires the use of the FORGE argument.
-
-   To avoid that, functions named ‘FORGE-request’ and ‘FORGE-METHOD’ are
-also available.  The following forms are equivalent, for example:
-
-     (ghub-get ... :auth 'PACKAGE :forge 'gitlab)
-     (glab-get ... :auth 'PACKAGE)
-
-   These forms would remain equivalent even if you did not specify a
-value for the AUTH arguments — but you should not do that if you plan to
-share your code with others (see *note Using Ghub in Your Own
-Package::).  If you do omit AUTH, then the request is made on behalf of
-the ‘ghub’ package, *regardless* of the symbol prefix of the function
-you use to do so.
-
-   All ‘FORGE-request’ and ‘FORGE-METHOD’ functions, including but not
-limited to ‘ghub-METHOD’, are very simple wrappers around
-‘ghub-request’.  They take fewer arguments than ‘ghub-request’ and
-instead pass constant values for the arguments METHOD and/or FORGE.
-
- -- Function: buck-request resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-request resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gogs-request resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
-     Wrappers around ‘ghub-request’ which hardcode the FORGE to either
-     ‘bitbucket’, ‘gitlab’, ‘gogs’ or ‘gitea’.
-
- -- Function: buck-get resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: buck-put resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: buck-post resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: buck-delete resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-head resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-get resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-put resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-post resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-patch resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: glab-delete resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gogs-get resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gogs-put resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gogs-post resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gogs-patch resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gogs-delete resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gtea-get resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gtea-put resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gtea-post resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gtea-patch resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
- -- Function: gtea-delete resource &optional params &key query payload
-          headers unpaginate noerror reader username auth host callback
-          errorback
-     Wrappers around ‘FORGE-METHOD’ which hardcode the FORGE to either
-     ‘bitbucket’, ‘gitlab’, ‘gogs’ or ‘gitea’, and the METHOD to the
-     implied method.
-
-     Note that ‘buck-head’, ‘buck-patch’, ‘gogs-head’ and ‘gtea-head’ do
-     not exist because the respective APIs do not appear to support
-     these methods.
 
 
 File: ghub.info,  Node: Notes,  Next: Function Index,  Prev: API,  Up: Top
@@ -1002,7 +890,8 @@ File: ghub.info,  Node: Forge Limitations and Notes,  Prev: Using Ghub in Your O
    • Where one would use ‘user/repo’ when accessing another forge, one
      has to use ‘user%2Frepo’ when accessing Gitlab, e.g.:
 
-          (glab-get "/projects/python-mode-devs%2Fpython-mode")
+          (ghub-get "/projects/python-mode-devs%2Fpython-mode"
+                    nil :forge 'gitlab)
 
 
 File: ghub.info,  Node: Function Index,  Next: Variable Index,  Prev: Notes,  Up: Top
@@ -1013,20 +902,10 @@ Appendix A Function Index
  [index ]
 * Menu:
 
-* buck-delete:                           Non-Github Convenience Wrappers.
-                                                              (line  49)
-* buck-get:                              Non-Github Convenience Wrappers.
-                                                              (line  40)
-* buck-post:                             Non-Github Convenience Wrappers.
-                                                              (line  46)
-* buck-put:                              Non-Github Convenience Wrappers.
-                                                              (line  43)
-* buck-request:                          Non-Github Convenience Wrappers.
-                                                              (line  28)
 * ghub--graphql-vacuum:                  Making GraphQL Requests.
                                                               (line  56)
 * ghub-continue:                         Making REST Requests.
-                                                              (line 125)
+                                                              (line 122)
 * ghub-delete:                           Github Convenience Wrappers.
                                                               (line  31)
 * ghub-fetch-issue:                      Making GraphQL Requests.
@@ -1050,45 +929,9 @@ Appendix A Function Index
 * ghub-request:                          Making REST Requests.
                                                               (line   6)
 * ghub-response-link-relations:          Making REST Requests.
-                                                              (line 174)
+                                                              (line 172)
 * ghub-wait:                             Github Convenience Wrappers.
                                                               (line  44)
-* glab-delete:                           Non-Github Convenience Wrappers.
-                                                              (line  67)
-* glab-get:                              Non-Github Convenience Wrappers.
-                                                              (line  55)
-* glab-head:                             Non-Github Convenience Wrappers.
-                                                              (line  52)
-* glab-patch:                            Non-Github Convenience Wrappers.
-                                                              (line  64)
-* glab-post:                             Non-Github Convenience Wrappers.
-                                                              (line  61)
-* glab-put:                              Non-Github Convenience Wrappers.
-                                                              (line  58)
-* glab-request:                          Non-Github Convenience Wrappers.
-                                                              (line  31)
-* gogs-delete:                           Non-Github Convenience Wrappers.
-                                                              (line  82)
-* gogs-get:                              Non-Github Convenience Wrappers.
-                                                              (line  70)
-* gogs-patch:                            Non-Github Convenience Wrappers.
-                                                              (line  79)
-* gogs-post:                             Non-Github Convenience Wrappers.
-                                                              (line  76)
-* gogs-put:                              Non-Github Convenience Wrappers.
-                                                              (line  73)
-* gogs-request:                          Non-Github Convenience Wrappers.
-                                                              (line  34)
-* gtea-delete:                           Non-Github Convenience Wrappers.
-                                                              (line  97)
-* gtea-get:                              Non-Github Convenience Wrappers.
-                                                              (line  85)
-* gtea-patch:                            Non-Github Convenience Wrappers.
-                                                              (line  94)
-* gtea-post:                             Non-Github Convenience Wrappers.
-                                                              (line  91)
-* gtea-put:                              Non-Github Convenience Wrappers.
-                                                              (line  88)
 
 
 File: ghub.info,  Node: Variable Index,  Prev: Function Index,  Up: Top
@@ -1100,7 +943,7 @@ Appendix B Variable Index
 * Menu:
 
 * ghub-response-headers:                 Making REST Requests.
-                                                              (line 165)
+                                                              (line 163)
 * github.host:                           Github Configuration Variables.
                                                               (line  26)
 * github.HOST.user:                      Github Configuration Variables.
@@ -1112,30 +955,29 @@ Appendix B Variable Index
 
 Tag Table:
 Node: Top773
-Node: Introduction2243
-Node: Getting Started2648
-Node: Basic Concepts Arguments and Variables3675
-Node: Setting the Username7655
-Ref: Setting your Githubcom Username8143
-Ref: Setting your Gitlabcom Username8499
-Ref: Setting your Github Enterprise Username8965
-Ref: Setting your Username for Other Hosts and/or Forges9698
-Node: Creating and Storing a Token10504
-Ref: Creating a Token10717
-Ref: Storing a Token11628
-Node: Github Configuration Variables13371
-Node: API15082
-Node: Their APIs15320
-Node: Making REST Requests16045
-Node: Making GraphQL Requests25458
-Node: Github Convenience Wrappers32141
-Node: Non-Github Convenience Wrappers35845
-Node: Notes41349
-Node: Using Ghub in Personal Scripts41556
-Node: Using Ghub in Your Own Package42447
-Node: Forge Limitations and Notes43382
-Node: Function Index44355
-Node: Variable Index50004
+Node: Introduction2207
+Node: Getting Started2612
+Node: Basic Concepts Arguments and Variables3639
+Node: Setting the Username7643
+Ref: Setting your Githubcom Username8131
+Ref: Setting your Gitlabcom Username8487
+Ref: Setting your Github Enterprise Username8953
+Ref: Setting your Username for Other Hosts and/or Forges9686
+Node: Creating and Storing a Token10492
+Ref: Creating a Token10705
+Ref: Storing a Token11622
+Node: Github Configuration Variables13365
+Node: API15076
+Node: Their APIs15278
+Node: Making REST Requests15960
+Node: Making GraphQL Requests25270
+Node: Github Convenience Wrappers31959
+Node: Notes35623
+Node: Using Ghub in Personal Scripts35830
+Node: Using Ghub in Your Own Package36721
+Node: Forge Limitations and Notes37656
+Node: Function Index38668
+Node: Variable Index40936
 
 End Tag Table
 

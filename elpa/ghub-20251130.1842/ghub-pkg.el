@@ -1,14 +1,14 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "ghub" "20250509.1440"
+(define-package "ghub" "20251130.1842"
   "Client libraries for Git forge APIs."
-  '((emacs     "29.1")
-    (compat    "30.1.0.0")
-    (let-alist "1.0.6")
-    (llama     "0.6.2")
-    (treepy    "0.1.2"))
+  '((emacs    "29.1")
+    (compat   "30.1")
+    (cond-let "0.2")
+    (llama    "1.0")
+    (treepy   "0.1.2"))
   :url "https://github.com/magit/ghub"
-  :commit "6bb612e7b7eada22569d84cc529f4ca36e08032d"
-  :revdesc "6bb612e7b7ea"
+  :commit "9f416605d560ed2a6b62a87d1f624549901b1102"
+  :revdesc "9f416605d560"
   :keywords '("tools")
   :authors '(("Jonas Bernoulli" . "emacs.ghub@jonas.bernoulli.dev"))
   :maintainers '(("Jonas Bernoulli" . "emacs.ghub@jonas.bernoulli.dev")))

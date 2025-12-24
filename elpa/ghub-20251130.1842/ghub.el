@@ -6,13 +6,13 @@
 ;; Homepage: https://github.com/magit/ghub
 ;; Keywords: tools
 
-;; Package-Version: 20250509.1440
-;; Package-Revision: 6bb612e7b7ea
+;; Package-Version: 20251130.1842
+;; Package-Revision: 9f416605d560
 ;; Package-Requires: (
-;;     (emacs "29.1")
-;;     (compat "30.1.0.0")
-;;     (let-alist "1.0.6")
-;;     (llama "0.6.2")
+;;     (emacs   "29.1")
+;;     (compat  "30.1")
+;;     (cond-let "0.2")
+;;     (llama    "1.0")
 ;;     (treepy "0.1.2"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
@@ -39,10 +39,7 @@
 
 ;; Ghub abstracts access to API resources using only a handful of basic
 ;; functions such as `ghub-get'.  These are convenience wrappers around
-;; `ghub-request'.  Additional forge-specific wrappers like `glab-put',
-;; `gtea-put', `gogs-post' and `buck-delete' are also available.  Ghub
-;; does not provide any resource-specific functions, with the exception
-;; of `FORGE-repository-id'.
+;; `ghub-request'.
 
 ;; When accessing Github, then Ghub handles the creation and storage of
 ;; access tokens using a setup wizard to make it easier for users to get
@@ -62,6 +59,7 @@
 (require 'auth-source)
 (require 'cl-lib)
 (require 'compat)
+(require 'cond-let)
 (require 'gnutls)
 (require 'let-alist)
 (require 'llama)
@@ -71,11 +69,6 @@
 
 (eval-when-compile (require 'subr-x))
 
-(declare-function glab-repository-id "glab" (owner name &key username auth host))
-(declare-function gtea-repository-id "gtea" (owner name &key username auth host))
-(declare-function gogs-repository-id "gogs" (owner name &key username auth host))
-(declare-function buck-repository-id "buck" (owner name &key username auth host))
-
 (defvar url-callback-arguments)
 (defvar url-http-end-of-headers)
 (defvar url-http-extra-headers)
@@ -83,8 +76,13 @@
 
 ;;; Settings
 
-(defconst ghub-default-host "api.github.com"
-  "The default host that is used if `ghub.host' is not set.")
+(defvar ghub-default-host-alist
+  '((github    . "api.github.com")
+    (gitlab    . "gitlab.com/api/v4")
+    (gitea     . "localhost:3000/api/v1")
+    (gogs      . "localhost:3000/api/v1")
+    (bitbucket . "api.bitbucket.org/2.0"))
+  "Alist of default hosts used when the respective `FORGE.host' is not set.")
 
 (defvar ghub-github-token-scopes '(repo)
   "The Github API scopes that your private tools need.
@@ -105,20 +103,21 @@ only serves as documentation.")
 (cl-defstruct (ghub--req
                (:constructor ghub--make-req)
                (:copier nil))
-  (url        nil :read-only nil)
-  (forge      nil :read-only t)
-  (silent     nil :read-only t)
-  (method     nil :read-only t)
-  (headers    nil :read-only t)
-  (handler    nil :read-only t)
-  (unpaginate nil :read-only nil)
-  (noerror    nil :read-only t)
-  (reader     nil :read-only t)
-  (buffer     nil :read-only t)
-  (callback   nil :read-only t)
-  (errorback  nil :read-only t)
-  (value      nil :read-only nil)
-  (extra      nil :read-only nil))
+  (url         nil :read-only nil)
+  (forge       nil :read-only t)
+  (silent      nil :read-only t)
+  (method      nil :read-only t)
+  (headers     nil :read-only t)
+  (handler     nil :read-only t)
+  (unpaginate  nil :read-only nil)
+  (noerror     nil :read-only t)
+  (reader      nil :read-only t)
+  (buffer      nil :read-only t)
+  (synchronous nil :read-only t)
+  (callback    nil :read-only t)
+  (errorback   nil :read-only t)
+  (value       nil :read-only nil)
+  (extra       nil :read-only nil))
 
 (defalias 'ghub-req-extra #'ghub--req-extra)
 
@@ -151,7 +150,7 @@ Like calling `ghub-request' (which see) with \"HEAD\" as METHOD."
                     &optional params
                     &key query payload headers
                     silent unpaginate noerror reader
-                    username auth host
+                    username auth host forge
                     callback errorback extra)
   "Make a `GET' request for RESOURCE, with optional query PARAMS.
 Like calling `ghub-request' (which see) with \"GET\" as METHOD."
@@ -159,14 +158,14 @@ Like calling `ghub-request' (which see) with \"GET\" as METHOD."
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
-                :username username :auth auth :host host
+                :username username :auth auth :host host :forge forge
                 :callback callback :errorback errorback :extra extra))
 
 (cl-defun ghub-put (resource
                     &optional params
                     &key query payload headers
                     silent unpaginate noerror reader
-                    username auth host
+                    username auth host forge
                     callback errorback extra)
   "Make a `PUT' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"PUT\" as METHOD."
@@ -174,14 +173,14 @@ Like calling `ghub-request' (which see) with \"PUT\" as METHOD."
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
-                :username username :auth auth :host host
+                :username username :auth auth :host host :forge forge
                 :callback callback :errorback errorback :extra extra))
 
 (cl-defun ghub-post (resource
                      &optional params
                      &key query payload headers
                      silent unpaginate noerror reader
-                     username auth host
+                     username auth host forge
                      callback errorback extra)
   "Make a `POST' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"POST\" as METHOD."
@@ -189,14 +188,14 @@ Like calling `ghub-request' (which see) with \"POST\" as METHOD."
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
-                :username username :auth auth :host host
+                :username username :auth auth :host host :forge forge
                 :callback callback :errorback errorback :extra extra))
 
 (cl-defun ghub-patch (resource
                       &optional params
                       &key query payload headers
                       silent unpaginate noerror reader
-                      username auth host
+                      username auth host forge
                       callback errorback extra)
   "Make a `PATCH' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"PATCH\" as METHOD."
@@ -204,14 +203,14 @@ Like calling `ghub-request' (which see) with \"PATCH\" as METHOD."
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
-                :username username :auth auth :host host
+                :username username :auth auth :host host :forge forge
                 :callback callback :errorback errorback :extra extra))
 
 (cl-defun ghub-delete (resource
                        &optional params
                        &key query payload headers
                        silent unpaginate noerror reader
-                       username auth host
+                       username auth host forge
                        callback errorback extra)
   "Make a `DELETE' request for RESOURCE, with optional payload PARAMS.
 Like calling `ghub-request' (which see) with \"DELETE\" as METHOD."
@@ -219,7 +218,7 @@ Like calling `ghub-request' (which see) with \"DELETE\" as METHOD."
                 :query query :payload payload :headers headers
                 :silent silent :unpaginate unpaginate
                 :noerror noerror :reader reader
-                :username username :auth auth :host host
+                :username username :auth auth :host host :forge forge
                 :callback callback :errorback errorback :extra extra))
 
 (cl-defun ghub-request ( method resource
@@ -295,10 +294,9 @@ If HOST is non-nil, then connect to that Github instance.  This
   that using the Git variable `github.host' instead of using this
   argument.
 
-If FORGE is `gitlab', then connect to Gitlab.com or, depending
-  on HOST, to another Gitlab instance.  This is only intended for
-  internal use.  Instead of using this argument you should use
-  function `glab-request' and other `glab-*' functions.
+If optional FORGE is nil, then it is assumed that HOST is a
+  Github host.  When connecting to another forge type, then
+  FORGE must be one of `gitlab', `gitea', `gogs' or `bitbucket'.
 
 If CALLBACK and/or ERRORBACK is non-nil, then make one or more
   asynchronous requests and call CALLBACK or ERRORBACK when
@@ -320,6 +318,7 @@ Both callbacks are called with four arguments.
      argument.
   4. A `ghub--req' struct, which can be passed to `ghub-continue'
      (which see) to retrieve the next page, if any."
+  (declare (indent defun))
   (cl-assert (or (booleanp unpaginate) (natnump unpaginate)))
   (unless (string-prefix-p "/" resource)
     (setq resource (concat "/" resource)))
@@ -343,33 +342,21 @@ Both callbacks are called with four arguments.
   (ghub--retrieve
    (ghub--encode-payload payload)
    (ghub--make-req
-    :url (url-generic-parse-url
-          (concat (if (member host ghub-insecure-hosts) "http://" "https://")
-                  (cond ((and (equal resource "/graphql")
-                              (string-suffix-p "/v3" host))
-                         ;; Needed for some Github Enterprise instances.
-                         (substring host 0 -3))
-                        ((and (equal resource "/api/graphql")
-                              (string-suffix-p "/api/v4" host))
-                         ;; Needed for all Gitlab instances.
-                         (substring host 0 -7))
-                        (host))
-                  resource
-                  (and query (concat "?" (ghub--url-encode-params query)))))
-    :forge forge
-    :silent silent
-    ;; Encode in case caller used (symbol-name 'GET). #35
-    :method     (encode-coding-string method 'utf-8)
-    :headers    (ghub--headers headers host auth username forge)
-    :handler    #'ghub--handle-response
-    :unpaginate unpaginate
-    :noerror    noerror
-    :reader     reader
-    :buffer     (current-buffer)
-    :callback   callback
-    :errorback  errorback
-    :value      value
-    :extra      extra)))
+    :url         (ghub--encode-url host resource query)
+    :forge       forge
+    :silent      silent
+    :method      (encode-coding-string method 'utf-8) ;#35
+    :headers     (ghub--headers headers host auth username forge)
+    :handler     #'ghub--handle-response
+    :unpaginate  unpaginate
+    :noerror     noerror
+    :reader      reader
+    :buffer      (current-buffer)
+    :synchronous (not (or callback errorback))
+    :callback    callback
+    :errorback   errorback
+    :value       value
+    :extra       extra)))
 
 (defun ghub-continue (req)
   "If there is a next page, then retrieve that.
@@ -454,43 +441,61 @@ this function is called with nil for PAYLOAD."
 (cl-defun ghub-repository-id (owner name &key username auth host forge noerror)
   "Return the id of the specified repository.
 Signal an error if the id cannot be determined."
-  (let ((fn (cl-case forge
-              ((nil ghub github) #'ghub--repository-id)
-              (gitlab            #'glab-repository-id)
-              (gitea             #'gtea-repository-id)
-              (gogs              #'gogs-repository-id)
-              (bitbucket         #'buck-repository-id)
-              (t (intern (format "%s-repository-id" forge))))))
-    (unless (fboundp fn)
-      (error "ghub-repository-id: Forge type/abbreviation `%s' is unknown"
-             forge))
-    (or (funcall fn owner name :username username :auth auth :host host)
-        (and (not noerror)
-             (error "Repository %S does not exist on %S.\n%s%S?"
-                    (concat owner "/" name)
-                    (or host (ghub--host forge))
-                    "Maybe it was renamed and you have to update "
-                    "remote.<remote>.url")))))
+  (or (pcase forge
+        ((or 'nil 'github)
+         (let-alist (ghub-graphql
+                     '(query (repository [(owner $owner String!)
+                                          (name  $name  String!)]
+                                         id))
+                     `((owner . ,owner)
+                       (name  . ,name))
+                     :username username :auth auth :host host)
+           .data.repository.id))
+        ('gitlab
+         (number-to-string
+          (alist-get
+           'id (ghub-get (format "/projects/%s%%2F%s"
+                                 (string-replace "/" "%2F" owner)
+                                 name)
+                         nil :forge 'gitlab
+                         :username username :auth auth :host host))))
+        ((or 'forgejo 'gitea 'gogs)
+         (number-to-string
+          (alist-get
+           'id (ghub-get (format "/repos/%s/%s" owner name)
+                         nil :forge forge
+                         :username username :auth auth :host host))))
+        ('bitbucket
+         (substring
+          (alist-get 'uuid
+                     (ghub-get (format "/repositories/%s/%s" owner name)
+                               nil :forge 'bitbucket
+                               :username username :auth auth :host host))
+          1 -1))
+        (_ (error "ghub-repository-id: Forge type `%s' is unknown" forge)))
+      (and (not noerror)
+           (error "Repository %S does not exist on %S.\n%s%S?"
+                  (concat owner "/" name)
+                  (or host (ghub--host forge))
+                  "Maybe it was renamed and you have to update "
+                  "remote.<remote>.url"))))
 
 ;;;; Internal
 
 (cl-defun ghub--retrieve (payload req)
-  (let ((url-request-extra-headers
-         (let ((headers (ghub--req-headers req)))
-           (if (functionp headers) (funcall headers) headers)))
-        (url-request-method (ghub--req-method req))
-        (url-request-data payload)
-        (url-show-status nil)
-        (url     (ghub--req-url req))
-        (handler (ghub--req-handler req))
-        (silent  (ghub--req-silent req)))
-    (if (or (ghub--req-callback  req)
-            (ghub--req-errorback req))
-        (url-retrieve url handler (list req) silent)
-      (if-let ((buf (url-retrieve-synchronously url silent)))
-          (with-current-buffer buf
-            (funcall handler (car url-callback-arguments) req))
-        (error "ghub--retrieve: No buffer returned")))))
+  (pcase-let*
+      (((cl-struct ghub--req headers method url handler silent synchronous) req)
+       (url-request-extra-headers
+        (if (functionp headers) (funcall headers) headers))
+       (url-request-method method)
+       (url-request-data payload)
+       (url-show-status nil))
+    (if synchronous
+        (if-let ((buf (url-retrieve-synchronously url silent)))
+            (with-current-buffer buf
+              (funcall handler (car url-callback-arguments) req))
+          (error "ghub--retrieve: No buffer returned"))
+      (url-retrieve url handler (list req) silent))))
 
 (defun ghub--handle-response (status req)
   (let ((buf (current-buffer)))
@@ -596,25 +601,27 @@ Signal an error if the id cannot be determined."
 
 (defun ghub--read-json-payload (_status &optional json-type-args)
   (and-let* ((payload (ghub--decode-payload)))
-    (ghub--assert-json-available)
-    (condition-case nil
-        (apply #'json-parse-string payload
-               (or json-type-args
-                   '( :object-type alist
-                      :array-type list
-                      :null-object nil
-                      :false-object nil)))
-      (json-parse-error
-       (pop-to-buffer (current-buffer))
-       (setq-local ghub-debug t)
-       `((message . ,(if (looking-at "<!DOCTYPE html>")
-                         (if (re-search-forward
-                              "<p>\\(?:<strong>\\)?\\([^<]+\\)" nil t)
-                             (match-string 1)
-                           "error description missing")
-                       (string-trim (buffer-substring (point) (point-max)))))
-         (documentation_url
-          . "https://github.com/magit/ghub/wiki/Github-Errors"))))))
+    (progn
+      (ghub--assert-json-available)
+      (condition-case nil
+          (apply #'json-parse-string payload
+                 (or json-type-args
+                     '( :object-type alist
+                        :array-type list
+                        :null-object nil
+                        :false-object nil)))
+        (json-parse-error
+         (when ghub-debug
+           (pop-to-buffer (current-buffer)))
+         (setq-local ghub-debug t)
+         `((message . ,(if (looking-at "<!DOCTYPE html>")
+                           (if (re-search-forward
+                                "<p>\\(?:<strong>\\)?\\([^<]+\\)" nil t)
+                               (match-string 1)
+                             "error description missing")
+                         (string-trim (buffer-substring (point) (point-max)))))
+           (documentation_url
+            . "https://github.com/magit/ghub/wiki/Github-Errors")))))))
 
 (defun ghub--decode-payload (&optional _status)
   (and (not (eobp))
@@ -632,6 +639,22 @@ Signal an error if the id cannot be determined."
                         :null-object :null
                         :false-object nil)
         'utf-8))))
+
+(defun ghub--encode-url (host resource &optional query)
+  (url-generic-parse-url
+   (concat (if (member host ghub-insecure-hosts) "http://" "https://")
+           ;; Needed for some Github Enterprise instances.
+           (cond
+            ((and (equal resource "/graphql")
+                  (string-suffix-p "/v3" host))
+             (substring host 0 -3))
+            ;; Needed for all Gitlab instances.
+            ((and (equal resource "/api/graphql")
+                  (string-suffix-p "/api/v4" host))
+             (substring host 0 -7))
+            (host))
+           resource
+           (and query (concat "?" (ghub--url-encode-params query))))))
 
 (defun ghub--url-encode-params (params)
   (mapconcat (lambda (param)
@@ -683,17 +706,15 @@ and call `auth-source-forget+'."
   (unless username
     (setq username (ghub--username host forge)))
   (if (eq auth 'basic)
-      (cl-ecase forge
-        ((nil gitea gogs bitbucket)
+      (pcase-exhaustive forge
+        ((or 'nil 'forgejo 'gitea 'gogs 'bitbucket)
          (cons "Authorization" (ghub--basic-auth host username)))
-        ((github gitlab)
+        ((or 'github 'gitlab)
          (error "%s does not support basic authentication"
                 (capitalize (symbol-name forge)))))
-    (cons (cl-ecase forge
-            ((nil github gitea gogs bitbucket)
-             "Authorization")
-            (gitlab
-             "Private-Token"))
+    (cons (pcase-exhaustive forge
+            ((or 'nil 'forgejo 'github 'gitea 'gogs 'bitbucket) "Authorization")
+            ('gitlab "Private-Token"))
           (if (eq forge 'bitbucket)
               ;; For some undocumented reason Bitbucket supports
               ;; values of the form "token <token>" only for GET
@@ -734,7 +755,7 @@ and call `auth-source-forget+'."
     (unless (or token nocreate)
       (error "\
 Required %s token (%S for %s%S) does not exist.
-See https://magit.vc/manual/ghub/Getting-Started.html
+See https://docs.magit.vc/ghub/Getting-Started.html
 or (info \"(ghub)Getting Started\") for instructions."
              (capitalize (symbol-name (or forge 'github)))
              user
@@ -744,73 +765,29 @@ or (info \"(ghub)Getting Started\") for instructions."
              host))
     (if (functionp token) (funcall token) token)))
 
-(cl-defgeneric ghub--host (&optional forge)
-  (cl-ecase forge
-    ((nil github)
-     (or (ignore-errors (car (process-lines "git" "config" "github.host")))
-         ghub-default-host))
-    (gitlab
-     (or (ignore-errors (car (process-lines "git" "config" "gitlab.host")))
-         (bound-and-true-p glab-default-host)))
-    (gitea
-     (or (ignore-errors (car (process-lines "git" "config" "gitea.host")))
-         (bound-and-true-p gtea-default-host)))
-    (gogs
-     (or (ignore-errors (car (process-lines "git" "config" "gogs.host")))
-         (bound-and-true-p gogs-default-host)))
-    (bitbucket
-     (or (ignore-errors (car (process-lines "git" "config" "bitbucket.host")))
-         (bound-and-true-p buck-default-host)))))
+(cl-defmethod ghub--host (&optional forge)
+  (let ((forge (or forge 'github)))
+    (or (ghub--git-get (format "%s.host" forge))
+        (alist-get forge ghub-default-host-alist))))
 
-(cl-defgeneric ghub--username (host &optional forge)
-  (let ((var
-         (cl-ecase forge
-           ((nil github)
-            (if (equal host ghub-default-host)
-                "github.user"
-              (format "github.%s.user" host)))
-           (gitlab
-            (if (equal host "gitlab.com/api/v4")
-                "gitlab.user"
-              (format "gitlab.%s.user" host)))
-           (bitbucket
-            (if (equal host "api.bitbucket.org/2.0")
-                "bitbucket.user"
-              (format "bitbucket.%s.user" host)))
-           (gitea
-            (when (zerop (call-process "git" nil nil nil "config" "gitea.host"))
-              (message "WARNING: gitea.host is set but always ignored"))
-            (format "gitea.%s.user" host))
-           (gogs
-            (when (zerop (call-process "git" nil nil nil "config" "gogs.host"))
-              (message "WARNING: gogs.host is set but always ignored"))
-            (format "gogs.%s.user"  host)))))
-    (condition-case nil
-        (car (process-lines "git" "config" var))
-      (error
-       (let ((user (read-string
-                    (format "Git variable `%s' is unset.  Set to: " var))))
-         (if (equal user "")
-             (user-error "The empty string is not a valid username")
-           (call-process
-            "git" nil nil nil "config"
-            (if (eq (read-char-choice
-                     (format "Set %s=%s [g]lobally (recommended) or [l]ocally? "
-                             var user)
-                     (list ?g ?l))
-                    ?g)
-                "--global"
-              "--local")
-            var user)
-           user))))))
+(cl-defmethod ghub--username (host &optional forge)
+  (let* ((forge (or forge 'github))
+         (host (or host (ghub--host forge)))
+         (var (format "%s.%s.user" forge host))
+         (default-var (format "%s.user" forge)))
+    (cond ((ghub--git-get var))
+          ((not (equal host (alist-get forge ghub-default-host-alist)))
+           (user-error "Cannot determine username; `%s' is unset" var))
+          ((ghub--git-get default-var))
+          ((user-error "%s; `%s' and `%s' are both unset"
+                       "Cannot determine username" var default-var)))))
 
 (defun ghub--ident (username package)
   (format "%s^%s" username package))
 
 (defun ghub--auth-source-get (keys &rest spec)
   (declare (indent 1))
-  (if-let ((plist (car (apply #'auth-source-search
-                              (append spec (list :max 1))))))
+  (if-let ((plist (car (apply #'auth-source-search spec))))
       (if (keywordp keys)
           (plist-get plist keys)
         (mapcar (##plist-get plist %) keys))
@@ -820,7 +797,30 @@ or (info \"(ghub)Getting Started\") for instructions."
     (auth-source-forget spec)
     nil))
 
+(define-advice auth-source-netrc-parse (:around (fn &rest args) handle-symlink)
+  "Follow symlinks for FILE before comparing modification times."
+  (let ((file (plist-get args :file)))
+    (when (and (stringp file)
+               (file-exists-p file))
+      (setq args (plist-put args :file (file-chase-links file)))))
+  (apply fn args))
+
+(defun ghub--git-get (var)
+  (catch 'non-zero
+    (car (process-lines-handling-status
+          "git" (##unless (zerop %) (throw 'non-zero nil))
+          ;; Beginning with Git v2.46 we could use "get".
+          "config" "--get" var))))
+
 ;;; _
+;; Local Variables:
+;; read-symbol-shorthands: (
+;;   ("and-let"   . "cond-let--and-let")
+;;   ("if-let"    . "cond-let--if-let")
+;;   ("when-let"  . "cond-let--when-let")
+;;   ("while-let" . "cond-let--while-let"))
+;; End:
 (provide 'ghub)
 (require 'ghub-graphql)
+(require 'ghub-legacy)
 ;;; ghub.el ends here

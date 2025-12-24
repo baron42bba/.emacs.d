@@ -9,11 +9,6 @@
 
 
 
-;;; Generated autoloads from buck.el
-
-(register-definition-prefixes "buck" '("buck-default-host"))
-
-
 ;;; Generated autoloads from ghub.el
 
 (autoload 'ghub-clear-caches "ghub" "\
@@ -25,7 +20,7 @@ asking the user for the correct information again.
 
 Set `url-http-real-basic-auth-storage' to nil
 and call `auth-source-forget+'." t)
-(register-definition-prefixes "ghub" '("ghub-"))
+(register-definition-prefixes "ghub" '("auth-source-netrc-parse" "ghub-"))
 
 
 ;;; Generated autoloads from ghub-graphql.el
@@ -33,24 +28,14 @@ and call `auth-source-forget+'." t)
 (register-definition-prefixes "ghub-graphql" '("ghub-"))
 
 
-;;; Generated autoloads from glab.el
+;;; Generated autoloads from ghub-legacy.el
 
-(register-definition-prefixes "glab" '("glab-default-host"))
-
-
-;;; Generated autoloads from gogs.el
-
-(register-definition-prefixes "gogs" '("gogs-default-host"))
+(register-definition-prefixes "ghub-legacy" '("ghub-fetch-repository"))
 
 
 ;;; Generated autoloads from gsexp.el
 
 (register-definition-prefixes "gsexp" '("gsexp-"))
-
-
-;;; Generated autoloads from gtea.el
-
-(register-definition-prefixes "gtea" '("gtea-default-host"))
 
 ;;; End of scraped data
 
