@@ -7,8 +7,8 @@
 ;; URL: https://github.com/andras-simonyi/citeproc-el
 ;; Keywords: bib
 ;; Package-Requires: ((emacs "26") (dash "2.13.0") (s "1.12.0") (f "0.18.0") (queue "0.2") (string-inflection "1.0") (org "9") (parsebib "2.4")(compat "28.1"))
-;; Package-Version: 20240722.1110
-;; Package-Revision: 54184baaff55
+;; Package-Version: 20251103.716
+;; Package-Revision: a3d62ab8e40a
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

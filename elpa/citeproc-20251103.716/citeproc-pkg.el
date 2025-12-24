@@ -1,5 +1,5 @@
 ;; -*- no-byte-compile: t; lexical-binding: nil -*-
-(define-package "citeproc" "20240722.1110"
+(define-package "citeproc" "20251103.716"
   "A CSL 1.0.2 Citation Processor."
   '((emacs             "26")
     (dash              "2.13.0")
@@ -11,8 +11,8 @@
     (parsebib          "2.4")
     (compat            "28.1"))
   :url "https://github.com/andras-simonyi/citeproc-el"
-  :commit "54184baaff555b5c7993d566d75dd04ed485b5c0"
-  :revdesc "54184baaff55"
+  :commit "a3d62ab8e40a75fcfc6e4c0c107e3137b4db6db8"
+  :revdesc "a3d62ab8e40a"
   :keywords '("bib")
   :authors '(("András Simonyi" . "andras.simonyi@gmail.com"))
   :maintainers '(("András Simonyi" . "andras.simonyi@gmail.com")))
