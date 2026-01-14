@@ -1014,6 +1014,14 @@ TRAMP gcloud ssh
                                                    ("-o" "StrictHostKeyChecking=no")))
                       (tramp-default-port         22)))))
 #+end_src
+
+if you have multiple docker containers with the same name on different
+hosts tramp tramp-default-proxies-alist gets confused.
+
+#+begin_src emacs-lisp
+  (setq tramp-show-ad-hoc-proxies t)
+#+end_src
+
 * translate
 [2022-12-25 Sun 15:02]
 
