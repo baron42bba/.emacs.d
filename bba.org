@@ -1386,7 +1386,7 @@ your =~/.emacs_secrets.el.gpg= might look like:
 
 #+BEGIN_SRC emacs-lisp :tangle never
   (setq my-sql-servers-alist
-        '("bbaprd" "bbatst"))
+        '("bbaprd" "bbatst" "mysql"))
 
   (setq sql-connection-alist
         '((bbaprd (sql-product 'vertica)
@@ -1399,7 +1399,12 @@ your =~/.emacs_secrets.el.gpg= might look like:
                   (sql-user "dbadmin")
                   (sql-password "foo")
                   (sql-database "bbatst"))
-          ))
+          (mysql  (sql-product 'mysql)
+                  (sql-server "localhost")
+                  (sql-user "root")
+                  (sql-password "bar")
+                  (sql-database "mysql")
+                  (sql-mysql-options '("--init-command=SET AUTOCOMMIT=OFF")))))
 
   (provide 'my-password)
 #+END_SRC
@@ -3378,31 +3383,31 @@ whole team. No matter what editor gets used.
          ;;'(show-paren-match ((t (:inverse-video t))))
        '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
        '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
-	 ;; '(show-paren-match ((t (:unterline (:color "#b8bb26" :style wave)))))
-	 )
-	(let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
-				     ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
-				     ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
-				     ((x-list-fonts "Verdana")         '(:font "Verdana"))
-				     ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
-				     (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
-	       (base-font-color     (face-foreground 'default nil 'default))
-	       (headline           `(:inherit default :foreground "#62a9cd")))
+  	 ;; '(show-paren-match ((t (:unterline (:color "#b8bb26" :style wave)))))
+  	 )
+  	(let* ((variable-tuple (cond ((x-list-fonts "Arial") '(:font "Arial"))
+  				     ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+  				     ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+  				     ((x-list-fonts "Verdana")         '(:font "Verdana"))
+  				     ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+  				     (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+  	       (base-font-color     (face-foreground 'default nil 'default))
+  	       (headline           `(:inherit default :foreground "#62a9cd")))
 
-	  (custom-theme-set-faces 'user
-				  `(org-level-8 ((t (,@headline ,@variable-tuple))))
-				  `(org-level-7 ((t (,@headline ,@variable-tuple))))
-				  `(org-level-6 ((t (,@headline ,@variable-tuple))))
-				  `(org-level-5 ((t (,@headline ,@variable-tuple))))
-				  `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.1))))
-				  `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.25))))
-				  `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.4))))
-				  `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.6))))
-				  `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil)))))
-	  (custom-set-variables
-	    '(ansi-color-names-vector
-	      ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"]))
-	  )))
+  	  (custom-theme-set-faces 'user
+  				  `(org-level-8 ((t (,@headline ,@variable-tuple))))
+  				  `(org-level-7 ((t (,@headline ,@variable-tuple))))
+  				  `(org-level-6 ((t (,@headline ,@variable-tuple))))
+  				  `(org-level-5 ((t (,@headline ,@variable-tuple))))
+  				  `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.1))))
+  				  `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.25))))
+  				  `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.4))))
+  				  `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.6))))
+  				  `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil)))))
+  	  (custom-set-variables
+  	    '(ansi-color-names-vector
+  	      ["black" "red3" "green3" "yellow3" "LightSkyBlue1" "magenta3" "cyan3" "gray90"]))
+  	  )))
 
 
 #+end_src
@@ -3410,7 +3415,7 @@ whole team. No matter what editor gets used.
 To prevent Emacs from storing faces we have to overwrite the default
 function:
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (defun custom-set-faces (&rest args)
   "Overwrite default function to return just nil as we handle faces in orgmode."
   nil  )
@@ -3454,7 +3459,7 @@ https://github.com/IBM/plex/releases
 
 #+BEGIN_SRC emacs-lisp
   (if (string-equal system-type "darwin")
-      (if (eql 203 (aref (car (cdr (network-interface-info '"en0"))) 2))
+      (if (and (network-interface-info '"en0") (eql 203 (aref (car (cdr (network-interface-info '"en0"))) 2)))
           (set-frame-font "IBM Plex Mono 12" nil 't)
         (set-frame-font "IBM Plex Mono 15" nil 't)))
 #+END_SRC
