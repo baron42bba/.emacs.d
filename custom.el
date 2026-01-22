@@ -22,6 +22,7 @@
      default))
  '(custom-theme-directory "~/.emacs.d/themes/")
  '(forge-topic-list-limit '(60 . -5))
+ '(frame-background-mode 'dark)
  '(gnuserv-program (concat exec-directory "/gnuserv"))
  '(grep-template "grep -i <X> <C> -nH -e <R> <F>")
  '(helm-comint-mode-list '(comint-mode slime-repl-mode sql-interactive-mode))
@@ -90,6 +91,7 @@
      (bba-keep-whitespaces . 1)))
  '(template-default-directories '("~/.emacs.d/templates/"))
  '(toolbar-visible-p nil)
+ '(tramp-allow-unsafe-temporary-files t)
  '(undo-tree-auto-save-history nil)
  '(vc-handled-backends '(RCS CVS SVN SCCS Bzr Hg Arch))
  '(warning-suppress-types
@@ -133,7 +135,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-blue ((t (:background "systemBlueColor" :foreground "systemBlueColor"))))
+ '(eat-term-font-0 ((t (:foreground "systemBlueColor"))))
  '(org-block ((t (:inherit shadow :background "#29759c" :foreground "#84cbef" :distant-forground "#131313" :extend t))))
  '(org-block-begin-line ((t (:background "#07538a" :foreground "#84cbef" :extend t))))
  '(org-block-end-line ((t (:inherit org-block-begin-line))))
@@ -148,4 +150,5 @@
  '(org-level-8 ((t (:inherit default :foreground "#62a9cd" :font "Arial"))))
  '(show-paren-match ((t (:underline (:color "#07e30d" :style line)))))
  '(show-paren-mismatch ((t (:underline (:color "red" :style wave)))))
- '(stripes-face ((t :background "gray0"))))
+ '(stripes-face ((t :background "gray0")))
+ '(vterm-color-blue ((t (:foreground "LightSkyBlue1")))))
