@@ -587,6 +587,69 @@ search the web on your fingertips. C-c /.
     (setq xah-lookup-browser-function 'eww)
     )
 #+END_SRC
+
+* xah-html-decode
+[2026-01-28 Wed 16:35]
+
+#+begin_src emacs-lisp
+  (defun xah-html-encode-ampersand-entity (&optional Begin End)
+    "Replace HTML chars & < > \" to &amp; &lt; &gt; &quot; on current block or selection.
+
+  URL `http://xahlee.info/emacs/emacs/elisp_replace_html_entities_command.html'
+  Created: 2020-08-30
+  Version: 2025-08-11"
+    (interactive)
+    (let (xbeg xend)
+      (seq-setq
+       (xbeg xend)
+       (if (and Begin End)
+           (list Begin End)
+         (if (region-active-p)
+             (list (region-beginning) (region-end))
+           (list (save-excursion
+                   (if (re-search-backward "\n[ \t]*\n" nil 1)
+                       (match-end 0)
+                     (point)))
+                 (save-excursion
+                   (if (re-search-forward "\n[ \t]*\n" nil 1)
+                       (match-beginning 0)
+                     (point)))))))
+      (save-restriction
+        (narrow-to-region xbeg xend)
+        (progn
+          (goto-char (point-min))
+          (while (re-search-forward "&\\|<\\|>\\|\"" nil t)
+            (cond
+             ((string-equal "&" (match-string 0)) (replace-match "&amp;" t t))
+             ((string-equal "<" (match-string 0)) (replace-match "&lt;" t t))
+             ((string-equal ">" (match-string 0)) (replace-match "&gt;" t t))
+             ((string-equal "\"" (match-string 0)) (replace-match "&quot;" t t)))
+            (overlay-put (make-overlay (match-beginning 0) (match-end 0)) 'face 'highlight))))))
+
+
+  (defun xah-html-decode-ampersand-entity (&optional Begin End)
+    "Replace &amp; &lt; &gt; &quot; to & < > ' on current block or selection.
+
+  URL `http://xahlee.info/emacs/emacs/elisp_replace_html_entities_command.html'
+  Created: 2020-08-30
+  Version: 2025-08-11"
+    (interactive)
+    (let (xbeg xend)
+      (seq-setq (xbeg xend) (if (and Begin End) (list Begin End) (if (region-active-p) (list (region-beginning) (region-end)) (list (save-excursion (if (re-search-backward "\n[ \t]*\n" nil 1) (match-end 0) (point))) (save-excursion (if (re-search-forward "\n[ \t]*\n" nil 1) (match-beginning 0) (point)))))))
+
+      (save-restriction
+        (narrow-to-region xbeg xend)
+        (progn
+          (goto-char (point-min))
+          (while (re-search-forward "&amp;\\|&lt;\\|&gt;\\|&quot;" nil t)
+            (cond
+             ((string-equal "&amp;" (match-string 0)) (replace-match "&" t t))
+             ((string-equal "&lt;" (match-string 0)) (replace-match "<" t t))
+             ((string-equal "&gt;" (match-string 0)) (replace-match ">" t t))
+             ((string-equal "&quot;" (match-string 0)) (replace-match "\"" t t)))
+            (overlay-put (make-overlay (match-beginning 0) (match-end 0)) 'face 'highlight))))))
+#+end_src
+
 * expand-region
     [2015-04-02 Thu 10:32]
 
