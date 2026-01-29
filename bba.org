@@ -1413,6 +1413,26 @@ thus installed via github.
   (lsp-define-stdio-client lsp-sql "sql"
                            (lsp-make-traverser #'(lambda (dir) (directory-files dir nil "sss.sql"))) '("~/.vscode/extensions/ms-mssql.mssql-1.4.0/sqltoolsservice/1.4.0/Ubuntu16/MicrosoftSqlToolsServiceLayer"))
 #+end_src
+* gptel
+[2026-01-29 Thu 10:14]
+
+#+begin_src emacs-lisp
+  (if (file-exists-p "/usr/local/bin/ollama")
+      (progn (require 'gptel)
+             (gptel-make-ollama "Ollama"             ;Any name of your choosing
+               :host "localhost:11434"               ;Where it's running
+               :stream t                             ;Stream responses
+               :models '(gpt-oss:20b))
+             (setq
+              gptel-model 'gpt-oss:20b
+              gptel-backend (gptel-make-ollama "Ollama"
+                              :host "localhost:11434"
+                              :stream t
+                              :models '(gpt-oss:20b))
+              gptel-expert-commands t)
+             (define-key global-map (kbd "C-c <return>") 'gptel-send)))
+#+end_src
+
 * sql
 [2016-11-27 Sun 17:56]
 
