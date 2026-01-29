@@ -1545,7 +1545,7 @@ On OS X you might want to run =sudo port install sqlparse= to have
 =sqlformat= available.
 
 #+BEGIN_SRC emacs-lisp
-  (load-file (expand-file-name "~/.emacs.d/lisp/sqlformat.el"))
+  (require 'sqlformat)
 
 #+END_SRC
 
