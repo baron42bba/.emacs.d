@@ -719,7 +719,7 @@ snippets for =aws cli= are awesome!
   (setq auto-insert-directory "~/.emacs.d/templates")
   (define-key global-map "\C-cy" 'yas-insert-snippet)
     (if (>= emacs-major-version 24)
-        (add-to-list 'yas-prompt-functions 'yas-shk-helm-prompt))
+        (add-to-list 'yas-prompt-functions 'shk-yas/helm-prompt))
   (defun ha-autoinsert-yas-expand()
     "Replace text in yasnippet template."
     (yas-expand-snippet (buffer-string) (point-min) (point-max)))
@@ -734,27 +734,27 @@ snippets for =aws cli= are awesome!
 #+END_SRC
 
 From http://emacswiki.org/emacs/Yasnippet
+
 #+begin_src emacs-lisp
-    (if (>= emacs-major-version 24)
-        (defun yas-shk-helm-prompt (prompt choices &optional display-fn)
-          "Use helm to select a snippet. Put this into `yas/prompt-functions.'"
-          (interactive)
-          (setq display-fn (or display-fn 'identity))
-          (if (require 'helm-misc)
-              (let (tmpsource cands result rmap)
-                (setq cands (mapcar (lambda (x) (funcall display-fn x)) choices))
-                (setq rmap (mapcar (lambda (x) (cons (funcall display-fn x) x)) choices))
-                (setq tmpsource
-                      (list
-                       (cons 'name prompt)
-                       (cons 'candidates cands)
-                       '(action . (("Expand" . (lambda (selection) selection))))
-                       ))
-                (setq result (helm-other-buffer '(tmpsource) "*helm-select-yasnippet"))
-                (if (null result)
-                    (signal 'quit "user quit!")
-                  (cdr (assoc result rmap))))
-            nil)))
+  (defun shk-yas/helm-prompt (prompt choices &optional display-fn)
+      "Use helm to select a snippet. Put this into `yas-prompt-functions.'"
+      (interactive)
+      (if (require 'helm-config nil t)
+          (let ((result (helm-other-buffer
+                         (list `((name . ,prompt)
+                                 (candidates . ,(if display-fn (mapcar display-fn choices)
+                                                  choices))
+                                 (action . (("Expand" . identity)))))
+                         "*helm-select-yasnippet")))
+            (cond ((null result)
+                   (signal 'quit "user quit!"))
+                  (display-fn
+                   (catch 'result
+                     (dolist (choice choices)
+                       (when (equal (funcall display-fn choice) result)
+                         (throw 'result choice)))))
+                  (t result)))
+        nil))
 #+end_src
 
 Default to snippet-mode if we are in a sub directory of snippets:
