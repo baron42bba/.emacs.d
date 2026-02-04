@@ -173,7 +173,9 @@ from bash.
               (setenv "https_proxy" path)
               )
             (let ((infopath (shell-command-to-string ". ~/.bashrc 2>/dev/null >/dev/null; echo -n $INFOPATH")))
-              (setenv "INFOPATH" infopath))
+              (setenv "INFOPATH" infopath)
+              (setq Info-directory-list
+                    (append (mapcar #'expand-file-name (split-string-and-unquote infopath ":")) Info-directory-list)))
             (let ((manpath (shell-command-to-string ". ~/.bashrc 2>/dev/null >/dev/null; manpath")))
               (setenv "MANPATH" manpath))
             (push "/opt/local/share/info" Info-directory-list)))
