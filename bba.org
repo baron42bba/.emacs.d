@@ -1658,6 +1658,12 @@ like these:
                                                         (save-excursion
                                                           (delete-trailing-whitespace))))))))
 
+  (eval-after-load "python-mode"
+    '(add-hook 'python-mode-hook (lambda() (add-hook 'write-contents-functions
+                                                   (lambda()
+                                                      (unless (boundp 'bba-keep-whitespaces)
+                                                        (save-excursion
+                                                          (delete-trailing-whitespace))))))))
   (eval-after-load "text-mode"
     '(add-hook 'text-mode-hook (lambda() (add-hook 'write-contents-functions
                                                    (lambda()
