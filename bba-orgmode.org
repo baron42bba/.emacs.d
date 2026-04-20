@@ -1982,6 +1982,57 @@ file.
   (load-file (expand-file-name "~/.emacs.d/lisp/org-listcruncher.el"))
 
 #+END_SRC
+
+** org as a primitive ticket system
+[2026-04-20 Mon 12:24]
+
+search the current file for identifiers with the prefix of
+customizable variable org-ticket-prefix.
+Eg have at least one ticket like
+
+- BBAIT-1
+- BBAMC-42
+- BBASYS-25
+
+Then you can pick between
+
+- BBAIT
+- BBAMC
+- BBASYS
+
+and the number gets increased by one.
+So you would get like BBAIT-2 inserted in the file.
+If you archive you have to keep the last ticket in the file.
+
+#+begin_src emacs-lisp
+  (defcustom bba-org-ticket-prefix "BBA"
+    "Prefix for org ticket ids.  For org-new-ticket."
+    :group 'org
+    :type 'string
+    )
+
+  (defun bba-org-new-ticket ()
+    "Generate next ticket number in current file.
+  write your first ticket id like OTSYS-1 manually in a heading.
+  After that this function will present OTSYS in a list and inserts last ticket number +1.
+  So in this example it will insert OTSYS-2.
+  customize `bba-org-ticket-prefix'."
+    (interactive)
+    (let* ((arg (helm--completing-read-default "Select from list: " (sort (remq nil (delete-dups (org-map-entries (lambda () (car (cdr (s-match (concat "^\\(" bba-org-ticket-prefix "[A-Z]*\\)-[0-9]*") (or (nth 4 (org-heading-components)) "")))))))) #'string<)))
+           (ticket (concat arg "-" (number-to-string (+ 1 (string-to-number (car (sort (remq nil (delete-dups (org-map-entries (lambda () (car (cdr (s-match (concat "^" (regexp-quote arg) "-\\([0-9]*\\)") (or (nth 4 (org-heading-components)) "")))))))) :reverse t))))))))
+      (insert ticket)
+      (org-set-property "ID" ticket)
+    ))
+#+end_src
+
+#+begin_src emacs-lisp
+  (defun bba-find-org-ticket ()
+    "Search ticket number at point. ticket as created with bba-org-new-ticket."
+    (interactive)
+    (org-id-goto (symbol-at-point)))
+  (define-key global-map "\C-co" 'bba-find-org-ticket)
+#+end_src
+
 ** additional org settings
 [2016-11-03 Thu 09:36]
 Thanks to [[https://github.com/dakrone/eos/blob/master/eos-org.org][eos-org]].
